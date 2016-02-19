@@ -1,0 +1,162 @@
+#
+DATAOBJ      =   $(OBJDIR)/kind_parameters.o         \
+                 $(OBJDIR)/data_1d_global.o          \
+                 $(OBJDIR)/data_block_fields.o       \
+                 $(OBJDIR)/data_constants.o          \
+                 $(OBJDIR)/data_convection.o         \
+                 $(OBJDIR)/data_fields.o             \
+                 $(OBJDIR)/data_flake.o              \
+                 $(OBJDIR)/data_gscp.o               \
+                 $(OBJDIR)/data_io.o                 \
+                 $(OBJDIR)/data_modelconfig.o        \
+                 $(OBJDIR)/data_parallel.o           \
+                 $(OBJDIR)/data_parameters.o         \
+                 $(OBJDIR)/data_radiation.o          \
+                 $(OBJDIR)/data_runcontrol.o         \
+                 $(OBJDIR)/data_soil.o               \
+                 $(OBJDIR)/data_tracer.o             \
+                 $(OBJDIR)/data_tracer_metadata.o    \
+                 $(OBJDIR)/data_traj.o               \
+                 $(OBJDIR)/data_turbulence.o
+#
+UTILOBJ      =   $(OBJDIR)/environment.o             \
+                 $(OBJDIR)/grid_metrics_utilities.o  \
+                 $(OBJDIR)/info_lm_f90.o             \
+                 $(OBJDIR)/io_utilities.o            \
+                 $(OBJDIR)/io_metadata.o             \
+                 $(OBJDIR)/meteo_utilities.o         \
+                 $(OBJDIR)/mo_random.o               \
+                 $(OBJDIR)/netcdf_io.o               \
+                 $(OBJDIR)/numeric_utilities.o       \
+                 $(OBJDIR)/numeric_utilities_rk.o    \
+                 $(OBJDIR)/parallel_utilities.o      \
+                 $(OBJDIR)/pp_utilities.o            \
+                 $(OBJDIR)/time_utilities.o          \
+                 $(OBJDIR)/turbulence_utilities.o    \
+                 $(OBJDIR)/utilities.o               \
+                 $(OBJDIR)/vgrid_refatm_utils.o
+#
+EXTOBJ        =  $(OBJDIR)/dfi_initialization.o      \
+                 $(OBJDIR)/hori_diffusion.o          \
+                 $(OBJDIR)/fast_waves.o              \
+                 $(OBJDIR)/fast_waves_rk.o           \
+                 $(OBJDIR)/fast_waves_sc.o           \
+                 $(OBJDIR)/near_surface.o            \
+                 $(OBJDIR)/organize_data.o           \
+                 $(OBJDIR)/organize_diagnosis.o      \
+                 $(OBJDIR)/organize_dynamics.o       \
+                 $(OBJDIR)/organize_eps.o            \
+                 $(OBJDIR)/organize_physics.o        \
+                 $(OBJDIR)/semi_implicit.o           \
+                 $(OBJDIR)/slow_tendencies.o         \
+                 $(OBJDIR)/lmorg.o
+#
+SRCOBJ       =   $(OBJDIR)/gscp_data.o               \
+                 $(OBJDIR)/gscp_cloudice.o           \
+                 $(OBJDIR)/gscp_graupel.o            \
+                 $(OBJDIR)/gscp_hydor.o              \
+                 $(OBJDIR)/gscp_kessler.o            \
+                 $(OBJDIR)/gscp_interface.o          \
+                 $(OBJDIR)/src_advection_rk.o        \
+                 $(OBJDIR)/src_allocation.o          \
+                 $(OBJDIR)/src_artifdata.o           \
+                 $(OBJDIR)/src_block_fields.o        \
+                 $(OBJDIR)/src_block_fields_org.o    \
+                 $(OBJDIR)/src_conv_tiedtke.o        \
+                 $(OBJDIR)/src_conv_shallow.o        \
+                 $(OBJDIR)/src_diagbudget.o          \
+                 $(OBJDIR)/src_flake.o               \
+                 $(OBJDIR)/src_gridpoints.o          \
+                 $(OBJDIR)/src_gscp.o                \
+                 $(OBJDIR)/src_input.o               \
+                 $(OBJDIR)/src_integrals.o           \
+                 $(OBJDIR)/src_flake_sfcflx.o        \
+                 $(OBJDIR)/src_leapfrog.o            \
+                 $(OBJDIR)/src_meanvalues.o          \
+                 $(OBJDIR)/src_output.o              \
+                 $(OBJDIR)/src_radiation.o           \
+                 $(OBJDIR)/src_relaxation.o          \
+                 $(OBJDIR)/src_runge_kutta.o         \
+                 $(OBJDIR)/src_seaice.o              \
+                 $(OBJDIR)/src_setup.o               \
+                 $(OBJDIR)/src_setup_vartab.o        \
+                 $(OBJDIR)/src_slow_tendencies_rk.o  \
+                 $(OBJDIR)/src_soil.o                \
+                 $(OBJDIR)/src_soil_multlay.o        \
+                 $(OBJDIR)/src_spectral_nudging.o    \
+                 $(OBJDIR)/src_sso.o                 \
+                 $(OBJDIR)/src_stoch_physics.o       \
+                 $(OBJDIR)/src_tracer.o              \
+                 $(OBJDIR)/src_tracer_metadata.o     \
+                 $(OBJDIR)/src_traj.o                \
+                 $(OBJDIR)/src_turbulence.o          \
+                 $(OBJDIR)/turbulence_interface.o    \
+                 $(OBJDIR)/turbulence_tran.o         \
+                 $(OBJDIR)/turbulence_diff.o
+#
+ASSOBJ =         $(OBJDIR)/data_nudge_all.o          \
+                 $(OBJDIR)/data_lheat_nudge.o        \
+                 $(OBJDIR)/data_lhn_diag.o           \
+                 $(OBJDIR)/data_nudge_gather.o       \
+                 $(OBJDIR)/data_nudge_local.o        \
+                 $(OBJDIR)/data_nudge_spread.o       \
+                 $(OBJDIR)/data_obs_cdfin.o          \
+                 $(OBJDIR)/data_obs_lib_cosmo.o      \
+                 $(OBJDIR)/data_obs_process.o        \
+                 $(OBJDIR)/data_obs_qc_limits.o      \
+                 $(OBJDIR)/data_obs_record.o         \
+                 $(OBJDIR)/mo_fdbk.o                 \
+                 $(OBJDIR)/mo_fdbk_cosmo.o           \
+                 $(OBJDIR)/mo_fdbk_io.o              \
+                 $(OBJDIR)/mo_fdbk_tables.o          \
+                 $(OBJDIR)/mo_netcdf_param.o         \
+                 $(OBJDIR)/mo_t_netcdf_file.o        \
+                 $(OBJDIR)/mo_t_table.o              \
+                 $(OBJDIR)/organize_assimilation.o   \
+                 $(OBJDIR)/src_correl_cutoff.o       \
+                 $(OBJDIR)/src_gather_info.o         \
+                 $(OBJDIR)/src_lheat_nudge.o         \
+                 $(OBJDIR)/src_lheating.o            \
+                 $(OBJDIR)/src_mult_local.o          \
+                 $(OBJDIR)/src_mult_spread.o         \
+                 $(OBJDIR)/src_nudging.o             \
+                 $(OBJDIR)/src_obs_cdfin_blk.o       \
+                 $(OBJDIR)/src_obs_cdfin_comhead.o   \
+                 $(OBJDIR)/src_obs_cdfin_gps.o       \
+                 $(OBJDIR)/src_obs_cdfin_mult.o      \
+                 $(OBJDIR)/src_obs_cdfin_org.o       \
+                 $(OBJDIR)/src_obs_cdfin_print.o     \
+                 $(OBJDIR)/src_obs_cdfin_sing.o      \
+                 $(OBJDIR)/src_obs_cdfin_util.o      \
+                 $(OBJDIR)/src_obs_cdfout_feedobs.o  \
+                 $(OBJDIR)/src_obs_fdbk_in.o         \
+                 $(OBJDIR)/src_obs_operator_conv.o   \
+                 $(OBJDIR)/src_obs_print_vof.o       \
+                 $(OBJDIR)/src_obs_proc_air.o        \
+                 $(OBJDIR)/src_obs_proc_aof.o        \
+                 $(OBJDIR)/src_obs_proc_cdf.o        \
+                 $(OBJDIR)/src_obs_proc_util.o       \
+                 $(OBJDIR)/src_obs_processing.o      \
+                 $(OBJDIR)/src_obs_qc_conv.o         \
+                 $(OBJDIR)/src_obs_use_org.o         \
+                 $(OBJDIR)/src_sfcana.o              \
+                 $(OBJDIR)/src_sing_local.o          \
+                 $(OBJDIR)/src_sing_spread.o
+#
+SATOBJ =         $(OBJDIR)/data_satellites.o         \
+                 $(OBJDIR)/src_obs_rad.o             \
+                 $(OBJDIR)/src_sat_tbs.o             \
+                 $(OBJDIR)/src_sat_rttov.o           \
+                 $(OBJDIR)/organize_satellites.o
+#
+OASOBJ       =   $(OBJDIR)/oas_cos_vardef.o          \
+                 $(OBJDIR)/oas_cos_define.o          \
+                 $(OBJDIR)/oas_cos_init.o            \
+                 $(OBJDIR)/oas_cos_finalize.o        \
+                 $(OBJDIR)/oas_cos_rcv.o             \
+                 $(OBJDIR)/oas_cos_snd.o             \
+                 $(OBJDIR)/receive_fld_2clm.o        \
+                 $(OBJDIR)/send_fld_2clm.o
+#
+PUBLICUTILS =    $(OBJDIR)/mpe_io2.o
+#

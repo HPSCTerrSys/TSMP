@@ -1,0 +1,75 @@
+#
+# Include file for OASIS3 Makefile for a Linux system using 
+# INTEL Fortran Compiler and Open MPI 
+#
+###############################################################################
+#
+#
+#
+CHAN            = MPI1
+# Paths for libraries, object files and binaries
+#
+# COUPLE        : path for oasis3-mct main directory
+COUPLE          =  $(SVAROOT)/oasis3
+#NETCDF 		= /homea/slts/sltsP3cp/local_juqueen/NetCDF3.6.3_xlc_xlf_64
+#MPIDIR		= $(HOME)/local/juqueen/mpi
+#COUPLE          = $(SVAROOT)/oasis3
+#
+# ARCHDIR       : directory created when compiling
+ARCHDIR         = $(COUPLE)/Ibm
+#
+# MPI library
+MPIBIN      = $(MPIDIR)/bin
+MPI_INCLUDE = $(MPIDIR)/include
+MPILIB      = -L$(MPIDIR)/lib
+#
+#  NETCDF library
+NETCDF_INCLUDE  = $(NETCDF)/include
+NETCDF_LIBRARY  = -L$(NETCDF)/lib -lnetcdf
+#
+# Compiling and other commands
+MAKE        = make
+F90         = $(PREP_C) $(MPIBIN)/mpixlf90_r # -I$(MPI_INCLUDE)
+F           = $(F90)
+f90         = $(F90)
+f           = $(F90)
+CC          = $(PREP_C) $(MPIBIN)/mpixlc_r # -I$(MPI_INCLUDE)
+LD          = $(PREP_C) $(MPIBIN)/mpixlf90_r # $(MPILIB)
+AR        = ar
+ARFLAGS   = r
+# compiler options and cpp keys
+# 
+CPPDEF    = -WF,-Duse_netCDF -WF,-Duse_comm_$(CHAN) -WF,-D__VERBOSE -WF,-DTREAT_OVERLAY
+CCPPDEF   = -Duse_netCDF -Duse_comm_$(CHAN) -D__VERBOSE -DTREAT_OVERLAY
+#
+COMFLAGS  = -q64 -qextname=flush $(OPT_C)
+F90FLAGS_1  = -qsuffix=cpp=F90 $(COMFLAGS)
+f90FLAGS_1  = -qsuffix=cpp=f90 $(COMFLAGS)
+FFLAGS_1    = -qfixed -qsuffix=cpp=F $(COMFLAGS)
+fFLAGS_1    = -qfixed -qsuffix=cpp=f $(COMFLAGS)
+CCFLAGS_1   = -q64
+#
+LDFLAGS   = -q64 -bmaxdata:2000000000 $(OPT_C) -qnosave
+#
+###################
+#
+# Additional definitions that should not be changed
+#
+FLIBS           = $(NETCDF_LIBRARY)
+# BINDIR        : directory for executables
+BINDIR          = $(ARCHDIR)/bin
+# LIBBUILD      : contains a directory for each library
+LIBBUILD        = $(ARCHDIR)/build/lib
+# INCPSMILE     : includes all *o and *mod for each library
+INCPSMILE       = -I$(LIBBUILD)/psmile.$(CHAN) -I$(LIBBUILD)/scrip  -I$(LIBBUILD)/mct
+
+F90FLAGS  = $(F90FLAGS_1) $(INCPSMILE) $(CPPDEF) -I$(NETCDF_INCLUDE)
+f90FLAGS  = $(f90FLAGS_1) $(INCPSMILE) $(CPPDEF) -I$(NETCDF_INCLUDE)
+FFLAGS    = $(FFLAGS_1) $(INCPSMILE) $(CPPDEF) -I$(NETCDF_INCLUDE)
+fFLAGS    = $(fFLAGS_1) $(INCPSMILE) $(CPPDEF) -I$(NETCDF_INCLUDE)
+CCFLAGS   = $(CCFLAGS_1) $(INCPSMILE) $(CPPDEF) $(CCPPDEF) -I$(NETCDF_INCLUDE)
+#
+
+#
+#
+##############################################################################

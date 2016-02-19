@@ -1,0 +1,1009 @@
+#!/bin/csh
+#
+#-----------------------------------------------------------------------------
+#
+# Generic build script for coupled model simulations using OASIS3 communicator
+# TerrSysMPV2.0
+# Author: Prabhakar Shrestha
+#
+#*****************************************************************************
+#                       USER SETTINGS                                        *
+#                                                                            *
+#*****************************************************************************
+#
+# 1) COMPILER SETTINGS
+#
+# Option for sva_compiler: Intel / Gnu / Ibm
+setenv sva_compiler Gnu 
+# Option for sva job scheduler: pbs / lls
+setenv job_scheduler pbs 
+setenv LDSEQ_COS gfortran
+setenv MPIDIR /daten01/z4/openmpi-1.4.3_gnu
+setenv LIBGRIB1_COS /daten01/z4/DWD_libgrib/libgrib1_061107gnu
+setenv NETCDF /daten01/z4/netcdf4.1.3_gfortran_4.2.1
+setenv HYPRE_DIR /daten01/z4/hypre2.9_gnu
+setenv SILO_DIR /daten01/z4/silo4.8_gnu
+setenv TCL_DIR /daten01/z4/tcl8.5.13_gnu
+setenv SVAROOT /$HOME/terrsysmp
+setenv nppn 64 
+#
+# 2) MODEL SETTINGS
+#
+# Model Domain Name
+#set GRIDNAME = 001x001pt_LDB
+set GRIDNAME = 300x300pt_NRW
+# Initialization Date and runhours(hrs) 
+set yyyy = 2012
+set mm   = 07
+set dd   = 21
+set hh   = 00
+set runhours = 120.
+# COSMO grid and time-stepping(sec)
+set nprocx_cos = 10
+set nprocy_cos = 10
+set ngcosx = 150
+set ngcosy = 150
+set dt_cos = 10 
+# CLM grid and time-stepping(sec)
+set nprocx_clm = 2 
+set nprocy_clm = 2 
+set ngclmx = 90000 
+set ngclmy = 1
+set dt_clm = 90
+set clm_data = /daten01/z4/database/clm3.5/Rur_NRW/
+# ParFlow grid and time-stepping(hour)
+set nprocx_pfl = 4 
+set nprocy_pfl = 5
+set ngpflx = 300 
+set ngpfly = 300 
+set dt_pfl = 0.025
+# OASIS coupling frequency(sec) : cplfreq > MIN(dt_cos, dt_clm, dt_pfl)
+set cplfreq1=90
+set cplfreq2=90
+#COSMO-CLM coupling scheme, default: 1
+#if set to 0, first the user needs to set cpl_scheme= FALSE manually in src code
+#1:Transfer coefficeints sent from CLM to COSMO
+#0:Transfer coefficients inverted using fluxes sent from CLM
+set cpl_scheme=0
+#CPS New flag added to compile component model with dummy model
+#compile_dum =1 compiles with CESM using OASIS3
+set compile_dum = 0 
+#
+#*****************************************************************************
+#                       END USER SETTINGS                                    *
+#                                                                            *
+#*****************************************************************************
+#
+#-----------------------------------------------------------------------------
+# Here we do sequential building of the executables, needs to be optimized later
+# for any redundancy
+#
+clear
+#
+echo "SVA Configuration: TR32/Z4"
+echo " 0 Only COSMO"
+echo " 1 Only CLM"
+echo " 2 Only ParFlow"
+echo " 3 COSMO + CLM"
+echo " 4 CLM + ParFlow"
+echo " 5 COSMO + CLM + ParFlow"
+echo "  "
+# User Input Start
+echo -n "Enter your selection [0-5]: "
+set compile_option = $<                     
+echo " "
+#
+set compile_oas = 0 ; set compile_cos = 0 ; set compile_clm = 0 ; set compile_pfl = 0 
+#
+if ($compile_option == 0) then
+set compile_cos = 1;
+else if ($compile_option == 1) then
+set compile_clm = 1
+else if ($compile_option == 2) then
+set compile_pfl = 1
+else if ($compile_option == 3) then
+set compile_oas = 1 ;set compile_cos = 1 ; set compile_clm = 1
+else if ($compile_option == 4) then
+set compile_oas = 1 ;set compile_clm = 1 ; set compile_pfl = 1
+else if ($compile_option == 5) then
+set compile_oas = 1 ; set compile_cos = 1 ; set compile_clm = 1 ; set compile_pfl = 1
+else
+ echo "Error: Compilation Option [ 0 1 2 3 4 5]"
+ exit 
+endif
+# User Input
+echo ""
+echo -n "Clean Compile (0/1) :"
+set compile_clean = $<
+echo " "
+if ($compile_clean == 0) then
+echo "Recreating the executables using old configuration"
+echo " "
+else if ($compile_clean == 1) then  
+echo "Creating new executables....."
+echo " "
+else
+ echo "Error: 1 or 0"
+ exit
+endif
+#
+if ($compile_oas == 1) then
+set nproc_oas = 1
+else
+set nproc_oas = 0
+endif
+if ($compile_dum == 1) then
+set nproc_dum = 1
+set nproc_oas = 1
+else
+set nproc_dum = 0
+endif
+#-----------------------------------------------------------------------------
+# Step 1a:  Create the rundir, where the executables will be stored 
+#-----------------------------------------------------------------------------
+set rundir          = $SVAROOT/run
+rm -rf $rundir
+mkdir $rundir
+#-----------------------------------------------------------------------------
+# Step 1b:  Compilers and OASIS3 flags 
+#-----------------------------------------------------------------------------
+if ($job_scheduler == pbs) set MPIRUN = $MPIDIR/bin/mpirun
+if ($job_scheduler == lls) set MPIRUN = "runjob"
+
+if ($sva_compiler == Intel || $sva_compiler == Gnu) then
+setenv CC    $MPIDIR/bin/mpicc
+setenv CXX   $MPIDIR/bin/mpic++
+setenv F77   $MPIDIR/bin/mpif77
+setenv F90   $MPIDIR/bin/mpif90
+setenv FC    $MPIDIR/bin/mpif90
+
+set ARCHDIR       = $SVAROOT/oasis3/$sva_compiler
+set LIBBUILD      = ${ARCHDIR}/build/lib
+set CHAN          = MPI1
+#
+setenv PSMILE_INCDIR "-I${LIBBUILD}/psmile.${CHAN} -I${LIBBUILD}/clim.${CHAN} -I${LIBBUILD}/mpp_io"
+#setenv CPPDEF1       "-Duse_libMPI -Duse_netCDF -Duse_comm_${CHAN} -DVERBOSE -DDEBUG -DTREAT_OVERLAY"
+#CESM /pio compilation fails for -DDEBUG flag
+setenv CPPDEF1       "-Duse_libMPI -Duse_netCDF -Duse_comm_${CHAN} -DVERBOSE -DTREAT_OVERLAY" 
+setenv LIBOASIS     "${ARCHDIR}/lib/oasis3/liboasis3.${CHAN}.a"
+setenv LIBPSMILE    "${ARCHDIR}/lib/libanaisg.a ${ARCHDIR}/lib/libanaism.a ${ARCHDIR}/lib/libclim.${CHAN}.a ${ARCHDIR}/lib/libpsmile.${CHAN}.a ${ARCHDIR}/lib/libfscint.a  ${ARCHDIR}/lib/libmpp_io.a ${ARCHDIR}/lib/libscrip.a ${ARCHDIR}/lib/libdownscal.a"
+
+# Enviroment Specific to Component Models
+# COSMO4.21
+setenv CPPDEF2  " "
+if ($compile_oas == 1 && $compile_cos == 1) then
+ setenv CPPDEF2  "-DCOUP_OAS_COS"
+endif
+setenv NETCDF_LIB   "-L${NETCDF}/lib -lnetcdf -lnetcdff"
+# CLM 3.5
+setenv USER_FC mpif90 
+setenv USER_CC mpicc
+setenv INC_NETCDF ${NETCDF}/include
+setenv LIB_NETCDF ${NETCDF}/lib
+setenv INC_MPI ${MPIDIR}/include
+setenv LIB_MPI ${MPIDIR}/lib
+setenv MOD_NETCDF "$INC_NETCDF"     
+#setenv MPI_LIB_NAME openmpi
+setenv MPI_LIB_NAME mpi
+setenv LIBNETCDF_FLAG "-lnetcdff"
+# ParFlow 3.1
+setenv PARFLOW_DIR $SVAROOT/parflow
+setenv NETCDF_INC   "-I${NETCDF}/include"
+setenv FCFLAGS      "${CPPDEF1} ${PSMILE_INCDIR} ${NETCDF_INC}"
+endif # $sva_compiler == Intel || $sva_compiler == Gnu
+
+if ($sva_compiler == Ibm ) then
+setenv CC    $MPIDIR/bin/mpixlc
+setenv CXX   $MPIDIR/bin/mpixlcxx
+setenv F77   $MPIDIR/bin/mpixlf77
+setenv F90   $MPIDIR/bin/mpixlf90
+setenv FC    $MPIDIR/bin/mpixlf90
+
+set ARCHDIR       = $SVAROOT/oasis3/$sva_compiler
+set LIBBUILD      = ${ARCHDIR}/build/lib
+set CHAN          = MPI1
+#
+setenv PSMILE_INCDIR "-I${LIBBUILD}/psmile.${CHAN} -I${LIBBUILD}/clim.${CHAN} -I${LIBBUILD}/mpp_io"
+setenv CPPDEF1       "-WF,-Duse_libMPI -WF,-Duse_netCDF -WF,-Duse_comm_${CHAN} -WF,-DVERBOSE -WF,-DDEBUG -WF,-DTREAT_OVERLAY"
+setenv LIBOASIS     "${ARCHDIR}/lib/oasis3/liboasis3.${CHAN}.a"
+setenv LIBPSMILE    "${ARCHDIR}/lib/libanaisg.a ${ARCHDIR}/lib/libanaism.a ${ARCHDIR}/lib/libclim.${CHAN}.a ${ARCHDIR}/lib/libpsmile.${CHAN}.a ${ARCHDIR}/lib/libfscint.a  ${ARCHDIR}/lib/libmpp_io.a ${ARCHDIR}/lib/libscrip.a ${ARCHDIR}/lib/libdownscal.a"
+ 
+# Enviroment Specific to Component Models
+# COSMO4.21uc
+setenv CPPDEF2  " "
+if ($compile_oas == 1 && $compile_cos == 1) then
+ setenv CPPDEF2  "-WF,-DCOUP_OAS_COS"
+endif
+setenv NETCDF_LIB   "-L${NETCDF}/lib -lnetcdf"
+# CLM 3.5
+setenv USER_FC mpixlf90
+setenv USER_CC mpixlc
+setenv INC_NETCDF ${NETCDF}/include
+setenv LIB_NETCDF ${NETCDF}/lib
+setenv INC_MPI ${MPIDIR}/include
+setenv LIB_MPI ${MPIDIR}/lib
+setenv MOD_NETCDF "$INC_NETCDF"
+setenv MPI_LIB_NAME mpich
+setenv LIBNETCDF_FLAG ""
+# ParFlow 3.1
+setenv PARFLOW_DIR $SVAROOT/parflow
+setenv NETCDF_INC   "-I${NETCDF}/include"
+setenv FCFLAGS      "-qfree=f90 -qsuffix=cpp=F90 -qnoextname ${CPPDEF1} ${PSMILE_INCDIR} ${NETCDF_INC}"
+endif # $sva_compiler == Ibm
+
+#-----------------------------------------------------------------------------
+# Step 1c:  Config and Build directory for OASIS3 and component models 
+#-----------------------------------------------------------------------------
+set blddir_oas    = $SVAROOT/oasis3
+set blddir_dum    = $SVAROOT/model2_oas3
+set cfgdir_cos    = $SVAROOT/cosmo
+set cfgdir_clm    = $SVAROOT/clm/bld
+set cfgdir_pfl    = $PARFLOW_DIR/pfsimulator
+#
+set case_clm      = tempbld_clm              #Needed for CESM
+set blddir_clm    = $SVAROOT/$case_clm       #UPDATE
+#
+#-----------------------------------------------------------------------------
+# Step 2a:  Compile oasis3 libraries
+#-----------------------------------------------------------------------------
+if ($compile_oas == 1 || $compile_option <= 2 ) then   #UPDATE 
+echo "*****************************************************"
+echo "* Compiling OASIS3 libraries                        *"
+echo "*****************************************************"
+
+cd $SVAROOT
+if (-d $blddir_oas) then
+  echo "cd $blddir_oas"
+  cd $blddir_oas/util/make_dir
+else
+  git clone https://git.meteo.uni-bonn.de/git/oasis3
+  echo " git clone https://git.meteo.uni-bonn.de/git/oasis3"
+  cd $blddir_oas 
+  git checkout -b v1.1.0 v1.1.0
+  cd $blddir_oas/util/make_dir
+endif
+
+if ($compile_clean == 1) then
+ make -f TopMakefileOasis3 realclean 
+endif
+make -f TopMakefileOasis3 oasis3_psmile 
+endif
+#
+if ( -f $blddir_oas/$sva_compiler/bin/oasis3.$CHAN.x) then   #UPDATE
+  echo " "
+  echo "OASIS3 Library Compilation Successful.............."
+  echo " "
+else
+  echo " "
+  echo "OASIS3 Library Compilation Failed.................."
+  echo " "
+  exit
+endif
+if ($compile_oas == 1) then
+ cp $blddir_oas/$sva_compiler/bin/*.x $rundir
+endif
+#
+#-----------------------------------------------------------------------------
+# Step 2b:  Compile cosmo with oasis3 libraries 
+#-----------------------------------------------------------------------------
+if ($compile_cos == 1) then
+
+echo "*****************************************************"
+echo "* Compiling COSMO                                   *"    #UPDATE
+echo "*****************************************************"
+
+cd $SVAROOT
+if (-d $cfgdir_cos) then
+  echo "cd $cfgdir_cos"
+  cd $cfgdir_cos 
+else
+  echo "COSMO VERSION"
+  echo "  "
+  # User Input Start
+  echo -n "Enter your selection [cosmo4_21,cosmo5_1]: "
+  set cos_ver = $<
+  echo " "
+  if ($cos_ver == "cosmo4_21") then
+    git clone https://git.meteo.uni-bonn.de/git/cosmo
+    echo " git clone https://git.meteo.uni-bonn.de/git/cosmo"
+    cd $cfgdir_cos
+    echo "git checkout -b v1.1.0 v1.1.0"
+    git checkout -b v1.1.0 v1.1.0
+  else if ($cos_ver == "cosmo5_1") then
+    cp -rf /daten01/z4/ComponentModels/cosmo_141128_5.01 $SVAROOT/cosmo
+    # Copy the terrsysmp interface to the cosmo source code 
+    cp -rf $SVAROOT/bldsva/intf_oas3/$cos_ver/oas3 $SVAROOT/cosmo/src/
+    cp     $SVAROOT/bldsva/intf_oas3/$cos_ver/tsmp/*.f90 $SVAROOT/cosmo/src/
+    cp     $SVAROOT/bldsva/intf_oas3/$cos_ver/arch/* $SVAROOT/cosmo/
+    cd $cfgdir_cos
+  else
+    echo "Error:"
+  exit
+  endif
+  cd $cfgdir_cos
+endif
+
+
+if ($compile_clean == 1) then
+ make -f Makefile clean
+endif
+make -f Makefile
+if ( -f ./lmparbin_pur ) then    #UPDATE
+  echo " "
+  echo "COSMO Compilation Successful......................."
+  echo " "
+else
+  echo " "
+  echo "COSMO Compilation Failed..........................."
+  echo " "
+  exit
+endif
+mv lmparbin_pur  $rundir    #UPDATE
+cp lmstarter $rundir
+cp lmrun_uc $rundir
+cd $rundir
+# Edit namelist 
+sed "s/init_y_bldsva/$yyyy/" -i lmrun_uc
+sed "s/init_m_bldsva/$mm/" -i lmrun_uc
+sed "s/init_d_bldsva/$dd/" -i lmrun_uc
+sed "s/init_h_bldsva/$hh/" -i lmrun_uc
+sed "s/nprocx_cos_bldsva/$nprocx_cos/" -i lmrun_uc
+sed "s/nprocy_cos_bldsva/$nprocy_cos/" -i lmrun_uc
+set nstop_cos = `echo "($runhours*3600-$cplfreq1)/$dt_cos" | bc`
+sed "s/nstop_cos_bldsva/$nstop_cos/" -i lmrun_uc
+sed "s/dt_cos_bldsva/$dt_cos/" -i lmrun_uc
+sed "s/ie_tot_bldsva/$ngcosx/" -i lmrun_uc
+sed "s/je_tot_bldsva/$ngcosy/" -i lmrun_uc
+# 
+$rundir/lmrun_uc cleancluma 
+$rundir/lmrun_uc execluma            #creates and executes cosmo_eu_job
+
+# Copy CLM3.5 grid to the rundir (CONSISTENT GRID between COSMO and CLM)
+# This is required when readclm = 1 in COSMO OASIS INTERFACE
+cp $clm_data/grid* $rundir/clmgrid.nc
+#
+endif
+#
+#-----------------------------------------------------------------------------
+# Step 2c:  Compile CLM  with oasis3 libraries                                  #UPDATE
+#-----------------------------------------------------------------------------
+if ($compile_clm == 1) then
+echo "*****************************************************"
+echo "* Compiling CLM                                     *" 
+echo "*****************************************************"
+
+  echo "CLM VERSION"
+  echo "  "
+  # User Input Start
+  echo -n "Enter your selection [clm3_5,clm4_0,clm4_5,clm5_0]: "
+  set clm_version = $<
+  echo " "
+
+ 
+if ($clm_version == "clm4_0") then
+
+set cesm_ver = cesm1_2_1
+
+if !(-d $SVAROOT/$cesm_ver) then
+  cp -rf /daten01/z4/ComponentModels/$cesm_ver $SVAROOT/
+endif
+
+# Flags to control OASIS coupled runs for CESM only
+if ($compile_dum == 1) then
+setenv USEOASLIB "TRUE"
+else
+#setenv CPPDEF2 ""
+setenv USEOASLIB "FALSE"
+endif
+#
+
+cp -rf /daten01/z4/ComponentModels/$cesm_ver $SVAROOT/
+# Copy the terrsysmp interface to the cesm source code 
+
+echo "*****************************************************"
+echo "* Compiling CLM 4.0                                 *"    #UPDATE
+echo "*****************************************************"
+
+
+if ($compile_clean == 1) then
+ rm -rf $blddir_clm
+endif
+#
+set MPI_LIB_NAME mpi
+set cesm_rut = $SVAROOT/$cesm_ver
+set cesm_cas = $case_clm
+set cesm_dir = $blddir_clm
+set cesm_bld = $SVAROOT/bldsva/cesm_build
+#
+#set cesm_res = 5x5_amazon
+set LMASK = navy
+set ATMDOM = domain.lnd.${GRIDNAME}_$LMASK.nc
+set yyyy_start = $yyyy
+set mm_start   = $mm
+set dd_start   = $dd
+set yyyy_end = $yyyy
+set stop_option = nhours
+set stop_optionVal = `echo "$runhours*1"  | bc`
+# For NCPL_BASE_PERIOD = day
+@ nATM_CPL = ( 24 * 3600 / $dt_clm )
+#Customizing PE Layout
+@ NPROC_LND = ( $nprocx_clm * $nprocy_clm )
+set NTHRD_LND = 1
+set NROOT_LND = 0
+#cpl7 parameters
+set cesm_res = CLM_USRDAT
+set cesm_cst = I
+set clm_ver  = clm4_0
+set cesm_mch = cluma2
+#
+
+echo "cd " $cesm_bld
+cd $cesm_bld
+
+#Update CESM Configuration
+set rel_folder = "/scripts/ccsm_utils/Machines/"
+cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/config_compilers.xml     $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/config_machines.xml      $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/env_mach_specific.cluma2 $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/mkbatch.cluma2           $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/Makefile                           $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/buildlib.oas3                      $cesm_rut/$rel_folder
+set rel_folder = "/scripts/ccsm_utils/Case.template/"
+cp $cesm_bld/$cesm_ver/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
+set rel_folder = "/scripts/ccsm_utils/Tools/"
+cp $cesm_bld/$cesm_ver/$rel_folder/cesm_buildexe                      $cesm_rut/$rel_folder
+set rel_folder = "/scripts/"
+cp $cesm_bld/$cesm_ver/$rel_folder/create_newcase                     $cesm_rut/$rel_folder
+set rel_folder = "/models/lnd/clm/bld/"
+cp $cesm_bld/$cesm_ver/$rel_folder/configure                          $cesm_rut/$rel_folder
+cp $cesm_bld/$cesm_ver/$rel_folder/clm.buildnml.csh                   $cesm_rut/$rel_folder
+set rel_folder = "/models/lnd/clm/bld/config_files/"
+cp $cesm_bld/$cesm_ver/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
+set rel_folder = "models/atm/datm/bld/"
+cp $cesm_bld/$cesm_ver/$rel_folder/datm.buildexe.csh                  $cesm_rut/$rel_folder
+#Update domain directory and domain file for DATM OFFLINE MODE
+cp $cesm_bld/$cesm_ver/namelist_defaults_datm.xml $cesm_rut/models/atm/datm/bld/namelist_files/
+
+#Patch oasis3 interface
+# Utility oasis3 libraray
+set rel_folder = "/models/utils/" 
+if (-d $SVAROOT/$cesm_ver/$rel_folder/oas3) then
+   rm -rf $SVAROOT/$cesm_ver/$rel_folder/oas3 
+   echo "Removing exisintg oasis3 interface in " $cesm_ver
+endif
+cp -rf $SVAROOT/bldsva/intf_oas3/$cesm_ver/oas3 $SVAROOT/$cesm_ver/$rel_folder
+#CLM dependent send/receive
+set rel_folder = "/models/lnd/clm/src/"
+if (-d $SVAROOT/$cesm_ver/$rel_folder/cpl_oas3) then
+   rm -rf $SVAROOT/$cesm_ver/$rel_folder/cpl_oas3
+   echo "Removing exisintg oasis3 interface in " $cesm_ver
+endif
+cp -rf $SVAROOT/bldsva/intf_oas3/$cesm_ver/clm/cpl_oas3 $SVAROOT/$cesm_ver/$rel_folder
+#DATM dependent send/receive
+set rel_folder = "/models/atm/datm/"
+if (-d $SVAROOT/$cesm_ver/$rel_folder/cpl_oas3) then
+   rm -rf $SVAROOT/$cesm_ver/$rel_folder/cpl_oas3
+   echo "Removing exisintg oasis3 interface in " $cesm_ver
+endif
+cp -rf $SVAROOT/bldsva/intf_oas3/$cesm_ver/atm/cpl_oas3 $SVAROOT/$cesm_ver/$rel_folder
+#
+#
+cd $SVAROOT
+if (-d $cesm_dir) then
+  echo "Directory already exists!"
+  #exit 0
+else
+  #CPS rm -rf scratch
+  echo "Creating newcase for cesm "
+  cd
+  cd $cesm_rut/scripts
+  ./create_newcase -v -case $cesm_dir -res $cesm_res -compset $cesm_cst -mach $cesm_mch
+  #CPS not needed ./link_dirtree $cesm_dat $cesm_dir/inputdata/
+  cd $cesm_dir
+  #
+  echo " "
+  echo "Updatexml for userspecific run"
+  echo " "
+  #env_machine_pes.xml
+  ./xmlchange NTASKS_ATM=$NPROC_LND
+  ./xmlchange NTASKS_LND=$NPROC_LND
+  ./xmlchange NTHRDS_LND=$NTHRD_LND
+  ./xmlchange ROOTPE_LND=$NROOT_LND
+  #env_build.xml
+  ./xmlchange USE_OAS_LIB=$USEOASLIB
+  ./xmlchange MASK_GRID=$LMASK
+  #env_run.xml
+  ./xmlchange CLM_BLDNML_OPTS="-mask $LMASK"
+  ./xmlchange CLM_FORCE_COLDSTART="off"
+  ./xmlchange CLM_CO2_TYPE="constant"
+  #./xmlchange CLM_NAMELIST_OPTS="hist_dov2xy=.true.;"
+  #./xmlchange CLM_NAMELIST_OPTS="hist_avgflag_pertape=&apos;A&apos;"
+  ./xmlchange CLM_USRDAT_NAME=$GRIDNAME
+  ./xmlchange ATM_DOMAIN_FILE=$ATMDOM,LND_DOMAIN_FILE=$ATMDOM
+  ./xmlchange DATM_MODE=CLM1PT
+  ./xmlchange DATM_CLMNCEP_YR_START=$yyyy_start,DATM_CLMNCEP_YR_END=$yyyy_end
+  ./xmlchange DATM_CLMNCEP_YR_ALIGN=$yyyy_start
+  ./xmlchange CLM_BLDNML_OPTS="-sim_year 2000"
+  ./xmlchange RUN_STARTDATE=$yyyy_start"-"$mm_start"-"$dd_start
+  ./xmlchange RUN_REFDATE=$yyyy_start"-"$mm_start"-"$dd_start
+  ./xmlchange STOP_OPTION=$stop_option
+  ./xmlchange STOP_N=$stop_optionVal
+  ./xmlchange ATM_NCPL=$nATM_CPL
+  #
+  echo " "
+  echo "Running cesm.setup ..."
+  echo " "
+  ./cesm_setup
+  
+  #Change Source Files
+  cp $cesm_bld/$cesm_ver/SourceMods/src.drv/*.F90  SourceMods/src.drv/
+  cp $cesm_bld/$cesm_ver/SourceMods/src.datm/*.F90 SourceMods/src.datm/
+  cp $cesm_bld/$cesm_ver/SourceMods/src.clm/*.F90  SourceMods/src.clm/
+  cp $cesm_bld/$cesm_ver/user_nl_clm .
+  cp $cesm_bld/$cesm_ver/user_nl_datm .
+  ./$cesm_cas.build
+  #./$cesm_cas.submit
+endif
+endif
+
+if ($clm_version == "clm3_5") then
+
+if !(-d $SVAROOT/clm) then
+  cp -rf /daten01/z4/ComponentModels/clm3.5 $SVAROOT/clm
+endif
+
+# Copy the terrsysmp interface to the cesm source code 
+cp -rf $SVAROOT/bldsva/intf_oas3/$clm_version/oas3 $SVAROOT/clm/src/
+cp     $SVAROOT/bldsva/intf_oas3/$clm_version/tsmp/*.F90 $SVAROOT/clm/bld/usr.src/
+cp     $SVAROOT/bldsva/intf_oas3/$clm_version/arch/* $SVAROOT/clm/bld/
+
+echo "*****************************************************"
+echo "* Compiling CLM 3.5                                 *"    #UPDATE
+echo "*****************************************************"
+if ($compile_clean == 1) then
+ rm -rf $blddir_clm
+endif
+
+mkdir -p $blddir_clm               || echo "cannot create $blddir_clm" && exit 1
+
+## Configuration settings:
+set spmd     = on       # settings are [on   | off       ] (default is off)
+set maxpft   = 1        # settings are 4->17               (default is 4)
+set rtm      = off      # settings are [on   | off       ] (default is off) 
+set cps_catch = off       # settings are [on   | off       ] (default is off)
+set usr_src  = $cfgdir_clm/usr.src
+if ($compile_option == 1) then
+ set flags = "-maxpft $maxpft -rtm $rtm -cps_catch $cps_catch -usr_src $usr_src"
+endif
+if ($compile_option == 3) then
+ set flags = "-maxpft $maxpft -rtm $rtm -usr_src $usr_src -oas3_cos"
+endif
+if ($compile_option == 4) then
+ set flags = "-maxpft $maxpft -rtm $rtm -usr_src $usr_src -oas3_pfl"
+endif
+if ($compile_option == 5) then
+ set flags = "-maxpft $maxpft -rtm $rtm -usr_src $usr_src -oas3_pfl -oas3_cos"
+endif
+if ($spmd == on ) set flags = "$flags -spmd"
+if ($spmd == off) set flags = "$flags -nospmd"
+
+echo "cd $blddir_clm"
+cd $blddir_clm
+
+if ( ! -f $blddir_clm/config_cache.xml ) then
+    echo "flags to configure are $flags"
+    $cfgdir_clm/configure $flags    || echo "configure failed" && exit 1
+    echo "Building CLM in $blddir_clm ..."
+    make  >&! MAKE.out      || echo "CLM build failed: see $blddir_clm/MAKE.out" && exit 1
+else
+    echo "Re-building CLM in $blddir_clm ..."
+    rm -f Depends
+    make  >&! REMAKE.out      || echo "CLM build failed: see $blddir_clm/REMAKE.out" && exit 1
+endif
+#
+if ( -f ./clm ) then    #UPDATE
+  echo " "
+  echo "CLM Compilation Successful........................."
+  echo " "
+else
+  echo " "
+  echo "CLM Compilation Failed............................."
+  echo " "
+  exit
+endif
+# Copy the executable to rundir
+mv clm $rundir
+#
+# Edit and copy the clm namelist to rundir
+cp $cfgdir_clm/lnd.stdin $rundir
+#
+cd $rundir
+# Edit namelist
+set yyyymmdd = `echo $yyyy$mm$dd` 
+sed "s/yyyymmdd_bldsva/$yyyymmdd/" -i lnd.stdin
+@ seconds_clm = ( $hh * 3600 )
+sed "s/seconds_clm_bldsva/$seconds_clm/" -i lnd.stdin
+sed "s/dt_clm_bldsva/$dt_clm/" -i lnd.stdin
+set runstep_clm = `echo "$runhours*3600/$dt_clm"  | bc`
+sed "s/runstep_clm_bldsva/$runstep_clm/" -i lnd.stdin
+#
+endif
+endif
+endif #CLM Directory exist check
+#-----------------------------------------------------------------------------
+# Step 2c.1:  Compile model2 with oasis3 libraries 
+#-----------------------------------------------------------------------------
+if ($compile_dum == 1) then
+echo "*****************************************************"
+echo "* Compiling dummy model2                            *"
+echo "*****************************************************"
+echo "cd $blddir_dum"
+cd $blddir_dum
+make -f Makefile clean
+make -f Makefile
+./job_script
+#set dummy_exe = model2.x
+et dummy_exe = model1.x
+cp $dummy_exe $rundir
+cp oasis3.MPI1.x $rundir
+endif
+#
+#-----------------------------------------------------------------------------
+# Step 2d: Compile parflow with oasis3 libraries 
+#-----------------------------------------------------------------------------
+if ($compile_pfl == 1) then
+echo "*****************************************************"
+echo "* Compiling ParFlow                                 *"   #UPDATE
+echo "*****************************************************"
+
+cd $SVAROOT
+if (-d parflow) then
+  echo "cd $cfgdir_pfl"
+  cd $cfgdir_pfl
+else
+  git clone https://git.meteo.uni-bonn.de/git/parflow
+  cd parflow
+  git checkout -b v1.1.0 v1.1.0 
+  echo "cd $cfgdir_pfl"
+  cd $cfgdir_pfl
+endif
+
+if ($compile_clean == 1) then
+ make veryclean
+if ($compile_oas == 1) then
+ ./configure --prefix=$PARFLOW_DIR --with-hypre=$HYPRE_DIR --with-silo=$SILO_DIR --with-amps=oas3 --with-oas3 --with-amps-sequential-io --enable-timing --enable-opt="-O3"
+endif
+if ($compile_oas == 0) then
+ ./configure --prefix=$PARFLOW_DIR --with-hypre=$HYPRE_DIR --with-silo=$SILO_DIR --with-amps=mpi1 --with-amps-sequential-io --enable-timing --enable-opt="-O3"
+endif
+endif
+make
+make install
+if ( -f ./bin/parflow ) then    #UPDATE
+  echo " "
+  echo "ParFLOW Compilation Successful....................."
+  echo " "
+else
+  echo " "
+  echo "ParFlow Compilation Failed........................."
+  echo " "
+  exit
+endif
+mv ./bin/parflow $rundir         #UPDATE
+#
+
+# Compile pfset tool
+echo "cd $PARFLOW_DIR/pftools"
+cd $PARFLOW_DIR/pftools
+if ($compile_clean == 1) then
+ make veryclean
+if ($compile_oas == 1) then
+ ./configure --prefix=$PARFLOW_DIR --with-tcl=$TCL_DIR --with-silo=$SILO_DIR --with-amps=oas3 --with-oas3 --with-amps-sequential-io
+endif
+if ($compile_oas == 0) then
+ ./configure --prefix=$PARFLOW_DIR --with-tcl=$TCL_DIR --with-silo=$SILO_DIR --with-amps=mpi1 --with-amps-sequential-io
+endif
+endif
+make
+make install
+#
+#Use the tcl script to create the database(pfidb) for parflow run
+echo "cd $PARFLOW_DIR/coup_oasrun"
+cd $PARFLOW_DIR/coup_oasrun
+cp coup_oas.tcl $rundir
+cd $rundir
+# Edit namelist
+sed "s/nprocx_pfl_bldsva/$nprocx_pfl/" -i coup_oas.tcl
+sed "s/nprocy_pfl_bldsva/$nprocy_pfl/" -i coup_oas.tcl
+sed "s/ngpflx_bldsva/$ngpflx/" -i coup_oas.tcl
+sed "s/ngpfly_bldsva/$ngpfly/" -i coup_oas.tcl
+sed "s/dt_pfl_bldsva/$dt_pfl/" -i coup_oas.tcl 
+sed "s/stop_pfl_bldsva/$runhours/" -i coup_oas.tcl
+#
+tclsh coup_oas.tcl
+#
+# Copy CLM3.5 grid to the rundir (CONSISTENT GRID between CLM and ParFlow)
+cp $clm_data/grid* $rundir/clmgrid.nc
+#
+endif
+#
+#
+#-----------------------------------------------------------------------------
+# Step 3: Configuration file for coupling component model via OASIS3 
+#-----------------------------------------------------------------------------
+set yyyymmdd = `echo $yyyy$mm$dd`
+set runseconds = `echo "$runhours*3600" |bc`
+set totalruntime = `echo $runseconds | awk '{printf "%.0f",$1}'`
+set nproc_cos = 0 ; set nproc_clm = 0 ; set nproc_pfl = 0 ;
+if ($compile_cos == 1) then
+@ nproc_cos = ( $nprocx_cos * $nprocy_cos )
+endif
+if ($compile_pfl == 1) then
+@ nproc_pfl = ( $nprocx_pfl * $nprocy_pfl )
+endif
+if ($compile_clm == 1) then
+@ nproc_clm = ( $nprocx_clm * $nprocy_clm )
+endif
+#
+if ($compile_dum == 1) then
+echo "*****************************************************"
+echo "* Editing the config file for coupling              *"
+echo "*****************************************************"
+echo "cd $SVAROOT/model2_oas3/data_oas3"
+cd $SVAROOT/model2_oas3/data_oas3
+cp cf_name_table.txt $rundir
+#cp namcouple_dummy2 $rundir/namcouple
+cp namcouple_dummy1 $rundir/namcouple
+set ncpl_exe1 = 1 
+#$nproc_clm
+set ncpl_exe2 = 1 
+cd $rundir
+ed namcouple <<EOF
+g/nproc_exe1/s/nproc_exe1/$nproc_clm/
+g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
+g/nproc_exe2/s/nproc_exe2/$nproc_dum/
+g/ncpl_exe2/s/ncpl_exe2/$ncpl_exe2/
+g/totalruntime/s/totalruntime/$totalruntime/
+g/yyyymmdd/s/yyyymmdd/$yyyymmdd/
+g/cplfreq1/s/cplfreq1/$cplfreq1/
+g/ngcosx/s/ngcosx/$ngcosx/
+g/ngcosy/s/ngcosy/$ngcosy/
+g/ngclmx/s/ngclmx/$ngclmx/
+g/ngclmy/s/ngclmy/$ngclmy/
+w
+q
+EOF
+endif
+
+if ($compile_oas == 1) then
+
+echo "*****************************************************"
+echo "* Editing the config file for coupling              *"
+echo "*****************************************************"
+echo "cd $SVAROOT/bldsva/data_oas3"
+cd $SVAROOT/bldsva/data_oas3
+cp cf_name_table.txt $rundir
+#cp cos_grids.nc $rundir
+# Now Editing the configure file and making the run
+#
+if ($compile_option == 3) then
+if ($cpl_scheme == 1) then
+cp namcouple_cos_clm $rundir/namcouple
+endif
+if ($cpl_scheme == 0) then
+cp namcouple_cos_clm_a1 $rundir/namcouple
+endif
+cd $rundir
+# ncpl_exe will be 1 for clm !!!
+set ncpl_exe1 = $nproc_cos 
+set ncpl_exe2 = 1 
+ed namcouple <<EOF
+g/nproc_exe1/s/nproc_exe1/$nproc_cos/
+g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
+g/nproc_exe2/s/nproc_exe2/$nproc_clm/
+g/ncpl_exe2/s/ncpl_exe2/$ncpl_exe2/
+g/totalruntime/s/totalruntime/$totalruntime/
+g/yyyymmdd/s/yyyymmdd/$yyyymmdd/
+g/cplfreq1/s/cplfreq1/$cplfreq1/
+g/ngcosx/s/ngcosx/$ngcosx/
+g/ngcosy/s/ngcosy/$ngcosy/
+g/ngclmx/s/ngclmx/$ngclmx/
+g/ngclmy/s/ngclmy/$ngclmy/
+w
+q
+EOF
+endif    #$compile_option == 3 
+
+if ($compile_option == 4) then
+cp namcouple_pfl_clm $rundir/namcouple
+cd $rundir
+# ncpl_exe will be 1 for clm !!!
+set ncpl_exe1 = $nproc_pfl 
+set ncpl_exe2 = 1 
+ed namcouple <<EOF
+g/nproc_exe1/s/nproc_exe1/$nproc_pfl/
+g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
+g/nproc_exe2/s/nproc_exe2/$nproc_clm/
+g/ncpl_exe2/s/ncpl_exe2/$ncpl_exe2/
+g/totalruntime/s/totalruntime/$totalruntime/
+g/yyyymmdd/s/yyyymmdd/$yyyymmdd/
+g/cplfreq2/s/cplfreq2/$cplfreq2/
+g/ngclmx/s/ngclmx/$ngclmx/
+g/ngclmy/s/ngclmy/$ngclmy/
+g/ngpflx/s/ngpflx/$ngpflx/
+g/ngpfly/s/ngpfly/$ngpfly/
+w
+q
+EOF
+endif    #$compile_option == 4
+
+if ($compile_option == 5) then
+if ($cpl_scheme == 1) then
+cp namcouple_cos_clm_pfl $rundir/namcouple
+endif
+if ($cpl_scheme == 0) then
+cp namcouple_cos_clm_pfl_a1 $rundir/namcouple
+endif
+cd $rundir
+# ncpl_exe will be 1 for clm !!!
+set ncpl_exe1 = $nproc_cos 
+set ncpl_exe2 = $nproc_pfl
+set ncpl_exe3 = 1 
+ed namcouple <<EOF
+g/nproc_exe1/s/nproc_exe1/$nproc_cos/
+g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
+g/nproc_exe2/s/nproc_exe2/$nproc_pfl/
+g/ncpl_exe2/s/ncpl_exe2/$ncpl_exe2/
+g/nproc_exe3/s/nproc_exe3/$nproc_clm/
+g/ncpl_exe3/s/ncpl_exe3/$ncpl_exe3/
+g/totalruntime/s/totalruntime/$totalruntime/
+g/yyyymmdd/s/yyyymmdd/$yyyymmdd/
+g/cplfreq1/s/cplfreq1/$cplfreq1/
+g/cplfreq2/s/cplfreq2/$cplfreq2/
+g/ngcosx/s/ngcosx/$ngcosx/
+g/ngcosy/s/ngcosy/$ngcosy/
+g/ngclmx/s/ngclmx/$ngclmx/
+g/ngclmy/s/ngclmy/$ngclmy/
+g/ngpflx/s/ngpflx/$ngpflx/
+g/ngpfly/s/ngpfly/$ngpfly/
+w
+q
+EOF
+endif    #$compile_option == 5 
+
+endif
+#-----------------------------------------------------------------------------
+# Step 4: Generate PBS script for MPMPD jobs in cluma 
+#-----------------------------------------------------------------------------
+if ($job_scheduler == pbs) then
+echo "*****************************************************"
+echo "* Creating PBS script for MPMD run                  *"
+echo "*****************************************************"
+#
+if ($compile_option == 0) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_cos ./lmstarter"
+endif
+if ($compile_option == 1) then
+if ($clm_version == "clm3_5") then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_clm ./clm"
+endif
+if ($clm_version == "clm4_0") then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_clm $rundir/bld/cesm.exe"
+if ($compile_dum == 1) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np 1 oasis3.MPI1.x : -np $nproc_clm $rundir/bld/cesm.exe : -np 1 $dummy_exe"
+endif
+endif
+endif
+if ($compile_option == 2) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_pfl ./parflow rurlaf"
+endif
+if ($compile_option == 3) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmstarter : -np $nproc_clm ./clm"
+endif
+if ($compile_option == 4) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_pfl ./parflow rurlaf : -np $nproc_clm ./clm"
+endif
+if ($compile_option == 5) then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmstarter : -np $nproc_pfl ./parflow rurlaf : -np $nproc_clm ./clm"
+endif
+#
+#PBS Script
+cd $rundir
+cat << EOF >> $rundir/cluma_pbs_run
+
+#Job Submission to Cluma
+#PBS -S /bin/csh
+#PBS -N sva_oas3
+#PBS -l walltime=700:00:00
+#PBS -l nodes=nnodes:ppn=$nppn
+#PBS -V
+#PBS -k oe
+#PBS -j oe
+#PBS -u $user
+
+cd $rundir
+mkdir timing
+mkdir timing/checkpoints
+$exec_line
+echo 'Results are found in rundir : '$rundir
+EOF
+# Specify number of nodes to use
+set ncluma_processor = `expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas + $nproc_dum`
+echo "Total number of processor required : " $ncluma_processor
+if ($ncluma_processor == $nppn || $ncluma_processor < $nppn) then
+set ncluma_nodes = 1
+else if ($ncluma_processor > $nppn ) then
+set ncluma_nodes_frac = `expr $ncluma_processor % $nppn`
+if ($ncluma_nodes_frac > 0 ) then
+set ncluma_nodes = `expr $ncluma_processor / $nppn  + 1`
+else 
+set ncluma_nodes = `expr $ncluma_processor / $nppn`
+endif
+endif
+echo "Number of nodes assigned in cluma: " $ncluma_nodes
+sed "s/nnodes/$ncluma_nodes/" -i cluma_pbs_run
+#-----------------------------------------------------------------------------
+chmod u+x cluma_pbs_run
+#-----------------------------------------------------------------------------
+endif #$job_scheduler == pbs
+#
+if ($job_scheduler == lls) then
+#-----------------------------------------------------------------------------
+# Step 4: Generate LLS script for MPMPD jobs in juqueen 
+#-----------------------------------------------------------------------------
+set mpitasks = `expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
+echo "*****************************************************"
+echo "* Creating LLS script for MPMD run                  *"
+echo "*****************************************************"
+# -p max. rank (# mpi task/node)  used for any component, -n total no. of mpitasks/processor
+if ($compile_option == 0) then
+set exec_line = "$MPIRUN -p $nppn -n $mpitasks : ./lmparbin_pur"
+endif
+if ($compile_option == 1) then
+set exec_line = "$MPIRUN -p 1 -n $mpitasks : ./clm"
+endif
+if ($compile_option == 2) then
+set exec_line = "$MPIRUN -p $nppn -n $mpitasks : ./parflow rurlaf"
+endif
+if ($compile_option == 3) then
+set exec_line = "$MPIRUN -p $nppn -n $mpitasks --mapping mapfile.txt : ./oasis3.MPI1.x "
+endif
+if ($compile_option == 4) then
+set exec_line = "$MPIRUN -p $nppn -n $mpitasks --mapping mapfile.txt : ./oasis3.MPI1.x "
+endif
+if ($compile_option == 5) then
+set exec_line = "$MPIRUN -p $nppn -n $mpitasks --mapping mapfile.txt : ./oasis3.MPI1.x "
+endif
+
+#LLS Script
+cd $rundir
+
+set errorname  = '# @ error= ~/$(job_name).$(jobid).out'
+set outputname = '# @ output= ~/$(job_name).$(jobid).out'
+
+cat << EOF >> $rundir/juqueen_lls_run.lls
+#!/bin/ksh
+
+#@ job_name= TerrSysMP_run
+$errorname
+$outputname
+#@ notification = never
+#@ wall_clock_limit = 00:30:00
+#@ job_type = bluegene
+#@ bg_size = 32
+#@ bg_connectivity = TORUS
+#@ environment = COPY_ALL
+#@ queue
+
+cd $rundir
+$exec_line
+echo 'Results are found in rundir : '$rundir
+EOF
+
+echo "Number of mpitasks for juqueen mpmpd : " $mpitasks
+#-----------------------------------------------------------------------------
+chmod u+x juqueen_lls_run.lls
+#-----------------------------------------------------------------------------
+endif #$job_scheduler == lls 
+#
+exit 0

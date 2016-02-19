@@ -1,0 +1,29 @@
+COSMO_FLAGS = -DNETCDF -D__COSMO__
+INCDIR      = ${NETCDF}/include
+LIBDIR      = /usr/lib
+F90         = ${MPIDIR}/bin/mpif90 -ffree-line-length-0
+
+COMFLG1      = -c -O0 -I$(INCDIR) -I/usr/include -L$(LIBDIR) -cpp -DGRIBDWD $(COSMO_FLAGS) ${CPPDEF2}
+COMFLG2      = $(COMFLG1)
+COMFLG3      = $(COMFLG1)
+COMFLG4      = $(COMFLG1)
+COMFLG       = $(COMFLG1)
+COMFLG5      = $(COMFLG1) ${PSMILE_INCDIR} ${CPPDEF1} ${CPPDEF2}
+
+#
+# linker
+LDPAR        = ${MPIDIR}/bin/mpif90
+LDSEQ        = gfortran
+LDFLG        =
+#
+# standard binary
+PROGRAM      = lmparbin
+LIB          = -lgrib1 -lgrib_api_f90 \
+               -lgrib_api -ljasper -lnetcdf -lnetcdff \
+               ${LIBOASIS} ${LIBPSMILE}
+LIBPATH      = -L/daten01/data/lib/DWD-libgrib1_20110128 \
+               -L/daten01/data/lib/grib_api-1.9.9/fortran  \
+               -L/daten01/data/lib/grib_api-1.9.9/src \
+               -L{NETCDF}/lib -L/usr/lib
+
+#

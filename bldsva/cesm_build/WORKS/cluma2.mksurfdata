@@ -1,0 +1,40 @@
+#!/bin/csh
+
+#Author: P. Shrestha
+
+setenv GRIDNAME 300x300NRW
+setenv CDATA `date +%y%m%d`
+
+#Create the SCRIP grid file for the location and create a unity mapping file for it.
+
+cd $HOME/cesm1.2.1/models/lnd/clm/tools/shared/mkmapdata
+./mknoocnmap.pl -p 40,255 -n $GRIDNAME
+
+# Set pointer to MAPFILE just created that will be used later
+setenv MAPFILE `pwd`/map_${GRIDNAME}_noocean_to_${GRIDNAME}_nomask_aave_da_${CDATE}.nc
+
+# Create the mapping files needed by mksurfdata_map.
+
+cd ../../shared/mkmapdata
+setenv GRIDFILE ../mkmapgrids/SCRIPgrid_${GRIDNAME}_nomask_${CDATE}.nc
+#./mkmapdata.sh -r $GRIDNAME -f $GRIDFILE -t regional
+./mkmapdata.sh -p clm4_0 --gridfile $GRIDFILE --res $GRIDNAME --gridtype regional
+
+##Create the domain file
+#cd ../../../../tools/mapping/gen_domain_files/src
+#../../../scripts/ccsm_utils/Machines/configure -mach yellowstone -compiler intel
+#gmake
+#cd ..
+#setenv OCNDOM domain.ocn_noocean.nc
+#setenv ATMDOM domain.lnd.{$GRIDNAME}_noocean.nc
+#./gen_domain -m $MAPFILE -o $OCNDOM -l $ATMDOM
+
+## Save the location where the domain file was created 
+#setenv GENDOM_PATH `pwd`
+
+#Finally create the surface dataset
+cd ../../../../lnd/clm/tools/clm4_5/mksurfdata_map/src
+gmake
+cd ..
+./mksurfdata.pl -r usrspec -usr_gname $GRIDNAME -usr_gdate $CDATE
+

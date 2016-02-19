@@ -1,0 +1,36 @@
+#!/bin/csh
+
+
+
+cp $SVAROOT/bldsva/ibm_changes/build_oas3_forJQ			   $SVAROOT/bldsva/build_oas3	
+
+sed "s@setenv SVAROOT.*@setenv SVAROOT $SVAROOT@" -i $SVAROOT/bldsva/build_oas3
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/ibm_changes/nrw_data-set/patch.ksh
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/ibm_changes/idealized-test-case_data-set/patch.ksh
+
+
+cp $SVAROOT/bldsva/ibm_changes/oasis3/make.inc             $SVAROOT/oasis3/util/make_dir/
+cp $SVAROOT/bldsva/ibm_changes/oasis3/make.xlf_juqueen_oa3 $SVAROOT/oasis3/util/make_dir/
+cp $SVAROOT/bldsva/ibm_changes/cosmo/Makefile              $SVAROOT/cosmo/
+
+cp $SVAROOT/bldsva/ibm_changes/clm/configure               $SVAROOT/clm/bld/
+
+
+#2 Issue with JUQUENN XLF Compilter FORTRAN underscore
+cp $SVAROOT/bldsva/ibm_changes/parflow/amps_init.c         $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/amps_init.c         $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/oas3_coupler.h      $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/oas3_external.h     $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/oas_pfl_vardef.F90  $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/parflow_proto_f90.h $SVAROOT/parflow/pfsimulator/parflow_lib/
+cp $SVAROOT/bldsva/ibm_changes/parflow/parflow_proto_f.h   $SVAROOT/parflow/pfsimulator/parflow_lib/
+#3 Issue with JUQUEEN LITTLE ENDIAN
+cp $SVAROOT/bldsva/ibm_changes/parflow/amps_proto.h        $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/ibm_changes/parflow/amps_proto.h        $SVAROOT/parflow/pfsimulator/amps/mpi1/
+cp $SVAROOT/bldsva/ibm_changes/parflow/amps_io.c           $SVAROOT/parflow/pfsimulator/amps/common/
+cp $SVAROOT/bldsva/ibm_changes/parflow/parflow_config.h.in $SVAROOT/parflow/pfsimulator/config/
+cp $SVAROOT/bldsva/ibm_changes/parflow/tools_io.h          $SVAROOT/parflow/pftools/
+#
+
+echo "JUQUEEN_PATCH complete........."
+exit 0 

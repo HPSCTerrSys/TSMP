@@ -1,0 +1,33 @@
+ &clm_inparm
+ caseid         = 'clmoas'
+ ctitle         = 'clmoas'
+ nsrest         =  0
+ nelapse        =  runstep_clm_bldsva 
+ dtime          =  dt_clm_bldsva 
+ start_ymd      =  yyyymmdd_bldsva 
+ start_tod      =  seconds_clm_bldsva 
+
+ finidat        = '/daten01/z4/database/clm3.5/Rur_NRW/spinup_new/clmoas.clm2.r.2008-05-08-00000.nc'
+ flndtopo       = '/daten01/z4/database/clm3.5/Rur_NRW/topodata_0300x0300.nc'
+ fsurdat        = '/daten01/z4/database/clm3.5/Rur_NRW/surfdata_0300x0300.nc'
+ fatmgrid       = '/daten01/z4/database/clm3.5/Rur_NRW/griddata_0300x0300.nc'
+ fatmlndfrc     = '/daten01/z4/database/clm3.5/Rur_NRW/fracdata_0300x0300.nc'
+ fatmtopo       = ''
+ fpftcon        = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ offline_atmdir = '/daten01/z4/database/clm3.5/Rur_NRW/atm_forcing/'
+ frivinp_rtm    = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+
+ hist_dov2xy    = .true.
+ hist_avgflag_pertape = 'A'
+ hist_nhtfrq    =  -1 
+ hist_mfilt     =  1
+ hist_crtinic   = 'NONE'
+ mss_irt        =  1 
+
+ irad           =  1
+ wrtdia         = .true.
+ archive_dir    = "/daten04/pshrestha/TerrSysMP_oup/"
+ rest_flag      = .false. 
+/
+ &prof_inparm
+ /

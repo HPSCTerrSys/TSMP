@@ -1,0 +1,431 @@
+# Oasis reads in this file at run-time.
+# Prepared for the SVA System (COMSO, CLM und ParFlow) 
+# Prabhakar Shrestha (pshrestha@uni-bonn.de)
+#
+# Any line beginning with # is ignored. Blank lines are not allowed.
+# LOCTRANS AVERAGE is used for sending COSMO field to CLM
+#
+ $SEQMODE
+# This keyword concerns the coupling algorithm. Put here the maximum number
+# of fields that have to be, at one particular coupling timestep,
+# exchanged sequentially in a given order.
+  4 
+ $END
+#########################################################################
+ $CHANNEL
+# The communication technique you want to use.
+# Choices are MPI1 or MPI2, NONE.
+# - if you want to use MPI1 or MPI2 message passing, you must write 
+# MPI1 or MPI2 (+ NOBSEND if you do not want to use the default MPI_BSend)
+# on one line 
+# + one line per model giving for the model the total number of procs,
+# the number of procs implied in the coupling and, for MPI2 only, an
+# optional launching argument
+#
+  MPI1 NOBSEND
+   nproc_exe1 ncpl_exe1
+   nproc_exe2 ncpl_exe2
+   nproc_exe3 ncpl_exe3
+ $END
+#########################################################################
+ $NFIELDS
+# Put the number of fields exchanged by OASIS.
+# If it is bigger than twice the number of fields exchanged, put also on 
+# the same line the maximum number of prism_def_var_proto
+# called by one component model in the coupled system (optional).
+# For the definition of the fields, see under $STRINGS keyword
+#
+             50 
+ $END
+#########################################################################
+ $JOBNAME
+# This is an acronym for this run (3 characters).
+  TR3
+ $END
+##########################################################################
+ $NBMODEL
+# This gives you the number of models running in this experiment +
+# their names (6 characters) + , in option, the maximum Fortran unit
+# number used by each model; 1024 will be used if none are given.
+#
+   3  oascos oaspfl oasclm 99 99 99
+ $END
+###########################################################################
+ $RUNTIME
+# This gives you the total simulated time for this run in seconds
+#
+  totalruntime 
+ $END
+###########################################################################
+ $INIDATE
+# This is the initial date of the run. This is important only if
+# FILLING analysis is used for a coupling field in the run.
+# The format is YYYYMMDD.
+  yyyymmdd 
+ $END
+###########################################################################
+ $MODINFO
+# Indicates if a header is encapsulated within the field brick 
+# in binary restart files for all communication techniques,  
+# (and for coupling field exchanges for PIPE, SIPC and GMEM.
+# (YES or NOT)
+  NOT
+ $END
+###########################################################################
+ $NLOGPRT
+# Index of printing level in output file cplout: 0 = no printing
+#  1 = main routines and field names when treated, 2 = complete output
+  0
+ $END
+###########################################################################
+ $CALTYPE
+# Calendar type :  0      = 365 day calendar (no leap years)
+#                  1      = 365 day, or 366 days for leap years, calendar
+#                  n (>1) = n day month calendar
+# This is important only if FILLING analysis is used for a coupling
+# field in the run.
+#
+  30
+ $END
+###########################################################################
+ $STRINGS
+#
+# The above variables are the general parameters for the experiment.
+# Everything below has to do with the fields being exchanged.
+#
+############################################################################
+#                      COSMO  <<--->>> CLM 
+#                      --------------------
+# Field 1 : 
+#
+#   First line:
+# 1) and 2) Symbolic names for the field before and after interpolation
+#           (8 characters maximum)
+# 3) Index of field in cf_name_table.txt
+# 4) Exchange frequency for the field in seconds (here 0.5 hours)
+# 5) Number of analysis to be performed
+# 6) Restart input NetCDF file names
+# 7) Field status (EXPORTED, AUXILARY, IGNORED, EXPOUT, IGNOUT, INPUT, OUTPUT)
+#
+#for ignout, the grid and partioning of source and target should be identical
+#################################################
+#COSMO to CLM                                   #
+#################################################
+COSTEMPE  CLMTEMPE  10 cplfreq1 2  cos01.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0 
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSUWIND  CLMUWIND  10 cplfreq1 2  cos02.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSVWIND  CLMVWIND  10 cplfreq1 2  cos03.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSSPWAT  CLMSPWAT  10 cplfreq1 2  cos04.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSTHICK  CLMTHICK  10 cplfreq1 2  cos05.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSPRESS  CLMPRESS  10 cplfreq1 2  cos06.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSDIRSW  CLMDIRSW  10 cplfreq1 1  cos07.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+COSDIFSW  CLMDIFSW  10 cplfreq1 1  cos08.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+COSLONGW  CLMLONGW  10 cplfreq1 1  cos09.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+COSCVPRE  CLMCVPRE  10 cplfreq1 2  cos10.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSGSPRE  CLMGSPRE  10 cplfreq1 2  cos11.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+COSCO2PP  CLMCO2PP  10 cplfreq1  2  cos12.nc EXPORTED
+ngcosx ngcosy ngclmx ngclmy gcos gclm SEQ=+1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#################################################
+# PARFLOW TO CLM                                #
+#################################################
+PFLSAT01  CLMSAT01  10 cplfreq2  1  pfl01.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT02  CLMSAT02  10 cplfreq2  1  pfl02.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT03  CLMSAT03  10 cplfreq2  1  pfl03.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT04  CLMSAT04  10 cplfreq2  1  pfl04.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT05  CLMSAT05  10 cplfreq2  1  pfl05.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT06  CLMSAT06  10 cplfreq2  1  pfl06.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT07  CLMSAT07  10 cplfreq2  1  pfl07.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT08  CLMSAT08  10 cplfreq2  1  pfl08.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT09  CLMSAT09  10 cplfreq2  1  pfl09.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT10  CLMSAT10  10 cplfreq2  1  pfl10.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#######
+PFLPSI01  CLMPSI01  10 cplfreq2  1  pfl11.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI02  CLMPSI02  10 cplfreq2  1  pfl12.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI03  CLMPSI03  10 cplfreq2  1  pfl13.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI04  CLMPSI04  10 cplfreq2  1  pfl14.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI05  CLMPSI05  10 cplfreq2  1  pfl15.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI06  CLMPSI06  10 cplfreq2  1  pfl16.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI07  CLMPSI07  10 cplfreq2  1  pfl17.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI08  CLMPSI08  10 cplfreq2  1  pfl18.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI09  CLMPSI09  10 cplfreq2  1  pfl19.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI10  CLMPSI10  10 cplfreq2  1  pfl20.nc EXPORTED
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#################################################
+# CLM TO COSMO                                  #
+#################################################
+#
+CLMALBED COSALBED  10 cplfreq1 1  clm06.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLMALBEI COSALBEI  10 cplfreq1 1  clm07.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLMCO2FL COSCO2FL  10 cplfreq1 1  clm08.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_RAM1 COS_RAM1  10 cplfreq1 1  clm09.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_RAH1 COS_RAH1  10 cplfreq1 1  clm10.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_RAW1 COS_RAW1  10 cplfreq1 1  clm11.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_TSF1 COS_TSF1  10 cplfreq1 1  clm12.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_QSF1 COS_QSF1  10 cplfreq1 1  clm13.nc EXPORTED
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+##################################################
+# CLM TO PFL                                     #
+##################################################
+CLMFLX01  PFLFLX01  10 cplfreq2  1  clm07.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX02  PFLFLX02  10 cplfreq2  1  clm08.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX03  PFLFLX03  10 cplfreq2  1  clm09.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX04  PFLFLX04  10 cplfreq2  1  clm10.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX05  PFLFLX05  10 cplfreq2  1  clm11.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX06  PFLFLX06  10 cplfreq2  1  clm12.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX07  PFLFLX07  10 cplfreq2  1  clm13.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX08  PFLFLX08  10 cplfreq2  1  clm14.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX09  PFLFLX09  10 cplfreq2  1  clm15.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX10  PFLFLX10  10 cplfreq2  1  clm16.nc EXPORTED
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+###################################################
+ $END

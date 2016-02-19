@@ -1,0 +1,95 @@
+#!/bin/csh
+
+set call = `echo $0 | sed 's@^\.@@'`    		#clean call from leading dot
+set call = `echo $call | sed 's@^/@@'`			#clean call from leading /
+set call = `echo "/$call" | sed 's@^/\./@/\.\./@'`	#if script is called without leading ./ replace /./ by /../
+set curr = `echo $cwd | sed 's@^/@@'`			#current directory without leading /	
+set call = `echo $call | sed "s@$curr@@"`		#remove current directory from call if absolute path was called
+set dir = `echo "/$curr$call" | sed 's@/bldsva/configure_machine@@'` #remove bldsva/configure machine to get rootpath
+
+setenv SVAROOT $dir
+#setenv SVAROOT $HOME/coup_oas
+
+
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/parallel-clm-coupling_Patch/patch.ksh
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+
+clear
+echo "We think your SVAROOT is: '$SVAROOT'. If this is not correct choose '0' to exit and uncomment the SVAROOT variable in this script with the right path."
+echo ""
+echo "Supported platforms. Select your machine. (This patch is irriversible)"
+echo "  0 exit"
+echo "  1 Linux x86_64, GNU compilers"
+echo "  2 Linux x86_64, Intel compilers"
+echo "  3 IBM BG/Q (JUQUEEN), IBM XL compilers"
+
+# User Input for Machine
+echo -n "Enter your selection [0-3]: "
+set machine_option = $<
+echo " "
+
+if ($machine_option == 0) then
+ exit
+else if ($machine_option == 1) then
+ $SVAROOT/bldsva/gnu_changes/gnu_patch
+ sed "s@host=.*@host=gnu@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+else if ($machine_option == 2) then
+ echo "Nothing to be done this is the default, exiting"
+ exit
+else if ($machine_option == 3) then
+ $SVAROOT/bldsva/ibm_changes/juqueen_patch
+ sed "s@host=.*@host=juqueen@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+else
+ echo "Error: Invalid machine option [ 0 1 2 3 ], exiting"
+ exit
+endif
+
+echo "Successfully patched machine!"
+echo " "
+echo "Would you also like to ...  (This patches are irriversible but you can also do them later)"
+echo "  1 patch Oasis3-MCT"
+echo "  2 patch Oasis3-MCT + parallel CLM coupling"
+echo "  3 no Thanks"
+
+echo -n "Enter your selection [1-3]: "
+set patch_option = $<
+echo " "
+
+if ($patch_option == 1) then
+  $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+else if ($patch_option == 2) then
+  $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+  $SVAROOT/bldsva/parallel-clm-coupling_Patch/patch.ksh
+else if ($patch_option == 3) then
+# Skip
+else
+  echo "Error: Invalid option [ 1 2 3 ], exiting"
+  exit
+endif
+
+echo "Successfully patched additions!"
+echo " "
+
+if ($machine_option == 3) then
+echo "Would you like to ship TerrSysMP with the ..."
+echo "  1 data-set for the idealized test case (300x300 pre-defined)"
+echo "  2 NRW-domain"
+echo "Remember, you can also re-apply this patches later to change the data-sets, but for now we need a choice to give you a running system"
+
+echo -n "Enter your selection [1-2]: "
+set data_option = $<
+echo " "
+
+if ($data_option == 1) then
+  $SVAROOT/bldsva/ibm_changes/idealized-test-case_data-set/patch.ksh
+else if ($data_option == 2) then
+  $SVAROOT/bldsva/ibm_changes/nrw_data-set/patch.ksh
+else
+  echo "Error: Invalid option [ 1 2 ], you need to make a choice!!! -  exiting"
+  exit
+endif
+
+endif
+
+echo "Successfully patched data-set!"
+echo " "
