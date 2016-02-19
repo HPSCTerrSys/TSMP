@@ -1,4 +1,0 @@
- &mkmapgrids_in
-  fname_in  = '/daten01/z4/database/clm3.5/Rur_NRW/griddata_0300x0300.nc'
-  fname_out = 'SCRIPgrid_300x300pt_NRW_nomask_c151126.nc'
-/

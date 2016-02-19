@@ -413,7 +413,7 @@ set MPI_LIB_NAME mpi
 set cesm_rut = $SVAROOT/$cesm_ver
 set cesm_cas = $case_clm
 set cesm_dir = $blddir_clm
-set cesm_bld = $SVAROOT/bldsva/cesm_build
+set cesm_bld = $SVAROOT/bldsva/intf_oas3/$cesm_ver/arch
 #
 #set cesm_res = 5x5_amazon
 set LMASK = navy
@@ -442,27 +442,27 @@ cd $cesm_bld
 
 #Update CESM Configuration
 set rel_folder = "/scripts/ccsm_utils/Machines/"
-cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/config_compilers.xml     $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/config_machines.xml      $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/env_mach_specific.cluma2 $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/$cesm_mch/mkbatch.cluma2           $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/Makefile                           $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/buildlib.oas3                      $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/$cesm_mch/config_compilers.xml     $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/$cesm_mch/config_machines.xml      $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/$cesm_mch/env_mach_specific.cluma2 $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/$cesm_mch/mkbatch.cluma2           $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/Makefile                           $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/buildlib.oas3                      $cesm_rut/$rel_folder
 set rel_folder = "/scripts/ccsm_utils/Case.template/"
-cp $cesm_bld/$cesm_ver/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
 set rel_folder = "/scripts/ccsm_utils/Tools/"
-cp $cesm_bld/$cesm_ver/$rel_folder/cesm_buildexe                      $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/cesm_buildexe                      $cesm_rut/$rel_folder
 set rel_folder = "/scripts/"
-cp $cesm_bld/$cesm_ver/$rel_folder/create_newcase                     $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/create_newcase                     $cesm_rut/$rel_folder
 set rel_folder = "/models/lnd/clm/bld/"
-cp $cesm_bld/$cesm_ver/$rel_folder/configure                          $cesm_rut/$rel_folder
-cp $cesm_bld/$cesm_ver/$rel_folder/clm.buildnml.csh                   $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/configure                          $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/clm.buildnml.csh                   $cesm_rut/$rel_folder
 set rel_folder = "/models/lnd/clm/bld/config_files/"
-cp $cesm_bld/$cesm_ver/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/config_definition.xml              $cesm_rut/$rel_folder
 set rel_folder = "models/atm/datm/bld/"
-cp $cesm_bld/$cesm_ver/$rel_folder/datm.buildexe.csh                  $cesm_rut/$rel_folder
+cp $cesm_bld/$rel_folder/datm.buildexe.csh                  $cesm_rut/$rel_folder
 #Update domain directory and domain file for DATM OFFLINE MODE
-cp $cesm_bld/$cesm_ver/namelist_defaults_datm.xml $cesm_rut/models/atm/datm/bld/namelist_files/
+cp $cesm_bld/namelist_defaults_datm.xml $cesm_rut/models/atm/datm/bld/namelist_files/
 
 #Patch oasis3 interface
 # Utility oasis3 libraray
@@ -536,11 +536,11 @@ else
   ./cesm_setup
   
   #Change Source Files
-  cp $cesm_bld/$cesm_ver/SourceMods/src.drv/*.F90  SourceMods/src.drv/
-  cp $cesm_bld/$cesm_ver/SourceMods/src.datm/*.F90 SourceMods/src.datm/
-  cp $cesm_bld/$cesm_ver/SourceMods/src.clm/*.F90  SourceMods/src.clm/
-  cp $cesm_bld/$cesm_ver/user_nl_clm .
-  cp $cesm_bld/$cesm_ver/user_nl_datm .
+  cp $cesm_bld/SourceMods/src.drv/*.F90  SourceMods/src.drv/
+  cp $cesm_bld/SourceMods/src.datm/*.F90 SourceMods/src.datm/
+  cp $cesm_bld/SourceMods/src.clm/*.F90  SourceMods/src.clm/
+  cp $cesm_bld/user_nl_clm .
+  cp $cesm_bld/user_nl_datm .
   ./$cesm_cas.build
   #./$cesm_cas.submit
 endif

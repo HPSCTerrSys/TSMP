@@ -11,8 +11,8 @@ setenv SVAROOT $dir
 #setenv SVAROOT $HOME/coup_oas
 
 
-sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/parallel-clm-coupling_Patch/patch.ksh
-sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/Machines/parallel-clm-coupling_Patch/patch.ksh
+sed "s@export SVAROOT.*@export SVAROOT=$SVAROOT@" -i $SVAROOT/bldsva/Machines/oasis3-mct_Patch/patch.ksh
 
 clear
 echo "We think your SVAROOT is: '$SVAROOT'. If this is not correct choose '0' to exit and uncomment the SVAROOT variable in this script with the right path."
@@ -31,14 +31,14 @@ echo " "
 if ($machine_option == 0) then
  exit
 else if ($machine_option == 1) then
- $SVAROOT/bldsva/gnu_changes/gnu_patch
- sed "s@host=.*@host=gnu@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+ $SVAROOT/bldsva/Machines/gnu_changes/gnu_patch
+ sed "s@host=.*@host=gnu@" -i $SVAROOT/bldsva/Machines/oasis3-mct_Patch/patch.ksh
 else if ($machine_option == 2) then
  echo "Nothing to be done this is the default, exiting"
  exit
 else if ($machine_option == 3) then
- $SVAROOT/bldsva/ibm_changes/juqueen_patch
- sed "s@host=.*@host=juqueen@" -i $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+ $SVAROOT/bldsva/Machines/ibm_changes/juqueen_patch
+ sed "s@host=.*@host=juqueen@" -i $SVAROOT/bldsva/Machines/oasis3-mct_Patch/patch.ksh
 else
  echo "Error: Invalid machine option [ 0 1 2 3 ], exiting"
  exit
@@ -56,10 +56,10 @@ set patch_option = $<
 echo " "
 
 if ($patch_option == 1) then
-  $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
+  $SVAROOT/bldsva/Machines/oasis3-mct_Patch/patch.ksh
 else if ($patch_option == 2) then
-  $SVAROOT/bldsva/oasis3-mct_Patch/patch.ksh
-  $SVAROOT/bldsva/parallel-clm-coupling_Patch/patch.ksh
+  $SVAROOT/bldsva/Machines/oasis3-mct_Patch/patch.ksh
+  $SVAROOT/bldsva/Machines/parallel-clm-coupling_Patch/patch.ksh
 else if ($patch_option == 3) then
 # Skip
 else
@@ -81,9 +81,9 @@ set data_option = $<
 echo " "
 
 if ($data_option == 1) then
-  $SVAROOT/bldsva/ibm_changes/idealized-test-case_data-set/patch.ksh
+  $SVAROOT/bldsva/Machines/ibm_changes/idealized-test-case_data-set/patch.ksh
 else if ($data_option == 2) then
-  $SVAROOT/bldsva/ibm_changes/nrw_data-set/patch.ksh
+  $SVAROOT/bldsva/Machines/ibm_changes/nrw_data-set/patch.ksh
 else
   echo "Error: Invalid option [ 1 2 ], you need to make a choice!!! -  exiting"
   exit
