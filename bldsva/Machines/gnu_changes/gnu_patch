@@ -1,0 +1,11 @@
+#!/bin/csh
+sed "/setenv SVAROOT/d" -i $SVAROOT/bldsva/build_oas3
+sed "/setenv nppn/i\setenv SVAROOT $SVAROOT" -i $SVAROOT/bldsva/build_oas3
+cp $SVAROOT/bldsva/gnu_changes/oasis3/make.inc          $SVAROOT/oasis3/util/make_dir/
+cp $SVAROOT/bldsva/gnu_changes/clm/Makefile.in          $SVAROOT/clm/bld/
+cp $SVAROOT/bldsva/gnu_changes/clm/shr_sys_mod.F90      $SVAROOT/clm/bld/usr.src/
+cp $SVAROOT/bldsva/gnu_changes/clm/m_FileResolv.F90     $SVAROOT/clm/bld/usr.src/
+cp $SVAROOT/bldsva/gnu_changes/parflow/amps_init.c      $SVAROOT/parflow/pfsimulator/amps/oas3/
+cp $SVAROOT/bldsva/gnu_changes/parflow/oas3_external.h  $SVAROOT/parflow/pfsimulator/amps/oas3/
+echo "GNU_PATCH complete........."
+exit 0 

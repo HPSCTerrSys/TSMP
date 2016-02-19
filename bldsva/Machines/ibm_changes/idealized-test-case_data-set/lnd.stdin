@@ -1,0 +1,36 @@
+ &clm_inparm
+ caseid         = 'clmoas'
+ ctitle         = 'clmoas'
+ nsrest         =  0
+ nelapse        =  runstep_clm_bldsva 
+ dtime          =  dt_clm_bldsva 
+ start_ymd      =  yyyymmdd_bldsva 
+ start_tod      =  seconds_clm_bldsva 
+
+ finidat        = ''
+ flndtopo       = '__forcingdir__/clm3.5/ideal/topodata___gridsize__.nc'
+ fsurdat        = '__forcingdir__/clm3.5/ideal/surfdata___gridsize__.nc'
+ fatmgrid       = '__forcingdir__/clm3.5/ideal/griddata___gridsize__.nc'
+ fatmlndfrc     = '__forcingdir__/clm3.5/ideal/fracdata___gridsize__.nc'
+ fatmtopo       = ''
+ fpftcon        = '__forcingdir__/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ offline_atmdir = '__forcingdir__/clm3.5/ideal/atm_forcing/'
+ frivinp_rtm    = '__forcingdir__/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+
+ hist_dov2xy    = .true.
+ hist_avgflag_pertape = 'A'
+ hist_nhtfrq    =  -1 
+ hist_mfilt     =  1
+ hist_crtinic   = 'NONE'
+ mss_irt        =  0 
+
+ hist_empty_htapes = .true.
+ hist_fincl1       = ''
+
+ irad           =  1
+ wrtdia         = .true.
+ archive_dir    = ''
+ rest_flag      = .false. 
+/
+ &prof_inparm
+ /
