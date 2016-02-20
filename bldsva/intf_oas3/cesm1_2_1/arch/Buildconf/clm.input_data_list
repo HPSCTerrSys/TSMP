@@ -1,0 +1,13 @@
+outgrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/griddata/SCRIPgrid_001x001pt_LDB_nomask_c160131.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_0.5x0.5_USGS_c110725.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_0.5x0.5_AVHRR_c110228.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_0.5x0.5_MODIS_c110228.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_3minx3min_LandScan2004_c120517.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_3minx3min_MODIS_c110915.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_3x3_USGS_c120912.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_5x5min_nomask_c110530.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_5x5min_IGBP-GSDP_c110228.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_5x5min_ISRIC-WISE_c111114.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_10x10min_nomask_c110228.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_3minx3min_GLOBE-Gardner_c120922.nc
+ingrid = /daten01/z4/database/cesm/inputdata//lnd/clm2/mappingdata/grids/SCRIPgrid_3minx3min_GLOBE-Gardner-mergeGIS_c120922.nc
