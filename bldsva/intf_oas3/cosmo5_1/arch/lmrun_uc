@@ -15,7 +15,7 @@ nsteps=nstop_cos_bldsva
 lmworkdir_cluma=$HOME/coup_oas/run
 lmoutdir_cluma=$HOME
 lmoutdir_cluma=$HOME/cosout
-lmindir_cluma=/daten01/z4/database/cosmo/int2lm_nrw/2012072100/
+lmindir_cluma=/daten01/z4/database/cosmo/int2lm_nrw/${INIT_Y}${INIT_M}${INIT_D}${INIT_H}/
 #
 lmworkdir_sx9=/e/uhome/xxxx/cosmo/
 lmoutdir_sx9=/e/gtmp/xxxx/cosmo/

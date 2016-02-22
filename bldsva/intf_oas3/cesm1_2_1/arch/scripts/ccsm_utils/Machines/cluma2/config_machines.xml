@@ -177,8 +177,8 @@
          <DESC>"MIUB Linux Cluster 64 ppn, batch system is PBS"</DESC>
          <COMPILERS>gnu</COMPILERS>
          <MPILIBS>openmpi</MPILIBS>
-         <RUNDIR>/home/$CCSMUSER/coup_oas/run</RUNDIR>
-         <EXEROOT>/home/$CCSMUSER/coup_oas/run/bld</EXEROOT>
+         <RUNDIR>/home/$CCSMUSER/terrsysmp/run</RUNDIR>
+         <EXEROOT>/home/$CCSMUSER/terrsysmp/run/bld</EXEROOT>
          <OBJROOT>$EXEROOT</OBJROOT>
          <INCROOT>$EXEROOT/lib/include</INCROOT>
          <DIN_LOC_ROOT>/daten01/z4/database/cesm/inputdata</DIN_LOC_ROOT>

@@ -309,6 +309,7 @@ else
     cd $cfgdir_cos
     echo "git checkout -b v1.1.0 v1.1.0"
     git checkout -b v1.1.0 v1.1.0
+    cp     $SVAROOT/bldsva/intf_oas3/$cos_ver/arch/* $SVAROOT/cosmo/
   else if ($cos_ver == "cosmo5_1") then
     cp -rf /daten01/z4/ComponentModels/cosmo_141128_5.01 $SVAROOT/cosmo
     # Copy the terrsysmp interface to the cosmo source code 
@@ -667,6 +668,8 @@ else
   echo "cd $cfgdir_pfl"
   cd $cfgdir_pfl
 endif
+
+cp $SVAROOT/bldsva/intf_oas3/parflow/arch/*.tcl $SVAROOT/parflow/coup_oasrun/
 
 if ($compile_clean == 1) then
  make veryclean

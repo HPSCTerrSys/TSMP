@@ -784,7 +784,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
 !CPS
 !CPS#ifdef COUP_OAS_COS
 !   call t_startf('receive data from oasis')
-   call receive_fld_2cos(idt, lcoupled) 
+!   call receive_fld_2cos(idt, lcoupled) 
 !   if (my_task == master_task) then
 !     call mct_aVect_init(avG,av,gsize)
 !     allocate(data(nx,ny))

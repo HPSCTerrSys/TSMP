@@ -7,7 +7,7 @@
  start_ymd      =  yyyymmdd_bldsva 
  start_tod      =  seconds_clm_bldsva 
 
- finidat        = '/daten01/z4/database/clm3.5/Rur_NRW/spinup_new/clmoas.clm2.r.2008-05-08-00000.nc'
+ finidat        = ''
  flndtopo       = '/daten01/z4/database/clm3.5/Rur_NRW/topodata_0300x0300.nc'
  fsurdat        = '/daten01/z4/database/clm3.5/Rur_NRW/surfdata_0300x0300.nc'
  fatmgrid       = '/daten01/z4/database/clm3.5/Rur_NRW/griddata_0300x0300.nc'
@@ -22,11 +22,10 @@
  hist_nhtfrq    =  -1 
  hist_mfilt     =  1
  hist_crtinic   = 'NONE'
- mss_irt        =  1 
+ mss_irt        =  0 
 
  irad           =  1
  wrtdia         = .true.
- archive_dir    = "/daten04/pshrestha/TerrSysMP_oup/"
  rest_flag      = .false. 
 /
  &prof_inparm
