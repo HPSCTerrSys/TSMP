@@ -34,7 +34,7 @@
 # called by one component model in the coupled system (optional).
 # For the definition of the fields, see under $STRINGS keyword
 #
-           21 
+           20 
  $END
 #########################################################################
  $JOBNAME
@@ -194,12 +194,6 @@ LOCTRANS SCRIPR
  AVERAGE
  BILINEAR LR SCALAR LATLON 1
 # FROM CLM TO COSMO
-CLMINFRA COSINFRA  10 cplfreq1  1  clm06.nc EXPORTED
-ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=2
-R 0 R 0
-SCRIPR
- DISTWGT U SCALAR LATLON 1 4
-#
 CLMALBED COSALBED  10 cplfreq1  1  clm06.nc EXPORTED
 ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=2
 R 0 R 0

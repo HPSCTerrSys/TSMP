@@ -7,7 +7,7 @@
  start_ymd      =  yyyymmdd_bldsva 
  start_tod      =  seconds_clm_bldsva 
 
- finidat        = ''
+ finidat        = '/daten01/z4/database/clm3.5/Rur_NRW/spinup_BCdp/clmoas.clm2.r.2012-07-21-00000.nc'
  flndtopo       = '/daten01/z4/database/clm3.5/Rur_NRW/topodata_0300x0300.nc'
  fsurdat        = '/daten01/z4/database/clm3.5/Rur_NRW/surfdata_0300x0300.nc'
  fatmgrid       = '/daten01/z4/database/clm3.5/Rur_NRW/griddata_0300x0300.nc'

@@ -40,7 +40,7 @@ set hh   = 00
 set runhours = 120.
 # COSMO grid and time-stepping(sec)
 set nprocx_cos = 6 
-set nprocy_cos = 10
+set nprocy_cos = 6 
 set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
@@ -64,7 +64,7 @@ set cplfreq2=90
 #if set to 0, first the user needs to set cpl_scheme= FALSE manually in src code
 #1:Transfer coefficeints sent from CLM to COSMO
 #0:Transfer coefficients inverted using fluxes sent from CLM
-set cpl_scheme=0
+set cpl_scheme=1
 #CPS New flag added to compile component model with dummy model
 #compile_dum =1 compiles with CESM using OASIS3
 set compile_dum = 0 
@@ -793,6 +793,7 @@ cp cf_name_table.txt $rundir
 if ($compile_option == 3) then
 if ($cpl_scheme == 1) then
 cp namcouple_cos_clm $rundir/namcouple
+#cp namcouple_cos_clm_v2 $rundir/namcouple
 endif
 if ($cpl_scheme == 0) then
 cp namcouple_cos_clm_a1 $rundir/namcouple

@@ -84,6 +84,6 @@ REAL(KIND=r8), DIMENSION(:,:,:), ALLOCATABLE :: exfld        ! Temporary buffer 
 INTEGER                    :: ndlon=1, ndlat=1
 
 LOGICAL, ALLOCATABLE       :: llmask(:,:,:)
-LOGICAL :: cpl_scheme = .False.                 !Coupling Scheme with COSMO, False for inversion technique
+LOGICAL :: cpl_scheme = .True.                 !Coupling Scheme with COSMO, False for inversion technique
 
 END MODULE oas_clm_vardef

@@ -118,7 +118,7 @@ pfset Cell.29.dzScale.Value                   0.02
 #-----------------------------------------------------------------------------
 # Setup timing info
 #-----------------------------------------------------------------------------
-pfset TimingInfo.BaseUnit		 0.0025
+pfset TimingInfo.BaseUnit		 1.0 
 pfset TimingInfo.StartCount		 0
 pfset TimingInfo.StartTime		 0.0
 pfset TimingInfo.StopTime		 stop_pfl_bldsva 
