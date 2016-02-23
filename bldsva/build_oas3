@@ -39,7 +39,7 @@ set dd   = 21
 set hh   = 00
 set runhours = 120.
 # COSMO grid and time-stepping(sec)
-set nprocx_cos = 10
+set nprocx_cos = 6 
 set nprocy_cos = 10
 set ngcosx = 150
 set ngcosy = 150
@@ -259,7 +259,7 @@ else
   git clone https://git.meteo.uni-bonn.de/git/oasis3
   echo " git clone https://git.meteo.uni-bonn.de/git/oasis3"
   cd $blddir_oas 
-  git checkout -b v1.1.0 v1.1.0
+  cp $SVAROOT/intf_oas3/oasis3/arch/* $blddir_oas/util/make_dir/
   cd $blddir_oas/util/make_dir
 endif
 
@@ -307,8 +307,8 @@ else
     git clone https://git.meteo.uni-bonn.de/git/cosmo
     echo " git clone https://git.meteo.uni-bonn.de/git/cosmo"
     cd $cfgdir_cos
-    echo "git checkout -b v1.1.0 v1.1.0"
-    git checkout -b v1.1.0 v1.1.0
+    echo "git checkout cosmo4.21"
+    git checkout cosmo4.21 
     cp     $SVAROOT/bldsva/intf_oas3/$cos_ver/arch/* $SVAROOT/cosmo/
   else if ($cos_ver == "cosmo5_1") then
     cp -rf /daten01/z4/ComponentModels/cosmo_141128_5.01 $SVAROOT/cosmo
@@ -664,12 +664,13 @@ if (-d parflow) then
 else
   git clone https://git.meteo.uni-bonn.de/git/parflow
   cd parflow
-  git checkout -b v1.1.0 v1.1.0 
+  git checkout parflow_vTdz 
   echo "cd $cfgdir_pfl"
   cd $cfgdir_pfl
 endif
 
 cp $SVAROOT/bldsva/intf_oas3/parflow/arch/*.tcl $SVAROOT/parflow/coup_oasrun/
+cp -rf $SVAROOT/bldsva/intf_oas3/parflow/oas3  $SVAROOT/parflow/pfsimulator/amps/
 
 if ($compile_clean == 1) then
  make veryclean
