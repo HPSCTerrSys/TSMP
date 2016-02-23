@@ -3,7 +3,7 @@
 ################  User Setup section  ###################
 
 host=gnu
-export SVAROOT=/home/pshrestha/coup_oas
+export SVAROOT=/home/pshrestha/terrsysmp
 patchroot=${SVAROOT}/bldsva/oasis3-mct_Patch
 
 #########################################################

@@ -2,7 +2,7 @@
 
 ################  User Setup section  ###################
 
-export SVAROOT=/home/pshrestha/coup_oas
+export SVAROOT=/home/pshrestha/terrsysmp
 patchroot=${SVAROOT}/bldsva/parallel-clm-coupling_Patch
 
 #########################################################

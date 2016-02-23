@@ -24,7 +24,7 @@ setenv NETCDF /daten01/z4/netcdf4.1.3_gfortran_4.2.1
 setenv HYPRE_DIR /daten01/z4/hypre2.9_gnu
 setenv SILO_DIR /daten01/z4/silo4.8_gnu
 setenv TCL_DIR /daten01/z4/tcl8.5.13_gnu
-setenv SVAROOT /$HOME/terrsysmp
+setenv SVAROOT /home/pshrestha/terrsysmp
 setenv nppn 64 
 #
 # 2) MODEL SETTINGS
@@ -45,8 +45,8 @@ set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
 # CLM grid and time-stepping(sec)
-set nprocx_clm = 2 
-set nprocy_clm = 2 
+set nprocx_clm = 1 
+set nprocy_clm = 1 
 set ngclmx = 90000 
 set ngclmy = 1
 set dt_clm = 90
