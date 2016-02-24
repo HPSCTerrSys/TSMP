@@ -39,8 +39,8 @@ set dd   = 21
 set hh   = 00
 set runhours = 120.
 # COSMO grid and time-stepping(sec)
-set nprocx_cos = 6 
-set nprocy_cos = 6 
+set nprocx_cos = 2
+set nprocy_cos = 10
 set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
@@ -792,8 +792,10 @@ cp cf_name_table.txt $rundir
 #
 if ($compile_option == 3) then
 if ($cpl_scheme == 1) then
-cp namcouple_cos_clm $rundir/namcouple
-#cp namcouple_cos_clm_v2 $rundir/namcouple
+#v1.2.0
+#cp namcouple_cos_clm $rundir/namcouple
+#v1.3.0
+cp namcouple_cos_clm_v2 $rundir/namcouple
 endif
 if ($cpl_scheme == 0) then
 cp namcouple_cos_clm_a1 $rundir/namcouple
@@ -844,7 +846,10 @@ endif    #$compile_option == 4
 
 if ($compile_option == 5) then
 if ($cpl_scheme == 1) then
-cp namcouple_cos_clm_pfl $rundir/namcouple
+#v1.2.0
+#cp namcouple_cos_clm_pfl $rundir/namcouple
+#v1.3.0
+cp namcouple_cos_clm_pfl_v2 $rundir/namcouple
 endif
 if ($cpl_scheme == 0) then
 cp namcouple_cos_clm_pfl_a1 $rundir/namcouple
