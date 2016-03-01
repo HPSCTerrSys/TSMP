@@ -37,7 +37,7 @@ set yyyy = 2012
 set mm   = 07
 set dd   = 21
 set hh   = 00
-set runhours = 120.
+set runhours = 2.
 # COSMO grid and time-stepping(sec)
 set nprocx_cos = 2
 set nprocy_cos = 10
@@ -47,9 +47,11 @@ set dt_cos = 10
 # CLM grid and time-stepping(sec)
 set nprocx_clm = 1 
 set nprocy_clm = 1 
-set ngclmx = 90000 
+#set ngclmx = 90000 
+set ngclmx = 1
 set ngclmy = 1
-set dt_clm = 90
+#set dt_clm = 1800
+set dt_clm = 1800
 set clm_data = /daten01/z4/database/clm3.5/Rur_NRW/
 # ParFlow grid and time-stepping(hour)
 set nprocx_pfl = 4 
@@ -58,8 +60,8 @@ set ngpflx = 300
 set ngpfly = 300 
 set dt_pfl = 0.025
 # OASIS coupling frequency(sec) : cplfreq > MIN(dt_cos, dt_clm, dt_pfl)
-set cplfreq1=90
-set cplfreq2=90
+set cplfreq1=1800
+set cplfreq2=1800
 #COSMO-CLM coupling scheme, default: 1
 #if set to 0, first the user needs to set cpl_scheme= FALSE manually in src code
 #1:Transfer coefficeints sent from CLM to COSMO
@@ -67,7 +69,7 @@ set cplfreq2=90
 set cpl_scheme=1
 #CPS New flag added to compile component model with dummy model
 #compile_dum =1 compiles with CESM using OASIS3
-set compile_dum = 0 
+set compile_dum = 1 
 #
 #*****************************************************************************
 #                       END USER SETTINGS                                    *
@@ -391,6 +393,7 @@ endif
 
 # Flags to control OASIS coupled runs for CESM only
 if ($compile_dum == 1) then
+setenv CPPDEF2 "-DCOUP_OAS_COS"
 setenv USEOASLIB "TRUE"
 else
 #setenv CPPDEF2 ""
@@ -545,7 +548,20 @@ else
   ./$cesm_cas.build
   #./$cesm_cas.submit
 endif
+  cd $rundir/bld
+  if ( -f ./cesm.exe ) then    #UPDATE
+   echo " "
+   echo "CESM Compilation Successful........................."
+   echo " "
+  else
+   echo " "
+   echo "CESM Compilation Failed............................."
+   echo " "
+   exit
 endif
+
+endif
+
 
 if ($clm_version == "clm3_5") then
 
@@ -643,8 +659,8 @@ cd $blddir_dum
 make -f Makefile clean
 make -f Makefile
 ./job_script
-#set dummy_exe = model2.x
-et dummy_exe = model1.x
+set dummy_exe = model2.x
+#set dummy_exe = model.x
 cp $dummy_exe $rundir
 cp oasis3.MPI1.x $rundir
 endif
@@ -756,8 +772,8 @@ echo "*****************************************************"
 echo "cd $SVAROOT/model2_oas3/data_oas3"
 cd $SVAROOT/model2_oas3/data_oas3
 cp cf_name_table.txt $rundir
-#cp namcouple_dummy2 $rundir/namcouple
-cp namcouple_dummy1 $rundir/namcouple
+cp namcouple_dummy $rundir/namcouple
+#cp namcouple_dummy1 $rundir/namcouple
 set ncpl_exe1 = 1 
 #$nproc_clm
 set ncpl_exe2 = 1 

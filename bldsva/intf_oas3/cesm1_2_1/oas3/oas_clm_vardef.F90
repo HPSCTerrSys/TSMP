@@ -81,11 +81,9 @@ TYPE(FLD_CPL), DIMENSION(nmaxfld), PUBLIC    :: srcv, ssnd   ! Coupling fields
 
 REAL(KIND=r8), DIMENSION(:,:,:), ALLOCATABLE :: exfld        ! Temporary buffer for sending and receiving
 
-INTEGER                    :: ndlon=1, ndlat=1
+INTEGER                    :: ndlon, ndlat
 
 LOGICAL, ALLOCATABLE       :: llmask(:,:,:)
 LOGICAL :: cpl_scheme = .False.                 !Coupling Scheme with COSMO, False for inversion technique
-INTEGER              :: ipshape(4)    ! CPScesm
-INTEGER                    :: il_offset(1,2),                     &   !CPScesm
-                              il_extent(1,2)                         !CPScesm
+
 END MODULE oas_clm_vardef

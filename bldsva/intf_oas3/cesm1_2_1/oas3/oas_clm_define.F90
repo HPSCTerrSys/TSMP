@@ -1,4 +1,4 @@
-SUBROUTINE oas_clm_define(filenam)
+SUBROUTINE oas_clm_define(SDATM)
 
 !---------------------------------------------------------------------
 ! Description:
@@ -7,9 +7,6 @@ SUBROUTINE oas_clm_define(filenam)
 !      2) domain decomposition
 !      3) coupling variable definition
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -17,18 +14,19 @@ SUBROUTINE oas_clm_define(filenam)
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in CLM3.5, Initial release
 ! @VERSION@    @DATE@     <Your name>
-! 1.1        2012/01/30 Mauro Sulis
+! 1.1.1        2012/01/30 Mauro Sulis
 ! Definition of 10 sending fields CLM2PFL (source/sink term) and 
 ! 20 receiving PFL2CLM (water saturation and soil matrix potential)
-! 2.1        2013/01/17 Markus Uebel, Prabhakar Shrestha
+! 1.2.1        2013/01/17 Markus Uebel, Prabhakar Shrestha
 ! Implementation of CO2 coupling
-! 3.1        2013/01/31 Prabhakar Shrestha
+! 1.3.1        2013/01/31 Prabhakar Shrestha
 ! Implementation of aerodynamic resistance exchange
 ! Implementation of surface temperature and moisture exchange
-!
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
 ! Code Description:
 ! Language: Fortran 90.
 ! Software Standards: "European Standards for Writing and
@@ -42,10 +40,8 @@ SUBROUTINE oas_clm_define(filenam)
 USE oas_clm_vardef
 USE mod_prism_grids_writing
 USE mod_prism_def_partition_proto
-
-!CPScesm USE domainMod   , ONLY : latlon_type, latlon_check
-!CPScesm USE spmdMod     , ONLY : masterproc
-!CPScesm USE surfrdMod   , ONLY : surfrd_get_latlon
+USE shr_strdata_mod
+USE mct_mod
 
 !==============================================================================
 
@@ -55,41 +51,27 @@ IMPLICIT NONE
 
 ! Local Parmaters 
 
-CHARACTER(len=256), INTENT(IN) :: filenam             !CPS clm grid data
+TYPE(shr_strdata_type), INTENT(IN)      :: SDATM
 
 ! Local Variables
+INTEGER                    :: igrid                         ! ids returned by prism_def_grid
 
-!CPScesm TYPE(latlon_type)    :: latlon                        ! domain to init
+INTEGER                    :: var_nodims(2) ! 
+INTEGER                    :: ipshape(2)    ! 
+INTEGER, ALLOCATABLE       :: igparal(:)                    ! shape of arrays passed to PSMILe
+INTEGER                    :: NULOUT=6
 
+INTEGER                    :: k, ji, jj, jg, jgm1              ! local loop indicees
+INTEGER ,POINTER           :: dmask(:)
+INTEGER ,ALLOCATABLE       :: oas_mask(:)
 
-INTEGER              :: igrid                         ! ids returned by prism_def_grid
-INTEGER              :: iptid                         ! ids returned by prism_set_points
+CHARACTER(len=4)           :: clgrd='gclm'                  ! CPS
 
-INTEGER              :: imskid                        ! ids returned by prism_set_mask
-
-INTEGER              :: iextent(1,3)  ! 
-INTEGER              :: ioffset(1,3)  ! 
-INTEGER              :: var_nodims(2) ! 
-!CPScesm INTEGER              :: ipshape(2)    ! 
-INTEGER, ALLOCATABLE :: igparal(:)                    ! shape of arrays passed to PSMILe
-INTEGER              :: NULOUT=6
-
-INTEGER              :: ji, jj, jg, jgm1              ! local loop indicees
-INTEGER ,pointer     :: dmask(:)
-INTEGER ,ALLOCATABLE :: oas_mask(:,:)
-
-CHARACTER(len=4)     :: clgrd='gclm'                  ! CPS
-
-!CPScesm REAL(KIND=r8)        :: dx
-!CPScesm REAL(KIND=r8), ALLOCATABLE :: zclo(:,:), zcla(:,:), tmp_2D(:,:)
-!CPScesm REAL(KIND=r8), ALLOCATABLE :: zlon(:), zlat(:)
-REAL(KIND=r8), ALLOCATABLE :: zclo(:,:,:), zcla(:,:,:)
-REAL(KIND=r8), ALLOCATABLE :: zlon(:,:), zlat(:,:)
+REAL(KIND=r8)              :: dx,dy
+REAL(KIND=r8), ALLOCATABLE :: tmp_2D(:,:)                   ! Store Corners
+REAL(KIND=r8), ALLOCATABLE :: zlon(:), zlat(:)
 INTEGER                    :: write_aux_files
-INTEGER                    :: rank, nprocs       !CPScesm
-INTEGER, PARAMETER         ::  halo_j=0  !CPScesm  
-REAL(KIND=r8)              ::  dx=0.10   !CPScesm
-REAL(KIND=r8)              ::  dy=0.10   !CPScesm
+INTEGER                    :: rank, nprocs                    !CPScesm
 !------------------------------------------------------------------------------
 !- End of header
 !------------------------------------------------------------------------------
@@ -98,53 +80,34 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
- ! Get grid bounds
- PRINT*, 'CPS  ' , TRIM(filenam)
-!CPScesm CALL surfrd_get_latlon(latlon, TRIM(filenam))
-!CPScesm CALL latlon_check(latlon)
-
-!CPScesm  ndlon = latlon%ni
-!CPScesm  ndlat = latlon%nj
- ndlon  = 300
- ndlat  = 300
- ALLOCATE(dmask(ndlon*ndlat))
- ! Get mask
-!CPScesm  CALL surfrd_get_latlon(latlon, filenam, mask=dmask)
- dmask = 1
-!CPS  CALL prism_start_grids_writing (write_aux_files)
-
- ! All exchanges through master processor 
- ! For the moment OASIS4 not able to process 2D subdomain with non contiguous unmasked points (land points) 
- ! (12/2010)
- ! To compare OASIS3/OASIS4 behaviours, we do the same with OASIS3
- !
  CALL MPI_Barrier(kl_comm, nerror)
  CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
  IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in oas_clm_define') !CPScesm
  CALL MPI_Comm_Size ( kl_comm, nprocs, nerror )
  IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Size', 'Failure in oas_clm_define')
 
-!CPScesm IF ( masterproc ) THEN
-   IF (rank == 0) THEN   !CPScesm
-   !
-   CALL prism_start_grids_writing (write_aux_files)
-   !
-   ALLOCATE( zclo(ndlon,ndlat, 4), stat = nerror )
+ IF (rank == 0) THEN
+   ndlon = SDATM%nxg
+   ndlat = SDATM%nyg
+   PRINT*, "CPS DEBUG", ndlon, ndlat
+
+   ALLOCATE( dmask(ndlon*ndlat), stat = nerror )
    IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zclo' )
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating dmask' )
      RETURN
    ENDIF
-   ALLOCATE( zcla(ndlon,ndlat, 4), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zcla' )
-     RETURN
-   ENDIF
-   ALLOCATE( zlon(ndlon,ndlat), stat = nerror )
+
+   k     = mct_aVect_indexRA(SDATM%grid%data,'mask')
+   dmask = SDATM%grid%data%rAttr(k,:)
+   PRINT*, "CPS DEBUG", MINVAL(dmask), MAXVAL(dmask)
+   !
+   !
+   ALLOCATE( zlon(ndlon*ndlat), stat = nerror )
    IF ( nerror > 0 ) THEN
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlon' )
      RETURN
    ENDIF
-   ALLOCATE( zlat(ndlon,ndlat), stat = nerror )
+   ALLOCATE( zlat(ndlat*ndlon), stat = nerror )
    IF ( nerror > 0 ) THEN
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat' )
      RETURN
@@ -154,7 +117,12 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
       CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating llmask' )
       RETURN
    ENDIF
-   ALLOCATE(oas_mask(ndlon,ndlat))
+   ALLOCATE( tmp_2D(ndlon*ndlat,8), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating tmp_2D' )
+     RETURN
+   ENDIF
+   ALLOCATE(oas_mask(ndlon*ndlat))
    IF ( nerror > 0 ) THEN
       CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating oas_mask' )
       RETURN
@@ -174,76 +142,28 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
    ! -----------------------------------------------------------------
    !  1: lower left corner. 2,: lower right corner.
    !  3: upper right corner. 4,: upper left corner.
-   !  using latlon%edges :  global edges (N,E,S,W)
    !
-   ! Latitudes
-   ! Assumes lats are constant on an i line
-   !
-!CPScesmx    zlat(:) = latlon%latc(1:ndlat)
-   !
-!CPScesm   IF (latlon%latc(ndlat) > latlon%latc(1)) THEN  ! South to North grid
-!CPScesm      zcla(1,1) = latlon%edges(3)
-!CPScesm      zcla(ndlat,2) = latlon%edges(1)
-    !
-!CPScesm      DO jj = 2, ndlat
-!CPScesm         jgm1 = jj - 1
-!CPScesm         zcla(jj,1) = ( latlon%latc(jj) + latlon%latc(jgm1) ) * 0.5_r8
-!CPScesm         zcla(jgm1,2) = zcla(jj,1)
-!CPScesm      ENDDO 
-
-!CPScesm   ELSE                                      ! North to South grid
-!CPScesm      zcla(ndlat,1) = latlon%edges(3)
-!CPScesm      zcla(1,2) = latlon%edges(1)
-      !
-!CPScesm      DO jj = 2, ndlat
-!CPScesm        jgm1 = jj - 1
-!CPScesm        zcla(jj,2) = ( latlon%latc(jj) + latlon%latc(jgm1) ) * 0.5_r8
-!CPScesm        zcla(jgm1,1) = zcla(jj,2)
-!CPScesm      ENDDO
-
-!CPScesm   ENDIF
-
    ! Longitudes
-   !
-!CPScesm   zlon(:) = latlon%lonc(1:ndlon)
-   !
-!CPScesm   zclo(:,1) = latlon%edges(4)
-!CPScesm   zclo(:,2) = latlon%edges(2)
+   k     = mct_aVect_indexRA(SDATM%grid%data,'lon')
+   zlon  = SDATM%grid%data%rAttr(k,ji)
 
-!CPScesm   dx = zlon(2)-zlon(1)
+   ! Latitudes
+   k     = mct_aVect_indexRA(SDATM%grid%data,'lat')
+   zlat  = SDATM%grid%data%rAttr(k,:)
+    
+   ! Grid Resolution 
+   dx    = ABS(zlon(2)-zlon(1))
+   dy    = ABS(zlat(ndlon+1)-zlat(1))  
 
-!CPScesm   DO ji = 2, ndlon
-!CPScesm      zclo(ji,1) = zclo(ji,1) + ( ji -1 ) * dx
-!CPScesm      zclo(ji-1,2) = zclo(ji,1)
-!CPScesm   ENDDO 
+   tmp_2D(:,1) = zlon - dx*0.5_r8
+   tmp_2D(:,2) = zlon + dx*0.5_r8
+   tmp_2D(:,3) = tmp_2D(:,2)
+   tmp_2D(:,4) = tmp_2D(:,1) 
 
-!CPScesm   DO ji = 1, ndlon  ! make sure that all centers are nearby corners regarding the longitude...
-!CPScesm     IF( zlon(ji) - zclo(ji,1) < -300._r8 )   zlon(ji) = zlon(ji) + 360._r8
-!CPScesm     IF( zlon(ji) - zclo(ji,1) >  300._r8 )   zlon(ji) = zlon(ji) - 360._r8
-!CPScesm   END DO
-
-!CPScesm
-   DO ji = 1, ndlon
-     zlon(ji,:) = 5.0 + (ji-1)*dx
-   END DO
-   DO jj = 1, ndlat
-     zlat(:,jj) = 40.0 + (jj-1)*dy
-   END DO
-
-   DO ji = 1, ndlon
-   DO jj = 1, ndlat
-     zclo(ji,jj,1) = zlon(ji,jj) + dx*0.5   !West
-     zclo(ji,jj,2) = zlon(ji,jj) + dx*0.5   !West
-     zclo(ji,jj,3) = zlon(ji,jj) - dx*0.5   !East
-     zclo(ji,jj,4) = zlon(ji,jj) - dx*0.5   !East
-
-     zcla(ji,jj,1) = zlat(ji,jj) - dy*0.5   !South
-     zcla(ji,jj,2) = zlat(ji,jj) + dy*0.5   !North 
-     zcla(ji,jj,3) = zlat(ji,jj) + dy*0.5   !North
-     zcla(ji,jj,4) = zlat(ji,jj) - dy*0.5   !South 
-   END DO
-   END DO
-!CPScesm
+   tmp_2D(:,5) = zlat - dy*0.5_r8
+   tmp_2D(:,6) = tmp_2D(:,5) 
+   tmp_2D(:,7) = zlat + dy*0.5_r8
+   tmp_2D(:,8) = tmp_2D(:,7) 
 
    ! -----------------------------------------------------------------
    ! ... Define the mask
@@ -253,10 +173,10 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
      jg    = (jj-1)*ndlon + ji
      IF ( dmask(jg) == 1 ) THEN        
         llmask(ji,jj,1) = .TRUE.
-        oas_mask(ji,jj) = 0
+        oas_mask(jg) = 0
      ELSE
         llmask(ji,jj,1) = .FALSE.
-        oas_mask(ji,jj) = 1
+        oas_mask(jg) = 1
      ENDIF
    ENDDO
    ENDDO
@@ -267,49 +187,18 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
    ! -----------------------------------------------------------------
    ! ... Write info on OASIS auxillary files (if needed)
    ! ----------------------------------------------------------------
-
-   IF ( write_aux_files == 1 ) THEN
+   CALL prism_start_grids_writing (write_aux_files)
+    
+  IF ( write_aux_files == 1 ) THEN
  
-!CPScesm    DO jj = 1, ndlat
-!CPScesm     DO ji = 1, ndlon
-!CPScesm        tmp_2d(ji+(jj-1)*ndlon,1) = zlon(ji)
-!CPScesm        tmp_2d(ji+(jj-1)*ndlon,2) = zlat(jj)
-!CPScesm     ENDDO
-!CPScesm     ENDDO
+ 
+     CALL prism_write_grid (clgrd, ndlon*ndlat, 1, zlon, zlat)
 
-!CPScesm     CALL prism_write_grid (clgrd, ndlon*ndlat, 1, tmp_2d(:,1), tmp_2d(:,2))
+     CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2d(:,1:4), tmp_2d(:,5:8))
 
-!CPScesm     DO jj = 1, ndlat
-!CPScesm     DO ji = 1, ndlon
-!CPScesm      tmp_2d(ji+(jj-1)*ndlon,1) = zclo(ji,1)
-!CPScesm      tmp_2d(ji+(jj-1)*ndlon,2) = zclo(ji,2)
-!CPScesm      tmp_2d(ji+(jj-1)*ndlon,5) = zcla(jj,1)
-!CPScesm      tmp_2d(ji+(jj-1)*ndlon,7) = zcla(jj,2)
-!CPScesm     ENDDO
-!CPScesm     ENDDO
+     CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
 
-    ! Fill missing corners for longitude
-!CPScesm     tmp_2d(:,3) = tmp_2d(:,2)
-!CPScesm     tmp_2d(:,4) = tmp_2d(:,1)
-
-    ! Fill missing corners for latitude
-!CPScesm     tmp_2d(:,6) = tmp_2d(:,5)
-!CPScesm     tmp_2d(:,8) = tmp_2d(:,7)
-
-!CPScesm     CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2d(:,1:4), tmp_2d(:,5:8))
-
-    ! tbd CALL prism_write_angle (clgrd, ndlon*ndlat, 1, angle)
-
-!CPScesm     CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
-
-    ! EM tbd Fill areas with true values
-!CPScesm     tmp_2d(:,1) = 1 
-!CPS        CALL prism_write_area (clgrd, ndlon*ndlat, 1, tmp_2d(:,1))
-
-    CALL prism_write_grid (clgrd, ndlon,ndlat, zlon, zlat)
-    CALL prism_write_corner (clgrd, ndlon,ndlat,4, zclo, zcla)
-    CALL prism_write_mask (clgrd, ndlon,ndlat, oas_mask)
-    CALL prism_terminate_grids_writing()
+     CALL prism_terminate_grids_writing()
         
   ENDIF                      ! write_aux_files = 1
 
@@ -318,58 +207,22 @@ REAL(KIND=r8)              ::  dy=0.10   !CPScesm
 
  ENDIF                       ! masterproc
 
-   ! Wait for OASIS signal to continue declarations
-!CPS   IF ( write_aux_files == 1 ) call MPI_Barrier(mpi_comm, nerror)
 
-!CPScesm IF ( masterproc ) THEN
-  IF (rank == 0) THEN !CPScesm
-  ! -----------------------------------------------------------------
-  ! ... Define the partition 
-  ! -----------------------------------------------------------------
+ IF (rank == 0) THEN !CPScesm
+ ! -----------------------------------------------------------------
+ ! ... Define the partition 
+ ! -----------------------------------------------------------------
      
-!CPScesm  ALLOCATE(igparal(4))
-  ALLOCATE(igparal(5))
+  ALLOCATE(igparal(4))
   ! Compute global offsets and local extents
-!CPScesm  igparal(1) = 3              ! ORANGE style partition
-!CPScesm  igparal(2) = 1              ! partitions number
-!CPScesm  igparal(3) = 0              ! Global offset
-!CPScesm  igparal(4) = ndlon*ndlat    ! Local extent
-
-!CPScesm
- il_offset(1,1) = 0
- il_extent(1,1) = ndlon
-!
- IF (rank<nprocs-1) THEN
- il_extent(1,2) = (ndlat-2*halo_j)/nprocs
- il_offset(1,2) = rank*il_extent(1,2)
- ELSE
- il_extent(1,2) = (ndlat-2*halo_j)/nprocs + MOD(ndlat-2*halo_j,nprocs)
- il_offset(1,2) = rank*((ndlat-2*halo_j)/nprocs)
- ENDIF
-
- igparal(1) = 2                                    ! Box partition
- IF (rank ==0) THEN                                 ! upper left corner global offset
-    igparal(2) = 0
- ELSE
-    igparal(2) = (il_offset(1,2)+halo_j)*il_extent(1,1)
- ENDIF                                              ! upper left corner global offset
- igparal(3) = il_extent(1,1)                       ! local extent in X
- IF (nprocs == 1) THEN                              ! local extent in Y
-     igparal(4) = il_extent(1,2)+2*halo_j
- ELSE
-     IF (rank == 0 .OR. rank == nprocs-1)  THEN
-        igparal(4) = il_extent(1,2)+ halo_j
-     ELSE
-        igparal(4) = il_extent(1,2)
-     ENDIF
- ENDIF                                               ! local extent in Y
- igparal(5) = ndlon                                ! global extent in X 
-!CPScesm
+  igparal(1) = 3              ! ORANGE style partition
+  igparal(2) = 1              ! partitions number
+  igparal(3) = 0              ! Global offset
+  igparal(4) = ndlon*ndlat    ! Local extent
 
   CALL prism_def_partition_proto( igrid, igparal, nerror )
   IF( nerror /= PRISM_Success )   CALL prism_abort_proto (ncomp_id, 'oas_clm_define',   &
             &                                                        'Failure in prism_def_partition' )
-
 
   WRITE(nulout,*) ' oasclm: oas_clm_define: prism_def_partition' 
   CALL flush(nulout)
@@ -520,19 +373,12 @@ ssnd(1)%laction=.TRUE. !CPScesm
   srcv(111:120)%laction=.TRUE.
 #endif
 
-!CPScesm  var_nodims(1) = 1           ! Dimension number of exchanged arrays
-!CPScesm  var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
+  var_nodims(1) = 1           ! Dimension number of exchanged arrays
+  var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
 
-!CPScesm  ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
-!CPScesm  ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
+  ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
+  ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
 
- var_nodims(1) = 2  !CPScesm
- var_nodims(2) = 1  !CPScesm
- ipshape(:)    = 1  !CPScesm
- ipshape(2)    = igparal(3) !CPScesm
- ipshape(4)    = igparal(4) !CPScesm
-
- 
   ! ... Announce send variables. 
   !
 !      ksnd=0                           !CPS
@@ -573,7 +419,7 @@ ssnd(1)%laction=.TRUE. !CPScesm
   !------------------------------------------------------------------
   ! End of definition phase
   !------------------------------------------------------------------
-  DEALLOCATE( zclo, zcla, zlon, zlat, igparal)
+  DEALLOCATE( tmp_2D, zlon, zlat, igparal)
 
   ! must be done by coupled processors only (OASIS3)
   CALL prism_enddef_proto( nerror )

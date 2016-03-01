@@ -449,7 +449,8 @@ subroutine datm_comp_init( EClock, cdata, x2a, a2x, NLFilename )
     ! Initialize MCT global seg map, 1d decomp
     !----------------------------------------------------------------------------
 #if (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-    call oas_clm_define(SDATM%domainFile)    !CPS sending clm global grid to oasis define
+!    call oas_clm_define(SDATM%domainFile)    !CPS sending clm global grid to oasis define
+     call oas_clm_define(SDATM)   !CPS
 #endif
 
     call t_startf('datm_initgsmaps')
