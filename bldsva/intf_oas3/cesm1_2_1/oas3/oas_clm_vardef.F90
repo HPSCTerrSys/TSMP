@@ -4,9 +4,6 @@ MODULE oas_clm_vardef
 ! Description:
 !  Definition and variables for OASIS3 communications
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -14,13 +11,16 @@ MODULE oas_clm_vardef
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in CLM3.5, Initial release
-! 2.1        2012/09/13 Markus Uebel
+! 1.2.1        2012/09/13 Markus Uebel
 !   Modified due to CO2 coupling
 !   Added cpl_scheme to TAB to choose COSMO-CLM coupling scheme
 !   Two Options: True, transfer coeffiecent sent from CLM direclty
 !                False, transfer coefficient inverted from CLM fluxes
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
+
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
 !
@@ -79,11 +79,10 @@ END TYPE FLD_CPL
 
 TYPE(FLD_CPL), DIMENSION(nmaxfld), PUBLIC    :: srcv, ssnd   ! Coupling fields
 
-REAL(KIND=r8), DIMENSION(:,:,:), ALLOCATABLE :: exfld        ! Temporary buffer for sending and receiving
+INTEGER                :: ndlon, ndlat
 
-INTEGER                    :: ndlon, ndlat
-
-LOGICAL, ALLOCATABLE       :: llmask(:,:,:)
-LOGICAL :: cpl_scheme = .False.                 !Coupling Scheme with COSMO, False for inversion technique
+LOGICAL, ALLOCATABLE   :: llmask(:,:,:)
+LOGICAL                :: cpl_scheme = .True.                 !Coupling Scheme with COSMO, False for inversion technique
+INTEGER                :: start1d, length1d, pe_loc1d     ! Parallel Decomp
 
 END MODULE oas_clm_vardef

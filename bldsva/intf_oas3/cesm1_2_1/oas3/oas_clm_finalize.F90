@@ -49,8 +49,6 @@ IMPLICIT NONE
 !------------------------------------------------------------------------------
 
 
-!CPScesm  IF (masterproc) DEALLOCATE(exfld)
-
  WRITE(6,*) "oasclm: oas_clm_finalize:  prsim terminate"
  CALL prism_terminate_proto ( nerror )
 

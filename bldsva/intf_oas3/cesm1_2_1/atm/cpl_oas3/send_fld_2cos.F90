@@ -75,10 +75,10 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:)      ! temporary arrays
  fsnd = 1._r8*nstep
   
  isec = nstep*dtime
- PRINT*, "sendfld2cos: rank,isec, sending ...",rank, isec, MINVAL(fsnd), MAXVAL(fsnd)
+
  IF( ssnd(jps_co2fl)%laction )  CALL oas_clm_snd( jps_co2fl, isec, fsnd,start1d,start1d+length1d-1,info )
 
- CALL MPI_Barrier(kl_comm, nerror)
+ !CALL MPI_Barrier(kl_comm, nerror)
 
  DEALLOCATE(fsnd)
 !------------------------------------------------------------------------------

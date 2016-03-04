@@ -631,7 +631,7 @@ contains
 !CPS
 #if defined COUP_OAS_COS
      ! send fields to Cosmo
-     call send_fld_2cos(nstep,dtime)
+     !call send_fld_2cos(nstep,dtime)
      !
 #endif
 

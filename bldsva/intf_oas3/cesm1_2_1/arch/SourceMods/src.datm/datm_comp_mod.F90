@@ -1163,6 +1163,15 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
 
    end select
 
+#if defined COUP_OAS_COS
+    if (firstcall) then
+    ! Do Nothing CPS 
+    else
+      call send_fld_2cos(stepno,idt)  
+    end if
+     !
+#endif
+
    call t_stopf('datm_mode')
 
    if (write_restart) then

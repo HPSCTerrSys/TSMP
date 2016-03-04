@@ -54,11 +54,11 @@ IMPLICIT NONE
 TYPE(shr_strdata_type), INTENT(IN)      :: SDATM
 
 ! Local Variables
-INTEGER                    :: igrid                         ! ids returned by prism_def_grid
+INTEGER                    :: igrid                       ! ids returned by prism_def_grid
 
-INTEGER                    :: var_nodims(2) ! 
-INTEGER                    :: ipshape(2)    ! 
-INTEGER, ALLOCATABLE       :: igparal(:)                    ! shape of arrays passed to PSMILe
+INTEGER                    :: var_nodims(2)               ! 
+INTEGER                    :: ipshape(2)                  ! 
+INTEGER, ALLOCATABLE       :: igparal(:)                  ! shape of arrays passed to PSMILe
 INTEGER                    :: NULOUT=6
 
 INTEGER                    :: k, ji, jj, jg, jgm1              ! local loop indicees
@@ -71,7 +71,7 @@ REAL(KIND=r8)              :: dx,dy
 REAL(KIND=r8), ALLOCATABLE :: tmp_2D(:,:)                   ! Store Corners
 REAL(KIND=r8), ALLOCATABLE :: zlon(:), zlat(:)
 INTEGER                    :: write_aux_files
-INTEGER                    :: rank, nprocs                    !CPScesm
+INTEGER                    :: rank, nprocs                  ! CPS
 !------------------------------------------------------------------------------
 !- End of header
 !------------------------------------------------------------------------------
@@ -89,7 +89,6 @@ INTEGER                    :: rank, nprocs                    !CPScesm
  IF (rank == 0) THEN
    ndlon = SDATM%nxg
    ndlat = SDATM%nyg
-   PRINT*, "CPS DEBUG", ndlon, ndlat
 
    ALLOCATE( dmask(ndlon*ndlat), stat = nerror )
    IF ( nerror > 0 ) THEN
@@ -99,7 +98,6 @@ INTEGER                    :: rank, nprocs                    !CPScesm
 
    k     = mct_aVect_indexRA(SDATM%grid%data,'mask')
    dmask = SDATM%grid%data%rAttr(k,:)
-   PRINT*, "CPS DEBUG", MINVAL(dmask), MAXVAL(dmask)
    !
    !
    ALLOCATE( zlon(ndlon*ndlat), stat = nerror )
@@ -128,7 +126,7 @@ INTEGER                    :: rank, nprocs                    !CPScesm
       RETURN
    ENDIF
 
-      
+   PRINT*, "CPS ALLOCATUON COMPLEETE"   
    ! -----------------------------------------------------------------
    ! ... Define the elements, i.e. specify the corner points for each
    !     volume element. 
@@ -145,7 +143,7 @@ INTEGER                    :: rank, nprocs                    !CPScesm
    !
    ! Longitudes
    k     = mct_aVect_indexRA(SDATM%grid%data,'lon')
-   zlon  = SDATM%grid%data%rAttr(k,ji)
+   zlon  = SDATM%grid%data%rAttr(k,:)
 
    ! Latitudes
    k     = mct_aVect_indexRA(SDATM%grid%data,'lat')
@@ -194,7 +192,7 @@ INTEGER                    :: rank, nprocs                    !CPScesm
  
      CALL prism_write_grid (clgrd, ndlon*ndlat, 1, zlon, zlat)
 
-     CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2d(:,1:4), tmp_2d(:,5:8))
+     CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2D(:,1:4), tmp_2D(:,5:8))
 
      CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
 
@@ -208,17 +206,33 @@ INTEGER                    :: rank, nprocs                    !CPScesm
  ENDIF                       ! masterproc
 
 
- IF (rank == 0) THEN !CPScesm
+ CALL MPI_Barrier(kl_comm, nerror)
  ! -----------------------------------------------------------------
  ! ... Define the partition 
  ! -----------------------------------------------------------------
-     
-  ALLOCATE(igparal(4))
+
+! DATM uses simple 1D parallel decomposition for vectors
+! stored in gsmap%gsize = ndlat*ndlon
+!           gsmap%start = global offsets, 
+!           gsmap%length = (ndlat*ndlon)/npes
+!           gspam%pe_loc = location of processors
+! Implicit assumption that always "1d" decomp is used in DATM
+
+  start1d  = SDATM%gsmap%start(rank+1) 
+  length1d = SDATM%gsmap%length(rank+1)
+  pe_loc1d = SDATM%gsmap%pe_loc(rank+1)
+
+  ALLOCATE(igparal(4), stat = nerror)  !Max 200
+  IF ( nerror > 0 ) THEN
+    CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating igparal' )
+    RETURN
+  ENDIF
+
   ! Compute global offsets and local extents
-  igparal(1) = 3              ! ORANGE style partition
-  igparal(2) = 1              ! partitions number
-  igparal(3) = 0              ! Global offset
-  igparal(4) = ndlon*ndlat    ! Local extent
+  igparal(1) = 3                  ! ORANGE style partition
+  igparal(2) = 1                  ! 1 segment per processor)
+  igparal(3) = start1d-1          ! Global offset
+  igparal(4) = length1d           ! Local extent
 
   CALL prism_def_partition_proto( igrid, igparal, nerror )
   IF( nerror /= PRISM_Success )   CALL prism_abort_proto (ncomp_id, 'oas_clm_define',   &
@@ -406,28 +420,20 @@ ssnd(1)%laction=.TRUE. !CPScesm
   END DO
       
   !
-  ! ... Allocate memory for data exchange and initilize it
-  !
-  ALLOCATE( exfld(ndlon, ndlat, krcv), stat = nerror )
-  IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_cos_define', 'Failure in allocating exfld' )
-     RETURN
-  ENDIF
-     
-  exfld = -99999._r8
-
   !------------------------------------------------------------------
   ! End of definition phase
   !------------------------------------------------------------------
-  DEALLOCATE( tmp_2D, zlon, zlat, igparal)
+  IF (rank == 0) THEN
+    DEALLOCATE( tmp_2D, zlon, zlat)
+  ENDIF
+
+  DEALLOCATE( igparal)
 
   ! must be done by coupled processors only (OASIS3)
   CALL prism_enddef_proto( nerror )
 
   IF ( nerror /= PRISM_Success )   CALL prism_abort_proto ( ncomp_id, 'oas_clm_define', 'Failure in prism_enddef')
 
- ENDIF                 !masterproc
-      
  CALL MPI_Barrier(kl_comm, nerror)
  WRITE(nulout,*) 'oasclm: oas_clm_define: prism enddef' 
  CALL flush(nulout)
