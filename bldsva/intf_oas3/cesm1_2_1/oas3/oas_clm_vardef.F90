@@ -83,6 +83,6 @@ INTEGER                :: ndlon, ndlat
 
 LOGICAL, ALLOCATABLE   :: llmask(:,:,:)
 LOGICAL                :: cpl_scheme = .True.                 !Coupling Scheme with COSMO, False for inversion technique
-INTEGER                :: start1d, length1d, pe_loc1d     ! Parallel Decomp
+INTEGER                :: start1d, length1d, pe_loc1d          ! Parallel Decomp
 
 END MODULE oas_clm_vardef

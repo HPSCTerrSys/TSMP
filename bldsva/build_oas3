@@ -45,8 +45,8 @@ set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
 # CLM grid and time-stepping(sec)
-set nprocx_clm = 10 
-set nprocy_clm = 6 
+set nprocx_clm = 2 
+set nprocy_clm = 2 
 set ngclmx = 90000 
 set ngclmy = 1
 set dt_clm = 1800
@@ -913,7 +913,7 @@ endif
 if ($clm_version == "clm4_0") then
 set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_clm $rundir/bld/cesm.exe"
 if ($compile_dum == 1) then
-set exec_line = "$MPIRUN --prefix $MPIDIR -np 1 oasis3.MPI1.x : -np $nproc_clm $rundir/bld/cesm.exe : -np 1 $dummy_exe"
+set exec_line = "$MPIRUN --prefix $MPIDIR -np 1 oasis3.MPI1.x : -np 1 $dummy_exe : -np $nproc_clm $rundir/bld/cesm.exe"
 endif
 endif
 endif

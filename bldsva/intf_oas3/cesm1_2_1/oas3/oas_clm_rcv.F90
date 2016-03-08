@@ -1,12 +1,9 @@
-SUBROUTINE oas_clm_rcv( kid, kstep, pdata, kinfo )
+SUBROUTINE oas_clm_rcv( kid, kstep, pdata,begg,endg, kinfo )
 
 !---------------------------------------------------------------------
 ! Description:
-!  This routine receiveds atmospheric field from OASIS3 coupler at
+!  This routine receives atmospheric field from OASIS3 coupler at
 !  each timestep
-!
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
 !
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
@@ -15,8 +12,10 @@ SUBROUTINE oas_clm_rcv( kid, kstep, pdata, kinfo )
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in CLM3.5, Initial release
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
 !
@@ -43,13 +42,14 @@ IMPLICIT NONE
 ! Arguments
 INTEGER,                          INTENT(IN)        :: kid    ! variable intex in the array
 INTEGER,                          INTENT(IN)        :: kstep  ! time-step in seconds
-REAL(KIND=r8), DIMENSION(ndlon,ndlat), INTENT(OUT)  :: pdata
+INTEGER,                          INTENT(IN)        :: begg, endg !
+REAL(KIND=r8), DIMENSION(begg:endg), INTENT(OUT)    :: pdata
 INTEGER,                          INTENT(OUT)       :: kinfo  ! OASIS info argument
 
 ! Local Variables
 LOGICAL                                           :: llaction
 INTEGER                                           :: NULOUT=6
-REAL(r8), DIMENSION(ndlon*ndlat)                  :: ztmp1
+REAL(r8), DIMENSION(begg:endg)                    :: ztmp1
 
 !------------------------------------------------------------------------------
 !- End of header
@@ -80,7 +80,7 @@ REAL(r8), DIMENSION(ndlon*ndlat)                  :: ztmp1
   kinfo = OASIS_Rcv
 
  ! Update array which contains coupling field (only on valid shape)
-   pdata(:,:) = RESHAPE (ztmp1(:), (/ndlon, ndlat/))
+   pdata = ztmp1
          
  ELSE
   ! Declare to calling routine that OASIS did not provide coupling field

@@ -783,7 +783,13 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
    call seq_infodata_PutData(infodata, nextsw_cday=nextsw_cday )
 
 !CPS
-!CPS#ifdef COUP_OAS_COS
+#ifdef COUP_OAS_COS
+    if (firstcall) then
+    ! Do Nothing CPS 
+    else
+      call receive_fld_2cos(stepno, idt, lcoupled)  
+    end if
+#endif
 !   call t_startf('receive data from oasis')
 !   call receive_fld_2cos(idt, lcoupled) 
 !   if (my_task == master_task) then
@@ -1167,7 +1173,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
     if (firstcall) then
     ! Do Nothing CPS 
     else
-      call send_fld_2cos(stepno,idt)  
+!CPS      call send_fld_2cos(stepno,idt)  
     end if
      !
 #endif

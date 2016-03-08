@@ -2,7 +2,7 @@ SUBROUTINE oas_clm_snd( kid, kstep, pdata,begg, endg, kinfo )
 
 !---------------------------------------------------------------------
 ! Description:
-!  This routine sends CLM3.5 fields to OASIS3 coupler at each coupling
+!  This routine sends CESM fields to OASIS3 coupler at each coupling
 !  time step defined in namcouple
 !
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha

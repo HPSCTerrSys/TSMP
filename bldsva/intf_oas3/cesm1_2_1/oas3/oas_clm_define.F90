@@ -42,7 +42,7 @@ USE mod_prism_grids_writing
 USE mod_prism_def_partition_proto
 USE shr_strdata_mod
 USE mct_mod
-
+USE m_mpif, only : MP_REAL8 => MPI_REAL8
 !==============================================================================
 
 IMPLICIT NONE
@@ -62,14 +62,14 @@ INTEGER, ALLOCATABLE       :: igparal(:)                  ! shape of arrays pass
 INTEGER                    :: NULOUT=6
 
 INTEGER                    :: k, ji, jj, jg, jgm1              ! local loop indicees
-INTEGER ,POINTER           :: dmask(:)
 INTEGER ,ALLOCATABLE       :: oas_mask(:)
 
 CHARACTER(len=4)           :: clgrd='gclm'                  ! CPS
 
 REAL(KIND=r8)              :: dx,dy
 REAL(KIND=r8), ALLOCATABLE :: tmp_2D(:,:)                   ! Store Corners
-REAL(KIND=r8), ALLOCATABLE :: zlon(:), zlat(:)
+REAL(KIND=r8), POINTER     :: dmask(:),zlon(:), zlat(:)     ! Global
+REAL(KIND=r8), POINTER     :: dmask_s(:),zlon_s(:), zlat_s(:)     ! Local
 INTEGER                    :: write_aux_files
 INTEGER                    :: rank, nprocs                  ! CPS
 !------------------------------------------------------------------------------
@@ -86,20 +86,47 @@ INTEGER                    :: rank, nprocs                  ! CPS
  CALL MPI_Comm_Size ( kl_comm, nprocs, nerror )
  IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Size', 'Failure in oas_clm_define')
 
- IF (rank == 0) THEN
-   ndlon = SDATM%nxg
-   ndlat = SDATM%nyg
+ ! Implicit assumption that always "1d" decomp is used in DATM
+ ndlon    = SDATM%nxg   ! Global Size
+ ndlat    = SDATM%nyg   ! Global Size
+ start1d  = SDATM%gsmap%start(rank+1)
+ length1d = SDATM%gsmap%length(rank+1)
+ pe_loc1d = SDATM%gsmap%pe_loc(rank+1)
 
+ ALLOCATE( dmask_s(length1d), stat = nerror )
+ IF ( nerror > 0 ) THEN
+   CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating dmask_s' )
+   RETURN
+ ENDIF
+ ALLOCATE( zlon_s(length1d), stat = nerror )
+ IF ( nerror > 0 ) THEN
+   CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlon_s' )
+   RETURN
+ ENDIF
+ ALLOCATE( zlat_s(length1d), stat = nerror )
+ IF ( nerror > 0 ) THEN
+   CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat_s' )
+   RETURN
+ ENDIF
+
+ !Mask
+ k       = mct_aVect_indexRA(SDATM%grid%data,'mask')
+ dmask_s = SDATM%grid%data%rAttr(k,:)
+
+ ! Longitudes
+ k       = mct_aVect_indexRA(SDATM%grid%data,'lon')
+ zlon_s  = SDATM%grid%data%rAttr(k,:)
+
+ ! Latitudes
+ k       = mct_aVect_indexRA(SDATM%grid%data,'lat')
+ zlat_s  = SDATM%grid%data%rAttr(k,:)
+
+! ALLOCATE GLOBAL BUFFER
    ALLOCATE( dmask(ndlon*ndlat), stat = nerror )
    IF ( nerror > 0 ) THEN
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating dmask' )
      RETURN
    ENDIF
-
-   k     = mct_aVect_indexRA(SDATM%grid%data,'mask')
-   dmask = SDATM%grid%data%rAttr(k,:)
-   !
-   !
    ALLOCATE( zlon(ndlon*ndlat), stat = nerror )
    IF ( nerror > 0 ) THEN
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlon' )
@@ -110,6 +137,8 @@ INTEGER                    :: rank, nprocs                  ! CPS
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat' )
      RETURN
    ENDIF
+ 
+ IF (rank == 0) THEN
    ALLOCATE( llmask(ndlon,ndlat,1), stat = nerror )
    IF ( nerror > 0 ) THEN
       CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating llmask' )
@@ -125,8 +154,15 @@ INTEGER                    :: rank, nprocs                  ! CPS
       CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating oas_mask' )
       RETURN
    ENDIF
+ ENDIF !masterproc
 
-   PRINT*, "CPS ALLOCATUON COMPLEETE"   
+ !CPS,  Gather data to master for writing grid files for OASIS3
+ 
+ CALL MPI_Gatherv(dmask_s,length1d,  MP_REAL8, dmask,SDATM%gsmap%length, SDATM%gsmap%start -1 , MP_REAL8,0, kl_comm, nerror)
+ CALL MPI_Gatherv( zlat_s,length1d,  MP_REAL8,  zlat,SDATM%gsmap%length, SDATM%gsmap%start -1 , MP_REAL8,0, kl_comm, nerror)
+ CALL MPI_Gatherv( zlon_s,length1d,  MP_REAL8,  zlon,SDATM%gsmap%length, SDATM%gsmap%start -1, MP_REAL8,0, kl_comm, nerror)
+
+ IF (rank == 0) THEN
    ! -----------------------------------------------------------------
    ! ... Define the elements, i.e. specify the corner points for each
    !     volume element. 
@@ -141,13 +177,6 @@ INTEGER                    :: rank, nprocs                  ! CPS
    !  1: lower left corner. 2,: lower right corner.
    !  3: upper right corner. 4,: upper left corner.
    !
-   ! Longitudes
-   k     = mct_aVect_indexRA(SDATM%grid%data,'lon')
-   zlon  = SDATM%grid%data%rAttr(k,:)
-
-   ! Latitudes
-   k     = mct_aVect_indexRA(SDATM%grid%data,'lat')
-   zlat  = SDATM%grid%data%rAttr(k,:)
     
    ! Grid Resolution 
    dx    = ABS(zlon(2)-zlon(1))
@@ -180,13 +209,18 @@ INTEGER                    :: rank, nprocs                  ! CPS
    ENDDO
 
    WRITE(nulout,*) 'oasclm: oas_clm_define: Land point number / total number', COUNT(llmask), ndlon*ndlat
+   WRITE(nulout,*) 'oasclm: oas_clm_define: Extent ', MINVAL(zlon), MAXVAL(zlon), MINVAL(zlat), MAXVAL(zlat)   
+
    CALL flush(nulout)
 
    ! -----------------------------------------------------------------
    ! ... Write info on OASIS auxillary files (if needed)
    ! ----------------------------------------------------------------
    CALL prism_start_grids_writing (write_aux_files)
-    
+
+   WRITE(nulout,*) 'oasclm: oas_clm_define: write_aux_files', write_aux_files
+   CALL flush(nulout)   
+ 
   IF ( write_aux_files == 1 ) THEN
  
  
@@ -216,11 +250,6 @@ INTEGER                    :: rank, nprocs                  ! CPS
 !           gsmap%start = global offsets, 
 !           gsmap%length = (ndlat*ndlon)/npes
 !           gspam%pe_loc = location of processors
-! Implicit assumption that always "1d" decomp is used in DATM
-
-  start1d  = SDATM%gsmap%start(rank+1) 
-  length1d = SDATM%gsmap%length(rank+1)
-  pe_loc1d = SDATM%gsmap%pe_loc(rank+1)
 
   ALLOCATE(igparal(4), stat = nerror)  !Max 200
   IF ( nerror > 0 ) THEN
@@ -231,7 +260,7 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ! Compute global offsets and local extents
   igparal(1) = 3                  ! ORANGE style partition
   igparal(2) = 1                  ! 1 segment per processor)
-  igparal(3) = start1d-1          ! Global offset
+  igparal(3) = start1d - 1        ! Global offset
   igparal(4) = length1d           ! Local extent
 
   CALL prism_def_partition_proto( igrid, igparal, nerror )
@@ -281,7 +310,9 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ssnd(109)%clname='CLMFLX09'
   ssnd(110)%clname='CLMFLX10'
 
-  srcv(1)%clname='CLMTEMPE'
+!CPSCESM  srcv(1)%clname='CLMTEMPE'
+  srcv(1)%clname='FRECVMD1'
+
   srcv(2)%clname='CLMUWIND'
   srcv(3)%clname='CLMVWIND'
   srcv(4)%clname='CLMSPWAT'   ! specific water vapor content
@@ -351,7 +382,9 @@ INTEGER                    :: rank, nprocs                  ! CPS
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
 
-ssnd(1)%laction=.TRUE. !CPScesm
+ssnd(1)%laction=.FALSE. !CPScesm
+srcv(1)%laction=.TRUE.  !CPScesm
+
 !CPScesm  IF (cpl_scheme) THEN         !CPS
 !CPScesm     ssnd(5:7)%laction=.TRUE.
     !ssnd(6:7)%laction=.TRUE.     !CPS
@@ -395,7 +428,6 @@ ssnd(1)%laction=.TRUE. !CPScesm
 
   ! ... Announce send variables. 
   !
-!      ksnd=0                           !CPS
   DO ji = 1, nmaxfld
     IF ( ssnd(ji)%laction ) THEN 
             
@@ -403,7 +435,6 @@ ssnd(1)%laction=.TRUE. !CPScesm
                                      var_nodims, PRISM_Out, ipshape, PRISM_Real, nerror )
       IF ( nerror /= PRISM_Success )   CALL prism_abort_proto( ssnd(ji)%nid, 'oas_clm_define',   &
                &                                               'Failure in prism_def_var for '//TRIM(ssnd(ji)%clname))
- !           ksnd = ksnd + 1             !CPS now defined in oas_clm_vardef
     ENDIF
   END DO
   !
@@ -424,10 +455,10 @@ ssnd(1)%laction=.TRUE. !CPScesm
   ! End of definition phase
   !------------------------------------------------------------------
   IF (rank == 0) THEN
-    DEALLOCATE( tmp_2D, zlon, zlat)
+    DEALLOCATE( tmp_2D, dmask, zlon, zlat)
   ENDIF
 
-  DEALLOCATE( igparal)
+  DEALLOCATE( zlon_s, zlat_s, dmask_s,igparal)
 
   ! must be done by coupled processors only (OASIS3)
   CALL prism_enddef_proto( nerror )
