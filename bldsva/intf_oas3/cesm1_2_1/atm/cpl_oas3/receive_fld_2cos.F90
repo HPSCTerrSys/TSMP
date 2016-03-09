@@ -1,4 +1,4 @@
-SUBROUTINE receive_fld_2cos(nstep, dtime, lcoupled)
+SUBROUTINE receive_fld_2cos(nstep, dtime, a2x, lcoupled)
 
 !---------------------------------------------------------------------
 ! Description:
@@ -12,10 +12,6 @@ SUBROUTINE receive_fld_2cos(nstep, dtime, lcoupled)
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
-! 1.2.1        2012/09/26 Markus Uebel, Prabhakar Shrestha 
-!   CO2 coupling included
 ! 2.1.0        2016/02/29 Prabhakar Shrestha
 ! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
@@ -33,6 +29,7 @@ SUBROUTINE receive_fld_2cos(nstep, dtime, lcoupled)
 
 USE oas_clm_vardef
 USE shr_kind_mod ,            ONLY : R8 => SHR_KIND_R8
+USE mct_mod
 !==============================================================================
 
 IMPLICIT NONE
@@ -43,6 +40,7 @@ IMPLICIT NONE
 INTEGER, INTENT(IN)                    ::   nstep                        ! time step
 INTEGER, INTENT(IN)                    ::   dtime                        ! dt
 LOGICAL, INTENT(OUT)                   ::  lcoupled                      ! CPS flag for coupling 
+TYPE(mct_aVect) ,INTENT(INOUT)         :: a2x
 !
 INTEGER, PARAMETER ::   jps_t   =  1            ! temperature
 INTEGER, PARAMETER ::   jps_u   =  2            ! u wind
@@ -64,6 +62,7 @@ INTEGER, PARAMETER ::   jps_gp  = 16            ! total gridscale precipitation
 INTEGER, PARAMETER ::   jps_co2 = 17            ! CO2 partial pressure (Pa)
 !MU (13.09.2012)
 
+INTEGER                                :: zrc,zrl,zsc,zsl
 ! Local Variables
 INTEGER                                :: jn, isec, ier , begg,endg
 INTEGER, DIMENSION(krcv)               :: nrcvinfo           ! OASIS info argument
@@ -93,14 +92,21 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
    CALL prism_abort_proto( ncomp_id, 'receive_fld_2cos', 'Failure in allocating ztmp1' )
    RETURN
  ENDIF
- 
+!
 ! Update DATM variable with the received input from COSMO
  DO jn = 1, krcv
    ztmp1 = -1._r8
    nrcvinfo = OASIS_idle
    IF(srcv(jn)%laction) CALL oas_clm_rcv( jn, isec, ztmp1,begg,endg, nrcvinfo(jn) )
    IF( nrcvinfo(jn)==OASIS_Rcv) THEN   
-     !atm_a2l%forc_t(g) = ztmp1(g,1) + SHR_CONST_TKFRZ
+     zrc   = mct_aVect_indexRA(a2x,'Faxa_rainc')
+     zrl   = mct_aVect_indexRA(a2x,'Faxa_rainl')
+     zsc   = mct_aVect_indexRA(a2x,'Faxa_snowc')
+     zsl   = mct_aVect_indexRA(a2x,'Faxa_snowl')
+     a2x%rAttr(zrc,:) = ztmp1*2._r8 
+     a2x%rAttr(zrl,:) = ztmp1*2._r8 
+     a2x%rAttr(zsc,:) = 0._r8
+     a2x%rAttr(zsl,:) = 0._r8
      lcoupled = .TRUE.
    ENDIF
  ENDDO

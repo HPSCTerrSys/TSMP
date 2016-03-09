@@ -449,7 +449,6 @@ subroutine datm_comp_init( EClock, cdata, x2a, a2x, NLFilename )
     ! Initialize MCT global seg map, 1d decomp
     !----------------------------------------------------------------------------
 #if (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-!    call oas_clm_define(SDATM%domainFile)    !CPS sending clm global grid to oasis define
      call oas_clm_define(SDATM)   !CPS
 #endif
 
@@ -783,13 +782,13 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
    call seq_infodata_PutData(infodata, nextsw_cday=nextsw_cday )
 
 !CPS
-#ifdef COUP_OAS_COS
-    if (firstcall) then
-    ! Do Nothing CPS 
-    else
-      call receive_fld_2cos(stepno, idt, lcoupled)  
-    end if
-#endif
+!#ifdef COUP_OAS_COS
+!    if (firstcall) then
+!    ! Do Nothing CPS 
+!    else
+!      call receive_fld_2cos(stepno, idt, lcoupled)  
+!    end if
+!#endif
 !   call t_startf('receive data from oasis')
 !   call receive_fld_2cos(idt, lcoupled) 
 !   if (my_task == master_task) then
@@ -871,8 +870,13 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
       call mct_aVect_zero(a2x)
    endif
 
-!CPS #endif   
-!CPS
+#ifdef COUP_OAS_COS
+    if (firstcall) then
+    ! Do Nothing CPS 
+    else
+      call receive_fld_2cos(stepno, idt, a2x, lcoupled)
+    end if
+#endif
 
    call t_startf('datm_mode')
 
@@ -1173,7 +1177,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
     if (firstcall) then
     ! Do Nothing CPS 
     else
-!CPS      call send_fld_2cos(stepno,idt)  
+      call send_fld_2cos(stepno,idt)  
     end if
      !
 #endif

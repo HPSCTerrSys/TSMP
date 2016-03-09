@@ -382,7 +382,7 @@ INTEGER                    :: rank, nprocs                  ! CPS
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
 
-ssnd(1)%laction=.FALSE. !CPScesm
+ssnd(1)%laction=.TRUE. !CPScesm
 srcv(1)%laction=.TRUE.  !CPScesm
 
 !CPScesm  IF (cpl_scheme) THEN         !CPS
