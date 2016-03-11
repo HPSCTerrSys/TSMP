@@ -278,7 +278,7 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
   ssnd(1)%clname='FSENDMD1'      !CPScesm dummy
-!CPScesm  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
+!CPS  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
   ssnd(2)%clname='CLM_TAUY'      !  meridional wind stress
   ssnd(3)%clname='CLMLATEN'      !  total latent heat flux (W/m**2)
   ssnd(4)%clname='CLMSENSI'      !  total sensible heat flux (W/m**2)

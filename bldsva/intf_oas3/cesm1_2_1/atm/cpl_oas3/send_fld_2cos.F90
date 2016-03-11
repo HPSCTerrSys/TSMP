@@ -1,8 +1,8 @@
-SUBROUTINE send_fld_2cos(nstep, dtime)
+SUBROUTINE send_fld_2cos(nstep, dtime, x2a)
 
 !---------------------------------------------------------------------
 ! Description:
-!  This routine sends the fluxes from CESM to COSMO
+!  This routine sends the fluxes from CESM to COSMO, via x2a vectors
 !
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
@@ -11,16 +11,6 @@ SUBROUTINE send_fld_2cos(nstep, dtime)
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
-! 1.2.1        2012/09/18 Markus Uebel 
-!   Inclusion of CO2 coupling (photosynthesis rate)
-! 1.3.1        2013/02/01 Prabhakar Shrestha
-!   nee used for CO2, albd and albi allocated for direct/diffuse albedos
-!   Included aerodynamic resistance and surface temperature/moisture
-! 1.3.1        2013/07/23 Fabian Gasper
-!   Bug fix in albt_gcell for sending with multiple threads
-!   This gives 2 options for coupling COSMO and CLM i.e either flux or transfer coefficients
 ! 2.1.0        2016/02/29 Prabhakar Shrestha
 ! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
@@ -38,6 +28,7 @@ SUBROUTINE send_fld_2cos(nstep, dtime)
 ! Modules used:
  
 USE oas_clm_vardef
+USE mct_mod
 !
 
 !==============================================================================
@@ -46,14 +37,31 @@ IMPLICIT NONE
 
 !==============================================================================
 
-! Local Variables:
-INTEGER                          :: g              ! indices
 INTEGER,  INTENT(IN)             :: nstep, dtime
+TYPE(mct_aVect) ,INTENT(IN)      :: x2a
+
+! Local Variables:
 INTEGER                          :: isec
+INTEGER                          :: k      ! mct_vectors ID
 ! processor bounds indices
-INTEGER, PARAMETER               ::   jps_co2fl  = 1 !CPScesm  8    !  net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
-INTEGER                          :: rank,info,jj, ji
-REAL(KIND=r8), ALLOCATABLE       :: fsnd(:)      ! temporary arrays
+INTEGER, PARAMETER ::   jps_taux   =  1    !  zonal wind stress
+INTEGER, PARAMETER ::   jps_tauy   =  2    !  meridional wind stress
+INTEGER, PARAMETER ::   jps_lat    =  3    !  total latent heat flux (W/m**2)
+INTEGER, PARAMETER ::   jps_sens   =  4    !  total sensible heat flux (W/m**2)
+INTEGER, PARAMETER ::   jps_ir     =  5    !  emitted infrared (longwave) radiation (W/m**2)
+INTEGER, PARAMETER ::   jps_albd   =  6    !  direct albedo
+INTEGER, PARAMETER ::   jps_albi   =  7    !  diffuse albedo
+INTEGER, PARAMETER ::   jps_co2fl  =  8    !  net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
+INTEGER, PARAMETER ::   jps_ram1   =  9    !  Aerodynamic Resistance (s/m). !CPS
+INTEGER, PARAMETER ::   jps_rah1   =  10    !  Aerodynamic Resistance (s/m). !CPS
+INTEGER, PARAMETER ::   jps_raw1   =  11    !  Aerodynamic Resistance (s/m). !CPS
+INTEGER, PARAMETER ::   jps_tsf1   =  12    !  Surface Temperature (K)  !CPS
+INTEGER, PARAMETER ::   jps_qsf1   =  13    !  Surface Humidity (kg/kg) !CPS
+INTEGER, PARAMETER ::   jps_fpsn   =  14   !  photosynthesis rate (umol CO2 m-2s-1)
+INTEGER, PARAMETER ::   jps_fplres =  15   !  plant respiration (umol CO2 m-2s-1)
+!
+INTEGER                          :: rank,info
+REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
 !------------------------------------------------------------------------------
 !- End of header
 !------------------------------------------------------------------------------
@@ -65,19 +73,24 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:)      ! temporary arrays
    CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
    IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in send_fld_2cos') !CPScesm
 
-   ALLOCATE ( fsnd(start1d:start1d+length1d-1), stat=nerror)  
+   ALLOCATE ( fsnd(start1d:start1d+length1d-1, ksnd), stat=nerror)  
    IF (nerror /= 0) THEN 
      CALL prism_abort_proto( ncomp_id, 'send_fld_2cos', 'Failure in allocating fsnd' )
      RETURN
    ENDIF
 
  ! zero on unmasked points
- fsnd = 1._r8*nstep
+ fsnd = -999999._r8
   
  isec = nstep*dtime
 
- IF( ssnd(jps_co2fl)%laction )  CALL oas_clm_snd( jps_co2fl, isec, fsnd,start1d,start1d+length1d-1,info )
+ ! Retrieve x2a Fields to send to COSMO
+ k                = mct_aVect_indexRA(x2a,'Faxx_taux')
+ fsnd(:,jps_taux) = x2a%rAttr(k,:)
+ k                = mct_aVect_indexRA(x2a,'Sx_anidr') 
+ fsnd(:,jps_tauy) = x2a%rAttr(k,:)
 
+ IF( ssnd(jps_taux)%laction )  CALL oas_clm_snd( jps_taux, isec, fsnd(:,jps_taux),start1d,start1d+length1d-1,info )
  !CALL MPI_Barrier(kl_comm, nerror)
 
  DEALLOCATE(fsnd)

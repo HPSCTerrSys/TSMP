@@ -36,7 +36,7 @@ set GRIDNAME = 300x300pt_NRW
 set yyyy = 2012
 set mm   = 07
 set dd   = 21
-set hh   = 00
+set hh   = 09
 set runhours = 2.
 # COSMO grid and time-stepping(sec)
 set nprocx_cos = 8 
@@ -45,8 +45,8 @@ set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
 # CLM grid and time-stepping(sec)
-set nprocx_clm = 2 
-set nprocy_clm = 2 
+set nprocx_clm = 10 
+set nprocy_clm = 6 
 set ngclmx = 90000 
 set ngclmy = 1
 set dt_clm = 1800
