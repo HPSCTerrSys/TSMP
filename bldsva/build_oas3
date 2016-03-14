@@ -36,7 +36,7 @@ set GRIDNAME = 300x300pt_NRW
 set yyyy = 2012
 set mm   = 07
 set dd   = 21
-set hh   = 09
+set hh   = 00
 set runhours = 2.
 # COSMO grid and time-stepping(sec)
 set nprocx_cos = 8 
@@ -61,10 +61,9 @@ set dt_pfl = 0.025
 set cplfreq1=1800
 set cplfreq2=1800
 #COSMO-CLM coupling scheme, default: 1
-#if set to 0, first the user needs to set cpl_scheme= FALSE manually in src code
 #1:Transfer coefficeints sent from CLM to COSMO
 #0:Transfer coefficients inverted using fluxes sent from CLM
-set cpl_scheme=1
+set cpl_scheme=0
 #CPS New flag added to compile component model with dummy model
 #compile_dum =1 compiles with CESM using OASIS3
 set compile_dum = 1 
@@ -172,7 +171,11 @@ setenv LIBPSMILE    "${ARCHDIR}/lib/libanaisg.a ${ARCHDIR}/lib/libanaism.a ${ARC
 # COSMO4.21
 setenv CPPDEF2  " "
 if ($compile_oas == 1 && $compile_cos == 1) then
- setenv CPPDEF2  "-DCOUP_OAS_COS"
+  if ($cpl_scheme == 1) then
+    setenv CPPDEF2  "-DCOUP_OAS_COS -DCPL_SCHEME_F"
+  else
+    setenv CPPDEF2  "-DCOUP_OAS_COS"
+  endif
 endif
 setenv NETCDF_LIB   "-L${NETCDF}/lib -lnetcdf -lnetcdff"
 # CLM 3.5
@@ -212,7 +215,11 @@ setenv LIBPSMILE    "${ARCHDIR}/lib/libanaisg.a ${ARCHDIR}/lib/libanaism.a ${ARC
 # COSMO4.21uc
 setenv CPPDEF2  " "
 if ($compile_oas == 1 && $compile_cos == 1) then
- setenv CPPDEF2  "-WF,-DCOUP_OAS_COS"
+  if ($cpl_scheme == 1) then
+    setenv CPPDEF2  "-WF,-DCOUP_OAS_COS -DCPL_SCHEME_F"
+  else
+    setenv CPPDEF2  "-WF,-DCOUP_OAS_COS"
+  endif
 endif
 setenv NETCDF_LIB   "-L${NETCDF}/lib -lnetcdf"
 # CLM 3.5
@@ -390,7 +397,11 @@ endif
 
 # Flags to control OASIS coupled runs for CESM only
 if ($compile_dum == 1) then
-setenv CPPDEF2 "-DCOUP_OAS_COS"
+  if ($cpl_scheme == 1) then
+    setenv CPPDEF2  "-DCOUP_OAS_COS -DCPL_SCHEME_F"
+  else
+    setenv CPPDEF2  "-DCOUP_OAS_COS"
+  endif
 setenv USEOASLIB "TRUE"
 else
 #setenv CPPDEF2 ""
@@ -921,7 +932,12 @@ if ($compile_option == 2) then
 set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_pfl ./parflow rurlaf"
 endif
 if ($compile_option == 3) then
+if ($clm_version == "clm3_5") then
 set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmstarter : -np $nproc_clm ./clm"
+endif
+if ($clm_version == "clm4_0") then
+set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmstarter : -np $nproc_clm $rundir/bld/cesm.exe"
+endif
 endif
 if ($compile_option == 4) then
 set exec_line = "$MPIRUN --prefix $MPIDIR -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_pfl ./parflow rurlaf : -np $nproc_clm ./clm"

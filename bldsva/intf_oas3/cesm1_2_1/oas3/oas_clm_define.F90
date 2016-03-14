@@ -80,6 +80,13 @@ INTEGER                    :: rank, nprocs                  ! CPS
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
+! Define coupling scheme between COSMO and CLM
+#ifdef CPL_SCHEME_F
+ cpl_scheme = .True. !TRN Scheme
+#else
+ cpl_scheme = .False. !INV Scheme
+#endif
+
  CALL MPI_Barrier(kl_comm, nerror)
  CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
  IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in oas_clm_define') !CPScesm
@@ -106,6 +113,12 @@ INTEGER                    :: rank, nprocs                  ! CPS
  ALLOCATE( zlat_s(length1d), stat = nerror )
  IF ( nerror > 0 ) THEN
    CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat_s' )
+   RETURN
+ ENDIF
+ ! ALLOCATE variable exchange buffer for receive
+ ALLOCATE( exfld(length1d,krcv), stat = nerror )
+ IF ( nerror > 0 ) THEN
+   CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating exfld' )
    RETURN
  ENDIF
 
@@ -277,28 +290,23 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ! Default values
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
-  ssnd(1)%clname='FSENDMD1'      !CPScesm dummy
-!CPS  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
+!CPS  ssnd(1)%clname='FSENDMD1'      !CPScesm dummy
+  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
   ssnd(2)%clname='CLM_TAUY'      !  meridional wind stress
   ssnd(3)%clname='CLMLATEN'      !  total latent heat flux (W/m**2)
   ssnd(4)%clname='CLMSENSI'      !  total sensible heat flux (W/m**2)
   ssnd(5)%clname='CLMINFRA'      ! emitted infrared (longwave) radiation (W/m**2)
   ssnd(6)%clname='CLMALBED'      ! direct albedo
   ssnd(7)%clname='CLMALBEI'      ! diffuse albedo
-!MU (17.01.13)
   ssnd(8)%clname='CLMCO2FL'      ! net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
-!MU (17.01.13)
   ssnd(9)%clname='CLM_RAM1'      ! Aerodynamic resistance (s/m)   !CPS
   ssnd(10)%clname='CLM_RAH1'      ! Aerodynamic resistance (s/m)   !CPS
   ssnd(11)%clname='CLM_RAW1'      ! Aerodynamic resistance (s/m)   !CPS
   ssnd(12)%clname='CLM_TSF1'      ! Surface Temperature (K)   !CPS
   ssnd(13)%clname='CLM_QSF1'      ! Surface Humidity (kg/kg)   !CPS
-!MU (12.04.13)
   ssnd(14)%clname='CLMPHOTO'      ! photosynthesis rate (umol CO2 m-2s-1)
   ssnd(15)%clname='CLMPLRES'      ! plant respiration (umol CO2 m-2s-1)
-!MU (12.04.13)
 
-  !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
   ssnd(102)%clname='CLMFLX02'
   ssnd(103)%clname='CLMFLX03'
@@ -310,9 +318,8 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ssnd(109)%clname='CLMFLX09'
   ssnd(110)%clname='CLMFLX10'
 
-!CPSCESM  srcv(1)%clname='CLMTEMPE'
-  srcv(1)%clname='FRECVMD1'
-
+  srcv(1)%clname='CLMTEMPE'
+!CPS  srcv(1)%clname='FRECVMD1'
   srcv(2)%clname='CLMUWIND'
   srcv(3)%clname='CLMVWIND'
   srcv(4)%clname='CLMSPWAT'   ! specific water vapor content
@@ -382,40 +389,33 @@ INTEGER                    :: rank, nprocs                  ! CPS
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
 
-ssnd(1)%laction=.TRUE. !CPScesm
-srcv(1)%laction=.TRUE.  !CPScesm
+!CPS ssnd(1)%laction=.TRUE. !CPScesm
+!CPS srcv(1)%laction=.TRUE.  !CPScesm
 
-!CPScesm  IF (cpl_scheme) THEN         !CPS
-!CPScesm     ssnd(5:7)%laction=.TRUE.
-    !ssnd(6:7)%laction=.TRUE.     !CPS
-!MU (12.04.13)
-!CPScesm    ssnd(8)%laction=.TRUE.
-!CPScesm    ssnd(14)%laction=.FALSE.
-!CPScesm    ssnd(15)%laction=.FALSE.
-!MU (12.04.13)
-!CPScesm    ssnd(9:13)%laction=.TRUE.    !CPS
-!CPScesm  ELSE
-!CPScesm    ssnd(1:7)%laction=.TRUE.
-!CPScesm    ssnd(8)%laction=.TRUE.
-!CPScesm    ssnd(14)%laction=.FALSE.
-!CPScesm    ssnd(15)%laction=.FALSE. 
-!CPScesm  ENDIF                         !CPS
+ IF (cpl_scheme) THEN        
+    ssnd(5:7)%laction=.TRUE.
+    ssnd(8)%laction=.TRUE.
+    ssnd(14)%laction=.FALSE.
+    ssnd(15)%laction=.FALSE.
+    ssnd(9:13)%laction=.TRUE.   
+ ELSE
+    ssnd(1)%laction=.TRUE.
+!    ssnd(1:7)%laction=.TRUE.
+!    ssnd(8)%laction=.TRUE.
+!    ssnd(14)%laction=.FALSE.
+!    ssnd(15)%laction=.FALSE. 
+ ENDIF                        
 
-!CPScesm  srcv(1:9)%laction=.TRUE.
-!CPScesm  srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
-!MU (17.01.13)
-!CPScesm  srcv(17)%laction=.TRUE.    ! always true
-!  IF (srcv(17)%laction==.FALSE.) THEN
-!    PRINT*, 'ERROR (oas_clm_define): srcv(17)%laction has to be .TRUE.'
-!    PRINT*, '----- If CO2 is not initialized in COSMO a dummy is sent to CLM and CO2 content from CLM is used.'
-!  ENDIF
-!MU (17.01.13)
+ srcv(1)%laction=.TRUE.
+! srcv(1:9)%laction=.TRUE.
+! srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
+! srcv(17)%laction=.TRUE.    ! Always true
 #endif
 
 #ifdef COUP_OAS_PFL
-! CMS From 101 to 110 the ssnd variables are defined for ParFlow
+  !SEND VARIABLES 101 to 110
   ssnd(101:110)%laction=.TRUE.
-! CMS From 101 to 120 the srcv variables are defined for parflow
+  !RECEIVE VARIABLES  101 to 120 
   srcv(101:110)%laction=.TRUE.
   srcv(111:120)%laction=.TRUE.
 #endif

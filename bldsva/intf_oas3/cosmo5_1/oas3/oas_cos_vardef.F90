@@ -4,9 +4,6 @@ MODULE oas_cos_vardef
 ! Description:
 !  This routine initializes coupler to get the MPI communicator
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -14,9 +11,9 @@ MODULE oas_cos_vardef
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
-! 2.1        2012/10/15 Markus Uebel, Prabhakar Shrestha
+! 1.2.1        2012/10/15 Markus Uebel, Prabhakar Shrestha
 !   Modfied and Implemented in COSMO4.21
 !            2013/09/17 P. Shrestha
 !   Added cpl_scheme to TAB to choose COSMO-CLM coupling scheme
@@ -87,7 +84,7 @@ INTEGER(KIND=iintegers)                        :: nldi,nlei, nldj,nlej ! halo li
 INTEGER(KIND=iintegers)                        :: jih, jjh             ! subdomain limit
 
 LOGICAL :: lpe_cpl = .FALSE.
-LOGICAL :: cpl_scheme = .True.                 !Coupling Scheme with CLM, False for inversion technique  
+LOGICAL :: cpl_scheme                          !Coupling Scheme with CLM, now set in oas_cos_define  
 LOGICAL :: fhalo =.True.                       !Removes Infinity with inversion of tcm/tch 1/0. 
 
 REAL(KIND=wp), DIMENSION(:,:,:),ALLOCATABLE  ::   frcv        ! all fields recieved from soil model

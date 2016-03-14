@@ -30,6 +30,7 @@ SUBROUTINE receive_fld_2cos(nstep, dtime, a2x, lcoupled)
 USE oas_clm_vardef
 USE shr_kind_mod ,            ONLY : R8 => SHR_KIND_R8
 USE mct_mod
+use shr_const_mod,            ONLY : SHR_CONST_TKFRZ
 !==============================================================================
 
 IMPLICIT NONE
@@ -62,8 +63,10 @@ INTEGER, PARAMETER ::   jps_gp  = 16            ! total gridscale precipitation
 INTEGER, PARAMETER ::   jps_co2 = 17            ! CO2 partial pressure (Pa)
 !MU (13.09.2012)
 
-INTEGER                                :: zrc,zrl,zsc,zsl
-! Local Variables
+INTEGER                                :: n, k, k1, k2   !INDICES
+REAL(KIND=r8),PARAMETER                :: tkFrz = SHR_CONST_TKFRZ ! freezing T of fresh water ~ K 
+REAL(KIND=r8)                          :: frac, qbot
+
 INTEGER                                :: jn, isec, ier , begg,endg
 INTEGER, DIMENSION(krcv)               :: nrcvinfo           ! OASIS info argument
 INTEGER                                :: rank
@@ -95,21 +98,93 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
 !
 ! Update DATM variable with the received input from COSMO
  DO jn = 1, krcv
-   ztmp1 = -1._r8
+   ztmp1 = -9999._r8
    nrcvinfo = OASIS_idle
    IF(srcv(jn)%laction) CALL oas_clm_rcv( jn, isec, ztmp1,begg,endg, nrcvinfo(jn) )
    IF( nrcvinfo(jn)==OASIS_Rcv) THEN   
-     zrc   = mct_aVect_indexRA(a2x,'Faxa_rainc')
-     zrl   = mct_aVect_indexRA(a2x,'Faxa_rainl')
-     zsc   = mct_aVect_indexRA(a2x,'Faxa_snowc')
-     zsl   = mct_aVect_indexRA(a2x,'Faxa_snowl')
-     a2x%rAttr(zrc,:) = ztmp1*2._r8 
-     a2x%rAttr(zrl,:) = ztmp1*2._r8 
-     a2x%rAttr(zsc,:) = 0._r8
-     a2x%rAttr(zsl,:) = 0._r8
-     lcoupled = .TRUE.
+      exfld(:,jn)=ztmp1(:)
    ENDIF
  ENDDO
+
+ ! temperature at the lowest model level (K)
+ IF( srcv(jps_t)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_tbot')
+   a2x%rAttr(k,:) = exfld(:,jps_t)
+ ENDIF
+ ! zonal wind at the lowest model level (m s-1)
+ IF( srcv(jps_u)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_u')
+   a2x%rAttr(k,:) = exfld(:,jps_u)
+ ENDIF
+ ! meridional wind at the lowest model level (m s-1)
+ IF( srcv(jps_v)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_v')
+   a2x%rAttr(k,:) = exfld(:,jps_v)
+ ENDIF
+ ! Specific humidity at the lowest model level (kg kg-1)
+ IF( srcv(jps_q)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_shum')
+   DO n = 1, length1d
+      qbot = exfld(n,jps_t)
+      a2x%rAttr(k,n) = qbot/(qbot + 1._r8)   !CPS Mixing Ratio to Sp. Humidity 
+   ENDDO
+ ENDIF
+ ! height at the lowest model level (m)
+ IF( srcv(jps_th)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_z')
+   a2x%rAttr(k,:) = exfld(:,jps_th)
+ ENDIF
+ ! pressure at the lowest model level (Pa)
+ IF( srcv(jps_pr)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_pbot')
+   a2x%rAttr(k,:) = exfld(:,jps_pr)
+ ENDIF
+ ! direct near-infrared/visible incident solar radiation (W m-2) 
+ IF( srcv(jps_rs)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Faxa_swndr')
+   a2x%rAttr(k,:) = exfld(:,jps_rs) * 0.50_r8
+   k              = mct_aVect_indexRA(a2x,'Faxa_swvdr')
+   a2x%rAttr(k,:) = exfld(:,jps_rs) * 0.50_r8
+ ENDIF
+ ! diffuse near-infrared/visible incident solar radiation (W m-2)
+ IF( srcv(jps_fs)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Faxa_swndf')
+   a2x%rAttr(k,:) = exfld(:,jps_fs) * 0.50_r8
+   k              = mct_aVect_indexRA(a2x,'Faxa_swvdf')
+   a2x%rAttr(k,:) = exfld(:,jps_fs) * 0.50_r8
+ ENDIF
+ ! downward longwave heat flux (W m-2)
+ IF( srcv(jps_lw)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Faxa_lwdn')
+   a2x%rAttr(k,:) = exfld(:,jps_lw)
+ ENDIF 
+ ! convective precipitaiton rate, rain/snow  (kg m-2 s-1)
+ IF( srcv(jps_cp)%laction ) THEN
+   k1             = mct_aVect_indexRA(a2x,'Faxa_rainc')
+   k2             = mct_aVect_indexRA(a2x,'Faxa_snowc')
+   DO n = 1, length1d
+     frac            = (exfld(n,jps_t) - tkFrz) * 0.5_r8   !ramp near freezing,, NCEPCLM
+     frac            = MIN(1.0_r8, MAX(0.0_r8,frac))
+     a2x%rAttr(k1,n) = MAX(0.0_r8, exfld(n,jps_cp) * (         frac) ) 
+     a2x%rAttr(k2,n) = MAX(0.0_r8, exfld(n,jps_cp) * (1.0_r8 - frac) ) 
+   ENDDO
+ ENDIF
+ ! large-scale (stable) precipitation rate (kg m-2 s-1)
+ IF( srcv(jps_gp)%laction ) THEN
+   k1             = mct_aVect_indexRA(a2x,'Faxa_rainl')
+   k2             = mct_aVect_indexRA(a2x,'Faxa_snowl')
+   DO n = 1, length1d
+     frac            = (exfld(n,jps_t) - tkFrz) * 0.5_r8   !ramp near freezing,, NCEPCLM
+     frac            = MIN(1.0_r8, MAX(0.0_r8,frac))
+     a2x%rAttr(k1,n) = MAX(0.0_r8, exfld(n,jps_gp) * (         frac) )
+     a2x%rAttr(k2,n) = MAX(0.0_r8, exfld(n,jps_gp) * (1.0_r8 - frac) )        
+   ENDDO 
+ ENDIF
+ ! prognostic CO2 at the lowest model level (1e-6 mol/mol)
+ IF( srcv(jps_co2)%laction ) THEN
+   k              = mct_aVect_indexRA(a2x,'Sa_co2prog') !,perrWith='quiet')
+   a2x%rAttr(k,:) = exfld(:,jps_co2)
+ ENDIF
 
  DEALLOCATE(ztmp1)
 

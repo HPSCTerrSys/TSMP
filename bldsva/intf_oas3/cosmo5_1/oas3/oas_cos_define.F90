@@ -5,9 +5,6 @@ SUBROUTINE oas_cos_define
 !  This routine defines grids, domain decomposition and coupling variables
 !  for the OASIS3 coupler
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -15,19 +12,19 @@ SUBROUTINE oas_cos_define
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
-! 2.1        2013/01/17 Markus Uebel 
+! 1.2.1        2013/01/17 Markus Uebel 
 !   CO2 coupling (photosynthesis rate) included and implemented in COSMO4.21
-! 2.2        2013/12/30 Prabhakar Shrestha
+! 1.2.2        2013/12/30 Prabhakar Shrestha
 !   Add readclm for masked simulations
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
-! 3.1        2013/01/31 Prabhakar Shrestha
+! 1.3.1        2013/01/31 Prabhakar Shrestha
 !   Added new receive variables from CLM
 !     aerodynamic resistance for heat, moisture, momentum
 !     surface temperature and humidity
-! 3.2        2014/01/05 Prabhakar Shrestha
+! 1.3.2        2014/01/05 Prabhakar Shrestha
 !   Added readclm flag for idealized masked simulation
 !
 ! Code Description:
@@ -113,6 +110,13 @@ INTEGER                         :: status, cosncid, cosvarid(7)
 !------------------------------------------------------------------------------
 !- Begin Subroutine oas_cos_define 
 !------------------------------------------------------------------------------
+
+ ! Define coupling scheme between COSMO and CLM
+#ifdef CPL_SCHEME_F
+ cpl_scheme = .True. !TRN Scheme
+#else
+ cpl_scheme = .False. !INV Scheme
+#endif
 
  !  array size without halo
  !
@@ -445,18 +449,11 @@ INTEGER                         :: status, cosncid, cosvarid(7)
 !MU (17.01.2013)
 
  IF (cpl_scheme) THEN    !CPS
-! Lower Boundary variable selection
    srcv(5:7)%laction=.TRUE.
-!CPS srcv(6:7)%laction=.TRUE.
-!MU (12.04.13)
-!MU_TEST
    srcv(8)%laction=.TRUE.
    srcv(14)%laction=.FALSE.
    srcv(15)%laction=.FALSE.
-!MU_TEST
-!MU (12.04.13)
    srcv(9:13)%laction=.TRUE.!CPS
-!!           
  ELSE
    srcv(1:7)%laction=.TRUE.
    srcv(8)%laction=.TRUE.

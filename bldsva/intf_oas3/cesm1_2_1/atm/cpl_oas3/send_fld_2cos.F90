@@ -42,7 +42,7 @@ TYPE(mct_aVect) ,INTENT(IN)      :: x2a
 
 ! Local Variables:
 INTEGER                          :: isec
-INTEGER                          :: k      ! mct_vectors ID
+INTEGER                          :: k, k1, k2      ! mct_vectors ID
 ! processor bounds indices
 INTEGER, PARAMETER ::   jps_taux   =  1    !  zonal wind stress
 INTEGER, PARAMETER ::   jps_tauy   =  2    !  meridional wind stress
@@ -85,12 +85,56 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
  isec = nstep*dtime
 
  ! Retrieve x2a Fields to send to COSMO
+ ! flux prefix, Faxx , between a and x, computed by x
  k                = mct_aVect_indexRA(x2a,'Faxx_taux')
  fsnd(:,jps_taux) = x2a%rAttr(k,:)
- k                = mct_aVect_indexRA(x2a,'Sx_anidr') 
+ k                = mct_aVect_indexRA(x2a,'Faxx_tauy') 
  fsnd(:,jps_tauy) = x2a%rAttr(k,:)
+ k                = mct_aVect_indexRA(x2a,'Faxx_lat')
+ fsnd(:,jps_lat)  = x2a%rAttr(k,:)
+ k                = mct_aVect_indexRA(x2a,'Faxx_lat')
+ fsnd(:,jps_lat)  = x2a%rAttr(k,:)
+ k                = mct_aVect_indexRA(x2a,'Faxx_sen')
+ fsnd(:,jps_sens) = x2a%rAttr(k,:)
+ k                = mct_aVect_indexRA(x2a,'Faxx_lwup')
+ fsnd(:,jps_ir)   = x2a%rAttr(k,:)
+ ! state prefix, Sx_, from coupler 
+ k1               = mct_aVect_indexRA(x2a,'Sx_avsdr')
+ k2               = mct_aVect_indexRA(x2a,'Sx_anidr')
+ fsnd(:,jps_albd) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
+ k1               = mct_aVect_indexRA(x2a,'Sx_avsdf')
+ k2               = mct_aVect_indexRA(x2a,'Sx_anidf')
+ fsnd(:,jps_albi) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
+ ! 
+ ! Missing Co2 from land via coupler
+ fsnd(:,jps_co2fl)= 300._r8  !CPS
 
- IF( ssnd(jps_taux)%laction )  CALL oas_clm_snd( jps_taux, isec, fsnd(:,jps_taux),start1d,start1d+length1d-1,info )
+
+ ! Zonal surface stress (N m-2) 
+ IF( ssnd(jps_taux)%laction )  &
+   CALL oas_clm_snd( jps_taux, isec, fsnd(:,jps_taux),start1d,start1d+length1d-1,info )
+ ! Meridional surface stress (N m-2)
+ IF( ssnd(jps_tauy)%laction )  &
+   CALL oas_clm_snd( jps_tauy, isec, fsnd(:,jps_tauy),start1d,start1d+length1d-1,info )
+ ! Surface latent heat flux (W m-2)
+ IF( ssnd(jps_lat)%laction )  &
+   CALL oas_clm_snd( jps_lat, isec, fsnd(:,jps_lat),start1d,start1d+length1d-1,info )
+ ! Surface sensible heat flux (W m-2)
+ IF( ssnd(jps_sens)%laction )  &
+   CALL oas_clm_snd( jps_sens, isec, fsnd(:,jps_sens),start1d,start1d+length1d-1,info )
+ ! Surface upward longwave heat flux (W m-2)
+ IF( ssnd(jps_ir)%laction )  &
+   CALL oas_clm_snd( jps_ir, isec, fsnd(:,jps_ir),start1d,start1d+length1d-1,info )
+ ! Direct albedo (visible radiation and near-infrared radiation)
+ IF( ssnd(jps_albd)%laction )  &
+   CALL oas_clm_snd( jps_albd, isec, fsnd(:,jps_albd),start1d,start1d+length1d-1,info )
+ ! Direct albedo (visible radiation and near-infrared radiation)
+ IF( ssnd(jps_albi)%laction )  &
+   CALL oas_clm_snd( jps_albi, isec, fsnd(:,jps_albi),start1d,start1d+length1d-1,info )
+ ! surface_upward_flux_of_carbon_dioxide_where_land (moles m-2 s-1) 
+ IF( ssnd(jps_co2fl)%laction )  &
+   CALL oas_clm_snd( jps_co2fl, isec, fsnd(:,jps_co2fl),start1d,start1d+length1d-1,info )
+ 
  !CALL MPI_Barrier(kl_comm, nerror)
 
  DEALLOCATE(fsnd)

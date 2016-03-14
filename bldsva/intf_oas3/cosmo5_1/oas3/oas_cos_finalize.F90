@@ -6,9 +6,6 @@ SUBROUTINE oas_cos_finalize
 !  called explicitly before oas_cos_init it will also close
 !  MPI communication.
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -16,7 +13,7 @@ SUBROUTINE oas_cos_finalize
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         

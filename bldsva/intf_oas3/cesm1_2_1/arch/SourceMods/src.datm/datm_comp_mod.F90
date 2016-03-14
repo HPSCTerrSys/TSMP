@@ -851,6 +851,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
       call receive_fld_2cos(stepno, idt, a2x, lcoupled)
     end if
 #endif
+!#else
 
    call t_startf('datm_mode')
 
@@ -1124,28 +1125,30 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
          endif
 
          !--- rain and snow ---
-!CPS         if (sprecc > 0 .and. sprecl > 0) then
-!CPS            a2x%rAttr(krc,n) = avstrm%rAttr(sprecc,n)
-!CPS            a2x%rAttr(krl,n) = avstrm%rAttr(sprecl,n)
-!CPS         elseif (sprecn > 0) then
-!CPS            a2x%rAttr(krc,n) = avstrm%rAttr(sprecn,n)*0.1_R8
-!CPS            a2x%rAttr(krl,n) = avstrm%rAttr(sprecn,n)*0.9_R8
-!CPS         else
-!CPS            call shr_sys_abort(subName//'ERROR: cannot compute rain and snow')
-!CPS         endif
+         if (sprecc > 0 .and. sprecl > 0) then
+            a2x%rAttr(krc,n) = avstrm%rAttr(sprecc,n)
+            a2x%rAttr(krl,n) = avstrm%rAttr(sprecl,n)
+         elseif (sprecn > 0) then
+            a2x%rAttr(krc,n) = avstrm%rAttr(sprecn,n)*0.1_R8
+            a2x%rAttr(krl,n) = avstrm%rAttr(sprecn,n)*0.9_R8
+         else
+            call shr_sys_abort(subName//'ERROR: cannot compute rain and snow')
+         endif
 
          !--- split precip between rain & snow ---
          !--- note: aribitrarily small negative values cause CLM to crash ---
-!CPS         frac = (tbot - tkFrz)*0.5_R8                  ! ramp near freezing
-!CPS         frac = min(1.0_R8,max(0.0_R8,frac))           ! bound in [0,1]
-!CPS         a2x%rAttr(ksc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(1.0_R8 - frac) )
-!CPS         a2x%rAttr(ksl,n) = max(0.0_R8, a2x%rAttr(krl,n)*(1.0_R8 - frac) )
-!CPS         a2x%rAttr(krc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(         frac) )
-!CPS         a2x%rAttr(krl,n) = max(0.0_R8, a2x%rAttr(krl,n)*(         frac) )
+         frac = (tbot - tkFrz)*0.5_R8                  ! ramp near freezing
+         frac = min(1.0_R8,max(0.0_R8,frac))           ! bound in [0,1]
+         a2x%rAttr(ksc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(1.0_R8 - frac) )
+         a2x%rAttr(ksl,n) = max(0.0_R8, a2x%rAttr(krl,n)*(1.0_R8 - frac) )
+         a2x%rAttr(krc,n) = max(0.0_R8, a2x%rAttr(krc,n)*(         frac) )
+         a2x%rAttr(krl,n) = max(0.0_R8, a2x%rAttr(krl,n)*(         frac) )
 
       enddo
 
    end select
+
+!#endif
 
 #if defined COUP_OAS_COS
     if (firstcall) then
@@ -1155,8 +1158,11 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
     end if
      !
 #endif
+!#else
 
    call t_stopf('datm_mode')
+
+!#endif
 
    if (write_restart) then
       call t_startf('datm_restart')
