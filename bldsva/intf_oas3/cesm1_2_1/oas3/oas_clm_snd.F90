@@ -12,8 +12,6 @@ SUBROUTINE oas_clm_snd( kid, kstep, pdata,begg, endg, kinfo )
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
 ! 2.1.0        2016/02/29 Prabhakar Shrestha
 ! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>

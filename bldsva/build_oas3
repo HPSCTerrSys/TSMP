@@ -803,7 +803,7 @@ cp namcouple_dummy $rundir/namcouple
 #cp namcouple_dummy1 $rundir/namcouple
 set ncpl_exe1 = $nproc_clm 
 #$nproc_clm
-if ($clm_version = "clm3_5") then
+if ($clm_version == "clm3_5") then
   set ncpl_exe2 = 1 
 else
   set ncpl_exe2 = $nproc_clm
@@ -850,7 +850,7 @@ endif
 cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_cos 
-if ($clm_version = "clm3_5") then
+if ($clm_version == "clm3_5") then
   set ncpl_exe2 = 1
 else
   set ncpl_exe2 = $nproc_clm
@@ -877,7 +877,7 @@ cp namcouple_pfl_clm $rundir/namcouple
 cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_pfl 
-if ($clm_version = "clm3_5") then
+if ($clm_version == "clm3_5") then
   set ncpl_exe2 = 1
 else
   set ncpl_exe2 = $nproc_clm
@@ -913,7 +913,7 @@ cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_cos 
 set ncpl_exe2 = $nproc_pfl
-if ($clm_version = "clm3_5") then
+if ($clm_version == "clm3_5") then
   set ncpl_exe3 = 1
 else
   set ncpl_exe3 = $nproc_clm

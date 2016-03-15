@@ -847,6 +847,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
 #ifdef COUP_OAS_COS
     if (firstcall) then
     ! Do Nothing CPS 
+    !if (my_task == master_task) PRINT*, "CPS RECV", stepno
     else
       call receive_fld_2cos(stepno, idt, a2x, lcoupled)
     end if
@@ -1157,6 +1158,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
 #if defined COUP_OAS_COS
     if (firstcall) then
     ! Do Nothing CPS 
+    !if (my_task == master_task) PRINT*, "CPS SEND", stepno
     else
       call send_fld_2cos(stepno,idt,x2a)  
     end if

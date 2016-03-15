@@ -2,7 +2,7 @@ SUBROUTINE oas_clm_define(SDATM)
 
 !---------------------------------------------------------------------
 ! Description:
-!  This routine sends invariant CLM3.5 fields to OASIS3 coupler:
+!  This routine sends invariant CESM fields to OASIS3 coupler:
 !      1) grid information
 !      2) domain decomposition
 !      3) coupling variable definition
@@ -14,19 +14,9 @@ SUBROUTINE oas_clm_define(SDATM)
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
-! @VERSION@    @DATE@     <Your name>
-! 1.1.1        2012/01/30 Mauro Sulis
-! Definition of 10 sending fields CLM2PFL (source/sink term) and 
-! 20 receiving PFL2CLM (water saturation and soil matrix potential)
-! 1.2.1        2013/01/17 Markus Uebel, Prabhakar Shrestha
-! Implementation of CO2 coupling
-! 1.3.1        2013/01/31 Prabhakar Shrestha
-! Implementation of aerodynamic resistance exchange
-! Implementation of surface temperature and moisture exchange
 ! 2.1.0        2016/02/29 Prabhakar Shrestha
 ! Implementation for CESM 1.2.1
+
 ! Code Description:
 ! Language: Fortran 90.
 ! Software Standards: "European Standards for Writing and
@@ -51,7 +41,7 @@ IMPLICIT NONE
 
 ! Local Parmaters 
 
-TYPE(shr_strdata_type), INTENT(IN)      :: SDATM
+TYPE(shr_strdata_type), INTENT(IN)      :: SDATM          !CLM GRID Information
 
 ! Local Variables
 INTEGER                    :: igrid                       ! ids returned by prism_def_grid
@@ -82,20 +72,20 @@ INTEGER                    :: rank, nprocs                  ! CPS
 
 ! Define coupling scheme between COSMO and CLM
 #ifdef CPL_SCHEME_F
- cpl_scheme = .True. !TRN Scheme
+ cpl_scheme = .True.  !TRN Scheme
 #else
  cpl_scheme = .False. !INV Scheme
 #endif
 
  CALL MPI_Barrier(kl_comm, nerror)
- CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
- IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in oas_clm_define') !CPScesm
+ CALL MPI_Comm_Rank(kl_comm, rank, nerror)  
+ IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in oas_clm_define') 
  CALL MPI_Comm_Size ( kl_comm, nprocs, nerror )
  IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Size', 'Failure in oas_clm_define')
 
  ! Implicit assumption that always "1d" decomp is used in DATM
- ndlon    = SDATM%nxg   ! Global Size
- ndlat    = SDATM%nyg   ! Global Size
+ ndlon    = SDATM%nxg                   ! Global Size
+ ndlat    = SDATM%nyg                   ! Global Size
  start1d  = SDATM%gsmap%start(rank+1)
  length1d = SDATM%gsmap%length(rank+1)
  pe_loc1d = SDATM%gsmap%pe_loc(rank+1)
@@ -213,10 +203,10 @@ INTEGER                    :: rank, nprocs                  ! CPS
      jg    = (jj-1)*ndlon + ji
      IF ( dmask(jg) == 1 ) THEN        
         llmask(ji,jj,1) = .TRUE.
-        oas_mask(jg) = 0
+        oas_mask(jg)    = 0
      ELSE
         llmask(ji,jj,1) = .FALSE.
-        oas_mask(jg) = 1
+        oas_mask(jg)    = 1
      ENDIF
    ENDDO
    ENDDO
@@ -231,9 +221,6 @@ INTEGER                    :: rank, nprocs                  ! CPS
    ! ----------------------------------------------------------------
    CALL prism_start_grids_writing (write_aux_files)
 
-   WRITE(nulout,*) 'oasclm: oas_clm_define: write_aux_files', write_aux_files
-   CALL flush(nulout)   
- 
   IF ( write_aux_files == 1 ) THEN
  
  
@@ -254,15 +241,16 @@ INTEGER                    :: rank, nprocs                  ! CPS
 
 
  CALL MPI_Barrier(kl_comm, nerror)
+
  ! -----------------------------------------------------------------
  ! ... Define the partition 
  ! -----------------------------------------------------------------
 
-! DATM uses simple 1D parallel decomposition for vectors
-! stored in gsmap%gsize = ndlat*ndlon
-!           gsmap%start = global offsets, 
-!           gsmap%length = (ndlat*ndlon)/npes
-!           gspam%pe_loc = location of processors
+ ! DATM uses simple 1D parallel decomposition for vectors
+ ! stored in gsmap%gsize = ndlat*ndlon
+ !           gsmap%start = global offsets, 
+ !           gsmap%length = (ndlat*ndlon)/npes
+ !           gspam%pe_loc = location of processors
 
   ALLOCATE(igparal(4), stat = nerror)  !Max 200
   IF ( nerror > 0 ) THEN
@@ -290,7 +278,6 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ! Default values
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
-!CPS  ssnd(1)%clname='FSENDMD1'      !CPScesm dummy
   ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
   ssnd(2)%clname='CLM_TAUY'      !  meridional wind stress
   ssnd(3)%clname='CLMLATEN'      !  total latent heat flux (W/m**2)
@@ -319,7 +306,6 @@ INTEGER                    :: rank, nprocs                  ! CPS
   ssnd(110)%clname='CLMFLX10'
 
   srcv(1)%clname='CLMTEMPE'
-!CPS  srcv(1)%clname='FRECVMD1'
   srcv(2)%clname='CLMUWIND'
   srcv(3)%clname='CLMVWIND'
   srcv(4)%clname='CLMSPWAT'   ! specific water vapor content
@@ -389,27 +375,24 @@ INTEGER                    :: rank, nprocs                  ! CPS
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
 
-!CPS ssnd(1)%laction=.TRUE. !CPScesm
-!CPS srcv(1)%laction=.TRUE.  !CPScesm
-
  IF (cpl_scheme) THEN        
-    ssnd(5:7)%laction=.TRUE.
-    ssnd(8)%laction=.TRUE.
-    ssnd(14)%laction=.FALSE.
-    ssnd(15)%laction=.FALSE.
-    ssnd(9:13)%laction=.TRUE.   
+    ssnd(5:7)%laction  =.TRUE.
+    ssnd(8)%laction    =.TRUE.
+    ssnd(14)%laction   =.FALSE.
+    ssnd(15)%laction   =.FALSE.
+    ssnd(9:13)%laction =.TRUE.   
  ELSE
 !    ssnd(1)%laction=.TRUE.
-    ssnd(1:7)%laction=.TRUE.
-    ssnd(8)%laction=.TRUE.
-    ssnd(14)%laction=.FALSE.
-    ssnd(15)%laction=.FALSE. 
+    ssnd(1:7)%laction  =.TRUE.
+    ssnd(8)%laction    =.TRUE.
+    ssnd(14)%laction   =.FALSE.
+    ssnd(15)%laction   =.FALSE. 
  ENDIF                        
 
 ! srcv(1)%laction=.TRUE.
- srcv(1:9)%laction=.TRUE.
- srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
- srcv(17)%laction=.TRUE.    ! Always true
+ srcv(1:9)%laction     =.TRUE.
+ srcv(15:16)%laction   =.TRUE. ! Coupling only total convective and gridscale precipitations 
+ srcv(17)%laction      =.TRUE. ! Always true
 #endif
 
 #ifdef COUP_OAS_PFL
@@ -423,8 +406,8 @@ INTEGER                    :: rank, nprocs                  ! CPS
   var_nodims(1) = 1           ! Dimension number of exchanged arrays
   var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
 
-  ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
-  ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
+  ipshape(1) = 1              ! minimum index for each dimension of the coupling field array
+  ipshape(2) = ndlon*ndlat    ! maximum index for each dimension of the coupling field array
 
   ! ... Announce send variables. 
   !

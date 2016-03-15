@@ -38,10 +38,10 @@ IMPLICIT NONE
 !==============================================================================
 
 ! Parameter List
-INTEGER, INTENT(IN)                    ::   nstep                        ! time step
-INTEGER, INTENT(IN)                    ::   dtime                        ! dt
-LOGICAL, INTENT(OUT)                   ::  lcoupled                      ! CPS flag for coupling 
-TYPE(mct_aVect) ,INTENT(INOUT)         :: a2x
+INTEGER, INTENT(IN)                    ::   nstep           ! time step
+INTEGER, INTENT(IN)                    ::   dtime           ! dt
+LOGICAL, INTENT(OUT)                   ::   lcoupled        ! CPS flag for coupling 
+TYPE(mct_aVect) ,INTENT(INOUT)         ::   a2x             !MCT Vector a to x
 !
 INTEGER, PARAMETER ::   jps_t   =  1            ! temperature
 INTEGER, PARAMETER ::   jps_u   =  2            ! u wind
@@ -59,9 +59,7 @@ INTEGER, PARAMETER ::   jps_gs  = 13            ! gridscale snow precipitation
 INTEGER, PARAMETER ::   jps_gg  = 14            ! gridscale graupel precipitation
 INTEGER, PARAMETER ::   jps_cp  = 15            ! total convective precipitation
 INTEGER, PARAMETER ::   jps_gp  = 16            ! total gridscale precipitation
-!MU (13.09.2012)
 INTEGER, PARAMETER ::   jps_co2 = 17            ! CO2 partial pressure (Pa)
-!MU (13.09.2012)
 
 INTEGER                                :: n, k, k1, k2   !INDICES
 REAL(KIND=r8),PARAMETER                :: tkFrz = SHR_CONST_TKFRZ ! freezing T of fresh water ~ K 
@@ -80,8 +78,8 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
 !- Begin Subroutine receive_fld2cos 
 !------------------------------------------------------------------------------
 
- CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
- IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in receive_fld_2cos') !CPScesm
+ CALL MPI_Comm_Rank(kl_comm, rank, nerror) 
+ IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in receive_fld_2cos') 
 
  isec = dtime * nstep 
 
@@ -198,7 +196,7 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
    vp = (a2x%rAttr(k1,n)*exfld(n,jps_pr)) / (0.622_R8 + 0.378_R8 * a2x%rAttr(k1,n))
    a2x%rAttr(k,n) = (exfld(n,jps_pr) - 0.378_R8 * vp) / (exfld(n,jps_t)*rdair)
  ENDDO
- IF (rank == 0) PRINT*, "CPS DENSITY", MINVAL(a2x%rAttr(k,:)), MAXVAL(a2x%rAttr(k,:))
+! IF (rank == 0) PRINT*, "CPS DENSITY", MINVAL(a2x%rAttr(k,:)), MAXVAL(a2x%rAttr(k,:))
 
  DEALLOCATE(ztmp1)
 

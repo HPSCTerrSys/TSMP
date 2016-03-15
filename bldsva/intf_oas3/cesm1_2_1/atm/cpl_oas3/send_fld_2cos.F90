@@ -3,7 +3,8 @@ SUBROUTINE send_fld_2cos(nstep, dtime, x2a)
 !---------------------------------------------------------------------
 ! Description:
 !  This routine sends the fluxes from CESM to COSMO, via x2a vectors
-!
+!  CESM sign convention is that fluxes are positive downward
+
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -38,29 +39,29 @@ IMPLICIT NONE
 !==============================================================================
 
 INTEGER,  INTENT(IN)             :: nstep, dtime
-TYPE(mct_aVect) ,INTENT(IN)      :: x2a
+TYPE(mct_aVect) ,INTENT(IN)      :: x2a            !MCT vector x to a, activates with prognostic
 
 ! Local Variables:
 INTEGER                          :: isec
 INTEGER                          :: k, k1, k2      ! mct_vectors ID
 ! processor bounds indices
-INTEGER, PARAMETER ::   jps_taux   =  1    !  zonal wind stress
-INTEGER, PARAMETER ::   jps_tauy   =  2    !  meridional wind stress
-INTEGER, PARAMETER ::   jps_lat    =  3    !  total latent heat flux (W/m**2)
-INTEGER, PARAMETER ::   jps_sens   =  4    !  total sensible heat flux (W/m**2)
-INTEGER, PARAMETER ::   jps_ir     =  5    !  emitted infrared (longwave) radiation (W/m**2)
-INTEGER, PARAMETER ::   jps_albd   =  6    !  direct albedo
-INTEGER, PARAMETER ::   jps_albi   =  7    !  diffuse albedo
-INTEGER, PARAMETER ::   jps_co2fl  =  8    !  net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
-INTEGER, PARAMETER ::   jps_ram1   =  9    !  Aerodynamic Resistance (s/m). !CPS
+INTEGER, PARAMETER ::   jps_taux   =  1     !  zonal wind stress
+INTEGER, PARAMETER ::   jps_tauy   =  2     !  meridional wind stress
+INTEGER, PARAMETER ::   jps_lat    =  3     !  total latent heat flux (W/m**2)
+INTEGER, PARAMETER ::   jps_sens   =  4     !  total sensible heat flux (W/m**2)
+INTEGER, PARAMETER ::   jps_ir     =  5     !  emitted infrared (longwave) radiation (W/m**2)
+INTEGER, PARAMETER ::   jps_albd   =  6     !  direct albedo
+INTEGER, PARAMETER ::   jps_albi   =  7     !  diffuse albedo
+INTEGER, PARAMETER ::   jps_co2fl  =  8     !  net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
+INTEGER, PARAMETER ::   jps_ram1   =  9     !  Aerodynamic Resistance (s/m). !CPS
 INTEGER, PARAMETER ::   jps_rah1   =  10    !  Aerodynamic Resistance (s/m). !CPS
 INTEGER, PARAMETER ::   jps_raw1   =  11    !  Aerodynamic Resistance (s/m). !CPS
 INTEGER, PARAMETER ::   jps_tsf1   =  12    !  Surface Temperature (K)  !CPS
 INTEGER, PARAMETER ::   jps_qsf1   =  13    !  Surface Humidity (kg/kg) !CPS
-INTEGER, PARAMETER ::   jps_fpsn   =  14   !  photosynthesis rate (umol CO2 m-2s-1)
-INTEGER, PARAMETER ::   jps_fplres =  15   !  plant respiration (umol CO2 m-2s-1)
+INTEGER, PARAMETER ::   jps_fpsn   =  14    !  photosynthesis rate (umol CO2 m-2s-1)
+INTEGER, PARAMETER ::   jps_fplres =  15    !  plant respiration (umol CO2 m-2s-1)
 !
-INTEGER                          :: rank,info
+INTEGER                          :: rank,info,n
 REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
 !------------------------------------------------------------------------------
 !- End of header
@@ -70,8 +71,8 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
 !- Begin Subroutine send_fld2cos 
 !------------------------------------------------------------------------------
 
-   CALL MPI_Comm_Rank(kl_comm, rank, nerror)  !CPScesm 
-   IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in send_fld_2cos') !CPScesm
+   CALL MPI_Comm_Rank(kl_comm, rank, nerror) 
+   IF (nerror /= 0) CALL prism_abort_proto(ncomp_id, 'MPI_Comm_Rank', 'Failure in send_fld_2cos') 
 
    ALLOCATE ( fsnd(start1d:start1d+length1d-1, ksnd), stat=nerror)  
    IF (nerror /= 0) THEN 
@@ -84,13 +85,12 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
   
  isec = nstep*dtime
 
- IF (isec > 0) THEN
  ! Retrieve x2a Fields to send to COSMO
  ! flux prefix, Faxx , between a and x, computed by x
  k                = mct_aVect_indexRA(x2a,'Faxx_taux')
- fsnd(:,jps_taux) = x2a%rAttr(k,:)
+ fsnd(:,jps_taux) = -1._r8 * x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_tauy') 
- fsnd(:,jps_tauy) = x2a%rAttr(k,:)
+ fsnd(:,jps_tauy) = -1._r8 * x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_lat')
  fsnd(:,jps_lat)  = -1._r8 * x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_sen')
@@ -101,26 +101,12 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
  k1               = mct_aVect_indexRA(x2a,'Sx_avsdr')
  k2               = mct_aVect_indexRA(x2a,'Sx_anidr')
  fsnd(:,jps_albd) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
- IF (rank == 0) &
- PRINT*, "CPS DEBUG", MINVAL(x2a%rAttr(k1,:)),MAXVAL(x2a%rAttr(k1,:)),MINVAL(x2a%rAttr(k2,:)),MAXVAL(x2a%rAttr(k2,:))
  k1               = mct_aVect_indexRA(x2a,'Sx_avsdf')
  k2               = mct_aVect_indexRA(x2a,'Sx_anidf')
  fsnd(:,jps_albi) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
- IF (rank == 0) &
- PRINT*, "CPS DEBUG", MINVAL(x2a%rAttr(k1,:)),MAXVAL(x2a%rAttr(k1,:)),MINVAL(x2a%rAttr(k2,:)),MAXVAL(x2a%rAttr(k2,:))
  ! 
  ! Missing Co2 from land via coupler
  fsnd(:,jps_co2fl)= 300._r8  !CPS
- ELSE
-   fsnd(:,jps_taux) = 0.008_r8
-   fsnd(:,jps_tauy) = 0.0008_r8
-   fsnd(:,jps_lat)  = -0.1_r8
-   fsnd(:,jps_sens) = -0.1_r8
-   fsnd(:,jps_ir)   = 350._r8
-   fsnd(:,jps_albd) = 0.0_r8
-   fsnd(:,jps_albi) = 0.0_r8
-   fsnd(:,jps_co2fl)= 300._r8  !CPS
- ENDIF    !CPS FIX
 
  ! Zonal surface stress (N m-2) 
  IF( ssnd(jps_taux)%laction )  &
