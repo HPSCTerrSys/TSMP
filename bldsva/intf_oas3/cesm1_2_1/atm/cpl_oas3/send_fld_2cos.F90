@@ -84,6 +84,7 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
   
  isec = nstep*dtime
 
+ IF (isec > 0) THEN
  ! Retrieve x2a Fields to send to COSMO
  ! flux prefix, Faxx , between a and x, computed by x
  k                = mct_aVect_indexRA(x2a,'Faxx_taux')
@@ -91,24 +92,35 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
  k                = mct_aVect_indexRA(x2a,'Faxx_tauy') 
  fsnd(:,jps_tauy) = x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_lat')
- fsnd(:,jps_lat)  = x2a%rAttr(k,:)
- k                = mct_aVect_indexRA(x2a,'Faxx_lat')
- fsnd(:,jps_lat)  = x2a%rAttr(k,:)
+ fsnd(:,jps_lat)  = -1._r8 * x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_sen')
- fsnd(:,jps_sens) = x2a%rAttr(k,:)
+ fsnd(:,jps_sens) = -1._r8 * x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_lwup')
- fsnd(:,jps_ir)   = x2a%rAttr(k,:)
+ fsnd(:,jps_ir)   = -1._r8 * x2a%rAttr(k,:)
  ! state prefix, Sx_, from coupler 
  k1               = mct_aVect_indexRA(x2a,'Sx_avsdr')
  k2               = mct_aVect_indexRA(x2a,'Sx_anidr')
  fsnd(:,jps_albd) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
+ IF (rank == 0) &
+ PRINT*, "CPS DEBUG", MINVAL(x2a%rAttr(k1,:)),MAXVAL(x2a%rAttr(k1,:)),MINVAL(x2a%rAttr(k2,:)),MAXVAL(x2a%rAttr(k2,:))
  k1               = mct_aVect_indexRA(x2a,'Sx_avsdf')
  k2               = mct_aVect_indexRA(x2a,'Sx_anidf')
  fsnd(:,jps_albi) = 0.5_r8 * x2a%rAttr(k1,:) + 0.5_r8 * x2a%rAttr(k2,:)
+ IF (rank == 0) &
+ PRINT*, "CPS DEBUG", MINVAL(x2a%rAttr(k1,:)),MAXVAL(x2a%rAttr(k1,:)),MINVAL(x2a%rAttr(k2,:)),MAXVAL(x2a%rAttr(k2,:))
  ! 
  ! Missing Co2 from land via coupler
  fsnd(:,jps_co2fl)= 300._r8  !CPS
-
+ ELSE
+   fsnd(:,jps_taux) = 0.008_r8
+   fsnd(:,jps_tauy) = 0.0008_r8
+   fsnd(:,jps_lat)  = -0.1_r8
+   fsnd(:,jps_sens) = -0.1_r8
+   fsnd(:,jps_ir)   = 350._r8
+   fsnd(:,jps_albd) = 0.0_r8
+   fsnd(:,jps_albi) = 0.0_r8
+   fsnd(:,jps_co2fl)= 300._r8  !CPS
+ ENDIF    !CPS FIX
 
  ! Zonal surface stress (N m-2) 
  IF( ssnd(jps_taux)%laction )  &

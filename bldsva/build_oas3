@@ -39,17 +39,17 @@ set dd   = 21
 set hh   = 00
 set runhours = 2.
 # COSMO grid and time-stepping(sec)
-set nprocx_cos = 8 
-set nprocy_cos = 8 
+set nprocx_cos = 10 
+set nprocy_cos = 10 
 set ngcosx = 150
 set ngcosy = 150
 set dt_cos = 10 
 # CLM grid and time-stepping(sec)
-set nprocx_clm = 10 
-set nprocy_clm = 6 
+set nprocx_clm = 5 
+set nprocy_clm = 4 
 set ngclmx = 90000 
 set ngclmy = 1
-set dt_clm = 1800
+set dt_clm = 10
 set clm_data = /daten01/z4/database/clm3.5/Rur_NRW/
 # ParFlow grid and time-stepping(hour)
 set nprocx_pfl = 4 
@@ -58,7 +58,7 @@ set ngpflx = 300
 set ngpfly = 300 
 set dt_pfl = 0.025
 # OASIS coupling frequency(sec) : cplfreq > MIN(dt_cos, dt_clm, dt_pfl)
-set cplfreq1=1800
+set cplfreq1=10
 set cplfreq2=1800
 #COSMO-CLM coupling scheme, default: 1
 #1:Transfer coefficeints sent from CLM to COSMO
@@ -66,7 +66,7 @@ set cplfreq2=1800
 set cpl_scheme=0
 #CPS New flag added to compile component model with dummy model
 #compile_dum =1 compiles with CESM using OASIS3
-set compile_dum = 1 
+set compile_dum = 0 
 #
 #*****************************************************************************
 #                       END USER SETTINGS                                    *
@@ -186,6 +186,13 @@ setenv LIB_NETCDF ${NETCDF}/lib
 setenv INC_MPI ${MPIDIR}/include
 setenv LIB_MPI ${MPIDIR}/lib
 setenv MOD_NETCDF "$INC_NETCDF"     
+if ($compile_option == 3) then
+  if ($cpl_scheme == 1) then
+    setenv CPPDEF3  "-DCPL_SCHEME_F"
+  else
+    setenv CPPDEF3  " "
+  endif
+endif
 #setenv MPI_LIB_NAME openmpi
 setenv MPI_LIB_NAME mpi
 setenv LIBNETCDF_FLAG "-lnetcdff"
@@ -357,7 +364,8 @@ sed "s/init_d_bldsva/$dd/" -i lmrun_uc
 sed "s/init_h_bldsva/$hh/" -i lmrun_uc
 sed "s/nprocx_cos_bldsva/$nprocx_cos/" -i lmrun_uc
 sed "s/nprocy_cos_bldsva/$nprocy_cos/" -i lmrun_uc
-set nstop_cos = `echo "($runhours*3600-$cplfreq1)/$dt_cos" | bc`
+#CPS set nstop_cos = `echo "($runhours*3600-$cplfreq1)/$dt_cos" | bc`
+set nstop_cos = `echo "($runhours*3600)/$dt_cos" | bc`
 sed "s/nstop_cos_bldsva/$nstop_cos/" -i lmrun_uc
 sed "s/dt_cos_bldsva/$dt_cos/" -i lmrun_uc
 sed "s/ie_tot_bldsva/$ngcosx/" -i lmrun_uc
@@ -408,6 +416,17 @@ else
 setenv USEOASLIB "FALSE"
 endif
 #
+if ($compile_option == 3) then
+  if ($cpl_scheme == 1) then
+    setenv CPPDEF2  "-DCOUP_OAS_COS -DCPL_SCHEME_F"
+  else
+    setenv CPPDEF2  "-DCOUP_OAS_COS"
+  endif
+  setenv USEOASLIB "TRUE"
+else
+#setenv CPPDEF2 ""
+  setenv USEOASLIB "FALSE"
+endif
 
 cp -rf /daten01/z4/ComponentModels/$cesm_ver $SVAROOT/
 # Copy the terrsysmp interface to the cesm source code 
@@ -784,7 +803,11 @@ cp namcouple_dummy $rundir/namcouple
 #cp namcouple_dummy1 $rundir/namcouple
 set ncpl_exe1 = $nproc_clm 
 #$nproc_clm
-set ncpl_exe2 = 1 
+if ($clm_version = "clm3_5") then
+  set ncpl_exe2 = 1 
+else
+  set ncpl_exe2 = $nproc_clm
+endif
 cd $rundir
 ed namcouple <<EOF
 g/nproc_exe1/s/nproc_exe1/$nproc_clm/
@@ -827,7 +850,11 @@ endif
 cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_cos 
-set ncpl_exe2 = 1 
+if ($clm_version = "clm3_5") then
+  set ncpl_exe2 = 1
+else
+  set ncpl_exe2 = $nproc_clm
+endif
 ed namcouple <<EOF
 g/nproc_exe1/s/nproc_exe1/$nproc_cos/
 g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
@@ -850,7 +877,11 @@ cp namcouple_pfl_clm $rundir/namcouple
 cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_pfl 
-set ncpl_exe2 = 1 
+if ($clm_version = "clm3_5") then
+  set ncpl_exe2 = 1
+else
+  set ncpl_exe2 = $nproc_clm
+endif
 ed namcouple <<EOF
 g/nproc_exe1/s/nproc_exe1/$nproc_pfl/
 g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/
@@ -882,7 +913,11 @@ cd $rundir
 # ncpl_exe will be 1 for clm !!!
 set ncpl_exe1 = $nproc_cos 
 set ncpl_exe2 = $nproc_pfl
-set ncpl_exe3 = 1 
+if ($clm_version = "clm3_5") then
+  set ncpl_exe3 = 1
+else
+  set ncpl_exe3 = $nproc_clm
+endif
 ed namcouple <<EOF
 g/nproc_exe1/s/nproc_exe1/$nproc_cos/
 g/ncpl_exe1/s/ncpl_exe1/$ncpl_exe1/

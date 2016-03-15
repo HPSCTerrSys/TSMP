@@ -399,17 +399,17 @@ INTEGER                    :: rank, nprocs                  ! CPS
     ssnd(15)%laction=.FALSE.
     ssnd(9:13)%laction=.TRUE.   
  ELSE
-    ssnd(1)%laction=.TRUE.
-!    ssnd(1:7)%laction=.TRUE.
-!    ssnd(8)%laction=.TRUE.
-!    ssnd(14)%laction=.FALSE.
-!    ssnd(15)%laction=.FALSE. 
+!    ssnd(1)%laction=.TRUE.
+    ssnd(1:7)%laction=.TRUE.
+    ssnd(8)%laction=.TRUE.
+    ssnd(14)%laction=.FALSE.
+    ssnd(15)%laction=.FALSE. 
  ENDIF                        
 
- srcv(1)%laction=.TRUE.
-! srcv(1:9)%laction=.TRUE.
-! srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
-! srcv(17)%laction=.TRUE.    ! Always true
+! srcv(1)%laction=.TRUE.
+ srcv(1:9)%laction=.TRUE.
+ srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
+ srcv(17)%laction=.TRUE.    ! Always true
 #endif
 
 #ifdef COUP_OAS_PFL

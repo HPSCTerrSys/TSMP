@@ -850,10 +850,12 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
     else
       call receive_fld_2cos(stepno, idt, a2x, lcoupled)
     end if
-#endif
-!#else
 
-   call t_startf('datm_mode')
+!#endif
+
+#else
+
+   call t_startf('datm_mode')   
 
    select case (trim(atm_mode))
 
@@ -1148,7 +1150,9 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
 
    end select
 
-!#endif
+   call t_stopf('datm_mode')
+
+#endif
 
 #if defined COUP_OAS_COS
     if (firstcall) then
@@ -1158,11 +1162,7 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
     end if
      !
 #endif
-!#else
 
-   call t_stopf('datm_mode')
-
-!#endif
 
    if (write_restart) then
       call t_startf('datm_restart')

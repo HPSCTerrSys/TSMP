@@ -30,7 +30,7 @@ SUBROUTINE receive_fld_2cos(nstep, dtime, a2x, lcoupled)
 USE oas_clm_vardef
 USE shr_kind_mod ,            ONLY : R8 => SHR_KIND_R8
 USE mct_mod
-use shr_const_mod,            ONLY : SHR_CONST_TKFRZ
+use shr_const_mod,            ONLY : SHR_CONST_TKFRZ,  SHR_CONST_RDAIR
 !==============================================================================
 
 IMPLICIT NONE
@@ -65,7 +65,8 @@ INTEGER, PARAMETER ::   jps_co2 = 17            ! CO2 partial pressure (Pa)
 
 INTEGER                                :: n, k, k1, k2   !INDICES
 REAL(KIND=r8),PARAMETER                :: tkFrz = SHR_CONST_TKFRZ ! freezing T of fresh water ~ K 
-REAL(KIND=r8)                          :: frac, qbot
+REAL(KIND=r8),PARAMETER                :: rdair  = SHR_CONST_RDAIR! dry air gas constant   ~ J/K/kg
+REAL(KIND=r8)                          :: vp, frac, qbot
 
 INTEGER                                :: jn, isec, ier , begg,endg
 INTEGER, DIMENSION(krcv)               :: nrcvinfo           ! OASIS info argument
@@ -110,6 +111,8 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
  IF( srcv(jps_t)%laction ) THEN
    k              = mct_aVect_indexRA(a2x,'Sa_tbot')
    a2x%rAttr(k,:) = exfld(:,jps_t)
+   k              = mct_aVect_indexRA(a2x,'Sa_ptem')
+   a2x%rAttr(k,:) = exfld(:,jps_t)
  ENDIF
  ! zonal wind at the lowest model level (m s-1)
  IF( srcv(jps_u)%laction ) THEN
@@ -125,7 +128,7 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
  IF( srcv(jps_q)%laction ) THEN
    k              = mct_aVect_indexRA(a2x,'Sa_shum')
    DO n = 1, length1d
-      qbot = exfld(n,jps_t)
+      qbot = exfld(n,jps_q)
       a2x%rAttr(k,n) = qbot/(qbot + 1._r8)   !CPS Mixing Ratio to Sp. Humidity 
    ENDDO
  ENDIF
@@ -137,6 +140,8 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
  ! pressure at the lowest model level (Pa)
  IF( srcv(jps_pr)%laction ) THEN
    k              = mct_aVect_indexRA(a2x,'Sa_pbot')
+   a2x%rAttr(k,:) = exfld(:,jps_pr)
+   k              = mct_aVect_indexRA(a2x,'Sa_pslv')
    a2x%rAttr(k,:) = exfld(:,jps_pr)
  ENDIF
  ! direct near-infrared/visible incident solar radiation (W m-2) 
@@ -182,9 +187,18 @@ REAL(KIND=r8), ALLOCATABLE             :: ztmp1(:)
  ENDIF
  ! prognostic CO2 at the lowest model level (1e-6 mol/mol)
  IF( srcv(jps_co2)%laction ) THEN
-   k              = mct_aVect_indexRA(a2x,'Sa_co2prog') !,perrWith='quiet')
+   k              = mct_aVect_indexRA(a2x,'Sa_co2prog',perrWith='quiet')
    a2x%rAttr(k,:) = exfld(:,jps_co2)
  ENDIF
+
+ k  = mct_aVect_indexRA(a2x,'Sa_dens')
+ k1 = mct_aVect_indexRA(a2x,'Sa_shum')
+ !--- density ---
+ DO n = 1, length1d
+   vp = (a2x%rAttr(k1,n)*exfld(n,jps_pr)) / (0.622_R8 + 0.378_R8 * a2x%rAttr(k1,n))
+   a2x%rAttr(k,n) = (exfld(n,jps_pr) - 0.378_R8 * vp) / (exfld(n,jps_t)*rdair)
+ ENDDO
+ IF (rank == 0) PRINT*, "CPS DENSITY", MINVAL(a2x%rAttr(k,:)), MAXVAL(a2x%rAttr(k,:))
 
  DEALLOCATE(ztmp1)
 

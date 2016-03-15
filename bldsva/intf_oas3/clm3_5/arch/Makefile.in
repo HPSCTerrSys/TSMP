@@ -398,7 +398,7 @@ endif
 #gfortran
 ifeq ($(findstring mpif90,$(FC)),mpif90)
 
-  FFLAGS      := $(cpp_path) $(mod_path) $(PSMILE_INCDIR) $(CPPDEF1) $(CPPDEF)
+  FFLAGS      := $(cpp_path) $(mod_path) $(PSMILE_INCDIR) $(CPPDEF1) $(CPPDEF3) $(CPPDEF)
   FFLAGS      += -fno-range-check
   FREEFLAGS   := -ffree-form
   FIXEDFLAGS  :=

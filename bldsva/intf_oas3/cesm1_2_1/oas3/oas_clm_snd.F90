@@ -65,7 +65,8 @@ INTEGER                                             :: NULOUT
  CALL prism_put_proto( ssnd(kid)%nid, kstep, pdata, kinfo )
  IF ( kinfo .NE. PRISM_Ok .AND. kinfo .LT. PRISM_Sent ) &
    CALL prism_abort_proto(kl_comm, 'oasclm', 'Failure in oas_clm_snd')
- WRITE(NULOUT,*) "oas_clm_snd : kstep", kstep, MINVAL(pdata), MAXVAL(pdata)
+ IF ( IOASISDEBUGLVL == 1 )  &
+  WRITE(NULOUT,*) "oas_clm_snd : ", kstep, ssnd(kid)%clname, MINVAL(pdata), MAXVAL(pdata)
 !------------------------------------------------------------------------------
 !- End of the Subroutine
 !------------------------------------------------------------------------------
