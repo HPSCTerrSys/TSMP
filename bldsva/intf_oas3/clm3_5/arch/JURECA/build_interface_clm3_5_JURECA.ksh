@@ -24,7 +24,7 @@ print "${cblue}<< make_clm${cnormal}"
 
 substitutions_clm(){
 print "${cblue}>> substitutions_clm${cnormal}"
-   c_substitutions_clm
+#   c_substitutions_clm
 
   if [[ $withOASMCT == "true" ]] ; then
     print -n "   replace files for oasis3-mct and parallel clm coupling"

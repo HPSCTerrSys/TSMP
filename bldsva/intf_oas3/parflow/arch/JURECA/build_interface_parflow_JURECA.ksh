@@ -41,7 +41,7 @@ print "${cblue}<< make_pfl${cnormal}"
 
 substitutions_pfl(){
 print "${cblue}>> substitutions_pfl${cnormal}"
-  c_substitutions_pfl
+#  c_substitutions_pfl
   print -n "   cp new pf_pfmg_octree.c to /parflow_lib/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
   check
