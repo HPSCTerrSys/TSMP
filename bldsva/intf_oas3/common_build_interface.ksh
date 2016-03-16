@@ -57,6 +57,9 @@ print "${cblue}<<< c_make_cos${cnormal}"
 
 c_substitutions_cos(){
 print "${cblue}>>> c_substitutions_cos${cnormal}"
+  print -n "    copy oas3 interface to cosmo/src "
+    cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src >> $log_file 2>> $err_file
+  check
 print "${cblue}<<< c_substitutions_cos${cnormal}"
 }
 
@@ -149,7 +152,7 @@ print "${cblue}>>> c_configure_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   print -n "    configure clm"
-    $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" >> $log_file 2>> $err_file
+    $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" >> $log_file 2>> $err_file
   check
 print "${cblue}<<< c_configure_clm${cnormal}"
 }
@@ -171,6 +174,12 @@ print "${cblue}<<< c_make_clm${cnormal}"
 
 c_substitutions_clm(){
 print "${cblue}>>> c_substitutions_clm${cnormal}"
+  print -n "    copy oas3 interface to clm/src "
+    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src >> $log_file 2>> $err_file
+  check
+  print -n "    replace hydrology. Add files to clm/bld/usr.src "
+    cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/* $clmdir/bld/usr.src >> $log_file 2>> $err_file
+  check
 print "${cblue}<<< c_substitutions_clm${cnormal}"
 }
 
@@ -264,6 +273,9 @@ print "${cblue}<<< c_make_pfl${cnormal}"
 
 c_substitutions_pfl(){
 print "${cblue}>>> c_substitutions_pfl${cnormal}"
+  print -n "    copy oas3 interface to parflow/pfsimulator/amps "
+    cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
+  check
 print "${cblue}<<< c_substitutions_pfl${cnormal}"
 }
 

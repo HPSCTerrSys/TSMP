@@ -192,7 +192,7 @@ cat > INPUT_ORG << end_input_org
  &RUNCTL
   hstart = 0.0,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
   nprocx = $NPX,  nprocy = $NPY,   nprocio = $NPIO,
-  nboundlines = 4,
+  nboundlines = nbdl_cos_bldsva,
   lphys      = .TRUE.,   luse_rttov    = .FALSE.,  luseobs = .FALSE., leps = .FALSE.,
   lreorder   = .FALSE.,  lreproduce    = .TRUE.,   itype_timing = 0,
   ldatatypes = .FALSE.,  ltime_barrier = .FALSE.,  ncomm_type=3,

@@ -48,13 +48,17 @@ print "${cblue}<< substitutions_clm${cnormal}"
 
 
 setup_clm(){
-print "${cblue}> setupClm${cnormal}"
+print "${cblue}>> setupClm${cnormal}"
   seconds_clm=$(($hh*3600))
   runstep_clm=$(($runhours*3600/$dt_clm))
+  rpointer=$rundir/lnd.clmoas.rpointer
 
 print -n "  cp namelist to rundir"
   cp $namelist_clm $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
+
+
+
 print -n "  sed starttime to namelist"
   sed "s,__seconds_clm_bldsva__,$seconds_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
@@ -67,7 +71,6 @@ check
 print -n "  sed gridsize to namelist"
   sed "s,__gridsize__,$res," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
-  rpointer=$rundir/lnd.clmoas.rpointer
 print -n "  create rpointer dummy file"
   touch $rpointer >> $log_file 2>> $err_file
 check
@@ -85,13 +88,13 @@ print -n "  sed no restart file path to namelist"
     sed "s,__finidat__,," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
   else
-    fn_finidat="/work/slts/slts06/tsmp/TSMPForecastNRW$restDate-00/run/clmoas.clm2.r.${yyyy}-${mm}-${dd}-00000.nc"
 print -n "  sed restart file path to namelist"
     sed "s,__finidat__,${fn_finidat}," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
-print -n "  write restart file path to rpointer file"
-    echo "${fn_finidat}" > $rpointer >> $log_file 2>> $err_file
-check
-  fi
-print "${cblue}< setupClm${cnormal}"
+
+fi
+
+    echo "${fn_finidat}" > $rpointer
+
+print "${cblue}<< setupClm${cnormal}"
 }

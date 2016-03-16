@@ -20,7 +20,7 @@ print "${cblue}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O0"
+  defaultOptC="-O2"
 
   # Default Processor settings
   defaultNppn=48
@@ -35,13 +35,15 @@ print "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default setups
-  setups="nrw ideal300150 ideal600300 ideal1200600 ideal24001200"
-  defaultRefSetup="nrw"
+  # important: leading and trailing ""
 print "${cblue}<< getMachineDefaults${cnormal}"
 }
 
-
 createRunscript(){
+print "${cblue}>> createRunscript${cnormal}"
+print -n "   copy JURECA module load script into rundirectory"
+  cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
+check
 
 mpitasks=`expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
@@ -92,42 +94,64 @@ __pfl__
 __clm__
 EOF
 
-if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf ; fi
+print -n "   sed executables and processors into mapping file"
+	if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
 
 if [[ $withCOS == "true" && $withCLM == "false" ]] then
-sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "false" ]] then
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 if [[ $withPFL == "true" && $withCLM == "false" ]] then
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow rurlaf/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 if [[ $withCOS == "true" && $withCLM == "true" && $withPFL == "false" ]] then
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 if [[ $withPFL == "true" && $withCLM == "true" && $withCOS == "false" ]] then
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow rurlaf/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 if [[ $withCOS == "true" && $withCLM == "true" && $withPFL == "true" ]] then
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow rurlaf/" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf
+sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 fi
 
-sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__cos__//" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__pfl__//" -i $rundir/slm_multiprog_mapping.conf
-sed "s/__clm__//" -i $rundir/slm_multiprog_mapping.conf
-sed '/^$/d' -i $rundir/slm_multiprog_mapping.conf
+sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__cos__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__pfl__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed "s/__clm__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+sed '/^$/d' -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
 
-chmod 755 $rundir/tsmp_slm_run.bsh
-chmod 755 $rundir/slm_multiprog_mapping.conf
-
+print -n "   change permission of runscript and mapfile"
+chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
+check
+chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+check
+print "${cblue}<< createRunscript${cnormal}"
 }
 

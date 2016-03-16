@@ -41,6 +41,7 @@ print "${cblue}<< make_pfl${cnormal}"
 
 substitutions_pfl(){
 print "${cblue}>> substitutions_pfl${cnormal}"
+  c_substitutions_pfl
   print -n "   cp new pf_pfmg_octree.c to /parflow_lib/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
   check
@@ -65,28 +66,56 @@ print "${cblue}<< substitutions_pfl${cnormal}"
 
 setup_pfl(){
 print "${cblue}>> setup_pfl${cnormal}"
-  cp $namelist_pfl $rundir/coup_oas.tcl
-  sed "s/__nprocx_pfl_bldsva__/$px_pfl/" -i $rundir/coup_oas.tcl
-  sed "s/__nprocy_pfl_bldsva__/$py_pfl/" -i $rundir/coup_oas.tcl
-  sed "s/__ngpflx_bldsva__/$gx_pfl/" -i $rundir/coup_oas.tcl
-  sed "s/__ngpfly_bldsva__/$gy_pfl/" -i $rundir/coup_oas.tcl
-  sed "s,__forcingdir__,$rundir," -i $rundir/coup_oas.tcl
-  sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl
-  sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl
+  print -n "   copy parflow namelist to rundir."
+    cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed nproc x to pfl namelist."
+    sed "s/__nprocx_pfl_bldsva__/$px_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed nproc y to pfl namelist."
+    sed "s/__nprocy_pfl_bldsva__/$py_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed gridpoints x to pfl namelist."
+    sed "s/__ngpflx_bldsva__/$gx_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed gridpoints y to pfl namelist."
+    sed "s/__ngpfly_bldsva__/$gy_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed forcingdir to pfl namelist."
+    sed "s,__forcingdir__,$rundir," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed dt to pfl namelist."
+    sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed end time to pfl namelist."
+    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  print -n "   sed start counter to pfl namelist."
+    sed "s/__start_cnt_pfl__/0/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+    if [[ $restart == 0 ]] then
+  print -n "   sed initial condition to pfl namelist."
+      sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
+  check
+      sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # comment this during restart run
+  check
+    else
+  print -n "   sed initial condition to pfl namelist."
+      sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
+  check
+      sed "s,__pfl_ICPpressureFileName__,$pfbfilename," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file       # comment this during restart run
+  check
+    fi
 
-  sed "s/__start_cnt_pfl__/0/" -i $rundir/coup_oas.tcl
-  if [[ $restart == 0 ]] then
-    sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl        # HydrostaticPatch > PFBFile
-    sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl        # comment this during restart run
-  else
-    pfbfilename="/work/slts/slts06/tsmp/TSMPForecastNRW$restDate-00/run/rurlaf.out.press.00024.pfb"
 
-    sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl        # HydrostaticPatch > PFBFile
-    sed "s,__pfl_ICPpressureFileName__,$pfbfilename," -i $rundir/coup_oas.tcl        # comment this during restart run
-  fi
   export PARFLOW_DIR="$pfldir"
-  cd $rundir
-  tclsh $rundir/coup_oas.tcl
+  print -n "   cd to rundir."
+    cd $rundir >> $log_file 2>> $err_file
+  check
+  print -n "   create parflow db with tclsh from namelist."
+    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
 print "${cblue}<< setup_pfl${cnormal}"
 }
+
 

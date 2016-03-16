@@ -38,6 +38,11 @@ print "${cblue}<< make_cos${cnormal}"
 
 substitutions_cos(){
 print "${cblue}>> substitutions_cos${cnormal}"
+ c_substitutions_cos
+
+ print -n "   currently a fixed receive_fld2clm.F90 is necessary"
+   cp cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
+ check
  print -n "   cp Makefile to cosmo dir"
    cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/config/Makefile $cosdir >> $log_file 2>> $err_file
  check
@@ -52,16 +57,17 @@ print "${cblue}>> substitutions_cos${cnormal}"
        sed -i "s/USE mod_prism.*//" $cosdir/src/oas3/oas_cos_define.F90 >> $log_file 2>> $err_file
      check
    fi
- c_substitutions_cos
 print "${cblue}<< substitutions_cos${cnormal}"
 }
 
 setup_cos(){
-print "${cblue}> setupCos${cnormal}"
+print "${cblue}>> setupCos${cnormal}"
   nstop_cos=$((($runhours*3600-$cplfreq1)/$dt_cos))
 print -n "  cp namelist to rundir"
   cp $namelist_cos $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
+
+
 print -n "  sed dt to namelist"
   sed "s,dt_cos_bldsva,$dt_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
@@ -74,6 +80,11 @@ print -n "  sed gridpoints to namelist"
   sed "s,ie_tot_bldsva,$gx_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
   sed "s,je_tot_bldsva,$gy_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+
+print -n "  sed gridpoints to namelist"
+  sed "s,nbdl_cos_bldsva,$nbndlines," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
 check
 print -n "  sed forcingdir to namelist"
   sed "s,__forcingdir__,$forcingdir_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
@@ -93,6 +104,8 @@ check
 check
   sed "s/init_h_bldsva/$hh/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
+
+
 print -n "  cd to rundir"
   cd $rundir >> $log_file 2>> $err_file
 check
@@ -102,5 +115,5 @@ check
 print -n "  run lmrun_uc exe"
   $rundir/lmrun_uc execluma >> $log_file 2>> $err_file
 check
-print "${cblue}< setupCos${cnormal}" 
+print "${cblue}<< setupCos${cnormal}" 
 }
