@@ -87,14 +87,15 @@ REAL(KIND=r8), ALLOCATABLE       :: fsnd(:,:)      ! temporary arrays
 
  ! Retrieve x2a Fields to send to COSMO
  ! flux prefix, Faxx , between a and x, computed by x
+ ! Sign change done in COSMO, except for IR, to be consistent with CLM3.5
  k                = mct_aVect_indexRA(x2a,'Faxx_taux')
- fsnd(:,jps_taux) = -1._r8 * x2a%rAttr(k,:)
+ fsnd(:,jps_taux) = x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_tauy') 
- fsnd(:,jps_tauy) = -1._r8 * x2a%rAttr(k,:)
+ fsnd(:,jps_tauy) = x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_lat')
- fsnd(:,jps_lat)  = -1._r8 * x2a%rAttr(k,:)
+ fsnd(:,jps_lat)  = x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_sen')
- fsnd(:,jps_sens) = -1._r8 * x2a%rAttr(k,:)
+ fsnd(:,jps_sens) = x2a%rAttr(k,:)
  k                = mct_aVect_indexRA(x2a,'Faxx_lwup')
  fsnd(:,jps_ir)   = -1._r8 * x2a%rAttr(k,:)
  ! state prefix, Sx_, from coupler 

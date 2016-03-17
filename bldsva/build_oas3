@@ -37,7 +37,7 @@ set yyyy = 2012
 set mm   = 07
 set dd   = 21
 set hh   = 00
-set runhours = 2.
+set runhours = 24.
 # COSMO grid and time-stepping(sec)
 set nprocx_cos = 10 
 set nprocy_cos = 10 
@@ -46,7 +46,7 @@ set ngcosy = 150
 set dt_cos = 10 
 # CLM grid and time-stepping(sec)
 set nprocx_clm = 5 
-set nprocy_clm = 4 
+set nprocy_clm = 2 
 set ngclmx = 90000 
 set ngclmy = 1
 set dt_clm = 10
@@ -779,7 +779,11 @@ endif
 # Step 3: Configuration file for coupling component model via OASIS3 
 #-----------------------------------------------------------------------------
 set yyyymmdd = `echo $yyyy$mm$dd`
-set runseconds = `echo "$runhours*3600" |bc`
+if ($clm_version == "clm3_5") then
+  set runseconds = `echo "$runhours*3600" |bc`
+else
+  set runseconds = `echo "$runhours*3600 + $cplfreq1" |bc`
+endif
 set totalruntime = `echo $runseconds | awk '{printf "%.0f",$1}'`
 set nproc_cos = 0 ; set nproc_clm = 0 ; set nproc_pfl = 0 ;
 if ($compile_cos == 1) then

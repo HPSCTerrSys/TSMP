@@ -360,7 +360,7 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
 
  ! Land points updated at each time step, frcv(:,:) updated only at coupling time step
 
-   ! CLM3.5 fluxes (+up) ,taux and tauy are always -ve, COSMO fluxes (+down) 
+   ! CESM / CLM3.5 fluxes (+up) ,taux and tauy are always -ve, COSMO fluxes (+down) 
    IF( srcv(jps_taux)%laction .and. nrcvinfo(jps_taux) == OASIS_Rcv ) frcv(:,:,jps_taux) = -frcv(:,:,jps_taux)
    IF( srcv(jps_tauy)%laction .and. nrcvinfo(jps_tauy) == OASIS_Rcv ) frcv(:,:,jps_tauy) = -frcv(:,:,jps_tauy)
 
