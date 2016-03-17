@@ -41,7 +41,7 @@ print "${cblue}>> substitutions_cos${cnormal}"
 # c_substitutions_cos
 
  print -n "   currently a fixed receive_fld2clm.F90 is necessary"
-   cp cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
  check
  print -n "   cp Makefile to cosmo dir"
    cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/config/Makefile $cosdir >> $log_file 2>> $err_file

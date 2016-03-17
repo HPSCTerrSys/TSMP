@@ -78,7 +78,7 @@ setSelection(){
   if [[ $siloPath == "" ]] then ; siloPath=$defaultSiloPath ; fi
 
   #compiler optimization
-  if [[ $mpiPath == "" ]] then ; def_optComp=$defaultOptC ; fi
+  if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
 
 
   set -A mList ${modelVersion[$version]}
