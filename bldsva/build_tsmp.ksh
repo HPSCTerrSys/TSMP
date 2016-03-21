@@ -410,7 +410,8 @@ listAvailabilities(){
 listTutorial(){
   print "1) The required component models need to be loaded in beforehand"
   print "2) The models must be named with their version name as specified in the supported_versions.ksh and in the intf-folder: for example cosmo4_21, parflow, clm3_5 or oasis3-mct in the root directory"
-  print "3) If not specified other, the component models will be copied to a working version with the name: MODEL_PLATFORM_DATE"
+  print "2b) You can download oasis3-mct with: svn checkout http://oasis3mct.cerfacs.fr/svn/branches/OASIS3-MCT_2.0_branch/oasis3-mct"
+  print "3) If not specified other, the component models will be copied to a working version with the name: MODEL_PLATFORM_COMBINATION"
   print "4) If a new version or platform is supported, edit the supported_versions.ksh and reflect all dependencies and constraints"
 	
   exit 0
@@ -569,7 +570,7 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-  runCompilation 
+  runCompilation | tee test.txt 
 
   printState >> $log_file
   print "$call $*">> $log_file

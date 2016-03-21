@@ -43,7 +43,7 @@ SUBROUTINE shr_sys_system(str,rcode)
    integer(SHR_KIND_IN),external    :: ishell ! function to envoke shell command
 #endif
 #if (defined OSF1 || defined SUNOS || (defined LINUX && !defined G95) || (defined LINUX && !defined CATAMOUNT))
-   !integer(SHR_KIND_IN),external    :: system ! function to envoke shell command
+   integer(SHR_KIND_IN),external    :: system ! function to envoke shell command
    ! COMMENT OUT FOR GNU COMPILER , CMS CPS
 #endif
 
@@ -137,7 +137,7 @@ SUBROUTINE shr_sys_chdir(path, rcode)
    !----- local -----
    integer(SHR_KIND_IN)             :: lenpath ! length of path
 #if (defined AIX || defined OSF1 || defined SUNOS || (defined LINUX && !defined G95) || defined NEC_SX)
-   !integer(SHR_KIND_IN),external    :: chdir   ! AIX system call
+   integer(SHR_KIND_IN),external    :: chdir   ! AIX system call
    !COMMENT OUT FOR GNU COMPILER; CMS; CPS
 #endif
 

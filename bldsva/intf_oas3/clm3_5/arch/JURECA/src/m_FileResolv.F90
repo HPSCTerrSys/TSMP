@@ -98,7 +98,7 @@ CONTAINS
 #if SYSUNICOS || CPRCRAY
    integer, external  :: ishell
 #else
-   !integer, external  :: system     
+   integer, external  :: system     
    !COMMENT OUT FOR GNU, CMS; CPS
 #endif
    character(len=255) :: path, host, dirn, basen, head, tail, cmd, filen

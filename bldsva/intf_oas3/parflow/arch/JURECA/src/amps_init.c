@@ -101,7 +101,8 @@ int amps_Init(int *argc, char **argv[])
 /*   MPI_Init(argc, argv);*/
    CALL_oas_pfl_init(&dummy1_oas3);
    amps_mpi_initialized = TRUE;
-   oas3Comm = MPI_Comm_f2c(__oas_pfl_vardef_MOD_localcomm);
+//   oas3Comm = MPI_Comm_f2c(__oas_pfl_vardef_MOD_localcomm);//for GNU compioers
+   oas3Comm = MPI_Comm_f2c(oas_pfl_vardef_mp_localcomm_);  //for Intel Compilers
 
    MPI_Comm_size(oas3Comm , &amps_size);
    MPI_Comm_rank(oas3Comm , &amps_rank);
