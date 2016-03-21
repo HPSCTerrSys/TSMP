@@ -34,7 +34,8 @@ setDefaults(){
   pfldir=$def_pfldir
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
-  rm -f $log_file $err_file
+  stdout_file=$cpwd/stdout_all_${date}.txt
+  rm -f $log_file $err_file $stdout_file
  
   refSetup=$def_refSetup
   combination=$def_combination
@@ -121,12 +122,20 @@ terminate(){
 
 check(){
  if [[ $? == 0  ]] then
-    print "    ... ${cgreen}passed!${cnormal}" 
+    print "    ... ${cgreen}passed!${cnormal}"  | tee -a $stdout_file
  else
-    print "    ... ${cred}error!!! - aborting...${cnormal}"
-    print "See $log_file and $err_file"
+    print "    ... ${cred}error!!! - aborting...${cnormal}" | tee -a $stdout_file
+    print "See $log_file and $err_file" | tee -a $stdout_file
     exit 1
   fi
+}
+
+comment(){
+  print -n "$1" | tee -a $stdout_file
+}
+
+rout(){
+  print "$1" | tee -a $stdout_file
 }
 
 warning(){
@@ -495,14 +504,14 @@ getRoot(){
 
 
 
-print -n "  source list with supported machines and configurations"
+comment "  source list with supported machines and configurations"
   . $rootdir/bldsva/supported_versions.ksh
 check
 
   if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
   sanityCheck
 
-print -n "  source machine build interface for $platform"
+comment "  source machine build interface for $platform"
   . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
 check
 
@@ -557,8 +566,20 @@ check
 
   printState >> $log_file
   print "$call $*">> $log_file
+  #remove special charecters for coloring from logfiles
+  sed -i "s,.\[32m,," $log_file
+  sed -i "s,.\[39m,," $log_file
+  sed -i "s,.\[31m,," $log_file
+  sed -i "s,.\[34m,," $log_file
+
+  sed -i "s,.\[32m,," $stdout_file
+  sed -i "s,.\[39m,," $stdout_file
+  sed -i "s,.\[31m,," $stdout_file
+  sed -i "s,.\[34m,," $stdout_file
+
   mv -f $err_file $rundir
   mv -f $log_file $rundir
+  mv -f $stdout_file $bindir
 
   print ${cgreen}"install script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"

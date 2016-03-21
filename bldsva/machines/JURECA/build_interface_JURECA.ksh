@@ -2,12 +2,12 @@
 
 
 getMachineDefaults(){
-print "${cblue}>> getMachineDefaults${cnormal}"
+rout "${cblue}>> getMachineDefaults${cnormal}"
   # Default library paths
-  print -n "   init lmod functionality"
+  comment "   init lmod functionality"
   . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  print -n "   source and load Modules on JURECA"
+  comment "   source and load Modules on JURECA"
   . $rootdir/bldsva/machines/JURECA/loadenvs >> $log_file 2>> $err_file
   check
   defaultMpiPath="$EBROOTPSMPI"
@@ -36,12 +36,12 @@ print "${cblue}>> getMachineDefaults${cnormal}"
 
   # Default setups
   # important: leading and trailing ""
-print "${cblue}<< getMachineDefaults${cnormal}"
+rout "${cblue}<< getMachineDefaults${cnormal}"
 }
 
 createRunscript(){
-print "${cblue}>> createRunscript${cnormal}"
-print -n "   copy JURECA module load script into rundirectory"
+rout "${cblue}>> createRunscript${cnormal}"
+comment "   copy JURECA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
 check
 
@@ -94,7 +94,7 @@ __pfl__
 __clm__
 EOF
 
-print -n "   sed executables and processors into mapping file"
+comment "   sed executables and processors into mapping file"
 	if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
 
 if [[ $withCOS == "true" && $withCLM == "false" ]] then
@@ -147,11 +147,11 @@ check
 sed '/^$/d' -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 
-print -n "   change permission of runscript and mapfile"
+comment "   change permission of runscript and mapfile"
 chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-print "${cblue}<< createRunscript${cnormal}"
+rout "${cblue}<< createRunscript${cnormal}"
 }
 

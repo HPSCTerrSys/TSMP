@@ -2,47 +2,46 @@
 #
 
 always_oas(){
-print "${cblue}>> always_oas${cnormal}"
+rout "${cblue}>> always_oas${cnormal}"
   liboas=""
   libpsmile="$oasdir/$platform/lib/libpsmile.MPI1.a $oasdir/$platform/lib/libmct.a $oasdir/$platform/lib/libmpeu.a $oasdir/$platform/lib/libscrip.a"
   incpsmile="-I$oasdir/$platform/build/lib/psmile.MPI1"
-print "${cblue}<< always_oas${cnormal}"
+rout "${cblue}<< always_oas${cnormal}"
 }
 
 substitutions_oas(){
-print "${cblue}>> substitutions_oas${cnormal}"
+rout "${cblue}>> substitutions_oas${cnormal}"
     c_substitutions_oas
-  print $oasdir  
-  print -n "   cp new  mod_oasis_method.F90 to psmile/src"
+  comment "   cp new  mod_oasis_method.F90 to psmile/src"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/JURECA/src/mod_oasis_method.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
-  print -n "   cp new  mod_oasis_grid.F90 to psmile/src"
+  comment "   cp new  mod_oasis_grid.F90 to psmile/src"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/JURECA/src/mod_oasis_grid.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
-  print -n "   sed prism_get_freq functionality to mod_prism.F90"
+  comment "   sed prism_get_freq functionality to mod_prism.F90"
     sed -i "/oasis_get_debug/a   use mod_oasis_method ,only: prism_get_freq            => oasis_get_freq" ${oasdir}/lib/psmile/src/mod_prism.F90  >> $log_file 2>> $err_file   # critical anchor
   check
     # set prefix vor all mct files to run with other mct
     prefix="oas_"
-  print -n "   cd to ${oasdir}/lib/mct/mct"
+  comment "   cd to ${oasdir}/lib/mct/mct"
     cd ${oasdir}/lib/mct/mct >> $log_file 2>> $err_file
   check
-  print -n "   mv all m_* to ${prefix}m_*"
+  comment "   mv all m_* to ${prefix}m_*"
     for i in m_* ; do mv $i ${prefix}${i}  >> $log_file 2>> $err_file ; check ; done
-  print -n "   mv mct_mod.F90 to ${prefix}mct_mod.F90"
+  comment "   mv mct_mod.F90 to ${prefix}mct_mod.F90"
     mv mct_mod.F90 ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
   check
-  print -n "   rename all interfaces in mct_mod.F90 and Makefile"
+  comment "   rename all interfaces in mct_mod.F90 and Makefile"
     sed -i "s/\(${prefix}\)*mct_/${prefix}mct_/g" ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
   check
     sed -i "s/\(${prefix}\)*mct_/${prefix}mct_/g" Makefile >> $log_file 2>> $err_file
   check
-  print -n "   rename all sources in mct_mod.F90 and Makefile"
+  comment "   rename all sources in mct_mod.F90 and Makefile"
     sed -i "s/use m_/use ${prefix}m_/g" ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
   check
     sed -i "s/\(${prefix}\)*m_/${prefix}m_/g" Makefile >> $log_file 2>> $err_file
   check
-  print -n "   except those which are redirecting mpeu sources"
+  comment "   except those which are redirecting mpeu sources"
     sed -i "s/${prefix}m_List/m_List/g" ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
   check
     sed -i "s/${prefix}m_string/m_string/g" ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
@@ -55,10 +54,10 @@ print "${cblue}>> substitutions_oas${cnormal}"
   check
     sed -i "s/${prefix}m_Permuter/m_Permuter/g" ${prefix}mct_mod.F90 >> $log_file 2>> $err_file
   check
-  print -n "   rename all module names"
+  comment "   rename all module names"
     sed -i "s/module m_/module ${prefix}m_/g" * >> $log_file 2>> $err_file
   check
-  print -n "   rename all dependencies"
+  comment "   rename all dependencies"
     sed -i "s/use m_MCTW/use ${prefix}m_MCTW/g" * >> $log_file 2>> $err_file
   check
     sed -i "s/use m_Glob/use ${prefix}m_Glob/g" * >> $log_file 2>> $err_file
@@ -81,64 +80,64 @@ print "${cblue}>> substitutions_oas${cnormal}"
   check
     sed -i "s/use m_Rear/use ${prefix}m_Rear/g" * >> $log_file 2>> $err_file
   check
-  print -n "   cd in psmile-source dir"
+  comment "   cd in psmile-source dir"
     cd ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
-  print -n "   rename all mct references"
+  comment "   rename all mct references"
     sed -i "s/\(${prefix}\)*mct_/${prefix}mct_/g" * >> $log_file 2>> $err_file
   check
     
-print "${cblue}<< substitutions_oas${cnormal}"
+rout "${cblue}<< substitutions_oas${cnormal}"
 }
 
 configure_oas(){
-print "${cblue}>> configure_oas${cnormal}"
+rout "${cblue}>> configure_oas${cnormal}"
   file=${oasdir}/util/make_dir/make.oas3
-  print -n "   cp jureca oasis3-mct makefile to /util/make_dir/"
+  comment "   cp jureca oasis3-mct makefile to /util/make_dir/"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/$platform/config/make.intel_jureca_oa3 $file >> $log_file 2>> $err_file
   check
   c_configure_oas
-  print -n "   sed new psmile includes to Makefile"
+  comment "   sed new psmile includes to Makefile"
     sed -i 's@__inc__@-I$(LIBBUILD)/psmile.$(CHAN) -I$(LIBBUILD)/scrip  -I$(LIBBUILD)/mct'" -I$ncdfPath/include@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed ldflg to oas Makefile"
+  comment "   sed ldflg to oas Makefile"
     sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed comF90 to oas Makefile"
+  comment "   sed comF90 to oas Makefile"
     sed -i "s@__comF90__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed comCC to oas Makefile"
+  comment "   sed comCC to oas Makefile"
     sed -i "s@__comCC__@$mpiPath/bin/mpicc@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed ld to oas Makefile"
+  comment "   sed ld to oas Makefile"
     sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed libs to oas Makefile"
+  comment "   sed libs to oas Makefile"
     sed -i "s@__lib__@-L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file
   check
-  print -n "   sed precision to oas Makefile"
+  comment "   sed precision to oas Makefile"
     sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
   check
 
-print "${cblue}<< configure_oas${cnormal}"
+rout "${cblue}<< configure_oas${cnormal}"
 }
 
 make_oas(){
-print "${cblue}>> make_oas${cnormal}"
+rout "${cblue}>> make_oas${cnormal}"
   c_make_oas
-print "${cblue}<< make_oas${cnormal}"
+rout "${cblue}<< make_oas${cnormal}"
 }
 
 
 setup_oas(){
-print "${cblue}>> setupOas${cnormal}"
-  print -n "   copy cf_name_table to rundir"
+rout "${cblue}>> setupOas${cnormal}"
+  comment "   copy cf_name_table to rundir"
     cp $rootdir/bldsva/data_oas3/cf_name_table.txt $rundir >> $log_file 2>> $err_file
   check
-  print -n "   copy oas Makefile to rundir"
+  comment "   copy oas Makefile to rundir"
     cp $namelist_oas $rundir/namcouple >> $log_file 2>> $err_file
   check
-  print -n "   sed procs, gridsize & coupling freq into namcouple"
+  comment "   sed procs, gridsize & coupling freq into namcouple"
   if [[ $withPFL == "true" && $withCOS == "true" ]] then
     ncpl_exe1=$nproc_cos
     ncpl_exe2=$nproc_pfl
@@ -223,13 +222,13 @@ print "${cblue}>> setupOas${cnormal}"
   check
 
   fi
-  print -n "   sed sim time into namcouple"
+  comment "   sed sim time into namcouple"
     sed "s/totalruntime/$(($runhours*3600))/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
-  print -n "   sed startdate into namcouple"
+  comment "   sed startdate into namcouple"
     sed "s/yyyymmdd/${yyyy}${mm}${dd}/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
 
-print "${cblue}<< setupOas${cnormal}"
+rout "${cblue}<< setupOas${cnormal}"
 }
 

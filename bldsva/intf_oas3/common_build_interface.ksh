@@ -21,8 +21,8 @@
 
 
 c_configure_cos(){
-print "${cblue}>>> c_configure_cos${cnormal}"
-  print -n "    make clean cosmo"
+rout "${cblue}>>> c_configure_cos${cnormal}"
+  comment "    make clean cosmo"
     make -f $cosdir/Makefile clean >> $log_file 2>> $err_file
   check
 
@@ -34,33 +34,33 @@ print "${cblue}>>> c_configure_cos${cnormal}"
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
     fi
-  print -n "    sed cosmo rootdir to Makefile"
+  comment "    sed cosmo rootdir to Makefile"
     sed -i "s@__cosmoroot__@$cosdir@" $file >> $log_file 2>> $err_file
   check
-  print -n "    sed OAS flag to Makefile"
+  comment "    sed OAS flag to Makefile"
     sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_configure_cos${cnormal}"
+rout "${cblue}<<< c_configure_cos${cnormal}"
 }
 
 c_make_cos(){
-print "${cblue}>>> c_make_cos${cnormal}"
-  print -n "    make cosmo"
+rout "${cblue}>>> c_make_cos${cnormal}"
+  comment "    make cosmo"
     make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
-  print -n "    cp cosmo binary to $bindir"
+  comment "    cp cosmo binary to $bindir"
     cp $cosdir/lmparbin_pur $bindir >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_make_cos${cnormal}"
+rout "${cblue}<<< c_make_cos${cnormal}"
 }
 
 
 c_substitutions_cos(){
-print "${cblue}>>> c_substitutions_cos${cnormal}"
-  print -n "    copy oas3 interface to cosmo/src "
+rout "${cblue}>>> c_substitutions_cos${cnormal}"
+  comment "    copy oas3 interface to cosmo/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_substitutions_cos${cnormal}"
+rout "${cblue}<<< c_substitutions_cos${cnormal}"
 }
 
 
@@ -70,42 +70,42 @@ print "${cblue}<<< c_substitutions_cos${cnormal}"
 ############################
 
 c_configure_oas(){
-print "${cblue}>>> c_configure_oas${cnormal}"
-  print -n "    sed oasis rootdir to Makefile"
+rout "${cblue}>>> c_configure_oas${cnormal}"
+  comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
-  print -n "    sed platform to Makefile"
+  comment "    sed platform to Makefile"
     sed -i "s@__platform__@$platform@" $file >> $log_file 2>> $err_file
   check
-  print -n "    make clean oasis"
+  comment "    make clean oasis"
     make -f $oasdir/util/make_dir/TopMakefileOasis3 realclean >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_configure_oas${cnormal}"
+rout "${cblue}<<< c_configure_oas${cnormal}"
 }
 
 c_make_oas(){
-print "${cblue}>>> c_make_oas${cnormal}"
+rout "${cblue}>>> c_make_oas${cnormal}"
     export SKIN_MODE=none
-  print -n "    make oasis" 
+  comment "    make oasis" 
     make -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
     export SKIN_MODE=mpi
-print "${cblue}<<< c_make_oas${cnormal}"
+rout "${cblue}<<< c_make_oas${cnormal}"
 }
 
 
 c_substitutions_oas(){
-print "${cblue}>>> c_substitutions_oas${cnormal}"
-  print -n "    sed absolut include paths to Makefile"
+rout "${cblue}>>> c_substitutions_oas${cnormal}"
+  comment "    sed absolut include paths to Makefile"
     sed -i "s@include make.inc@include $oasdir/util/make_dir/make.inc@" ${oasdir}/util/make_dir/TopMakefileOasis3 >> $log_file 2>> $err_file
   check
-  print -n "    sed absolut makefile path to Makefile"
+  comment "    sed absolut makefile path to Makefile"
     sed -i "s@ TopMakefileOasis3@ $oasdir/util/make_dir/TopMakefileOasis3@" ${oasdir}/util/make_dir/TopMakefileOasis3 >> $log_file 2>> $err_file
   check
-  print -n "    sed usermakefile to make.inc"
+  comment "    sed usermakefile to make.inc"
     sed -i "s@include.*@include $oasdir/util/make_dir/make.oas3@" ${oasdir}/util/make_dir/make.inc >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_substitutions_oas${cnormal}"
+rout "${cblue}<<< c_substitutions_oas${cnormal}"
 }
 
 
@@ -117,11 +117,11 @@ print "${cblue}<<< c_substitutions_oas${cnormal}"
 
 
 c_configure_clm(){
-print "${cblue}>>> c_configure_clm${cnormal}"
-  print -n "    clean clm by removing build dir"
+rout "${cblue}>>> c_configure_clm${cnormal}"
+  comment "    clean clm by removing build dir"
     rm -rf $clmdir/build >> $log_file 2>> $err_file
   check
-  print -n "    create new build dir"
+  comment "    create new build dir"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
 
@@ -148,39 +148,39 @@ print "${cblue}>>> c_configure_clm${cnormal}"
       cplLib+="$liboas $libpsmile"
       cplInc=$incpsmile
     fi
-  print -n "    cd to clm build"
+  comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
-  print -n "    configure clm"
+  comment "    configure clm"
     $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_configure_clm${cnormal}"
+rout "${cblue}<<< c_configure_clm${cnormal}"
 }
 
 c_make_clm(){
-print "${cblue}>>> c_make_clm${cnormal}"
-  print -n "    cd to clm build"
+rout "${cblue}>>> c_make_clm${cnormal}"
+  comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
-  print -n "    make clm"
+  comment "    make clm"
     gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
-  print -n "    cp clm binary to $bindir"
+  comment "    cp clm binary to $bindir"
     cp $clmdir/build/clm $bindir >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_make_clm${cnormal}"
+rout "${cblue}<<< c_make_clm${cnormal}"
 }
 
 
 c_substitutions_clm(){
-print "${cblue}>>> c_substitutions_clm${cnormal}"
-  print -n "    copy oas3 interface to clm/src "
+rout "${cblue}>>> c_substitutions_clm${cnormal}"
+  comment "    copy oas3 interface to clm/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src >> $log_file 2>> $err_file
   check
-  print -n "    replace hydrology. Add files to clm/bld/usr.src "
+  comment "    replace hydrology. Add files to clm/bld/usr.src "
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/* $clmdir/bld/usr.src >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_substitutions_clm${cnormal}"
+rout "${cblue}<<< c_substitutions_clm${cnormal}"
 }
 
 
@@ -192,7 +192,7 @@ print "${cblue}<<< c_substitutions_clm${cnormal}"
 c_configure_pfl(){
 
 
-print "${cblue}>>> c_configure_pfl${cnormal}"
+rout "${cblue}>>> c_configure_pfl${cnormal}"
 
 
     if [[ $withOAS == "true" ]] ; then 
@@ -207,75 +207,75 @@ print "${cblue}>>> c_configure_pfl${cnormal}"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
     export SKIN_MODE=none
-  print -n "    cd to pfsimulator"
+  comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
   check
 
     if [[ -e "$pfldir/pfsimulator/Makefile" ]] ; then
-      print -n "    make pfsimulator very clean"
+      comment "    make pfsimulator very clean"
         make -f $pfldir/pfsimulator/Makefile veryclean >> $log_file 2>> $err_file
       check
     fi 
 
-  print -n "    configure pfsimulator"
+  comment "    configure pfsimulator"
     $pfldir/pfsimulator/configure $flagsSim FCFLAGS="$fcflagsSim" >> $log_file 2>> $err_file
   check
-  print -n "    cd to pftools"
+  comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file
   check
 
     if [[ -e "$pfldir/pftools/Makefile" ]] ; then
-      print -n "    make pftools very clean"
+      comment "    make pftools very clean"
         make -f $pfldir/pftools/Makefile veryclean >> $log_file 2>> $err_file
       check
     fi
 
-  print -n "    configure pftools"
+  comment "    configure pftools"
     $pfldir/pftools/configure $flagsTools >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
 
-  print -n "    sed libs to /parflow_exe/Makefile"
+  comment "    sed libs to /parflow_exe/Makefile"
     sed -i "s@__libs__@$libsSim@" $pfldir/pfsimulator/parflow_exe/Makefile >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_configure_pfl${cnormal}"
+rout "${cblue}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
-print "${cblue}>>> c_make_pfl${cnormal}"
-print -n "    cd to pfsimulator" 
+rout "${cblue}>>> c_make_pfl${cnormal}"
+comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
-print -n "    make pfsimulator"
+comment "    make pfsimulator"
   make -f $pfldir/pfsimulator/Makefile >> $log_file 2>> $err_file
 check
-print -n "    make install pfsimulator"
+comment "    make install pfsimulator"
   make -f $pfldir/pfsimulator/Makefile install >> $log_file 2>> $err_file
 check
 
 
-print -n "    cd to pftools"
+comment "    cd to pftools"
   cd $pfldir/pftools >> $log_file 2>> $err_file
 check
-print -n "    make pftools"
+comment "    make pftools"
   make -f $pfldir/pftools/Makefile >> $log_file 2>> $err_file
 check
-print -n "    make install pftools"
+comment "    make install pftools"
   make -f $pfldir/pftools/Makefile install >> $log_file 2>> $err_file
 check
 
-print -n "    cp binary to $bindir"
+comment "    cp binary to $bindir"
   cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
 check
 
-print "${cblue}<<< c_make_pfl${cnormal}"
+rout "${cblue}<<< c_make_pfl${cnormal}"
 }
 
 c_substitutions_pfl(){
-print "${cblue}>>> c_substitutions_pfl${cnormal}"
-  print -n "    copy oas3 interface to parflow/pfsimulator/amps "
+rout "${cblue}>>> c_substitutions_pfl${cnormal}"
+  comment "    copy oas3 interface to parflow/pfsimulator/amps "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
   check
-print "${cblue}<<< c_substitutions_pfl${cnormal}"
+rout "${cblue}<<< c_substitutions_pfl${cnormal}"
 }
 

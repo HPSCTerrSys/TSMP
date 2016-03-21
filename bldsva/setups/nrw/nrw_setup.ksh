@@ -48,17 +48,17 @@ initSetup(){
 }
 
 finalizeSetup(){
-print "${cblue}>> finalizeSetup${cnormal}"
-  print -n "   copy clmgrid into rundir"
+rout "${cblue}>> finalizeSetup${cnormal}"
+  comment "   copy clmgrid into rundir"
     cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
   check  
   if [[ $withOAS == "true" ]] then
-    print -n "   copy oasis remappingfiles into rundir"
+    comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check
     if [[ $withOASMCT == "true" ]] then
       for x in $rundir/*BILINEA* ;do 
-        print -n "   rename oasis3 remapping files" 
+        comment "   rename oasis3 remapping files" 
           mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
         check 
       done
@@ -66,45 +66,45 @@ print "${cblue}>> finalizeSetup${cnormal}"
   fi  
 
   if [[ $withPFL == "true" ]] then
-        print -n "   cd to rundir"
+        comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
 
-        print -n "   copy slopes and slope script into rundir"
+        comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/slopes/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           cp $forcingdir_pfl/slopes/*slope.pfb* $rundir >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/*slope*  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-	print -n "   sed procs into slopescript"
+	comment "   sed procs into slopescript"
           sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-	print -n "   create sloap pfb with tclsh"
+	comment "   create sloap pfb with tclsh"
           tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
 	check		
 	
-	print -n "   copy soilind and soilind script into rundir"
+	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/soilInd/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           cp $forcingdir_pfl/soilInd/*Soil* $rundir >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/*Soil* $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-	print -n "   sed procs into soilindscript"
+	comment "   sed procs into soilindscript"
           sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-	print -n "   create soilInd pfb with tclsh"
+	comment "   create soilInd pfb with tclsh"
         tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
   fi 
-print "${cblue}<< finalizeSetup${cnormal}"
+rout "${cblue}<< finalizeSetup${cnormal}"
 }

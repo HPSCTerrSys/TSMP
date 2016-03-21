@@ -59,7 +59,8 @@ setDefaults(){
 
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
-  rm -f $log_file $err_file
+  stdout_file=$cpwd/stdout_all_${date}.txt
+  rm -f $log_file $err_file $stdout_file
 
   options+=(["oas"]=${def_options["oas"]})
   options+=(["cos"]=${def_options["cos"]})
@@ -90,7 +91,7 @@ setSelection(){
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
 
-print -n "  create bindir: $bindir"
+comment "  create bindir: $bindir"
   mkdir -p $bindir >> $log_file 2>> $err_file
 check
 #  rm -f $bindir/* >> $log_file 2>> $err_file
@@ -105,24 +106,24 @@ check
 
 check(){
   if [[ $? == 0  ]] then
-     print "    ... ${cgreen}passed!${cnormal}" 
+     print "    ... ${cgreen}passed!${cnormal}" | tee -a $stdout_file
   else
-     print "    ... ${cred}error!!! - aborting...${cnormal}"
-     print "See $log_file and $err_file"
+     print "    ... ${cred}error!!! - aborting...${cnormal}"  | tee -a $stdout_file
+     print "See $log_file and $err_file" | tee -a $stdout_file
      exit 1
    fi
 }
 
 
 compileClm(){
-print "${cblue}> c_compileClm${cnormal}"
-  print -n "  source clm interface script"
+rout "${cblue}> c_compileClm${cnormal}"
+  comment "  source clm interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_clm
-    if [[ ${options["clm"]} == "skip" ]] ; then ; return  ;fi 
+    if [[ ${options["clm"]} == "skip" ]] ; then ; rout "${cblue}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
-  print -n "  backup clm dir to: $clmdir"
+  comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
       cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
@@ -136,18 +137,18 @@ print "${cblue}> c_compileClm${cnormal}"
     if [[ ${options["clm"]} == "make" || ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       make_clm
     fi
-print "${cblue}< c_compileClm${cnormal}"
+rout "${cblue}< c_compileClm${cnormal}"
 }
 
 compileCosmo(){
-print "${cblue}> c_compileCosmo${cnormal}"
-  print -n "  source cos interface script"
+rout "${cblue}> c_compileCosmo${cnormal}"
+  comment "  source cos interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_cos
-    if [[ ${options["cos"]} == "skip" ]] ; then ; return  ;fi 
+    if [[ ${options["cos"]} == "skip" ]] ; then ; rout "${cblue}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
-  print -n "  backup cos dir to: $cosdir"
+  comment "  backup cos dir to: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
   check
       cp -rf ${rootdir}/${mList[2]} $cosdir >> $log_file 2>> $err_file
@@ -161,18 +162,18 @@ print "${cblue}> c_compileCosmo${cnormal}"
     if [[ ${options["cos"]} == "make" || ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
       make_cos
     fi
-print "${cblue}< c_compileCosmo${cnormal}"
+rout "${cblue}< c_compileCosmo${cnormal}"
 }
 
 compileOasis(){
-print "${cblue}> c_compileOasis${cnormal}"
-  print -n "  source oas interface script"
+rout "${cblue}> c_compileOasis${cnormal}"
+  comment "  source oas interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_oas
-    if [[ ${options["oas"]} == "skip" ]] ; then ; return  ;fi 
+    if [[ ${options["oas"]} == "skip" ]] ; then ; rout "${cblue}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
-  print -n "  backup oas dir to: $oasdir"
+  comment "  backup oas dir to: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
   check
       cp -rf ${rootdir}/${mList[0]} $oasdir >> $log_file 2>> $err_file
@@ -186,18 +187,18 @@ print "${cblue}> c_compileOasis${cnormal}"
     if [[ ${options["oas"]} == "make" || ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
       make_oas
     fi
-print "${cblue}< c_compileOasis${cnormal}"
+rout "${cblue}< c_compileOasis${cnormal}"
 }
 
 compileParflow(){
-print "${cblue}> c_compileParflow${cnormal}"
-  print -n "  source pfl interface script"
+rout "${cblue}> c_compileParflow${cnormal}"
+  comment "  source pfl interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
-    if [[ ${options["pfl"]} == "skip" ]] ; then ; return  ;fi 
+    if [[ ${options["pfl"]} == "skip" ]] ; then ; rout "${cblue}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
-  print -n "  backup pfl dir to: $pfldir"
+  comment "  backup pfl dir to: $pfldir"
       rm -rf $pfldir >> $log_file 2>> $err_file
   check
       cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
@@ -211,7 +212,7 @@ print "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["pfl"]} == "make" || ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       make_pfl
     fi
-print "${cblue}< c_compileParflow${cnormal}"
+rout "${cblue}< c_compileParflow${cnormal}"
 }
 
 
@@ -334,6 +335,14 @@ terminate(){
   print ""
   print "Terminating $call. No changes were made..."
   exit 0
+}
+
+comment(){
+  print -n "$1" | tee -a $stdout_file
+}
+
+rout(){
+  print "$1" | tee -a $stdout_file
 }
 
 warning(){
@@ -542,22 +551,22 @@ getRoot(){
   fi 
 
 
-print -n "  source list with supported machines and configurations"
+comment "  source list with supported machines and configurations"
   . $rootdir/bldsva/supported_versions.ksh
 check
 
   if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
   sanityCheck
 
-print -n "  source common interface"
+comment "  source common interface"
   . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
 check
-print -n "  source machine build interface for $platform"
+comment "  source machine build interface for $platform" 
   . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
 check
 
-  getMachineDefaults 
-  setSelection
+  getMachineDefaults
+  setSelection   
 
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
@@ -570,12 +579,26 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-  runCompilation | tee test.txt 
+  runCompilation
 
   printState >> $log_file
+
+
+  #remove special charecters for coloring from logfiles
+  sed -i "s,.\[32m,," $log_file
+  sed -i "s,.\[39m,," $log_file
+  sed -i "s,.\[31m,," $log_file
+  sed -i "s,.\[34m,," $log_file
+
+  sed -i "s,.\[32m,," $stdout_file
+  sed -i "s,.\[39m,," $stdout_file
+  sed -i "s,.\[31m,," $stdout_file
+  sed -i "s,.\[34m,," $stdout_file
+
   print "$call $*">> $log_file
   mv -f $err_file $bindir
   mv -f $log_file $bindir
+  mv -f $stdout_file $bindir
 
   print ${cgreen}"build script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"
