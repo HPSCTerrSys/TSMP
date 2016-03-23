@@ -14,20 +14,26 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplInc="$incpsmile"
     fi  
 
-    flagsSim+="CC=$mpiPath/bin/mpicc  CXX=$mpiPath/bin/mpic++ FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
-    flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
-    libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
-    fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
+    flagsSim+="CC=$mpiPath/bin/mpixlc_r  CXX=$mpiPath/bin/mpixlcxx_r FC=$mpiPath/bin/mpixlf90_r F77=$mpiPath/bin/mpixlf77_r "
+    flagsTools+="CC=gcc FC=gfortran F77=gfortran "
+    libsSim="$cplLib -L$ncdfPath/lib -lnetcdf"
+    fcflagsSim="-qfree=f90 -qsuffix=cpp=F90 -qnoextname $cplInc -WF,-Duse_libMPI -WF,-Duse_netCDF -WF,-Duse_comm_MPI1 -WF,-DVERBOSE -WF,-DDEBUG -WF,-DTREAT_OVERLAY -I$ncdfPath/include "
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
-  comment "   sed correct linker command in pftools"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-check
-
-
+    sed "s/ m /  -lm  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+  print -n "   sed correct linker command in pftools"
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/ m /  -lm  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
 
 route "${cblue}<< configure_pfl${cnormal}"
 }
@@ -42,18 +48,37 @@ route "${cblue}<< make_pfl${cnormal}"
 substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
-    comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/src/amps_init.c $pfldir/pfsimulator/amps/oas3
-  check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
-  check
  
-  comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
-  check
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
+
+
+  print -n "   cp new files with Fortran underscore fix"
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+  check
+  print -n "   cp new files with little endian fix"
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_io.c           $pfldir/pfsimulator/amps/common/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_config.h.in $pfldir/pfsimulator/config/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/tools_io.h          $pfldir/pftools/ >> $log_file 2>> $err_file
+  check
+
     if [[ $withOASMCT == "true" ]] ; then 
       comment "   sed replace old mod_prism includes from pfl oas files"
         sed -i "s/mod_prism_proto/mod_prism/" $pfldir/pfsimulator/amps/oas3/oas_pfl_vardef.F90 >> $log_file 2>> $err_file

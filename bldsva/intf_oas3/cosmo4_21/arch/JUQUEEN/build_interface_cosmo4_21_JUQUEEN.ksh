@@ -9,22 +9,22 @@ configure_cos(){
 route "${cblue}>> configure_cos${cnormal}"
   c_configure_cos
   if [[ $withOAS == "true" ]]; then
-    cplFlag="-DCOUP_OAS_COS" 
+    cplFlag="-WF,-DCOUP_OAS_COS" 
   fi  
 comment "   sed comflg to cos Makefile"
-  sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -cpp -DGRIBDWD -DNETCDF $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -qextname=flush -qsuffix=cpp=f90 -WF,-DGRIBDWD -WF,-DNETCDF $cplFlag -WF,-DHYMACS@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
 check
 comment "   sed comF90 to cos Makefile"
-  sed -i "s@__comF90__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comF90__@$mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ld to cos Makefile"
-  sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  sed -i "s@__ld__@$mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
-  sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib -L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file
+  sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib $ncdfPath/lib/libnetcdf.a@" $file >> $log_file 2>> $err_file
 check
 route "${cblue}<< configure_cos${cnormal}"
 }
@@ -41,10 +41,10 @@ route "${cblue}>> substitutions_cos${cnormal}"
  c_substitutions_cos
 
  comment "   currently a fixed receive_fld2clm.F90 is necessary"
-   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JUQUEEN/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
  check
  comment "   cp Makefile to cosmo dir"
-   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JURECA/config/Makefile $cosdir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/JUQUEEN/config/Makefile $cosdir >> $log_file 2>> $err_file
  check
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"

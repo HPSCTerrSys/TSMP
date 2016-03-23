@@ -30,13 +30,6 @@ module atmdrvMod
   public :: atmdrv_init  ! read atmospheric grid
   public :: atmdrv       ! read atmospheric data
 !
-#if (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-! CPS and CMS
-! x is made public with COUP_OAS_COS or COUP_OAS_PFL, 
-! atmospheric forcing variables on raw data grid (public for coupling case), used in receive field
-!
-  real(r8), public, allocatable :: x(:,:,:)            !temp. array in which atm data is stored
-#endif
 
 ! !REVISION HISTORY:
 ! Created by Gordon Bonan, Sam Levis and Mariana Vertenstein
@@ -101,11 +94,9 @@ module atmdrvMod
   logical         :: usevector=.false.
 
 !
-#if ! (defined COUP_OAS_PFL || defined COUP_OAS_COS)
 ! atmospheric forcing variables on raw data grid
 !
   real(r8), allocatable :: x(:,:,:)            !temp. array in which atm data is stored
-#endif
 !
 ! file netCDF id's
 !
@@ -258,11 +249,11 @@ contains
     ! Determine if new data is to be read
 
     if (open_data .or. mod(nstep-1,atmmin*secpmin/dtime) ==0 ) then
-#endif
+
        ! Read data for current time slice
 
        call t_startf('atmdread')
-
+#endif
        if (masterproc) then
           write (6,*)
           write (6,'(72a1)') ("-",i=1,60)
@@ -274,14 +265,13 @@ contains
           write (6,*)
        endif
 !       call atm_readdata (locfn, kmo, itim)           !CPS
-       call atm_readdata (locfn, kmo, itim, lcoupled)  !CPS
+
+!FG: readdata and looping over begg-endg to get values into atm_a2l%forc is now 
+!completely done in receive_fld_2cos 
+#if !defined COUP_OAS_COS
+       call atm_readdata (locfn, kmo, itim, lcoupled)  !CPS      
        call t_stopf('atmdread')
 
-#if defined COUP_OAS_COS
-
-       ! At coupling time step, update internal arrays which need coupling fields 
-       if ( lcoupled ) THEN 
-#endif
 
        ! Map 2d atmospheric fields from atmospheric grid to land model surface grid.
        ! Area-average absolute value of winds (i.e., regardless of
@@ -329,19 +319,7 @@ contains
 
           !BGC tracers
 
-!MU (15.01.2013)
-#if defined COUP_OAS_COS
-!    input for CLM is partial pressure of CO2 (from OASIS3)
-!      ==> no conversion here
-          IF ( nint(aV_atm_d2a%rAttr(if_co2,g1)) == -999 ) THEN
-            atm_a2l%forc_pco2(g) = co2_ppmv_const * 1.e-6_r8 * atm_a2l%forc_pbot(g)
-          ELSE
-            atm_a2l%forc_pco2(g) = aV_atm_d2a%rAttr(if_co2,g1)
-          ENDIF
-#else
           atm_a2l%forc_pco2(g) = co2_ppmv_const * 1.e-6_r8 * atm_a2l%forc_pbot(g)
-#endif
-!MU (15.01.2013)
 
           atm_a2l%forc_po2(g)  = o2_molar_const * atm_a2l%forc_pbot(g)
           ! 4/14/05: PET
@@ -391,15 +369,22 @@ contains
 
        call t_stopf('atmdinterp')
 
-    end if             !CPS end if for both "if (open_data ..." and "if ( lcoupled )" cases
+    end if           
     ! Reset open_data
 
-#if ! defined COUP_OAS_COS
-    if (open_data) then
-       open_data = .false.    !reset to false
-    elseif (kda == 1 .and. mcsec == 0) then
-       open_data = .true.     !for next time step
-    endif
+     if (open_data) then
+        open_data = .false.    !reset to false
+     elseif (kda == 1 .and. mcsec == 0) then
+        open_data = .true.     !for next time step
+     endif
+
+
+#else
+   
+  call receive_fld_2cos(itim, lcoupled)    
+  call clm_mapa2l(atm_a2l, clm_a2l)
+
+!COUP_OAS_COS 
 #endif
 
   end subroutine atmdrv
@@ -471,11 +456,6 @@ contains
     ! Build [month]-[year] extension for file name to be read
     ! append extension to path name to get full file name
 
-! CPS CLM3.5 has two grids: 1) Offline Atm Grid and 2) Land Grid.
-! CPS When coupled with OASIS3 to COSMO, we do not read the Offline Atm data 
-! CPS but we do need to read the Atm grid, so for the coupling , the Atm grid is
-! CPS made consistent with the Land grid. Simply this will make the allocated
-! CPS filed x(:,:,:) consistent with the received field exfld(:,:,:) from oasis3.
 #if defined COUP_OAS_COS
     PRINT*, "CLM3.5 - atmDrv routine, Read dlatlon from ", TRIM(fatmgrid) 
     call surfrd_get_latlon(dlatlon, fatmgrid)
@@ -496,13 +476,13 @@ contains
     ! to be able to set up coupling only on PE with at least one land point
     ! Call to OASIS definitions, we use the same definition for both cosmo and
     ! parflow coupling !CMS and CPS
-!CPS    call oas_clm_define(filenam)
     call oas_clm_define(fatmgrid)    !CPS sending clm global grid to oasis define
 #endif
 
     datlon = dlatlon%ni
     datlat = dlatlon%nj
 
+#if !defined COUP_OAS_COS
     ! Initialize gsmaps and attr vectors
     ngseg = 1
     root = 0
@@ -537,18 +517,8 @@ contains
     if_solld  = mct_aVect_indexRA(aV_drv_d2a,'f_solld' ,perrWith=subName)
     if_pbotxy = mct_aVect_indexRA(aV_drv_d2a,'f_pbotxy',perrWith=subName)
     if_psrfxy = mct_aVect_indexRA(aV_drv_d2a,'f_psrfxy',perrWith=subName)
-!MU (21.09.2012)
-#if defined COUP_OAS_COS
-    if_co2    = mct_aVect_indexRA(aV_drv_d2a,'f_co2'   ,perrWith=subName)
-#endif
-!MU (21.09.2012)
     
-#if defined COUP_OAS_COS  
-    ! Add 3 fields to x arrays (UV winds, CO2 partial pressure)
-    allocate( x(datlon,datlat,17), stat=ier)    !MU: changed from 16 to 17 due to CO2 coupling
-#else
     allocate( x(datlon,datlat,14), stat=ier)
-#endif
     if (ier /= 0) then
        write (6,*) 'atmdrv_init(): allocation error _d'
        call endrun
@@ -593,6 +563,9 @@ contains
        write (6,*) 'Successfully initialized area-averaging interpolation'
        write (6,*)
     end if
+
+! !defined COUP_OAS_COS
+#endif 
 
     call latlon_clean(dlatlon)
 
@@ -747,6 +720,9 @@ contains
 
   end subroutine atm_openfile
 
+
+
+
 !------------------------------------------------------------------------
 !BOP
 !
@@ -851,18 +827,11 @@ contains
 
     ! Read single level fields
 
-    if (masterproc) x(:,:,:) = -1._r8             !CPS  initialize fields to the flag value
 
-#if defined COUP_OAS_COS
-    ! Get atmospheric coupled fields at this stage
-    call receive_fld_2cos(itim, lcoupled)         !CPS receive x(:,:,:) fields here
-#else
+    if (masterproc) x(:,:,:) = -1._r8             !CPS  initialize fields to the flag value
 
     if (masterproc) then
 
-!CPS       ! initialize fields to the flag value
-
-!CPS       x(:,:,:) = -1._r8
 
        ! read input data single-level fields
 
@@ -890,7 +859,6 @@ contains
 
     endif     !end of if-masterproc block
 
-#endif        !COUP_OAS_COS
     ! ----------------------------------------------------------------------
     ! Determine 2d atmospheric fields
     ! Follow order in fldlst(14) to determine what was read and what was not
@@ -925,29 +893,10 @@ contains
              write(6,*)'ATM error: WIND has not been read by atmrd'
              atmread_err = .true.
           else
-#if defined COUP_OAS_COS
-             ! Use component of wind fields from atmosphere
-             ! instead of norm 
-             ! WARNING !   Why sqrt 2 ????
-             aV_drv_d2a%rAttr(if_uxy,n) = abs(x(i,j,15))   !CPS CLM cares for magnitude
-             aV_drv_d2a%rAttr(if_vxy,n) = abs(x(i,j,16))   !CPS CLM cares for magnitude
-#else
              aV_drv_d2a%rAttr(if_uxy,n) = x(i,j,2) / sqrt(2._r8)
              aV_drv_d2a%rAttr(if_vxy,n) = x(i,j,2) / sqrt(2._r8)
-#endif
           end if
 
-!MU (20.09.2012)
-#if defined COUP_OAS_COS
-          ! FORC_PCO2
-          if (nint(x(i,j,17)) == -1) then
-             write(6,*)'ATM error: PCO2 has not been read by atmrd'
-             atmread_err = .true.
-          else
-             aV_drv_d2a%rAttr(if_co2,n) = x(i,j,17)
-          end if
-#endif
-!MU (20.09.2012)
 
           ! FORC_PSRFXY, FORC_PBOTXY
           if (nint(x(i,j,7)) == -1) then
@@ -1007,17 +956,8 @@ contains
           if (nint(x(i,j,6)) == -1) then
              aV_drv_d2a%rAttr(izgcmxy,n) = 30._r8
           else
-!CPS             write(6,*) 'MS warning'
-!CPS             write(85,*) x(i,j,6)
              aV_drv_d2a%rAttr(izgcmxy,n) = x(i,j,6)
           end if
-
-#ifdef COUP_OAS_COS
-!CPS bug fix for max canopy ht > forcing hght
-!CPS          if ((x(i,j,6)) < 30._r8) then
-!CPS              aV_drv_d2a%rAttr(izgcmxy,n) = 30._r8
-!CPS          end if
-#endif
 
 
           ! FORC_SOLSXY, FORC_SOLLXY, FORC_SOLSDXY, FORC_SOLLDXY
@@ -1082,6 +1022,7 @@ contains
 
   end subroutine atm_readdata
 
+
 !------------------------------------------------------------------------
 !BOP
 !
@@ -1126,24 +1067,12 @@ contains
        end do
     endif
 
-!#ifdef COUP_OAS_COS
-    !CPS CLM atmospheric grid and landsurface grid are the same
-    !CPS OASIS does the interpolation from COSMO rotated grid to CLM atmosphere grid
-    !CPS This area average interpolation generates some perturbation even when the two grids
-    !CPS are same
-
-    !CFG I deaktivated it in the master branch again since it caused troubles on JURECA/JUQUEEN at
-    !CFG least with NRW testcase in which land grid size != atmospheric grid size. 
-    !CFG For idealized testcases it might be worthwhile to manualy activate it again.      
-!    av_atm_d2a = av_drv_d2a
-!#else
     if (datlon*datlat == 1) then          !CPS why?
        av_atm_d2a = av_drv_d2a            !CPS
     else                                  !CPS
        call mct_Smat_AvMult(av_drv_d2a, sMatP_d2a, av_atm_d2a, vector=usevector)
        call mct_aVect_unpermute(av_atm_d2a, perm_atm_gdc2glo)
     endif                                 !CPS
-!#endif
 
   end subroutine interpa2s
 

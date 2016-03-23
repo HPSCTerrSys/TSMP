@@ -11,6 +11,16 @@ initSetup(){
   if [[ $namelist_cos == "" ]] ; then ; namelist_cos=$rootdir/bldsva/setups/nrw/lmrun_uc ; fi
   if [[ $namelist_pfl == "" ]] ; then ; namelist_pfl=$rootdir/bldsva/setups/nrw/coup_oas.tcl ; fi
 
+
+  defaultNppn=48
+  defaultCLMProcX=4
+  defaultCLMProcY=2
+  defaultCOSProcX=8
+  defaultCOSProcY=8
+  defaultPFLProcX=4
+  defaultPFLProcY=4
+
+
   gx_clm=300
   gy_clm=300
   dt_clm=900
@@ -48,7 +58,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-rout "${cblue}>> finalizeSetup${cnormal}"
+route "${cblue}>> finalizeSetup${cnormal}"
   comment "   copy clmgrid into rundir"
     cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
   check  
@@ -106,5 +116,5 @@ rout "${cblue}>> finalizeSetup${cnormal}"
         tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
   fi 
-rout "${cblue}<< finalizeSetup${cnormal}"
+route "${cblue}<< finalizeSetup${cnormal}"
 }

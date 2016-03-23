@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 getDefaults(){
-  def_platform="JURECA" 
+  def_platform="JUQUEEN" 
   def_version="1.1.0MCT" 
-  def_combination="clm-cos-pfl"
+  def_combination=""
   def_rootdir="$estdir" #This should be correct - change with caution
 
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
@@ -94,14 +94,7 @@ setSelection(){
 comment "  create bindir: $bindir"
   mkdir -p $bindir >> $log_file 2>> $err_file
 check
-#  rm -f $bindir/* >> $log_file 2>> $err_file
-#check
 
-
-  if [[ $combination == "" ]] ; then
-    set -A array ${combinations[$version]}
-    combination=${array[0]}
-  fi
 }
 
 check(){
@@ -116,12 +109,12 @@ check(){
 
 
 compileClm(){
-rout "${cblue}> c_compileClm${cnormal}"
+route "${cblue}> c_compileClm${cnormal}"
   comment "  source clm interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_clm
-    if [[ ${options["clm"]} == "skip" ]] ; then ; rout "${cblue}< c_compileClm${cnormal}" ; return  ;fi 
+    if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cblue}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
   comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
@@ -137,16 +130,16 @@ rout "${cblue}> c_compileClm${cnormal}"
     if [[ ${options["clm"]} == "make" || ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       make_clm
     fi
-rout "${cblue}< c_compileClm${cnormal}"
+route "${cblue}< c_compileClm${cnormal}"
 }
 
 compileCosmo(){
-rout "${cblue}> c_compileCosmo${cnormal}"
+route "${cblue}> c_compileCosmo${cnormal}"
   comment "  source cos interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_cos
-    if [[ ${options["cos"]} == "skip" ]] ; then ; rout "${cblue}< c_compileCosmo${cnormal}" ;  return  ;fi 
+    if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cblue}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
   comment "  backup cos dir to: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
@@ -162,16 +155,16 @@ rout "${cblue}> c_compileCosmo${cnormal}"
     if [[ ${options["cos"]} == "make" || ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
       make_cos
     fi
-rout "${cblue}< c_compileCosmo${cnormal}"
+route "${cblue}< c_compileCosmo${cnormal}"
 }
 
 compileOasis(){
-rout "${cblue}> c_compileOasis${cnormal}"
+route "${cblue}> c_compileOasis${cnormal}"
   comment "  source oas interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_oas
-    if [[ ${options["oas"]} == "skip" ]] ; then ; rout "${cblue}< c_compileOasis${cnormal}" ; return  ;fi 
+    if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cblue}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
   comment "  backup oas dir to: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
@@ -187,16 +180,16 @@ rout "${cblue}> c_compileOasis${cnormal}"
     if [[ ${options["oas"]} == "make" || ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
       make_oas
     fi
-rout "${cblue}< c_compileOasis${cnormal}"
+route "${cblue}< c_compileOasis${cnormal}"
 }
 
 compileParflow(){
-rout "${cblue}> c_compileParflow${cnormal}"
+route "${cblue}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
-    if [[ ${options["pfl"]} == "skip" ]] ; then ; rout "${cblue}< c_compileParflow${cnormal}" ;return  ;fi 
+    if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cblue}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
   comment "  backup pfl dir to: $pfldir"
       rm -rf $pfldir >> $log_file 2>> $err_file
@@ -212,7 +205,7 @@ rout "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["pfl"]} == "make" || ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       make_pfl
     fi
-rout "${cblue}< c_compileParflow${cnormal}"
+route "${cblue}< c_compileParflow${cnormal}"
 }
 
 
@@ -303,31 +296,31 @@ interactive(){
 }
 printState(){
   print ""
-  print "${cred}(1)${cnormal} platform (default=$def_platform): ${cgreen}$platform${cnormal}"
-  print "${cred}(2)${cnormal} version (default=$def_version): ${cgreen}$version${cnormal}"
-  print "${cred}(3)${cnormal} combination (default=$def_combination): ${cgreen}$combination${cnormal}"
+  print "${cred}(1)${cnormal} platform (default=$def_platform): ${cgreen}$platform ${cnormal}"
+  print "${cred}(2)${cnormal} version (default=$def_version): ${cgreen}$version ${cnormal}"
+  print "${cred}(3)${cnormal} combination (default=$def_combination): ${cgreen}$combination ${cnormal}"
   print ""
-  print "${cred}(4)${cnormal} oasis build option (default=${def_options["oas"]}): ${cgreen}${options["oas"]}${cnormal}" 
-  print "${cred}(5)${cnormal} clm build option (default=${def_options["clm"]}): ${cgreen}${options["clm"]}${cnormal}"
-  print "${cred}(6)${cnormal} cosmo build option (default=${def_options["cos"]}): ${cgreen}${options["cos"]}${cnormal}"
-  print "${cred}(7)${cnormal} parflow build option (default=${def_options["pfl"]}): ${cgreen}${options["pfl"]}${cnormal}"
+  print "${cred}(4)${cnormal} oasis build option (default=${def_options["oas"]}): ${cgreen}${options["oas"]} ${cnormal}" 
+  print "${cred}(5)${cnormal} clm build option (default=${def_options["clm"]}): ${cgreen}${options["clm"]} ${cnormal}"
+  print "${cred}(6)${cnormal} cosmo build option (default=${def_options["cos"]}): ${cgreen}${options["cos"]} ${cnormal}"
+  print "${cred}(7)${cnormal} parflow build option (default=${def_options["pfl"]}): ${cgreen}${options["pfl"]} ${cnormal}"
   print ""
   print "${cred}(8)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
-  print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir${cnormal}"
-  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${def_platform}_$combination): ${cgreen}$oasdir${cnormal}"
-  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${def_platform}_$combination): ${cgreen}$clmdir${cnormal}"
-  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${def_platform}_$combination): ${cgreen}$cosdir${cnormal}"
-  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir${cnormal}"
+  print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
+  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${def_platform}_$combination): ${cgreen}$oasdir ${cnormal}"
+  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${def_platform}_$combination): ${cgreen}$clmdir ${cnormal}"
+  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${def_platform}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir ${cnormal}"
   print ""
-  print "${cred}(14)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath${cnormal}"
-  print "${cred}(15)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath${cnormal}"
-  print "${cred}(16)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath${cnormal}"
-  print "${cred}(17)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath${cnormal}"
-  print "${cred}(18)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path${cnormal}"
-  print "${cred}(19)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath${cnormal}"
+  print "${cred}(14)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
+  print "${cred}(15)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
+  print "${cred}(16)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath ${cnormal}"
+  print "${cred}(17)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
+  print "${cred}(18)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
+  print "${cred}(19)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
   print ""
-  print "${cred}(20)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp${cnormal}"
-  print "${cred}(21)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
+  print "${cred}(20)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
+  print "${cred}(21)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
 }
 
 
@@ -341,7 +334,7 @@ comment(){
   print -n "$1" | tee -a $stdout_file
 }
 
-rout(){
+route(){
   print "$1" | tee -a $stdout_file
 }
 
@@ -388,7 +381,10 @@ sanityCheck(){
   if [[ $withCLM == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
+
 }
+
+
 
 listAvailabilities(){
    
@@ -535,6 +531,31 @@ getRoot(){
   done
 
 
+
+
+comment "  source list with supported machines and configurations"
+  . $rootdir/bldsva/supported_versions.ksh
+check
+
+  if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
+
+  # determine whether or not to run interactive session
+  if [[ $mode == 0 ]] then
+    if [[ $args == 0 ]] then
+        mode=2
+    else
+        mode=1
+    fi  
+  fi
+  if [[ $mode == 2 ]] then ; interactive ; fi
+
+
+  #if no combination is set, load first as default
+  if [[ $combination == "" ]] ; then
+    set -A array ${combinations[$version]}
+    combination=${array[0]}
+  fi
+
   #choose combination
   withOAS="false"
   withCOS="false"
@@ -548,52 +569,35 @@ getRoot(){
   if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
-  fi 
-
-
-comment "  source list with supported machines and configurations"
-  . $rootdir/bldsva/supported_versions.ksh
-check
-
-  if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
+  fi
   sanityCheck
 
-comment "  source common interface"
-  . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
-check
-comment "  source machine build interface for $platform" 
-  . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
-check
+  comment "  source common interface"
+    . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
+  check
+
+  comment "  source machine build interface for $platform"
+   . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+  check
+
 
   getMachineDefaults
-  setSelection   
-
-  # determine whether or not to run interactive session
-  if [[ $mode == 0 ]] then
-    if [[ $args == 0 ]] then
-        mode=2
-    else
-        mode=1
-    fi  
-  fi
-  if [[ $mode == 2 ]] then ; interactive ; fi
-
-
+  setSelection
   runCompilation
 
   printState >> $log_file
 
 
   #remove special charecters for coloring from logfiles
-  sed -i "s,.\[32m,," $log_file
-  sed -i "s,.\[39m,," $log_file
-  sed -i "s,.\[31m,," $log_file
-  sed -i "s,.\[34m,," $log_file
+  sed -i "s,.\[32m,,g" $log_file
+  sed -i "s,.\[39m,,g" $log_file
+  sed -i "s,.\[31m,,g" $log_file
+  sed -i "s,.\[34m,,g" $log_file
 
-  sed -i "s,.\[32m,," $stdout_file
-  sed -i "s,.\[39m,," $stdout_file
-  sed -i "s,.\[31m,," $stdout_file
-  sed -i "s,.\[34m,," $stdout_file
+  sed -i "s,.\[32m,,g" $stdout_file
+  sed -i "s,.\[39m,,g" $stdout_file
+  sed -i "s,.\[31m,,g" $stdout_file
+  sed -i "s,.\[34m,,g" $stdout_file
 
   print "$call $*">> $log_file
   mv -f $err_file $bindir

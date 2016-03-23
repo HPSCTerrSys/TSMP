@@ -15,7 +15,7 @@ platforms+=(
 #        ["AGROCLUSTER"]="IBG3 (FZ-Juelich) - general purpose Linux Cluster"
 #        ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
-#        ["JUQUEEN"]="JSC (FZ-Juelich) - high scale machine"
+        ["JUQUEEN"]="JSC (FZ-Juelich) - high scale machine"
 )
 
 # list of available versions for a platform
@@ -70,5 +70,6 @@ setups+=(
 
 setupsAvail+=(
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
+        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
 )
 

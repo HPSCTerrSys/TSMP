@@ -1,4 +1,4 @@
-SUBROUTINE oas_clm_rcv( kid, kstep, pdata, kinfo )
+SUBROUTINE oas_clm_rcv( kid, kstep, pdata, begg,endg, kinfo )
 
 !---------------------------------------------------------------------
 ! Description:
@@ -31,9 +31,11 @@ SUBROUTINE oas_clm_rcv( kid, kstep, pdata, kinfo )
 ! Modules used:
 
 USE shr_kind_mod , ONLY : r8 => shr_kind_r8
+USE spmdMod ,ONLY : iam,npes,mpicom
 USE oas_clm_vardef
-USE mod_prism_get_proto
 
+ USE decompMod ,               ONLY :  adecomp
+USE domainMod   , ONLY : adomain
 !==============================================================================
 
 IMPLICIT NONE
@@ -43,13 +45,15 @@ IMPLICIT NONE
 ! Arguments
 INTEGER,                          INTENT(IN)        :: kid    ! variable intex in the array
 INTEGER,                          INTENT(IN)        :: kstep  ! time-step in seconds
-REAL(KIND=r8), DIMENSION(ndlon,ndlat), INTENT(OUT)  :: pdata
+INTEGER, INTENT(IN)                               :: begg,endg
+REAL(KIND=r8), DIMENSION(begg:endg), INTENT(OUT)  :: pdata
 INTEGER,                          INTENT(OUT)       :: kinfo  ! OASIS info argument
 
 ! Local Variables
 LOGICAL                                           :: llaction
-INTEGER                                           :: NULOUT=6
-REAL(r8), DIMENSION(ndlon*ndlat)                  :: ztmp1
+INTEGER                                           :: NULOUT=6,ier
+real(kind=r8), dimension(:) , allocatable :: buffer_array
+integer :: c,cl,c1,ani,anj,an,owner,last_owner,ai,aj
 
 !------------------------------------------------------------------------------
 !- End of header
@@ -59,30 +63,53 @@ REAL(r8), DIMENSION(ndlon*ndlat)                  :: ztmp1
 !- Begin Subroutine oas_clm_rcv 
 !------------------------------------------------------------------------------
 
- !  Masked point are not modified by OASIS
- !  = buffer set to 0 before calling oasis
- ztmp1=0.     !_r8     CFG This caused errors on JUQUEEN/JURECA. On other
-                      !machines this might be necessary to avoid little
-                      !inaccuracies that grow over time.
- !
- ! receive data from OASIS
- !
- CALL prism_get_proto( srcv(kid)%nid, kstep, ztmp1, kinfo )         
+
+pdata=0.
+
+
+allocate(buffer_array(begg:(begg+total_part_len-1)))
+
+
+CALL prism_get_proto( srcv(kid)%nid, kstep, buffer_array , kinfo )
+
+
+ani = adomain%ni
+anj = adomain%nj
+last_owner=-1
+c=0
+c1=0
+cl=0
+do aj = 1,anj
+   do ai = 1,ani
+     an = (aj-1)*ani + ai
+     owner = adecomp%glo2owner(an)
+     if(owner == iam) then
+        pdata(begg+c1)=buffer_array(begg+c+cl)
+        c=c+1
+        c1=c1+1 
+     else
+        if(owner == -1) then
+           if(last_owner==iam) c=c+1
+           if(last_owner==-1)   cl=cl+1
+        else
+           if(last_owner==-1)   cl=0
+        endif
+     endif
+     if(owner/=-1) last_owner=owner
+   enddo
+enddo
+
+deallocate(buffer_array)
 
  llaction = .false.
  IF( kinfo == PRISM_Recvd   .OR. kinfo == PRISM_FromRest .OR.   &
      kinfo == PRISM_RecvOut .OR. kinfo == PRISM_FromRestOut )   llaction = .TRUE.
 
- IF ( IOASISDEBUGLVL == 1 )  &
-    WRITE(NULOUT,*) "oasclm: oas_clm_rcv: llaction, kinfo, kstep, clname: " , llaction, kinfo, kstep, srcv(kid)%clname
 
  IF ( llaction ) THEN
 
   ! Declare to calling routine that OASIS provided coupling field
   kinfo = OASIS_Rcv
-
- ! Update array which contains coupling field (only on valid shape)
-   pdata(:,:) = RESHAPE (ztmp1(:), (/ndlon, ndlat/))
          
  ELSE
   ! Declare to calling routine that OASIS did not provide coupling field

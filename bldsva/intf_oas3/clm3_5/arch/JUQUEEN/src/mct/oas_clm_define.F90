@@ -28,7 +28,8 @@ SUBROUTINE oas_clm_define(filenam)
 ! 3.1        2013/01/31 Prabhakar Shrestha
 ! Implementation of aerodynamic resistance exchange
 ! Implementation of surface temperature and moisture exchange
-!
+! 4.1        2013/10/31 Fabian Gasper
+! Implementation of a parallel coupling   
 ! Code Description:
 ! Language: Fortran 90.
 ! Software Standards: "European Standards for Writing and
@@ -40,13 +41,14 @@ SUBROUTINE oas_clm_define(filenam)
 ! Modules used:
 
 USE oas_clm_vardef
-USE mod_prism_grids_writing
-USE mod_prism_def_partition_proto
 
-USE domainMod   , ONLY : latlon_type, latlon_check
-USE spmdMod     , ONLY : masterproc
+!USE mod_prism_grid
+!USE mod_prism_def_partition_proto
+
+USE domainMod   , ONLY : latlon_type, latlon_check, alatlon,amask , adomain
+USE spmdMod     , ONLY : masterproc , mpicom, iam
 USE surfrdMod   , ONLY : surfrd_get_latlon
-
+USE decompMod    , only : get_proc_global, get_proc_bounds, adecomp
 !==============================================================================
 
 IMPLICIT NONE
@@ -59,8 +61,7 @@ CHARACTER(len=256), INTENT(IN) :: filenam             !CPS clm grid data
 
 ! Local Variables
 
-TYPE(latlon_type)    :: latlon                        ! domain to init
-
+Integer :: begg,endg, begl,endl,begc,endc,begp,endp,c,off,leng,it1,i,j,im1,jm1
 INTEGER              :: igrid                         ! ids returned by prism_def_grid
 INTEGER              :: iptid                         ! ids returned by prism_set_points
 
@@ -75,7 +76,6 @@ INTEGER, ALLOCATABLE :: igparal(:)                    ! shape of arrays passed t
 INTEGER              :: NULOUT=6
 
 INTEGER              :: ji, jj, jg, jgm1              ! local loop indicees
-INTEGER ,pointer     :: dmask(:)
 INTEGER ,ALLOCATABLE :: oas_mask(:)
 
 CHARACTER(len=4)     :: clgrd='gclm'                  ! CPS
@@ -85,6 +85,14 @@ REAL(KIND=r8), ALLOCATABLE :: zclo(:,:), zcla(:,:), tmp_2D(:,:)
 REAL(KIND=r8), ALLOCATABLE :: zlon(:), zlat(:)
 INTEGER                    :: write_aux_files
 
+Integer :: c_comm
+
+
+
+integer :: ai, aj ,ani , anj , an , owner, last_owner
+
+
+
 !------------------------------------------------------------------------------
 !- End of header
 !------------------------------------------------------------------------------
@@ -93,24 +101,20 @@ INTEGER                    :: write_aux_files
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
- ! Get grid bounds
- CALL surfrd_get_latlon(latlon, TRIM(filenam))
- CALL latlon_check(latlon)
 
- ndlon = latlon%ni
- ndlat = latlon%nj
- ALLOCATE(dmask(ndlon*ndlat))
- ! Get mask
- CALL surfrd_get_latlon(latlon, filenam, mask=dmask)
 
-!CPS  CALL prism_start_grids_writing (write_aux_files)
+ ndlon = alatlon%ni
+ ndlat = alatlon%nj
 
- ! All exchanges through master processor 
+ 
+
  ! For the moment OASIS4 not able to process 2D subdomain with non contiguous unmasked points (land points) 
  ! (12/2010)
  ! To compare OASIS3/OASIS4 behaviours, we do the same with OASIS3
  !
  CALL MPI_Barrier(kl_comm, nerror)
+#define WITHAUXFILES
+#ifdef WITHAUXFILES
  IF ( masterproc ) THEN
    !
    CALL prism_start_grids_writing (write_aux_files)
@@ -135,16 +139,12 @@ INTEGER                    :: write_aux_files
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat' )
      RETURN
    ENDIF
-   ALLOCATE( llmask(ndlon,ndlat,1), stat = nerror )
-   IF ( nerror > 0 ) THEN
-      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating llmask' )
-      RETURN
-   ENDIF
    ALLOCATE( tmp_2D(ndlon*ndlat,8), stat = nerror )
    IF ( nerror > 0 ) THEN
      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating tmp_2D' )
      RETURN
    ENDIF
+
    ALLOCATE(oas_mask(ndlon*ndlat))
    IF ( nerror > 0 ) THEN
       CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating oas_mask' )
@@ -170,25 +170,25 @@ INTEGER                    :: write_aux_files
    ! Latitudes
    ! Assumes lats are constant on an i line
    !
-    zlat(:) = latlon%latc(1:ndlat)
+    zlat(:) = alatlon%latc(1:ndlat)
    !
-   IF (latlon%latc(ndlat) > latlon%latc(1)) THEN  ! South to North grid
-      zcla(1,1) = latlon%edges(3)
-      zcla(ndlat,2) = latlon%edges(1)
+   IF (alatlon%latc(ndlat) > alatlon%latc(1)) THEN  ! South to North grid
+      zcla(1,1) = alatlon%edges(3)
+      zcla(ndlat,2) = alatlon%edges(1)
     !
       DO jj = 2, ndlat
          jgm1 = jj - 1
-         zcla(jj,1) = ( latlon%latc(jj) + latlon%latc(jgm1) ) * 0.5_r8
+         zcla(jj,1) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
          zcla(jgm1,2) = zcla(jj,1)
       ENDDO 
 
    ELSE                                      ! North to South grid
-      zcla(ndlat,1) = latlon%edges(3)
-      zcla(1,2) = latlon%edges(1)
+      zcla(ndlat,1) = alatlon%edges(3)
+      zcla(1,2) = alatlon%edges(1)
       !
       DO jj = 2, ndlat
         jgm1 = jj - 1
-        zcla(jj,2) = ( latlon%latc(jj) + latlon%latc(jgm1) ) * 0.5_r8
+        zcla(jj,2) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
         zcla(jgm1,1) = zcla(jj,2)
       ENDDO
 
@@ -196,10 +196,10 @@ INTEGER                    :: write_aux_files
 
    ! Longitudes
    !
-   zlon(:) = latlon%lonc(1:ndlon)
+   zlon(:) = alatlon%lonc(1:ndlon)
    !
-   zclo(:,1) = latlon%edges(4)
-   zclo(:,2) = latlon%edges(2)
+   zclo(:,1) = alatlon%edges(4)
+   zclo(:,2) = alatlon%edges(2)
 
    dx = zlon(2)-zlon(1)
 
@@ -213,15 +213,6 @@ INTEGER                    :: write_aux_files
      IF( zlon(ji) - zclo(ji,1) >  300._r8 )   zlon(ji) = zlon(ji) - 360._r8
    END DO
 
-   IF ( IOASISDEBUGLVL > 1 ) THEN
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zclo WEST', zclo(:,1)
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zlon ', zlon(:)
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zclo EAST', zclo(:,2)
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zcla NORTH', zcla(:,2)
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zlat ', zlat(:)
-     WRITE(nulout,*) ' oasclm: oas_clm_define: zcla SOUTH', zcla(:,1)
-     CALL flush(nulout)
-   ENDIF
 
    ! -----------------------------------------------------------------
    ! ... Define the mask
@@ -229,17 +220,14 @@ INTEGER                    :: write_aux_files
    DO jj = 1, ndlat
    DO ji = 1, ndlon
      jg    = (jj-1)*ndlon + ji
-     IF ( dmask(jg) == 1 ) THEN        
-        llmask(ji,jj,1) = .TRUE.
+     IF ( amask(jg) == 1 ) THEN
         oas_mask(jg) = 0
      ELSE
-        llmask(ji,jj,1) = .FALSE.
         oas_mask(jg) = 1
      ENDIF
    ENDDO
    ENDDO
 
-   WRITE(nulout,*) 'oasclm: oas_clm_define: Land point number / total number', COUNT(llmask), ndlon*ndlat
    CALL flush(nulout)
 
    ! -----------------------------------------------------------------
@@ -250,39 +238,39 @@ INTEGER                    :: write_aux_files
  
     DO jj = 1, ndlat
     DO ji = 1, ndlon
-       tmp_2d(ji+(jj-1)*ndlon,1) = zlon(ji)
-       tmp_2d(ji+(jj-1)*ndlon,2) = zlat(jj)
+       tmp_2D(ji+(jj-1)*ndlon,1) = zlon(ji)
+       tmp_2D(ji+(jj-1)*ndlon,2) = zlat(jj)
     ENDDO
     ENDDO
 
-    CALL prism_write_grid (clgrd, ndlon*ndlat, 1, tmp_2d(:,1), tmp_2d(:,2))
+   CALL prism_write_grid (clgrd, ndlon*ndlat, 1, tmp_2D(:,1), tmp_2D(:,2))
 
     DO jj = 1, ndlat
     DO ji = 1, ndlon
-     tmp_2d(ji+(jj-1)*ndlon,1) = zclo(ji,1)
-     tmp_2d(ji+(jj-1)*ndlon,2) = zclo(ji,2)
-     tmp_2d(ji+(jj-1)*ndlon,5) = zcla(jj,1)
-     tmp_2d(ji+(jj-1)*ndlon,7) = zcla(jj,2)
+     tmp_2D(ji+(jj-1)*ndlon,1) = zclo(ji,1)
+     tmp_2D(ji+(jj-1)*ndlon,2) = zclo(ji,2)
+     tmp_2D(ji+(jj-1)*ndlon,5) = zcla(jj,1)
+     tmp_2D(ji+(jj-1)*ndlon,7) = zcla(jj,2)
     ENDDO
     ENDDO
 
     ! Fill missing corners for longitude
-    tmp_2d(:,3) = tmp_2d(:,2)
-    tmp_2d(:,4) = tmp_2d(:,1)
+    tmp_2D(:,3) = tmp_2D(:,2)
+    tmp_2D(:,4) = tmp_2D(:,1)
 
     ! Fill missing corners for latitude
-    tmp_2d(:,6) = tmp_2d(:,5)
-    tmp_2d(:,8) = tmp_2d(:,7)
+    tmp_2D(:,6) = tmp_2D(:,5)
+    tmp_2D(:,8) = tmp_2D(:,7)
 
-    CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2d(:,1:4), tmp_2d(:,5:8))
+    CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2D(:,1:4), tmp_2D(:,5:8))
 
     ! tbd CALL prism_write_angle (clgrd, ndlon*ndlat, 1, angle)
 
     CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
 
     ! EM tbd Fill areas with true values
-    tmp_2d(:,1) = 1 
-!CPS        CALL prism_write_area (clgrd, ndlon*ndlat, 1, tmp_2d(:,1))
+    tmp_2D(:,1) = 1 
+!CPS        CALL prism_write_area (clgrd, ndlon*ndlat, 1, tmp_2D(:,1))
 
     CALL prism_terminate_grids_writing()
         
@@ -290,33 +278,114 @@ INTEGER                    :: write_aux_files
 
   WRITE(nulout,*) ' oasclm: oas_clm_define: prism_terminate_grids'
   CALL flush(nulout)
-
+  DEALLOCATE(tmp_2D, oas_mask, zclo, zcla, zlon, zlat)
  ENDIF                       ! masterproc
+#endif
 
-   ! Wait for OASIS signal to continue declarations
-!CPS   IF ( write_aux_files == 1 ) call MPI_Barrier(mpi_comm, nerror)
+!FG  The following piece of code querries the number, length and offset of 
+!    contiguous parts in the lat/lon representation. This is done in a 
+!    brutforce way by travercing through begg-endg and determining if
+!    predecessor in begg-endg is also predecessor in lat/lon.
+!    I couldn't find a CLM intrinsic way to get this information, if there is
+!    one, please let me know. 
+!    At the moment the orange partition of oasis supports only 200 parts,
+!    luckily CLM seem to use always 20 parts regardless of the domainsize.
 
- IF ( masterproc ) THEN
+ALLOCATE(igparal(200))
+
+
+igparal(1) = 3  !orange partition
+
+#if (1 == 0)
+CALL get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
+
+c=1
+off=(adecomp%gdc2j(begg)-1)*ndlon +adecomp%gdc2i(begg) -1
+leng=1
+
+do it1=begg+1,endg
+
+  i=adecomp%gdc2i(it1)
+  im1=adecomp%gdc2i(it1-1)
+  j=adecomp%gdc2j(it1)
+  if(j.eq.1) then
+        jm1=-1
+  else
+    jm1=adecomp%gdc2j(it1-1)
+  endif
+
+  if( (i-1.eq.im1) .or. (i.eq.1 .and. jm1.eq.j-1 .and. im1.eq.ndlon)  ) then
+    leng=leng+1
+  else
+    igparal(c*2+1) = off
+    igparal(c*2+2) = leng
+    igparal(2) = c
+    off=(adecomp%gdc2j(it1)-1)*ndlon +adecomp%gdc2i(it1) -1
+    c=c+1
+    leng=1
+  endif
+
+enddo
+igparal(c*2+1) = off
+igparal(c*2+2) = leng
+igparal(2) = c
+
+#endif
+
+ani = adomain%ni
+anj = adomain%nj
+
+total_part_len=0
+c=0
+leng=0
+last_owner=-1
+do aj = 1,anj
+  do ai = 1,ani
+    an = (aj-1)*ani + ai
+    owner = adecomp%glo2owner(an)
+    if(owner==iam ) then
+       if(last_owner/=iam) then       !start of new partiontion
+          if(last_owner/=-1) leng=0   !no leading masked cells have to be added to the first partition
+          c=c+1
+          if(last_owner==-1) then
+             igparal(c*2+1) = 0
+          else
+             igparal(c*2+1) = an-1
+          endif
+       endif
+       leng=leng+1
+    else  
+       if(owner==-1) then
+          if(last_owner== iam .or. last_owner== -1) leng=leng+1 !adding also masked cells to the partition
+       else                                                     !other procs partiton start
+          if(last_owner==iam) then                               ! if this cell ends ongoing partition, length is written out
+             igparal(c*2+2) = leng            
+             total_part_len=total_part_len+leng
+          endif
+       endif 
+    endif    
+    if(owner/=-1) last_owner=owner
+  enddo
+enddo
+if(last_owner==iam)then   !write length if this proc had last partition
+  igparal(c*2+2) = leng  
+  total_part_len=total_part_len+leng
+endif
+igparal(2)=c
+
+CALL MPI_Barrier(kl_comm, nerror)
 
   ! -----------------------------------------------------------------
   ! ... Define the partition 
   ! -----------------------------------------------------------------
      
-  ALLOCATE(igparal(4))
-
-  ! Compute global offsets and local extents
-  igparal(1) = 3              ! ORANGE style partition
-  igparal(2) = 1              ! partitions number
-  igparal(3) = 0              ! Global offset
-  igparal(4) = ndlon*ndlat    ! Local extent
-
+        
   CALL prism_def_partition_proto( igrid, igparal, nerror )
   IF( nerror /= PRISM_Success )   CALL prism_abort_proto (ncomp_id, 'oas_clm_define',   &
             &                                                        'Failure in prism_def_partition' )
 
 
-  WRITE(nulout,*) ' oasclm: oas_clm_define: prism_def_partition' 
-  CALL flush(nulout)
+
 
   ! -----------------------------------------------------------------
   ! ... Variable definition
@@ -426,22 +495,13 @@ INTEGER                    :: write_aux_files
  
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
-
-  IF (cpl_scheme) THEN         !CPS
-!     ssnd(5:7)%laction=.TRUE.
-     ssnd(6:7)%laction=.TRUE.     !CPS
+  ssnd(6:7)%laction=.TRUE.     !CPS
 !MU (12.04.13)
-    ssnd(8)%laction=.TRUE.
-    ssnd(14)%laction=.FALSE.
-    ssnd(15)%laction=.FALSE.
+  ssnd(8)%laction=.TRUE.
+  ssnd(14)%laction=.FALSE.
+  ssnd(15)%laction=.FALSE.
 !MU (12.04.13)
-    ssnd(9:13)%laction=.TRUE.    !CPS
-  ELSE
-    ssnd(1:7)%laction=.TRUE.
-    ssnd(8)%laction=.TRUE.
-    ssnd(14)%laction=.FALSE.
-    ssnd(15)%laction=.FALSE. 
-  ENDIF                         !CPS
+  ssnd(9:13)%laction=.TRUE.    !CPS
 
   srcv(1:9)%laction=.TRUE.
   srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
@@ -468,6 +528,9 @@ INTEGER                    :: write_aux_files
   ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
   ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
 
+
+
+
   ! ... Announce send variables. 
   !
 !      ksnd=0                           !CPS
@@ -493,30 +556,19 @@ INTEGER                    :: write_aux_files
                &                                               'Failure in prism_def_var for '//TRIM(srcv(ji)%clname))
     ENDIF
   END DO
-      
-  !
-  ! ... Allocate memory for data exchange and initilize it
-  !
-  ALLOCATE( exfld(ndlon, ndlat, krcv), stat = nerror )
-  IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_cos_define', 'Failure in allocating exfld' )
-     RETURN
-  ENDIF
-     
-  exfld = -99999._r8
+
 
   !------------------------------------------------------------------
   ! End of definition phase
   !------------------------------------------------------------------
-  DEALLOCATE( zclo, zcla, zlon, zlat, igparal)
 
-  ! must be done by coupled processors only (OASIS3)
+DEALLOCATE( igparal)
+
+
   CALL prism_enddef_proto( nerror )
-
   IF ( nerror /= PRISM_Success )   CALL prism_abort_proto ( ncomp_id, 'oas_clm_define', 'Failure in prism_enddef')
 
- ENDIF                 !masterproc
-      
+
  CALL MPI_Barrier(kl_comm, nerror)
  WRITE(nulout,*) 'oasclm: oas_clm_define: prism enddef' 
  CALL flush(nulout)

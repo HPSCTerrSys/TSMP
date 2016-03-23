@@ -1,9 +1,9 @@
 #! /bin/ksh
 getDefaults(){
-  def_platform="JURECA"               
+  def_platform="JUQUEEN"               
   def_version="1.1.0MCT"                 
   def_rootdir="$estdir"    #This should be correct - change with caution
-  def_combination="clm-cos-pfl"           
+  def_combination=""           
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$date if empty
   def_pfldir=""
@@ -89,10 +89,6 @@ setSelection(){
      combination=${array[0]}
   fi
 
-  if [[ $refSetup == "" ]] ; then
-    set -A array ${setupsAvail[$platform]}
-    refSetup=${array[0]}
-  fi
 
   nproc_oas=0
   nproc_pfl=0
@@ -134,7 +130,7 @@ comment(){
   print -n "$1" | tee -a $stdout_file
 }
 
-rout(){
+route(){
   print "$1" | tee -a $stdout_file
 }
 
@@ -186,11 +182,9 @@ sanityCheck(){
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
 
-  if [[ $refSetup != "" ]] ; then
-    valid="false"
-    case "${setupsAvail[${platform}]}" in *" ${refSetup} "*) valid="true" ;; esac
-    if [[ $valid != "true" ]] then; print "This setup is not supported on this machine" ; terminate  ;fi
-  fi
+  valid="false"
+  case "${setupsAvail[${platform}]}" in *" ${refSetup} "*) valid="true" ;; esac
+  if [[ $valid != "true" ]] then; print "This setup is not supported on this machine" ; terminate  ;fi
 }
 
 interactive(){
@@ -487,21 +481,6 @@ getRoot(){
 
 
 
-  withOAS="false"
-  withCOS="false"
-  withPFL="false"
-  withCLM="false"
-  withOASMCT="false"
-  withPCLM="false"
-
-  case "$combination" in *clm*) withCLM="true" ;; esac
-  case "$combination" in *cos*) withCOS="true" ;; esac
-  case "$combination" in *pfl*) withPFL="true" ;; esac
-  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
-    withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
-  fi
-
 
 
 comment "  source list with supported machines and configurations"
@@ -509,14 +488,6 @@ comment "  source list with supported machines and configurations"
 check
 
   if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
-  sanityCheck
-
-comment "  source machine build interface for $platform"
-  . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
-check
-
-  getMachineDefaults
-  setSelection
 
 
   # determine whether or not to run interactive session
@@ -530,56 +501,112 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
+  #if no combination is set, load first as default
+  if [[ $combination == "" ]] ; then
+    set -A array ${combinations[$version]}
+    combination=${array[0]}
+  fi
+  if [[ $refSetup == "" ]] ; then
+    set -A array ${setupsAvail[$platform]}
+    refSetup=${array[0]}
+  fi
+  
+
+
+  withOAS="false"
+  withCOS="false"
+  withPFL="false"
+  withCLM="false"
+  withOASMCT="false"
+  withPCLM="false"
+
+  case "$combination" in *clm*) withCLM="true" ;; esac
+  case "$combination" in *cos*) withCOS="true" ;; esac
+  case "$combination" in *pfl*) withPFL="true" ;; esac
+  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
+    withOAS="true"
+    case "$version" in *MCT*) withOASMCT="true" ;; esac
+  fi  
+
+
+  sanityCheck
+
+comment "  source machine build interface for $platform"
+  . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+check
+
+comment "  source setup for $refSetup on $platform"
+    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh
+check
+
+
+  getMachineDefaults
+  initSetup
+  setSelection
+  
+
 #  start setup
 
 
-
-  if [[ $refSetup != "" ]] ;then  
-    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_setup.ksh 
-    initSetup
-  fi
-
   if [[ $withCLM == "true" ]] ; then 
+comment "  source clm build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh 
-      setup_clm 
+check
+      setup_clm
+comment "  cp clm exe to $rundir" 
     cp $bindir/clm $rundir 
+check
   fi
   if [[ $withCOS == "true" ]] ; then
+comment "  source cos build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh 
+check
       setup_cos 
+comment "  cp cos exe to $rundir"
     cp $bindir/lmparbin_pur $rundir 
+check
   fi
   if [[ $withPFL == "true" ]] ; then 
+comment "  source pfl build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh 
+check
       setup_pfl 
+comment "  cp pfl exe to $rundir"
     cp $bindir/parflow $rundir 
+check
   fi
   if [[ $withOAS == "true" ]] ; then 
+comment "  source oas build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh 
+check
       setup_oas 
-    if [[ $withOASMCT == "false" ]] ; then ; cp $bindir/oasis3.MPI1.x $rundir ;fi
+    if [[ $withOASMCT == "false" ]] ; then 
+comment "  cp oas exe to $rundir"
+	 cp $bindir/oasis3.MPI1.x $rundir 
+check
+    fi
   fi
 
-  if [[ $refSetup != "" ]] ;then  ; finalizeSetup ; fi
+  finalizeSetup
 
   createRunscript
 
   printState >> $log_file
   print "$call $*">> $log_file
   #remove special charecters for coloring from logfiles
-  sed -i "s,.\[32m,," $log_file
-  sed -i "s,.\[39m,," $log_file
-  sed -i "s,.\[31m,," $log_file
-  sed -i "s,.\[34m,," $log_file
+  sed -i "s,.\[32m,,g" $log_file
+  sed -i "s,.\[39m,,g" $log_file
+  sed -i "s,.\[31m,,g" $log_file
+  sed -i "s,.\[34m,,g" $log_file
 
-  sed -i "s,.\[32m,," $stdout_file
-  sed -i "s,.\[39m,," $stdout_file
-  sed -i "s,.\[31m,," $stdout_file
-  sed -i "s,.\[34m,," $stdout_file
+  sed -i "s,.\[32m,,g" $stdout_file
+  sed -i "s,.\[39m,,g" $stdout_file
+  sed -i "s,.\[31m,,g" $stdout_file
+  sed -i "s,.\[34m,,g" $stdout_file
 
   mv -f $err_file $rundir
   mv -f $log_file $rundir
-  mv -f $stdout_file $bindir
+  mv -f $stdout_file $rundir
 
   print ${cgreen}"install script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"

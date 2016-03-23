@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-rout "${cblue}>> getMachineDefaults${cnormal}"
+route "${cblue}>> getMachineDefaults${cnormal}"
   # Default library paths
   comment "   init lmod functionality"
   . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
@@ -23,24 +23,14 @@ rout "${cblue}>> getMachineDefaults${cnormal}"
   defaultOptC="-O2"
 
   # Default Processor settings
-  defaultNppn=48
   defaultwtime="01:00:00"
   defaultQ="batch"
-  defaultCLMProcX=4
-  defaultCLMProcY=2
-  defaultCOSProcX=8
-  defaultCOSProcY=8
-  defaultPFLProcX=4
-  defaultPFLProcY=4
 
-
-  # Default setups
-  # important: leading and trailing ""
-rout "${cblue}<< getMachineDefaults${cnormal}"
+route "${cblue}<< getMachineDefaults${cnormal}"
 }
 
 createRunscript(){
-rout "${cblue}>> createRunscript${cnormal}"
+route "${cblue}>> createRunscript${cnormal}"
 comment "   copy JURECA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
 check
@@ -152,6 +142,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-rout "${cblue}<< createRunscript${cnormal}"
+route "${cblue}<< createRunscript${cnormal}"
 }
 

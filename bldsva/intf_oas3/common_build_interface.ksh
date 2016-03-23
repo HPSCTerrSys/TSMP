@@ -21,7 +21,7 @@
 
 
 c_configure_cos(){
-rout "${cblue}>>> c_configure_cos${cnormal}"
+route "${cblue}>>> c_configure_cos${cnormal}"
   comment "    make clean cosmo"
     make -f $cosdir/Makefile clean >> $log_file 2>> $err_file
   check
@@ -40,27 +40,27 @@ rout "${cblue}>>> c_configure_cos${cnormal}"
   comment "    sed OAS flag to Makefile"
     sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_configure_cos${cnormal}"
+route "${cblue}<<< c_configure_cos${cnormal}"
 }
 
 c_make_cos(){
-rout "${cblue}>>> c_make_cos${cnormal}"
+route "${cblue}>>> c_make_cos${cnormal}"
   comment "    make cosmo"
     make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
   comment "    cp cosmo binary to $bindir"
     cp $cosdir/lmparbin_pur $bindir >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_make_cos${cnormal}"
+route "${cblue}<<< c_make_cos${cnormal}"
 }
 
 
 c_substitutions_cos(){
-rout "${cblue}>>> c_substitutions_cos${cnormal}"
+route "${cblue}>>> c_substitutions_cos${cnormal}"
   comment "    copy oas3 interface to cosmo/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_substitutions_cos${cnormal}"
+route "${cblue}<<< c_substitutions_cos${cnormal}"
 }
 
 
@@ -70,7 +70,7 @@ rout "${cblue}<<< c_substitutions_cos${cnormal}"
 ############################
 
 c_configure_oas(){
-rout "${cblue}>>> c_configure_oas${cnormal}"
+route "${cblue}>>> c_configure_oas${cnormal}"
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
@@ -80,22 +80,22 @@ rout "${cblue}>>> c_configure_oas${cnormal}"
   comment "    make clean oasis"
     make -f $oasdir/util/make_dir/TopMakefileOasis3 realclean >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_configure_oas${cnormal}"
+route "${cblue}<<< c_configure_oas${cnormal}"
 }
 
 c_make_oas(){
-rout "${cblue}>>> c_make_oas${cnormal}"
+route "${cblue}>>> c_make_oas${cnormal}"
     export SKIN_MODE=none
   comment "    make oasis" 
     make -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
     export SKIN_MODE=mpi
-rout "${cblue}<<< c_make_oas${cnormal}"
+route "${cblue}<<< c_make_oas${cnormal}"
 }
 
 
 c_substitutions_oas(){
-rout "${cblue}>>> c_substitutions_oas${cnormal}"
+route "${cblue}>>> c_substitutions_oas${cnormal}"
   comment "    sed absolut include paths to Makefile"
     sed -i "s@include make.inc@include $oasdir/util/make_dir/make.inc@" ${oasdir}/util/make_dir/TopMakefileOasis3 >> $log_file 2>> $err_file
   check
@@ -105,7 +105,7 @@ rout "${cblue}>>> c_substitutions_oas${cnormal}"
   comment "    sed usermakefile to make.inc"
     sed -i "s@include.*@include $oasdir/util/make_dir/make.oas3@" ${oasdir}/util/make_dir/make.inc >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_substitutions_oas${cnormal}"
+route "${cblue}<<< c_substitutions_oas${cnormal}"
 }
 
 
@@ -117,7 +117,7 @@ rout "${cblue}<<< c_substitutions_oas${cnormal}"
 
 
 c_configure_clm(){
-rout "${cblue}>>> c_configure_clm${cnormal}"
+route "${cblue}>>> c_configure_clm${cnormal}"
   comment "    clean clm by removing build dir"
     rm -rf $clmdir/build >> $log_file 2>> $err_file
   check
@@ -154,11 +154,11 @@ rout "${cblue}>>> c_configure_clm${cnormal}"
   comment "    configure clm"
     $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_configure_clm${cnormal}"
+route "${cblue}<<< c_configure_clm${cnormal}"
 }
 
 c_make_clm(){
-rout "${cblue}>>> c_make_clm${cnormal}"
+route "${cblue}>>> c_make_clm${cnormal}"
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
@@ -168,19 +168,19 @@ rout "${cblue}>>> c_make_clm${cnormal}"
   comment "    cp clm binary to $bindir"
     cp $clmdir/build/clm $bindir >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_make_clm${cnormal}"
+route "${cblue}<<< c_make_clm${cnormal}"
 }
 
 
 c_substitutions_clm(){
-rout "${cblue}>>> c_substitutions_clm${cnormal}"
+route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    copy oas3 interface to clm/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src >> $log_file 2>> $err_file
   check
   comment "    replace hydrology. Add files to clm/bld/usr.src "
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/* $clmdir/bld/usr.src >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_substitutions_clm${cnormal}"
+route "${cblue}<<< c_substitutions_clm${cnormal}"
 }
 
 
@@ -192,7 +192,7 @@ rout "${cblue}<<< c_substitutions_clm${cnormal}"
 c_configure_pfl(){
 
 
-rout "${cblue}>>> c_configure_pfl${cnormal}"
+route "${cblue}>>> c_configure_pfl${cnormal}"
 
 
     if [[ $withOAS == "true" ]] ; then 
@@ -238,11 +238,11 @@ rout "${cblue}>>> c_configure_pfl${cnormal}"
   comment "    sed libs to /parflow_exe/Makefile"
     sed -i "s@__libs__@$libsSim@" $pfldir/pfsimulator/parflow_exe/Makefile >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_configure_pfl${cnormal}"
+route "${cblue}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
-rout "${cblue}>>> c_make_pfl${cnormal}"
+route "${cblue}>>> c_make_pfl${cnormal}"
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -268,14 +268,19 @@ comment "    cp binary to $bindir"
   cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
 check
 
-rout "${cblue}<<< c_make_pfl${cnormal}"
+route "${cblue}<<< c_make_pfl${cnormal}"
 }
 
 c_substitutions_pfl(){
-rout "${cblue}>>> c_substitutions_pfl${cnormal}"
+route "${cblue}>>> c_substitutions_pfl${cnormal}"
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
   check
-rout "${cblue}<<< c_substitutions_pfl${cnormal}"
+route "${cblue}<<< c_substitutions_pfl${cnormal}"
 }
+
+
+############################ 
+#setup interface methods
+############################
 
