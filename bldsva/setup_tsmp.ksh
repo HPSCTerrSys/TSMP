@@ -5,7 +5,7 @@ getDefaults(){
   def_rootdir="$estdir"    #This should be correct - change with caution
   def_combination=""           
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
-  def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$date if empty
+  def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$date if empty
   def_pfldir=""
   # parameters  will be set to tested platform defaults if empty
   def_nppn=""
@@ -71,7 +71,7 @@ setSelection(){
 
 
   if [[ $rundir == "" ]] then
-     rundir=$rootdir/run/${platform}_${version}_${combination}_${date}
+     rundir=$rootdir/run/${platform}_${version}_${combination}_${refSetup}_${date}
   fi
   mkdir -p $rundir
   rm -rf $rundir/*
@@ -302,7 +302,7 @@ printState(){
   print ""
   print "${cred}(16)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
   print "${cred}(17)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir${cnormal}"
-  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${date}): ${cgreen}$rundir${cnormal}"
+  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${date}): ${cgreen}$rundir${cnormal}"
   print ""
   print "${cred}(19)${cnormal} namelist dir for clm (default='given by setup'): ${cgreen}$namelist_clm${cnormal}"
   print "${cred}(20)${cnormal} forcing dir for clm (default='given by setup'): ${cgreen}$forcingdir_clm${cnormal}"
