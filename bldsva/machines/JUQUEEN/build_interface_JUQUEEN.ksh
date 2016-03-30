@@ -14,7 +14,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O0" #"-O2 -qhot -qarch=qp -qtune=qp"
+  defaultOptC="-O2 -qhot -qarch=qp -qtune=qp"
 
 
   # Default Processor settings

@@ -1,7 +1,7 @@
 #! /bin/ksh
 getDefaults(){
-  def_platform="JUQUEEN"               
-  def_version="1.1.0MCT"                 
+  def_platform="CLUMA2"               
+  def_version="1.1.0"                 
   def_rootdir="$estdir"    #This should be correct - change with caution
   def_combination=""           
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
@@ -562,7 +562,7 @@ comment "  source cos build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh 
 check
       setup_cos 
-comment "  cp cos exe to $rundir"
+comment "  cp cos exe and starter to $rundir"
     cp $bindir/lmparbin_pur $rundir 
 check
   fi
@@ -598,11 +598,13 @@ check
   sed -i "s,.\[39m,,g" $log_file
   sed -i "s,.\[31m,,g" $log_file
   sed -i "s,.\[34m,,g" $log_file
+  sed -i "s,.\[91m,,g" $log_file
 
   sed -i "s,.\[32m,,g" $stdout_file
   sed -i "s,.\[39m,,g" $stdout_file
   sed -i "s,.\[31m,,g" $stdout_file
   sed -i "s,.\[34m,,g" $stdout_file
+  sed -i "s,.\[91m,,g" $stdout_file
 
   mv -f $err_file $rundir
   mv -f $log_file $rundir

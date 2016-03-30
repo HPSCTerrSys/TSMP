@@ -11,7 +11,7 @@ typeset -A modelVersion
 
 # list of platforms with descriptions
 platforms+=(
-#        ["CLUMA2"]="MIUB (Uni Bonn) - general purpose Linux Cluster"
+        ["CLUMA2"]="MIUB (Uni Bonn) - general purpose Linux Cluster"
 #        ["AGROCLUSTER"]="IBG3 (FZ-Juelich) - general purpose Linux Cluster"
 #        ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
@@ -21,11 +21,11 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" curr currMCT 1.1.0 1.1.0MCT "
-        ["JUQUEEN"]=" curr currMCT 1.1.0 1.1.0MCT "
-        ["AGROCLUSTER"]=" curr currMCT  1.1.0 1.1.0MCT "
-        ["CCA2"]=" curr currMCT  1.1.0 1.1.0MCT "
-        ["CLUMA2"]=" curr currMCT 1.1.0 1.1.0MCT "
+        ["JURECA"]=" 1.1.0 1.1.0MCT "
+        ["JUQUEEN"]=" 1.1.0 1.1.0MCT "
+        ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT "
+        ["CCA2"]=" 1.1.0 1.1.0MCT "
+        ["CLUMA2"]=" 1.1.0MCT "
 )
 
 # list of versions with descriptions
@@ -71,5 +71,6 @@ setups+=(
 setupsAvail+=(
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
+	["CLUMA2"]=" nrw "
 )
 

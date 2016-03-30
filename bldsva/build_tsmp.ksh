@@ -1,8 +1,8 @@
 #! /bin/ksh
 
 getDefaults(){
-  def_platform="JUQUEEN" 
-  def_version="1.1.0MCT" 
+  def_platform="CLUMA2" 
+  def_version="1.1.0" 
   def_combination=""
   def_rootdir="$estdir" #This should be correct - change with caution
 
@@ -593,11 +593,13 @@ check
   sed -i "s,.\[39m,,g" $log_file
   sed -i "s,.\[31m,,g" $log_file
   sed -i "s,.\[34m,,g" $log_file
+  sed -i "s,.\[91m,,g" $log_file
 
   sed -i "s,.\[32m,,g" $stdout_file
   sed -i "s,.\[39m,,g" $stdout_file
   sed -i "s,.\[31m,,g" $stdout_file
   sed -i "s,.\[34m,,g" $stdout_file
+  sed -i "s,.\[91m,,g" $stdout_file
 
   print "$call $*">> $log_file
   mv -f $err_file $bindir

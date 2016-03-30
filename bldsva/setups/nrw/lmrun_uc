@@ -228,8 +228,8 @@ end_input_sat
 
 cat > INPUT_IO  << end_input_io
  &IOCTL
-  lasync_io=.FALSE., ngribout=1,
-  yform_read='grb1',
+!  lasync_io=.FALSE., ngribout=1,
+!  yform_read='grb1',
 !  ydir_restart='$RESTAR',
 !  nincwait=30,
 !  nmaxwait=2400,

@@ -7,7 +7,9 @@ route "${cblue}<< always_pfl${cnormal}"
 
 configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
-
+  comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
+  check
 
     if [[ $withOAS == "true" ]]; then
       cplLib="$liboas $libpsmile"
@@ -49,34 +51,30 @@ substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
  
-  comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JURECA/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
-  check
-
 
   print -n "   cp new files with Fortran underscore fix"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
   check
   print -n "   cp new files with little endian fix"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/amps_io.c           $pfldir/pfsimulator/amps/common/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_io.c           $pfldir/pfsimulator/amps/common/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/parflow_config.h.in $pfldir/pfsimulator/config/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_config.h.in $pfldir/pfsimulator/config/ >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/JUQUEEN/src/tools_io.h          $pfldir/pftools/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/tools_io.h          $pfldir/pftools/ >> $log_file 2>> $err_file
   check
 
     if [[ $withOASMCT == "true" ]] ; then 

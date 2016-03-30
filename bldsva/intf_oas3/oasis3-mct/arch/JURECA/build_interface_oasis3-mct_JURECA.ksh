@@ -13,10 +13,10 @@ substitutions_oas(){
 route "${cblue}>> substitutions_oas${cnormal}"
     c_substitutions_oas
   comment "   cp new  mod_oasis_method.F90 to psmile/src"
-    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/JURECA/src/mod_oasis_method.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/$platform/src/mod_oasis_method.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
   comment "   cp new  mod_oasis_grid.F90 to psmile/src"
-    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/JURECA/src/mod_oasis_grid.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/$platform/src/mod_oasis_grid.F90 ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
   comment "   sed prism_get_freq functionality to mod_prism.F90"
     sed -i "/oasis_get_debug/a   use mod_oasis_method ,only: prism_get_freq            => oasis_get_freq" ${oasdir}/lib/psmile/src/mod_prism.F90  >> $log_file 2>> $err_file   # critical anchor
