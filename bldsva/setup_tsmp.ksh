@@ -1,6 +1,6 @@
 #! /bin/ksh
 getDefaults(){
-  def_platform="CLUMA2"               
+  def_platform="AGROCLUSTER"               
   def_version="1.1.0"                 
   def_rootdir="$estdir"    #This should be correct - change with caution
   def_combination=""           
@@ -536,7 +536,7 @@ comment "  source machine build interface for $platform"
 check
 
 comment "  source setup for $refSetup on $platform"
-    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh
+    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
 check
 
 
@@ -550,39 +550,39 @@ check
 
   if [[ $withCLM == "true" ]] ; then 
 comment "  source clm build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh 
+      . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_clm
 comment "  cp clm exe to $rundir" 
-    cp $bindir/clm $rundir 
+    cp $bindir/clm $rundir >> $log_file 2>> $err_file
 check
   fi
   if [[ $withCOS == "true" ]] ; then
 comment "  source cos build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh 
+      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_cos 
 comment "  cp cos exe and starter to $rundir"
-    cp $bindir/lmparbin_pur $rundir 
+    cp $bindir/lmparbin_pur $rundir  >> $log_file 2>> $err_file
 check
   fi
   if [[ $withPFL == "true" ]] ; then 
 comment "  source pfl build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh 
+      . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_pfl 
 comment "  cp pfl exe to $rundir"
-    cp $bindir/parflow $rundir 
+    cp $bindir/parflow $rundir  >> $log_file 2>> $err_file
 check
   fi
   if [[ $withOAS == "true" ]] ; then 
 comment "  source oas build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh 
+      . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_oas 
     if [[ $withOASMCT == "false" ]] ; then 
 comment "  cp oas exe to $rundir"
-	 cp $bindir/oasis3.MPI1.x $rundir 
+	 cp $bindir/oasis3.MPI1.x $rundir  >> $log_file 2>> $err_file
 check
     fi
   fi

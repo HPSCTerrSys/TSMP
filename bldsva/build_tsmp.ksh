@@ -1,7 +1,7 @@
 #! /bin/ksh
 
 getDefaults(){
-  def_platform="CLUMA2" 
+  def_platform="AGROCLUSTER" 
   def_version="1.1.0" 
   def_combination=""
   def_rootdir="$estdir" #This should be correct - change with caution

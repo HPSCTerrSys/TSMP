@@ -12,7 +12,7 @@ typeset -A modelVersion
 # list of platforms with descriptions
 platforms+=(
         ["CLUMA2"]="MIUB (Uni Bonn) - general purpose Linux Cluster"
-#        ["AGROCLUSTER"]="IBG3 (FZ-Juelich) - general purpose Linux Cluster"
+        ["AGROCLUSTER"]="IBG3 (FZ-Juelich) - general purpose Linux Cluster"
 #        ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUQUEEN"]="JSC (FZ-Juelich) - high scale machine"
@@ -68,9 +68,12 @@ setups+=(
 	["ideal24001200"]="idealized domain with gridsize scaled to 1200x1200 (atmosphere) 2400x2400 (land)"
 )
 
+# list of setups that are available on a machine. (first is default)
+# IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
 	["CLUMA2"]=" nrw "
+	["AGROCLUSTER"]=" nrw "
 )
 

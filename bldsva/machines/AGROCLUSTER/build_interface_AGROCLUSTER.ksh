@@ -3,19 +3,26 @@
 
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
-  # Default library paths
-  defaultMpiPath="/daten01/z4/openmpi-1.4.3_gnu"
-  defaultNcdfPath="/daten01/z4/netcdf4.1.3_gfortran_4.2.1"
-  defaultGrib1Path="/daten01/z4/DWD_libgrib/libgrib1_061107gnu"
-  defaultTclPath="/daten01/z4/tcl8.5.13_gnu"
-  defaultHyprePath="/daten01/z4/hypre2.9_gnu"
-  defaultSiloPath="/daten01/z4/silo4.8_gnu"
 
-  export LD_LIBRARY_PATH=$defaultTclPath/lib/
+  comment "   init lmod functionality"
+    . /usr/share/Modules/init/ksh  >> $log_file 2>> $err_file
+  check
+  comment "   source and load Modules on $platform"
+    module load gcc-ibg3  >> $log_file 2>> $err_file
+  check
+  # Default library paths
+  defaultMpiPath="/opt/ibg3/openmpi-1.8.4"
+  defaultNcdfPath="/home/w.kurtz/libs/netcdf_openmpi-1.8.4"
+  defaultGrib1Path="/home/w.kurtz/libs/DWD-libgrib1_061107"
+  defaultTclPath="/usr"
+  defaultHyprePath="/home/w.kurtz/libs/hypre_openmpi-1.8.4"
+  defaultSiloPath="/home/w.kurtz/libs/silo-4.8_openmpi-1.8.4"
+	
+  export LD_LIBRARY_PATH=$defaultTclPath/lib64/:/home/w.kurtz/libs/netcdf_openmpi-1.8.4/lib
 
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  defaultOptC="-O0"
 
 
   # Default Processor settings
@@ -52,7 +59,7 @@ if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOA
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
 #!/bin/ksh
 
-#Job Submission to Cluma
+#Job Submission to Agrocluster
 #PBS -N TerrSysMP_run
 #PBS -l walltime=$wtime
 #PBS -l nodes=$nnodes:ppn=$nppn
@@ -66,10 +73,10 @@ cd $rundir
 
 rm -rf  YU*
 
-export LD_LIBRARY_PATH=$defaultNcdfPath/lib/
+export LD_LIBRARY_PATH=$defaultNcdfPath/lib/ : $defaultTclPath/lib64/
 
 date
-$exel >> log_file 2>> err_file
+$exel 
 date
 
 echo "ready" > ready.txt
