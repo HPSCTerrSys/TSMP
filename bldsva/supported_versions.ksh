@@ -13,7 +13,7 @@ typeset -A modelVersion
 platforms+=(
         ["CLUMA2"]="MIUB (Uni Bonn) - general purpose Linux Cluster"
         ["AGROCLUSTER"]="IBG3 (FZ-Juelich) - general purpose Linux Cluster"
-#        ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
+        ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUQUEEN"]="JSC (FZ-Juelich) - high scale machine"
 )
@@ -75,5 +75,6 @@ setupsAvail+=(
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 "
 	["CLUMA2"]=" nrw "
 	["AGROCLUSTER"]=" nrw "
+        ["CCA2"]=" nrw "
 )
 

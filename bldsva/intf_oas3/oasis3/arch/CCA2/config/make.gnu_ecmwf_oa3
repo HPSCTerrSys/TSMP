@@ -1,0 +1,62 @@
+#
+# Include file for OASIS3 Makefile for a Linux system using 
+# INTEL Fortran Compiler and Open MPI 
+#
+###############################################################################
+#
+# CHAN : MPI1/MPI2
+CHAN            = MPI1
+#
+# Paths for libraries, object files and binaries
+#
+# COUPLE        : path for the root of prism directory tree, can be anywhere
+# ARCHDIR       : directory created when compiling
+# LIBPSMILE     : list of oasis3 libraries
+# PSMILE_INCDIR : includes all *o and *mod for each library
+# BINDIR        : directory for executables
+# LIBBUILD      : contains a directory for each library
+#
+COUPLE          = __oasisroot__
+ARCHDIR         = $(COUPLE)/__platform__
+PSMILE_INCDIR   = __inc__ 
+BINDIR          = $(ARCHDIR)/bin
+LIBBUILD        = $(ARCHDIR)/build/lib
+#
+# MPI library
+#
+# NETCDF library
+#
+# Compiling and other commands
+MAKE        = make
+F90         = __comF90__
+F           = $(F90)
+f90         = $(F90)
+f           = $(F90)
+CC          = __comCC__
+LD          = __ld__
+AR          = ar
+ARFLAGS     = -ruv
+#
+# compiler options and cpp keys
+# 
+CPPDEF    =  -Duse_libMPI -Duse_netCDF -Duse_comm_$(CHAN) -DVERBOSE -DDEBUG -DTREAT_OVERLAY 
+#
+# For compiling in double precision, put -r8
+# For compiling in single precision, remove -r8 and add -Duse_realtype_single
+# 
+F90FLAGS  = -fno-align-commons __precision__ $(PSMILE_INCDIR) $(CPPDEF)
+#
+f90FLAGS  = $(F90FLAGS)
+FFLAGS    = $(F90FLAGS)
+fFLAGS    = $(F90FLAGS)
+CCFLAGS   = $(PSMILE_INCDIR) $(CPPDEF)
+LDFLAGS   = __ldflg__
+#
+# MPP_IOOPT needed for compiling mpp_io
+MPP_IOOPT = __precision__ 
+#
+#  External libraies for linking
+FLIBS     = __lib__	
+#
+#
+#############################################################################

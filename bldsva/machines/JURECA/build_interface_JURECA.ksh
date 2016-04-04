@@ -8,7 +8,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/JURECA/loadenvs >> $log_file 2>> $err_file
+  . $rootdir/bldsva/machines/$platform/loadenvs >> $log_file 2>> $err_file
   check
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
