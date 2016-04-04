@@ -55,11 +55,10 @@ if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; th
 if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname" ; fi
 
 
-
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
-#!/bin/ksh
 
 #Job Submission to Agrocluster
+#PBS -S /bin/csh
 #PBS -N TerrSysMP_run
 #PBS -l walltime=$wtime
 #PBS -l nodes=$nnodes:ppn=$nppn
@@ -67,19 +66,16 @@ cat << EOF >> $rundir/tsmp_pbs_run.ksh
 #PBS -u $USER
 #PBS -q $queue
 
-export LOGNAME="$rundir"
 
 cd $rundir
 
 rm -rf  YU*
 
-export LD_LIBRARY_PATH=$defaultNcdfPath/lib/ : $defaultTclPath/lib64/
 
 date
 $exel 
 date
 
-echo "ready" > ready.txt
 exit 0
 
 EOF
