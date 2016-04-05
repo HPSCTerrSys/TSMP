@@ -1,8 +1,8 @@
 #! /bin/ksh
 
 getDefaults(){
-  def_platform="CCA2" 
-  def_version="1.1.0" 
+  def_platform="JURECA" 
+  def_version="1.1.0MCT" 
   def_combination=""
   def_rootdir="$estdir" #This should be correct - change with caution
 

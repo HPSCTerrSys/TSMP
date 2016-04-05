@@ -22,7 +22,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O0"
+  defaultOptC="-O2"
 
 
   # Default Processor settings

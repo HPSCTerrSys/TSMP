@@ -38,14 +38,14 @@ if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $np
 if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $nproc_pfl  ./parflow $pflrunname" ; fi
 if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm" ; fi
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_pfl ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname" ; fi
+if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmparbin_pur : -np $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_pfl ./parflow $pflrunname : -np $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname : -np $nproc_clm  ./clm" ; fi
 
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_pfl ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname" ; fi
+if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_cos ./lmparbin_pur : -np $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_pfl ./parflow $pflrunname : -np $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname : -np $nproc_clm  ./clm" ; fi
 
 
 

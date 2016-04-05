@@ -22,7 +22,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O0"
+  defaultOptC="-O2"
 
 
   # Default Processor settings
@@ -41,8 +41,11 @@ check
 
 
 mpitasks=`expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
-nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
-
+nnodes1=`echo "scale = 2; $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes2=`echo "scale = 2; $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes3=`echo "scale = 2; $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes4=`echo "scale = 2; $nproc_oas / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes=$(($nnodes1+$nnodes2+$nnodes3+$nnodes4))
 
 
 exel=""
@@ -50,14 +53,18 @@ if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $npro
 if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $nproc_pfl  -N $nppn ./parflow $pflrunname" ; fi
 if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $nproc_clm  -N $nppn ./clm" ; fi
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas -N $nppn ./oasis3.MPI1.x : -n $nproc_clm -N $nppn  ./clm : -n $nproc_cos -N $nppn ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas -N $nppn ./oasis3.MPI1.x : -n $nproc_clm -N $nppn  ./clm : -n $nproc_pfl -N $nppn ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas -N $nppn ./oasis3.MPI1.x : -n $nproc_clm -N $nppn  ./clm : -n $nproc_cos -N $nppn ./lmparbin_pur : -n $nproc_pfl -N $nppn ./parflow $pflrunname" ; fi
+if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_pfl  ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas  ./oasis3.MPI1.x : -n $nproc_cos ./lmparbin_pur : -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
 
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_clm -N $nppn  ./clm : -n $nproc_cos -N $nppn ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_clm -N $nppn  ./clm : -n $nproc_pfl -N $nppn ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_clm -N $nppn  ./clm : -n $nproc_cos -N $nppn ./lmparbin_pur : -n $nproc_pfl -N $nppn ./parflow $pflrunname" ; fi
+if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_cos ./lmparbin_pur : -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm ./clm" ; fi
+
+
+
+
 
 
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
@@ -69,6 +76,7 @@ cat << EOF >> $rundir/tsmp_pbs_run.ksh
 #PBS -l EC_total_tasks=$mpitasks
 #PBS -l EC_tasks_per_node=$nppn
 #PBS -l EC_threads_per_task=1
+#PBS -l EC_nodes=$nnodes
 #PBS -V 
 #PBS -q $queue
 

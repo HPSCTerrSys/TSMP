@@ -1,7 +1,7 @@
 #! /bin/ksh
 getDefaults(){
-  def_platform="CCA2"               
-  def_version="1.1.0"                 
+  def_platform="JURECA"               
+  def_version="1.1.0MCT"                 
   def_rootdir="$estdir"    #This should be correct - change with caution
   def_combination=""           
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
@@ -546,7 +546,16 @@ check
   
 
 #  start setup
-
+numInst=1 #This needs to be included as a run flag
+origrundir=$rundir
+for instance in {0..$(($numInst-1))}
+do
+if [[ $numInst > 1 ]] ; then 
+print "  creating instance: $instance"
+rundir=$origrundir/tsmp_instance_$instance
+mkdir -p $rundir
+#TODO implement instace dependent stuff - currently all instances are the same
+fi
 
   if [[ $withCLM == "true" ]] ; then 
 comment "  source clm build interface for $platform"
@@ -588,6 +597,9 @@ check
   fi
 
   finalizeSetup
+done
+  rundir=$origrundir
+
 
   createRunscript
 
