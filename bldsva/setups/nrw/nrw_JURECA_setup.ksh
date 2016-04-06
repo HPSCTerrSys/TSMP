@@ -17,7 +17,7 @@ initSetup(){
   defaultCLMProcY=2
   defaultCOSProcX=4
   defaultCOSProcY=8
-  defaultPFLProcX=2
+  defaultPFLProcX=3
   defaultPFLProcY=4
 
 

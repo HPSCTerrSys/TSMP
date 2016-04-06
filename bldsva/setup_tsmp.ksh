@@ -9,6 +9,7 @@ getDefaults(){
   def_pfldir=""
   # parameters  will be set to tested platform defaults if empty
   def_nppn=""
+  def_numInst="1"
   def_wtime=""
   def_queue=""
   def_px_clm=""
@@ -40,6 +41,7 @@ setDefaults(){
   refSetup=$def_refSetup
   combination=$def_combination
   nppn=$def_nppn
+  numInst=$def_numInst
   queue=$def_queue
   wtime=$def_wtime
   px_clm=$def_px_clm
@@ -268,6 +270,7 @@ interactive(){
                   if [[ $numb == 26 ]] ; then ; read forcingdir_oas ; fi
 		  if [[ $numb == 27 ]] ; then ; read pfldir ; fi
                   if [[ $numb == 28 ]] ; then ; read profiling ; fi
+                  if [[ $numb == 29 ]] ; then ; read numInst ; fi
                 done
                 interactive
           ;;
@@ -315,6 +318,7 @@ printState(){
   print ""
   print "${cred}(27)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir${cnormal}"
   print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
+  print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
 }
 
 
@@ -411,6 +415,7 @@ getRoot(){
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[n:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
+  USAGE+="[N:numinst? Number of instances of TerrSysMP. Currently only works with Oasis3-MCT - ignored otherwise.]:[numinst:='$def_numInst']"
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
   USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[startdate:='$def_startDate']"
@@ -450,7 +455,7 @@ getRoot(){
     q)  queue=$OPTARG ; args=1 ;; 
     Q)  wtime=$OPTARG ; args=1 ;;   
     n)  nppn=$OPTARG ; args=1 ;;
-
+    N)  numInst=$OPTARG ; args=1 ;;
     s)  startDate=$OPTARG ; args=1 ;;
 #    S)  #restart
     T)  runhours=$OPTARG ; args=1 ;;    
@@ -546,14 +551,16 @@ check
   
 
 #  start setup
-numInst=1 #This needs to be included as a run flag
 origrundir=$rundir
 for instance in {0..$(($numInst-1))}
 do
-if [[ $numInst > 1 ]] ; then 
-print "  creating instance: $instance"
+route ${cblue}"> creating instance: $instance"${cnormal}
+if [[ $numInst > 1 && $withOASMCT == "true"   ]] ; then 
 rundir=$origrundir/tsmp_instance_$instance
-mkdir -p $rundir
+comment "  mkdir sub-directory for instance"
+  mkdir -p $rundir >> $log_file 2>> $err_file
+check
+  echo "${instance}" > $rundir/instance.txt
 #TODO implement instace dependent stuff - currently all instances are the same
 fi
 
@@ -597,6 +604,7 @@ check
   fi
 
   finalizeSetup
+route ${cblue}"< creating instance: $instance"${cnormal}
 done
   rundir=$origrundir
 
