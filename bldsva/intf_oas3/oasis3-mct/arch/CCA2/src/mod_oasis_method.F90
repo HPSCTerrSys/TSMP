@@ -16,6 +16,8 @@ MODULE mod_oasis_method
 
    IMPLICIT NONE
 
+
+
    private
 
    public oasis_init_comp
@@ -30,6 +32,7 @@ MODULE mod_oasis_method
    public oasis_enddef
    public oasis_get_freq
 
+   INTEGER(kind=ip_i4_p) :: mpi_comm_loc_world
 #ifdef __VERBOSE
    integer(kind=ip_intwp_p),parameter :: debug=2
 #else
@@ -108,8 +111,20 @@ CONTAINS
       if (OASIS_debug >= 0) WRITE (0,FMT='(A)') subname//': Not Calling MPI_Init'
    ENDIF
 
+   !FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
+   open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=mpi_err)
+   if(mpi_err==0) then
+     read(4711, *), icolor
+     close(4711) 
+   else
+     icolor = 0
+   endif         
+   ikey=icolor
+   call MPI_COMM_SPLIT(MPI_COMM_WORLD,icolor,ikey,mpi_comm_loc_world,mpi_err)
+
+
 #ifdef use_comm_MPI1
-   mpi_comm_global = MPI_COMM_WORLD
+   mpi_comm_global = mpi_comm_loc_world
 #elif defined use_comm_MPI2
    mpi_comm_global = ??
 #endif
@@ -245,10 +260,10 @@ CONTAINS
 
 #ifdef use_comm_MPI1
 
-   mpi_comm_global = MPI_COMM_WORLD
+   mpi_comm_global = mpi_comm_loc_world
    ikey = compid
    icolor = compid
-   call MPI_COMM_SPLIT(MPI_COMM_WORLD,icolor,ikey,mpi_comm_local,mpi_err)
+   call MPI_COMM_SPLIT(mpi_comm_loc_world,icolor,ikey,mpi_comm_local,mpi_err)
 
 #elif defined use_comm_MPI2
 
@@ -279,7 +294,7 @@ CONTAINS
          tmparr(n) = mpi_rank_global
       endif
    enddo
-   call oasis_mpi_max(tmparr,mpi_root_global,MPI_COMM_WORLD, &
+   call oasis_mpi_max(tmparr,mpi_root_global,mpi_comm_loc_world, &
       string=subname//':mpi_root_global',all=.true.)
    deallocate(tmparr)
 
@@ -373,7 +388,7 @@ CONTAINS
    if (OASIS_debug >= 2)  then
       write(nulprt,*) subname,' compid         = ',compid
       write(nulprt,*) subname,' compnm         = ',trim(compnm)
-      write(nulprt,*) subname,' mpi_comm_world = ',MPI_COMM_WORLD
+      write(nulprt,*) subname,' mpi_comm_world = ',mpi_comm_loc_world
       write(nulprt,*) subname,' mpi_comm_global= ',mpi_comm_global
       write(nulprt,*) subname,'     size_global= ',mpi_size_global
       write(nulprt,*) subname,'     rank_global= ',mpi_rank_global
@@ -636,7 +651,7 @@ CONTAINS
    ENDIF
 
    tag=ICHAR(TRIM(compnm))+ICHAR(TRIM(cdnam))
-   CALL mpi_intercomm_create(mpi_comm_local, 0, MPI_COMM_WORLD, &
+   CALL mpi_intercomm_create(mpi_comm_local, 0, mpi_comm_loc_world, &
                              mpi_root_global(il), tag, new_comm, ierr)
 
    call oasis_debug_exit(subname)

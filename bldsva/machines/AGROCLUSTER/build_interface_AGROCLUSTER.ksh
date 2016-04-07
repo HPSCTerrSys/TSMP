@@ -35,24 +35,31 @@ route "${cblue}<< getMachineDefaults${cnormal}"
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
-mpitasks=`expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
+mpitasks=$((numInst*($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 
 
+exel="mpirun "
 
-exel=""
-if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $nproc_cos  ./lmparbin_pur" ; fi 
-if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $nproc_pfl  ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm" ; fi
+for instance in {0..$(($numInst-1))}
+do
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_pfl ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="mpirun -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname" ; fi
+if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -np $nproc_cos  ./cos_starter.ksh $instance :" ; fi
+if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -np $nproc_pfl  ./pfl_starter.ksh $instance :" ; fi
+if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+
+if [[ $withCLM == "true" && $withCOS == "true"  && $withPFL == "false" && $withOASMCT == "false" ]] ; then ; exel=$exel" -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./cos_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel=$exel" -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_pfl ./pfl_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel=$exel" -np $nproc_oas ./oasis3.MPI1.x : -np $nproc_cos ./cos_starter.ksh $instance : -np $nproc_pfl ./pfl_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
 
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_pfl ./parflow $pflrunname" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="mpirun -np $nproc_clm  ./clm : -np $nproc_cos ./lmparbin_pur : -np $nproc_pfl ./parflow $pflrunname" ; fi
+if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" && $withOASMCT == "true" ]] ; then ; exel=$exel" -np $nproc_cos ./cos_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel=$exel" -np $nproc_pfl ./pfl_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel=$exel" -np $nproc_cos ./cos_starter.ksh $instance : -np $nproc_pfl ./pfl_starter.ksh $instance : -np $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+
+done
+
+exel=${exel%?} #remove trailing ":"
 
 
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
@@ -80,6 +87,53 @@ exit 0
 
 EOF
 
+if [[ $numInst > 1 && $withOASMCT == "true"   ]] ; then
+
+cat << EOF >> $rundir/cos_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./lmparbin_pur
+EOF
+
+cat << EOF >> $rundir/clm_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./clm
+EOF
+
+cat << EOF >> $rundir/pfl_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./parflow $pflrunname
+EOF
+
+else
+
+cat << EOF >> $rundir/cos_starter.ksh
+#!/bin/ksh
+./lmparbin_pur
+EOF
+
+cat << EOF >> $rundir/clm_starter.ksh
+#!/bin/ksh
+./clm
+EOF
+
+cat << EOF >> $rundir/pfl_starter.ksh
+#!/bin/ksh
+./parflow $pflrunname
+EOF
+
+fi
+
+
+comment "   change permission of module starter scripts"
+chmod 755 $rundir/cos_starter.ksh >> $log_file 2>> $err_file
+check
+chmod 755 $rundir/clm_starter.ksh >> $log_file 2>> $err_file
+check
+chmod 755 $rundir/pfl_starter.ksh >> $log_file 2>> $err_file
+check
 
 
 
