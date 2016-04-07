@@ -53,13 +53,13 @@ if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $npro
 if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $nproc_pfl  -N $nppn ./parflow $pflrunname" ; fi
 if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel="aprun -n $nproc_clm  -N $nppn ./clm" ; fi
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_pfl  ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_pfl  ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
 if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel="aprun -n $nproc_oas  ./oasis3.MPI1.x : -n $nproc_cos ./lmparbin_pur : -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
 
 
-if [[ $withCLM == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
-if [[ $withCLM == "true" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_cos ./lmparbin_pur : -n $nproc_clm  ./clm" ; fi
+if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm  ./clm" ; fi
 if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel="aprun -n $nproc_cos ./lmparbin_pur : -n $nproc_pfl ./parflow $pflrunname : -n $nproc_clm ./clm" ; fi
 
 

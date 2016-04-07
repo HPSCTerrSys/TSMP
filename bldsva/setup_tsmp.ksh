@@ -552,6 +552,9 @@ check
 
 #  start setup
 origrundir=$rundir
+orignamelist_cos=$namelist_cos
+orignamelist_clm=$namelist_clm
+orignamelist_pfl=$namelist_pfl
 for instance in {0..$(($numInst-1))}
 do
 route ${cblue}"> creating instance: $instance"${cnormal}
@@ -561,7 +564,21 @@ comment "  mkdir sub-directory for instance"
   mkdir -p $rundir >> $log_file 2>> $err_file
 check
   echo "${instance}" > $rundir/instance.txt
-#TODO implement instace dependent stuff - currently all instances are the same
+  if [[ -e "${orignamelist_cos}_${instance}" ]] ; then 
+	namelist_cos="${orignamelist_cos}_${instance}"
+  else
+        namelist_cos="$orignamelist_cos"	
+  fi
+  if [[ -e "${orignamelist_clm}_${instance}" ]] ; then
+        namelist_clm="${orignamelist_clm}_${instance}"
+  else
+        namelist_clm="$orignamelist_clm"
+  fi
+  if [[ -e "${orignamelist_pfl}_${instance}" ]] ; then
+        namelist_pfl="${orignamelist_pfl}_${instance}"
+  else
+        namelist_pfl="$orignamelist_pfl"
+  fi
 fi
 
   if [[ $withCLM == "true" ]] ; then 
@@ -607,7 +624,9 @@ check
 route ${cblue}"< creating instance: $instance"${cnormal}
 done
   rundir=$origrundir
-
+  namelist_cos="$orignamelist_cos"
+  namelist_clm="$orignamelist_clm"
+  namelist_pfl="$orignamelist_pfl"
 
   createRunscript
 
