@@ -27,34 +27,14 @@ route "${cblue}<< getMachineDefaults${cnormal}"
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
-mpitasks=`expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
+mpitasks=$(($numInst*($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 bgs_oas=`echo "scale = 2; $nproc_oas / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
 bgs_cos=`echo "scale = 2; $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
 bgs_clm=`echo "scale = 2; $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
 bgs_pfl=`echo "scale = 2; $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
-start_oas=0
-end_oas=$(($start_oas+$nproc_oas-1))
-start_cos=$nproc_oas
-end_cos=$(($start_cos+$nproc_cos-1))
 
-start_pfl=$(($nproc_cos+$nproc_oas))
-end_pfl=$(($start_pfl+$nproc_pfl-1))
 
-start_clm=$(($nproc_cos+$nproc_oas+$nproc_pfl))
-end_clm=$(($start_clm+$nproc_clm-1))
-
-start_oasM=1
-end_oasM=$(($start_oasM + $nproc_oas - 1))
-
-start_cosM=$(($bgs_oas * $nppn + 1))
-end_cosM=$(($start_cosM + $nproc_cos - 1))
-
-start_pflM=$(($bgs_cos * $nppn + $bgs_oas * $nppn + 1))
-end_pflM=$(($start_pflM + $nproc_pfl - 1))
-
-start_clmM=$(($bgs_cos * $nppn + $bgs_oas * $nppn + $bgs_pfl * $nppn + 1))
-end_clmM=$(($start_clmM + $nproc_clm - 1))
 
 errorname='$(job_name).$(jobid).err'
 outputname='$(job_name).$(jobid).out'
@@ -81,21 +61,63 @@ rm -rf partinfos.txt base YU*
 
 runjob -p $nppn --verbose 4 : /bgsys/local/samples/personality/personality.elf > partinfos.txt
 grep -i "task" partinfos.txt | sort | cut -d " " -f 17 | sed 's/,/ /g' | sed 's/(/ /;s/)//' > base
+
+EOF
+
+
+
+
+
+counter=0
+counter2=1
+
+for instance in {0..$(($numInst-1))}
+do
+#for mapfile
+start_oas=$counter
+end_oas=$(($start_oas+$nproc_oas-1))
+
+start_cos=$(($nproc_oas+$counter))
+end_cos=$(($start_cos+$nproc_cos-1))
+
+start_pfl=$(($nproc_cos+$nproc_oas+$counter))
+end_pfl=$(($start_pfl+$nproc_pfl-1))
+
+start_clm=$(($nproc_cos+$nproc_oas+$nproc_pfl+$counter))
+end_clm=$(($start_clm+$nproc_clm-1))
+
+counter=$(($counter+$nproc_clm+$nproc_pfl+$nproc_cos+$nproc_oas))
+
+
+
+#for cutting from personality
+start_oasM=$counter2
+end_oasM=$(($start_oasM + $nproc_oas - 1))
+
+start_cosM=$(($bgs_oas * $nppn + $counter2))
+end_cosM=$(($start_cosM + $nproc_cos - 1))
+
+start_pflM=$((($bgs_cos  + $bgs_oas) * $nppn + $counter2))
+end_pflM=$(($start_pflM + $nproc_pfl - 1))
+
+start_clmM=$((($bgs_cos + $bgs_oas + $bgs_pfl ) * $nppn + $counter2))
+end_clmM=$(($start_clmM + $nproc_clm - 1))
+
+counter2=$(($counter2+ $nppn*($bgs_cos + $bgs_pfl + $bgs_clm + $bgs_oas)))
+
+
+
+
+cat << EOF >> $rundir/tsmp_ll_run.ksh
 __oas__
 __cos__
 __pfl__
 __clm__
 
-date
-runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe 
-date
-
-echo "ready" > ready.txt
-exit 0
-
 EOF
 
-comment "   sed personality creation into run script"
+
+comment "   sed personality creation into run script for instance $instance"
   if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas__//" -i $rundir/tsmp_ll_run.ksh  >> $log_file 2>> $err_file; check; fi
   if [[ $withCOS == "false" ]] then ; sed "s/__cos__//" -i $rundir/tsmp_ll_run.ksh  >> $log_file 2>> $err_file; check; fi
   if [[ $withCLM == "false" ]] then ; sed "s/__clm__//" -i $rundir/tsmp_ll_run.ksh  >> $log_file 2>> $err_file; check; fi
@@ -109,6 +131,8 @@ sed "s@__pfl__@sed -n \"${start_pflM},${end_pflM}p\" base >> $rundir/ll_multipro
 check
 sed "s@__clm__@sed -n \"${start_clmM},${end_clmM}p\" base >> $rundir/ll_multiprog_mapping.conf@" -i $rundir/tsmp_ll_run.ksh >> $log_file 2>> $err_file
 check
+
+
 
 
 cat << EOF >> $rundir/ll_multiprog_mapping.conf
@@ -127,7 +151,7 @@ __clm3__
 
 EOF
 
-comment "   sed executables and processors into mapping file"
+comment "   sed executables and processors into mapping file for instance $instance"
   if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas.__//" -i $rundir/ll_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
   if [[ $withCOS == "false" ]] then ; sed "s/__cos.__//" -i $rundir/ll_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
   if [[ $withCLM == "false" ]] then ; sed "s/__clm.__//" -i $rundir/ll_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
@@ -162,6 +186,72 @@ comment "   sed executables and processors into mapping file"
   check
 
 
+done
+
+
+
+
+cat << EOF >> $rundir/tsmp_ll_run.ksh
+date
+runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe 
+date
+
+echo "ready" > ready.txt
+exit 0
+
+EOF
+
+
+
+
+
+if [[ $numInst > 1 && $withOASMCT == "true"   ]] ; then
+
+cat << EOF >> $rundir/cos_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./lmparbin_pur
+EOF
+
+cat << EOF >> $rundir/clm_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./clm
+EOF
+
+cat << EOF >> $rundir/pfl_starter.ksh
+#!/bin/ksh
+cd tsmp_instance_\$1
+./parflow $pflrunname
+EOF
+
+else
+
+cat << EOF >> $rundir/cos_starter.ksh
+#!/bin/ksh
+./lmparbin_pur
+EOF
+
+cat << EOF >> $rundir/clm_starter.ksh
+#!/bin/ksh
+./clm
+EOF
+
+cat << EOF >> $rundir/pfl_starter.ksh
+#!/bin/ksh
+./parflow $pflrunname
+EOF
+
+fi
+
+
+comment "   change permission of module starter scripts"
+chmod 755 $rundir/cos_starter.ksh >> $log_file 2>> $err_file
+check
+chmod 755 $rundir/clm_starter.ksh >> $log_file 2>> $err_file
+check
+chmod 755 $rundir/pfl_starter.ksh >> $log_file 2>> $err_file
+check
 
 
 

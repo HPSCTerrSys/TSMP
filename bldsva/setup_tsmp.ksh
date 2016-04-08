@@ -155,8 +155,9 @@ warning(){
 
 sanityCheck(){
 
-
-  
+  #check multi instance functionality (only working with Oasis3-MCT and not on JUQUEEN)
+  if [[ $numInst > 0 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored ic you continue." ; warning  ;fi
+  if [[ $numInst > 0 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
 
   if [[ "${versions[${version}]}" == ""  ]] then
       print "The selected version '${version}' is not available. run '.$call --man' for help"

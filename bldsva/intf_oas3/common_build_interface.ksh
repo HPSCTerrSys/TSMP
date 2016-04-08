@@ -203,7 +203,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
       flagsTools+="--with-amps=mpi1 "
     fi
 
-    flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing --enable-opt=$optComp"
+    flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
     export SKIN_MODE=none
@@ -218,7 +218,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
-    $pfldir/pfsimulator/configure $flagsSim FCFLAGS="$fcflagsSim" >> $log_file 2>> $err_file
+    $pfldir/pfsimulator/configure $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" >> $log_file 2>> $err_file
   check
   comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file
