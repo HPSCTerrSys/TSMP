@@ -559,7 +559,7 @@ orignamelist_pfl=$namelist_pfl
 for instance in {0..$(($numInst-1))}
 do
 route ${cblue}"> creating instance: $instance"${cnormal}
-if [[ $numInst > 1 && $withOASMCT == "true"   ]] ; then 
+if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then 
 rundir=$origrundir/tsmp_instance_$instance
 comment "  mkdir sub-directory for instance"
   mkdir -p $rundir >> $log_file 2>> $err_file

@@ -60,6 +60,10 @@ route "${cblue}>>> c_substitutions_cos${cnormal}"
   comment "    copy oas3 interface to cosmo/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src >> $log_file 2>> $err_file
   check
+  comment "    replace files with coupling. Add files to cosmo/src "
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/* $cosdir/src >> $log_file 2>> $err_file
+  check
+
 route "${cblue}<<< c_substitutions_cos${cnormal}"
 }
 
@@ -275,6 +279,11 @@ c_substitutions_pfl(){
 route "${cblue}>>> c_substitutions_pfl${cnormal}"
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
+  check
+  comment "    copy fix for hardwired MPI_COMM_WORLD in amps "
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps* $pfldir/pfsimulator/amps/mpi1 >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/pf_pfmg* $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_substitutions_pfl${cnormal}"
 }

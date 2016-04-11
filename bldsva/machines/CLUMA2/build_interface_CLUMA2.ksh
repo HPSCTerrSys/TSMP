@@ -83,8 +83,7 @@ exit 0
 
 EOF
 
-
-if [[ $numInst > 1 && $withOASMCT == "true"   ]] ; then
+if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then
 
 cat << EOF >> $rundir/cos_starter.ksh
 #!/bin/ksh

@@ -103,33 +103,6 @@ MODULE  environment
 ! V4_20        2011/08/31 Ulrich Schaettler
 !  Implemented interface to OASIS coupler using conditional compilation with -DCOUP_OAS
 !   (by CLM Community)
-! V4_23        2012/05/10 Ulrich Schaettler
-!  Unification with latest INT2LM Version 1.19
-! V4_25        2012/09/28 Carlos Osuna, Ulrich Blahak
-!  Introduce asynchronous netcdf in the distribution of PE into
-!  compute PE and I/O PE.
-! Ulrich Blahak: some bug fixes
-!  SR init_procgrid: added correct setting of my_cart_neigh in case of serial
-!                    runs with periodic BCs.
-!  SR exchg_boundaries:
-!  - in error-case nlines > nboundlines, changed RETURN to MODEL_ABORT() for user safety.
-!  - for periodic BCs, exchange all nboundlines regardless of the parameter nlines,
-!    to get "beautiful" periodic output. In this case, performance is usually not
-!    so important to the users.
-! V4_27        2013/03/19 Ulrich Blahak, Astrid Kerkweg
-!  bugfix of bugfix concerning serial periodic BCs: corrected lperi_x to lperi_y (UB)
-!  MESSy interface introduced: here interface for MMD (Multi-Model-Driver) (AK)
-! V4_28        2013/07/12 Ulrich Schaettler
-!  Extended interface for init_environment, to pass integer type imp_integ_ga
-!    for grib_api integer (for length of message in bytes)
-!  Boundary exchange in extend_field only for num_compute > 1
-! V4_30        2013/11/08 Ulrich Schaettler
-!  Corrected usage of uninitialized variable yzerrmsg in SR exchg_boundaries
-! V5_1         2014-11-28 Ulrich Schaettler, Oliver Fuhrer
-!  Adaptations to latest INT2LM version
-!  Replaced ireals by wp (working precision) (OF)
-!  Added parameters imp_single and imp_double (SP and DP REAL kind for MPI) (OF)
-!  Replaced call to fsleep with dosleep from utilities.f90
 !
 ! Code Description:
 ! Language: Fortran 90.
@@ -143,18 +116,8 @@ MODULE  environment
 !------------------------------------------------------------------------------
 
 USE data_parameters , ONLY :   &
-  wp,        & ! KIND-type parameters for real variables
-  iintegers, & ! kind-type parameter for "normal" integer variables
-  int_ga       ! integer precision for grib_api: length of message in bytes
-
-USE utilities,        ONLY: dosleep
-
-#ifdef MESSYMMD
-  USE mmd_handle_communicator, ONLY: MMD_get_model_communicator &
-                                   , MMD_Print_Error_Message    &
-                                   , MMD_FreeMem_communicator   &
-                                   , MMD_STATUS_OK
-#endif
+  ireals,    & ! KIND-type parameters for real variables
+  iintegers    ! kind-type parameter for "normal" integer variables
 
 !------------------------------------------------------------------------------
 
@@ -164,10 +127,6 @@ IMPLICIT NONE
 
 ! include statements
 INCLUDE "mpif.h"
-
-#ifdef MESSYMMD
-  INTEGER(KIND=iintegers),  SAVE  :: MMD_comm_world  ! mz_kk_20081107
-#endif
 
 !------------------------------------------------------------------------------
 
@@ -204,18 +163,18 @@ CONTAINS
 !+ Subroutine that extends a given field with additional rows and columns
 !------------------------------------------------------------------------------
 
-SUBROUTINE collapse (onoff, ie, istart, iend, jstart, jend)
+SUBROUTINE collapse (onoff, ie, je, istart, iend, jstart, jend)
 
 !------------------------------------------------------------------------------
 !
 !  This subroutine changes the computational indices to 1, ie, 1, je instead
-!  of using istartpar, iendpar, jstartpar, jendpar. This enables a loop
+!  of using istartpar, iendpar, jstartpar, jendpar. This enables a loop 
 !  collapsing on NEC-SX machines.
 !
 !------------------------------------------------------------------------------
 
 LOGICAL,                  INTENT(IN)    :: onoff
-INTEGER (KIND=iintegers), INTENT(IN)    :: ie
+INTEGER (KIND=iintegers), INTENT(IN)    :: ie, je
 
 INTEGER (KIND=iintegers), INTENT(INOUT) :: istart,iend,jstart,jend
 
@@ -228,7 +187,7 @@ IF (onoff) THEN
   iendmem=iend
   jstartmem=jstart
   jendmem=jend
-  IF ((istart == 1) .AND. (iend == ie)) THEN
+  IF ((istart.eq.1).and.(iend.eq.ie)) THEN 
     jend=jstart
     iend=ie*(jendmem+1-jstartmem)
   END IF
@@ -286,17 +245,16 @@ SUBROUTINE extend_field ( field_in,  ie_in,  je_in,                          &
     jstartpar_ext, jendpar_ext ! start- and end-indices for the boundary
                                ! exchange for the extended field
 
-  REAL (KIND=wp),           INTENT (INOUT) ::    &
+  REAL (KIND=ireals),       INTENT (INOUT) ::    &
     sendbuf (isblen, 8)        ! send buffer
 
-  REAL    (KIND=wp),        INTENT (IN) ::  &
+  REAL    (KIND=ireals   ), INTENT (IN) ::  &
     field_in (ie_in, je_in, kedim)
 
-  REAL    (KIND=wp),        INTENT(OUT) ::  &
+  REAL    (KIND=ireals   ), INTENT(OUT) ::  &
     field_out(ie_out,je_out,kedim)
 
-  LOGICAL,                  INTENT(IN)  ::  &
-    lperi_x, lperi_y, l2dim
+  LOGICAL, INTENT(in)     :: lperi_x, lperi_y, l2dim
 
 ! Local scalars:
 ! -------------
@@ -313,7 +271,7 @@ CHARACTER (LEN=200)        ::  &
 
   nbdext    = nboundlines + nextlines
 
-  field_out(:,:,:) = 0.0_wp
+  field_out(:,:,:) = 0.0_ireals
 
   DO k = 1, kedim
     DO j = 1, je_in
@@ -419,14 +377,13 @@ CHARACTER (LEN=200)        ::  &
     ENDDO
   ENDIF
 
-  IF (num_compute > 1) THEN
+!!$  IF (num_compute > 1) THEN
     kzdims(1:24) = (/ kedim,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0 /)
-    CALL exchg_boundaries                                                      &
-      ( 0, sendbuf, isblen, imp_reals, icomm, num_compute, ie_out,             &
-        je_out, kzdims, jstartpar_ext, jendpar_ext, nbdext, nbdext, neighbors, &
-        lperi_x, lperi_y, l2dim, 2000,  .FALSE., 1, izerror, yzerrmsg,         &
-        field_out )
-  ENDIF
+    CALL exchg_boundaries                                                  &
+      ( 0, sendbuf, isblen, imp_reals, icomm, num_compute, ie_out, je_out, kzdims,      &
+      jstartpar_ext, jendpar_ext, nbdext, nbdext, neighbors, lperi_x, lperi_y, l2dim, 2000,       &
+      .FALSE., 1, izerror, yzerrmsg, field_out )
+!!$  ENDIF
 
 END SUBROUTINE extend_field
 
@@ -434,11 +391,9 @@ END SUBROUTINE extend_field
 !+ Subroutine that initializes variables for the parallel environment
 !------------------------------------------------------------------------------
 
-SUBROUTINE init_environment (nproc, my_world_id, icomm_world, igroup_world, &
-                             imp_int, imp_real, imp_single, imp_double,     &
-                             imp_grib, imp_byte, imp_char,                  &
-                             imp_logical, imp_intga, iexch_req,             &
-                             irealgrib, yerrmsg, ierror                     )
+SUBROUTINE init_environment (nproc, my_world_id, icomm_world, igroup_world,  &
+                          imp_int, imp_real, imp_grib, imp_byte, imp_char,   &
+                          imp_logical, iexch_req, irealgrib, yerrmsg, ierror )
 
 !------------------------------------------------------------------------------
 !
@@ -476,30 +431,32 @@ SUBROUTINE init_environment (nproc, my_world_id, icomm_world, igroup_world, &
   INTEGER (KIND=iintegers), INTENT(OUT)  ::       &
     nproc,           & ! total number of processors: nprocx * nprocy + nprocio
     my_world_id,     & ! rank of this subdomain in the global communicator
-    icomm_world,     & ! communicator that belongs to igroup_world
-                       ! (is MPI_COMM_WORLD, if no coupling is used)
-    igroup_world,    & ! group that belongs to MPI_COMM_WORLD, i.e. all processors
-    imp_real,        & ! determines the correct REAL type used in the model for MPI
-    imp_single,      & ! single precision REAL type for MPI
-    imp_double,      & ! double precision REAL type for MPI
+    icomm_world,     & ! communicator that belongs to igroup_world, i.e.
+                       ! = MPI_COMM_WORLD
+    igroup_world,    & ! group that belongs to MPI_COMM_WORLD, i.e. all
+                       ! processors
+    imp_real,        & ! determines the correct REAL type used in the model
+                       ! for MPI
     imp_grib,        & ! determines the REAL type for the GRIB library
-    imp_int,         & ! determines the correct INTEGER type used in the model for MPI
-    imp_byte,        & ! determines the correct BYTE type used in the model for MPI
-    imp_char,        & ! determines the correct CHARACTER type used in the model for MPI
-    imp_logical,     & ! determines the correct LOGICAL   type used in the model for MPI
-    imp_intga,       & ! determines the correct INTEGER type used for grib_api
+    imp_int,         & ! determines the correct INTEGER type used in the
+                       ! model for MPI
+    imp_byte,        & ! determines the correct BYTE type used in the model
+                       ! for MPI
+    imp_char,        & ! determines the correct CHARACTER type used in the
+                       ! model for MPI
+    imp_logical,     & ! determines the correct LOGICAL   type used in the
+                       ! model for MPI
 
     iexch_req(4),    & ! stores the sends requests for the neighbor-exchange
                        ! that can be used by MPI_WAIT to identify the send
-    ierror,          & ! error status variable
-    inst               ! reads instance from file  
+    ierror             ! error status variable
 
-  CHARACTER (LEN=100),      INTENT(OUT)  ::       &
+  CHARACTER (LEN=25),       INTENT(OUT)  ::       &
     yerrmsg            ! for MPI error message
 
 ! Local variables:
 
-INTEGER (KIND=iintegers)           :: izmplcode
+INTEGER (KIND=iintegers)           :: izmplcode , inst
 
 !------------------------------------------------------------------------------
 
@@ -507,14 +464,7 @@ INTEGER (KIND=iintegers)           :: izmplcode
 
   ierror     = 0
   izmplcode  = 0
-  yerrmsg(:) = ' '
-
-#if defined(MESSYMMD) && defined(COUP_OAS_COS)
-  WRITE (*,'(a)') 'ERROR: MESSy-MMD (-DMESSYMMD) and OASIS (-DCOUP_OAS) cannot run at the same time!'
-  ierror = 33
-  yerrmsg = 'ERROR: MESSy-MMD (-DMESSYMMD) and OASIS (-DCOUP_OAS) cannot run at the same time!'
-  RETURN
-#endif
+  yerrmsg    = '    '
 
 ! If the coupler OASIS is active, the COSMO-Model gets its communicator
 ! from OASIS
@@ -529,28 +479,17 @@ INTEGER (KIND=iintegers)           :: izmplcode
     yerrmsg = 'MPI_INIT'
     RETURN
   ENDIF
-#ifdef MESSYMMD
-  call MMD_get_model_communicator (MMD_comm_world, izmplcode)
-  if(izmplcode /= MMD_STATUS_OK)   then
-    ierror  = izmplcode
-    yerrmsg = 'MMD_model_communicator'
-    RETURN
-
-  end if
-  icomm_world = MMD_comm_world ! mz_kk_20081107
-#else
   !FGa: enables multi instances. reads a non-negative instance number from
   !instance.txt and splits MPI_COMM_WORLD 
   open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=ierror)
-  if(ierror==0) then
-    read(4711, *) inst
+  if(ierror==0) then 
+    read(4711, *) inst 
     close(4711)
-  else
-    inst = 0 
+  else 
+    inst = 0  
   endif
  
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,inst,inst,icomm_world,ierror)
-#endif
 #endif
 
   ! Determination of number of present processors
@@ -581,18 +520,16 @@ INTEGER (KIND=iintegers)           :: izmplcode
   ! If the KIND-type parameters in data_parameters are changed, the
   ! variables here have to be changed accordingly.
   ! Model Real variables
-  imp_single = MPI_REAL
-  imp_double = MPI_DOUBLE_PRECISION
-  IF     (KIND (1.0)   == wp) THEN
-    imp_real = imp_single
-  ELSEIF (KIND (1.0D0) == wp) THEN
-    imp_real = imp_double
-  ELSEIF (KIND (1.0) == 8 .AND. wp == 4) THEN
+  IF     (KIND (1.0)   == ireals) THEN
+    imp_real = MPI_REAL
+  ELSEIF (KIND (1.0D0) == ireals) THEN
+    imp_real = MPI_DOUBLE_PRECISION
+  ELSEIF (KIND (1.0) == 8 .AND. ireals == 4) THEN
     ! it seems that this is a T3E where 4 Byte REALs are used
     imp_real = MPI_REAL4
   ELSE
     ierror = 1
-    yerrmsg = 'cannot find MPI REAL Type for working precision wp'
+    yerrmsg = 'cannot find MPI REAL Type for ireals'
     RETURN
   ENDIF
   ! GRIB Real variables
@@ -608,7 +545,6 @@ INTEGER (KIND=iintegers)           :: izmplcode
     yerrmsg = 'cannot find MPI REAL Type for irealgrib'
     RETURN
   ENDIF
-
   IF     (KIND (1)   == iintegers) THEN
     imp_int     = MPI_INTEGER
   ELSE
@@ -616,22 +552,6 @@ INTEGER (KIND=iintegers)           :: izmplcode
     yerrmsg = 'cannot find MPI INTEGER Type for iintegers'
     RETURN
   ENDIF
-
-! This could be used with MPI 3.0
-! CALL MPI_SIZEOF (1_int_ga, izsize, izmplcode)
-! CALL MPI_TYPE_MATCH_SIZE (MPI_TYPECLASS_INTEGER, izsize, imp_intga, izmplcode)
-
-! and this is the old style
-  IF     (HUGE(1_int_ga) == INT(HUGE(1_iintegers), int_ga)) THEN
-    imp_intga   = MPI_INTEGER
-  ELSEIF (HUGE(1_int_ga) >  INT(HUGE(1_iintegers), int_ga)) THEN
-    imp_intga   = MPI_INTEGER8
-  ELSE
-    ierror = 2
-    yerrmsg = 'cannot find MPI INTEGER Type for int_ga'
-    RETURN
-  ENDIF
-
   imp_byte    = MPI_BYTE
   imp_char    = MPI_CHARACTER
   imp_logical = MPI_LOGICAL
@@ -856,11 +776,9 @@ CHARACTER (LEN=100) ymplmsg   ! for MPI error message
     ! If my_id == 0 does not call model_abort, then one of the other PEs
     ! will print the message and abort
 
-    i = dosleep(30)
-
-!US#ifdef GRIBDWD
-!US    CALL fsleep (30)
-!US#endif
+#ifdef GRIBDWD
+    CALL fsleep (30)
+#endif
 
     IF (PRESENT (implerrorcode)) THEN
       ! this is parallel mode
@@ -906,11 +824,11 @@ END SUBROUTINE model_abort
 !+ Subroutine that creates the virtual processor topology.
 !------------------------------------------------------------------------------
 
-SUBROUTINE init_procgrid                                                        &
-     (nproc, nprocx, nprocy, nprocio, nc_asyn_io, lperi_x, lperi_y, lreproduce, &
-      lreorder, icomm_world, my_world_id, icomm_compute,                        &
-      icomm_asynio, icomm_cart, igroup_cart, my_cart_id, my_cart_pos,           &
-      my_cart_neigh, icomm_row, lcompute_pe, yerrmsg, ierror )
+SUBROUTINE init_procgrid                                                     &
+     (nproc, nprocx, nprocy, nprocio, lperi_x, lperi_y, lreproduce, lreorder,&
+      icomm_world, igroup_world, my_world_id, icomm_compute,                 &
+      icomm_cart, igroup_cart, my_cart_id, my_cart_pos, my_cart_neigh,       &
+      icomm_row, lcompute_pe, yerrmsg, ierror )
 
 !------------------------------------------------------------------------------
 !
@@ -942,16 +860,18 @@ SUBROUTINE init_procgrid                                                        
 ! Subroutine arguments
   INTEGER (KIND=iintegers), INTENT(IN)   ::       &
     icomm_world,       & ! communicator for all processors
-    my_world_id,       & ! ID of this PE in icomm_world
+    igroup_world,      & ! group for all processors
+    my_world_id,       & ! ID of this PE in igroup_world
     nproc,             & ! number of total processes
     nprocx,            & ! number of processes in east-west-direction
     nprocy,            & ! number of processes in north-south-direction
-    nprocio,           & ! number of extra processes for IO (GRIB)
-    nc_asyn_io           ! number of extra processes for IO (NetCDF)
+    nprocio              ! number of extra processes for IO
 
   LOGICAL,                  INTENT(IN)   ::       &
-    lperi_x,           & ! special treatment for periodic boundary conditions in x-dir.
-    lperi_y,           & ! special treatment for periodic boundary conditions in y-dir.
+! UB>>
+    lperi_x,         & ! special treatment for periodic boundary conditions in x-dir.
+    lperi_y,         & ! special treatment for periodic boundary conditions in y-dir.
+! UB<<
     lreproduce,        & ! additional communication necessary for creating
                          ! reproducible results
     lreorder             ! during the creation of the virtual topology the
@@ -959,7 +879,6 @@ SUBROUTINE init_procgrid                                                        
 
   INTEGER (KIND=iintegers), INTENT(OUT)  ::       &
     icomm_compute,     & ! communicator for compute PEs
-    icomm_asynio,      & ! communicator for netcdf asynchronous PEs
     icomm_cart,        & ! communicator for the virtual cartesian topology
     igroup_cart,       & ! MPI-group for icomm_cart
     icomm_row,         & ! communicator for the group of a east-west processor
@@ -1007,7 +926,6 @@ SUBROUTINE init_procgrid                                                        
  
   ! Set defaults as if this is a sequential program
   icomm_compute    = icomm_world
-  icomm_asynio     = icomm_world
   lcompute_pe      = .TRUE.
   my_cart_id       = 0
   icomm_cart       = icomm_world
@@ -1021,16 +939,8 @@ SUBROUTINE init_procgrid                                                        
 !- Section 2: Create the communicator for the compute PEs
 !------------------------------------------------------------------------------
 
-    nziope0 = 0
-
     IF (nprocio > 0) THEN
       nziope0 = nproc - nprocio ! first PE of IO-group
-    ELSE IF (nc_asyn_io > 0) THEN
-      nziope0 = nproc - nc_asyn_io ! first PE of IO-group
-    ENDIF
-
-    ! nziope0 has to be greater than 0, restricted by namelists
-    IF( nziope0 /= 0 ) THEN
 
       IF( my_world_id >= nziope0) THEN     ! last PEs = I/O PE
         lcompute_pe   = .FALSE.
@@ -1210,7 +1120,9 @@ SUBROUTINE init_procgrid                                                        
             RETURN
           ENDIF
 
+! UB>>
           my_cart_neigh(1) = nzneigh
+! UB<<
         ENDIF
   
         IF (my_cart_pos(1) == nprocx-1) THEN
@@ -1218,17 +1130,19 @@ SUBROUTINE init_procgrid                                                        
           ij(1) = 0
           ij(2) = my_cart_pos(2)
           CALL MPI_CART_RANK (icomm_cart, ij, nzneigh, izmplcode)
-
+  
           IF (izmplcode /= 0) THEN
             ierror  = izmplcode
             yerrmsg = 'MPI_CART_RANK'
             RETURN
           ENDIF
-
+  
+! UB>>
           my_cart_neigh(3) = nzneigh
-        ENDIF
+! UB<<
+        END IF
 
-      ENDIF   ! periodic boundaries in x-dir.
+      END IF   ! periodic boundaries in x-dir.
 
       IF ( lperi_y) THEN
 
@@ -1237,14 +1151,16 @@ SUBROUTINE init_procgrid                                                        
           ij(1) = my_cart_pos(1)
           ij(2) = 0
           CALL MPI_CART_RANK (icomm_cart, ij, nzneigh, izmplcode)
-
+  
           IF (izmplcode /= 0) THEN
             ierror  = izmplcode
             yerrmsg = 'MPI_CART_RANK'
             RETURN
           ENDIF
-
+  
+! UB>>
           my_cart_neigh(2) = nzneigh
+! UB<<
         END IF
 
         IF (my_cart_pos(2) == 0) THEN
@@ -1259,7 +1175,9 @@ SUBROUTINE init_procgrid                                                        
             RETURN
           ENDIF
 
+! UB>>
           my_cart_neigh(4) = nzneigh
+! UB<<
         ENDIF
 
       ENDIF   ! periodic boundaries in y-dir.
@@ -1312,18 +1230,6 @@ SUBROUTINE init_procgrid                                                        
       icomm_row  = MPI_UNDEFINED
     ENDIF
 
-  ELSE   ! serial run
-
-    IF (lperi_x) THEN
-      my_cart_neigh(1) = 0
-      my_cart_neigh(3) = 0
-    END IF
-
-    IF (lperi_y) THEN
-      my_cart_neigh(2) = 0
-      my_cart_neigh(4) = 0
-    END IF
-
   ENDIF  parallel
 
 !------------------------------------------------------------------------------
@@ -1344,8 +1250,7 @@ END SUBROUTINE init_procgrid
 SUBROUTINE exchg_boundaries                                                  &
                ( icase, sendbuf, isendbuflen, imp_type, icomm, num_compute,  &
                  idim, jdim, kdim, jstartpar, jendpar, nlines, nboundlines,  &
-                 neighbors, lperi_x, lperi_y, l2dim, ntag, lmpi_types, ntype,&
-                 ierror, yerrmsg,                                            &
+                 neighbors, lperi_x, lperi_y, l2dim, ntag, lmpi_types, ntype, ierror, yerrmsg, &
                  var01, var02, var03, var04, var05, var06, var07, var08,     &
                  var09, var10, var11, var12, var13, var14, var15, var16,     &
                  var17, var18, var19, var20, var21, var22, var23, var24 )
@@ -1395,13 +1300,15 @@ SUBROUTINE exchg_boundaries                                                  &
   CHARACTER (LEN=*),        INTENT(OUT)  ::       &
     yerrmsg               ! for MPI error message
 
-  REAL (KIND=wp),           INTENT (INOUT)      ::    &
+  REAL (KIND=ireals),       INTENT (INOUT)      ::    &
     sendbuf (isendbuflen, 8)   ! send buffer
 
-  REAL (KIND=wp),           INTENT (INOUT), TARGET      ::    &
+! UB>> TARGET attribute added:
+  REAL (KIND=ireals),       INTENT (INOUT), TARGET      ::    &
     var01 (idim, jdim, kdim( 1))   ! first field that has to occur
 
-  REAL (KIND=wp),     OPTIONAL, INTENT (INOUT), TARGET  ::    &
+! UB>> TARGET attribute added:
+  REAL (KIND=ireals), OPTIONAL, INTENT (INOUT), TARGET  ::    &
     var02 (idim, jdim, kdim( 2)),& ! additional optional fields
     var03 (idim, jdim, kdim( 3)),& ! additional optional fields
     var04 (idim, jdim, kdim( 4)),& ! additional optional fields
@@ -1446,8 +1353,7 @@ SUBROUTINE exchg_boundaries                                                  &
     nzstatus (MPI_STATUS_SIZE), & ! for MPI-WAIT
     ncount, type_handle,        & ! return values from setup_data_type
     MPI_neighbors(4), i, j, k,  & ! same as neighbors, if neighbor exists
-    ilocalreq(4),               & ! the local requests for the ISEND and IRECV
-    nlines_x, nlines_y            ! to adapt nlines=nboundlines in case of parallel periodic exchange
+    ilocalreq(4)                  ! the local requests for the ISEND and IRECV
 
   INTEGER (KIND=iintegers)   ::       &
     izmplcode                   ! for MPI error code
@@ -1456,7 +1362,7 @@ SUBROUTINE exchg_boundaries                                                  &
   CHARACTER  (LEN=200)          :: yzerrmsg
 
   TYPE :: pointerto3d
-    REAL(KIND=wp),     POINTER, DIMENSION(:,:,:) :: p
+    REAL(KIND=ireals), POINTER, DIMENSION(:,:,:) :: p
   END TYPE pointerto3d
 
   TYPE(pointerto3d) :: varxxp(24)
@@ -1470,12 +1376,14 @@ SUBROUTINE exchg_boundaries                                                  &
 !- Section 1: Initializations
 !------------------------------------------------------------------------------
 
+! UB>>
   DO i=1,24
     NULLIFY(varxxp(i)%p)
   END DO
 
   !.. Enable/disable debugging mode:
   ldebugflag = .TRUE.
+! UB<<
 
   ierror     = 0
   izmplcode  = 0
@@ -1485,60 +1393,48 @@ SUBROUTINE exchg_boundaries                                                  &
   IF (nlines > nboundlines) THEN
     ierror  = 9011
     yerrmsg     = ' *** nlines > nboundlines *** '
-    CALL model_abort (0, ierror, TRIM(yerrmsg), 'EXCHG_BOUNDARIES()')
+    RETURN
   ENDIF
-
-  IF (lperi_x) THEN
-    nlines_x = nboundlines
-  ELSE
-    nlines_x = nlines
-  END IF
-
-  IF (lperi_y) THEN
-    nlines_y = nboundlines
-  ELSE
-    nlines_y = nlines
-  END IF
 
   ! Determine the start- and end-indices for routines putbuf, getbuf
   izlo_ls = nboundlines + 1
-  izup_ls = nboundlines + nlines_x
+  izup_ls = nboundlines + nlines
   jzlo_ls = jstartpar
   jzup_ls = jendpar
 
-  izlo_lr = nboundlines + 1 - nlines_x
+  izlo_lr = nboundlines + 1 - nlines
   izup_lr = nboundlines
   jzlo_lr = jstartpar
   jzup_lr = jendpar
 
   izlo_us = 1
   izup_us = idim
-  jzlo_us = jdim - nboundlines - nlines_y + 1
+  jzlo_us = jdim - nboundlines - nlines + 1
   jzup_us = jdim - nboundlines
 
   izlo_ur = 1
   izup_ur = idim
   jzlo_ur = jdim - nboundlines + 1
-  jzup_ur = jdim - nboundlines + nlines_y
+  jzup_ur = jdim - nboundlines + nlines
 
-  izlo_rs = idim - nboundlines - nlines_x + 1
+  izlo_rs = idim - nboundlines - nlines + 1
   izup_rs = idim - nboundlines
   jzlo_rs = jstartpar
   jzup_rs = jendpar
 
   izlo_rr = idim - nboundlines + 1
-  izup_rr = idim - nboundlines + nlines_x
+  izup_rr = idim - nboundlines + nlines
   jzlo_rr = jstartpar
   jzup_rr = jendpar
 
   izlo_ds = 1
   izup_ds = idim
   jzlo_ds = nboundlines + 1
-  jzup_ds = nboundlines + nlines_y
+  jzup_ds = nboundlines + nlines
 
   izlo_dr = 1
   izup_dr = idim
-  jzlo_dr = nboundlines + 1 - nlines_y
+  jzlo_dr = nboundlines + 1 - nlines
   jzup_dr = nboundlines
 
   nzcount_lr = 0
@@ -1550,6 +1446,7 @@ SUBROUTINE exchg_boundaries                                                  &
   nzcount_us = 0
   nzcount_ds = 0
 
+! UB>>
   !.. Check whether optional exchange-variables are present but are 
   !   erroneously assiged a Z-dimension of 0:
   !
@@ -1587,7 +1484,7 @@ SUBROUTINE exchg_boundaries                                                  &
       IF (zlvarpresent(k) .AND. kdim(k) <= 0) THEN
         yzerrmsg = REPEAT(' ', LEN(yzerrmsg))
         WRITE(yzerrmsg,'(a,i2.2,a,i2,a)') ' *** Error: var',k,&
-             ' is exchanged but kdim(',k,') is 0! This may lead to erroneous exchange! *** '
+             ' is exchanged but kdim(',k,') is 0! This may lead to erroneous exchgange! *** '
         ierror = 54321
         CALL model_abort (0, ierror, TRIM(yzerrmsg), 'EXCHG_BOUNDARIES()')
       END IF
@@ -1620,11 +1517,17 @@ SUBROUTINE exchg_boundaries                                                  &
   IF (zlvarpresent(22)) varxxp(22)%p => var22
   IF (zlvarpresent(23)) varxxp(23)%p => var23
   IF (zlvarpresent(24)) varxxp(24)%p => var24
+! UB<<
+
+
+! UB>> =================================================================
+!
+!      Do serial exchange(s): periodic and/or 2-dim; presently all nboundlines are
+!      exchanged, not only nlines:
+
 
 
   IF (l2dim .OR. (num_compute == 1 .AND. lperi_y)) THEN
-    ! Do serial exchange(s): periodic and/or 2-dim; presently all nboundlines are
-    ! exchanged, not only nlines:
 
     ! Exchange needed in y-direction:
     DO k = 1, 24
@@ -1632,11 +1535,11 @@ SUBROUTINE exchg_boundaries                                                  &
         DO j=1, nboundlines
           varxxp(k)%p(:,nboundlines+1-j   ,:) = varxxp(k)%p(:,jdim-nboundlines+1-j,:)
           varxxp(k)%p(:,jdim-nboundlines+j,:) = varxxp(k)%p(:,nboundlines+j       ,:)
-        ENDDO
-      ENDIF
-    ENDDO
+        END DO
+      END IF
+    END DO
 
-  ENDIF
+  END IF
 
   IF (num_compute == 1) THEN
 
@@ -1648,976 +1551,982 @@ SUBROUTINE exchg_boundaries                                                  &
             varxxp(k)%p(nboundlines+1-i   ,:,:) = varxxp(k)%p(idim-nboundlines+1-i,:,:)
             varxxp(k)%p(idim-nboundlines+i,:,:) = varxxp(k)%p(nboundlines+i       ,:,:)
           END DO
-        ENDIF
-      ENDDO
+        END IF
+      END DO
 
-    ENDIF
+    END IF
 
   ELSE  ! num_compute > 1
 
-    ! Do parallel exchange, inner boundaries and periodic exchange
-    ! together:
+!      Do parallel exchange, inner boundaries and periodic exchange
+!      together:
 
-    ! Fix list of neighbors (use MPI_PROC_NULL rather than -1 to indicate
-    ! missing neighbor).
-    DO i= 1, 4
-      IF ( neighbors(i) /= -1 ) THEN
-        MPI_neighbors(i) = neighbors(i)
+! UB<< =================================================================
+
+  ! Fix list of neighbors (use MPI_PROC_NULL rather than -1 to indicate
+  ! missing neighbor).
+  DO i= 1, 4
+    IF ( neighbors(i) /= -1 ) THEN
+      MPI_neighbors(i) = neighbors(i)
+    ELSE
+      MPI_neighbors(i) = MPI_PROC_NULL
+    ENDIF
+  ENDDO
+
+!------------------------------------------------------------------------------
+!- Section 2: Determine the necessary datatypes
+!------------------------------------------------------------------------------
+
+  IF (lmpi_types) THEN
+    ! Exchange with left and right neighbor
+    IF ( iexchg_MPI_types(2*icase-1) == MPI_DATATYPE_NULL ) THEN
+      IF ( MPI_neighbors(1) /= MPI_PROC_NULL ) THEN
+        CALL setup_data_type                                               &
+         ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
+           var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
+           var21,var22,var23,var24,                                        &
+           idim, jdim, kdim, izlo_ls, izup_ls, jzlo_ls, jzup_ls,           &
+           ierror, yerrmsg, imp_type, ncount, type_handle )
+        iexchg_MPI_types(2*icase-1) = type_handle
+        iexchg_counts   (2*icase-1) = ncount
       ELSE
-        MPI_neighbors(i) = MPI_PROC_NULL
+        CALL setup_data_type                                               &
+         ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
+           var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
+           var21,var22,var23,var24,                                        &
+           idim, jdim, kdim, izlo_rr, izup_rr, jzlo_rr, jzup_rr,           &
+           ierror, yerrmsg, imp_type, ncount, type_handle )
+        iexchg_MPI_types(2*icase-1) = type_handle
+        iexchg_counts   (2*icase-1) = ncount
       ENDIF
-    ENDDO
-
-  !------------------------------------------------------------------------------
-  !- Section 2: Determine the necessary datatypes
-  !------------------------------------------------------------------------------
+    ENDIF
   
+    ! Exchange with upper and lower neighbor
+    IF ( iexchg_MPI_types(2*icase) == MPI_DATATYPE_NULL ) THEN
+      IF ( MPI_neighbors(2) /= MPI_PROC_NULL ) THEN
+        CALL setup_data_type                                               &
+         ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
+           var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
+           var21,var22,var23,var24,                                        &
+           idim, jdim, kdim, izlo_us, izup_us, jzlo_us, jzup_us,           &
+           ierror, yerrmsg, imp_type, ncount, type_handle )
+        iexchg_MPI_types(2*icase) = type_handle
+        iexchg_counts   (2*icase) = ncount
+      ELSE
+        CALL setup_data_type                                               &
+         ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
+           var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
+           var21,var22,var23,var24,                                        &
+           idim, jdim, kdim, izlo_dr, izup_dr, jzlo_dr, jzup_dr,           &
+           ierror, yerrmsg, imp_type, ncount, type_handle )
+        iexchg_MPI_types(2*icase) = type_handle
+        iexchg_counts   (2*icase) = ncount
+      ENDIF
+    ENDIF
+  ENDIF
+
+!------------------------------------------------------------------------------
+!- Section 3: Exchange with immediate Send and blocking Recv
+!------------------------------------------------------------------------------
+
+  IF   (ntype == 1) THEN
+
     IF (lmpi_types) THEN
-      ! Exchange with left and right neighbor
-      IF ( iexchg_MPI_types(2*icase-1) == MPI_DATATYPE_NULL ) THEN
-        IF ( MPI_neighbors(1) /= MPI_PROC_NULL ) THEN
-          CALL setup_data_type                                               &
-           ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
-             var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
-             var21,var22,var23,var24,                                        &
-             idim, jdim, kdim, izlo_ls, izup_ls, jzlo_ls, jzup_ls,           &
-             ierror, yerrmsg, imp_type, ncount, type_handle )
-          iexchg_MPI_types(2*icase-1) = type_handle
-          iexchg_counts   (2*icase-1) = ncount
-        ELSE
-          CALL setup_data_type                                               &
-           ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
-             var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
-             var21,var22,var23,var24,                                        &
-             idim, jdim, kdim, izlo_rr, izup_rr, jzlo_rr, jzup_rr,           &
-             ierror, yerrmsg, imp_type, ncount, type_handle )
-          iexchg_MPI_types(2*icase-1) = type_handle
-          iexchg_counts   (2*icase-1) = ncount
-        ENDIF
-      ENDIF
-    
-      ! Exchange with upper and lower neighbor
-      IF ( iexchg_MPI_types(2*icase) == MPI_DATATYPE_NULL ) THEN
-        IF ( MPI_neighbors(2) /= MPI_PROC_NULL ) THEN
-          CALL setup_data_type                                               &
-           ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
-             var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
-             var21,var22,var23,var24,                                        &
-             idim, jdim, kdim, izlo_us, izup_us, jzlo_us, jzup_us,           &
-             ierror, yerrmsg, imp_type, ncount, type_handle )
-          iexchg_MPI_types(2*icase) = type_handle
-          iexchg_counts   (2*icase) = ncount
-        ELSE
-          CALL setup_data_type                                               &
-           ( var01,var02,var03,var04,var05,var06,var07,var08,var09,var10,    &
-             var11,var12,var13,var14,var15,var16,var17,var18,var19,var20,    &
-             var21,var22,var23,var24,                                        &
-             idim, jdim, kdim, izlo_dr, izup_dr, jzlo_dr, jzup_dr,           &
-             ierror, yerrmsg, imp_type, ncount, type_handle )
-          iexchg_MPI_types(2*icase) = type_handle
-          iexchg_counts   (2*icase) = ncount
-        ENDIF
-      ENDIF
-    ENDIF
-  
-  !------------------------------------------------------------------------------
-  !- Section 3: Exchange with immediate Send and blocking Recv
-  !------------------------------------------------------------------------------
-  
-    IF   (ntype == 1) THEN
-  
-      IF (lmpi_types) THEN
-  
-        !------------------------------------------------------------------------
-        !- Section 3.1: exchange with left and right neighbors using datatypes
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(1) /= -1) THEN
-          ! left neighbor is present
-          CALL MPI_ISEND ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1), &
-                           iexchg_MPI_types(2*icase-1), MPI_neighbors(1),      &
-                           ntag, icomm, ilocalreq(1), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! right neighbor is present
-          ! send the data
-          CALL MPI_ISEND ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1), &
-                           iexchg_MPI_types(2*icase-1), MPI_neighbors(3),      &
-                           ntag, icomm, ilocalreq(3), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! right neighbor is present
-          ! receive the data
-          CALL MPI_RECV (var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1),   &
-                         iexchg_MPI_types(2*icase-1), MPI_neighbors(3),        &
-                         ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          ! left neighbor is present
-          ! receive the data
-          CALL MPI_RECV ( var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),  &
-                          iexchg_MPI_types(2*icase-1), MPI_neighbors(1),       &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(1)
-          CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(3)
-          CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        !------------------------------------------------------------------------
-        !- Section 3.2: exchange with upper and lower neighbors using datatypes
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(2) /= -1) THEN
-          ! upper neighbor is present
-          ! send the data
-          CALL MPI_ISEND (var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),    &
-                          iexchg_MPI_types(2*icase), MPI_neighbors(2),         &
-                          ntag, icomm, ilocalreq(2), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          ! send the data
-          CALL MPI_ISEND (var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),    &
-                          iexchg_MPI_types(2*icase), MPI_neighbors(4),         &
-                          ntag, icomm, ilocalreq(4), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          ! lower neighbor is present
-          CALL MPI_RECV (var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),    &
-                         iexchg_MPI_types(2*icase), MPI_neighbors(4),         &
-                         ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(2) /= -1) THEN
-          ! upper neighbor is present
-          CALL MPI_RECV (var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),     &
-                          iexchg_MPI_types(2*icase), MPI_neighbors(2),         &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-        ENDIF
-    
-        IF (neighbors(2) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(2)
-          CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-    
-        IF (neighbors(4) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(4)
-          CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-      ELSE
-  
-        !------------------------------------------------------------------------
-        !- Section 3.3: exchange with left and right neigh. using explict buff.
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(1) /= -1) THEN
-          ! left neighbor is present
-    
-          ! determine start- and end-indices for routine putbuf
-          nzcount_ls = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
-  
-          ! send the data
-          CALL MPI_ISEND ( sendbuf(1,1), nzcount_ls, imp_type, neighbors(1),   &
-                           ntag, icomm, ilocalreq(1), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! right neighbor is present
-  
-          ! determine start- and end-indices for routine putbuf
-          nzcount_rs = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
-  
-          ! send the data
-          CALL MPI_ISEND ( sendbuf(1,3), nzcount_rs, imp_type, neighbors(3),   &
-                           ntag, icomm, ilocalreq(3), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! receive the data
-          CALL MPI_RECV ( sendbuf(1,7), isendbuflen, imp_type, neighbors(3),   &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          ! left neighbor is present
-          ! receive the data
-  
-          CALL MPI_RECV ( sendbuf(1,5), isendbuflen, imp_type, neighbors(1),   &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(1)
-          ! to safely reuse sendbuf(1,1)
-          CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(3)
-          ! to safely reuse sendbuf(1,3)
-          CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
-            IF (izmplcode /= 0) THEN
-              ierror  = izmplcode
-              yerrmsg = 'MPI_WAIT'
-              RETURN
-            ENDIF
-        ENDIF
-  
-        !------------------------------------------------------------------------
-        !- Section 3.4: exchange with lower and upper neigh. using explict buff.
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(2) /= -1) THEN
-          nzcount_us = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
-  
-          ! send the data
-          CALL MPI_ISEND ( sendbuf(1,2), nzcount_us, imp_type, neighbors(2),   &
-                           ntag, icomm, ilocalreq(2), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          ! lower neighbor is present
-  
-          nzcount_ds = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
-  
-          ! send the data
-          CALL MPI_ISEND ( sendbuf(1,4), nzcount_ds, imp_type, neighbors(4),   &
-                           ntag, icomm, ilocalreq(4), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_ISEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          ! lower neighbor is present
-          ! receive the data
-    
-          CALL MPI_RECV ( sendbuf(1,8), isendbuflen, imp_type, neighbors(4),   &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-    
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
-        ENDIF
-    
-        IF (neighbors(2) /= -1) THEN
-          ! upper neighbor is present
-          ! receive the data
-    
-          CALL MPI_RECV ( sendbuf(1,6), isendbuflen, imp_type, neighbors(2),   &
-                          ntag, icomm, nzrequest, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_RECV'
-            RETURN
-          ENDIF
-    
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
-        ENDIF
-    
-        IF (neighbors(2) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(2)
-          ! to safely reuse sendbuf(1,2)
-          CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-    
-        IF (neighbors(4) /= -1) THEN
-          ! wait for the completion of the last send to neighbors(4)
-          ! to safely reuse sendbuf(1,4)
-          CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-      ENDIF
-  
-  !------------------------------------------------------------------------------
-  !- Section 4: Exchange with immediate Recv and blocking Send
-  !------------------------------------------------------------------------------
-  
-    ELSEIF (ntype == 2) THEN
-  
-      IF (lmpi_types) THEN
-  
-        !------------------------------------------------------------------------
-        !- Section 4.1: exchange with left and right neighbors
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(3) /= -1) THEN
-          CALL MPI_IRECV (var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1), &
-                          iexchg_MPI_types(2*icase-1), MPI_neighbors(3),      &
-                          ntag, icomm, ilocalreq(3), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          CALL MPI_IRECV (var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),&
-                          iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
-                          ntag, icomm, ilocalreq(1), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          ! now send the data to the left neighbor
-          CALL MPI_SEND ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1),&
-                          iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          ! now send the data to the right neighbor
-          CALL MPI_SEND ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1),&
-                          iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        !------------------------------------------------------------------------
-        !- Section 4.2: exchange with upper and lower neighbors
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(2) /= -1) THEN
-          CALL MPI_IRECV (var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),  &
-                          iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
-                          ntag, icomm, ilocalreq(2), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          CALL MPI_IRECV (var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),  &
-                          iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
-                          ntag, icomm, ilocalreq(4), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          CALL MPI_SEND (var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),  &
-                         iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
-                         ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(2) /= -1) THEN
-          CALL MPI_SEND (var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),  &
-                         iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
-                         ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(2) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-        ENDIF
-  
-      ELSE
-  
-        !------------------------------------------------------------------------
-        !- Section 4.3: exchange with left and right neighbors
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(3) /= -1) THEN
-          CALL MPI_IRECV ( sendbuf(1,7), isendbuflen, imp_type, neighbors(3),  &
-                          ntag, icomm, ilocalreq(3), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          CALL MPI_IRECV ( sendbuf(1,5), isendbuflen, imp_type, neighbors(1),  &
-                          ntag, icomm, ilocalreq(1), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          nzcount_ls = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
-  
-          CALL MPI_SEND ( sendbuf(1,1), nzcount_ls, imp_type, neighbors(1),    &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          nzcount_rs = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
-  
-          CALL MPI_SEND ( sendbuf(1,3), nzcount_rs, imp_type, neighbors(3),    &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(3) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
-        ENDIF
-  
-        IF (neighbors(1) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
-        ENDIF
-  
-        !------------------------------------------------------------------------
-        !- Section 4.4: exchange with upper and lower neighbors
-        !------------------------------------------------------------------------
-  
-        IF (neighbors(2) /= -1) THEN
-          CALL MPI_IRECV ( sendbuf(1,6), isendbuflen, imp_type, neighbors(2),  &
-                          ntag, icomm, ilocalreq(2), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          CALL MPI_IRECV ( sendbuf(1,8), isendbuflen, imp_type, neighbors(4),  &
-                          ntag, icomm, ilocalreq(4), izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_IRECV'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(4) /= -1) THEN
-          nzcount_ds = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
-  
-          CALL MPI_SEND ( sendbuf(1,4), nzcount_ds, imp_type, neighbors(4),    &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(2) /= -1) THEN
-          nzcount_us = 0
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
-   
-          CALL MPI_SEND ( sendbuf(1,2), nzcount_us, imp_type, neighbors(2),    &
-                          ntag, icomm, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_SEND'
-            RETURN
-          ENDIF
-        ENDIF
-  
-        IF (neighbors(2) /= -1) THEN
-          CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
-        ENDIF
-  
-   
-        IF (neighbors(4) /= -1) THEN
-          ! Now wait until the data have arrived
-          CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
-          IF (izmplcode /= 0) THEN
-            ierror  = izmplcode
-            yerrmsg = 'MPI_WAIT'
-            RETURN
-          ENDIF
-  
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
-        ENDIF
-  
-      ENDIF
-  
-  !------------------------------------------------------------------------------
-  !- Section 5: Exchange with SendRecv
-  !------------------------------------------------------------------------------
-  
-    ELSEIF (ntype == 3) THEN
-  
-      IF (lmpi_types) THEN
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.1: Send data to the left and receive from the right neighbor
-        !--------------------------------------------------------------------------
-   
-        CALL MPI_SENDRECV ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1),&
-                            iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
-                            ntag,                                              &
-                            var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1),&
-                            iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
-                            ntag,                                              &
-                            icomm, nzstatus, izmplcode)
+
+      !------------------------------------------------------------------------
+      !- Section 3.1: exchange with left and right neighbors using datatypes
+      !------------------------------------------------------------------------
+
+      IF (neighbors(1) /= -1) THEN
+        ! left neighbor is present
+        CALL MPI_ISEND ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1), &
+                         iexchg_MPI_types(2*icase-1), MPI_neighbors(1),      &
+                         ntag, icomm, ilocalreq(1), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV-1'
+          yerrmsg = 'MPI_ISEND'
           RETURN
         ENDIF
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.2: Receive data from the left and send to the right neighbor
-        !--------------------------------------------------------------------------
-  
-        CALL MPI_SENDRECV ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1),&
-                            iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
-                            ntag+1,                                            &
-                            var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),&
-                            iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
-                            ntag+1,                                            &
-                            icomm, nzstatus, izmplcode)
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! right neighbor is present
+        ! send the data
+        CALL MPI_ISEND ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1), &
+                         iexchg_MPI_types(2*icase-1), MPI_neighbors(3),      &
+                         ntag, icomm, ilocalreq(3), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV-2'
+          yerrmsg = 'MPI_ISEND'
           RETURN
         ENDIF
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.3: Send data to the upper and receive from the lower neighbor
-        !--------------------------------------------------------------------------
-  
-        CALL MPI_SENDRECV ( var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),  &
-                            iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
-                            ntag+2,                                            &
-                            var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),  &
-                            iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
-                            ntag+2,                                            &
-                            icomm, nzstatus, izmplcode)
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! right neighbor is present
+        ! receive the data
+        CALL MPI_RECV (var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1),   &
+                       iexchg_MPI_types(2*icase-1), MPI_neighbors(3),        &
+                       ntag, icomm, nzrequest, izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV-3'
+          yerrmsg = 'MPI_RECV'
           RETURN
         ENDIF
-   
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.4: Receive data from the upper and send to the lower neighbor
-        !--------------------------------------------------------------------------
-   
-        CALL MPI_SENDRECV ( var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),  &
-                            iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
-                            ntag+3,                                            &
-                            var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),  &
-                            iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
-                            ntag+3,                                            &
-                            icomm, nzstatus, izmplcode)
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        ! left neighbor is present
+        ! receive the data
+        CALL MPI_RECV ( var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),  &
+                        iexchg_MPI_types(2*icase-1), MPI_neighbors(1),       &
+                        ntag, icomm, nzrequest, izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV-4'
+          yerrmsg = 'MPI_RECV'
           RETURN
         ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(1)
+        CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(3)
+        CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      !------------------------------------------------------------------------
+      !- Section 3.2: exchange with upper and lower neighbors using datatypes
+      !------------------------------------------------------------------------
+
+      IF (neighbors(2) /= -1) THEN
+        ! upper neighbor is present
+        ! send the data
+        CALL MPI_ISEND (var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),    &
+                        iexchg_MPI_types(2*icase), MPI_neighbors(2),         &
+                        ntag, icomm, ilocalreq(2), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_ISEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        ! send the data
+        CALL MPI_ISEND (var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),    &
+                        iexchg_MPI_types(2*icase), MPI_neighbors(4),         &
+                        ntag, icomm, ilocalreq(4), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_ISEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        ! lower neighbor is present
+        CALL MPI_RECV (var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),    &
+                       iexchg_MPI_types(2*icase), MPI_neighbors(4),         &
+                       ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(2) /= -1) THEN
+        ! upper neighbor is present
+        CALL MPI_RECV (var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),     &
+                        iexchg_MPI_types(2*icase), MPI_neighbors(2),         &
+                        ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
+          RETURN
+        ENDIF
+      ENDIF
   
-      ELSE
+      IF (neighbors(2) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(2)
+        CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
   
-        !--------------------------------------------------------------------------
-        !- Section 5.5: Send data to the left and receive from the right neighbor
-        !--------------------------------------------------------------------------
+      IF (neighbors(4) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(4)
+        CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+    ELSE
+
+      !------------------------------------------------------------------------
+      !- Section 3.3: exchange with left and right neigh. using explict buff.
+      !------------------------------------------------------------------------
+
+      IF (neighbors(1) /= -1) THEN
+        ! left neighbor is present
   
+        ! determine start- and end-indices for routine putbuf
         nzcount_ls = 0
-        IF (MPI_neighbors(1) /= MPI_PROC_NULL) THEN
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
-        ENDIF
-  
-        CALL MPI_SENDRECV                                                      &
-             ( sendbuf(1,1), nzcount_ls,  imp_type, MPI_neighbors(1), ntag,    &
-               sendbuf(1,7), isendbuflen, imp_type, MPI_neighbors(3), ntag,    &
-               icomm, nzstatus, izmplcode)
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
+
+        ! send the data
+        CALL MPI_ISEND ( sendbuf(1,1), nzcount_ls, imp_type, neighbors(1),   &
+                         ntag, icomm, ilocalreq(1), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV'
+          yerrmsg = 'MPI_ISEND'
           RETURN
         ENDIF
-  
-        IF (MPI_neighbors(3) /= MPI_PROC_NULL) THEN
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
-        ENDIF
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.6: Send data to the right and receive from the left neighbor
-        !--------------------------------------------------------------------------
-  
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! right neighbor is present
+
+        ! determine start- and end-indices for routine putbuf
         nzcount_rs = 0
-        IF (MPI_neighbors(3) /= MPI_PROC_NULL) THEN
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
-        ENDIF
-  
-        CALL MPI_SENDRECV                                                      &
-             ( sendbuf(1,3), nzcount_rs,  imp_type, MPI_neighbors(3), ntag,    &
-               sendbuf(1,5), isendbuflen, imp_type, MPI_neighbors(1), ntag,    &
-               icomm, nzstatus, izmplcode)
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
+
+        ! send the data
+        CALL MPI_ISEND ( sendbuf(1,3), nzcount_rs, imp_type, neighbors(3),   &
+                         ntag, icomm, ilocalreq(3), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV'
+          yerrmsg = 'MPI_ISEND'
           RETURN
         ENDIF
-  
-        IF (MPI_neighbors(1) /= MPI_PROC_NULL) THEN
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! receive the data
+        CALL MPI_RECV ( sendbuf(1,7), isendbuflen, imp_type, neighbors(3),   &
+                        ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
+          RETURN
         ENDIF
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.7: Send data to the upper and receive from the lower neighbor
-        !--------------------------------------------------------------------------
-   
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        ! left neighbor is present
+        ! receive the data
+
+        CALL MPI_RECV ( sendbuf(1,5), isendbuflen, imp_type, neighbors(1),   &
+                        ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
+          RETURN
+        ENDIF
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(1)
+        ! to safely reuse sendbuf(1,1)
+        CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(3)
+        ! to safely reuse sendbuf(1,3)
+        CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
+          IF (izmplcode /= 0) THEN
+            ierror  = izmplcode
+            yerrmsg = 'MPI_WAIT'
+            RETURN
+          ENDIF
+      ENDIF
+
+      !------------------------------------------------------------------------
+      !- Section 3.4: exchange with lower and upper neigh. using explict buff.
+      !------------------------------------------------------------------------
+
+      IF (neighbors(2) /= -1) THEN
         nzcount_us = 0
-        IF (MPI_neighbors(2) /= MPI_PROC_NULL) THEN
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
-        ENDIF
-  
-        CALL MPI_SENDRECV                                                      &
-             ( sendbuf(1,2), nzcount_us,  imp_type, MPI_neighbors(2), ntag,    &
-               sendbuf(1,8), isendbuflen, imp_type, MPI_neighbors(4), ntag,    &
-               icomm, nzstatus, izmplcode)
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
+
+        ! send the data
+        CALL MPI_ISEND ( sendbuf(1,2), nzcount_us, imp_type, neighbors(2),   &
+                         ntag, icomm, ilocalreq(2), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV'
+          yerrmsg = 'MPI_ISEND'
           RETURN
         ENDIF
-  
-        IF (MPI_neighbors(4) /= MPI_PROC_NULL) THEN
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
-        ENDIF
-  
-        !--------------------------------------------------------------------------
-        !- Section 5.8: Send data to the lower and receive from the upper neighbor
-        !--------------------------------------------------------------------------
-   
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        ! lower neighbor is present
+
         nzcount_ds = 0
-        IF (MPI_neighbors(4) /= MPI_PROC_NULL) THEN
-          CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
-        ENDIF
-  
-        CALL MPI_SENDRECV                                                      &
-             ( sendbuf(1,4), nzcount_ds,  imp_type, MPI_neighbors(4), ntag,    &
-               sendbuf(1,6), isendbuflen, imp_type, MPI_neighbors(2), ntag,    &
-               icomm, nzstatus, izmplcode)
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
+
+        ! send the data
+        CALL MPI_ISEND ( sendbuf(1,4), nzcount_ds, imp_type, neighbors(4),   &
+                         ntag, icomm, ilocalreq(4), izmplcode)
         IF (izmplcode /= 0) THEN
           ierror  = izmplcode
-          yerrmsg = 'MPI_SENDRECV'
+          yerrmsg = 'MPI_ISEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        ! lower neighbor is present
+        ! receive the data
+  
+        CALL MPI_RECV ( sendbuf(1,8), isendbuflen, imp_type, neighbors(4),   &
+                        ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
           RETURN
         ENDIF
   
-        IF (MPI_neighbors(2) /= MPI_PROC_NULL) THEN
-          CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
-                        var09, var10, var11, var12, var13, var14, var15 ,var16,&
-                        var17, var18, var19, var20, var21, var22, var23 ,var24,&
-                        sendbuf, isendbuflen, idim, jdim, kdim,                &
-                        izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
-        ENDIF
-  
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
       ENDIF
   
+      IF (neighbors(2) /= -1) THEN
+        ! upper neighbor is present
+        ! receive the data
+  
+        CALL MPI_RECV ( sendbuf(1,6), isendbuflen, imp_type, neighbors(2),   &
+                        ntag, icomm, nzrequest, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_RECV'
+          RETURN
+        ENDIF
+  
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
+      ENDIF
+  
+      IF (neighbors(2) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(2)
+        ! to safely reuse sendbuf(1,2)
+        CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+  
+      IF (neighbors(4) /= -1) THEN
+        ! wait for the completion of the last send to neighbors(4)
+        ! to safely reuse sendbuf(1,4)
+        CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
     ENDIF
+
+!------------------------------------------------------------------------------
+!- Section 4: Exchange with immediate Recv and blocking Send
+!------------------------------------------------------------------------------
+
+  ELSEIF (ntype == 2) THEN
+
+    IF (lmpi_types) THEN
+
+      !------------------------------------------------------------------------
+      !- Section 4.1: exchange with left and right neighbors
+      !------------------------------------------------------------------------
+
+      IF (neighbors(3) /= -1) THEN
+        CALL MPI_IRECV (var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1), &
+                        iexchg_MPI_types(2*icase-1), MPI_neighbors(3),      &
+                        ntag, icomm, ilocalreq(3), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        CALL MPI_IRECV (var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),&
+                        iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
+                        ntag, icomm, ilocalreq(1), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        ! now send the data to the left neighbor
+        CALL MPI_SEND ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1),&
+                        iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        ! now send the data to the right neighbor
+        CALL MPI_SEND ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1),&
+                        iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      !------------------------------------------------------------------------
+      !- Section 4.2: exchange with upper and lower neighbors
+      !------------------------------------------------------------------------
+
+      IF (neighbors(2) /= -1) THEN
+        CALL MPI_IRECV (var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),  &
+                        iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
+                        ntag, icomm, ilocalreq(2), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        CALL MPI_IRECV (var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),  &
+                        iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
+                        ntag, icomm, ilocalreq(4), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        CALL MPI_SEND (var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),  &
+                       iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
+                       ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(2) /= -1) THEN
+        CALL MPI_SEND (var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),  &
+                       iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
+                       ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(2) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+      ENDIF
+
+    ELSE
+
+      !------------------------------------------------------------------------
+      !- Section 4.3: exchange with left and right neighbors
+      !------------------------------------------------------------------------
+
+      IF (neighbors(3) /= -1) THEN
+        CALL MPI_IRECV ( sendbuf(1,7), isendbuflen, imp_type, neighbors(3),  &
+                        ntag, icomm, ilocalreq(3), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        CALL MPI_IRECV ( sendbuf(1,5), isendbuflen, imp_type, neighbors(1),  &
+                        ntag, icomm, ilocalreq(1), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        nzcount_ls = 0
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
+
+        CALL MPI_SEND ( sendbuf(1,1), nzcount_ls, imp_type, neighbors(1),    &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        nzcount_rs = 0
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
+
+        CALL MPI_SEND ( sendbuf(1,3), nzcount_rs, imp_type, neighbors(3),    &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(3) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(3), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
+      ENDIF
+
+      IF (neighbors(1) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(1), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
+      ENDIF
+
+      !------------------------------------------------------------------------
+      !- Section 4.4: exchange with upper and lower neighbors
+      !------------------------------------------------------------------------
+
+      IF (neighbors(2) /= -1) THEN
+        CALL MPI_IRECV ( sendbuf(1,6), isendbuflen, imp_type, neighbors(2),  &
+                        ntag, icomm, ilocalreq(2), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        CALL MPI_IRECV ( sendbuf(1,8), isendbuflen, imp_type, neighbors(4),  &
+                        ntag, icomm, ilocalreq(4), izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_IRECV'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(4) /= -1) THEN
+        nzcount_ds = 0
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
+
+        CALL MPI_SEND ( sendbuf(1,4), nzcount_ds, imp_type, neighbors(4),    &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(2) /= -1) THEN
+        nzcount_us = 0
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
+ 
+        CALL MPI_SEND ( sendbuf(1,2), nzcount_us, imp_type, neighbors(2),    &
+                        ntag, icomm, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_SEND'
+          RETURN
+        ENDIF
+      ENDIF
+
+      IF (neighbors(2) /= -1) THEN
+        CALL MPI_WAIT (ilocalreq(2), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
+      ENDIF
+
+ 
+      IF (neighbors(4) /= -1) THEN
+        ! Now wait until the data have arrived
+        CALL MPI_WAIT (ilocalreq(4), nzstatus, izmplcode)
+        IF (izmplcode /= 0) THEN
+          ierror  = izmplcode
+          yerrmsg = 'MPI_WAIT'
+          RETURN
+        ENDIF
+
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
+      ENDIF
+
+    ENDIF
+
+!------------------------------------------------------------------------------
+!- Section 5: Exchange with SendRecv
+!------------------------------------------------------------------------------
+
+  ELSEIF (ntype == 3) THEN
+
+    IF (lmpi_types) THEN
+
+      !--------------------------------------------------------------------------
+      !- Section 5.1: Send data to the left and receive from the right neighbor
+      !--------------------------------------------------------------------------
+ 
+      CALL MPI_SENDRECV ( var01(izlo_ls,jzlo_ls,1), iexchg_counts(2*icase-1),&
+                          iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
+                          ntag,                                              &
+                          var01(izlo_rr,jzlo_rr,1), iexchg_counts(2*icase-1),&
+                          iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
+                          ntag,                                              &
+                          icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV-1'
+        RETURN
+      ENDIF
+
+      !--------------------------------------------------------------------------
+      !- Section 5.2: Receive data from the left and send to the right neighbor
+      !--------------------------------------------------------------------------
+
+      CALL MPI_SENDRECV ( var01(izlo_rs,jzlo_rs,1), iexchg_counts(2*icase-1),&
+                          iexchg_MPI_types(2*icase-1), MPI_neighbors(3),     &
+                          ntag+1,                                            &
+                          var01(izlo_lr,jzlo_lr,1), iexchg_counts(2*icase-1),&
+                          iexchg_MPI_types(2*icase-1), MPI_neighbors(1),     &
+                          ntag+1,                                            &
+                          icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV-2'
+        RETURN
+      ENDIF
+
+      !--------------------------------------------------------------------------
+      !- Section 5.3: Send data to the upper and receive from the lower neighbor
+      !--------------------------------------------------------------------------
+
+      CALL MPI_SENDRECV ( var01(izlo_us,jzlo_us,1), iexchg_counts(2*icase),  &
+                          iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
+                          ntag+2,                                            &
+                          var01(izlo_dr,jzlo_dr,1), iexchg_counts(2*icase),  &
+                          iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
+                          ntag+2,                                            &
+                          icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV-3'
+        RETURN
+      ENDIF
+ 
+
+      !--------------------------------------------------------------------------
+      !- Section 5.4: Receive data from the upper and send to the lower neighbor
+      !--------------------------------------------------------------------------
+ 
+      CALL MPI_SENDRECV ( var01(izlo_ds,jzlo_ds,1), iexchg_counts(2*icase),  &
+                          iexchg_MPI_types(2*icase), MPI_neighbors(4),       &
+                          ntag+3,                                            &
+                          var01(izlo_ur,jzlo_ur,1), iexchg_counts(2*icase),  &
+                          iexchg_MPI_types(2*icase), MPI_neighbors(2),       &
+                          ntag+3,                                            &
+                          icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV-4'
+        RETURN
+      ENDIF
+
+    ELSE
+
+      !--------------------------------------------------------------------------
+      !- Section 5.5: Send data to the left and receive from the right neighbor
+      !--------------------------------------------------------------------------
+
+      nzcount_ls = 0
+      IF (MPI_neighbors(1) /= MPI_PROC_NULL) THEN
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ls, izup_ls, jzlo_ls, jzup_ls, nzcount_ls, 1 )
+      ENDIF
+
+      CALL MPI_SENDRECV                                                      &
+           ( sendbuf(1,1), nzcount_ls,  imp_type, MPI_neighbors(1), ntag,    &
+             sendbuf(1,7), isendbuflen, imp_type, MPI_neighbors(3), ntag,    &
+             icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV'
+        RETURN
+      ENDIF
+
+      IF (MPI_neighbors(3) /= MPI_PROC_NULL) THEN
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rr, izup_rr, jzlo_rr, jzup_rr, nzcount_rr, 7 )
+      ENDIF
+
+      !--------------------------------------------------------------------------
+      !- Section 5.6: Send data to the right and receive from the left neighbor
+      !--------------------------------------------------------------------------
+
+      nzcount_rs = 0
+      IF (MPI_neighbors(3) /= MPI_PROC_NULL) THEN
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_rs, izup_rs, jzlo_rs, jzup_rs, nzcount_rs, 3 )
+      ENDIF
+
+      CALL MPI_SENDRECV                                                      &
+           ( sendbuf(1,3), nzcount_rs,  imp_type, MPI_neighbors(3), ntag,    &
+             sendbuf(1,5), isendbuflen, imp_type, MPI_neighbors(1), ntag,    &
+             icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV'
+        RETURN
+      ENDIF
+
+      IF (MPI_neighbors(1) /= MPI_PROC_NULL) THEN
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_lr, izup_lr, jzlo_lr, jzup_lr, nzcount_lr, 5 )
+      ENDIF
+
+      !--------------------------------------------------------------------------
+      !- Section 5.7: Send data to the upper and receive from the lower neighbor
+      !--------------------------------------------------------------------------
+ 
+      nzcount_us = 0
+      IF (MPI_neighbors(2) /= MPI_PROC_NULL) THEN
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_us, izup_us, jzlo_us, jzup_us, nzcount_us, 2 )
+      ENDIF
+
+      CALL MPI_SENDRECV                                                      &
+           ( sendbuf(1,2), nzcount_us,  imp_type, MPI_neighbors(2), ntag,    &
+             sendbuf(1,8), isendbuflen, imp_type, MPI_neighbors(4), ntag,    &
+             icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV'
+        RETURN
+      ENDIF
+
+      IF (MPI_neighbors(4) /= MPI_PROC_NULL) THEN
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_dr, izup_dr, jzlo_dr, jzup_dr, nzcount_dr, 8 )
+      ENDIF
+
+      !--------------------------------------------------------------------------
+      !- Section 5.8: Send data to the lower and receive from the upper neighbor
+      !--------------------------------------------------------------------------
+ 
+      nzcount_ds = 0
+      IF (MPI_neighbors(4) /= MPI_PROC_NULL) THEN
+        CALL putbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ds, izup_ds, jzlo_ds, jzup_ds, nzcount_ds, 4 )
+      ENDIF
+
+      CALL MPI_SENDRECV                                                      &
+           ( sendbuf(1,4), nzcount_ds,  imp_type, MPI_neighbors(4), ntag,    &
+             sendbuf(1,6), isendbuflen, imp_type, MPI_neighbors(2), ntag,    &
+             icomm, nzstatus, izmplcode)
+      IF (izmplcode /= 0) THEN
+        ierror  = izmplcode
+        yerrmsg = 'MPI_SENDRECV'
+        RETURN
+      ENDIF
+
+      IF (MPI_neighbors(2) /= MPI_PROC_NULL) THEN
+        CALL getbuf ( var01, var02, var03, var04, var05, var06, var07, var08,&
+                      var09, var10, var11, var12, var13, var14, var15 ,var16,&
+                      var17, var18, var19, var20, var21, var22, var23 ,var24,&
+                      sendbuf, isendbuflen, idim, jdim, kdim,                &
+                      izlo_ur, izup_ur, jzlo_ur, jzup_ur, nzcount_ur, 6 )
+      ENDIF
+
+    ENDIF
+
+  ENDIF
+
+! UB>> =================================================================
 
   END IF  ! num_compute > 1
+
+! UB<< =================================================================
 
 !------------------------------------------------------------------------------
 !- End of the Subroutine
@@ -2657,11 +2566,11 @@ SUBROUTINE putbuf  (var01, var02, var03, var04, var05, var06, var07, var08, &
   INTEGER (KIND=iintegers), INTENT (INOUT)      ::    &
     ncount                          ! counts the variables
 
-  REAL (KIND=wp),     INTENT (INOUT)            ::    &
+  REAL (KIND=ireals), INTENT (INOUT)            ::    &
     sendbuf (isendbuflen, 8),     & ! send buffer
     var01  (idim, jdim, kdim( 1))   ! first field that has to occur
 
-  REAL (KIND=wp),     OPTIONAL, INTENT (INOUT)  ::    &
+  REAL (KIND=ireals), OPTIONAL, INTENT (INOUT)  ::    &
     var02  (idim, jdim, kdim( 2)),& ! additional optional fields
     var03  (idim, jdim, kdim( 3)),& ! additional optional fields
     var04  (idim, jdim, kdim( 4)),& ! additional optional fields
@@ -3064,11 +2973,11 @@ SUBROUTINE getbuf  (var01, var02, var03, var04, var05, var06, var07, var08, &
   INTEGER (KIND=iintegers), INTENT (INOUT)      ::    &
     ncount                          ! counts the variables
 
-  REAL (KIND=wp),     INTENT (INOUT)            ::    &
+  REAL (KIND=ireals), INTENT (INOUT)            ::    &
     sendbuf (isendbuflen, 8),     & ! send buffer
     var01  (idim, jdim, kdim( 1))   ! first field that has to occur
 
-  REAL (KIND=wp),     OPTIONAL, INTENT (INOUT)  ::    &
+  REAL (KIND=ireals), OPTIONAL, INTENT (INOUT)  ::    &
     var02  (idim, jdim, kdim( 2)),& ! additional optional fields
     var03  (idim, jdim, kdim( 3)),& ! additional optional fields
     var04  (idim, jdim, kdim( 4)),& ! additional optional fields
@@ -3541,10 +3450,10 @@ SUBROUTINE setup_data_type                                                   &
   CHARACTER (LEN=*),        INTENT(OUT)  ::       &
     yerrmsg               ! for MPI error message
 
-  REAL (KIND=wp),     INTENT (INOUT)            ::    &
+  REAL (KIND=ireals), INTENT (INOUT)            ::    &
     var01 (idim,jdim,kdim( 1))         ! first field that has to occur
 
-  REAL (KIND=wp),     OPTIONAL, INTENT (INOUT)  ::    &
+  REAL (KIND=ireals), OPTIONAL, INTENT (INOUT)  ::    &
     var02 (idim,jdim,kdim( 2)),& ! additional optional fields
     var03 (idim,jdim,kdim( 3)),& ! additional optional fields
     var04 (idim,jdim,kdim( 4)),& ! additional optional fields

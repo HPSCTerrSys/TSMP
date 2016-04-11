@@ -101,7 +101,16 @@ PROGRAM program_off
 #else
   call mpi_initialized (mpi_running, ier)
   if (.not. mpi_running) call mpi_init(ier)
-  mpicom_glob = MPI_COMM_WORLD
+  !FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
+  open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=ierror)
+  if(ierror==0) then
+    read(4711, *) i
+    close(4711)
+  else
+    i = 0
+  endif
+ 
+  call MPI_COMM_SPLIT(MPI_COMM_WORLD,i,i,mpicom_glob,ierror) 
   call spmd_init(mpicom_glob)
   call mct_world_init(1,mpicom_glob,mpicom,comp_id)
 #endif
