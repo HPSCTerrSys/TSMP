@@ -91,7 +91,7 @@ check
 comment "  sed runtime to namelist"
   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
-  if [[ $restart == 0 ]] then
+  if [[ $restDate == "" ]] then
 comment "  sed no restart file path to namelist"
     sed "s,__finidat__,," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check

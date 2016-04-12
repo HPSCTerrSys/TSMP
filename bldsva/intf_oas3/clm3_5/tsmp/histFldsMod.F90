@@ -79,6 +79,23 @@ contains
     ! Snow properties
     ! These will be vertically averaged over the snow profile
 
+
+!FG for forecast output
+     call add_fld1d (fname='QFLX_RAIN_GRND', units='mm H2O/s', &
+          avgflag='A', long_name='rain on ground after interception', &
+          ptr_pft=clm3%g%l%c%p%pwf%qflx_rain_grnd)
+ 
+     call add_fld1d (fname='QFLX_SNOW_GRND', units='mm H2O/s', &
+          avgflag='A', long_name='snow on ground after interception', &
+          ptr_pft=clm3%g%l%c%p%pwf%qflx_snow_grnd)
+
+     call add_fld1d (fname='QFLX_EVAP_TOT', units='mm H2O/s', &
+          avgflag='A', long_name='qflx_evap_soi + qflx_evap_veg + qflx_tran_veg', &
+          ptr_pft=clm3%g%l%c%p%pwf%qflx_evap_tot)
+
+
+
+
     call add_fld1d (fname='SNOWDP',  units='m',  &
          avgflag='A', long_name='snow height', &
          ptr_col=clm3%g%l%c%cps%snowdp)

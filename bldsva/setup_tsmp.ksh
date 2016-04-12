@@ -20,6 +20,7 @@ getDefaults(){
   def_py_pfl=""
   def_refSetup=""
   def_startDate="2008-05-08 00"
+  def_restDate=""
   def_runhours=3
   #profiling ("yes" , "no") - will use machine standard
   def_profiling="no"
@@ -52,11 +53,7 @@ setDefaults(){
   py_pfl=$def_py_pfl
   startDate=$def_startDate
   runhours=$def_runhours
-
-#TODO:
-  restart=0
-  restDate=2015-11-08
-
+  restDate=$ref_restDate
 }
 
 setSelection(){
@@ -272,6 +269,7 @@ interactive(){
 		  if [[ $numb == 27 ]] ; then ; read pfldir ; fi
                   if [[ $numb == 28 ]] ; then ; read profiling ; fi
                   if [[ $numb == 29 ]] ; then ; read numInst ; fi
+                  if [[ $numb == 30 ]] ; then ; read restDate ; fi
                 done
                 interactive
           ;;
@@ -320,6 +318,7 @@ printState(){
   print "${cred}(27)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir${cnormal}"
   print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
   print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
+  print "${cred}(30)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
 }
 
 
@@ -420,7 +419,7 @@ getRoot(){
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
   USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[startdate:='$def_startDate']"
-#USAGE+="[S:restartdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[restartdate:='$def_restart']" 
+  USAGE+="[S:restdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[restdate:='$def_restDate']" 
   USAGE+="[T:runhours? Number of simulated hours.]:[runhours:='$def_runhours']" 
   USAGE+="[w:pxclm? Number of tasks for clm in X direction. If you leave it '' the machine default will be taken.]:[pxclm:='$def_px_clm']"
   USAGE+="[W:pyclm? Number of tasks for clm in Y direction. If you leave it '' the machine default will be taken.]:[pyclm:='$def_py_clm']"
@@ -458,7 +457,7 @@ getRoot(){
     n)  nppn=$OPTARG ; args=1 ;;
     N)  numInst=$OPTARG ; args=1 ;;
     s)  startDate=$OPTARG ; args=1 ;;
-#    S)  #restart
+    S)  restDate=$OPTARG ; args=1 ;;
     T)  runhours=$OPTARG ; args=1 ;;    
     
     d)  namelist_oas=$OPTARG ; args=1 ;;

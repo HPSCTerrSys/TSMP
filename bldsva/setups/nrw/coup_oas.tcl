@@ -375,11 +375,15 @@ pfset Mannings.Geom.domain.Value	 5.52e-6
 #pfset ICPressure.GeomNames		 "domain"
 #pfset Geom.domain.ICPressure.FileName    "/daten01/z4/database/ParFlow/Rur_NRW/Rur_300X300_Ini/rur_ic_press.pfb" 
 #
-pfset ICPressure.Type                    HydroStaticPatch
+pfset ICPressure.Type                    __pfl_ICPpressureType__
 pfset ICPressure.GeomNames               domain
-pfset Geom.domain.ICPressure.Value       -5.
+pfset Geom.domain.ICPressure.Value       __pfl_ICPpressureValue__
+pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.RefGeom     domain
 pfset Geom.domain.ICPressure.RefPatch    z-upper
+
+
+
 #
 #-----------------------------------------------------------------------------
 # Phase sources:

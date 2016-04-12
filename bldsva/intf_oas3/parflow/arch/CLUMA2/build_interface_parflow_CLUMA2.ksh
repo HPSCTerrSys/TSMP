@@ -88,7 +88,7 @@ route "${cblue}>> setup_pfl${cnormal}"
   comment "   sed start counter to pfl namelist."
     sed "s/__start_cnt_pfl__/0/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
-    if [[ $restart == 0 ]] then
+    if [[ $restDate == "" ]] then
   comment "   sed initial condition to pfl namelist."
       sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
   check

@@ -1,15 +1,15 @@
 #! /bin/ksh
 
 initSetup(){
-  if [[ $forcingdir_clm == "" ]] ; then ;forcingdir_clm="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std";fi
-  if [[ $forcingdir_cos == "" ]] ; then ;forcingdir_cos="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/cosmo/int2lm_output.20080508";fi
-  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/oasis3/";fi
-  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW/";fi
+  if [[ $forcingdir_clm == "" ]] ; then ;forcingdir_clm="/homea/slts/slts06/forcings/testdata_EU_std";fi
+  if [[ $forcingdir_cos == "" ]] ; then ;forcingdir_cos="";fi
+  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/homea/slts/slts06/forcings/testdata_EU_std/oasis3";fi
+  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/homea/slts/slts06/forcings/testdata_EU_std/ParFlow";fi
 
 
-  if [[ $namelist_clm == "" ]] ; then ; namelist_clm=$rootdir/bldsva/setups/nrw/lnd.stdin ; fi
-  if [[ $namelist_cos == "" ]] ; then ; namelist_cos=$rootdir/bldsva/setups/nrw/lmrun_uc ; fi
-  if [[ $namelist_pfl == "" ]] ; then ; namelist_pfl=$rootdir/bldsva/setups/nrw/coup_oas.tcl ; fi
+  if [[ $namelist_clm == "" ]] ; then ; namelist_clm=$rootdir/bldsva/setups/cordex/lnd.stdin ; fi
+  if [[ $namelist_cos == "" ]] ; then ; namelist_cos=$rootdir/bldsva/setups/cordex/lmrun_uc ; fi
+  if [[ $namelist_pfl == "" ]] ; then ; namelist_pfl=$rootdir/bldsva/setups/cordex/coup_oas.tcl ; fi
 
 
   defaultNppn=16
@@ -20,23 +20,24 @@ initSetup(){
   defaultPFLProcX=8
   defaultPFLProcY=8
 
-  gx_clm=300
-  gy_clm=300
-  dt_clm=900
-  res="0300x0300"
 
-  gx_cos=150
-  gy_cos=150
-  dt_cos=10
+  gx_clm=436
+  gy_clm=424
+  dt_clm=3600
+  res="436x424"
+
+  gx_cos=444
+  gy_cos=432
+  dt_cos=60
   nbndlines=4
 
-  gx_pfl=300
-  gy_pfl=300
-  dt_pfl=0.25
-  pflrunname="rurlaf"
+  gx_pfl=436
+  gy_pfl=424
+  dt_pfl=1.0
+  pflrunname="cordex0.11"
 
-  cplfreq1=900
-  cplfreq2=900
+  cplfreq1=3600
+  cplfreq2=3600
 
 
   if [[ $namelist_oas == "" ]] ; then  
@@ -51,17 +52,16 @@ initSetup(){
     fi
   fi
 
-  restDir="/work/slts/slts15/tsmp/TSMPForecastNRW$(date '+%Y-%m-%d-%H' -d "$restDate")/run"
-  fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-00000.nc"
+  restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDat")/run"
+  fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-43200.nc"
   pfbfilename="$restDir/rurlaf.out.press.00024.pfb"
-
 
 }
 
 finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   comment "   copy clmgrid into rundir"
-    cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+    cp $forcingdir_clm/clm3.5/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
   check  
   if [[ $withOAS == "true" ]] then
     comment "   copy oasis remappingfiles into rundir"
@@ -82,14 +82,14 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
 
         comment "   copy slopes and slope script into rundir"
-          cp $forcingdir_pfl/slopes/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/slopes/ascii2pfb_slopes.tcl.template $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/slopes/*slope.pfb* $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/slopes/slope*.sa $rundir >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/*slope*  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/slope*.sa  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
@@ -100,14 +100,14 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check		
 	
 	comment "   copy soilind and soilind script into rundir"
-          cp $forcingdir_pfl/soilInd/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/soilInd/ascii2pfb_ind.tcl.template $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/soilInd/*Soil* $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/soilInd/parflow_436x424x15_cosmomask_indicator_FAOonly.sa $rundir/pfl_ind.sa >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/*Soil* $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/parflow_436x424x15_cosmomask_indicator_FAOonly.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check

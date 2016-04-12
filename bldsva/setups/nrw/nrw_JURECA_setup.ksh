@@ -3,8 +3,8 @@
 initSetup(){
   if [[ $forcingdir_clm == "" ]] ; then ;forcingdir_clm="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std";fi
   if [[ $forcingdir_cos == "" ]] ; then ;forcingdir_cos="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/cosmo/int2lm_output.20080508";fi
-  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/oasis3/";fi
-  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW/";fi
+  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/oasis3";fi
+  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW";fi
 
 
   if [[ $namelist_clm == "" ]] ; then ; namelist_clm=$rootdir/bldsva/setups/nrw/lnd.stdin ; fi
@@ -52,8 +52,9 @@ initSetup(){
     fi
   fi
 
-  fn_finidat="$WORK/tsmp/TSMPForecastNRW$restDate-00/run/clmoas.clm2.r.${yyyy}-${mm}-${dd}-00000.nc"
-  pfbfilename="/work/slts/slts06/tsmp/TSMPForecastNRW$restDate-00/run/rurlaf.out.press.00024.pfb"
+  restDir="/work/slts/slts15/tsmp/TSMPForecastNRW$(date '+%Y-%m-%d-%H' -d "$restDate")/run"
+  fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-00000.nc"
+  pfbfilename="$restDir/rurlaf.out.press.00024.pfb"
 
 }
 
