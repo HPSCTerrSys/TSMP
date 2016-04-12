@@ -53,7 +53,7 @@ initSetup(){
 
   restDir="/work/slts/slts15/tsmp/TSMPForecastNRW$(date '+%Y-%m-%d-%H' -d "$restDate")/run"
   fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-00000.nc"
-  pfbfilename="$restDir/rurlaf.out.press.00024.pfb"
+  pfbfilename="$restDir/${pflrunname}.out.press.00024.pfb"
 
 
 }

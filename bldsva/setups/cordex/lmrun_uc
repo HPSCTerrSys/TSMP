@@ -252,7 +252,7 @@ cat > INPUT_IO  << end_input_io
   ydirbd     = '$BD_DIR',
  /
  &GRIBOUT
-    ncomb=0,$nsteps,_dt_cos_out_,
+    ncomb=0,$nsteps,60,
     !ncomb=0,$nsteps,1440,
     !ncomb=0,$nsteps,360,
     !ncomb=__ncomb_start__,$nsteps,360,
@@ -267,7 +267,7 @@ cat > INPUT_IO  << end_input_io
     plev=500,700,850,
     yvarml='PS        ','P         ','PMSL      ','T_G       ',
            'QV_2M     ','RELHUM_2M ',
-           'T_S       ','T_2M      ','T         ','FI'
+           'T_S       ','T_2M      ','T         ','FI',
            'U_10M     ','V_10M     ','U         ','V         ',
            'W         ','TCM       ','TCH       ',
   	   'RAIN_GSP','SNOW_GSP', 'RAIN_CON', 'SNOW_CON','PRR_CON','PRS_CON','PRR_GSP','PRS_GSP',
@@ -286,7 +286,7 @@ cat > INPUT_IO  << end_input_io
  /
 !&GRIBOUT
    ! Following output can be used to restart COSMO
-!    ncomb=0,$nsteps,_dt_cos_resout_,
+!    ncomb=0,$nsteps,60,
     !ncomb=0,$nsteps,1440,
     !ncomb=0,$nsteps,720,
 !    lanalysis=.true.,

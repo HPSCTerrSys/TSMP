@@ -54,7 +54,7 @@ initSetup(){
 
   restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDat")/run"
   fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-43200.nc"
-  pfbfilename="$restDir/rurlaf.out.press.00024.pfb"
+  pfbfilename="$restDir/${pflrunname}.out.press.00024.pfb"
 
 }
 
@@ -104,7 +104,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check
           cp $forcingdir_pfl/soilInd/parflow_436x424x15_cosmomask_indicator_FAOonly.sa $rundir/pfl_ind.sa >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/parflow_436x424x15_cosmomask_indicator_FAOonly.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/pfl_ind.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
           sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
