@@ -1165,14 +1165,18 @@ REAL    (KIND=wp   )     ::  &
   END IF
 
 #ifdef COUP_OAS_COS
-  ALLOCATE ( za1t(ke1), za2t(ke1), zpia(ie,je,ke), zpianf(ie,je,ke1),    &
-    ztmkvm(ie,je,ke), ztmkvh(ie,je), ztch(ie,je), ztcm(ie,je),           &
-    ztcw(ie,je), ztheta(ie,je,ke), zkh(ie,je,ke), STAT=izstata )
-#else
+  ALLOCATE (ztcw(ie,je), STAT=izstata)
+
+  IF ( izstata /= 0 ) THEN 
+    yzerrmsg="allocation of ztcw"
+    CALL model_abort (my_cart_id, izstata, yzerrmsg, yzroutine)
+  END IF
+#endif
+
   ALLOCATE ( za1t(ke1), za2t(ke1), zpia(ie,je,ke), zpianf(ie,je,ke1),    &
     ztmkvm(ie,je,ke), ztmkvh(ie,je), ztch(ie,je), ztcm(ie,je),           &
     ztheta(ie,je,ke), zkh(ie,je,ke), STAT=izstata )
-#endif
+
   IF ( izstata /= 0 ) THEN
     yzerrmsg="allocation of za1t"
     CALL model_abort (my_cart_id, 100+izerror, yzerrmsg, yzroutine)
@@ -1848,13 +1852,13 @@ REAL    (KIND=wp   )     ::  &
 
   DEALLOCATE ( wcon, STAT=izstatd )
   DEALLOCATE ( zsqrtgrho_r_s, zsqrtgrho_r_u, zsqrtgrho_r_v, STAT=izstatd )
-#ifdef COUP_OAS
-  DEALLOCATE ( za1t, za2t, zpia, zpianf, ztmkvm, ztmkvh, ztch, ztcm, zkh,  &
-               ztcw,ztheta, STAT=izstatd )
-#else
+
+#ifdef COUP_OAS_COS
+  DEALLOCATE ( ztcw, STAT=izstatd )
+#endif
+
   DEALLOCATE ( za1t, za2t, zpia, zpianf, ztmkvm, ztmkvh, ztch, ztcm, zkh,  &
                ztheta, STAT=izstatd )
-#endif
   IF ( lvertdiff_w )  DEALLOCATE ( ztmkvw, zsqrtgrho_r_w, STAT=izstatd )
   IF ( lprog_tke )    DEALLOCATE ( ztmkvtke, STAT=izstatd )
   IF ( lmoist_turb .AND. l3dturb )  DEALLOCATE ( ztheta_l, STAT=izstatd )

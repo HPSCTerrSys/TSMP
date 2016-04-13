@@ -13,11 +13,12 @@
 #
 .SILENT:
 #
-STDROOT      = ${PWD}
+STDROOT      = __cosmoroot__
 SRCDIR       = $(STDROOT)/src
 OASDIR       = $(STDROOT)/src/oas3
 OBJDIR       = $(STDROOT)/obj
 WORKDIR      = $(STDROOT)/work
+WITHOAS      = __withoas__
 #
 #
 ####################################################
@@ -26,13 +27,13 @@ WORKDIR      = $(STDROOT)/work
 #     and can be copied to Fopts
 ####################################################
 
-include Fopts
+include $(STDROOT)/Fopts
 
 ####################################################
 #  Declaration of the Object Files
 ####################################################
 
-include ObjFiles
+include $(STDROOT)/ObjFiles
 
 ####################################################
 #  Actions that can be performed

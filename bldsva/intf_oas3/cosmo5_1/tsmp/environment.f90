@@ -491,15 +491,14 @@ SUBROUTINE init_environment (nproc, my_world_id, icomm_world, igroup_world, &
 
     iexch_req(4),    & ! stores the sends requests for the neighbor-exchange
                        ! that can be used by MPI_WAIT to identify the send
-    ierror,          & ! error status variable
-    inst               ! reads instance from file  
+    ierror             ! error status variable
 
   CHARACTER (LEN=100),      INTENT(OUT)  ::       &
     yerrmsg            ! for MPI error message
 
 ! Local variables:
 
-INTEGER (KIND=iintegers)           :: izmplcode
+INTEGER (KIND=iintegers)           :: izmplcode , inst
 
 !------------------------------------------------------------------------------
 

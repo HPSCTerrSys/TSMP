@@ -22,11 +22,20 @@
 
 c_configure_cos(){
 route "${cblue}>>> c_configure_cos${cnormal}"
+  comment "    cd to cosmo dir"
+    cd $cosdir >> $log_file 2>> $err_file
+  check
+  file=$cosdir/Makefile
+  comment "    sed cosmo rootdir to Makefile"
+    sed -i "s@__cosmoroot__@$cosdir@" $file >> $log_file 2>> $err_file
+  check
+  comment "    sed OAS flag to Makefile"
+    sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
+  check
   comment "    make clean cosmo"
-    make -f $cosdir/Makefile clean >> $log_file 2>> $err_file
+    make clean >> $log_file 2>> $err_file
   check
 
-    file=$cosdir/Makefile
     cplFlag=""
     cplLib=""
     cplInc=""
@@ -34,12 +43,6 @@ route "${cblue}>>> c_configure_cos${cnormal}"
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
     fi
-  comment "    sed cosmo rootdir to Makefile"
-    sed -i "s@__cosmoroot__@$cosdir@" $file >> $log_file 2>> $err_file
-  check
-  comment "    sed OAS flag to Makefile"
-    sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
-  check
 route "${cblue}<<< c_configure_cos${cnormal}"
 }
 

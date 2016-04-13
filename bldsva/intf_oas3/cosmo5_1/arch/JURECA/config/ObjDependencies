@@ -213,6 +213,7 @@ $(OBJDIR)/mo_t_table.o:                 $(SRCDIR)/mo_t_table.f90
 #
 ####################################################
 #
+ifeq ($(WITHOAS),true)
 $(OBJDIR)/oas_cos_vardef.o:                  $(OASDIR)/oas_cos_vardef.F90     \
 	$(OBJDIR)/data_parameters.o
 	echo compiling oas_cos_vardef.F90
@@ -229,6 +230,18 @@ $(OBJDIR)/environment.o:                     $(SRCDIR)/environment.f90        \
 	$(OBJDIR)/oas_cos_vardef.o
 	echo compiling environment.f90
 	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(SRCDIR)/environment.f90 )
+
+else
+
+
+$(OBJDIR)/environment.o:                     $(SRCDIR)/environment.f90        \
+	$(OBJDIR)/data_parameters.o        $(OBJDIR)/utilities.o            
+	echo compiling environment.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(SRCDIR)/environment.f90 )
+ 
+endif
+
+
 #
 $(OBJDIR)/grid_metrics_utilities.o:     $(SRCDIR)/grid_metrics_utilities.f90  \
           $(OBJDIR)/data_fields.o            $(OBJDIR)/data_modelconfig.o     \
@@ -1314,6 +1327,8 @@ $(OBJDIR)/slow_tendencies.o:                 $(SRCDIR)/slow_tendencies.f90    \
 #
 ################################################################################
 #
+#
+ifeq ($(WITHOAS),true)
 $(OBJDIR)/oas_cos_define.o:                  $(OASDIR)/oas_cos_define.F90     \
 	$(OBJDIR)/data_parameters.o        $(OBJDIR)/oas_cos_vardef.o       \
 	$(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_fields.o          \
@@ -1357,6 +1372,7 @@ $(OBJDIR)/send_fld_2clm.o:                  $(OASDIR)/send_fld_2clm.F90       \
 	$(OBJDIR)/data_runcontrol.o       $(OBJDIR)/data_fields.o
 	echo compiling send_fld_2clm.F90 
 	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/send_fld_2clm.F90 )
+endif
 #
 ################################################################################
 #

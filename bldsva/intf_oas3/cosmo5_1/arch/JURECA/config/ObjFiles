@@ -149,6 +149,7 @@ SATOBJ =         $(OBJDIR)/data_satellites.o         \
                  $(OBJDIR)/src_sat_rttov.o           \
                  $(OBJDIR)/organize_satellites.o
 #
+ifeq ($(WITHOAS),true)
 OASOBJ       =   $(OBJDIR)/oas_cos_vardef.o          \
                  $(OBJDIR)/oas_cos_define.o          \
                  $(OBJDIR)/oas_cos_init.o            \
@@ -157,6 +158,7 @@ OASOBJ       =   $(OBJDIR)/oas_cos_vardef.o          \
                  $(OBJDIR)/oas_cos_snd.o             \
                  $(OBJDIR)/receive_fld_2clm.o        \
                  $(OBJDIR)/send_fld_2clm.o
+endif
 #
 PUBLICUTILS =    $(OBJDIR)/mpe_io2.o
 #

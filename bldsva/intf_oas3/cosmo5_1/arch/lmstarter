@@ -1,5 +1,0 @@
-#!/bin/bash
-ulimit -s unlimited
-#ulimit -a
-export group
-./lmparbin_pur

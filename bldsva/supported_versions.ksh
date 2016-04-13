@@ -21,7 +21,7 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" 1.1.0 1.1.0MCT "
+        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT "
         ["CCA2"]=" 1.1.0 1.1.0MCT "
@@ -30,6 +30,8 @@ availability+=(
 
 # list of versions with descriptions
 versions+=(
+        ["1.2.0"]="1.2.0 without modifications"
+        ["1.2.0MCT"]="1.2.0 with Oasis3-MCT"
         ["1.1.0"]="1.1.0 without modifications"
         ["1.1.0MCT"]="1.1.0 with Oasis3-MCT"
         ["curr"]="latest version without modifications"
@@ -41,6 +43,8 @@ versions+=(
 # order: Oasis, CLM , COSMO, Parflow !!!
 # Important: this order must be fulfilled. If one of it is not supported, leave a "" at its place.
 modelVersion+=(
+        ["1.2.0"]="oasis3 clm3_5 cosmo5_1 parflow"
+        ["1.2.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow"
         ["1.1.0"]="oasis3 clm3_5 cosmo4_21 parflow"
         ["1.1.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow"
         ["curr"]="oasis3 clm3_5 cosmo4_21 parflow"
@@ -52,6 +56,8 @@ modelVersion+=(
 # with that model limitation/combination and make it available only for this platform 
 # IMPORTANT: add a leading and trailing " "(space)
 combinations+=(
+        ["1.2.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["1.2.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["curr"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
@@ -61,6 +67,7 @@ combinations+=(
 #list of supported testcases for a certain machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setups+=(
+        ["cordex"]="444x432 (12km res) atmosphere 436x424 (12km res) land domain of Europe and northern Afrika"
 	["nrw"]="150x150 (1km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
 	["ideal300150"]="idealized domain with gridsize scaled to 150x150 (atmosphere) 300x300 (land)"
 	["ideal600300"]="idealized domain with gridsize scaled to 300x300 (atmosphere) 600x600 (land)"
