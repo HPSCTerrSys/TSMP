@@ -4,9 +4,6 @@ SUBROUTINE send_fld_2clm
 ! Description:
 !  This routine sends coupling fields to CLM3.5 
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -14,9 +11,9 @@ SUBROUTINE send_fld_2clm
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
-! 1.2        2013/01/15 Markus Uebel, Prabhakar Shrestha 
+! 1.1.2        2013/01/15 Markus Uebel, Prabhakar Shrestha 
 !   Adding CO2 fields and implemented in COSMO4.21
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         

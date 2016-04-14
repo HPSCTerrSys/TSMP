@@ -150,6 +150,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-mpi_lib $mpiPath/lib "
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
+    flags+="-cppdefs $cpl_scheme"
     cplInc=""
     if [[ $withOAS == "true" ]]; then
       cplLib+="$liboas $libpsmile"
@@ -159,7 +160,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    configure clm"
-    $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" >> $log_file 2>> $err_file
+    $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "-DCPL_SCHEME_F"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
 }

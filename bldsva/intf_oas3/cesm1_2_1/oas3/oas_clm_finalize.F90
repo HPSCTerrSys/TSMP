@@ -6,9 +6,6 @@ SUBROUTINE oas_clm_finalize
 !  called explicitly before oas_clm_init it will also close
 !  MPI communication. 
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -16,8 +13,8 @@ SUBROUTINE oas_clm_finalize
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
 !
@@ -32,7 +29,6 @@ SUBROUTINE oas_clm_finalize
 ! Modules used:
 
 USE oas_clm_vardef
-!CPScesm USE spmdMod      ,       ONLY : masterproc
 
 !==============================================================================
 
@@ -48,8 +44,7 @@ IMPLICIT NONE
 !- Begin Subroutine oas_clm_finalize 
 !------------------------------------------------------------------------------
 
-
-!CPScesm  IF (masterproc) DEALLOCATE(exfld)
+ DEALLOCATE(exfld)
 
  WRITE(6,*) "oasclm: oas_clm_finalize:  prsim terminate"
  CALL prism_terminate_proto ( nerror )

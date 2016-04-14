@@ -15,7 +15,7 @@ check
 
   c_configure_cos
   if [[ $withOAS == "true" ]]; then
-    cplFlag="-WF,-DCOUP_OAS_COS" 
+    cplFlag="-WF,-DCOUP_OAS_COS -WF,-DCPL_SCHEME_F" 
   fi 
   file=$cosdir/Fopts  
 comment "   sed comflg to cos Makefile"

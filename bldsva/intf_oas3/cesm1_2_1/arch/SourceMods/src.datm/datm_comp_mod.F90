@@ -308,7 +308,11 @@ subroutine datm_comp_init( EClock, cdata, x2a, a2x, NLFilename )
                               orb_lambm0=orbLambm0,orb_obliqr=orbObliqr )
 
     atm_present = .false.
+#ifdef COUP_OAS_COS
+    atm_prognostic = .true.
+#else
     atm_prognostic = .false.
+#endif
     call seq_infodata_GetData(infodata,read_restart=read_restart)
 
     !----------------------------------------------------------------------------
@@ -449,7 +453,7 @@ subroutine datm_comp_init( EClock, cdata, x2a, a2x, NLFilename )
     ! Initialize MCT global seg map, 1d decomp
     !----------------------------------------------------------------------------
 #if (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-    call oas_clm_define(SDATM%domainFile)    !CPS sending clm global grid to oasis define
+     call oas_clm_define(SDATM)   !CPS
 #endif
 
     call t_startf('datm_initgsmaps')
@@ -781,30 +785,6 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
    nextsw_cday = datm_shr_getNextRadCDay( CurrentYMD, CurrentTOD, stepno, idt, iradsw, calendar )
    call seq_infodata_PutData(infodata, nextsw_cday=nextsw_cday )
 
-!CPS
-!CPS#ifdef COUP_OAS_COS
-!   call t_startf('receive data from oasis')
-!   call receive_fld_2cos(idt, lcoupled) 
-!   if (my_task == master_task) then
-!     call mct_aVect_init(avG,av,gsize)
-!     allocate(data(nx,ny))
-!     do k = 1,mct_aVect_nRAttr(av)
-!        avG%rAttr(k,:) = reshape(data, (/gsize/))
-!     enddo
-!     deallocate(data)
-!   end if
-!   call t_stopf('recieve data from oasis')
-!   call t_barrierf('scatter'//'_BARRIER',mpicom)
-!   call t_startf('_scatter')
-!   call mct_aVect_scatter(avG,avtmp,gsMap,master_task,mpicom)
-!   call mct_aVect_copy(avtmp,av)
-!   if (my_task == master_task) call mct_aVect_clean(avG)
-!   call mct_aVect_clean(avtmp)
-!   call t_stopf('_scatter')
-
-!CPS #else
-   !--- copy all fields from streams to a2x as default ---
-
    if (trim(atm_mode) /= 'NULL') then
       call t_startf('datm_strdata_advance')
       call shr_strdata_advance(SDATM,currentYMD,currentTOD,mpicom,'datm')
@@ -864,10 +844,19 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
       call mct_aVect_zero(a2x)
    endif
 
-!CPS #endif   
-!CPS
+#ifdef COUP_OAS_COS
+    if (firstcall) then
+    ! Do Nothing CPS 
+    !if (my_task == master_task) PRINT*, "CPS RECV", stepno
+    else
+      call receive_fld_2cos(stepno, idt, a2x, lcoupled)
+    end if
 
-   call t_startf('datm_mode')
+!#endif
+
+#else
+
+   call t_startf('datm_mode')   
 
    select case (trim(atm_mode))
 
@@ -1163,6 +1152,19 @@ subroutine datm_comp_run( EClock, cdata,  x2a, a2x)
    end select
 
    call t_stopf('datm_mode')
+
+#endif
+
+#if defined COUP_OAS_COS
+    if (firstcall) then
+    ! Do Nothing CPS 
+    !if (my_task == master_task) PRINT*, "CPS SEND", stepno
+    else
+      call send_fld_2cos(stepno,idt,x2a)  
+    end if
+     !
+#endif
+
 
    if (write_restart) then
       call t_startf('datm_restart')

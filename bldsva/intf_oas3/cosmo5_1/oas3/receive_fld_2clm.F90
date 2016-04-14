@@ -5,9 +5,6 @@ SUBROUTINE receive_fld_2clm
 !  This routine receives fluxes from CLM3.5 and updates the mixing 
 !  mixing coefficients in COSMO (Important surface layer physics involved)
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -15,11 +12,11 @@ SUBROUTINE receive_fld_2clm
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
-! 2.1        2012/09/21 Markus Uebel 
+! 1.2.1        2012/09/21 Markus Uebel 
 !   Inclusion of CO2 fluxes (photosynthesis rate)
-! 3.1        2013/01/31 Prabhakar Shrestha
+! 1.3.1        2013/01/31 Prabhakar Shrestha
 !   Inclusion of aerodynamic resistance from CLM
 !    ram1, rah1, raw1
 !   Inclusion of surface temperature, humidity
@@ -27,9 +24,9 @@ SUBROUTINE receive_fld_2clm
 !   This new option updates the surface temperature, surface humidity and
 !   transfer coefficients directly without inversion. But now coupling frequency
 !   between COSMO and CLM and timesteps should be the same.
-! 3.2        2014/01/05 Prabhakar Shrestha
+! 1.3.2        2014/01/05 Prabhakar Shrestha
 !   Inclusion of masked coupling between cosmo and clm (see zmask)
-! 3.3        2015/08/26 Prabhakar Shrestha
+! 1.3.3        2015/08/26 Prabhakar Shrestha
 !   Inclusion of full "frcv" including the outerbound halos
 !
 ! @VERSION@    @DATE@     <Your name>
@@ -363,7 +360,7 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
 
  ! Land points updated at each time step, frcv(:,:) updated only at coupling time step
 
-   ! CLM3.5 fluxes (+up) ,taux and tauy are always -ve, COSMO fluxes (+down) 
+   ! CESM / CLM3.5 fluxes (+up) ,taux and tauy are always -ve, COSMO fluxes (+down) 
    IF( srcv(jps_taux)%laction .and. nrcvinfo(jps_taux) == OASIS_Rcv ) frcv(:,:,jps_taux) = -frcv(:,:,jps_taux)
    IF( srcv(jps_tauy)%laction .and. nrcvinfo(jps_tauy) == OASIS_Rcv ) frcv(:,:,jps_tauy) = -frcv(:,:,jps_tauy)
 

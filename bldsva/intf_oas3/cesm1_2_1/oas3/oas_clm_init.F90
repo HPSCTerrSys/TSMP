@@ -4,9 +4,6 @@ SUBROUTINE oas_clm_init
 ! Description:
 !  This routine initializes coupler to get the MPI communicator
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
-!
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
 !    email: pshrestha@uni-bonn.de
@@ -14,8 +11,8 @@ SUBROUTINE oas_clm_init
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
 !

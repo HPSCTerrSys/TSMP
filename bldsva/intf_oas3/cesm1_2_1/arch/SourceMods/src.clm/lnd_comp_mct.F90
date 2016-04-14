@@ -1,6 +1,5 @@
 module lnd_comp_mct
   
-!CPS 12-03-2015 Added send/receive routine for TerrSysMP Interface
 !---------------------------------------------------------------------------
 !BOP
 !
@@ -571,12 +570,6 @@ contains
        end if
        call update_rad_dtime(doalb)
 
-#if defined COUP_OAS_PFL
-    !  received fields from ParFlow
-    ! call receive_fld_2pfl(nstep)   !CPS nstep starts with zero now?
-    !
-#endif
-
        ! Determine if time to write cam restart and stop
 
        rstwr = .false.
@@ -628,19 +621,6 @@ contains
           endif
        endif    ! create_glacier_mec_landunit
 
-!CPS
-#if defined COUP_OAS_COS
-     ! send fields to Cosmo
-     call send_fld_2cos(nstep,dtime)
-     !
-#endif
-
-#if defined COUP_OAS_PFL
-    !  send flux fields to ParFlow
-   !call send_fld_2pfl
-    !
-#endif
-!CPS
        ! Advance clm time step
        
        call t_startf ('lc_clm2_adv_timestep')
@@ -826,6 +806,7 @@ contains
     use shr_megan_mod      , only : shr_megan_mechcomps_n
     use clm_cpl_indices
     use clmtype
+
     implicit none
 ! !ARGUMENTS:
     type(lnd2atm_type), intent(inout) :: clm_l2a    ! clm land to atmosphere exchange data type

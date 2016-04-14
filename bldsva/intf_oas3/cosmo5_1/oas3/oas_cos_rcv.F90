@@ -4,8 +4,6 @@ SUBROUTINE oas_cos_rcv( kid, kstep, pdata, kinfo )
 ! Description:
 !  This routine call fields from OASIS3 coupler at each coupling time step.
 !
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
 !
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
@@ -14,9 +12,9 @@ SUBROUTINE oas_cos_rcv( kid, kstep, pdata, kinfo )
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
+! 1.1.1        2011/11/28 Prabhakar Shrestha 
 !   Modfied and Implemented in COSMO4.11, Initial release
-! 2.1        2015/08/24 Prabhakar Shrestha
+! 1.2.1        2015/08/24 Prabhakar Shrestha
 !   Added update of outerbound halos using inner domain data
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         

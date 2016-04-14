@@ -1,12 +1,9 @@
-SUBROUTINE oas_clm_snd( kid, kstep, pdata, kinfo )
+SUBROUTINE oas_clm_snd( kid, kstep, pdata,begg, endg, kinfo )
 
 !---------------------------------------------------------------------
 ! Description:
-!  This routine sends CLM3.5 fields to OASIS3 coupler at each coupling
+!  This routine sends CESM fields to OASIS3 coupler at each coupling
 !  time step defined in namcouple
-!
-! References:
-!  CEREFACS/ETH: E. Maisonnave, Edoward Davin
 !
 ! Current Code Owner: TR32, Z4: Prabhakar Shrestha
 !    phone: 0228733453
@@ -15,8 +12,8 @@ SUBROUTINE oas_clm_snd( kid, kstep, pdata, kinfo )
 ! History:
 ! Version    Date       Name
 ! ---------- ---------- ----
-! 1.1        2011/11/28 Prabhakar Shrestha 
-!   Modfied and Implemented in CLM3.5, Initial release
+! 2.1.0        2016/02/29 Prabhakar Shrestha
+! Implementation for CESM 1.2.1
 ! @VERSION@    @DATE@     <Your name>
 !  <Modification comments>         
 !
@@ -45,10 +42,10 @@ IMPLICIT NONE
 INTEGER,                 INTENT(IN)    :: kid    ! variable index in the array
 INTEGER,                 INTENT(OUT)   :: kinfo  ! OASIS4 info argument
 INTEGER,                 INTENT(IN)    :: kstep  ! CLM time-step in seconds
-REAL(KIND=r8), DIMENSION(ndlon,ndlat), INTENT(IN)   :: pdata
+INTEGER,                 INTENT(IN)    :: begg,endg
+REAL(KIND=r8), DIMENSION(begg:endg), INTENT(IN)     :: pdata
 !
 INTEGER                                             :: NULOUT
-REAL(KIND=r8), DIMENSION(ndlon*ndlat)               :: ztmp1
 
 !------------------------------------------------------------------------------
 !- End of header
@@ -63,10 +60,11 @@ REAL(KIND=r8), DIMENSION(ndlon*ndlat)               :: ztmp1
  ! Call OASIS at each time step but field sent to other model only at coupling time step
  ! (accumulation otherwise, if asked in the SMIOC configuration file)
  !
-!CPScesm ztmp1(:) = RESHAPE (pdata(:,:), (/ndlon*ndlat/))
  CALL prism_put_proto( ssnd(kid)%nid, kstep, pdata, kinfo )
  IF ( kinfo .NE. PRISM_Ok .AND. kinfo .LT. PRISM_Sent ) &
    CALL prism_abort_proto(kl_comm, 'oasclm', 'Failure in oas_clm_snd')
+ IF ( IOASISDEBUGLVL == 1 )  &
+  WRITE(NULOUT,*) "oas_clm_snd : ", kstep, ssnd(kid)%clname, MINVAL(pdata), MAXVAL(pdata)
 !------------------------------------------------------------------------------
 !- End of the Subroutine
 !------------------------------------------------------------------------------

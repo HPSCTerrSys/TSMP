@@ -93,6 +93,13 @@ INTEGER                    :: write_aux_files
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
+! Define coupling scheme between COSMO and CLM
+#ifdef CPL_SCHEME_F
+ cpl_scheme = .True. !TRN Scheme
+#else
+ cpl_scheme = .False. !INV Scheme
+#endif
+
  ! Get grid bounds
  CALL surfrd_get_latlon(latlon, TRIM(filenam))
  CALL latlon_check(latlon)
