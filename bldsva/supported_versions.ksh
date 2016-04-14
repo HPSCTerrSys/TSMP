@@ -22,7 +22,7 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
-        ["JUQUEEN"]=" 1.1.0 1.1.0MCT "
+        ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["CCA2"]=" 1.1.0 1.1.0MCT "
         ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "

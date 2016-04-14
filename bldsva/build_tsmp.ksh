@@ -475,13 +475,13 @@ getRoot(){
   USAGE+=$(printf "[?%-12s #%s]" "configure" "only make clean and configure - no make")
   USAGE+=$(printf "[?%-12s #%s]" "skip" "no build")
   USAGE+="}"
-  USAGE+="[X:optcos?Build option for Cosmo.]:[optcos:='${def_options["cos"]}']"
-  USAGE+="[Y:optclm?Build option for CLM.]:[optclm:='${def_options["clm"]}']"
+  USAGE+="[Y:optcos?Build option for Cosmo.]:[optcos:='${def_options["cos"]}']"
+  USAGE+="[X:optclm?Build option for CLM.]:[optclm:='${def_options["clm"]}']"
   USAGE+="[Z:optpfl?Build option for Parflow.]:[optpfl:='${def_options["pfl"]}']"
    
   USAGE+="[w:oasdir?Source directory for Oasis3. oasis3_MACHINE_DATE will be taken if ''.]:[oasdir:='${def_oasdir}']"
-  USAGE+="[x:cosdir?Source directory for Cosmo. cosmo_MACHINE_DATE will be taken if ''.]:[cosdir:='${def_cosdir}']"
-  USAGE+="[y:clmdir?Source directory for CLM. clm_MACHINE_DATE will be taken if ''.]:[clmdir:='${def_clmdir}']"
+  USAGE+="[y:cosdir?Source directory for Cosmo. cosmo_MACHINE_DATE will be taken if ''.]:[cosdir:='${def_cosdir}']"
+  USAGE+="[x:clmdir?Source directory for CLM. clm_MACHINE_DATE will be taken if ''.]:[clmdir:='${def_clmdir}']"
   USAGE+="[z:pfldir?Source directory for Parflow. parflow_MACHINE_DATE will be taken if ''.]:[pfldir:='${def_pfldir}']"
 
   USAGE+="[H:hyprepath?Include Path for Hypre. The machine default will be taken if ''.]:[hyprepath:='$hyprePath']"
@@ -512,13 +512,13 @@ getRoot(){
     c)  combination="$OPTARG" ; args=1 ;;
 
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
-    X)  options+=(["cos"]="$OPTARG") ; args=1 ;;
-    Y)  options+=(["clm"]="$OPTARG") ; args=1 ;;
+    Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
+    X)  options+=(["clm"]="$OPTARG") ; args=1 ;;
     Z)  options+=(["pfl"]="$OPTARG") ; args=1 ;;
 
     w)  oasdir="$OPTARG" ; args=1 ;;
-    x)  cosdir="$OPTARG"; args=1 ;;
-    y)  clmdir="$OPTARG"; args=1 ;;
+    y)  cosdir="$OPTARG"; args=1 ;;
+    x)  clmdir="$OPTARG"; args=1 ;;
     z)  pfldir="$OPTARG"; args=1 ;;
 
     M)  mpiPath="$OPTARG" ; args=1 ;;
