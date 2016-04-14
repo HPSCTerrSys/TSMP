@@ -25,7 +25,7 @@ availability+=(
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT "
         ["CCA2"]=" 1.1.0 1.1.0MCT "
-        ["CLUMA2"]=" 1.1.0 1.1.0MCT "
+        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT  "
 )
 
 # list of versions with descriptions
