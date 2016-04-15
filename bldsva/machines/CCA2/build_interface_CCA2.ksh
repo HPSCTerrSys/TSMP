@@ -4,12 +4,6 @@
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
-  comment "   init lmod functionality"
-    . /opt/modules/default/init/ksh  >> $log_file 2>> $err_file
-  check
-  comment "   source and load Modules on $platform"
-    . $rootdir/bldsva/machines/$platform/loadenvs  >> $log_file 2>> $err_file
-  check
   # Default library paths
   defaultMpiPath="/opt/cray/mpt/6.3.1/gni/mpich2-gnu/48"
   defaultNcdfPath="/usr/local/apps/netcdf/3.6.3/GNU/48"
@@ -32,6 +26,21 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
 
+finalizeMachine(){
+route "${cblue}>> finalizeMachine${cnormal}"
+
+  comment "   init lmod functionality"
+    . /opt/modules/default/init/ksh  >> $log_file 2>> $err_file
+  check
+  comment "   source and load Modules on $platform"
+    . $rootdir/bldsva/machines/$platform/loadenvs  >> $log_file 2>> $err_file
+  check
+
+route "${cblue}<< finalizeMachine${cnormal}"
+}
+
+
+
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
@@ -50,7 +59,7 @@ nnodes=$(($numInst*($nnodes1+$nnodes2+$nnodes3+$nnodes4)))
 
 exel="aprun"
 
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 
 if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -n $nproc_cos  ./cos_starter.ksh $instance :" ; fi 

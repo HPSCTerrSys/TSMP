@@ -25,6 +25,12 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
 
+finalizeMachine(){
+route "${cblue}>> finalizeMachine${cnormal}"
+route "${cblue}<< finalizeMachine${cnormal}"
+}
+
+
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
@@ -35,7 +41,7 @@ nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ce
 
 exel="mpirun "
 
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 
 if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -np $nproc_cos  ./cos_starter.ksh $instance :" ; fi 

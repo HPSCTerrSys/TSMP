@@ -1,15 +1,15 @@
 #! /bin/ksh
 
 initSetup(){
-  if [[ $forcingdir_clm == "" ]] ; then ;forcingdir_clm="/homea/slts/slts06/forcings/testdata_EU_std";fi
-  if [[ $forcingdir_cos == "" ]] ; then ;forcingdir_cos="";fi
-  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/homea/slts/slts06/forcings/testdata_EU_std/oasis3";fi
-  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/homea/slts/slts06/forcings/testdata_EU_std/ParFlow";fi
+  defaultFDCLM="/homea/slts/slts06/forcings/testdata_EU_std"
+  defaultFDCOS="/work/slts/slts15/tsmp/TSMPForecastEU2016-04-10-12/forcing/cosmoinput"
+  defaultFDOAS="/homea/slts/slts06/forcings/testdata_EU_std/oasis3"
+  defaultFDPFL="/homea/slts/slts06/forcings/testdata_EU_std/ParFlow"
 
 
-  if [[ $namelist_clm == "" ]] ; then ; namelist_clm=$rootdir/bldsva/setups/cordex/lnd.stdin ; fi
-  if [[ $namelist_cos == "" ]] ; then ; namelist_cos=$rootdir/bldsva/setups/cordex/lmrun_uc ; fi
-  if [[ $namelist_pfl == "" ]] ; then ; namelist_pfl=$rootdir/bldsva/setups/cordex/coup_oas.tcl ; fi
+  defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
+  defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc 
+  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl 
 
 
   defaultNppn=16
@@ -20,6 +20,9 @@ initSetup(){
   defaultPFLProcX=8
   defaultPFLProcY=8
 
+  defaultStartDate="2016-04-10 12"
+  defaultRestDate=""
+  defaultRunhours=3
 
   gx_clm=436
   gy_clm=424
@@ -40,16 +43,14 @@ initSetup(){
   cplfreq2=3600
 
 
-  if [[ $namelist_oas == "" ]] ; then  
-    if [[ $withPFL == "false" && $withCOS == "true" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_cos_clm
-    fi	
-    if [[ $withPFL == "true" && $withCOS == "false" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
-    fi
-    if [[ $withPFL == "true" && $withCOS == "true" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
-    fi
+  if [[ $withPFL == "false" && $withCOS == "true" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm
+  fi	
+  if [[ $withPFL == "true" && $withCOS == "false" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
+  fi
+  if [[ $withPFL == "true" && $withCOS == "true" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
   fi
 
   restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDat")/run"

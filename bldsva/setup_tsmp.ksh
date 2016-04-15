@@ -1,16 +1,27 @@
 #! /bin/ksh
 getDefaults(){
-  def_platform="JURECA"               
-  def_version="1.1.0MCT"                 
+  def_platform=""               
+  def_version=""                 
   def_rootdir="$estdir"    #This should be correct - change with caution
   def_combination=""           
+  def_refSetup=""
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$date if empty
   def_pfldir=""
-  # parameters  will be set to tested platform defaults if empty
+  def_numInst=""
+  def_startInst=""
+  # following parameters  will be set to tested platform defaults if empty
   def_nppn=""
-  def_numInst="1"
   def_wtime=""
+  ## following parameters  will be set to tested setup defaults if empty
+  def_namelist_clm=""
+  def_namelist_cos=""
+  def_namelist_oas=""
+  def_namelist_pfl=""
+  def_forcingdir_clm=""
+  def_forcingdir_cos=""
+  def_forcingdir_oas=""
+  def_forcingdir_pfl=""
   def_queue=""
   def_px_clm=""
   def_py_clm=""
@@ -18,17 +29,18 @@ getDefaults(){
   def_py_cos=""
   def_px_pfl=""
   def_py_pfl=""
-  def_refSetup=""
-  def_startDate="2008-05-08 00"
+  def_startDate=""
   def_restDate=""
-  def_runhours=3
+  def_runhours=""
   #profiling ("yes" , "no") - will use machine standard
   def_profiling="no"
 }
 
 setDefaults(){
   platform=$def_platform
+  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
   version=$def_version
+  if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
   profiling=$def_profiling
@@ -43,6 +55,9 @@ setDefaults(){
   combination=$def_combination
   nppn=$def_nppn
   numInst=$def_numInst
+  if [[ $numInst == "" ]] then ; numInst="1" ; fi #We need a hard default here
+  startInst=$def_startInst
+  if [[ $startInst == "" ]] then ; startInst="0" ; fi #We need a hard default here
   queue=$def_queue
   wtime=$def_wtime
   px_clm=$def_px_clm
@@ -51,9 +66,52 @@ setDefaults(){
   py_cos=$def_py_cos
   px_pfl=$def_px_pfl
   py_pfl=$def_py_pfl
+  forcingdir_clm=$def_forcingdir_clm
+  forcingdir_cos=$def_forcingdir_cos
+  forcingdir_oas=$def_forcingdir_oas
+  forcingdir_pfl=$def_forcingdir_pfl
+  namelist_clm=$def_namelist_clm
+  namelist_cos=$def_namelist_cos
+  namelist_oas=$def_namelist_oas
+  namelist_pfl=$def_namelist_pfl
   startDate=$def_startDate
   runhours=$def_runhours
   restDate=$ref_restDate
+}
+
+clearMachineSelection(){
+  wtime=""
+  queue=""
+  clearSetupSelection
+}
+
+clearSetupSelection(){
+  nppn=""
+  px_clm=""
+  py_clm=""
+  px_cos=""
+  py_cos=""
+  px_pfl=""
+  py_pfl=""
+  startDate=""
+  restDate=""
+  runhours=""
+
+  forcingdir_clm=""
+  forcingdir_cos=""
+  forcingdir_pfl=""
+  forcingdir_oas=""
+  clearPathSelection
+}
+
+clearPathSelection(){
+  rundir=""
+  bindir=""
+  pfldir=""
+  namelist_clm=""
+  namelist_cos=""
+  namelist_pfl=""
+  namelist_oas=""
 }
 
 setSelection(){
@@ -67,37 +125,69 @@ setSelection(){
   if [[ $py_cos == "" ]] then ; py_cos=$defaultCOSProcY ; fi
   if [[ $px_pfl == "" ]] then ; px_pfl=$defaultPFLProcX ; fi
   if [[ $py_pfl == "" ]] then ; py_pfl=$defaultPFLProcY ; fi
+  
+  if [[ $forcingdir_clm == "" ]] then ; forcingdir_clm=$defaultFDCLM ; fi
+  if [[ $forcingdir_cos == "" ]] then ; forcingdir_cos=$defaultFDCOS ; fi
+  if [[ $forcingdir_oas == "" ]] then ; forcingdir_oas=$defaultFDOAS ; fi
+  if [[ $forcingdir_pfl == "" ]] then ; forcingdir_pfl=$defaultFDPFL ; fi
+
+  if [[ $namelist_clm == "" ]] then ; namelist_clm=$defaultNLCLM ; fi
+  if [[ $namelist_cos == "" ]] then ; namelist_cos=$defaultNLCOS ; fi
+  if [[ $namelist_oas == "" ]] then ; namelist_oas=$defaultNLOAS ; fi
+  if [[ $namelist_pfl == "" ]] then ; namelist_pfl=$defaultNLPFL ; fi
+
+  if [[ $startDate == "" ]] then ; startDate=$defaultStartDate ; fi
+  if [[ $restDate == "" ]] then ; restDate=$defaultRestDate ; fi
+  if [[ $runhours == "" ]] then ; runhours=$defaultRunhours ; fi
 
 
   if [[ $rundir == "" ]] then
      rundir=$rootdir/run/${platform}_${version}_${combination}_${refSetup}_${date}
   fi
-  mkdir -p $rundir
-  rm -rf $rundir/*
 
   if [[ $bindir == "" ]] then
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
 
-  set -A mList ${modelVersion[$version]}
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
 
+}
 
-  if [[ $combination == "" ]] ; then
-     set -A array ${combinations[$version]}
-     combination=${array[0]}
-  fi
 
+setCombination(){
+  withOAS="false"
+  withCOS="false"
+  withPFL="false"
+  withCLM="false"
+  withOASMCT="false"
+  withPCLM="false"
+
+  case "$combination" in *clm*) withCLM="true" ;; esac
+  case "$combination" in *cos*) withCOS="true" ;; esac
+  case "$combination" in *pfl*) withPFL="true" ;; esac
+  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
+    withOAS="true"
+    case "$version" in *MCT*) withOASMCT="true" ;; esac
+  fi  
+
+}
+
+finalizeSelection(){
+
+  mkdir -p $rundir
+  rm -rf $rundir/*
+
+  set -A mList ${modelVersion[$version]}  
 
   nproc_oas=0
   nproc_pfl=0
   nproc_clm=0
   nproc_cos=0
-  if [[ $withPFL == "true" ]] ; then ; nproc_pfl=$((${px_pfl}*${py_pfl})) ;fi
-  if [[ $withCOS == "true" ]] ; then ; nproc_cos=$((${px_cos}*${py_cos})) ;fi
-  if [[ $withCLM == "true" ]] ; then ; nproc_clm=$((${px_clm}*${py_clm})) ;fi
-  if [[ $withOAS == "true" ]] ; then ; nproc_oas=1 ;fi
-  if [[ $withOASMCT == "true" ]] ; then ; nproc_oas=0 ;fi
+  if [[ $withPFL == "true" ]] ; then ; nproc_pfl=$((${px_pfl}*${py_pfl})) ;fi 
+  if [[ $withCOS == "true" ]] ; then ; nproc_cos=$((${px_cos}*${py_cos})) ;fi 
+  if [[ $withCLM == "true" ]] ; then ; nproc_clm=$((${px_clm}*${py_clm})) ;fi 
+  if [[ $withOAS == "true" ]] ; then ; nproc_oas=1 ;fi 
+  if [[ $withOASMCT == "true" ]] ; then ; nproc_oas=0 ;fi 
 
 
   yyyy=$(date '+%Y' -d "$startDate")
@@ -105,12 +195,14 @@ setSelection(){
   dd=$(date '+%d' -d "$startDate")
   hh=$(date '+%H' -d "$startDate")
 
-
 }
 
 terminate(){
  print ""
  print "Terminating $call. No changes were made..."
+ rm -f $err_file
+ rm -f $log_file
+ rm -f $stdout_file
  exit 0
 }
 
@@ -150,21 +242,28 @@ warning(){
 }
 
 
-sanityCheck(){
-
-  #check multi instance functionality (only working with Oasis3-MCT and not on JUQUEEN)
-  if [[ $numInst > 0 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored ic you continue." ; warning  ;fi
-  if [[ $numInst > 0 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
-
+hardSanitycheck(){
   if [[ "${versions[${version}]}" == ""  ]] then
       print "The selected version '${version}' is not available. run '.$call --man' for help"
       terminate
-  fi  
+  fi
 
   if [[ "${platforms[${platform}]}" == ""  ]] then
       print "The selected platform '${platform}' is not available. run '.$call --man' for help"
       terminate
-  fi  
+  fi
+
+  valid="false"
+  case "${setupsAvail[${platform}]}" in *" ${refSetup} "*) valid="true" ;; esac
+  if [[ $valid != "true" ]] then; print "This setup is not supported on this machine" ; terminate  ;fi
+
+}
+
+softSanityCheck(){
+
+  #check multi instance functionality (only working with Oasis3-MCT and not on JUQUEEN)
+  if [[ $numInst > 0 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored if you continue." ; warning  ;fi
+  if [[ $numInst > 0 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
 
 
   valid="false"
@@ -182,9 +281,6 @@ sanityCheck(){
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
 
-  valid="false"
-  case "${setupsAvail[${platform}]}" in *" ${refSetup} "*) valid="true" ;; esac
-  if [[ $valid != "true" ]] then; print "This setup is not supported on this machine" ; terminate  ;fi
 }
 
 interactive(){
@@ -215,6 +311,38 @@ interactive(){
                         done
                         print "Please type in your desired value..."
                         read platform
+                        comment "  source machine build interface for $platform"
+  			  . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+      			check
+			clearMachineSelection
+      			getMachineDefaults
+			#reset features if not supported by new machine selection
+    			case "${availability[$platform]}" in 
+				*" $version "*) ;;
+		     		*)
+	  			set -A array ${availability[$platform]}
+          			version=${array[0]} ;; 
+    			esac
+    			case "${combinations[$version]}" in 
+        			*" $combination "*);;
+		         	*)      
+          			set -A array ${combinations[$version]}
+          			combination=${array[0]} ;;     
+    			esac
+
+    			case "${setupsAvail[$platform]}" in 
+        			*" $refSetup "*) ;;
+		      		*)     
+          			set -A array ${setupsAvail[$platform]}
+          			refSetup=${array[0]} ;;     
+    			esac
+      			setCombination
+      			comment "  source setup for $refSetup on $platform"
+        		  . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+      			check
+      			initSetup
+      			setSelection
+
                   fi
                   if [[ $numb == 2 ]] ; then
                         print "The following versions are available for $platform:"
@@ -226,6 +354,20 @@ interactive(){
                         done
                         print "Please type in your desired value..."
                         read version
+			                        case "${combinations[$version]}" in  
+                                *" $combination "*);;
+                                *)    
+                                set -A array ${combinations[$version]}
+                                combination=${array[0]} ;;    
+                        esac
+			clearSetupSelection
+			setCombination
+			comment "  source setup for $refSetup on $platform"
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                        check
+			initSetup	
+			setSelection
+
                   fi
                   if [[ $numb == 3 ]] ; then
                         print "The following combinations are available for $version:"
@@ -234,6 +376,14 @@ interactive(){
                         done
                         print "Please type in your desired value..."
                         read combination
+                        clearSetupSelection
+                        setCombination
+                        comment "  source setup for $refSetup on $platform"
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                        check
+                        initSetup
+                        setSelection
+
                   fi
                   if [[ $numb == 4 ]] ; then 
 			print "The following setups are available for $platform:"
@@ -241,9 +391,18 @@ interactive(){
                                 printf "%-20s\n" "$a"
                         done
                         print "Please type in your desired value..."
-                        read refSetup
+		        read refSetup
+                        clearSetupSelection
+                        setCombination
+                        comment "  source setup for $refSetup on $platform"
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                        check
+                        initSetup
+                        setSelection
 
 		  fi
+
+
                   if [[ $numb == 5 ]] ; then ; read queue ; fi
                   if [[ $numb == 6 ]] ; then ; read wtime ; fi
                   if [[ $numb == 7 ]] ; then ; read startDate  ; fi
@@ -255,7 +414,7 @@ interactive(){
                   if [[ $numb == 13 ]] ; then ; read py_cos ; fi
                   if [[ $numb == 14 ]] ; then ; read px_pfl ; fi
                   if [[ $numb == 15 ]] ; then ; read py_pfl ; fi
-                  if [[ $numb == 16 ]] ; then ; read rootdir ; fi
+                  if [[ $numb == 16 ]] ; then ; read rootdir ;clearPathSelection; setSelection ; fi
                   if [[ $numb == 17 ]] ; then ; read bindir ; fi
                   if [[ $numb == 18 ]] ; then ; read rundir ; fi
                   if [[ $numb == 19 ]] ; then ; read namelist_clm ; fi
@@ -269,7 +428,8 @@ interactive(){
 		  if [[ $numb == 27 ]] ; then ; read pfldir ; fi
                   if [[ $numb == 28 ]] ; then ; read profiling ; fi
                   if [[ $numb == 29 ]] ; then ; read numInst ; fi
-                  if [[ $numb == 30 ]] ; then ; read restDate ; fi
+  		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
+                  if [[ $numb == 31 ]] ; then ; read restDate ; fi
                 done
                 interactive
           ;;
@@ -306,19 +466,20 @@ printState(){
   print "${cred}(17)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir${cnormal}"
   print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${date}): ${cgreen}$rundir${cnormal}"
   print ""
-  print "${cred}(19)${cnormal} namelist dir for clm (default='given by setup'): ${cgreen}$namelist_clm${cnormal}"
-  print "${cred}(20)${cnormal} forcing dir for clm (default='given by setup'): ${cgreen}$forcingdir_clm${cnormal}"
-  print "${cred}(21)${cnormal} namelist dir for cos (default='given by setup'): ${cgreen}$namelist_cos${cnormal}"
-  print "${cred}(22)${cnormal} forcing dir for cos (default='given by setup'): ${cgreen}$forcingdir_cos${cnormal}"
-  print "${cred}(23)${cnormal} namelist dir for pfl (default='given by setup'): ${cgreen}$namelist_pfl${cnormal}"
-  print "${cred}(24)${cnormal} forcing dir for pfl (default='given by setup'): ${cgreen}$forcingdir_pfl${cnormal}"
-  print "${cred}(25)${cnormal} namelist dir for oas (default='given by setup'): ${cgreen}$namelist_oas${cnormal}"
-  print "${cred}(26)${cnormal} forcing dir for oas (default='given by setup'): ${cgreen}$forcingdir_oas${cnormal}"
+  print "${cred}(19)${cnormal} namelist dir for clm (default='$def_namelist_clm'): ${cgreen}$namelist_clm${cnormal}"
+  print "${cred}(20)${cnormal} forcing dir for clm (default='$def_forcingdir_clm'): ${cgreen}$forcingdir_clm${cnormal}"
+  print "${cred}(21)${cnormal} namelist dir for cos (default='$def_namelist_cos'): ${cgreen}$namelist_cos${cnormal}"
+  print "${cred}(22)${cnormal} forcing dir for cos (default='$def_forcingdir_cos'): ${cgreen}$forcingdir_cos${cnormal}"
+  print "${cred}(23)${cnormal} namelist dir for pfl (default='$def_namelist_pfl'): ${cgreen}$namelist_pfl${cnormal}"
+  print "${cred}(24)${cnormal} forcing dir for pfl (default='$def_forcingdir_pfl'): ${cgreen}$forcingdir_pfl${cnormal}"
+  print "${cred}(25)${cnormal} namelist dir for oas (default='$def_namelist_oas'): ${cgreen}$namelist_oas${cnormal}"
+  print "${cred}(26)${cnormal} forcing dir for oas (default='$def_forcingdir_oas'): ${cgreen}$forcingdir_oas${cnormal}"
   print ""
   print "${cred}(27)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir${cnormal}"
   print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
   print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
-  print "${cred}(30)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
+  print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
+  print "${cred}(31)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
 }
 
 
@@ -414,8 +575,9 @@ getRoot(){
   USAGE+="[z:pfldir?Source directory for Parflow. parflow_MACHINE_DATE will be taken if ''.]:[pfldir:='${def_pfldir}']"
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
-  USAGE+="[n:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
+  USAGE+="[P:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
   USAGE+="[N:numinst? Number of instances of TerrSysMP. Currently only works with Oasis3-MCT - ignored otherwise.]:[numinst:='$def_numInst']"
+  USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
   USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[startdate:='$def_startDate']"
@@ -454,7 +616,8 @@ getRoot(){
     t)  listTutorial ;;
     q)  queue=$OPTARG ; args=1 ;; 
     Q)  wtime=$OPTARG ; args=1 ;;   
-    n)  nppn=$OPTARG ; args=1 ;;
+    P)  nppn=$OPTARG ; args=1 ;;
+    n)  startInst=$OPTARG ; args=1 ;;
     N)  numInst=$OPTARG ; args=1 ;;
     s)  startDate=$OPTARG ; args=1 ;;
     S)  restDate=$OPTARG ; args=1 ;;
@@ -494,6 +657,29 @@ check
 
   if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
 
+  hardSanityCheck
+
+  #if no combination is set, load first as default
+  if [[ $combination == "" ]] ; then
+    set -A array ${combinations[$version]}
+    combination=${array[0]}
+  fi
+  if [[ $refSetup == "" ]] ; then
+    set -A array ${setupsAvail[$platform]}
+    refSetup=${array[0]}
+    comment "  source setup for $refSetup on $platform"
+      . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+    check
+  fi
+  setCombination
+  initSetup
+  comment "  source machine build interface for $platform"
+    . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+  check
+  getMachineDefaults
+  setSelection
+     	
+
 
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
@@ -506,56 +692,16 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-  #if no combination is set, load first as default
-  if [[ $combination == "" ]] ; then
-    set -A array ${combinations[$version]}
-    combination=${array[0]}
-  fi
-  if [[ $refSetup == "" ]] ; then
-    set -A array ${setupsAvail[$platform]}
-    refSetup=${array[0]}
-  fi
-  
-
-
-  withOAS="false"
-  withCOS="false"
-  withPFL="false"
-  withCLM="false"
-  withOASMCT="false"
-  withPCLM="false"
-
-  case "$combination" in *clm*) withCLM="true" ;; esac
-  case "$combination" in *cos*) withCOS="true" ;; esac
-  case "$combination" in *pfl*) withPFL="true" ;; esac
-  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
-    withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
-  fi  
-
-
-  sanityCheck
-
-comment "  source machine build interface for $platform"
-  . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
-check
-
-comment "  source setup for $refSetup on $platform"
-    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
-check
-
-
-  getMachineDefaults
-  initSetup
-  setSelection
-  
+  softSanityCheck
+  finalizeMachine
+  finalizeSelection 
 
 #  start setup
 origrundir=$rundir
 orignamelist_cos=$namelist_cos
 orignamelist_clm=$namelist_clm
 orignamelist_pfl=$namelist_pfl
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 route ${cblue}"> creating instance: $instance"${cnormal}
 if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then 

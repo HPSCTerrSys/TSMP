@@ -24,6 +24,13 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
 
+
+finalizeMachine(){
+route "${cblue}>> finalizeMachine${cnormal}"
+route "${cblue}<< finalizeMachine${cnormal}"
+}
+
+
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
@@ -71,7 +78,7 @@ EOF
 counter=0
 counter2=1
 
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 #for mapfile
 start_oas=$counter

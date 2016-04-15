@@ -1,8 +1,8 @@
 #! /bin/ksh
 
 getDefaults(){
-  def_platform="JURECA" 
-  def_version="1.1.0MCT" 
+  def_platform="" 
+  def_version="" 
   def_combination=""
   def_rootdir="$estdir" #This should be correct - change with caution
 
@@ -40,7 +40,9 @@ getDefaults(){
 setDefaults(){
   #load the default values
   platform=$def_platform
+  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
   version=$def_version
+  if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
   rootdir=$def_rootdir
   bindir=$def_bindir
   optComp=$def_optComp
@@ -69,6 +71,28 @@ setDefaults(){
 
 }
 
+
+clearMachineSelection(){
+  mpiPath=""
+  ncdfPath=""
+  grib1Path=""
+  tclPath=""
+  hyprePath=""
+  siloPath=""
+  optComp=""
+  clearPathSelection
+}
+
+
+clearPathSelection(){
+  bindir=""
+  pfldir=""
+  oasdir=""
+  cosdir=""
+  clmdir=""
+}
+
+
 setSelection(){
 
   if [[ $mpiPath == "" ]] then ; mpiPath=$defaultMpiPath ; fi
@@ -91,11 +115,34 @@ setSelection(){
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
 
+
+}
+
+finalizeSelection(){
 comment "  create bindir: $bindir"
   mkdir -p $bindir >> $log_file 2>> $err_file
 check
 
 }
+
+setCombination(){
+  withOAS="false"
+  withCOS="false"
+  withPFL="false"
+  withCLM="false"
+  withOASMCT="false"
+  withPCLM="false"
+
+  case "$combination" in *clm*) withCLM="true" ;; esac
+  case "$combination" in *cos*) withCOS="true" ;; esac
+  case "$combination" in *pfl*) withPFL="true" ;; esac
+  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
+    withOAS="true"
+    case "$version" in *MCT*) withOASMCT="true" ;; esac
+  fi
+
+}
+
 
 check(){
   if [[ $? == 0  ]] then
@@ -245,7 +292,28 @@ interactive(){
     				printf "%-20s #%s\n" "$a" "${platforms[$a]}"
 			done
 			print "Please type in your desired value..."
-			read platform 
+			read platform
+			comment "  source machine build interface for $platform"
+                          . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+                        check
+                        clearMachineSelection
+                        getMachineDefaults
+                        #reset features if not supported by new machine selection
+                        case "${availability[$platform]}" in
+                                *" $version "*) ;;
+                                *)
+                                set -A array ${availability[$platform]}
+                                version=${array[0]} ;;
+                        esac
+                        case "${combinations[$version]}" in
+                                *" $combination "*);;
+                                *)
+                                set -A array ${combinations[$version]}
+                                combination=${array[0]} ;;
+                        esac
+
+                        setCombination
+                        setSelection 
 		  fi
 		  if [[ $numb == 2 ]] ; then 
                         print "The following versions are available for $platform:"
@@ -256,7 +324,14 @@ interactive(){
 				done
                         done		
 			print "Please type in your desired value..."
-			read version 
+			read version
+                        case "${combinations[$version]}" in  
+                                *" $combination "*);;
+                                *)
+                                set -A array ${combinations[$version]}
+                                combination=${array[0]} ;;
+                        esac
+ 			setCombination
 		  fi
 		  if [[ $numb == 3 ]] ; then  
                         print "The following combinations are available for $version:"
@@ -264,13 +339,14 @@ interactive(){
                                 printf "%-20s\n" "$a"
                         done
                         print "Please type in your desired value..."
-			read combination 
+			read combination
+			setCombination 
 		  fi
 		  if [[ $numb == 4 ]] ; then ; read val ;options+=(["oas"]="$val") ; fi
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
-		  if [[ $numb == 8 ]] ; then ; read rootdir ; fi
+		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setSelection; fi
 		  if [[ $numb == 9 ]] ; then ; read bindir ; fi
 		  if [[ $numb == 10 ]] ; then ; read oasdir ; fi
 		  if [[ $numb == 11 ]] ; then ; read clmdir ; fi
@@ -306,11 +382,11 @@ printState(){
   print "${cred}(7)${cnormal} parflow build option (default=${def_options["pfl"]}): ${cgreen}${options["pfl"]} ${cnormal}"
   print ""
   print "${cred}(8)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
-  print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
-  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${def_platform}_$combination): ${cgreen}$oasdir ${cnormal}"
-  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${def_platform}_$combination): ${cgreen}$clmdir ${cnormal}"
-  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${def_platform}_$combination): ${cgreen}$cosdir ${cnormal}"
-  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir ${cnormal}"
+  print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
+  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_$combination): ${cgreen}$oasdir ${cnormal}"
+  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_$combination): ${cgreen}$clmdir ${cnormal}"
+  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_$combination): ${cgreen}$pfldir ${cnormal}"
   print ""
   print "${cred}(14)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
   print "${cred}(15)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
@@ -354,7 +430,7 @@ warning(){
   done
 }
 
-sanityCheck(){
+hardSanityCheck(){
 
   if [[ "${versions[${version}]}" == ""  ]] then
       print "The selected version '${version}' is not available. run '.$call --man' for help"
@@ -365,6 +441,9 @@ sanityCheck(){
       print "The selected platform '${platform}' is not available. run '.$call --man' for help"
       terminate
   fi
+
+}
+softSanityCheck(){
 
 
   valid="false"
@@ -539,6 +618,26 @@ check
 
   if [[ $listA == "true" ]] ; then ; listAvailabilities ; fi
 
+
+
+
+
+  hardSanityCheck
+
+  #if no combination is set, load first as default
+  if [[ $combination == "" ]] ; then
+    set -A array ${combinations[$version]}
+    combination=${array[0]}
+  fi
+
+  setCombination
+  comment "  source machine build interface for $platform"
+    . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+  check
+  getMachineDefaults
+  setSelection
+
+
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
     if [[ $args == 0 ]] then
@@ -550,39 +649,16 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-  #if no combination is set, load first as default
-  if [[ $combination == "" ]] ; then
-    set -A array ${combinations[$version]}
-    combination=${array[0]}
-  fi
 
-  #choose combination
-  withOAS="false"
-  withCOS="false"
-  withPFL="false"
-  withCLM="false"
-  withOASMCT="false"
-
-  case "$combination" in *clm*) withCLM="true" ;; esac
-  case "$combination" in *cos*) withCOS="true" ;; esac
-  case "$combination" in *pfl*) withPFL="true" ;; esac
-  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
-    withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
-  fi
-  sanityCheck
+  softSanityCheck
 
   comment "  source common interface"
     . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
   check
 
-  comment "  source machine build interface for $platform"
-   . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
-  check
 
-
-  getMachineDefaults
-  setSelection
+  finalizeSelection
+  finalizeMachine
   runCompilation
 
   printState >> $log_file

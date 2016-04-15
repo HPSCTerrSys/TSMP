@@ -4,12 +4,6 @@
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
-  comment "   init lmod functionality"
-    . /usr/share/Modules/init/ksh  >> $log_file 2>> $err_file
-  check
-  comment "   source and load Modules on $platform"
-    module load gcc-ibg3  >> $log_file 2>> $err_file
-  check
   # Default library paths
   defaultMpiPath="/opt/ibg3/openmpi-1.8.4"
   defaultNcdfPath="/home/w.kurtz/libs/netcdf_openmpi-1.8.4"
@@ -32,6 +26,23 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
 
+
+
+finalizeMachine(){
+route "${cblue}>> finalizeMachine${cnormal}"
+
+  comment "   init lmod functionality"
+    . /usr/share/Modules/init/ksh  >> $log_file 2>> $err_file
+  check
+  comment "   source and load Modules on $platform"
+    module load gcc-ibg3  >> $log_file 2>> $err_file
+  check
+
+route "${cblue}<< finalizeMachine${cnormal}"
+}
+
+
+
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 
@@ -41,7 +52,7 @@ nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ce
 
 exel="mpirun "
 
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 
 if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -np $nproc_cos  ./cos_starter.ksh $instance :" ; fi

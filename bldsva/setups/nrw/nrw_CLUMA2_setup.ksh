@@ -1,15 +1,15 @@
 #! /bin/ksh
 
 initSetup(){
-  if [[ $forcingdir_clm == "" ]] ; then ;forcingdir_clm="/daten01/z4/database";fi
-  if [[ $forcingdir_cos == "" ]] ; then ;forcingdir_cos="/daten01/z4/database/cosmo/int2lm_output";fi
-  if [[ $forcingdir_oas == "" ]] ; then ;forcingdir_oas="/daten01/z4/database/oasis3/mapping_matrix_NRW";fi
-  if [[ $forcingdir_pfl == "" ]] ; then ;forcingdir_pfl="/daten01/z4/database/ParFlow/Rur_NRW";fi
+  defaultFDCLM="/daten01/z4/database"
+  defaultFDCOS="/daten01/z4/database/cosmo/int2lm_output"
+  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_NRW"
+  defaultFDPFL="/daten01/z4/database/ParFlow/Rur_NRW"
 
 
-  if [[ $namelist_clm == "" ]] ; then ; namelist_clm=$rootdir/bldsva/setups/nrw/lnd.stdin ; fi
-  if [[ $namelist_cos == "" ]] ; then ; namelist_cos=$rootdir/bldsva/setups/nrw/lmrun_uc ; fi
-  if [[ $namelist_pfl == "" ]] ; then ; namelist_pfl=$rootdir/bldsva/setups/nrw/coup_oas.tcl ; fi
+  defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
+  defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
+  defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
 
 
   defaultNppn=64
@@ -20,6 +20,9 @@ initSetup(){
   defaultPFLProcX=6
   defaultPFLProcY=6
 
+  defaultStartDate="2008-05-08 00"
+  defaultRestDate=""
+  defaultRunhours=3
 
   gx_clm=300
   gy_clm=300
@@ -40,16 +43,14 @@ initSetup(){
   cplfreq2=900
 
 
-  if [[ $namelist_oas == "" ]] ; then  
-    if [[ $withPFL == "false" && $withCOS == "true" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_cos_clm
-    fi	
-    if [[ $withPFL == "true" && $withCOS == "false" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
-    fi
-    if [[ $withPFL == "true" && $withCOS == "true" ]]; then
-      namelist_oas=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
-    fi
+  if [[ $withPFL == "false" && $withCOS == "true" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm
+  fi	
+  if [[ $withPFL == "true" && $withCOS == "false" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
+  fi
+  if [[ $withPFL == "true" && $withCOS == "true" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
   fi
 
   fn_finidat="$WORK/tsmp/TSMPForecastNRW$restDate-00/run/clmoas.clm2.r.${yyyy}-${mm}-${dd}-00000.nc"

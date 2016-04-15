@@ -3,13 +3,6 @@
 
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
-  # Default library paths
-  comment "   init lmod functionality"
-  . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
-  check
-  comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/$platform/loadenvs >> $log_file 2>> $err_file
-  check
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   defaultGrib1Path="/homea/slts/slts00/sandbox/grib1-DWD20061107.jureca_tc2015.07_psintel_opt_KGo2/lib"
@@ -28,6 +21,18 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
+
+finalizeMachine(){
+route "${cblue}>> finalizeMachine${cnormal}"
+  comment "   init lmod functionality"
+  . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  check
+  comment "   source and load Modules on JURECA"
+  . $rootdir/bldsva/machines/$platform/loadenvs >> $log_file 2>> $err_file
+  check
+route "${cblue}<< finalizeMachine${cnormal}"
+}
+
 
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
@@ -73,7 +78,7 @@ EOF
 
 counter=0
 
-for instance in {0..$(($numInst-1))}
+for instance in {$startInst..$(($numInst-1))}
 do
 start_oas=$counter
 end_oas=$(($start_oas+$nproc_oas-1))
