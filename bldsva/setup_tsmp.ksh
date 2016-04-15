@@ -354,7 +354,7 @@ interactive(){
                         done
                         print "Please type in your desired value..."
                         read version
-			                        case "${combinations[$version]}" in  
+                        case "${combinations[$version]}" in  
                                 *" $combination "*);;
                                 *)    
                                 set -A array ${combinations[$version]}
