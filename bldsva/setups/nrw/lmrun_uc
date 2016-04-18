@@ -184,7 +184,7 @@ rm -f $OUTPUT/l*
 
 cat > INPUT_ORG << end_input_org
  &LMGRID
-  startlat_tot = -0.100, startlon_tot = -2.95,
+  startlat_tot = -0.100, startlon_tot = -2.949,
   pollat       = 40.0,          pollon = -170.0,
   dlat         = 0.010,           dlon = 0.010,
   ie_tot       = ie_tot_bldsva, je_tot = je_tot_bldsva,     ke_tot = 50,

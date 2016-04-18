@@ -78,5 +78,6 @@ TYPE(FLD_CPL), DIMENSION(nmaxfld), PUBLIC    :: srcv, ssnd   ! Coupling fields
 INTEGER                    :: ndlon=1, ndlat=1 
 Integer  :: total_part_len  ! length of the partition including masked cells
 INTEGER ,pointer     :: dmask(:)
+LOGICAL :: cpl_scheme                  ! Now set in oas_clm_define 
 
 END MODULE oas_clm_vardef

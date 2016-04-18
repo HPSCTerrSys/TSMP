@@ -445,14 +445,10 @@ INTEGER                         :: status, cosncid, cosvarid(7)
 
  IF (cpl_scheme) THEN    !CPS
 ! Lower Boundary variable selection
-   srcv(6:7)%laction=.TRUE.
-!MU (12.04.13)
-!MU_TEST
+   srcv(5:7)%laction=.TRUE.
    srcv(8)%laction=.TRUE.
    srcv(14)%laction=.FALSE.
    srcv(15)%laction=.FALSE.
-!MU_TEST
-!MU (12.04.13)
    srcv(9:13)%laction=.TRUE.!CPS
 !!           
  ELSE

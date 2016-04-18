@@ -495,7 +495,7 @@ CALL MPI_Barrier(kl_comm, nerror)
  
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
-  ssnd(6:7)%laction=.TRUE.     !CPS
+  ssnd(5:7)%laction=.TRUE.     !CPS
 !MU (12.04.13)
   ssnd(8)%laction=.TRUE.
   ssnd(14)%laction=.FALSE.

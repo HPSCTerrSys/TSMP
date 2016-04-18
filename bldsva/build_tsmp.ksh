@@ -40,7 +40,7 @@ getDefaults(){
 setDefaults(){
   #load the default values
   platform=$def_platform
-  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
   version=$def_version
   if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
   rootdir=$def_rootdir

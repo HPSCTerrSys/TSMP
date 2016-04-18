@@ -101,6 +101,12 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
+! Define coupling scheme between COSMO and CLM
+#ifdef CPL_SCHEME_F
+ cpl_scheme = .True. !TRN Scheme
+#else
+ cpl_scheme = .False. !INV Scheme
+#endif
 
 
  ndlon = alatlon%ni
@@ -495,13 +501,19 @@ CALL MPI_Barrier(kl_comm, nerror)
  
 ! Send/Receive Variable Selection
 #ifdef COUP_OAS_COS
-  ssnd(6:7)%laction=.TRUE.     !CPS
-!MU (12.04.13)
+
+IF (cpl_scheme) THEN         !CPS
+  ssnd(5:7)%laction=.TRUE.     !CPS
   ssnd(8)%laction=.TRUE.
   ssnd(14)%laction=.FALSE.
   ssnd(15)%laction=.FALSE.
-!MU (12.04.13)
   ssnd(9:13)%laction=.TRUE.    !CPS
+ELSE
+  ssnd(1:7)%laction=.TRUE.
+  ssnd(8)%laction=.TRUE.
+  ssnd(14)%laction=.FALSE.
+  ssnd(15)%laction=.FALSE.
+ENDIF 
 
   srcv(1:9)%laction=.TRUE.
   srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 

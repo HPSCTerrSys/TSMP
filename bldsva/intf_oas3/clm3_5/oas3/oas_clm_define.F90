@@ -435,13 +435,10 @@ INTEGER                    :: write_aux_files
 #ifdef COUP_OAS_COS
 
   IF (cpl_scheme) THEN         !CPS
-!     ssnd(5:7)%laction=.TRUE.
-     ssnd(6:7)%laction=.TRUE.     !CPS
-!MU (12.04.13)
+    ssnd(5:7)%laction=.TRUE.     !CPS
     ssnd(8)%laction=.TRUE.
     ssnd(14)%laction=.FALSE.
     ssnd(15)%laction=.FALSE.
-!MU (12.04.13)
     ssnd(9:13)%laction=.TRUE.    !CPS
   ELSE
     ssnd(1:7)%laction=.TRUE.

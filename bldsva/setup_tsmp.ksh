@@ -38,7 +38,7 @@ getDefaults(){
 
 setDefaults(){
   platform=$def_platform
-  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
   version=$def_version
   if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
   bindir=$def_bindir
@@ -148,7 +148,7 @@ setSelection(){
   if [[ $bindir == "" ]] then
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
-
+  set -A mList ${modelVersion[$version]}
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
 
 }
@@ -176,8 +176,6 @@ finalizeSelection(){
 
   mkdir -p $rundir
   rm -rf $rundir/*
-
-  set -A mList ${modelVersion[$version]}  
 
   nproc_oas=0
   nproc_pfl=0
@@ -242,7 +240,7 @@ warning(){
 }
 
 
-hardSanitycheck(){
+hardSanityCheck(){
   if [[ "${versions[${version}]}" == ""  ]] then
       print "The selected version '${version}' is not available. run '.$call --man' for help"
       terminate
@@ -254,6 +252,7 @@ hardSanitycheck(){
   fi
 
   valid="false"
+  if [[ ${refSetup} == "" ]] ; then ; valid="true" ; fi
   case "${setupsAvail[${platform}]}" in *" ${refSetup} "*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; print "This setup is not supported on this machine" ; terminate  ;fi
 
@@ -262,8 +261,8 @@ hardSanitycheck(){
 softSanityCheck(){
 
   #check multi instance functionality (only working with Oasis3-MCT and not on JUQUEEN)
-  if [[ $numInst > 0 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored if you continue." ; warning  ;fi
-  if [[ $numInst > 0 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
+  if [[ $numInst > 1 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored if you continue." ; warning  ;fi
+  if [[ $numInst > 1 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
 
 
   valid="false"
