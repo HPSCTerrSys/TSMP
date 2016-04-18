@@ -31,15 +31,15 @@ route "${cblue}>> substitutions_clm${cnormal}"
   check
   if [[ $withOASMCT == "true" ]] ; then
     comment "   replace files for oasis3-mct and parallel clm coupling"
-        cp $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/mct/atmdrvMod.F90 $clmdir/bld/usr.src/ >> $log_file 2>> $err_file
+        cp $rootdir/bldsva/intf_oas3/clm3_5/mct/atmdrvMod.F90 $clmdir/bld/usr.src/ >> $log_file 2>> $err_file
     check
-        cp $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/mct/decompMod.F90 $clmdir/bld/usr.src/ >> $log_file 2>> $err_file
+        cp $rootdir/bldsva/intf_oas3/clm3_5/mct/decompMod.F90 $clmdir/bld/usr.src/ >> $log_file 2>> $err_file
     check
-        cp $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/mct/oas* $clmdir/src/oas3/ >> $log_file 2>> $err_file
+        cp $rootdir/bldsva/intf_oas3/clm3_5/mct/oas* $clmdir/src/oas3/ >> $log_file 2>> $err_file
     check
-        cp $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/mct/receive* $clmdir/src/oas3/ >> $log_file 2>> $err_file
+        cp $rootdir/bldsva/intf_oas3/clm3_5/mct/receive* $clmdir/src/oas3/ >> $log_file 2>> $err_file
     check
-        cp $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/mct/send* $clmdir/src/oas3/ >> $log_file 2>> $err_file
+        cp $rootdir/bldsva/intf_oas3/clm3_5/mct/send* $clmdir/src/oas3/ >> $log_file 2>> $err_file
     check
   fi
 
