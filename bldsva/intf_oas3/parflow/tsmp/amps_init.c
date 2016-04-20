@@ -101,7 +101,8 @@ int amps_Init(int *argc, char **argv[])
    amps_mpi_initialized = TRUE;
 
    //FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
-   fscanf(stream, "%d",&inst);
+   if (stream != NULL)
+     fscanf(stream, "%d",&inst);
    MPI_Comm_split(MPI_COMM_WORLD,inst,inst,&oas3Comm);
    
    MPI_Comm_size(amps_CommWorld, &amps_size);

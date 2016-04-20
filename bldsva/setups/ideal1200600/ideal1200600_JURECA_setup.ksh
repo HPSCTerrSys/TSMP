@@ -60,10 +60,10 @@ initSetup(){
 
 finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
-  comment "   copy clmgrid into rundir"
-    cp $forcingdir_clm/clm3.5/ideal/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
-  check  
   if [[ $withOAS == "true" ]] then
+    comment "   copy clmgrid into rundir"
+      cp $forcingdir_clm/clm3.5/ideal/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+    check
     comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check

@@ -403,6 +403,9 @@ printState(){
 terminate(){
   print ""
   print "Terminating $call. No changes were made..."
+  rm -f $err_file
+  rm -f $log_file
+  rm -f $stdout_file
   exit 0
 }
 

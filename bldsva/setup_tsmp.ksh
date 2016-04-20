@@ -666,10 +666,12 @@ check
   if [[ $refSetup == "" ]] ; then
     set -A array ${setupsAvail[$platform]}
     refSetup=${array[0]}
-    comment "  source setup for $refSetup on $platform"
-      . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
-    check
   fi
+
+  comment "  source setup for $refSetup on $platform"
+    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+  check
+
   setCombination
   initSetup
   comment "  source machine build interface for $platform"
