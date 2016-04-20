@@ -4,6 +4,13 @@
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
+  comment "   init lmod functionality"
+    . /opt/modules/default/init/ksh  >> $log_file 2>> $err_file
+  check
+  comment "   source and load Modules on $platform"
+    . $rootdir/bldsva/machines/$platform/loadenvs  >> $log_file 2>> $err_file
+  check
+
   # Default library paths
   defaultMpiPath="/opt/cray/mpt/6.3.1/gni/mpich2-gnu/48"
   defaultNcdfPath="/usr/local/apps/netcdf/3.6.3/GNU/48"
@@ -28,14 +35,6 @@ route "${cblue}<< getMachineDefaults${cnormal}"
 
 finalizeMachine(){
 route "${cblue}>> finalizeMachine${cnormal}"
-
-  comment "   init lmod functionality"
-    . /opt/modules/default/init/ksh  >> $log_file 2>> $err_file
-  check
-  comment "   source and load Modules on $platform"
-    . $rootdir/bldsva/machines/$platform/loadenvs  >> $log_file 2>> $err_file
-  check
-
 route "${cblue}<< finalizeMachine${cnormal}"
 }
 
