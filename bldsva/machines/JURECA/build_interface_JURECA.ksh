@@ -79,22 +79,45 @@ EOF
 
 
 counter=0
-
-for instance in {$startInst..$(($numInst-1))}
-do
+#for mapfile
 start_oas=$counter
 end_oas=$(($start_oas+$nproc_oas-1))
 
 start_cos=$(($nproc_oas+$counter))
-end_cos=$(($start_cos+$nproc_cos-1))
+end_cos=$(($start_cos+($numInst*$nproc_cos)-1))
 
-start_pfl=$(($nproc_cos+$nproc_oas+$counter))
-end_pfl=$(($start_pfl+$nproc_pfl-1))
+start_pfl=$(($numInst*$nproc_cos+$nproc_oas+$counter))
+end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
-start_clm=$(($nproc_cos+$nproc_oas+$nproc_pfl+$counter))
-end_clm=$(($start_clm+$nproc_clm-1))
+start_clm=$((($numInst*$nproc_cos)+$nproc_oas+($numInst*$nproc_pfl)+$counter))
+end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
 
-counter=$(($counter+$nproc_clm+$nproc_pfl+$nproc_cos+$nproc_oas))
+
+if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_cos}
+  do
+    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_pfl}
+  do
+    if [[ $withPFL == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_clm}
+  do
+    if [[ $withCLM == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+fi
+
+
 cat << EOF >> $rundir/slm_multiprog_mapping.conf
 __oas__
 __cos__
@@ -105,112 +128,20 @@ EOF
 
 comment "   sed executables and processors into mapping file"
 	if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
+	if [[ $withCOS == "false" ]] then ; sed "s/__cos__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
+        if [[ $withPFL == "false" ]] then ; sed "s/__pfl__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
+        if [[ $withCLM == "false" ]] then ; sed "s/__clm__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
 
-if [[ $withCOS == "true" && $withCLM == "false" ]] then
-sed "s/__cos__/$start_cos-$end_cos  \.\/cos_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-fi
-if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "false" ]] then
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-fi
-if [[ $withPFL == "true" && $withCLM == "false" ]] then
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/pfl_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-fi
-if [[ $withCOS == "true" && $withCLM == "true" && $withPFL == "false" ]] then
+
 sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-sed "s/__cos__/$start_cos-$end_cos  \.\/cos_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-fi
-if [[ $withPFL == "true" && $withCLM == "true" && $withCOS == "false" ]] then
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/pfl_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-fi
-if [[ $withCOS == "true" && $withCLM == "true" && $withPFL == "true" ]] then
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/pfl_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__cos__/$start_cos-$end_cos  \.\/cos_starter.bsh $instance/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-fi
-
-sed "s/__oas__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__cos__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__pfl__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed "s/__clm__//" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
-check
-sed '/^$/d' -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 
-
-
-done
-
-
-
-
-
-if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then
-
-cat << EOF >> $rundir/cos_starter.bsh
-#!/bin/bash
-cd tsmp_instance_\$1
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.bsh
-#!/bin/bash
-cd tsmp_instance_\$1
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.bsh
-#!/bin/bash
-cd tsmp_instance_\$1
-./parflow $pflrunname
-EOF
-
-else
-
-cat << EOF >> $rundir/cos_starter.bsh
-#!/bin/bash
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.bsh
-#!/bin/bash
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.bsh
-#!/bin/bash
-./parflow $pflrunname
-EOF
-
-fi
-
-
-comment "   change permission of module starter scripts"
-chmod 755 $rundir/cos_starter.bsh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/clm_starter.bsh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/pfl_starter.bsh >> $log_file 2>> $err_file
-check
 
 
 comment "   change permission of runscript and mapfile"

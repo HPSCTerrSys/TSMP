@@ -37,9 +37,9 @@ route "${cblue}>> createRunscript${cnormal}"
 mpitasks=$(($numInst*($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 bgs_oas=`echo "scale = 2; $nproc_oas / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
-bgs_cos=`echo "scale = 2; $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
-bgs_clm=`echo "scale = 2; $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
-bgs_pfl=`echo "scale = 2; $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
+bgs_cos=`echo "scale = 2; $numInst * $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
+bgs_clm=`echo "scale = 2; $numInst * $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
+bgs_pfl=`echo "scale = 2; $numInst * $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'` 
 
 
 
@@ -78,23 +78,18 @@ EOF
 counter=0
 counter2=1
 
-for instance in {$startInst..$(($numInst-1))}
-do
 #for mapfile
 start_oas=$counter
 end_oas=$(($start_oas+$nproc_oas-1))
 
 start_cos=$(($nproc_oas+$counter))
-end_cos=$(($start_cos+$nproc_cos-1))
+end_cos=$(($start_cos+($numInst*$nproc_cos)-1))
 
-start_pfl=$(($nproc_cos+$nproc_oas+$counter))
-end_pfl=$(($start_pfl+$nproc_pfl-1))
+start_pfl=$(($numInst*$nproc_cos+$nproc_oas+$counter))
+end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
-start_clm=$(($nproc_cos+$nproc_oas+$nproc_pfl+$counter))
-end_clm=$(($start_clm+$nproc_clm-1))
-
-counter=$(($counter+$nproc_clm+$nproc_pfl+$nproc_cos+$nproc_oas))
-
+start_clm=$((($numInst*$nproc_cos)+$nproc_oas+($numInst*$nproc_pfl)+$counter))
+end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
 
 
 #for cutting from personality
@@ -102,16 +97,37 @@ start_oasM=$counter2
 end_oasM=$(($start_oasM + $nproc_oas - 1))
 
 start_cosM=$(($bgs_oas * $nppn + $counter2))
-end_cosM=$(($start_cosM + $nproc_cos - 1))
+end_cosM=$(($start_cosM + ($numInst*$nproc_cos) - 1))
 
 start_pflM=$((($bgs_cos  + $bgs_oas) * $nppn + $counter2))
-end_pflM=$(($start_pflM + $nproc_pfl - 1))
+end_pflM=$(($start_pflM + ($numInst*$nproc_pfl) - 1))
 
 start_clmM=$((($bgs_cos + $bgs_oas + $bgs_pfl ) * $nppn + $counter2))
-end_clmM=$(($start_clmM + $nproc_clm - 1))
+end_clmM=$(($start_clmM + ($numInst*$nproc_clm) - 1))
 
-counter2=$(($counter2+ $nppn*($bgs_cos + $bgs_pfl + $bgs_clm + $bgs_oas)))
-
+if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then 
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_cos}
+  do
+    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_pfl}
+  do  
+    if [[ $withPFL == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_clm}
+  do  
+    if [[ $withCLM == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+fi
 
 
 
@@ -193,9 +209,6 @@ comment "   sed executables and processors into mapping file for instance $insta
   check
 
 
-done
-
-
 
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
@@ -207,57 +220,6 @@ echo "ready" > ready.txt
 exit 0
 
 EOF
-
-
-
-
-if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then
-
-cat << EOF >> $rundir/cos_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./parflow $pflrunname
-EOF
-
-else
-
-cat << EOF >> $rundir/cos_starter.ksh
-#!/bin/ksh
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.ksh
-#!/bin/ksh
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.ksh
-#!/bin/ksh
-./parflow $pflrunname
-EOF
-
-fi
-
-
-comment "   change permission of module starter scripts"
-chmod 755 $rundir/cos_starter.ksh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/clm_starter.ksh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/pfl_starter.ksh >> $log_file 2>> $err_file
-check
 
 
 
