@@ -207,7 +207,7 @@ terminate(){
 
 check(){
  if [[ $? == 0  ]] then
-    print "    ... ${cgreen}passed!${cnormal}"  | tee -a $stdout_file
+    print "    ... ${cgreen}OK!${cnormal}"  | tee -a $stdout_file
  else
     print "    ... ${cred}error!!! - aborting...${cnormal}" | tee -a $stdout_file
     print "See $log_file and $err_file" | tee -a $stdout_file

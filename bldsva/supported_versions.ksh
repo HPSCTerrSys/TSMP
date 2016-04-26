@@ -25,17 +25,17 @@ availability+=(
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
-        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
+        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.0.0 2.0.0MCT "
 )
 
 # list of versions with descriptions
 versions+=(
-        ["1.2.0"]="1.2.0 without modifications"
-        ["1.2.0MCT"]="1.2.0 with Oasis3-MCT"
+        ["1.2.0"]="1.2.0 (Cosmo5.1) without modifications"
+        ["1.2.0MCT"]="1.2.0 (Cosmo5.1) with Oasis3-MCT"
         ["1.1.0"]="1.1.0 without modifications"
         ["1.1.0MCT"]="1.1.0 with Oasis3-MCT"
-        ["curr"]="latest version without modifications"
-        ["currMCT"]="latest version with Oasis3-MCT"
+        ["2.0.0"]="1.2.0 (Cosmo5.1 & CESM) without modifications"
+        ["2.0.0MCT"]="1.2.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
 )
 
 
@@ -47,8 +47,8 @@ modelVersion+=(
         ["1.2.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow"
         ["1.1.0"]="oasis3 clm3_5 cosmo4_21 parflow"
         ["1.1.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow"
-        ["curr"]="oasis3 clm3_5 cosmo4_21 parflow"
-        ["currMCT"]="oasis3-mct clm3_5 cosmo4_21 parflow"
+        ["2.0.0"]="oasis3 clm4_0 cosmo5_1 parflow"
+        ["2.0.0MCT"]="oasis3-mct clm4_0 cosmo5_1 parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -60,8 +60,8 @@ combinations+=(
         ["1.2.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["curr"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["currMCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["2.0.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["2.0.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
 )
 
 #list of supported testcases for a certain machine. (first is default)
