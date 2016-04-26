@@ -498,7 +498,8 @@ SUBROUTINE init_environment (nproc, my_world_id, icomm_world, igroup_world, &
 
 ! Local variables:
 
-INTEGER (KIND=iintegers)           :: izmplcode , inst
+INTEGER (KIND=iintegers)           :: izmplcode , inst, counter, rank
+character(len=256) :: istr
 
 !------------------------------------------------------------------------------
 
@@ -538,14 +539,26 @@ INTEGER (KIND=iintegers)           :: izmplcode , inst
   end if
   icomm_world = MMD_comm_world ! mz_kk_20081107
 #else
+
+  call MPI_COMM_RANK (MPI_COMM_WORLD, rank, ierror)
+
+  inst=0 
+  counter=0
   !FGa: enables multi instances. reads a non-negative instance number from
-  !instance.txt and splits MPI_COMM_WORLD 
-  open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=ierror)
-  if(ierror==0) then
-    read(4711, *) inst
+  !instanceMap.txt and splits MPI_COMM_WORLD 
+  open (unit=4711, file='instanceMap.txt',access='sequential', form='formatted',status='old', action='read', iostat=ierror)
+  if(ierror==0) then 
+    do while(counter<=rank)    
+      read(4711, '(A)') istr 
+      if(counter .eq. rank) then 
+        read(istr,'(I8)') inst 
+        call chdir("./tsmp_instance_"//trim(istr))
+        exit
+      else 
+        counter=counter+1  
+      endif    
+    enddo
     close(4711)
-  else
-    inst = 0 
   endif
  
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,inst,inst,icomm_world,ierror)

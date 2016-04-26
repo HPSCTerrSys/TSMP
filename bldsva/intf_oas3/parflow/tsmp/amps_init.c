@@ -94,19 +94,37 @@ int amps_Init(int *argc, char **argv[])
 #endif
 
    char processor_name[MPI_MAX_PROCESSOR_NAME];
-   int namelen,inst=0;
-   FILE* stream = fopen("instance.txt", "r");
+   int namelen,inst=0,count=0;
+   FILE* stream = fopen("instanceMap.txt", "r");   
+   char dir_name[256];
+   char line[256];
 
    MPI_Init(argc, argv);
    amps_mpi_initialized = TRUE;
+   MPI_Comm_rank(MPI_COMM_WORLD, &amps_rank);
 
-   //FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
-   if (stream != NULL)
-     fscanf(stream, "%d",&inst);
+   //FGa: enables multi instances. reads a non-negative instance number from instanceMap.txt and splits MPI_COMM_WORLD 
+   if (stream != NULL){
+	while(fgets(line, sizeof line, stream) != NULL){
+	  if(count==amps_rank){
+ 	    inst=atoi(line);
+	    break;
+	  }else{
+	    count++;	
+	  }	
+	}	
+	sprintf(dir_name,"tsmp_instance_%d",inst);	
+	chdir(dir_name);
+	fclose(stream); 
+   }
+
    MPI_Comm_split(MPI_COMM_WORLD,inst,inst,&oas3Comm);
    
    MPI_Comm_size(amps_CommWorld, &amps_size);
    MPI_Comm_rank(amps_CommWorld, &amps_rank);
+
+
+
 
 #ifdef AMPS_STDOUT_NOBUFF
    setbuf (stdout, NULL);

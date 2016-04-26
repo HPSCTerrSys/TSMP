@@ -49,35 +49,47 @@ check
 
 
 mpitasks=`expr $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas`
-nnodes1=`echo "scale = 2; $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
-nnodes2=`echo "scale = 2; $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
-nnodes3=`echo "scale = 2; $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes1=`echo "scale = 2; $numInst * $nproc_cos / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes2=`echo "scale = 2; $numInst * $nproc_clm / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
+nnodes3=`echo "scale = 2; $numInst * $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 nnodes4=`echo "scale = 2; $nproc_oas / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
-nnodes=$(($numInst*($nnodes1+$nnodes2+$nnodes3+$nnodes4)))
+nnodes=$(($nnodes1+$nnodes2+$nnodes3+$nnodes4))
 
 
-exel="aprun"
+if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_cos}
+  do
+    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_pfl}
+  do
+    if [[ $withPFL == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi 
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_clm}
+  do  
+    if [[ $withCLM == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi 
+  done
+ done
+fi
 
-for instance in {$startInst..$(($numInst-1))}
-do
 
-if [[ $withCOS == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -n $nproc_cos  ./cos_starter.ksh $instance :" ; fi 
-if [[ $withPFL == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -n $nproc_pfl  ./pfl_starter.ksh $instance :" ; fi
-if [[ $withCLM == "true" && $withOAS == "false" ]] ; then ; exel=$exel" -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
-
-if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" && $withOASMCT == "false" ]] ; then ; exel=$exel" -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_cos ./cos_starter.ksh $instance : -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
-if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "false" ]] ; then ; exel=$exel" -n $nproc_oas ./oasis3.MPI1.x : -n $nproc_pfl  ./pfl_starter.ksh $instance : -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "false" ]] ; then ; exel=$exel" -n $nproc_oas  ./oasis3.MPI1.x : -n $nproc_cos ./cos_starter.ksh $instance : -n $nproc_pfl ./pfl_starter.ksh $instance : -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
+exel="aprun "
 
 
-if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false"  && $withOASMCT == "true" ]] ; then ; exel=$exel" -n $nproc_cos ./cos_starter.ksh $instance : -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
-if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true"  && $withOASMCT == "true" ]] ; then ; exel=$exel" -n $nproc_pfl ./pfl_starter.ksh $instance : -n $nproc_clm  ./clm_starter.ksh $instance :" ; fi
-if [[ $withCLM == "true" && $withPFL == "true" && $withCOS == "true"  && $withOASMCT == "true" ]] ; then ; exel=$exel" -n $nproc_cos ./cos_starter.ksh $instance : -n $nproc_pfl ./pfl_starter.ksh $instance : -n $nproc_clm ./clm_starter.ksh $instance :" ; fi
+if [[ $withOAS == "true" && $withOASMCT == "false" ]] ; then ; exel=$exel" -n $nproc_oas  ./oasis3.MPI1.x :" ; fi
+if [[ $withCOS == "true" ]] ; then ; exel=$exel" -n $(($numInst*$nproc_cos))  ./lmparbin_pur :" ; fi  
+if [[ $withPFL == "true" ]] ; then ; exel=$exel" -n $(($numInst*$nproc_pfl))  ./parflow $pflrunname  :" ; fi
+if [[ $withCLM == "true" ]] ; then ; exel=$exel" -n $(($numInst*$nproc_clm))  ./clm  :" ; fi
 
-done
 exel=${exel%?} #remove trailing ":"
-
-
 
 
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
@@ -106,55 +118,6 @@ date
 exit 0
 
 EOF
-
-
-if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then
-
-cat << EOF >> $rundir/cos_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.ksh
-#!/bin/ksh
-cd tsmp_instance_\$1
-./parflow $pflrunname
-EOF
-
-else
-
-cat << EOF >> $rundir/cos_starter.ksh
-#!/bin/ksh
-./lmparbin_pur
-EOF
-
-cat << EOF >> $rundir/clm_starter.ksh
-#!/bin/ksh
-./clm
-EOF
-
-cat << EOF >> $rundir/pfl_starter.ksh
-#!/bin/ksh
-./parflow $pflrunname
-EOF
-
-fi
-
-
-comment "   change permission of module starter scripts"
-chmod 755 $rundir/cos_starter.ksh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/clm_starter.ksh >> $log_file 2>> $err_file
-check
-chmod 755 $rundir/pfl_starter.ksh >> $log_file 2>> $err_file
-check
 
 comment "   change permission of runscript"
 chmod 755 $rundir/tsmp_pbs_run.ksh >> $log_file 2>> $err_file

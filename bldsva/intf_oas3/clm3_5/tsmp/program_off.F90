@@ -84,10 +84,11 @@ PROGRAM program_off
   logical  :: mpi_running  ! true => MPI is initialized 
   integer  :: mpicom_glob  ! MPI communicator
 
-  character(len=SHR_KIND_CL) :: nlfilename = "lnd.stdin"
+  character(len=SHR_KIND_CL) :: nlfilename = "lnd.stdin" , istr
 !
-  integer :: ierror, lengths_of_types, i
+  integer :: ierror, lengths_of_types, i,counter,rank
   logical :: flag
+  
 !-----------------------------------------------------------------------
 
   ! -----------------------------------------------------------------
@@ -101,14 +102,28 @@ PROGRAM program_off
 #else
   call mpi_initialized (mpi_running, ier)
   if (.not. mpi_running) call mpi_init(ier)
-  !FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
-  open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=ierror)
+
+  call MPI_COMM_RANK (MPI_COMM_WORLD, rank, ier)
+
+
+  i=0
+  counter=0
+  !FGa: enables multi instances. reads a non-negative instance number from instanceMap.txt and splits MPI_COMM_WORLD 
+  open (unit=4711, file='instanceMap.txt',access='sequential', form='formatted', status='old', action='read', iostat=ierror)
   if(ierror==0) then
-    read(4711, *) i
+    do while(counter<=rank)    
+      read(4711, '(A)') istr
+      if(counter .eq. rank) then
+        read(istr,'(I8)') i
+        call chdir("./tsmp_instance_"//trim(istr))
+        exit
+      else
+        counter=counter+1  
+      endif        
+    enddo
     close(4711)
-  else
-    i = 0
   endif
+
  
   call MPI_COMM_SPLIT(MPI_COMM_WORLD,i,i,mpicom_glob,ierror) 
   call spmd_init(mpicom_glob)

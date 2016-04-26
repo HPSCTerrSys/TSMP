@@ -89,7 +89,10 @@ CONTAINS
    INTEGER(kind=ip_intwp_p),ALLOCATABLE :: tmparr(:)
    INTEGER(kind=ip_intwp_p) :: k,i,m
    INTEGER(kind=ip_intwp_p) :: nt
+   INTEGER(kind=ip_intwp_p) :: inst,rank,counter,ierror
+   character(len=256) :: istr 
    character(len=ic_field)  :: i_name
+
    character(len=*),parameter :: subname = 'oasis_init_comp'
 !  ---------------------------------------------------------
 
@@ -111,16 +114,29 @@ CONTAINS
       if (OASIS_debug >= 0) WRITE (0,FMT='(A)') subname//': Not Calling MPI_Init'
    ENDIF
 
-   !FGa: enables multi instances. reads a non-negative instance number from instance.txt and splits MPI_COMM_WORLD 
-   open (unit=4711, file='instance.txt',access='sequential', form='formatted', status='old', action='read', iostat=mpi_err)
-   if(mpi_err==0) then
-     read(4711, *), icolor
-     close(4711) 
-   else
-     icolor = 0
-   endif         
-   ikey=icolor
-   call MPI_COMM_SPLIT(MPI_COMM_WORLD,icolor,ikey,mpi_comm_loc_world,mpi_err)
+
+  call MPI_COMM_RANK (MPI_COMM_WORLD, rank, ierror)
+
+  inst=0 
+  counter=0
+  !FGa: enables multi instances. reads a non-negative instance number from
+  !instanceMap.txt and splits MPI_COMM_WORLD 
+  open (unit=4711, file='instanceMap.txt',access='sequential',form='formatted',status='old', action='read', iostat=ierror)
+  if(ierror==0) then 
+    do while(counter<=rank)    
+      read(4711, '(A)') istr 
+      if(counter .eq. rank) then 
+        read(istr,'(I8)') inst 
+        call chdir("./tsmp_instance_"//trim(istr))
+        exit
+      else 
+        counter=counter+1  
+      endif    
+    enddo
+    close(4711)
+  endif
+
+  call MPI_COMM_SPLIT(MPI_COMM_WORLD,inst,inst,mpi_comm_loc_world,mpi_err)
 
 
 #ifdef use_comm_MPI1

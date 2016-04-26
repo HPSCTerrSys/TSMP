@@ -702,7 +702,7 @@ origrundir=$rundir
 orignamelist_cos=$namelist_cos
 orignamelist_clm=$namelist_clm
 orignamelist_pfl=$namelist_pfl
-for instance in {$startInst..$(($numInst-1))}
+for instance in {$startInst..$(($startInst+$numInst-1))}
 do
 route ${cblue}"> creating instance: $instance"${cnormal}
 if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then 
@@ -710,7 +710,6 @@ rundir=$origrundir/tsmp_instance_$instance
 comment "  mkdir sub-directory for instance"
   mkdir -p $rundir >> $log_file 2>> $err_file
 check
-  echo "${instance}" > $rundir/instance.txt
   if [[ -e "${orignamelist_cos}_${instance}" ]] ; then 
 	namelist_cos="${orignamelist_cos}_${instance}"
   else
@@ -733,8 +732,8 @@ comment "  source clm build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_clm
-comment "  cp clm exe to $rundir" 
-    cp $bindir/clm $rundir >> $log_file 2>> $err_file
+comment "  cp clm exe to $origrundir" 
+    cp $bindir/clm $origrundir >> $log_file 2>> $err_file
 check
   fi
   if [[ $withCOS == "true" ]] ; then
@@ -742,8 +741,8 @@ comment "  source cos build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_cos 
-comment "  cp cos exe and starter to $rundir"
-    cp $bindir/lmparbin_pur $rundir  >> $log_file 2>> $err_file
+comment "  cp cos exe and starter to $origrundir"
+    cp $bindir/lmparbin_pur $origrundir  >> $log_file 2>> $err_file
 check
   fi
   if [[ $withPFL == "true" ]] ; then 
@@ -751,8 +750,8 @@ comment "  source pfl build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
       setup_pfl 
-comment "  cp pfl exe to $rundir"
-    cp $bindir/parflow $rundir  >> $log_file 2>> $err_file
+comment "  cp pfl exe to $origrundir"
+    cp $bindir/parflow $origrundir  >> $log_file 2>> $err_file
 check
   fi
   if [[ $withOAS == "true" ]] ; then 
@@ -761,8 +760,8 @@ comment "  source oas build interface for $platform"
 check
       setup_oas 
     if [[ $withOASMCT == "false" ]] ; then 
-comment "  cp oas exe to $rundir"
-	 cp $bindir/oasis3.MPI1.x $rundir  >> $log_file 2>> $err_file
+comment "  cp oas exe to $origrundir"
+	 cp $bindir/oasis3.MPI1.x $origrundir  >> $log_file 2>> $err_file
 check
     fi
   fi
