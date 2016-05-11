@@ -25,7 +25,7 @@ availability+=(
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT "
-        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.0.0 2.0.0MCT "
+        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
 )
 
 # list of versions with descriptions
@@ -34,8 +34,10 @@ versions+=(
         ["1.2.0MCT"]="1.2.0 (Cosmo5.1) with Oasis3-MCT"
         ["1.1.0"]="1.1.0 without modifications"
         ["1.1.0MCT"]="1.1.0 with Oasis3-MCT"
-        ["2.0.0"]="1.2.0 (Cosmo5.1 & CESM) without modifications"
-        ["2.0.0MCT"]="1.2.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
+        ["2.1.0"]="2.1.0 (Cosmo5.1 & CESM) without modifications"
+        ["2.1.0MCT"]="2.1.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
+        ["2.0.5"]="2.0.5 (Cosmo4.21 & CESM) without modifications"
+        ["2.0.5MCT"]="2.0.5 (Cosmo4.21 & CESM) with Oasis3-MCT"
 )
 
 
@@ -47,8 +49,10 @@ modelVersion+=(
         ["1.2.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow"
         ["1.1.0"]="oasis3 clm3_5 cosmo4_21 parflow"
         ["1.1.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow"
-        ["2.0.0"]="oasis3 clm4_0 cosmo5_1 parflow"
-        ["2.0.0MCT"]="oasis3-mct clm4_0 cosmo5_1 parflow"
+        ["2.1.0"]="oasis3 clm4_0 cosmo5_1 parflow"
+        ["2.1.0MCT"]="oasis3-mct clm4_0 cosmo5_1 parflow"
+        ["2.0.5"]="oasis3 clm4_0 cosmo4_21 parflow"
+        ["2.0.5MCT"]="oasis3-mct clm4_0 cosmo4_21 parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -60,8 +64,11 @@ combinations+=(
         ["1.2.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["2.0.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["2.0.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["2.1.0"]=" clm cos pfl clm-cos "
+        ["2.1.0MCT"]=" clm cos pfl clm-cos "
+        ["2.0.5"]=" clm cos pfl clm-cos "
+        ["2.0.5MCT"]=" clm cos pfl clm-cos "
+
 )
 
 #list of supported testcases for a certain machine. (first is default)

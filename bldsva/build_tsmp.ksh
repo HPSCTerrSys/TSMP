@@ -19,6 +19,11 @@ getDefaults(){
   def_tclPath=""
   def_hyprePath=""
   def_siloPath=""
+  def_pncdfPath=""
+  def_lapackPath=""
+
+  def_mode=""
+  def_cplscheme=""
 
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
@@ -53,11 +58,18 @@ setDefaults(){
   pfldir=$def_pfldir
   mpiPath=$def_mpiPath
   ncdfPath=$def_ncdfPath
+  lapackPath=$def_lapackPath
+  pncdfPath=$def_pncdfPath
   grib1Path=$def_grib1Path
   tclPath=$def_tclPath
   hyprePath=$def_hyprePath
   siloPath=$def_siloPath
   combination=$def_combination
+
+  cplscheme=$def_cplscheme
+  if [[ $cplscheme == "" ]] then ; cplscheme="true" ; fi #We need a hard default here
+  mode=$def_mode
+  if [[ $mode == "" ]] then ; mode="0" ; fi #We need a hard default here
 
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
@@ -101,19 +113,19 @@ setSelection(){
   if [[ $tclPath == "" ]] then ; tclPath=$defaultTclPath ; fi
   if [[ $hyprePath == "" ]] then ; hyprePath=$defaultHyprePath ; fi
   if [[ $siloPath == "" ]] then ; siloPath=$defaultSiloPath ; fi
+  if [[ $pnetcdfPath == "" ]] then ; pncdfPath=$defaultPncdfPath ; fi
+  if [[ $lapackPath == "" ]] then ; lapackPath=$defaultLapackPath ; fi
 
   #compiler optimization
   if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
 
 
   set -A mList ${modelVersion[$version]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
-  if [[ $bindir == "" ]] then
-     bindir="$rootdir/bin/${platform}_${version}_${combination}"
-  fi
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
+  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
 
 
 }
@@ -358,8 +370,12 @@ interactive(){
 	 	  if [[ $numb == 17 ]] ; then ; read tclPath ; fi
 		  if [[ $numb == 18 ]] ; then ; read grib1Path ; fi
 		  if [[ $numb == 19 ]] ; then ; read ncdfPath ; fi
-		  if [[ $numb == 20 ]] ; then ; read optComp ; fi
-		  if [[ $numb == 21 ]] ; then ; read profiling ; fi
+ 		  if [[ $numb == 20 ]] ; then ; read pncdfPath ; fi
+		  if [[ $numb == 21 ]] ; then ; read lapackPath ; fi
+
+		  if [[ $numb == 22 ]] ; then ; read optComp ; fi
+		  if [[ $numb == 23 ]] ; then ; read profiling ; fi
+		  if [[ $numb == 24 ]] ; then ; read cplscheme ; fi
 		done	
 		interactive
 	  ;;
@@ -383,10 +399,10 @@ printState(){
   print ""
   print "${cred}(8)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
   print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
-  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_$combination): ${cgreen}$oasdir ${cnormal}"
-  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_$combination): ${cgreen}$clmdir ${cnormal}"
-  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_$combination): ${cgreen}$cosdir ${cnormal}"
-  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_$combination): ${cgreen}$pfldir ${cnormal}"
+  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
+  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
+  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
   print ""
   print "${cred}(14)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
   print "${cred}(15)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
@@ -394,9 +410,12 @@ printState(){
   print "${cred}(17)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
   print "${cred}(18)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
   print "${cred}(19)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
+  print "${cred}(20)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
+  print "${cred}(21)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
   print ""
-  print "${cred}(20)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
-  print "${cred}(21)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
+  print "${cred}(22)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
+  print "${cred}(23)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
+  print "${cred}(24)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
 }
 
 
@@ -550,6 +569,7 @@ getRoot(){
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[o:optimization?Compiler optimisation flags.]:[optimization:='$def_optComp']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
+  USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[W:optoas?Build option for Oasis.]:[optoas:='${def_options["oas"]}']{"
   USAGE+=$(printf "[?%-12s #%s]" "fresh" "build from scratch in a new folder")
   USAGE+=$(printf "[?%-12s #%s]" "build" "build clean")
@@ -561,10 +581,10 @@ getRoot(){
   USAGE+="[X:optclm?Build option for CLM.]:[optclm:='${def_options["clm"]}']"
   USAGE+="[Z:optpfl?Build option for Parflow.]:[optpfl:='${def_options["pfl"]}']"
    
-  USAGE+="[w:oasdir?Source directory for Oasis3. oasis3_MACHINE_DATE will be taken if ''.]:[oasdir:='${def_oasdir}']"
-  USAGE+="[y:cosdir?Source directory for Cosmo. cosmo_MACHINE_DATE will be taken if ''.]:[cosdir:='${def_cosdir}']"
-  USAGE+="[x:clmdir?Source directory for CLM. clm_MACHINE_DATE will be taken if ''.]:[clmdir:='${def_clmdir}']"
-  USAGE+="[z:pfldir?Source directory for Parflow. parflow_MACHINE_DATE will be taken if ''.]:[pfldir:='${def_pfldir}']"
+  USAGE+="[w:oasdir?Source directory for Oasis3. oasisV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[oasdir:='${def_oasdir}']"
+  USAGE+="[y:cosdir?Source directory for Cosmo. cosmoV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[cosdir:='${def_cosdir}']"
+  USAGE+="[x:clmdir?Source directory for CLM. clmV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[clmdir:='${def_clmdir}']"
+  USAGE+="[z:pfldir?Source directory for Parflow. parflowV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[pfldir:='${def_pfldir}']"
 
   USAGE+="[H:hyprepath?Include Path for Hypre. The machine default will be taken if ''.]:[hyprepath:='$hyprePath']"
   USAGE+="[S:silopath?Include Path for Silo. The machine default will be taken if ''.]:[silopath:='$siloPath']"
@@ -572,11 +592,12 @@ getRoot(){
   USAGE+="[G:grib1path?Include Path for Grib1. The machine default will be taken if ''.]:[grib1path:='$grib1Path']"
   USAGE+="[M:mpipath?Include Path for MPI. The machine default will be taken if ''.]:[mpipath:='$mpiPath']"
   USAGE+="[N:ncdfpath?Include Path for NetCDF. The machine default will be taken if ''.]:[ncdfpath:='$ncdfPath']"
+  USAGE+="[P:pncdfpath?Include Path for PNetCDF. The machine default will be taken if ''.]:[pncdfpath:='$pncdfPath']"
+  USAGE+="[L:lapackpath?Include Path for LapackCDF. The machine default will be taken if ''.]:[lapackpath:='$lapackPath']"
   USAGE+=$'\n\n\n\n'
 
 
 
-  mode=0
   args=0
   # parsing the command line arguments
   while getopts "$USAGE" optchar ; do
@@ -592,6 +613,7 @@ getRoot(){
     R)  rootdir="$OPTARG" ; args=1 ;;
     B)  bindir="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
+    C)  cplscheme="$OPTARG" ; args=1 ;;
 
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
     Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
@@ -608,7 +630,9 @@ getRoot(){
     G)  grib1Path="$OPTARG" ; args=1 ;;
     T)  tclPath="$OPTARG" ; args=1 ;;
     H)  hyprePath="$OPTARG" ; args=1 ;;
-    S)  siloPath="$OPTARG" ; args=1 ;;    
+    S)  siloPath="$OPTARG" ; args=1 ;; 
+    P)  pnetcdfPath="$OPTARG" ; args=1 ;;
+    L)  lapackPath="$OPTARG" ; args=1 ;; 
     esac
   done
 

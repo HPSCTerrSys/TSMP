@@ -87,7 +87,7 @@ INTEGER(KIND=iintegers)                        :: nldi,nlei, nldj,nlej ! halo li
 INTEGER(KIND=iintegers)                        :: jih, jjh             ! subdomain limit
 
 LOGICAL :: lpe_cpl = .FALSE.
-LOGICAL :: cpl_scheme = .TRUE.                 !Coupling Scheme with CLM, False for inversion technique  
+LOGICAL :: cpl_scheme                 !Coupling Scheme with CLM, False for inversion technique  
  
 REAL(KIND=ireals), DIMENSION(:,:,:),ALLOCATABLE  ::   frcv        ! all fields recieved from soil model
 

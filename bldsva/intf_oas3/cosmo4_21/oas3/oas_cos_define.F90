@@ -113,6 +113,12 @@ INTEGER                         :: status, cosncid, cosvarid(7)
 !------------------------------------------------------------------------------
 !- Begin Subroutine oas_cos_define 
 !------------------------------------------------------------------------------
+ ! Define coupling scheme between COSMO and CLM
+#ifdef CPL_SCHEME_F
+ cpl_scheme = .True. !TRN Scheme
+#else
+ cpl_scheme = .False. !INV Scheme
+#endif
 
  !  array size without halo
  !

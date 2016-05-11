@@ -66,10 +66,14 @@ route "${cblue}>> setupOas${cnormal}"
     cp $namelist_oas $rundir/namcouple
   check
   comment "   sed procs, gridsize & coupling freq into namcouple"
+
+  ncpl_exe1=$nproc_cos
+  ncpl_exe2=$nproc_pfl
+  ncpl_exe3=1
+  if [[ $withCESM == "true" ]] ; then ; ncpl_exe3=$nproc_clm ; fi
+
+
   if [[ $withPFL == "true" && $withCOS == "true" ]] then
-    ncpl_exe1=$nproc_cos
-    ncpl_exe2=$nproc_pfl
-    ncpl_exe3=1
 
     sed "s/nproc_exe1/$nproc_cos/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
@@ -104,16 +108,14 @@ route "${cblue}>> setupOas${cnormal}"
   fi  
 
   if [[ $withPFL == "true" && $withCOS == "false" ]] then
-    ncpl_exe1=$nproc_pfl
-    ncpl_exe2=1
 
     sed "s/nproc_exe1/$nproc_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
-    sed "s/ncpl_exe1/$ncpl_exe1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+    sed "s/ncpl_exe1/$ncpl_exe2/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/nproc_exe2/$nproc_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
-    sed "s/ncpl_exe2/$ncpl_exe2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+    sed "s/ncpl_exe2/$ncpl_exe3/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/cplfreq2/$cplfreq2/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
@@ -128,15 +130,13 @@ route "${cblue}>> setupOas${cnormal}"
   check
   fi
   if [[ $withPFL == "false" && $withCOS == "true" ]] then
-    ncpl_exe1=$nproc_cos
-    ncpl_exe2=1
     sed "s/nproc_exe1/$nproc_cos/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/ncpl_exe1/$ncpl_exe1/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/nproc_exe2/$nproc_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
-    sed "s/ncpl_exe2/$ncpl_exe2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+    sed "s/ncpl_exe2/$ncpl_exe3/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
@@ -151,8 +151,10 @@ route "${cblue}>> setupOas${cnormal}"
   check
 
   fi
+  rtime=$(($runhours*3600))
+  if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
   comment "   sed sim time into namcouple"
-    sed "s/totalruntime/$(($runhours*3600))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+    sed "s/totalruntime/$rtime/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
   comment "   sed startdate into namcouple"
     sed "s/yyyymmdd/${yyyy}${mm}${dd}/" -i $rundir/namcouple  >> $log_file 2>> $err_file

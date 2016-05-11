@@ -8,8 +8,9 @@ module purge
 
 
 # Only necessary if modules are missing after maintenence
-#module use /usr/local/software/jureca/OtherStages
-#module load Stages/Legacy
+module use /usr/local/software/jureca/OtherStages
+module load Stages/2015b 
+
 
 # basic toolchain, latest Intel compilers and ParaStation MPI
 module load intel-para/2015.07

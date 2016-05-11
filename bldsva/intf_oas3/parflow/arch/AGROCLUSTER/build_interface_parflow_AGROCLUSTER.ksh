@@ -118,10 +118,13 @@ route "${cblue}>> setup_pfl${cnormal}"
     fi
 
 
-  export PARFLOW_DIR="$pfldir"
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check
+  comment "   sed pfl_dir into coup_oas.tcl"
+    sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+
   comment "   create parflow db with tclsh from namelist."
     tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check

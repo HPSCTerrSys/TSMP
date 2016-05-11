@@ -13,7 +13,8 @@ check
   c_configure_cos
   if [[ $withOAS == "true" ]]; then
     cplFlag="-WF,-DCOUP_OAS_COS" 
-  fi  
+  fi 
+  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -WF,-DCPL_SCHEME_F " ; fi 
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -qextname=flush -qsuffix=cpp=f90 -WF,-DGRIBDWD -WF,-DNETCDF $cplFlag -WF,-DHYMACS@" $file >> $log_file 2>> $err_file
 check

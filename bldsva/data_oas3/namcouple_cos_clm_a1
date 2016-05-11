@@ -34,7 +34,7 @@
 # called by one component model in the coupled system (optional).
 # For the definition of the fields, see under $STRINGS keyword
 #
-           19 
+           20 
  $END
 #########################################################################
  $JOBNAME

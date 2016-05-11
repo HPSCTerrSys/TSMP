@@ -44,14 +44,23 @@ initSetup(){
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
-    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm
-  fi	
+    if [[ $cplscheme == "false" ]]; then
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_a1
+    else
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm
+    fi
+  fi
   if [[ $withPFL == "true" && $withCOS == "false" ]]; then
     defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
   fi
   if [[ $withPFL == "true" && $withCOS == "true" ]]; then
-    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
+    if [[ $cplscheme == "false" ]]; then
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl_a1
+    else
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
+    fi
   fi
+
 
   restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDat")/run"
   fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-43200.nc"

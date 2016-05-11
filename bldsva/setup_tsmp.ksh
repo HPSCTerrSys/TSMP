@@ -34,6 +34,8 @@ getDefaults(){
   def_runhours=""
   #profiling ("yes" , "no") - will use machine standard
   def_profiling="no"
+  def_cplscheme=""
+  def_mode=""
 }
 
 setDefaults(){
@@ -46,6 +48,12 @@ setDefaults(){
   profiling=$def_profiling
   rootdir=$def_rootdir
   pfldir=$def_pfldir
+
+  cplscheme=$def_cplscheme
+  if [[ $cplscheme == "" ]] then ; cplscheme="true" ; fi #We need a hard default here
+  mode=$def_mode
+  if [[ $mode == "" ]] then ; mode="0" ; fi #We need a hard default here
+
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
   stdout_file=$cpwd/stdout_all_${date}.txt
@@ -77,6 +85,8 @@ setDefaults(){
   startDate=$def_startDate
   runhours=$def_runhours
   restDate=$ref_restDate
+
+  withCESM="false"
 }
 
 clearMachineSelection(){
@@ -429,6 +439,7 @@ interactive(){
                   if [[ $numb == 29 ]] ; then ; read numInst ; fi
   		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
                   if [[ $numb == 31 ]] ; then ; read restDate ; fi
+		  if [[ $numb == 32 ]] ; then ; read cplscheme ; fi
                 done
                 interactive
           ;;
@@ -479,6 +490,7 @@ printState(){
   print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
   print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
   print "${cred}(31)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
+  print "${cred}(32)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
 }
 
 
@@ -574,6 +586,7 @@ getRoot(){
   USAGE+="[z:pfldir?Source directory for Parflow. parflow_MACHINE_DATE will be taken if ''.]:[pfldir:='${def_pfldir}']"
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
+  USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[P:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
   USAGE+="[N:numinst? Number of instances of TerrSysMP. Currently only works with Oasis3-MCT - ignored otherwise.]:[numinst:='$def_numInst']"
   USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
@@ -600,7 +613,6 @@ getRoot(){
   USAGE+=$'\n\n\n\n'
 
 
-  mode=0
   args=0
   # parsing the command line arguments
   while getopts "$USAGE" optchar ; do
@@ -642,6 +654,7 @@ getRoot(){
     B)  bindir="$OPTARG" ; args=1 ;;
     r)  rundir="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
+    C)  cplscheme="$OPTARG" ; args=1 ;;
     z)  pfldir="$OPTARG"; args=1 ;;
     esac
   done

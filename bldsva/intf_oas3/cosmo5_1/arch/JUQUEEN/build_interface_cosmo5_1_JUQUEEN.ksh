@@ -15,8 +15,9 @@ check
 
   c_configure_cos
   if [[ $withOAS == "true" ]]; then
-    cplFlag="-WF,-DCOUP_OAS_COS -WF,-DCPL_SCHEME_F" 
-  fi 
+    cplFlag="-WF,-DCOUP_OAS_COS " 
+  fi
+  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -WF,-DCPL_SCHEME_F " ; fi 
   file=$cosdir/Fopts  
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -qextname=flush -qsuffix=cpp=f90 -WF,-DGRIBDWD -WF,-DNETCDF -WF,-D__COSMO__ $cplFlag -WF,-DHYMACS@" $file >> $log_file 2>> $err_file
@@ -68,7 +69,7 @@ setup_cos(){
 route "${cblue}>> setupCos${cnormal}"
   nstop_cos=$((($runhours*3600-$cplfreq1)/$dt_cos))
 comment "  cp namelist to rundir"
-  cp $namelist_cos $rundir/lmrun_uc >> $log_file 2>> $err_file
+  cp ${namelist_cos}5_1 $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
 

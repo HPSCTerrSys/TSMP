@@ -195,10 +195,10 @@ LOCTRANS SCRIPR
  BILINEAR LR SCALAR LATLON 1
 # FROM CLM TO COSMO
 CLMINFRA COSINFRA  10 cplfreq1  1  clm05.nc EXPORTED
-ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=+3
+ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=2
 R 0 R 0 
 SCRIPR
-DISTWGT U SCALAR LATLON 1 4 
+ DISTWGT U SCALAR LATLON 1 4 
 #
 CLMALBED COSALBED  10 cplfreq1  1  clm06.nc EXPORTED
 ngclmx ngclmy ngcosx ngcosy gclm gcos SEQ=2

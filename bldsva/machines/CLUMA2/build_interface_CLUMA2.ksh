@@ -10,6 +10,8 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultTclPath="/daten01/z4/tcl8.5.13_gnu"
   defaultHyprePath="/daten01/z4/hypre2.9_gnu"
   defaultSiloPath="/daten01/z4/silo4.8_gnu"
+  defaultPncdfPath="/daten01/z4/p-netcdf"
+  defaultLapackPath="/daten01/z4/lapack-3.6.0"
 
   export LD_LIBRARY_PATH=$defaultTclPath/lib/
 
