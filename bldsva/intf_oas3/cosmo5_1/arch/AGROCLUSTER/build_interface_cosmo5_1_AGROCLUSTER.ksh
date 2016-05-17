@@ -65,7 +65,7 @@ route "${cblue}<< substitutions_cos${cnormal}"
 
 setup_cos(){
 route "${cblue}>> setupCos${cnormal}"
-  nstop_cos=$((($runhours*3600-$cplfreq1)/$dt_cos))
+  nstop_cos=$((($runhours*3600)/$dt_cos))
 comment "  cp namelist to rundir"
   cp ${namelist_cos}5_1 $rundir/lmrun_uc >> $log_file 2>> $err_file
 check

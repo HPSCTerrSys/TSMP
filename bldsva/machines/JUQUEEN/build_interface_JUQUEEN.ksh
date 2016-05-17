@@ -3,14 +3,27 @@
 
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
+
   # Default library paths
+  comment "   init lmod functionality"
+    eval `tclsh /usr/local/module/modulecmd.tcl sh autoinit`
+  check
+  comment "   load modules"
+    module purge >> $log_file 2>> $err_file
+  check
+    module load lapack >> $log_file 2>> $err_file
+  check
+    module load parallel-netcdf >> $log_file 2>> $err_file 
+  check
+
   defaultMpiPath="/homea/slts/slts00/local/juqueen/mpi"
   defaultNcdfPath="/homea/slts/slts00/local/juqueen/netcdf"
   defaultGrib1Path="/homea/slts/slts00/local/juqueen/grib1"
   defaultTclPath="/homea/slts/slts00/local/juqueen/tcl"
   defaultHyprePath="/homea/slts/slts00/local/juqueen/hypre"
   defaultSiloPath="/homea/slts/slts00/local/juqueen/silo"
-
+  defaultLapackPath="$LAPACK_DIR"
+  defaultPncdfPath="$PNETCDF_DIR"
 
 
   # Default Compiler/Linker optimization

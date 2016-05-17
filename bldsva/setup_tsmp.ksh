@@ -159,7 +159,7 @@ setSelection(){
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
   set -A mList ${modelVersion[$version]}
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
 
 }
 

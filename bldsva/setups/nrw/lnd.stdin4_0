@@ -91,8 +91,8 @@ cat << EOF >> __rundir__/drv_in
  samegrid_ro = .false.
  shr_map_dopole = .true.
  start_type = 'startup'
- tchkpt_dir = './timing/checkpoints'
- timing_dir = './timing'
+ tchkpt_dir = './'
+ timing_dir = './'
  username = 'fgasper'
  vect_map = 'cart3d'
 /

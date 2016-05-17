@@ -19,6 +19,8 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
+  defaultLapackPath="$EBROOTIMKL"
+  defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
   defaultOptC="-O2"

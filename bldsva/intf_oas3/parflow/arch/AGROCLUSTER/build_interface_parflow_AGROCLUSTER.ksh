@@ -117,7 +117,7 @@ route "${cblue}>> setup_pfl${cnormal}"
   check
     fi
 
-
+  export PARFLOW_DIR=$pfldir
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check

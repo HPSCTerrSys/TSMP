@@ -1,7 +1,7 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std"
+  defaultFDCLM="/homea/slts/slts06/forcings/testdata_NRW_std"
   defaultFDCOS="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/cosmo/int2lm_output.20080508"
   defaultFDOAS="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/oasis3/"
   defaultFDPFL="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW/"
