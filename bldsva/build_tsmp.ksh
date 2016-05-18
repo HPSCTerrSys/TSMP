@@ -421,7 +421,7 @@ printState(){
 
 terminate(){
   print ""
-  print "Terminating $call. No changes were made..."
+  print "Terminating $call. No changes were made...${cnormal}"
   rm -f $err_file
   rm -f $log_file
   rm -f $stdout_file

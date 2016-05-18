@@ -185,7 +185,10 @@ setCombination(){
 finalizeSelection(){
 
   mkdir -p $rundir
-  rm -rf $rundir/*
+  if [[ -n $(ls -A $rundir) ]] ; then
+     mv ${rundir} ${rundir}_backup_${date}
+     mkdir $rundir
+  fi
 
   nproc_oas=0
   nproc_pfl=0
@@ -207,7 +210,7 @@ finalizeSelection(){
 
 terminate(){
  print ""
- print "Terminating $call. No changes were made..."
+ print "Terminating $call. No changes were made...${cnormal}"
  rm -f $err_file
  rm -f $log_file
  rm -f $stdout_file
