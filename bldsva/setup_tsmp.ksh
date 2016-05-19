@@ -6,7 +6,8 @@ getDefaults(){
   def_combination=""           
   def_refSetup=""
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
-  def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$date if empty
+  def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$exp_id if empty
+  def_exp_id=""				
   def_pfldir=""
   def_numInst=""
   def_startInst=""
@@ -45,6 +46,7 @@ setDefaults(){
   if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
+  exp_id=$def_exp_id
   profiling=$def_profiling
   rootdir=$def_rootdir
   pfldir=$def_pfldir
@@ -151,8 +153,12 @@ setSelection(){
   if [[ $runhours == "" ]] then ; runhours=$defaultRunhours ; fi
 
 
+  if [[ $exp_id == "" ]] then
+     exp_id=${date}
+  fi
+
   if [[ $rundir == "" ]] then
-     rundir=$rootdir/run/${platform}_${version}_${combination}_${refSetup}_${date}
+     rundir=$rootdir/run/${platform}_${version}_${combination}_${refSetup}_${exp_id}
   fi
 
   if [[ $bindir == "" ]] then
@@ -443,6 +449,7 @@ interactive(){
   		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
                   if [[ $numb == 31 ]] ; then ; read restDate ; fi
 		  if [[ $numb == 32 ]] ; then ; read cplscheme ; fi
+   		  if [[ $numb == 33 ]] ; then ; read exp_id ; fi
                 done
                 interactive
           ;;
@@ -477,7 +484,7 @@ printState(){
   print ""
   print "${cred}(16)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
   print "${cred}(17)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir${cnormal}"
-  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${date}): ${cgreen}$rundir${cnormal}"
+  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${$exp_id}): ${cgreen}$rundir${cnormal}"
   print ""
   print "${cred}(19)${cnormal} namelist dir for clm (default='$def_namelist_clm'): ${cgreen}$namelist_clm${cnormal}"
   print "${cred}(20)${cnormal} forcing dir for clm (default='$def_forcingdir_clm'): ${cgreen}$forcingdir_clm${cnormal}"
@@ -494,6 +501,7 @@ printState(){
   print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
   print "${cred}(31)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
   print "${cred}(32)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
+  print "${cred}(33)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
 }
 
 
@@ -583,6 +591,7 @@ getRoot(){
   USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
   USAGE+="[B:bindir?Absolut path to bin directory for the builded executables.]:[path:='$def_bindir']"
   USAGE+="[r:rundir?Absolut path to run directory for TSMP.]:[path:='$def_rundir']"
+  USAGE+="[I:expid?Experiment ID suffix for rundir. DATE will be taken if empty.]:[expid:='$def_exp_id']"
   USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
   USAGE+="[V:refsetup?Reference setup. This is a setup that is supported and tested on a certain machine. No further inputs are needed for this setup. If you leave it '' the machine default will be taken.]:[refsetup:='$def_refSetup']"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$platform']"
@@ -656,6 +665,7 @@ getRoot(){
     R)  rootdir="$OPTARG" ; args=1 ;;
     B)  bindir="$OPTARG" ; args=1 ;;
     r)  rundir="$OPTARG" ; args=1 ;;
+    I)  exp_id="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
     z)  pfldir="$OPTARG"; args=1 ;;
