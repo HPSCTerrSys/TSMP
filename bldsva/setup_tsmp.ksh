@@ -484,7 +484,7 @@ printState(){
   print ""
   print "${cred}(16)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
   print "${cred}(17)${cnormal} bin dir (default=$def_rootdir/bin/${def_platform}_${version}_${combination}): ${cgreen}$bindir${cnormal}"
-  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${$exp_id}): ${cgreen}$rundir${cnormal}"
+  print "${cred}(18)${cnormal} run dir (default=$def_rootdir/run/${def_platform}_${version}_${combination}_${refSetup}_${exp_id}): ${cgreen}$rundir${cnormal}"
   print ""
   print "${cred}(19)${cnormal} namelist dir for clm (default='$def_namelist_clm'): ${cgreen}$namelist_clm${cnormal}"
   print "${cred}(20)${cnormal} forcing dir for clm (default='$def_forcingdir_clm'): ${cgreen}$forcingdir_clm${cnormal}"
@@ -604,8 +604,8 @@ getRoot(){
   USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
-  USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[startdate:='$def_startDate']"
-  USAGE+="[S:restdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD HH']:[restdate:='$def_restDate']" 
+  USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD_HH' () ]:[startdate:='$def_startDate']"
+  USAGE+="[S:restdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD_HH']:[restdate:='$def_restDate']" 
   USAGE+="[T:runhours? Number of simulated hours.]:[runhours:='$def_runhours']" 
   USAGE+="[w:pxclm? Number of tasks for clm in X direction. If you leave it '' the machine default will be taken.]:[pxclm:='$def_px_clm']"
   USAGE+="[W:pyclm? Number of tasks for clm in Y direction. If you leave it '' the machine default will be taken.]:[pyclm:='$def_py_clm']"
@@ -642,8 +642,8 @@ getRoot(){
     P)  nppn=$OPTARG ; args=1 ;;
     n)  startInst=$OPTARG ; args=1 ;;
     N)  numInst=$OPTARG ; args=1 ;;
-    s)  startDate=$OPTARG ; args=1 ;;
-    S)  restDate=$OPTARG ; args=1 ;;
+    s)  startDate=$(echo $OPTARG | sed -e "s/_/ /g"); args=1 ;;
+    S)  restDate=$(echo $OPTARG | sed -e "s/_/ /g") ; args=1 ;;
     T)  runhours=$OPTARG ; args=1 ;;    
     
     d)  namelist_oas=$OPTARG ; args=1 ;;
