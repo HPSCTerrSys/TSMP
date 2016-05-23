@@ -588,7 +588,6 @@ pfset Solver.WriteCLMBinary			        False
 #
 pfset ICPressure.Type                    __pfl_ICPpressureType__
 pfset ICPressure.GeomNames               domain
-pfdist "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.Value       __pfl_ICPpressureValue__
 pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.RefGeom     domain

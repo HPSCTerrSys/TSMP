@@ -382,8 +382,6 @@ pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.RefGeom     domain
 pfset Geom.domain.ICPressure.RefPatch    z-upper
 
-
-
 #
 #-----------------------------------------------------------------------------
 # Phase sources:

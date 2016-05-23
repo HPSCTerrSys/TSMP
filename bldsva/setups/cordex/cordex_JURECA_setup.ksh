@@ -2,7 +2,7 @@
 
 initSetup(){
   defaultFDCLM="/homea/slts/slts06/forcings/testdata_EU_std"
-  defaultFDCOS="/work/slts/slts15/tsmp/TSMPForecastEU2016-04-10-12/forcing/cosmoinput"
+  defaultFDCOS="/homea/slts/slts06/forcings/testdata_EU_std/cosmo/cosmoinput_2016050112"
   defaultFDOAS="/homea/slts/slts06/forcings/testdata_EU_std/oasis3"
   defaultFDPFL="/homea/slts/slts06/forcings/testdata_EU_std/ParFlow"
 
@@ -20,7 +20,7 @@ initSetup(){
   defaultPFLProcX=9
   defaultPFLProcY=8
 
-  defaultStartDate="2016-04-10 12"
+  defaultStartDate="2016-05-01 12"
   defaultRestDate=""
   defaultRunhours=3
 

@@ -108,13 +108,17 @@ route "${cblue}>> setup_pfl${cnormal}"
   comment "   sed initial condition to pfl namelist."
       sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
   check
-      sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # comment this during restart run
+      sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      
   check
+  comment "   sed delete restart file name from pfl namelist."
+      sed '/__pfl_ICPpressureFileName__/d' -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file 
+  check
+
     else
   comment "   sed initial condition to pfl namelist."
       sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
   check
-      sed "s,__pfl_ICPpressureFileName__,$pfbfilename," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file       # comment this during restart run
+      sed "s,__pfl_ICPpressureFileName__,$pfbfilename," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file       
   check
     fi
 
