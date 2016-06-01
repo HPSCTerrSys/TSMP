@@ -158,8 +158,10 @@ setSelection(){
   fi
 
   if [[ $rundir == "" ]] then
-     rundir=$rootdir/run/${platform}_${version}_${combination}_${refSetup}_${exp_id}
+     rundir="$rootdir/run/${platform}_${version}_${combination}_${refSetup}"
   fi
+  rundir="${rundir}_${exp_id}"
+
 
   if [[ $bindir == "" ]] then
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
