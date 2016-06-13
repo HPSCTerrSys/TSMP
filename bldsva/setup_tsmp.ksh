@@ -771,6 +771,10 @@ check
   finalizeMachine
   finalizeSelection 
 
+  comment "  source common interface"
+    . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
+  check
+
 #  start setup
 origrundir=$rundir
 orignamelist_cos=$namelist_cos
