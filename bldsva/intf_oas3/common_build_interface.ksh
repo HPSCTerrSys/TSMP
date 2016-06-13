@@ -388,7 +388,7 @@ route "${cblue}<<< c_substitutions_clm${cnormal}"
 }
 
 
-c_setup_clm(){{
+c_setup_clm(){
 route "${cblue}>>> c_setup_clm${cnormal}"
 
 comment "  sed starttime to namelist"
