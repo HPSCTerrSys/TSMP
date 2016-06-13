@@ -216,7 +216,8 @@ cat << EOF >> __rundir__/lnd_in
  urban_traffic = .false.
  hist_empty_htapes = .true.
  hist_fincl1       = 'H2OSOI','SOILLIQ','WT','FSH','FSDS','FLDS','FGR','FGEV','FCTR','FCEV','FSR','FIRA','TBOT','TSA'
- hist_nhtfrq = -1
+ hist_nhtfrq = -__dump_clm_interval__
+ rest_flag      = .true.
  hist_mfilt = 1
 /
 &ndepdyn_nml

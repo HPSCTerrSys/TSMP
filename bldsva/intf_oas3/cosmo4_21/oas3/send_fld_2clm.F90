@@ -32,7 +32,7 @@ SUBROUTINE send_fld_2clm
 ! Modules used:
 
 USE oas_cos_vardef
-USE data_runcontrol,  ONLY :  ntstep, nnow, itype_gscp, nstop
+USE data_runcontrol,  ONLY :  ntstep, nnow, itype_gscp, nstop, ntstep, hstart
 
 USE data_modelconfig, ONLY :  ke, dt, ie, je, ie_tot, je_tot,     &
                               istartpar, iendpar, jstartpar, jendpar
@@ -269,7 +269,12 @@ INTEGER :: il_var_id(17),  dimids(2), il_file_id, mype, ib, npes, ierror, status
  ! Coupling only on PE with at least one land point
  IF ( lpe_cpl ) THEN
 
-   isec = ntstep * dt
+   IF ( hstart > 0 ) THEN    
+      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+   ELSE    
+      isec = ntstep * dt    
+   ENDIF
+
 
    IF( ssnd(jps_t)%laction )   CALL oas_cos_snd( jps_t, isec, t(:,:,ke,nnow), info )
    ! CPS Need to send u and v at mass point for CLM

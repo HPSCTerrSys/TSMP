@@ -143,7 +143,7 @@ pfset TimingInfo.StartTime               0.0
 pfset TimingInfo.StopTime                __stop_pfl_bldsva__
 pfset TimeStep.Type                      Constant
 pfset TimeStep.Value                     __dt_pfl_bldsva__
-pfset TimingInfo.DumpInterval            1.0
+pfset TimingInfo.DumpInterval            __dump_pfl_interval__
 
 # Time Cycles
 #-----------------------------------------------------------------------------
@@ -569,9 +569,8 @@ pfset Solver.Linear.Preconditioner               PFMGOctree
 #pfset Solver.Drop					 1E-20
 #pfset Solver.AbsTol					 1E-12
 
-#pfset Solver.PrintSaturation                            True 
-#pfset Solver.PrintSubsurf                               False
-#pfset Solver.PrintPressure                              True 
+pfset Solver.PrintSaturation                            True 
+pfset Solver.PrintPressure                              True 
 #pfset Solver.PrintSubsurf                               False
 #pfset Solver.Nonlinear.PrintFlag                        LowVerbosity
 

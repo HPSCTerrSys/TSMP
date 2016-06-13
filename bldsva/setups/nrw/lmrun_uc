@@ -14,6 +14,7 @@ nsteps=nstop_cos_bldsva
 #
 lmworkdir_cluma=__rundir__
 lmoutdir_cluma=__rundir__/cosmo_out
+lmrestdir_cluma=__rundir__/cosmo_rest
 lmindir_cluma=__forcingdir__/
 #
 lmworkdir_sx9=/e/uhome/xxxx/cosmo/
@@ -52,7 +53,7 @@ fi
 nprocspernode=999
 if [[ $cmd = execluma ]]; then
   nprocspernode=4; queue=batch; username=$username_cluma
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "###### JOB RUN ON CLUMA ######"
 elif [[ $cmd = exesx9 ]]; then
   nprocspernode=16; queue=normal@sx9esiox1; username=$username_sx9
@@ -60,7 +61,7 @@ elif [[ $cmd = exesx9 ]]; then
   echo "###### JOB RUN ON SX9 ######"
 elif [[ $cmd = cleancluma ]]; then
   nprocspernode=999; queue=none
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "LMRUN_UC: clean up"
 elif [[ $cmd = cleansx9 ]]; then
   nprocspernode=999; queue=none
@@ -98,7 +99,7 @@ workdir=$lmworkdir/
 INIDIR=$lmindir
 OUTPUT=$lmoutdir
 DATUM=${INIT_Y}${INIT_M}${INIT_D}${INIT_H}
-RESTAR=$INIDIR
+RESTAR=$lmrestdir
 BD_DIR=$INIDIR 
 #
 #################################################
@@ -132,9 +133,14 @@ fi
 # generate output directory
 #################################################
 #
+
 if [ ! -d $OUTPUT ] ; then
   mkdir -p $OUTPUT
 fi
+if [ ! -d $RESTAR ] ; then
+  mkdir -p $RESTAR
+fi
+
 #
 echo "VK CONFIG with DATE        ${INIT_D}.${INIT_M}.${INIT_Y} ${INIT_H}:00"
 echo "VK CONFIG with CONV.SCHEME $CONV_SCHEME"
@@ -173,6 +179,7 @@ if [[ ($cmd = execluma) || ($cmd = exesx9) ]]; then
 rm -f cosmo_eu_job
 echo "generate cosmo_eu_job ..."
 
+
 cat >> cosmo_eu_job << namelists
 #################################################
 # namelist settings
@@ -180,7 +187,7 @@ cat >> cosmo_eu_job << namelists
 cd $workdir
 rm -f YU* M_*
 rm -f $OUTPUT/l*
-#rm -f $RESTAR/l*
+rm -f $RESTAR/l*
 
 cat > INPUT_ORG << end_input_org
  &LMGRID
@@ -190,7 +197,7 @@ cat > INPUT_ORG << end_input_org
   ie_tot       = ie_tot_bldsva, je_tot = je_tot_bldsva,     ke_tot = 50,
  /
  &RUNCTL
-  hstart = 0.0,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
+  hstart = __hstart__,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
   nprocx = $NPX,  nprocy = $NPY,   nprocio = $NPIO,
   nboundlines = nbdl_cos_bldsva,
   lphys      = .TRUE.,   luse_rttov    = .FALSE.,  luseobs = .FALSE., leps = .FALSE.,
@@ -230,7 +237,9 @@ cat > INPUT_IO  << end_input_io
  &IOCTL
 !  lasync_io=.FALSE., ngribout=1,
 !  yform_read='grb1',
-!  ydir_restart='$RESTAR',
+   ydir_restart='$RESTAR',
+   nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
+   ytunit_restart='f',
 !  nincwait=30,
 !  nmaxwait=2400,
  /
@@ -248,7 +257,7 @@ cat > INPUT_IO  << end_input_io
   ydirbd     = '$BD_DIR',
  /
  &GRIBOUT
-    ncomb=0,$nsteps,360,
+    ncomb=__ncomb_start__,$nsteps,360,
 !    ncomb=0,1125,45,   1126,1169,1,   1170,2160,45,
     lanalysis=.false.,
     lcheck=.true.,

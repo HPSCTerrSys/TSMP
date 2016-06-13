@@ -108,12 +108,12 @@ pfset Cell.29.dzScale.Value                   0.02
 # Setup timing info
 #-----------------------------------------------------------------------------
 pfset TimingInfo.BaseUnit		 0.0025
-pfset TimingInfo.StartCount		 0
+pfset TimingInfo.StartCount		 __start_cnt_pfl__
 pfset TimingInfo.StartTime		 0.0
 pfset TimingInfo.StopTime		 __stop_pfl_bldsva__ 
 pfset TimeStep.Type			 Constant
 pfset TimeStep.Value			 __dt_pfl_bldsva__ 
-pfset TimingInfo.DumpInterval		 1.0
+pfset TimingInfo.DumpInterval		 __dump_pfl_interval__
 
 # Time Cycles
 #-----------------------------------------------------------------------------
@@ -266,9 +266,11 @@ pfset Mannings.Geom.domain.Value	 5.52e-6
 #pfset ICPressure.GeomNames		 "domain"
 #pfset Geom.domain.ICPressure.FileName    "/daten01/z4/database/ParFlow/Rur_NRW/Rur_300X300_Ini/rur_ic_press.pfb" 
 #
-pfset ICPressure.Type                    HydroStaticPatch
+pfset ICPressure.Type                    __pfl_ICPpressureType__
 pfset ICPressure.GeomNames               domain
-pfset Geom.domain.ICPressure.Value       -2.
+pfset Geom.domain.ICPressure.Value       __pfl_ICPpressureValue__
+pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
+
 pfset Geom.domain.ICPressure.RefGeom     domain
 pfset Geom.domain.ICPressure.RefPatch    z-upper
 #
@@ -311,9 +313,9 @@ pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12
 
-pfset Solver.PrintSaturation                            False
+pfset Solver.PrintSaturation                            True
 pfset Solver.PrintSubsurf                               False
-pfset Solver.PrintPressure                              False
+pfset Solver.PrintPressure                              True
 pfset Solver.PrintSubsurf                               False
 pfset Solver.Nonlinear.PrintFlag                        LowVerbosity
 

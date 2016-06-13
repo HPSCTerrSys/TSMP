@@ -185,12 +185,14 @@ route "${cblue}>> setupClm${cnormal}"
 
   withCESM="true"
   seconds_clm=$(($hh*3600))
-#  runstep_clm=$(($runhours*3600/$dt_clm))
   rpointer=$rundir/lnd.clmoas.rpointer
+  runstep_clm=$runhours
+
 
 comment "  cp namelist to rundir"
   cp ${namelist_clm}4_0 $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
+
 
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
@@ -200,42 +202,7 @@ comment "  sed num procs to namelist"
   sed "s,__nprocs__,$(($px_clm * $py_clm))," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 
-comment "  sed starttime to namelist"
-  sed "s,__seconds_clm_bldsva__,$seconds_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed dt to namelist"
-  sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed forcingdir to namelist"
-  sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed gridsize to namelist"
-  sed "s,__gridsize__,$res," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  create rpointer dummy file"
-  touch $rpointer >> $log_file 2>> $err_file
-check
-comment "  sed rpointer path to namelist"
-  sed "s,__rundir_rpointerdir__,$rpointer," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed date to namelist"
-  sed "s,__yyyymmdd_bldsva__,${yyyy}${mm}${dd}," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed runtime to namelist"
-  sed "s,__runstep_clm_bldsva__,$runhours," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-  if [[ $restDate == "" ]] then
-comment "  sed no restart file path to namelist"
-    sed "s,__finidat__,," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-  else
-comment "  sed restart file path to namelist"
-    sed "s,__finidat__,${fn_finidat}," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-
-fi
-
-    echo "${fn_finidat}" > $rpointer
+  c_setup_clm
 
 comment "  split clm4_0 namelist to individual parts"
     $rundir/lnd.stdin >> $log_file 2>> $err_file

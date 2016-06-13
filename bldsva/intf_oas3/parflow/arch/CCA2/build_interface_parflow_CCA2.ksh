@@ -77,62 +77,9 @@ route "${cblue}<< substitutions_pfl${cnormal}"
 
 setup_pfl(){
 route "${cblue}>> setup_pfl${cnormal}"
-  comment "   copy parflow namelist to rundir."
-    cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed nproc x to pfl namelist."
-    sed "s/__nprocx_pfl_bldsva__/$px_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed nproc y to pfl namelist."
-    sed "s/__nprocy_pfl_bldsva__/$py_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed gridpoints x to pfl namelist."
-    sed "s/__ngpflx_bldsva__/$gx_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed gridpoints y to pfl namelist."
-    sed "s/__ngpfly_bldsva__/$gy_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed forcingdir to pfl namelist."
-    sed "s,__forcingdir__,$rundir," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed dt to pfl namelist."
-    sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed end time to pfl namelist."
-    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-  comment "   sed start counter to pfl namelist."
-    sed "s/__start_cnt_pfl__/0/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-    if [[ $restDate == "" ]] then
-  comment "   sed initial condition to pfl namelist."
-      sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
-  check
-      sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      
-  check
-  comment "   sed delete restart file name from pfl namelist."
-      sed '/__pfl_ICPpressureFileName__/d' -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file 
-  check
 
-    else
-  comment "   sed initial condition to pfl namelist."
-      sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
-  check
-      sed "s,__pfl_ICPpressureFileName__,$pfbfilename," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file       
-  check
-    fi
+  c_setup_pfl
 
-  export PARFLOW_DIR=$pfldir
-  comment "   cd to rundir."
-    cd $rundir >> $log_file 2>> $err_file
-  check
-  comment "   sed pfl_dir into coup_oas.tcl"
-    sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
-
-  comment "   create parflow db with tclsh from namelist."
-    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
 route "${cblue}<< setup_pfl${cnormal}"
 }
 

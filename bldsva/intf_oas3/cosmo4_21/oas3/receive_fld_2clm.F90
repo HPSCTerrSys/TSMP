@@ -73,7 +73,8 @@ USE data_runcontrol , ONLY :                &
           nnow  ,       & ! corresponds to ntstep
           nnew  ,       & ! corresponds to ntstep + 1
           nstop ,       & ! last time step of the forecast period
-          ntstep
+          ntstep,       &
+          hstart
 
 USE data_constants  , ONLY :                &
           r_d,          & ! gas constant for dry air
@@ -233,7 +234,12 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    nrcvinfo = OASIS_idle
    ztmp1=0.
 
-   isec = ntstep * dt
+   IF ( hstart > 0 ) THEN    
+      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+   ELSE    
+      isec = ntstep * dt    
+   ENDIF
+
 
    cplfreq = NINT ( hincrad * 3600.0_ireals)        !CPS
 

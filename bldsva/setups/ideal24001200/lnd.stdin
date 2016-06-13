@@ -19,7 +19,7 @@
 
  hist_dov2xy    = .true.
  hist_avgflag_pertape = 'A'
- hist_nhtfrq    =  -1 
+ hist_nhtfrq    =  -__dump_clm_interval__ 
  hist_mfilt     =  1
  hist_crtinic   = 'NONE'
  mss_irt        =  0 

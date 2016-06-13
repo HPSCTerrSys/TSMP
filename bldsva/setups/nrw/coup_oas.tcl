@@ -120,12 +120,12 @@ pfset Cell.29.dzScale.Value                   0.02
 # Setup timing info
 #-----------------------------------------------------------------------------
 pfset TimingInfo.BaseUnit		 0.0025
-pfset TimingInfo.StartCount		 0
+pfset TimingInfo.StartCount		 __start_cnt_pfl__
 pfset TimingInfo.StartTime		 0.0
 pfset TimingInfo.StopTime		 __stop_pfl_bldsva__ 
 pfset TimeStep.Type			 Constant
 pfset TimeStep.Value			 __dt_pfl_bldsva__ 
-pfset TimingInfo.DumpInterval		 1.0
+pfset TimingInfo.DumpInterval		 __dump_pfl_interval__
 
 # Time Cycles
 #-----------------------------------------------------------------------------
@@ -422,15 +422,14 @@ pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12
 
-pfset Solver.PrintSaturation                            False
-pfset Solver.PrintSubsurf                               False
-pfset Solver.PrintPressure                              False 
-pfset Solver.PrintSubsurf                               False
+pfset Solver.PrintSaturation                            True
+pfset Solver.PrintSubsurf                               True
+pfset Solver.PrintPressure                              True 
 pfset Solver.Nonlinear.PrintFlag                        LowVerbosity
 
 pfset Solver.WriteSiloSubsurfData		        False	
-pfset Solver.WriteSiloPressure				True
-pfset Solver.WriteSiloSaturation		        True	
+pfset Solver.WriteSiloPressure				False
+pfset Solver.WriteSiloSaturation		        False	
 pfset Solver.WriteSiloMask			        False	
 pfset Solver.WriteCLMBinary			        False	
 

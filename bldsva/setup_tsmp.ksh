@@ -23,6 +23,12 @@ getDefaults(){
   def_forcingdir_cos=""
   def_forcingdir_oas=""
   def_forcingdir_pfl=""
+  def_restfile_pfl=""
+  def_restfile_clm=""
+  def_restfile_cos=""
+  def_dump_clm=""
+  def_dump_cos=""
+  def_dump_pfl=""	  
   def_queue=""
   def_px_clm=""
   def_py_clm=""
@@ -31,7 +37,7 @@ getDefaults(){
   def_px_pfl=""
   def_py_pfl=""
   def_startDate=""
-  def_restDate=""
+  def_initDate=""
   def_runhours=""
   #profiling ("yes" , "no") - will use machine standard
   def_profiling="no"
@@ -80,13 +86,19 @@ setDefaults(){
   forcingdir_cos=$def_forcingdir_cos
   forcingdir_oas=$def_forcingdir_oas
   forcingdir_pfl=$def_forcingdir_pfl
+  restfile_pfl=$def_restfile_pfl
+  restfile_clm=$def_restfile_clm
+  restfile_cos=$def_restfile_cos
+  dump_clm=$def_dump_clm
+  dump_cos=$def_dump_cos
+  dump_pfl=$def_dump_pfl
   namelist_clm=$def_namelist_clm
   namelist_cos=$def_namelist_cos
   namelist_oas=$def_namelist_oas
   namelist_pfl=$def_namelist_pfl
   startDate=$def_startDate
   runhours=$def_runhours
-  restDate=$ref_restDate
+  initDate=$ref_initDate
 
   withCESM="false"
 }
@@ -106,7 +118,7 @@ clearSetupSelection(){
   px_pfl=""
   py_pfl=""
   startDate=""
-  restDate=""
+  initDate=""
   runhours=""
 
   forcingdir_clm=""
@@ -149,9 +161,12 @@ setSelection(){
   if [[ $namelist_pfl == "" ]] then ; namelist_pfl=$defaultNLPFL ; fi
 
   if [[ $startDate == "" ]] then ; startDate=$defaultStartDate ; fi
-  if [[ $restDate == "" ]] then ; restDate=$defaultRestDate ; fi
+  if [[ $initDate == "" ]] then ; initDate=$defaultInitDate ; fi
   if [[ $runhours == "" ]] then ; runhours=$defaultRunhours ; fi
 
+  if [[ $dump_clm == "" ]] then ; dump_clm=$defaultDumpCLM ; fi
+  if [[ $dump_cos == "" ]] then ; dump_cos=$defaultDumpCOS ; fi
+  if [[ $dump_pfl == "" ]] then ; dump_pfl=$defaultDumpPFL ; fi
 
   if [[ $exp_id == "" ]] then
      exp_id=${date}
@@ -449,9 +464,15 @@ interactive(){
                   if [[ $numb == 28 ]] ; then ; read profiling ; fi
                   if [[ $numb == 29 ]] ; then ; read numInst ; fi
   		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
-                  if [[ $numb == 31 ]] ; then ; read restDate ; fi
+                  if [[ $numb == 31 ]] ; then ; read initDate ; fi
 		  if [[ $numb == 32 ]] ; then ; read cplscheme ; fi
    		  if [[ $numb == 33 ]] ; then ; read exp_id ; fi
+		  if [[ $numb == 34 ]] ; then ; read restfile_pfl ; fi
+		  if [[ $numb == 35 ]] ; then ; read restfile_clm ; fi
+		  if [[ $numb == 36 ]] ; then ; read restfile_cos ; fi
+                  if [[ $numb == 37 ]] ; then ; read dump_pfl ; fi
+                  if [[ $numb == 38 ]] ; then ; read dump_clm ; fi
+                  if [[ $numb == 39 ]] ; then ; read dump_cos ; fi
                 done
                 interactive
           ;;
@@ -501,9 +522,17 @@ printState(){
   print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
   print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
   print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
-  print "${cred}(31)${cnormal} restart Date (default=$def_restDate): ${cgreen}$restDate${cnormal}"
+  print "${cred}(31)${cnormal} init Date (default=$def_initDate): ${cgreen}$initDate${cnormal}"
   print "${cred}(32)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
   print "${cred}(33)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
+  print ""
+  print "${cred}(34)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
+  print "${cred}(35)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
+  print "${cred}(36)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
+  print "${cred}(37)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
+  print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
+  print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
+
 }
 
 
@@ -607,7 +636,7 @@ getRoot(){
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
   USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD_HH' () ]:[startdate:='$def_startDate']"
-  USAGE+="[S:restdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD_HH']:[restdate:='$def_restDate']" 
+  USAGE+="[S:initdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD_HH']:[initdate:='$def_initDate']" 
   USAGE+="[T:runhours? Number of simulated hours.]:[runhours:='$def_runhours']" 
   USAGE+="[w:pxclm? Number of tasks for clm in X direction. If you leave it '' the machine default will be taken.]:[pxclm:='$def_px_clm']"
   USAGE+="[W:pyclm? Number of tasks for clm in Y direction. If you leave it '' the machine default will be taken.]:[pyclm:='$def_py_clm']"
@@ -623,6 +652,13 @@ getRoot(){
   USAGE+="[F:forcedircos? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcedircos:='']"
   USAGE+="[g:nampfl? Namelist for ParFlow. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[nampfl:='']"
   USAGE+="[G:forcedirpfl? Forcing directory for ParFlow. This will replace the default forcing dir from the reference setup.]:[forcedirpfl:='']"
+  USAGE+="[j:restfileclm? Restart file for CLM. No restart for CLM if ''.]:[restfileclm:='$def_restfile_clm']"
+  USAGE+="[k:restfilecos? Restart file for Cosmo. No restart for Cosmo if ''.]:[restfilecos:='$def_restfile_cos']"
+  USAGE+="[l:restfilepfl? Restart file for ParFlow. No restart for ParFlow if ''.]:[restfilepfl:='$def_restfile_pfl']"
+  USAGE+="[J:dumpclm? Dump interval for CLM (in hours).]:[dumpclm:='$def_dump_clm']"
+  USAGE+="[K:dumpcos? Dump interval for Cosmo (in hours).]:[dumpcos:='$def_dump_cos']"
+  USAGE+="[L:dumppfl? Dump interval for ParFlow (in hours).]:[dumppfl:='$def_dump_pfl']"
+
 
   USAGE+=$'\n\n\n\n'
 
@@ -645,7 +681,7 @@ getRoot(){
     n)  startInst=$OPTARG ; args=1 ;;
     N)  numInst=$OPTARG ; args=1 ;;
     s)  startDate=$(echo $OPTARG | sed -e "s/_/ /g"); args=1 ;;
-    S)  restDate=$(echo $OPTARG | sed -e "s/_/ /g") ; args=1 ;;
+    S)  initDate=$(echo $OPTARG | sed -e "s/_/ /g") ; args=1 ;;
     T)  runhours=$OPTARG ; args=1 ;;    
     
     d)  namelist_oas=$OPTARG ; args=1 ;;
@@ -671,6 +707,16 @@ getRoot(){
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
     z)  pfldir="$OPTARG"; args=1 ;;
+
+    l)  restfile_pfl="$OPTARG"; args=1 ;;
+    j)  restfile_clm="$OPTARG"; args=1 ;;
+    k)  restfile_cos="$OPTARG"; args=1 ;;
+
+    L)  dump_pfl="$OPTARG"; args=1 ;;
+    J)  dump_clm="$OPTARG"; args=1 ;;
+    K)  dump_cos="$OPTARG"; args=1 ;;
+
+
     esac
   done
 

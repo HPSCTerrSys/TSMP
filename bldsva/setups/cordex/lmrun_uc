@@ -15,7 +15,7 @@ nsteps=nstop_cos_bldsva
 lmworkdir_cluma=__rundir__
 lmoutdir_cluma=__rundir__/cosmo_out
 lmindir_cluma=__forcingdir__/
-#lmindir_cluma=__forcingdir__/int2lm_out/__int2lmyy__/__int2lmmm__/__int2lmdd__
+lmrestdir_cluma=__rundir__/cosmo_rest
 lmworkdir_sx9=/e/uhome/xxxx/cosmo/
 lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
 lmindir_sx9=/e/uscratch/xxxx/cosmo/
@@ -52,7 +52,7 @@ fi
 nprocspernode=999
 if [[ $cmd = execluma ]]; then
   nprocspernode=4; queue=batch; username=$username_cluma
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "###### JOB RUN ON CLUMA ######"
 elif [[ $cmd = exesx9 ]]; then
   nprocspernode=16; queue=normal@sx9esiox1; username=$username_sx9
@@ -60,7 +60,7 @@ elif [[ $cmd = exesx9 ]]; then
   echo "###### JOB RUN ON SX9 ######"
 elif [[ $cmd = cleancluma ]]; then
   nprocspernode=999; queue=none
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "LMRUN_UC: clean up"
 elif [[ $cmd = cleansx9 ]]; then
   nprocspernode=999; queue=none
@@ -98,7 +98,7 @@ workdir=$lmworkdir/
 INIDIR=$lmindir
 OUTPUT=$lmoutdir
 DATUM=${INIT_Y}${INIT_M}${INIT_D}${INIT_H}
-RESTAR=$OUTPUT
+RESTAR=$lmrestdir
 BD_DIR=$INIDIR 
 #
 #################################################
@@ -135,6 +135,10 @@ fi
 if [ ! -d $OUTPUT ] ; then
   mkdir -p $OUTPUT
 fi
+if [ ! -d $RESTAR ] ; then
+  mkdir -p $RESTAR
+fi
+
 #
 echo "VK CONFIG with DATE        ${INIT_D}.${INIT_M}.${INIT_Y} ${INIT_H}:00"
 echo "VK CONFIG with CONV.SCHEME $CONV_SCHEME"
@@ -190,8 +194,7 @@ cat > INPUT_ORG << end_input_org
  ie_tot       = ie_tot_bldsva, je_tot = je_tot_bldsva,     ke_tot = 50,
  /
  &RUNCTL
-  hstart = 0.0,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
-	!hstart = __hstart__,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
+  hstart = __hstart__,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
   nprocx = $NPX,  nprocy = $NPY,   nprocio = $NPIO,
   nboundlines = 4,
   lphys      = .TRUE.,   luse_rttov    = .FALSE.,  luseobs = .FALSE., leps = .FALSE.,
@@ -230,11 +233,11 @@ end_input_sat
 cat > INPUT_IO  << end_input_io
  &IOCTL
   lasync_io=.FALSE., ngribout=1,
-!  lasync_io=.FALSE., ngribout=2,
-  yform_read='grb1',
-!  ydir_restart='$RESTAR',
-  	!nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
-!  ytunit_restart='f',
+   ydir_restart='$RESTAR',
+   nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
+   ytunit_restart='f',
+
+!  yform_read='grb1',
 !  nincwait=30,
 !  nmaxwait=2400,
  /
@@ -252,7 +255,7 @@ cat > INPUT_IO  << end_input_io
   ydirbd     = '$BD_DIR',
  /
  &GRIBOUT
-    ncomb=0,$nsteps,60,
+    ncomb=__ncomb_start__,$nsteps,60,
     !ncomb=0,$nsteps,1440,
     !ncomb=0,$nsteps,360,
     !ncomb=__ncomb_start__,$nsteps,360,

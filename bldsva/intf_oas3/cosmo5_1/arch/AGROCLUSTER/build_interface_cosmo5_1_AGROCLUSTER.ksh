@@ -65,59 +65,10 @@ route "${cblue}<< substitutions_cos${cnormal}"
 
 setup_cos(){
 route "${cblue}>> setupCos${cnormal}"
-  nstop_cos=$((($runhours*3600)/$dt_cos))
-  if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 comment "  cp namelist to rundir"
   cp ${namelist_cos}5_1 $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
+  c_setup_cos
 
-
-comment "  sed dt to namelist"
-  sed "s,dt_cos_bldsva,$dt_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-comment "  sed number of procs to namelist"
-  sed "s,nprocx_cos_bldsva,$px_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-  sed "s,nprocy_cos_bldsva,$py_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-comment "  sed gridpoints to namelist"
-  sed "s,ie_tot_bldsva,$gx_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-  sed "s,je_tot_bldsva,$gy_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-
-comment "  sed gridpoints to namelist"
-  sed "s,nbdl_cos_bldsva,$nbndlines," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-
-check
-comment "  sed forcingdir to namelist"
-  sed "s,__forcingdir__,$forcingdir_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-comment "  sed rundir to namelist"
-  sed "s,__rundir__,$rundir," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-comment "  sed stop time to namelist"
-  sed "s/nstop_cos_bldsva/$nstop_cos/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-comment "  sed date to namelist"
-  sed "s/init_y_bldsva/$yyyy/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-  sed "s/init_m_bldsva/$mm/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-  sed "s/init_d_bldsva/$dd/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-  sed "s/init_h_bldsva/$hh/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
-
-
-comment "  cd to rundir"
-  cd $rundir >> $log_file 2>> $err_file
-check
-comment "  run lmrun_uc clean"
-  $rundir/lmrun_uc cleancluma >> $log_file 2>> $err_file
-check
-comment "  run lmrun_uc exe"
-  $rundir/lmrun_uc execluma >> $log_file 2>> $err_file
-check
 route "${cblue}<< setupCos${cnormal}" 
 }
