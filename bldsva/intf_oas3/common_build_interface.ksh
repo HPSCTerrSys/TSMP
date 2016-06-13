@@ -391,6 +391,10 @@ route "${cblue}<<< c_substitutions_clm${cnormal}"
 c_setup_clm(){
 route "${cblue}>>> c_setup_clm${cnormal}"
 
+comment "  sed rundir to namelist"
+  sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+
 comment "  sed starttime to namelist"
   sed "s,__seconds_clm_bldsva__,$seconds_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
@@ -424,6 +428,10 @@ check
 
 
     echo "${fn_finidat}" > $rpointer
+
+comment "  run clm namelist"
+    $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
 
 route "${cblue}<<< c_setup_clm${cnormal}"
 }

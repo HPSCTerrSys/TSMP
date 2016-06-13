@@ -194,19 +194,11 @@ comment "  cp namelist to rundir"
 check
 
 
-comment "  sed rundir to namelist"
-  sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-
 comment "  sed num procs to namelist"
   sed "s,__nprocs__,$(($px_clm * $py_clm))," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 
   c_setup_clm
-
-comment "  split clm4_0 namelist to individual parts"
-    $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
 
 route "${cblue}<< setupClm${cnormal}"
 }

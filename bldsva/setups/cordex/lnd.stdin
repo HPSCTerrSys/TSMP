@@ -1,4 +1,8 @@
- &clm_inparm
+#! /bin/ksh
+
+
+cat << EOF >> __rundir__/lnd.stdin 
+&clm_inparm
  caseid         = 'clmoas'
  ctitle         = 'clmoas'
  nsrest         =  0
@@ -34,3 +38,4 @@
 /
  &prof_inparm
  /
+EOF
