@@ -1,0 +1,8 @@
+echo "-------------------------------------------------------------------------"
+echo " CESM BUILDNML SCRIPT STARTING"
+echo " - To prestage restarts, untar a restart.tar file into $RUNDIR"
+
+
+
+echo " CESM BUILDNML SCRIPT HAS FINISHED SUCCESSFULLY"
+echo "-------------------------------------------------------------------------"
