@@ -600,7 +600,7 @@ getRoot(){
 #######################################
 
   cblue=$(tput setaf 4)
-  cnormal=$(tput setaf 9)
+  cnormal=$(tput sgr0)
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
 
@@ -858,16 +858,14 @@ done
   print "$call $*">> $log_file
   #remove special charecters for coloring from logfiles
   sed -i "s,.\[32m,,g" $log_file
-  sed -i "s,.\[39m,,g" $log_file
   sed -i "s,.\[31m,,g" $log_file
   sed -i "s,.\[34m,,g" $log_file
-  sed -i "s,.\[91m,,g" $log_file
+  sed -i "s,.[(]B.\[m,,g" $log_file
 
   sed -i "s,.\[32m,,g" $stdout_file
-  sed -i "s,.\[39m,,g" $stdout_file
   sed -i "s,.\[31m,,g" $stdout_file
   sed -i "s,.\[34m,,g" $stdout_file
-  sed -i "s,.\[91m,,g" $stdout_file
+  sed -i "s,.[(]B.\[m,,g" $stdout_file
 
   mv -f $err_file $rundir
   mv -f $log_file $rundir
