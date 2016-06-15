@@ -11,6 +11,8 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultTclPath="/usr"
   defaultHyprePath="/home/w.kurtz/libs/hypre_openmpi-1.8.4"
   defaultSiloPath="/home/w.kurtz/libs/silo-4.8_openmpi-1.8.4"
+  defaultPncdfPath="/usr"
+  defaultLapackPath="/usr"
 	
   export LD_LIBRARY_PATH=$defaultTclPath/lib64/:/home/w.kurtz/libs/netcdf_openmpi-1.8.4/lib
 
