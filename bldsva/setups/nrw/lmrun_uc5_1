@@ -243,7 +243,8 @@ end_input_sat
 cat > INPUT_IO  << end_input_io
  &IOCTL
   lasync_io=.FALSE, ngribout=1,
-   ydir_restart='$RESTAR',
+   ydir_restart_out='$RESTAR',
+   ydir_restart_in='$INIDIR',
    nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
    ytunit_restart='f',
 

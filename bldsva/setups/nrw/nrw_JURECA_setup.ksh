@@ -11,7 +11,6 @@ initSetup(){
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
 
-
   defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=2

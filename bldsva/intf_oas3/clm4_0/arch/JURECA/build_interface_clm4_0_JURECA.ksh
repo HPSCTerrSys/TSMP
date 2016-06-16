@@ -190,7 +190,7 @@ route "${cblue}>> setupClm${cnormal}"
 
 
 comment "  cp namelist to rundir"
-  cp ${namelist_clm}4_0 $rundir/lnd.stdin >> $log_file 2>> $err_file
+  cp ${namelist_clm} $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 
 

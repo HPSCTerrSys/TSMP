@@ -73,6 +73,10 @@ route "${cblue}<<< c_substitutions_cos${cnormal}"
 c_setup_cos(){
 route "${cblue}>>> c_setup_cos${cnormal}"
 
+comment "  cp namelist to rundir"
+  cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
 nstop_cos=$((  ($runhours*3600 + ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) )  /$dt_cos   ))
 if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 

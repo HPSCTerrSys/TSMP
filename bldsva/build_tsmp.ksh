@@ -557,7 +557,7 @@ getRoot(){
   USAGE+="[+NAME?TerrSysMP build script]"
   USAGE+="[+DESCRIPTION?builds TSMP based on decisions for included modules]"
   USAGE+="[b:bash?Bash mode - set command line arguments will overwrite default values (no interactive mode) (This is the default with arguments).]"
-  USAGE+="[i:interactive?Interactive mode - command line arguments are ignored and defaults will be overwritten during the interactive session (This is the default without arguments).]"
+  USAGE+="[i:interactive?Interactive mode - command line arguments and defaults will be overwritten during the interactive session (This is the default without arguments).]"
   USAGE+="[a:avail?Prints a listing of every machine with available versions. The script will exit afterwards.]"
   USAGE+="[t:tutorial?Prints a tutorial/description on how to add new versions and platforms to this script. The script will exit afterwards.]"
   USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
@@ -689,10 +689,6 @@ check
   runCompilation
 
   printState >> $log_file
-  comment "${cred}foo${cnormal}"
-  check
-  comment "foo2"
-  check
 
   #remove special charecters for coloring from logfiles
   sed -i "s,.\[32m,,g" $log_file

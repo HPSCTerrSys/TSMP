@@ -73,9 +73,6 @@ route "${cblue}<< substitutions_cos${cnormal}"
 setup_cos(){
 route "${cblue}>> setupCos${cnormal}"
 
-comment "  cp namelist to rundir"
-  cp ${namelist_cos}5_1 $rundir/lmrun_uc >> $log_file 2>> $err_file
-check
   c_setup_cos
 
 route "${cblue}<< setupCos${cnormal}" 

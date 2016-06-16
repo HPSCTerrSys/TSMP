@@ -182,6 +182,11 @@ setSelection(){
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
   set -A mList ${modelVersion[$version]}
+
+  #Fix for cos /clm namelist because they differ in newer version.
+  if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
+  if [[ ${mList[2]} == cosmo5_1  ]] ; then ; namelist_cos+=5_1 ; fi
+
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
 
 }
@@ -616,7 +621,7 @@ getRoot(){
   USAGE+="[+NAME?TerrSysMP setup script]"
   USAGE+="[+DESCRIPTION?sets up TSMP run by handling namelists and copying necessary files into a run directory]"
   USAGE+="[b:bash?Bash mode - set command line arguments will overwrite default values (no interactive mode) (This is the default with arguments).]"
-  USAGE+="[i:interactive?Interactive mode - command line arguments are ignored and defaults will be overwritten during the interactive session (This is the default without arguments).]"
+  USAGE+="[i:interactive?Interactive mode - command line arguments and defaults will be overwritten during the interactive session (This is the default without arguments).]"
   USAGE+="[a:avail?Prints a listing of every machine with available versions. The script will exit afterwards.]"
   USAGE+="[t:tutorial?Prints a tutorial/description on how to add new versions and platforms to this script. The script will exit afterwards.]"
   USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
