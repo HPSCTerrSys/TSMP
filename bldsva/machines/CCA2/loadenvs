@@ -14,7 +14,17 @@
 # basic toolchain, latest Intel compilers and ParaStation MPI
 
 
-module swap PrgEnv-cray PrgEnv-gnu
+#module swap PrgEnv-cray PrgEnv-gnu/5.2.14
+
+prgenvswitchto gnu
+#module unload gcc
+#module switch gcc/4.9.3 gcc/4.8.0
+
+#module swap gcc/4.9.3 gcc/5.3.0
+
+#module load craype-hugepages2M
+
+#module swap PrgEnv-cray PrgEnv-gnu
 
 #module load PrgEnv-gnu
 
@@ -22,8 +32,10 @@ module swap PrgEnv-cray PrgEnv-gnu
 #module load git/2.3.2
 
 # libs for TerrSysMP
-module load netcdf/3.6.3
+#module load netcdf/3.6.3
 
+module load netcdf/3.6.3
+#module load netcdf4
 
 # standard analysis and vis. libs and tools 
 #module load NCO/4.4.8

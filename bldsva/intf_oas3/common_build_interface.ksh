@@ -136,7 +136,7 @@ sed "s/__nhour_restart_start__/$(($cnt+$runhours-1))/" -i $rundir/lmrun_uc  >> $
 check
 sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__nhour_restart_incr__/2/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / $dt_cos))

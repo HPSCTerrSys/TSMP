@@ -12,13 +12,13 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl 
 
 
-  defaultNppn=24
-  defaultCLMProcX=4
-  defaultCLMProcY=5
+  defaultNppn=36
+  defaultCLMProcX=2
+  defaultCLMProcY=2
   defaultCOSProcX=4
-  defaultCOSProcY=6
+  defaultCOSProcY=4
   defaultPFLProcX=4
-  defaultPFLProcY=6
+  defaultPFLProcY=4
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
