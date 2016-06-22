@@ -108,7 +108,7 @@ pfset Cell.29.dzScale.Value                   0.02
 # Setup timing info
 #-----------------------------------------------------------------------------
 pfset TimingInfo.BaseUnit		 1.0
-pfset TimingInfo.StartCount		 0
+pfset TimingInfo.StartCount		 __start_cnt_pfl__ 
 pfset TimingInfo.StartTime		 0.0
 pfset TimingInfo.StopTime		 __stop_pfl_bldsva__
 pfset TimeStep.Type			 Constant
@@ -261,7 +261,9 @@ pfset Mannings.Geom.domain.Value	 5.52e-6
 #---------------------------------------------------------
 pfset ICPressure.Type                   "PFBFile"
 pfset ICPressure.GeomNames              "domain"
-pfset Geom.domain.ICPressure.FileName   "__forcingdir__/rur_ic_press.pfb" 
+pfset Geom.domain.ICPressure.FileName   "__forcingdir__/rur_ic_press.pfb"
+#for restart purpose
+pfset Geom.domain.ICPressure.FileName   "__pfl_ICPpressureFileName__" 
 
 #pfset ICPressure.Type			 HydroStaticPatch
 #pfset ICPressure.GeomNames		 domain

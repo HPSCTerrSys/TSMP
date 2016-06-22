@@ -11,6 +11,7 @@ nsteps=nstop_cos_bldsva
 #
 lmworkdir_cluma=__rundir__
 lmoutdir_cluma=__rundir__/cosout
+lmrestdir_cluma=__rundir__/cosrst
 lmindir_cluma=__forcingdir__/
 #
 rasoinput=__forcingdir__/raso_IdealSnd_0000LT.dat
@@ -51,7 +52,7 @@ fi
 nprocspernode=999
 if [[ $cmd = execluma ]]; then
   nprocspernode=4; queue=batch; username=$username_cluma
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "###### JOB RUN ON CLUMA ######"
 elif [[ $cmd = exesx9 ]]; then
   nprocspernode=16; queue=normal@sx9esiox1; username=$username_sx9
@@ -59,7 +60,7 @@ elif [[ $cmd = exesx9 ]]; then
   echo "###### JOB RUN ON SX9 ######"
 elif [[ $cmd = cleancluma ]]; then
   nprocspernode=999; queue=none
-  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
   echo "LMRUN_UC: clean up"
 elif [[ $cmd = cleansx9 ]]; then
   nprocspernode=999; queue=none
@@ -97,7 +98,7 @@ workdir=$lmworkdir/
 INIDIR=$lmindir
 OUTPUT=$lmoutdir
 DATUM=${INIT_Y}${INIT_M}${INIT_D}${INIT_H}
-RESTAR=$INIDIR
+RESTAR=$lmrestdir
 BD_DIR=$INIDIR
 #
 #################################################
@@ -133,6 +134,9 @@ fi
 #
 if [ ! -d $OUTPUT ] ; then
   mkdir -p $OUTPUT
+fi
+if [ ! -d $RESTAR ] ; then
+  mkdir -p $RESTAR
 fi
 #
 echo "VK CONFIG with DATE        ${INIT_D}.${INIT_M}.${INIT_Y} ${INIT_H}:00"
@@ -208,7 +212,7 @@ cat > INPUT_ORG << end_input_org
     dt=dt_cos_bldsva,
     ! Starting hour of the forecast relative to to the starting date ydate_ini below:
     ! (normally 0.0, except for restart runs)
-    hstart=0.0,
+    hstart=__hstart__,
     ! End hour of the forecast:
     nstop= $nsteps,
     ! Produces additional control output:
@@ -298,6 +302,10 @@ cat > INPUT_IO  << end_input_io
   ncenter=78,
   ! Number of gribout namelists:
   ngribout=1,
+  ydir_restart_out='$RESTAR',
+  ydir_restart_in='$INIDIR',
+  nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
+  ytunit_restart='f',
  /
 
  &DATABASE
@@ -345,7 +353,7 @@ cat > INPUT_IO  << end_input_io
   ! hcomb = 0.0, 6.0, 0.1 means: from hour 0 to hour 6 in steps of 6 minutes
   ! (Several triples may be given one after another!)
   !hcomb=0.0, 20.0, 0.25,
-  ncomb=0,$nsteps,200,
+  ncomb=__ncomb_start__,$nsteps,200,
   nrbit=16,
   ! Indikator for the time unit in grib-output (0=min, 1=stunde) - 0 no more possible since COSMO 5.0:
 !  nunit_of_time=1,
