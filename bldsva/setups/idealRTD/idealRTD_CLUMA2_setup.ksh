@@ -23,7 +23,7 @@ initSetup(){
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
   defaultRestDate=""
-  defaultRunhours=3.
+  defaultRunhours=24
 
   gx_clm=14
   gy_clm=14
