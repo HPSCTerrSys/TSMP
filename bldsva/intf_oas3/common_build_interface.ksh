@@ -136,7 +136,7 @@ sed "s/__nhour_restart_start__/$(($cnt+$runhours-1))/" -i $rundir/lmrun_uc  >> $
 check
 sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__nhour_restart_incr__/2/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / $dt_cos))
@@ -566,7 +566,8 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
     sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed end time to pfl namelist."
-    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  nstop_pfl=`python -c "print ($runhours*3600 - $cplfreq2)/3600."`
+    sed "s/__stop_pfl_bldsva__/$nstop_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file

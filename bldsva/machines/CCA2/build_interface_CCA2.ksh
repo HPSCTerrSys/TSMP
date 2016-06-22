@@ -12,12 +12,15 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   check
 
   # Default library paths
-  defaultMpiPath="/opt/cray/mpt/6.3.1/gni/mpich2-gnu/48"
-  defaultNcdfPath="/usr/local/apps/netcdf/3.6.3/GNU/48"
+  defaultMpiPath="$CRAY_MPICH_DIR"
+  defaultNcdfPath="$NETCDF_DIR"
   defaultGrib1Path="/home/ms/de/dwd/libdwd/1.1.6/GNU/lib"
   defaultTclPath="/perm/ms/spde/de5f/libs/tcl"
   defaultHyprePath="/perm/ms/spde/de5f/libs/hypre"
   defaultSiloPath="/perm/ms/spde/de5f/libs/silo"
+  defaultPncdfPath=""
+  defaultLapackPath=""
+
 	
   export LD_LIBRARY_PATH=$defaultNcdfPath/lib
 
