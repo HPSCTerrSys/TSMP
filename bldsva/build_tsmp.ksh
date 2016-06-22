@@ -1,5 +1,9 @@
 #! /bin/ksh
 
+######################################################
+##################### Defaults #######################
+######################################################
+
 getDefaults(){
   def_platform="" 
   def_version="" 
@@ -22,8 +26,8 @@ getDefaults(){
   def_pncdfPath=""
   def_lapackPath=""
 
-  def_mode=""
-  def_cplscheme=""
+  def_mode="0" #0: let flags decide, 1:batch, 2:interactive
+  def_cplscheme="true"
 
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
@@ -41,6 +45,10 @@ getDefaults(){
   def_options+=(["pfl"]="fresh")
   def_options+=(["cos"]="fresh")
 }
+
+#####################################################
+# USERS SHOULD NOT EDIT BELOW THIS LINE
+#####################################################
 
 setDefaults(){
   #load the default values
@@ -67,9 +75,7 @@ setDefaults(){
   combination=$def_combination
 
   cplscheme=$def_cplscheme
-  if [[ $cplscheme == "" ]] then ; cplscheme="true" ; fi #We need a hard default here
   mode=$def_mode
-  if [[ $mode == "" ]] then ; mode="0" ; fi #We need a hard default here
 
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
@@ -156,17 +162,6 @@ setCombination(){
 }
 
 
-check(){
-  if [[ $? == 0  ]] then
-     print "    ... ${cgreen}OK!${cnormal}" | tee -a $stdout_file
-  else
-     print "    ... ${cred}error!!! - aborting...${cnormal}"  | tee -a $stdout_file
-     print "See $log_file and $err_file" | tee -a $stdout_file
-     exit 1
-   fi
-}
-
-
 compileClm(){
 route "${cblue}> c_compileClm${cnormal}"
   comment "  source clm interface script"
@@ -180,7 +175,9 @@ route "${cblue}> c_compileClm${cnormal}"
   check
       cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
   check
-      substitutions_clm  
+    fi
+    if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
+      substitutions_clm
     fi
     if [[ ${options["clm"]} == "configure" || ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       configure_clm    
@@ -205,6 +202,8 @@ route "${cblue}> c_compileCosmo${cnormal}"
   check
       cp -rf ${rootdir}/${mList[2]} $cosdir >> $log_file 2>> $err_file
   check
+    fi
+    if [[ ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
       substitutions_cos  
     fi
     if [[ ${options["cos"]} == "configure" || ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
@@ -230,6 +229,8 @@ route "${cblue}> c_compileOasis${cnormal}"
   check
       cp -rf ${rootdir}/${mList[0]} $oasdir >> $log_file 2>> $err_file
   check
+    fi
+    if [[ ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
       substitutions_oas  
     fi
     if [[ ${options["oas"]} == "configure" || ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
@@ -255,6 +256,8 @@ route "${cblue}> c_compileParflow${cnormal}"
   check
       cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
   check
+    fi
+    if [[ ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       substitutions_pfl
     fi
     if [[ ${options["pfl"]} == "configure" || ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
@@ -418,6 +421,15 @@ printState(){
   print "${cred}(24)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
 }
 
+check(){
+  if [[ $? == 0  ]] then
+     print "    ... ${cgreen}OK!${cnormal}" | tee -a $stdout_file
+  else
+     print "    ... ${cred}error!!! - aborting...${cnormal}"  | tee -a $stdout_file
+     print "See $log_file and $err_file" | tee -a $stdout_file
+     exit 1
+   fi
+}
 
 terminate(){
   print ""

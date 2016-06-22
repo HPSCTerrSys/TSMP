@@ -1,4 +1,9 @@
 #! /bin/ksh
+
+######################################################
+##################### Defaults #######################
+######################################################
+
 getDefaults(){
   def_platform=""               
   def_version=""                 
@@ -44,6 +49,10 @@ getDefaults(){
   def_cplscheme=""
   def_mode=""
 }
+
+#####################################################
+# USERS SHOULD NOT EDIT BELOW THIS LINE
+#####################################################
 
 setDefaults(){
   platform=$def_platform
@@ -301,10 +310,8 @@ hardSanityCheck(){
 
 softSanityCheck(){
 
-  #check multi instance functionality (only working with Oasis3-MCT and not on JUQUEEN)
+  #check multi instance functionality (only working with Oasis3-MCT)
   if [[ $numInst > 1 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored if you continue." ; warning  ;fi
-  if [[ $numInst > 1 && $machine == "JUQUEEN" ]] ; then ; wmessage="The -N option is not supported on JUQUEEN. If you continue, the script will setup multiple instances, but the runscript+mapfile won't work." ; warning  ;fi 
-
 
   valid="false"
   case "${availability[${platform}]}" in *" ${version} "*) valid="true" ;; esac

@@ -1,0 +1,10 @@
+The two important scripts to setup TerrSysMP are:
+build_tsmp.ksh   -to compile the model
+setup_tsmp.ksh   -to setup one of the predefined experiments
+
+Type:
+./build_tsmp.ksh --man
+or
+./setup_tsmp.ksh --man
+to get a man-page for the usage of this scripts.
+For more in-depth information refer to the developers_manual.pdf

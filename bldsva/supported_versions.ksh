@@ -72,7 +72,6 @@ combinations+=(
 )
 
 #list of supported testcases for a certain machine. (first is default)
-# IMPORTANT: add a leading and trailing " "(space)
 setups+=(
         ["cordex"]="444x432 (12km res) atmosphere 436x424 (12km res) land domain of Europe and northern Afrika"
 	["nrw"]="150x150 (1km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
