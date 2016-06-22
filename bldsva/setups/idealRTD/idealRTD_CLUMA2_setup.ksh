@@ -22,8 +22,7 @@ initSetup(){
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRestDate=""
-  defaultRunhours=3.
+  defaultRunhours=3
 
   gx_clm=14
   gy_clm=14
@@ -61,9 +60,6 @@ initSetup(){
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
     fi
   fi
-
-  fn_finidat="$WORK/tsmp/TSMPForecastNRW$restDate-00/run/clmoas.clm2.r.${yyyy}-${mm}-${dd}-00000.nc"
-  pfbfilename="/work/slts/slts06/tsmp/TSMPForecastNRW$restDate-00/run/rurlaf.out.press.00024.pfb"
 
 }
 

@@ -58,7 +58,7 @@ route "${cblue}<< substitutions_clm${cnormal}"
 setup_clm(){
 route "${cblue}>> setupClm${cnormal}"
   seconds_clm=$(($hh*3600))
-  runstep_clm=$(($runhours*3600/$dt_clm))
+#  runstep_clm=$(($runhours*3600/$dt_clm))
   rpointer=$rundir/lnd.clmoas.rpointer
 
 comment "  cp namelist to rundir"

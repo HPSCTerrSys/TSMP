@@ -77,7 +77,7 @@ comment "  cp namelist to rundir"
   cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
-nstop_cos=$((  ($runhours*3600 + ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) )  /$dt_cos   ))
+nstop_cos=$((  ($runhours*3600 + ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) )  /$dt_cos  ))
 #if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 
 comment "  sed dt to namelist"
@@ -132,7 +132,7 @@ comment "  sed start hour to namelist"
 sed "s/__hstart__/$cnt/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 comment "  sed restart interval to namelist"
-sed "s/__nhour_restart_start__/$(($cnt+$runhours-1))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
@@ -568,7 +568,8 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
   check
   comment "   sed end time to pfl namelist."
  # nstop_pfl=`python -c "print ($runhours*3600 - $cplfreq2)/3600."`
-    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+#    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+ sed "s/__stop_pfl_bldsva__/3.25/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
