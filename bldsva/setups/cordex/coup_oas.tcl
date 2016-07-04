@@ -137,7 +137,7 @@ pfset GeomInput.W16.Value 16
 #-----------------------------------------------------------------------------
 # Setup timing info
 #-----------------------------------------------------------------------------
-pfset TimingInfo.BaseUnit                1.0
+pfset TimingInfo.BaseUnit                __base_pfl__
 pfset TimingInfo.StartCount              __start_cnt_pfl__
 pfset TimingInfo.StartTime               0.0
 pfset TimingInfo.StopTime                __stop_pfl_bldsva__

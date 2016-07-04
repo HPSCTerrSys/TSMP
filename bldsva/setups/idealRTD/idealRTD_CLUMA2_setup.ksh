@@ -26,7 +26,7 @@ initSetup(){
 
   gx_clm=14
   gy_clm=14
-  dt_clm=18
+  dt_clm=36
   res="0014x0014"
 
   gx_cos=20
@@ -36,11 +36,12 @@ initSetup(){
 
   gx_pfl=14
   gy_pfl=14
-  dt_pfl=0.005
+  dt_pfl=0.01
   pflrunname="rurlaf"
+  base_pfl=0.0025
 
-  cplfreq1=18
-  cplfreq2=18
+  cplfreq1=36
+  cplfreq2=36
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then

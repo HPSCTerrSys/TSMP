@@ -127,7 +127,7 @@ check
   sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
-cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / 3600))
+cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))/3600))
 comment "  sed start hour to namelist"
 sed "s/__hstart__/$cnt/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
@@ -139,7 +139,7 @@ check
 sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
-cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / $dt_cos))
+cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / ${dt_cos} ))
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
@@ -567,15 +567,19 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
     sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed end time to pfl namelist."
-    sed "s/__stop_pfl_bldsva__/$runhours/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+    sed "s/__stop_pfl_bldsva__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
+  comment "   sed timing base to pfl namelist."
+    sed "s/__base_pfl__/$base_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
 
   comment "   sed start counter to pfl namelist."
-      cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / 3600))
+      cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))))
+      cnt=$(python -c "print $cnt/3600.")
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 

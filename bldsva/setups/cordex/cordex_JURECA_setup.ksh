@@ -38,6 +38,7 @@ initSetup(){
   gy_pfl=424
   dt_pfl=1.0
   pflrunname="cordex0.11"
+  base_pfl=0.0025
 
   cplfreq1=3600
   cplfreq2=3600

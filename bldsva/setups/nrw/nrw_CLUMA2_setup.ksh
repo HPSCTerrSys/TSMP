@@ -42,6 +42,7 @@ initSetup(){
   gy_pfl=300
   dt_pfl=0.25
   pflrunname="rurlaf"
+  base_pfl=0.0025
 
   cplfreq1=900
   cplfreq2=900
