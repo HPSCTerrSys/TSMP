@@ -24,17 +24,17 @@ initSetup(){
   defaultInitDate="2008-05-08 00"
   defaultRunhours=3
 
-  gx_clm=14
+  gx_clm=24
   gy_clm=14
   dt_clm=36
-  res="0014x0014"
+  res="0014x0024"
 
-  gx_cos=20
+  gx_cos=30
   gy_cos=20
   dt_cos=18
   nbndlines=3
 
-  gx_pfl=14
+  gx_pfl=24
   gy_pfl=14
   dt_pfl=0.01
   pflrunname="rurlaf"
