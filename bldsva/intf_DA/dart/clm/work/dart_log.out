@@ -1,0 +1,101 @@
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2016  7  1 23 54 34
+ Program preprocess
+ --------------------------------------
+
+ set_nml_output Echo NML values to log file only
+ Path names of default obs_def and obs_kind modules
+ ../../../obs_def/DEFAULT_obs_def_mod.F90
+ ../../../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../obs_def/obs_def_mod.f90
+ ../../../obs_kind/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../../../obs_def/obs_def_tower_mod.f90
+ ../../../obs_def/obs_def_COSMOS_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  routine: preprocess
+  message:  file ../../../obs_def/DEFAULT_obs_def_mod.F90 must exist (and does not)
+  
+  source file: $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/preprocess/preprocess.f90 $
+  file revision: $Revision: 6256 $
+  revision date: $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2016  7  1 23 58 18
+ Program preprocess
+ --------------------------------------
+
+ set_nml_output Echo NML values to log file only
+ Path names of default obs_def and obs_kind modules
+ ../../../obs_def/DEFAULT_obs_def_mod.F90
+ ../../../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../obs_def/obs_def_mod.f90
+ ../../../obs_kind/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../../../obs_def/obs_def_tower_mod.f90
+ ../../../obs_def/obs_def_COSMOS_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  routine: preprocess
+  message:  file ../../../obs_def/DEFAULT_obs_def_mod.F90 must exist (and does not)
+  
+  source file: $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/preprocess/preprocess.f90 $
+  file revision: $Revision: 6256 $
+  revision date: $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2016  7  1 23 59 39
+ Program preprocess
+ --------------------------------------
+
+ set_nml_output Echo NML values to log file only
+ Path names of default obs_def and obs_kind modules
+ ../../../obs_def/DEFAULT_obs_def_mod.F90
+ ../../../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../obs_def/obs_def_mod.f90
+ ../../../obs_kind/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../../../obs_def/obs_def_tower_mod.f90
+ ../../../obs_def/obs_def_COSMOS_mod.f90
+ INPUT model files follow:
+ ERROR FROM:
+  routine: preprocess
+  message:  file ../../../obs_def/DEFAULT_obs_def_mod.F90 must exist (and does not)
+  
+  source file: $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/preprocess/preprocess.f90 $
+  file revision: $Revision: 6256 $
+  revision date: $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
+
+ --------------------------------------
+ Starting ... at YYYY MM DD HH MM SS = 
+                 2016  7  2  0  1 33
+ Program preprocess
+ --------------------------------------
+
+ set_nml_output Echo NML values to log file only
+ Path names of default obs_def and obs_kind modules
+ ../../../../obs_def/DEFAULT_obs_def_mod.F90
+ ../../../../obs_kind/DEFAULT_obs_kind_mod.F90
+ Path names of output obs_def and obs_kind modules
+ ../../../../obs_def/obs_def_mod.f90
+ ../../../../obs_kind/obs_kind_mod.f90
+ INPUT obs_def files follow:
+ ../../../../obs_def/obs_def_tower_mod.f90
+ ../../../../obs_def/obs_def_COSMOS_mod.f90
+ INPUT model files follow:
+ preprocess Finished successfully.
+
+ --------------------------------------
+ Finished ... at YYYY MM DD HH MM SS = 
+                 2016  7  2  0  1 33
+ Program preprocess
+ --------------------------------------
+

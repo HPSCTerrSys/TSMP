@@ -1,0 +1,96 @@
+&assim_model_nml
+   write_binary_restart_files = .true.,
+   netCDF_large_file_support  = .false.
+  /
+
+
+# The times in the namelist for the obs_diag program are vectors
+# that follow the following sequence:
+# year   month   day   hour   minute   second
+# max_num_bins can be used to specify a fixed number of bins,
+# in which case last_bin_center should be safely in the future.
+#
+# Acceptable latitudes range from  [-90,  90]
+# Acceptable longitudes range from [  0, Inf]
+#
+# you can specify either [phm]level_edges or [phm]level,
+# but not both. You can mix and match. plevel & hlevel_edges is fine.
+
+   plevel_edges = 1050, 962.5, 887.5, 775, 600, 450, 350, 275, 225, 175, 125, 75
+   hlevel_edges = 0, 1500, 2500, 3500, 4500, 5500, 6500,
+   mlevel_edges = 0.5, 1.5, 2.5, 3.5, 10.5,
+
+&obs_diag_nml
+   obs_sequence_name = 'obs_seq.final',
+   obs_sequence_list = '',
+   first_bin_center =  2003, 1, 1, 0, 0, 0 ,
+   last_bin_center  =  2003, 1, 2, 0, 0, 0 ,
+   bin_separation   =     0, 0, 0, 6, 0, 0 ,
+   bin_width        =     0, 0, 0, 6, 0, 0 ,
+   time_to_skip     =     0, 0, 0, 6, 0, 0 ,
+   max_num_bins     = 1000,
+
+   plevel     = 1000, 925, 850, 700, 500, 400, 300, 250, 200, 150, 100,
+   hlevel     = 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000, 11000,
+   mlevel     = 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,
+
+   Nregions   = 4,
+   lonlim1    =   0.0,   0.0,   0.0, 235.0,
+   lonlim2    = 360.0, 360.0, 360.0, 295.0,
+   latlim1    =  20.0, -80.0, -20.0,  25.0,
+   latlim2    =  80.0, -20.0,  20.0,  55.0,
+   reg_names  = 'Northern Hemisphere', 'Southern Hemisphere', 'Tropics', 'North America',
+
+   trusted_obs           = 'null',
+   use_zero_error_obs    = .false.,
+   print_mismatched_locs = .false.,
+   create_rank_histogram = .true.,
+   outliers_in_histogram = .true.,
+   verbose               = .false.
+   /
+
+&location_nml
+   horiz_dist_only                 = .true.,
+   vert_normalization_pressure     = 100000.0, 
+   vert_normalization_height       = 10000.0,
+   vert_normalization_level        = 20.0,
+   vert_normalization_scale_height = 5.0,
+   approximate_distance            = .false.,
+   nlon                            = 71,
+   nlat                            = 36,
+   output_box_info                 = .false.,
+   maintain_original_vert          = .false.,
+/
+
+&model_nml
+   clm_restart_filename         = 'clm_restart.nc',
+   clm_history_filename         = 'clm_history.nc',
+   assimilation_period_days     = 1,
+   assimilation_period_seconds  = 0,
+   model_perturbation_amplitude = 0.2,
+   output_state_vector          = .true.,
+   calendar                     = 'Gregorian',
+   debug                        = 0,
+   clm_state_variables          = 'frac_sno',    'KIND_SNOWCOVER_FRAC',
+                                  'SNOWDP',      'KIND_SNOW_THICKNESS',
+                                  'T_SOISNO',    'KIND_SOIL_TEMPERATURE',
+                                  'leafc',       'KIND_LEAF_CARBON'
+   /
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'null',
+   evaluate_these_obs_types   = 'null'  
+/
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.  /
+
+&utilities_nml
+   TERMLEVEL      = 1,
+   logfilename    = 'dart_log.out',
+   nmlfilename    = 'dart_log.nml',
+   module_details = .true.,
+   print_debug    = .false.,
+   write_nml      = 'file'
+/
+

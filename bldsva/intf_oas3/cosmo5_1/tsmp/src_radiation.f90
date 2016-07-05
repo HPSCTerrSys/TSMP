@@ -3118,11 +3118,11 @@ CHARACTER (LEN=14), INTENT(IN)     ::   &
 
           zalso_rn  (i)     = zalso    (i,js)
 #ifdef COUP_OAS_COS
-          IF (ntstep>0) THEN        !At start, trad_clm = 0.0
-            zti_rn    (i,ke1) = trad_clm (i,js)   !LongWave Closure CPS
-          ELSE
+!CPSr          IF (ntstep>0) THEN        !At start, trad_clm = 0.0
+!CPSr            zti_rn    (i,ke1) = trad_clm (i,js)   !LongWave Closure CPS
+!CPSr          ELSE
             zti_rn    (i,ke1) = zti    (i,js,ke1)
-          ENDIF
+!CPSr          ENDIF
           zpalp_rn  (i)     = zpalp    (i,js)
 #endif 
           zalth_rn  (i)     = zalth    (i,js)

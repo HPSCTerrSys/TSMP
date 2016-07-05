@@ -395,7 +395,7 @@ cat > INPUT_IO  << end_input_io
   lwrite_const=.true.,
   ! Interpolation of u and v from the staggered grid to the mass points on output:
   ! (only effective for the eta-levels-output; is done for z- oder p-levels in any case):
-  luvmasspoint=.true.,
+  luvmasspoint=.false.,
   ! Directory for the output files:
   ydir='$OUTPUT',
  /

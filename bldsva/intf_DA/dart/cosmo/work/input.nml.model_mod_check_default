@@ -1,0 +1,42 @@
+&assim_model_nml
+   write_binary_restart_files = .true.,
+   netCDF_large_file_support  = .false.
+  /
+
+&location_nml
+   horiz_dist_only                 = .true.,
+   vert_normalization_pressure     = 100000.0, 
+   vert_normalization_height       = 10000.0,
+   vert_normalization_level        = 20.0,
+   vert_normalization_scale_height = 5.0,
+   approximate_distance            = .false.,
+   nlon                            = 71,
+   nlat                            = 36,
+   output_box_info                 = .false.,
+   maintain_original_vert          = .false.,
+/
+
+&model_nml
+   cosmo_filename               = "test.grb",
+   model_dt                     = 40,
+   model_perturbation_amplitude = 0.1,
+   output_state_vector          = .false.,
+   model_dims                   = 665, 657, 40,
+   record_length                = 1,
+   verbose                      = .false.
+  /
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'null',
+   evaluate_these_obs_types   = 'null'  
+/
+
+&utilities_nml
+   TERMLEVEL      = 1,
+   logfilename    = 'dart_log.out',
+   nmlfilename    = 'dart_log.nml',
+   module_details = .true.,
+   print_debug    = .false.,
+   write_nml      = 'file'
+/
+

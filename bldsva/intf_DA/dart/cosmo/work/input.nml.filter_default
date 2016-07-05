@@ -1,0 +1,144 @@
+&assim_model_nml
+   write_binary_restart_files = .true.,
+   netCDF_large_file_support  = .false.
+  /
+
+
+# With a deterministic filter (filter_kind == 1 or 8)
+# and a deterministic inflation (filter_nml:inf_deterministic == .true.)
+# sort_obs_inc is not needed and is expensive. Should be .false.
+
+&assim_tools_nml
+   filter_kind                     = 1,
+   cutoff                          = 0.2,
+   sort_obs_inc                    = .false.,
+   spread_restoration              = .false.,
+   sampling_error_correction       = .false.,
+   adaptive_localization_threshold = -1,
+   adaptive_cutoff_floor           = -1.0,
+   output_localization_diagnostics = .false.,
+   localization_diagnostics_file   = "localization_diagnostics",
+   print_every_nth_obs             = 0,
+   rectangular_quadrature          = .true.,
+   gaussian_likelihood_tails       = .false.,
+   close_obs_caching               = .true.,
+   allow_missing_in_clm            = .false.
+/
+
+# specify these in the same order, the same number of items
+#   special_localization_obs_types  = "",
+#   special_localization_cutoffs    = -1,
+
+&cov_cutoff_nml
+   select_localization = 1  /
+
+&ensemble_manager_nml
+   single_restart_file_in  = .true.,
+   single_restart_file_out = .true.,
+   perturbation_amplitude  = 0.2,
+   layout = 1,
+   tasks_per_node = 1,
+   communication_configuration = 1,
+   flag_unneeded_transposes = .false.,
+   debug = .false.
+ /
+
+&filter_nml
+   async                    = 0,
+   adv_ens_command          = "./advance_model.csh",
+   ens_size                 = 20,
+   start_from_restart       = .false.,
+   output_restart           = .false.,
+   obs_sequence_in_name     = "obs_seq.out",
+   obs_sequence_out_name    = "obs_seq.final",
+   restart_in_file_name     = "filter_ics",
+   restart_out_file_name    = "filter_restart",
+   init_time_days           = 0,
+   init_time_seconds        = 0,
+   first_obs_days           = -1,
+   first_obs_seconds        = -1,
+   last_obs_days            = -1,
+   last_obs_seconds         = -1,
+   num_output_state_members = 0,
+   num_output_obs_members   = 0,
+   output_interval          = 1,
+   num_groups               = 1,
+   input_qc_threshold       =  3.0,
+   outlier_threshold        = -1.0,
+   enable_special_outlier_code = .false.,
+   output_forward_op_errors = .false.,
+   output_restart_mean      = .false.,
+   output_timestamps        = .false.,
+   output_inflation         = .true.,
+   trace_execution          = .false.,
+   silence                  = .false.,
+
+   inf_flavor                  = 0,                       0,
+   inf_initial_from_restart    = .false.,                 .false.,
+   inf_sd_initial_from_restart = .false.,                 .false.,
+   inf_output_restart          = .false.,                 .false.,
+   inf_deterministic           = .true.,                  .true.,
+   inf_in_file_name            = 'not_initialized',       'not_initialized',
+   inf_out_file_name           = 'not_initialized',       'not_initialized',
+   inf_diag_file_name          = 'not_initialized',       'not_initialized',
+   inf_initial                 = 1.0,                     1.0,
+   inf_sd_initial              = 0.0,                     0.0,
+   inf_damping                 = 1.0,                     1.0,
+   inf_lower_bound             = 1.0,                     1.0,
+   inf_upper_bound             = 1000000.0,               1000000.0,
+   inf_sd_lower_bound          = 0.0,                     0.0
+/
+
+&location_nml
+   horiz_dist_only                 = .true.,
+   vert_normalization_pressure     = 100000.0, 
+   vert_normalization_height       = 10000.0,
+   vert_normalization_level        = 20.0,
+   vert_normalization_scale_height = 5.0,
+   approximate_distance            = .false.,
+   nlon                            = 71,
+   nlat                            = 36,
+   output_box_info                 = .false.,
+   maintain_original_vert          = .false.,
+/
+
+&model_nml
+   cosmo_filename               = "test.grb",
+   model_dt                     = 40,
+   model_perturbation_amplitude = 0.1,
+   output_state_vector          = .false.,
+   model_dims                   = 665, 657, 40,
+   record_length                = 1,
+   verbose                      = .false.
+  /
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'null',
+   evaluate_these_obs_types   = 'null'  
+/
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.  /
+
+&reg_factor_nml
+   select_regression    = 1,
+   input_reg_file       = "time_mean_reg",
+   save_reg_diagnostics = .false.,
+   reg_diagnostics_file = "reg_diagnostics"  /
+
+&smoother_nml
+   num_lags              = 0,
+   start_from_restart    = .false.,
+   output_restart        = .false.,
+   restart_in_file_name  = 'ics',
+   restart_out_file_name = 'restart'  /
+
+&utilities_nml
+   TERMLEVEL      = 1,
+   logfilename    = 'dart_log.out',
+   nmlfilename    = 'dart_log.nml',
+   module_details = .true.,
+   print_debug    = .false.,
+   write_nml      = 'file'
+/
+

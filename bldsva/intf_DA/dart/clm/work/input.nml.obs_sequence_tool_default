@@ -1,0 +1,134 @@
+&assim_model_nml
+   write_binary_restart_files = .true.,
+   netCDF_large_file_support  = .false.
+  /
+
+&cov_cutoff_nml
+   select_localization = 1  /
+
+&location_nml
+   horiz_dist_only                 = .true.,
+   vert_normalization_pressure     = 100000.0, 
+   vert_normalization_height       = 10000.0,
+   vert_normalization_level        = 20.0,
+   vert_normalization_scale_height = 5.0,
+   approximate_distance            = .false.,
+   nlon                            = 71,
+   nlat                            = 36,
+   output_box_info                 = .false.,
+   maintain_original_vert          = .false.,
+/
+
+&model_nml
+   clm_restart_filename         = 'clm_restart.nc',
+   clm_history_filename         = 'clm_history.nc',
+   assimilation_period_days     = 1,
+   assimilation_period_seconds  = 0,
+   model_perturbation_amplitude = 0.2,
+   output_state_vector          = .true.,
+   calendar                     = 'Gregorian',
+   debug                        = 0,
+   clm_state_variables          = 'frac_sno',    'KIND_SNOWCOVER_FRAC',
+                                  'SNOWDP',      'KIND_SNOW_THICKNESS',
+                                  'T_SOISNO',    'KIND_SOIL_TEMPERATURE',
+                                  'leafc',       'KIND_LEAF_CARBON'
+   /
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'null',
+   evaluate_these_obs_types   = 'null'  
+/
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.  /
+
+&obs_sequence_tool_nml
+   filename_seq         = '',
+   filename_seq_list    = '',
+   filename_out         = 'obs_seq.processed',
+   num_input_files      = 0,
+   first_obs_days       = -1,
+   first_obs_seconds    = -1,
+   last_obs_days        = -1,
+   last_obs_seconds     = -1,
+   obs_types            = '',
+   keep_types           = .true.,
+   min_lat              =  -90.0,
+   max_lat              =   90.0,
+   min_lon              =    0.0,
+   max_lon              =  360.0,
+   print_only           = .false.,
+   gregorian_cal        = .true.,
+   edit_copy_metadata   = .false.,
+   new_copy_metadata    = '',
+   edit_qc_metadata     = .false.,
+   new_qc_metadata      = '',
+   edit_copies          = .false.,
+   new_copy_index       = -1,
+   new_copy_data        = -888888.
+   edit_qcs             = .false.,
+   new_qc_index         = -1,
+   new_qc_data          = 0.
+   synonymous_copy_list = '',
+   synonymous_qc_list   = '', 
+/
+
+! SEE THE .HTML FILE FOR MORE DETAILED EXAMPLES AND FULL
+! DOCUMENTATION.  here are brief examples of possible settings:
+!
+! keep only observations with a DART QC of 0:
+!   qc_metadata        = 'Dart quality control',
+!   min_qc             = 0,
+!   max_qc             = 0,
+!
+! keep only radiosonde temp obs between 250 and 300 K:
+!   copy_metadata      = 'NCEP BUFR observation',
+!   copy_type          = 'RADIOSONDE_TEMPERATURE', 
+!   min_copy           = 250.0,
+!   max_copy           = 300.0,
+!
+! keep only the U and V radiosonde winds:
+!   obs_types          = 'RADIOSONDE_U_WIND_COMPONENT', 
+!                        'RADIOSONDE_V_WIND_COMPONENT',
+!   keep_types         = .true.,
+!
+! remove the U and V radiosonde winds:
+!   obs_types          = 'RADIOSONDE_U_WIND_COMPONENT', 
+!                        'RADIOSONDE_V_WIND_COMPONENT',
+!   keep_types         = .false.,
+!
+! change the metadata strings:
+!   edit_copy_metadata  = .true.,
+!   new_copy_metadata   = 'observations', 
+!   edit_qc_metadata    = .true.,
+!   new_qc_metadata     = 'QC', 'DART quality control',
+!
+! change the number and order of the copies and qc:
+!   edit_copies    = .true.,
+!   new_copy_index = 1, 2, 81, 82
+!   edit_qcs       = .true.,
+!   new_qc_index   =  2
+!
+! add a new copy or qc by using 0 as the index number:
+!   edit_copies    = .true.,
+!   new_copy_index = 1, 2, 0, 81, 82
+!   new_copy_data  = 5.0,
+!   edit_qcs       = .true.,
+!   new_qc_index   =  1, 2, 0, 0
+!   new_qc_data    = 0.0, 3.0
+!
+! allow different metadata strings in multiple files to match:
+!   synonymous_copy_list = 'NCEP BUFR observations', 'observations',
+!   synonymous_qc_list   = 'NCEP QC index', 'AIRS QC', 'QC',
+
+
+
+&utilities_nml
+   TERMLEVEL      = 1,
+   logfilename    = 'dart_log.out',
+   nmlfilename    = 'dart_log.nml',
+   module_details = .true.,
+   print_debug    = .false.,
+   write_nml      = 'file'
+/
+

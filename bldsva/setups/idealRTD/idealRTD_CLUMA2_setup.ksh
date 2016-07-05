@@ -13,12 +13,12 @@ initSetup(){
 
 
   defaultNppn=64
-  defaultCLMProcX=2
-  defaultCLMProcY=2
+  defaultCLMProcX=1
+  defaultCLMProcY=1
   defaultCOSProcX=2
-  defaultCOSProcY=2
-  defaultPFLProcX=2
-  defaultPFLProcY=2
+  defaultCOSProcY=1
+  defaultPFLProcX=1
+  defaultPFLProcY=1
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
@@ -26,7 +26,7 @@ initSetup(){
 
   gx_clm=24
   gy_clm=14
-  dt_clm=36
+  dt_clm=18
   res="0014x0024"
 
   gx_cos=30
@@ -36,12 +36,12 @@ initSetup(){
 
   gx_pfl=24
   gy_pfl=14
-  dt_pfl=0.01
+  dt_pfl=0.005
   pflrunname="rurlaf"
   base_pfl=0.0025
 
-  cplfreq1=36
-  cplfreq2=36
+  cplfreq1=18
+  cplfreq2=18
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
@@ -104,7 +104,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        comment "   create sloap pfb with tclsh"
+        comment "   create slope pfb with tclsh"
           tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
         check
               
