@@ -26,11 +26,16 @@ program cosmo_to_dart
 !----------------------------------------------------------------------
 
 use        types_mod, only : r8
+
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
-                             find_namelist_in_file, check_namelist_read
+                             find_namelist_in_file, check_namelist_read, &
+                             E_MSG, E_ERR, error_handler
+
 use        model_mod, only : get_model_size, get_state_vector, get_state_time, &
                              get_cosmo_filename, static_init_model
+
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
+
 use time_manager_mod, only : time_type, print_time, print_date
 
 implicit none
@@ -45,7 +50,7 @@ character(len=128), parameter :: &
 ! namelist parameters with default values.
 !-----------------------------------------------------------------------
 
-character(len=128) :: cosmo_to_dart_output_file  = 'dart.ud'
+character(len=256) :: cosmo_to_dart_output_file  = 'dart.ud'
 
 namelist /cosmo_to_dart_nml/ cosmo_to_dart_output_file
 
@@ -53,15 +58,15 @@ namelist /cosmo_to_dart_nml/ cosmo_to_dart_output_file
 ! global storage
 !----------------------------------------------------------------------
 
-integer               :: io, iunit, x_size
-real(r8),allocatable  :: x(:)
-type(time_type)       :: model_time
-character(len=256)    :: cosmo_filename
-logical               :: verbose = .false.
+integer              :: io, iunit, x_size
+real(r8),allocatable :: x(:)
+type(time_type)      :: model_time
+character(len=256)   :: cosmo_filename
+character(len=512)   :: string1, string2, string3
 
 !======================================================================
 
-call initialize_utilities(progname='cosmo_to_dart', output_flag=verbose)
+call initialize_utilities(progname='cosmo_to_dart')
 
 !----------------------------------------------------------------------
 ! Read the namelist to get the output filename.
@@ -77,20 +82,17 @@ call check_namelist_read(iunit, io, "cosmo_to_dart_nml") ! closes, too.
 !----------------------------------------------------------------------
 call static_init_model()
 
-cosmo_filename = get_cosmo_filename()
+cosmo_filename = get_cosmo_filename(filetype='restart')
 
-write(*,*)
-write(*,'(''cosmo_to_dart:converting cosmo file "'',A, &
-      &''" to DART file "'',A,''"'')') &
-     trim(cosmo_filename), trim(cosmo_to_dart_output_file)
+write(string1,*)'converting cosmo file "'//trim(cosmo_filename)//'"'
+write(string2,*)' to DART file "'//trim(cosmo_to_dart_output_file)//'"'
+call error_handler(E_MSG,'cosmo_to_dart',string1,text2=string2)
 
-model_time     = get_state_time()
-x_size         = get_model_size()
+model_time = get_state_time()
+x_size     = get_model_size()
 
-print*,'model size is ',x_size
-
-allocate(x(1:x_size))
-x(:)=get_state_vector()
+allocate( x(x_size) )
+x(:) = get_state_vector()
 
 iunit = open_restart_write(cosmo_to_dart_output_file)
 

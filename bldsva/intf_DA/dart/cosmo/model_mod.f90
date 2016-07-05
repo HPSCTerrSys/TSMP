@@ -1,3 +1,7 @@
+! This code is not necessarily under the DART copyright ...
+!
+! $Id:
+
 module model_mod
 
 ! This module provides routines to work with COSMO data
@@ -7,14 +11,9 @@ module model_mod
 !         Meteorological Institute, University of Bonn, Germany
 !         2011-09-15
 !
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/model_mod.f90 $
-! $Id: model_mod.f90 5367 2011-10-19 17:14:36Z nancy $
-! $Revision: 5367 $
-! $Date: 2011-10-19 11:14:36 -0600 (Wed, 19 Oct 2011) $
 
 use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,          &
-                             rad2deg, deg2rad, PI
+                             rad2deg, deg2rad, PI, obstypelength
 
 use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
                              print_time, print_date, set_calendar_type,        &
@@ -22,14 +21,14 @@ use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
                              operator(>),  operator(<), operator(/),           &
                              operator(/=), operator(<=)
 
-use   cosmo_data_mod, only : cosmo_meta,cosmo_hcoord,cosmo_non_state_data,     &
-                             get_cosmo_info,get_data_from_binary,              &
-                             set_vertical_coords,grib_header_type,             &
-                             model_dims,record_length
+use   cosmo_data_mod, only : cosmo_meta, cosmo_hcoord, cosmo_non_state_data,   &
+                             get_cosmo_info, get_data_from_binary,             &
+                             set_vertical_coords, grib_header_type,            &
+                             model_dims, record_length
 
 use     location_mod, only : location_type, get_dist, query_location,          &
                              get_close_maxdist_init, get_close_type,           &
-                             set_location, get_location, horiz_dist_only,      & 
+                             set_location, get_location, horiz_dist_only,      &
                              vert_is_undef,        VERTISUNDEF,                &
                              vert_is_surface,      VERTISSURFACE,              &
                              vert_is_level,        VERTISLEVEL,                &
@@ -43,304 +42,396 @@ use    utilities_mod, only : register_module, error_handler,                   &
                              nc_check, do_output, to_upper,                    &
                              find_namelist_in_file, check_namelist_read,       &
                              open_file, close_file, file_exist,                &
-                             find_textfile_dims, file_to_text
+                             find_textfile_dims, file_to_text,                 &
+                             do_nml_file, do_nml_term
 
-use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,                            &
-                             KIND_V_WIND_COMPONENT,                            &
-                             KIND_VERTICAL_VELOCITY,                           &
-                             KIND_TEMPERATURE,                                 &
-                             KIND_PRESSURE,                                    &
-                             KIND_PRESSURE_PERTURBATION,                       &
-                             KIND_SPECIFIC_HUMIDITY,                           &
-                             KIND_CLOUD_LIQUID_WATER,                          &
-                             KIND_CLOUD_ICE,                                   &
-                             KIND_SURFACE_ELEVATION,                           &
-                             KIND_SURFACE_GEOPOTENTIAL
+use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,       &
+                             KIND_V_WIND_COMPONENT,       &
+                             KIND_VERTICAL_VELOCITY,      &
+                             KIND_TEMPERATURE,            &
+                             KIND_PRESSURE,               &
+                             KIND_PRESSURE_PERTURBATION,  &
+                             KIND_SPECIFIC_HUMIDITY,      &
+                             KIND_CLOUD_LIQUID_WATER,     &
+                             KIND_CLOUD_ICE,              &
+                             KIND_SURFACE_ELEVATION,      &
+                             KIND_SURFACE_GEOPOTENTIAL,   &
+                             paramname_length,            &
+                             get_raw_obs_kind_index,      &
+                             get_raw_obs_kind_name
 
 use    random_seq_mod, only: random_seq_type, init_random_seq, random_gaussian
 
 use byte_mod, only: to_float1,from_float1,word_to_byte,byte_to_word_signed,concat_bytes1
 
-use netcdf 
+use netcdf
 
 implicit none
+private
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: branches/cosmo/models/cosmo/model_mod.f90 $", &
-   revision = "$Revision: none $", &
-   revdate  = "$Date: none $"
+character(len=256), parameter :: source = "$URL: $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
- public  :: get_model_size
- public  :: static_init_model
- public  :: get_state_meta_data
- public  :: get_model_time_step
- public  :: model_interpolate
- public  :: init_conditions
- public  :: init_time
- public  :: adv_1step
- public  :: end_model
- public  :: nc_write_model_atts
- public  :: nc_write_model_vars
- public  :: pert_model_state
- public  :: get_close_maxdist_init
- public  :: get_close_obs_init
- public  :: get_close_obs
- public  :: ens_mean_for_model
+character(len=256) :: string1, string2, string3
+logical, save :: module_initialized = .false.
+
+! these routines must be public and you cannot change
+! the arguments - they will be called *from* the DART code.
+
+public :: get_model_size, &
+          adv_1step , &
+          get_state_meta_data , &
+          model_interpolate , &
+          get_model_time_step , &
+          static_init_model , &
+          end_model , &
+          init_time , &
+          init_conditions , &
+          nc_write_model_atts , &
+          nc_write_model_vars , &
+          pert_model_state , &
+          get_close_maxdist_init , &
+          get_close_obs_init , &
+          get_close_obs , &
+          ens_mean_for_model
+
+! generally useful routines for various support purposes.
+! the interfaces here can be changed as appropriate.
 
 !  public  :: grib_to_sv
 !  public  :: sv_to_grib
 
-  private :: set_allowed_state_vector_vars
-  private :: ll_to_xyz_vector
-  private :: ll_to_xyz_single
-  private :: get_enclosing_grid_box
-  private :: bilinear_interpolation
-  private :: linear_interpolation
-!  public :: linear_interpolation
-!  private :: data_to_state_vector
-  private :: get_vertical_boundaries
+public :: get_state_time, &
+          get_state_vector, &
+          write_grib_file, &
+          get_cosmo_filename, &
+          write_state_times
 
-  public  :: get_state_time
-  public  :: get_state_vector
-  public  :: write_grib_file
-  public  :: get_cosmo_filename
-  public  :: write_state_times
+INTERFACE sv_to_field
+   MODULE PROCEDURE sv_to_field_2d
+   MODULE PROCEDURE sv_to_field_3d
+END INTERFACE
 
-  INTERFACE sv_to_field
-    MODULE PROCEDURE sv_to_field_2d
-    MODULE PROCEDURE sv_to_field_3d
-  END INTERFACE
+! TODO FIXME  ultimately the dart_variable_info type will be removed
+type dart_variable_info
+   character(len=16)    :: varname_short
+   character(len=256)   :: varname_long
+   character(len=32)    :: units
+   logical              :: is_present
+   integer              :: nx
+   integer              :: ny
+   integer              :: nz
+   real(r8),allocatable :: vertical_level(:)
+   integer              :: vertical_coordinate
+   integer              :: horizontal_coordinate
+   integer,allocatable  :: state_vector_sindex(:) ! starting index in state vector for every vertical level
+   integer,allocatable  :: cosmo_state_index(:)   ! index in cosmo state of every vertical level
+end type dart_variable_info
 
-  type dart_variable_info
-    character(len=16)    :: varname_short
-    character(len=256)   :: varname_long
-    character(len=32)    :: units
-    logical              :: is_present
-    integer              :: nx
-    integer              :: ny
-    integer              :: nz
-    real(r8),allocatable :: vertical_level(:)
-    integer              :: vertical_coordinate
-    integer              :: horizontal_coordinate
-    integer,allocatable  :: state_vector_sindex(:) ! starting index in state vector for every vertical level
-    integer,allocatable  :: cosmo_state_index(:)   ! index in cosmo state of every vertical level
-  end type dart_variable_info
+integer :: nfields
+integer, parameter :: max_state_variables = 80
+integer, parameter :: num_state_table_columns = 6
+character(len=obstypelength) :: variable_table(max_state_variables, num_state_table_columns)
 
-  integer,parameter              :: n_state_vector_vars=8
-  integer,parameter              :: n_non_state_vars=1
+! Codes for interpreting the columns of the variable_table
+integer, parameter :: VT_GRIBVERSIONINDX = 1 ! ... variable name
+integer, parameter :: VT_VARNAMEINDX     = 2 ! ... variable name
+integer, parameter :: VT_KINDINDX        = 3 ! ... DART kind
+integer, parameter :: VT_MINVALINDX      = 4 ! ... minimum value if any
+integer, parameter :: VT_MAXVALINDX      = 5 ! ... maximum value if any
+integer, parameter :: VT_STATEINDX       = 6 ! ... update (state) or not
 
-  character(len=256)             :: string
-  logical, save                  :: module_initialized = .FALSE.
+! Everything needed to describe a variable
 
-  type(cosmo_meta),allocatable   :: cosmo_slabs(:)
-  type(cosmo_hcoord)             :: cosmo_lonlat(3) ! 3 is for the stagger
-  integer                        :: nslabs
+type progvartype
+   private
+   character(len=NF90_MAX_NAME) :: varname
+   character(len=NF90_MAX_NAME) :: long_name
+   character(len=NF90_MAX_NAME) :: units
+   character(len=obstypelength), dimension(NF90_MAX_VAR_DIMS) :: dimnames
+   integer, dimension(NF90_MAX_VAR_DIMS) :: dimlens
+   integer  :: gribtable
+   integer  :: gribvariablenumber
+   integer  :: numdims
+   integer  :: maxlevels
+   integer  :: xtype
+   integer  :: varsize     ! prod(dimlens(1:numdims))
+   integer  :: index1      ! location in dart state vector of first occurrence
+   integer  :: indexN      ! location in dart state vector of last  occurrence
+   integer  :: dart_kind
+   integer  :: rangeRestricted
+   real(r8) :: minvalue
+   real(r8) :: maxvalue
+   integer  :: spvalINT, missingINT
+   real(r4) :: spvalR4, missingR4
+   real(r8) :: spvalR8, missingR8
+   logical  :: has_fill_value      ! intended for future use
+   logical  :: has_missing_value   ! intended for future use
+   character(len=paramname_length) :: kind_string
+   character(len=512) :: origin    ! the file it came from
+   logical  :: update
+end type progvartype
 
-  character(len=256)             :: cosmo_filename               = "test.grb"
-  integer                        :: model_dt                     = 40
-  logical                        :: output_state_vector          = .FALSE.
-  real(r8)                       :: model_perturbation_amplitude = 0.1
-  logical                        :: verbose                      = .false.
+type(progvartype), dimension(max_state_variables) :: progvar
 
-  namelist /model_nml/  &
-    cosmo_filename, model_dt, model_perturbation_amplitude, output_state_vector,&
-    model_dims,record_length,verbose
+! Dimensions (from the netCDF file) specifying the grid shape, etc.
+integer :: ntime
+integer :: nbnds
+integer :: nrlon
+integer :: nrlat
+integer :: nsrlon
+integer :: nsrlat
+integer :: nlevel
+integer :: nlevel1
+integer :: nsoil
+integer :: nsoil1
 
-  integer                        :: model_size
-  type(time_type)                :: model_timestep ! smallest time to adv model
+integer,parameter              :: n_state_vector_vars=8
+integer,parameter              :: n_non_state_vars=1
 
-  integer, parameter             :: n_max_kinds=400
+type(cosmo_meta),allocatable   :: cosmo_slabs(:)
+type(cosmo_hcoord)             :: cosmo_lonlat(3) ! 3 is for the stagger
+integer                        :: nslabs
 
-  integer                        :: allowed_state_vector_vars(n_state_vector_vars)
-  integer                        :: allowed_non_state_vars(1:n_max_kinds)
-  logical                        :: is_allowed_state_vector_var(n_max_kinds)
-  logical                        :: is_allowed_non_state_var(n_max_kinds)
-  type(dart_variable_info)       :: state_vector_vars(1:n_max_kinds)
-  type(cosmo_non_state_data)     :: non_state_data
 
-  real(r8),allocatable           :: state_vector(:)
+character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
+character(len=256) :: cosmo_netcdf_file            = "cosmo_netcdf_file"
+integer            :: model_dt                     = 40
+logical            :: output_state_vector          = .FALSE.
+real(r8)           :: model_perturbation_amplitude = 0.1
+integer            :: debug                        = 0
+character(len=obstypelength) :: variables(max_state_variables*num_state_table_columns) = ' '
 
-  real(r8),allocatable           :: ens_mean(:)  
+namelist /model_nml/             &
+   cosmo_restart_file,           &
+   cosmo_netcdf_file,            &
+   model_dt,                     &
+   model_perturbation_amplitude, &
+   output_state_vector,          &
+   model_dims,                   &
+   record_length,                &
+   debug,                        &
+   variables
 
-  type(random_seq_type) :: random_seq
+integer                        :: model_size
+type(time_type)                :: model_timestep ! smallest time to adv model
 
-  character(len=256)    :: error_string,error_string2
+integer, parameter             :: n_max_kinds=400
 
-  type(time_type)                :: cosmo_fc_time
-  type(time_type)                :: cosmo_an_time
+integer                        :: allowed_state_vector_vars(n_state_vector_vars)
+integer                        :: allowed_non_state_vars(1:n_max_kinds)
+logical                        :: is_allowed_state_vector_var(n_max_kinds)
+logical                        :: is_allowed_non_state_var(n_max_kinds)
+type(dart_variable_info)       :: state_vector_vars(1:n_max_kinds)
+type(cosmo_non_state_data)     :: non_state_data
 
-  type(grib_header_type),allocatable  :: grib_header(:)
+real(r8),allocatable           :: state_vector(:)
+
+real(r8),allocatable           :: ens_mean(:)
+
+type(random_seq_type) :: random_seq
+
+type(time_type)                :: cosmo_fc_time
+type(time_type)                :: cosmo_an_time
+
+type(grib_header_type),allocatable  :: grib_header(:)
 
 contains
 
-  function get_model_size()
 
-    integer :: get_model_size
-    
-    if ( .not. module_initialized ) call static_init_model
-    
-    get_model_size = model_size
-
-  end function get_model_size
+!------------------------------------------------------------------------
+!>
 
 
+function get_model_size()
+
+  integer :: get_model_size
+
+  call error_handler(E_ERR,'get_model_size','routine not written',source,revision,revdate)
+
+  if ( .not. module_initialized ) call static_init_model
+
+  get_model_size = model_size
+
+end function get_model_size
 
 
-  subroutine static_init_model()
+!------------------------------------------------------------------------
+!> Called to do one time initialization of the model.
+!>
+!> All the grid information comes from the COSMOS netCDF file
 
-    integer                       :: iunit,io,islab,ikind,sv_length
-    real(r8),allocatable          :: data(:,:)
+subroutine static_init_model()
 
-    real(r8),parameter            :: g = 9.80665_r8
+! Local variables - all the important ones have module scope
 
-    if ( module_initialized ) return ! only need to do this once.
-    
-    module_initialized=.TRUE.
+integer               :: iunit, io, islab, ikind, sv_length
+real(r8), allocatable :: datmat(:,:)
 
-    call set_allowed_state_vector_vars()
+real(r8), parameter   :: g = 9.80665_r8
 
-    ! read the DART namelist for this model
-    call find_namelist_in_file('input.nml', 'model_nml', iunit)
-    read(iunit, nml = model_nml, iostat = io)
-    call check_namelist_read(iunit, io, 'model_nml')
+if ( module_initialized ) return ! only need to do this once.
 
-    call set_calendar_type('Gregorian')
+module_initialized = .TRUE.
 
-    call get_cosmo_info(cosmo_filename,cosmo_slabs,cosmo_lonlat,grib_header,&
-                        is_allowed_state_vector_var,cosmo_fc_time)
+! read the DART namelist for this model
+call find_namelist_in_file('input.nml', 'model_nml', iunit)
+read(iunit, nml = model_nml, iostat = io)
+call check_namelist_read(iunit, io, 'model_nml')
 
-    state_vector_vars(:)%is_present=.false.
-    non_state_data%orography_present=.false.
-    non_state_data%pressure_perturbation_present=.false.
+! Record the namelist values used for the run
+if (do_nml_file()) write(logfileunit, nml=model_nml)
+if (do_nml_term()) write(     *     , nml=model_nml)
 
-    model_size = maxval(cosmo_slabs(:)%dart_eindex)
-    nslabs     = size(cosmo_slabs,1)
+call set_calendar_type('Gregorian')
 
-    sv_length = 0
-    do islab = 1,nslabs
-      ikind = cosmo_slabs(islab)%dart_kind
-      if (ikind>0) then 
-        if (is_allowed_state_vector_var(ikind).OR.(ikind==KIND_PRESSURE_PERTURBATION)) then
-          sv_length = sv_length+cosmo_slabs(islab)%dims(1)*cosmo_slabs(islab)%dims(2)
-        end if
-      end if
-    end do
+! Get the dimensions of the grid from the netCDF file.
 
-    allocate(state_vector(1:sv_length))
+call get_cosmo_gridinfo(cosmo_netcdf_file)
 
-    ! cycle through all GRIB records
-    ! one record corresponds to one horizontal field
-    do islab=1,nslabs
-      ikind=cosmo_slabs(islab)%dart_kind
+call error_handler(E_ERR,'static_init_model','routine not written',source,revision,revdate)
 
-      ! check if variable is a possible state vector variable
-      if (ikind>0) then 
-        if (is_allowed_state_vector_var(ikind)) then
-          
-          ! check if state vector variable information has not already been read
-          ! e.g. for another vertical level
-          if (.not. state_vector_vars(ikind)%is_present) then
-            ! assign the variable information
-            state_vector_vars(ikind)%is_present   = .true.
-            state_vector_vars(ikind)%varname_short= cosmo_slabs(islab)%varname_short
-            state_vector_vars(ikind)%varname_long = cosmo_slabs(islab)%varname_long
-            state_vector_vars(ikind)%units        = cosmo_slabs(islab)%units
-            state_vector_vars(ikind)%nx           = cosmo_slabs(islab)%dims(1)
-            state_vector_vars(ikind)%ny           = cosmo_slabs(islab)%dims(2)
-            state_vector_vars(ikind)%nz           = cosmo_slabs(islab)%dims(3)
-            state_vector_vars(ikind)%horizontal_coordinate=cosmo_slabs(islab)%hcoord_type
-            if (state_vector_vars(ikind)%nz>1) then
-              state_vector_vars(ikind)%vertical_coordinate=VERTISLEVEL
-            else
-              state_vector_vars(ikind)%vertical_coordinate=VERTISSURFACE
-            end if
-            
-            allocate(state_vector_vars(ikind)%vertical_level(     1:state_vector_vars(ikind)%nz))
-            allocate(state_vector_vars(ikind)%state_vector_sindex(1:state_vector_vars(ikind)%nz))
-            allocate(state_vector_vars(ikind)%cosmo_state_index(  1:state_vector_vars(ikind)%nz))
-            
-          end if
-          
-          ! set vertical information for this vertical level (record/slab)
-          state_vector_vars(ikind)%vertical_level(     cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_level
-          state_vector_vars(ikind)%state_vector_sindex(cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_sindex
-          state_vector_vars(ikind)%cosmo_state_index(  cosmo_slabs(islab)%ilevel)=islab
-          
-        end if
-        
-      ! check for non state vector data (e.g. surface elevation) needed to run DART
-        if (is_allowed_non_state_var(ikind)) then
-          if (ikind==KIND_SURFACE_ELEVATION) then
-            allocate(data(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
-            data=get_data_from_binary(cosmo_filename,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
-            if (.not. allocated(non_state_data%surface_orography)) then
-              allocate(non_state_data%surface_orography(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
-            end if
-            non_state_data%surface_orography(:,:)=data(:,:)
-            deallocate(data)
-            non_state_data%orography_present=.true.
-          end if
-          if ((ikind==KIND_SURFACE_GEOPOTENTIAL).and.(.not. allocated(non_state_data%surface_orography))) then
-            allocate(data(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
-            data=get_data_from_binary(cosmo_filename,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
+call get_cosmo_info(cosmo_restart_file, cosmo_slabs, cosmo_lonlat, grib_header, &
+                      is_allowed_state_vector_var, cosmo_fc_time)
+
+call set_allowed_state_vector_vars()
+
+  state_vector_vars(:)%is_present=.false.
+  non_state_data%orography_present=.false.
+  non_state_data%pressure_perturbation_present=.false.
+
+  model_size = maxval(cosmo_slabs(:)%dart_eindex)
+  nslabs     = size(cosmo_slabs,1)
+
+  sv_length = 0
+  do islab = 1,nslabs
+    ikind = cosmo_slabs(islab)%dart_kind
+    if (ikind>0) then
+      if (is_allowed_state_vector_var(ikind).OR.(ikind==KIND_PRESSURE_PERTURBATION)) then
+        sv_length = sv_length+cosmo_slabs(islab)%dims(1)*cosmo_slabs(islab)%dims(2)
+      endif
+    endif
+  enddo
+
+  allocate(state_vector(1:sv_length))
+
+  ! cycle through all GRIB records
+  ! one record corresponds to one horizontal field
+  do islab=1,nslabs
+    ikind=cosmo_slabs(islab)%dart_kind
+
+    ! check if variable is a possible state vector variable
+    if (ikind>0) then
+      if (is_allowed_state_vector_var(ikind)) then
+
+        ! check if state vector variable information has not already been read
+        ! e.g. for another vertical level
+        if (.not. state_vector_vars(ikind)%is_present) then
+          ! assign the variable information
+          state_vector_vars(ikind)%is_present   = .true.
+          state_vector_vars(ikind)%varname_short= cosmo_slabs(islab)%varname_short
+          state_vector_vars(ikind)%varname_long = cosmo_slabs(islab)%varname_long
+          state_vector_vars(ikind)%units        = cosmo_slabs(islab)%units
+          state_vector_vars(ikind)%nx           = cosmo_slabs(islab)%dims(1)
+          state_vector_vars(ikind)%ny           = cosmo_slabs(islab)%dims(2)
+          state_vector_vars(ikind)%nz           = cosmo_slabs(islab)%dims(3)
+          state_vector_vars(ikind)%horizontal_coordinate=cosmo_slabs(islab)%hcoord_type
+          if (state_vector_vars(ikind)%nz>1) then
+            state_vector_vars(ikind)%vertical_coordinate=VERTISLEVEL
+          else
+            state_vector_vars(ikind)%vertical_coordinate=VERTISSURFACE
+          endif
+
+          allocate(state_vector_vars(ikind)%vertical_level(     1:state_vector_vars(ikind)%nz))
+          allocate(state_vector_vars(ikind)%state_vector_sindex(1:state_vector_vars(ikind)%nz))
+          allocate(state_vector_vars(ikind)%cosmo_state_index(  1:state_vector_vars(ikind)%nz))
+
+        endif
+
+        ! set vertical information for this vertical level (record/slab)
+        state_vector_vars(ikind)%vertical_level(     cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_level
+        state_vector_vars(ikind)%state_vector_sindex(cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_sindex
+        state_vector_vars(ikind)%cosmo_state_index(  cosmo_slabs(islab)%ilevel)=islab
+
+      endif
+
+    ! check for non state vector datmat (e.g. surface elevation) needed to run DART
+      if (is_allowed_non_state_var(ikind)) then
+        if (ikind==KIND_SURFACE_ELEVATION) then
+          allocate(datmat(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
+          datmat=get_data_from_binary(cosmo_restart_file,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
+          if (.not. allocated(non_state_data%surface_orography)) then
             allocate(non_state_data%surface_orography(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
-            non_state_data%surface_orography(:,:)=data(:,:)/g
-            deallocate(data)
-            non_state_data%orography_present=.true.
-          end if
-          if (ikind==KIND_PRESSURE_PERTURBATION) then
-            allocate(data(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
-            data=get_data_from_binary(cosmo_filename,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
-            if (.not. allocated(non_state_data%pressure_perturbation)) then
-              allocate(non_state_data%pressure_perturbation(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2),1:cosmo_slabs(islab)%dims(3)))
-            end if
-            non_state_data%pressure_perturbation(:,:,cosmo_slabs(islab)%ilevel)=data(:,:)
-            deallocate(data)
-            
-            if (.not. state_vector_vars(KIND_PRESSURE)%is_present) then
-              ! assign the pressure variable information
-              state_vector_vars(KIND_PRESSURE)%is_present   = .true.
-              state_vector_vars(KIND_PRESSURE)%varname_short= cosmo_slabs(islab)%varname_short
-              state_vector_vars(KIND_PRESSURE)%varname_long = cosmo_slabs(islab)%varname_long
-              state_vector_vars(KIND_PRESSURE)%units        = cosmo_slabs(islab)%units
-              state_vector_vars(KIND_PRESSURE)%nx           = cosmo_slabs(islab)%dims(1)
-              state_vector_vars(KIND_PRESSURE)%ny           = cosmo_slabs(islab)%dims(2)
-              state_vector_vars(KIND_PRESSURE)%nz           = cosmo_slabs(islab)%dims(3)
-              state_vector_vars(KIND_PRESSURE)%horizontal_coordinate=cosmo_slabs(islab)%hcoord_type
-              state_vector_vars(KIND_PRESSURE)%vertical_coordinate=VERTISLEVEL
-              allocate(state_vector_vars(KIND_PRESSURE)%vertical_level(     1:state_vector_vars(KIND_PRESSURE)%nz))
-              allocate(state_vector_vars(KIND_PRESSURE)%state_vector_sindex(1:state_vector_vars(KIND_PRESSURE)%nz))
-              allocate(state_vector_vars(KIND_PRESSURE)%cosmo_state_index(  1:state_vector_vars(KIND_PRESSURE)%nz))
-            end if
-            
-            ! set vertical information for this vertical level (record/slab)
-            state_vector_vars(KIND_PRESSURE)%vertical_level(     cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_level
-            state_vector_vars(KIND_PRESSURE)%state_vector_sindex(cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_sindex
-            state_vector_vars(KIND_PRESSURE)%cosmo_state_index(  cosmo_slabs(islab)%ilevel)=islab
-            
-            non_state_data%pressure_perturbation_present=.true.
-          end if
-          
-        end if
-      end if
-    end do
+          endif
+          non_state_data%surface_orography(:,:)=datmat(:,:)
+          deallocate(datmat)
+          non_state_data%orography_present=.true.
+        endif
+        if ((ikind==KIND_SURFACE_GEOPOTENTIAL).and.(.not. allocated(non_state_data%surface_orography))) then
+          allocate(datmat(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
+          datmat=get_data_from_binary(cosmo_restart_file,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
+          allocate(non_state_data%surface_orography(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
+          non_state_data%surface_orography(:,:)=datmat(:,:)/g
+          deallocate(datmat)
+          non_state_data%orography_present=.true.
+        endif
+        if (ikind==KIND_PRESSURE_PERTURBATION) then
+          allocate(datmat(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2)))
+          datmat=get_data_from_binary(cosmo_restart_file,grib_header(islab),cosmo_slabs(islab)%dims(1),cosmo_slabs(islab)%dims(2))
+          if (.not. allocated(non_state_data%pressure_perturbation)) then
+            allocate(non_state_data%pressure_perturbation(1:cosmo_slabs(islab)%dims(1),1:cosmo_slabs(islab)%dims(2),1:cosmo_slabs(islab)%dims(3)))
+          endif
+          non_state_data%pressure_perturbation(:,:,cosmo_slabs(islab)%ilevel)=datmat(:,:)
+          deallocate(datmat)
 
-    ! set up the vertical coordinate system information
-    !   search for one 3D variable (U-wind component should be contained in every analysis file)
-    setlevel : do islab=1,nslabs
-      if (cosmo_slabs(islab)%dart_kind==KIND_U_WIND_COMPONENT) then
+          if (.not. state_vector_vars(KIND_PRESSURE)%is_present) then
+            ! assign the pressure variable information
+            state_vector_vars(KIND_PRESSURE)%is_present   = .true.
+            state_vector_vars(KIND_PRESSURE)%varname_short= cosmo_slabs(islab)%varname_short
+            state_vector_vars(KIND_PRESSURE)%varname_long = cosmo_slabs(islab)%varname_long
+            state_vector_vars(KIND_PRESSURE)%units        = cosmo_slabs(islab)%units
+            state_vector_vars(KIND_PRESSURE)%nx           = cosmo_slabs(islab)%dims(1)
+            state_vector_vars(KIND_PRESSURE)%ny           = cosmo_slabs(islab)%dims(2)
+            state_vector_vars(KIND_PRESSURE)%nz           = cosmo_slabs(islab)%dims(3)
+            state_vector_vars(KIND_PRESSURE)%horizontal_coordinate=cosmo_slabs(islab)%hcoord_type
+            state_vector_vars(KIND_PRESSURE)%vertical_coordinate=VERTISLEVEL
+            allocate(state_vector_vars(KIND_PRESSURE)%vertical_level(     1:state_vector_vars(KIND_PRESSURE)%nz))
+            allocate(state_vector_vars(KIND_PRESSURE)%state_vector_sindex(1:state_vector_vars(KIND_PRESSURE)%nz))
+            allocate(state_vector_vars(KIND_PRESSURE)%cosmo_state_index(  1:state_vector_vars(KIND_PRESSURE)%nz))
+          endif
 
-        ! calculate the vertical coordinates for every grid point
-        call set_vertical_coords(grib_header(islab),non_state_data,state_vector_vars(KIND_PRESSURE)%state_vector_sindex(:),state_vector)
+          ! set vertical information for this vertical level (record/slab)
+          state_vector_vars(KIND_PRESSURE)%vertical_level(     cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_level
+          state_vector_vars(KIND_PRESSURE)%state_vector_sindex(cosmo_slabs(islab)%ilevel)=cosmo_slabs(islab)%dart_sindex
+          state_vector_vars(KIND_PRESSURE)%cosmo_state_index(  cosmo_slabs(islab)%ilevel)=islab
 
-        exit setlevel
-      end if
-    end do setlevel
+          non_state_data%pressure_perturbation_present=.true.
+        endif
 
-    return
-  end subroutine static_init_model
+      endif
+    endif
+  enddo
 
+  ! set up the vertical coordinate system information
+  !   search for one 3D variable (U-wind component should be contained in every analysis file)
+  setlevel : do islab=1,nslabs
+    if (cosmo_slabs(islab)%dart_kind==KIND_U_WIND_COMPONENT) then
+
+      ! calculate the vertical coordinates for every grid point
+      call set_vertical_coords(grib_header(islab),non_state_data,state_vector_vars(KIND_PRESSURE)%state_vector_sindex(:),state_vector)
+
+      exit setlevel
+    endif
+  enddo setlevel
+
+  return
+end subroutine static_init_model
+
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine get_state_meta_data(index_in,location,var_type)
@@ -352,8 +443,10 @@ contains
     integer                        :: islab,var,hindex,dims(3)
     real(r8)                       :: lon,lat,vloc
 
+    call error_handler(E_ERR,'get_state_meta_data','routine not written',source,revision,revdate)
+
     if (.NOT. module_initialized) CALL static_init_model()
-    
+
     var=-1
 
     findindex : DO islab=1,nslabs
@@ -367,16 +460,19 @@ contains
         lat      = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lat(hindex)
         location = set_location(lon,lat,vloc,VERTISLEVEL)
         EXIT findindex
-      END IF
-    END DO findindex
+      endif
+    enddo findindex
 
     IF( var == -1 ) THEN
-      write(string,*) 'Problem, cannot find base_offset, index_in is: ', index_in
-      call error_handler(E_ERR,'get_state_meta_data',string,source,revision,revdate)
+      write(string1,*) 'Problem, cannot find base_offset, index_in is: ', index_in
+      call error_handler(E_ERR,'get_state_meta_data',string1,source,revision,revdate)
     ENDIF
 
   end subroutine get_state_meta_data
 
+
+!------------------------------------------------------------------------
+!>
 
 
   function get_model_time_step()
@@ -385,15 +481,20 @@ contains
   ! It is NOT the dynamical timestep of the model.
 
     type(time_type) :: get_model_time_step
-    
+
+    call error_handler(E_ERR,'get_model_time_step','routine not written',source,revision,revdate)
+
     if ( .not. module_initialized ) call static_init_model
-    
+
     model_timestep      = set_time(model_dt)
     get_model_time_step = model_timestep
     return
 
   end function get_model_time_step
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
@@ -406,23 +507,25 @@ contains
   ! istatus = 19 : observation vertical coordinate is not supported
 
   ! Passed variables
-  
+
   real(r8),            intent(in)  :: x(:)
   type(location_type), intent(in)  :: location
   integer,             intent(in)  :: obs_type
   real(r8),            intent(out) :: interp_val
   integer,             intent(out) :: istatus
-  
+
   ! Local storage
-  
+
   real(r8)             :: point_coords(1:3)
-  
+
   integer              :: i,j,hbox(2,2),n,vbound(2),sindex
   real(r8)             :: hbox_weight(2,2),hbox_val(2,2),hbox_lon(2,2),hbox_lat(2,2)
   real(r8)             :: vbound_weight(2),val1,val2
 
+  call error_handler(E_ERR,'model_interpolate','routine not written',source,revision,revdate)
+
   IF ( .not. module_initialized ) call static_init_model
-  
+
   interp_val = MISSING_R8     ! the DART bad value flag
   istatus = 99                ! unknown error
 
@@ -430,7 +533,7 @@ contains
   if ( .not. state_vector_vars(obs_type)%is_present) then
      istatus=10
      return
-  end if
+  endif
 
   ! horizontal interpolation
 
@@ -443,11 +546,11 @@ contains
                                      cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lat,&
                                      point_coords(1:2),n,state_vector_vars(obs_type)%nx,                 &
                                      state_vector_vars(obs_type)%ny, hbox, hbox_weight)
-   
+
   if (hbox(1,1)==-1) then
      istatus=15
      return
-  end if
+  endif
 
   ! determine vertical level above and below obsevation
   call get_vertical_boundaries(hbox, hbox_weight, obs_type, query_location(location,'which_vert'),&
@@ -457,8 +560,8 @@ contains
   ! FIXME istatus value?
   if (vbound(1)==-1) then
      return
-  end if
-   
+  endif
+
   ! Perform a bilinear interpolation from the grid box to the desired location
   ! for the level above and below the observation
 
@@ -478,8 +581,8 @@ contains
   do i=1,2
   do j=1,2
      hbox_val(i,j)=x(sindex+hbox(i,j)-1)
-  end do
-  end do
+  enddo
+  enddo
 
   call bilinear_interpolation(hbox_val,hbox_lon,hbox_lat,point_coords,val2)
 
@@ -487,83 +590,106 @@ contains
 
   interp_val=val1*vbound_weight(1)+val2*vbound_weight(2)
   istatus=0
-   
+
   end subroutine model_interpolate
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine init_conditions(x)
   !------------------------------------------------------------------
   ! Returns a model state vector, x, that is some sort of appropriate
   ! initial condition for starting up a long integration of the model.
-  ! At present, this is only used if the namelist parameter 
+  ! At present, this is only used if the namelist parameter
   ! start_from_restart is set to .false. in the program perfect_model_obs.
 
   real(r8), intent(out) :: x(:)
+
+  call error_handler(E_ERR,'init_conditions','routine not written',source,revision,revdate)
 
   if ( .not. module_initialized ) call static_init_model
 
   x = 0.0_r8  ! suppress compiler warnings about unused variables
 
-  write(string,*) 'Cannot initialize COSMO state via subroutine call; start_from_restart cannot be F'
-  call error_handler(E_ERR,'init_conditions',string,source,revision,revdate)
+  write(string1,*) 'Cannot initialize COSMO state via subroutine call; start_from_restart cannot be F'
+  call error_handler(E_ERR,'init_conditions',string1,source,revision,revdate)
 
   end subroutine init_conditions
 
 
+!------------------------------------------------------------------------
+!>
+
 
   subroutine init_time(time)
   !------------------------------------------------------------------
-  ! Companion interface to init_conditions. Returns a time that is somehow 
+  ! Companion interface to init_conditions. Returns a time that is somehow
   ! appropriate for starting up a long integration of the model.
-  ! At present, this is only used if the namelist parameter 
+  ! At present, this is only used if the namelist parameter
   ! start_from_restart is set to .false. in the program perfect_model_obs.
 
   type(time_type), intent(out) :: time
 
+  call error_handler(E_ERR,'init_time','routine not written',source,revision,revdate)
+
+  if ( .not. module_initialized ) call static_init_model
+
   time = set_time(0,0) ! suppress compiler warnings about unused variables
 
-  write(string,*) 'Cannot initialize COSMO time via subroutine call; start_from_restart cannot be F'
-  call error_handler(E_ERR,'init_time',string,source,revision,revdate)
-  
+  write(string1,*) 'Cannot initialize COSMO time via subroutine call; start_from_restart cannot be F'
+  call error_handler(E_ERR,'init_time',string1,source,revision,revdate)
+
   end subroutine init_time
 
 
-  
+!------------------------------------------------------------------------
+!>
+
+
   subroutine adv_1step(x, time)
   !------------------------------------------------------------------
   ! As COSMO can only be advanced as a separate executable,
   ! this is a NULL INTERFACE.
   !------------------------------------------------------------------
-    
+
   real(r8),        intent(inout) :: x(:)
   type(time_type), intent(in)    :: time
-    
+
+  call error_handler(E_ERR,'adv_1step','routine not written',source,revision,revdate)
   if ( .not. module_initialized ) call static_init_model
-    
+
   if (do_output()) then
       call print_time(time,'NULL interface adv_1step (no advance) DART time is')
       call print_time(time,'NULL interface adv_1step (no advance) DART time is',logfileunit)
   endif
 
-  write(string,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
-  call error_handler(E_ERR,'adv_1step',string,source,revision,revdate)
+  write(string1,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
+  call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
 
   end subroutine adv_1step
 
 
-  
+!------------------------------------------------------------------------
+!>
+
+
   subroutine end_model()
 
+  call error_handler(E_ERR,'end_model','routine not written',source,revision,revdate)
   deallocate(cosmo_slabs)
   deallocate(state_vector)
 
   end subroutine end_model
 
 
+!------------------------------------------------------------------------
+!>
+
 
   function nc_write_model_atts( ncFileID ) result (ierr)
-    
+
     integer, intent(in)  :: ncFileID      ! netCDF file identifier
     integer              :: ierr          ! return value of function
 
@@ -589,7 +715,9 @@ contains
     integer, dimension(8) :: values      ! needed by F90 DATE_AND_TIME intrinsic
 
     logical :: has_std_latlon, has_ustag_latlon, has_vstag_latlon
-   
+
+  call error_handler(E_ERR,'nc_write_model_atts','routine not written',source,revision,revdate)
+
     if ( .not. module_initialized ) call static_init_model
 
     ierr = -1 ! assume things go poorly
@@ -605,31 +733,31 @@ contains
     write(filename,*) 'ncFileID', ncFileID
 
     !-------------------------------------------------------------------------------
-    ! make sure ncFileID refers to an open netCDF file, 
+    ! make sure ncFileID refers to an open netCDF file,
     ! and then put into define mode.
     !-------------------------------------------------------------------------------
-    
+
     call nc_check(nf90_Inquire(ncFileID,nDimensions,nVariables,nAttributes,unlimitedDimID),&
                                        'nc_write_model_atts', 'inquire '//trim(filename))
     call nc_check(nf90_Redef(ncFileID),'nc_write_model_atts',   'redef '//trim(filename))
-    
+
     !-------------------------------------------------------------------------------
     ! We need the dimension ID for the number of copies/ensemble members, and
-    ! we might as well check to make sure that Time is the Unlimited dimension. 
+    ! we might as well check to make sure that Time is the Unlimited dimension.
     ! Our job is create the 'model size' dimension.
     !-------------------------------------------------------------------------------
-    
+
     call nc_check(nf90_inq_dimid(ncid=ncFileID, name='NMLlinelen', dimid=LineLenDimID), &
      'nc_write_model_atts','inq_dimid NMLlinelen')
     call nc_check(nf90_inq_dimid(ncid=ncFileID, name='copy', dimid=MemberDimID), &
      'nc_write_model_atts', 'copy dimid '//trim(filename))
     call nc_check(nf90_inq_dimid(ncid=ncFileID, name='time', dimid=  TimeDimID), &
      'nc_write_model_atts', 'time dimid '//trim(filename))
-    
+
     if ( TimeDimID /= unlimitedDimId ) then
-      write(error_string,*)'Time Dimension ID ',TimeDimID, &
+      write(string1,*)'Time Dimension ID ',TimeDimID, &
        ' should equal Unlimited Dimension ID',unlimitedDimID
-!      call error_handler(E_ERR,'nc_write_model_atts', error_string, source, revision, revdate)
+!      call error_handler(E_ERR,'nc_write_model_atts', string1, source, revision, revdate)
     endif
 
     !-------------------------------------------------------------------------------
@@ -637,16 +765,16 @@ contains
     !-------------------------------------------------------------------------------
     call nc_check(nf90_def_dim(ncid=ncFileID, name='StateVariable', len=model_size, &
      dimid = StateVarDimID),'nc_write_model_atts', 'state def_dim '//trim(filename))
-    
+
     !-------------------------------------------------------------------------------
-    ! Write Global Attributes 
+    ! Write Global Attributes
     !-------------------------------------------------------------------------------
 
      call DATE_AND_TIME(crdate,crtime,crzone,values)
-     write(string,'(''YYYY MM DD HH MM SS = '',i4,5(1x,i2.2))') &
+     write(string1,'(''YYYY MM DD HH MM SS = '',i4,5(1x,i2.2))') &
       values(1), values(2), values(3), values(5), values(6), values(7)
-    
-     call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, 'creation_date' ,string    ), &
+
+     call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, 'creation_date' ,string1 ), &
                    'nc_write_model_atts', 'creation put '//trim(filename))
      call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, 'model_source'  ,source  ), &
                    'nc_write_model_atts', 'source put '//trim(filename))
@@ -656,20 +784,20 @@ contains
                    'nc_write_model_atts', 'revdate put '//trim(filename))
      call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, 'model',  'cosmo' ), &
                    'nc_write_model_atts', 'model put '//trim(filename))
-    
+
     !-------------------------------------------------------------------------------
     ! Here is the extensible part. The simplest scenario is to output the state vector,
     ! parsing the state vector into model-specific parts is complicated, and you need
     ! to know the geometry, the output variables (PS,U,V,T,Q,...) etc. We're skipping
     ! complicated part.
     !-------------------------------------------------------------------------------
-    
+
     if ( output_state_vector ) then
-      
+
       !----------------------------------------------------------------------------
       ! Create a variable for the state vector
       !----------------------------------------------------------------------------
-      
+
       ! Define the state vector coordinate variable and some attributes.
       call nc_check(nf90_def_var(ncid=ncFileID,name='StateVariable', xtype=nf90_int, &
                     dimids=StateVarDimID, varid=StateVarVarID), 'nc_write_model_atts', &
@@ -680,23 +808,23 @@ contains
                     'nc_write_model_atts', 'statevariable units '//trim(filename))
       call nc_check(nf90_put_att(ncFileID,StateVarVarID,'valid_range',(/ 1,model_size /)),&
                     'nc_write_model_atts', 'statevariable valid_range '//trim(filename))
-      
-      ! Define the actual (3D) state vector, which gets filled as time goes on ... 
+
+      ! Define the actual (3D) state vector, which gets filled as time goes on ...
       call nc_check(nf90_def_var(ncid=ncFileID, name='state', xtype=nf90_real, &
                     dimids=(/StateVarDimID,MemberDimID,unlimitedDimID/),varid=StateVarID),&
                     'nc_write_model_atts','state def_var '//trim(filename))
       call nc_check(nf90_put_att(ncFileID,StateVarID,'long_name','model state or fcopy'),&
                     'nc_write_model_atts', 'state long_name '//trim(filename))
-                   
+
       ! Leave define mode so we can fill the coordinate variable.
       call nc_check(nf90_enddef(ncfileID),'nc_write_model_atts','state enddef '//trim(filename))
-      
+
       ! Fill the state variable coordinate variable
       call nc_check(nf90_put_var(ncFileID, StateVarVarID, (/ (i,i=1,model_size) /) ), &
                     'nc_write_model_atts', 'state put_var '//trim(filename))
-      
+
     else
-      
+
       !----------------------------------------------------------------------------
       ! We need to output the prognostic variables.
       !----------------------------------------------------------------------------
@@ -708,17 +836,17 @@ contains
           nx=state_vector_vars(ikind)%nx
           ny=state_vector_vars(ikind)%ny
           exit findnxny
-        end if
-      end do findnxny
+        endif
+      enddo findnxny
 
       findnz : do ikind=1,n_max_kinds
         if (state_vector_vars(ikind)%is_present) then
           if ((state_vector_vars(ikind)%nz>1) .and. (ikind .ne. KIND_VERTICAL_VELOCITY)) then
             nz=state_vector_vars(ikind)%nz
             exit findnz
-          end if
-        end if
-      end do findnz
+          endif
+        endif
+      enddo findnz
 
       call nc_check(nf90_def_dim(ncid=ncFileID, name='lon', len=nx, dimid = lonDimID), &
                      'nc_write_model_atts', 'lon def_dim '//trim(filename))
@@ -729,7 +857,7 @@ contains
       call nc_check(nf90_def_dim(ncid=ncFileID, name='wlev', len=nz+1, dimid = wlevDimID), &
                      'nc_write_model_atts', 'lev def_dim '//trim(filename))
 
-      if ( has_std_latlon ) then 
+      if ( has_std_latlon ) then
       ! Standard Grid Longitudes
       call nc_check(nf90_def_var(ncFileID,name='LON', xtype=nf90_real, &
                     dimids=(/ lonDimID, latDimID /), varid=lonVarID),&
@@ -757,7 +885,7 @@ contains
       endif
 
 
-      if ( has_ustag_latlon ) then 
+      if ( has_ustag_latlon ) then
       ! U Grid Longitudes
       call nc_check(nf90_def_var(ncFileID,name='ULON', xtype=nf90_real, &
                     dimids=(/ lonDimID, latDimID /), varid=ulonVarID),&
@@ -785,7 +913,7 @@ contains
       endif
 
 
-      if ( has_vstag_latlon ) then 
+      if ( has_vstag_latlon ) then
       ! V Grid Longitudes
       call nc_check(nf90_def_var(ncFileID,name='VLON', xtype=nf90_real, &
                     dimids=(/ lonDimID, latDimID /), varid=vlonVarID),&
@@ -839,7 +967,7 @@ contains
                     'nc_write_model_atts', 'WLEV valid_range '//trim(filename))
 
       ! DEBUG block to check shape of netCDF variables
-      if ( 1 == 0 ) then
+      if ( debug > 0 .and. do_output() ) then
          write(*,*)'lon   dimid is ',lonDimID
          write(*,*)'lat   dimid is ',latDimID
          write(*,*)'lev   dimid is ',levDimID
@@ -851,7 +979,7 @@ contains
       do ikind=1,n_max_kinds
         if (state_vector_vars(ikind)%is_present) then
 
-          error_string = trim(filename)//' '//trim(state_vector_vars(ikind)%varname_short)
+          string1 = trim(filename)//' '//trim(state_vector_vars(ikind)%varname_short)
 
           dims(1)=lonDimID
           dims(2)=latDimID
@@ -864,12 +992,12 @@ contains
               dims(idim)=wlevDimID
             else
               levs(1:nz)=state_vector_vars(ikind)%vertical_level(1:nz)
-            end if
+            endif
             idim=idim+1
-          end if
+          endif
 
-          ! Create a dimension for the ensemble 
-          dims(idim) = memberDimID 
+          ! Create a dimension for the ensemble
+          dims(idim) = memberDimID
           idim=idim+1
 
           ! Put ensemble member dimension here
@@ -877,25 +1005,25 @@ contains
           ndims=idim
 
           ! check shape of netCDF variables
-          if ( verbose ) &
+          if ( debug > 0 .and. do_output() ) &
           write(*,*)trim(state_vector_vars(ikind)%varname_short),' has netCDF dimIDs ',dims(1:ndims)
 
           call nc_check(nf90_def_var(ncid=ncFileID, name=trim(state_vector_vars(ikind)%varname_short), xtype=nf90_real, &
                         dimids = dims(1:ndims), varid=VarID),&
-                        'nc_write_model_atts', trim(error_string)//' def_var' )
+                        'nc_write_model_atts', trim(string1)//' def_var' )
 
           call nc_check(nf90_put_att(ncFileID, VarID, 'long_name', trim(state_vector_vars(ikind)%varname_long)), &
-                        'nc_write_model_atts', trim(error_string)//' put_att long_name' )
+                        'nc_write_model_atts', trim(string1)//' put_att long_name' )
 
           write(ckind,'(I6)') ikind
           call nc_check(nf90_put_att(ncFileID, VarID, 'DART_kind', trim(ckind)), &
-                        'nc_write_model_atts', trim(error_string)//' put_att dart_kind' )
+                        'nc_write_model_atts', trim(string1)//' put_att dart_kind' )
 
           call nc_check(nf90_put_att(ncFileID, VarID, 'units', trim(state_vector_vars(ikind)%units)), &
-                        'nc_write_model_atts', trim(error_string)//' put_att units' )
+                        'nc_write_model_atts', trim(string1)//' put_att units' )
 
-        end if
-      end do
+        endif
+      enddo
 
       ! Leave define mode so we can fill the coordinate variable.
       call nc_check(nf90_enddef(ncfileID),'nc_write_model_atts','prognostic enddef '//trim(filename))
@@ -914,7 +1042,7 @@ contains
       call nc_check(nf90_put_var(ncFileID, latVarID, data2d ), &
                     'nc_write_model_atts', 'LAT put_var '//trim(filename))
       endif
-      
+
       if (has_ustag_latlon) then
       data2d = reshape(cosmo_lonlat(2)%lon, (/ nx, ny /) )
       call nc_check(nf90_put_var(ncFileID, ulonVarID, data2d ), &
@@ -924,7 +1052,7 @@ contains
       call nc_check(nf90_put_var(ncFileID, ulatVarID, data2d ), &
                     'nc_write_model_atts', 'ULAT put_var '//trim(filename))
       endif
-      
+
       if (has_vstag_latlon) then
       data2d = reshape(cosmo_lonlat(3)%lon, (/ nx, ny /) )
       call nc_check(nf90_put_var(ncFileID, vlonVarID, data2d ), &
@@ -942,21 +1070,24 @@ contains
 
       call nc_check(nf90_put_var(ncFileID, wlevVarID, wlevs(1:nz+1) ), &
                     'nc_write_model_atts', 'WLEV put_var '//trim(filename))
-      
-    end if
+
+    endif
 
     !-------------------------------------------------------------------------------
     ! Flush the buffer and leave netCDF file open
     !-------------------------------------------------------------------------------
     call nc_check(nf90_sync(ncFileID), 'nc_write_model_atts', 'atts sync')
-    
-    ierr = 0 ! If we got here, things went well.
-    
-  end function nc_write_model_atts
- 
 
- 
-  function nc_write_model_vars( ncFileID, state_vec, copyindex, timeindex ) result (ierr)         
+    ierr = 0 ! If we got here, things went well.
+
+  end function nc_write_model_atts
+
+
+!------------------------------------------------------------------------
+!>
+
+
+  function nc_write_model_vars( ncFileID, state_vec, copyindex, timeindex ) result (ierr)
     !------------------------------------------------------------------
     ! TJH 24 Oct 2006 -- Writes the model variables to a netCDF file.
     !
@@ -979,27 +1110,29 @@ contains
     ! NF90_ENDDEF           ! end definitions: leave define mode
     !    NF90_put_var       ! provide values for variable
     ! NF90_CLOSE            ! close: save updated netCDF dataset
-    
+
     integer,                intent(in) :: ncFileID      ! netCDF file identifier
     real(r8), dimension(:), intent(in) :: state_vec
     integer,                intent(in) :: copyindex
     integer,                intent(in) :: timeindex
     integer                            :: ierr          ! return value of function
-    
+
     integer, dimension(NF90_MAX_VAR_DIMS) :: dimIDs, mystart, mycount
-    character(len=NF90_MAX_NAME)          :: varname 
+    character(len=NF90_MAX_NAME)          :: varname
     integer :: i,ikind, VarID, ncNdims, dimlen,ndims,vardims(3)
     integer :: TimeDimID, CopyDimID
-    
+
     real(r8), allocatable, dimension(:,:)     :: data_2d_array
     real(r8), allocatable, dimension(:,:,:)   :: data_3d_array
-    
+
     character(len=128) :: filename
-    
+
+  call error_handler(E_ERR,'nc_write_model_vars','routine not written',source,revision,revdate)
+
     if ( .not. module_initialized ) call static_init_model
-    
+
     ierr = -1 ! assume things go poorly
-    
+
     !--------------------------------------------------------------------
     ! we only have a netcdf handle here so we do not know the filename
     ! or the fortran unit number.  but construct a string with at least
@@ -1008,76 +1141,76 @@ contains
     !--------------------------------------------------------------------
 
     write(filename,*) 'ncFileID', ncFileID
-    
+
     !-------------------------------------------------------------------------------
-    ! make sure ncFileID refers to an open netCDF file, 
+    ! make sure ncFileID refers to an open netCDF file,
     !-------------------------------------------------------------------------------
-    
+
     call nc_check(nf90_inq_dimid(ncFileID, 'copy', dimid=CopyDimID), &
      'nc_write_model_vars', 'inq_dimid copy '//trim(filename))
-    
+
     call nc_check(nf90_inq_dimid(ncFileID, 'time', dimid=TimeDimID), &
      'nc_write_model_vars', 'inq_dimid time '//trim(filename))
-    
+
     if ( output_state_vector ) then
-      
+
       call nc_check(NF90_inq_varid(ncFileID, 'state', VarID), &
        'nc_write_model_vars', 'state inq_varid '//trim(filename))
       call nc_check(NF90_put_var(ncFileID,VarID,state_vec,start=(/1,copyindex,timeindex/)),&
        'nc_write_model_vars', 'state put_var '//trim(filename))
-      
+
     else
 
       !----------------------------------------------------------------------------
       ! We need to process the prognostic variables.
       !----------------------------------------------------------------------------
-      
+
       do ikind=1,n_max_kinds
         if (state_vector_vars(ikind)%is_present) then
-          
-          varname      = trim(state_vector_vars(ikind)%varname_short)
-          error_string = trim(filename)//' '//trim(varname)
+
+          varname = trim(state_vector_vars(ikind)%varname_short)
+          string1 = trim(filename)//' '//trim(varname)
 
           ! Ensure netCDF variable is conformable with progvar quantity.
           ! The TIME and Copy dimensions are intentionally not queried
           ! by looping over the dimensions stored in the progvar type.
-          
+
           call nc_check(nf90_inq_varid(ncFileID, varname, VarID), &
-                        'nc_write_model_vars', 'inq_varid '//trim(error_string))
-          
+                        'nc_write_model_vars', 'inq_varid '//trim(string1))
+
           call nc_check(nf90_inquire_variable(ncFileID,VarId,dimids=dimIDs,ndims=ncNdims), &
-                        'nc_write_model_vars', 'inquire '//trim(error_string))
+                        'nc_write_model_vars', 'inquire '//trim(string1))
 
           mystart(:)=1
           mycount(:)=1
-          
+
           if (state_vector_vars(ikind)%nz==1) then
             ndims=2
           else
             ndims=3
-          end if
+          endif
 
           vardims(1)=state_vector_vars(ikind)%nx
           vardims(2)=state_vector_vars(ikind)%ny
           vardims(3)=state_vector_vars(ikind)%nz
 
           DimCheck : do i = 1,ndims
-            
-            write(error_string,'(a,i2,A)') 'inquire dimension ',i,trim(varname)
+
+            write(string1,'(a,i2,A)') 'inquire dimension ',i,trim(varname)
             call nc_check(nf90_inquire_dimension(ncFileID, dimIDs(i), len=dimlen), &
-             'nc_write_model_vars', trim(error_string))
-            
+             'nc_write_model_vars', string1)
+
             if ( dimlen /= vardims(i) ) then
-              write(error_string,*) trim(varname),' dim/dimlen ',i,dimlen,' not ',vardims(i)
-              write(error_string2,*)' but it should be.'
-              call error_handler(E_ERR, 'nc_write_model_vars', trim(error_string), &
-                              source, revision, revdate, text2=trim(error_string2))
+              write(string1,*) trim(varname),' dim/dimlen ',i,dimlen,' not ',vardims(i)
+              write(string2,*)' but it should be.'
+              call error_handler(E_ERR, 'nc_write_model_vars', string1, &
+                              source, revision, revdate, text2=string2)
             endif
-            
+
             mycount(i) = dimlen
-            
-          end do DimCheck
-        
+
+          enddo DimCheck
+
           where(dimIDs == CopyDimID) mystart = copyindex
           where(dimIDs == CopyDimID) mycount = 1
           where(dimIDs == TimeDimID) mystart = timeindex
@@ -1088,7 +1221,7 @@ contains
             call sv_to_field(data_2d_array,state_vec,state_vector_vars(ikind))
             call nc_check(nf90_put_var(ncFileID, VarID, data_2d_array, &
                           start = mystart(1:ncNdims), count=mycount(1:ncNdims)), &
-                          'nc_write_model_vars', 'put_var '//trim(error_string2))
+                          'nc_write_model_vars', 'put_var '//trim(string2))
             deallocate(data_2d_array)
 
           elseif (ndims==3) then
@@ -1096,25 +1229,28 @@ contains
             call sv_to_field(data_3d_array,state_vec,state_vector_vars(ikind))
             call nc_check(nf90_put_var(ncFileID, VarID, data_3d_array, &
                           start = mystart(1:ncNdims), count=mycount(1:ncNdims)), &
-                          'nc_write_model_vars', 'put_var '//trim(error_string2))
+                          'nc_write_model_vars', 'put_var '//trim(string2))
             deallocate(data_3d_array)
 
           else
-             write(error_string, *) 'no support for data array of dimension ', ncNdims
-             call error_handler(E_ERR,'nc_write_model_vars', error_string, &
+             write(string1, *) 'no support for data array of dimension ', ncNdims
+             call error_handler(E_ERR,'nc_write_model_vars', string1, &
                            source,revision,revdate)
-          end if
+          endif
 
-        end if
+        endif
 
-      end do
+      enddo
 
-    end if
+    endif
 
     return
 
   end function nc_write_model_vars
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine pert_model_state(state, pert_state, interf_provided)
@@ -1124,13 +1260,13 @@ contains
     ! A model may choose to provide a NULL INTERFACE by returning
     ! .false. for the interf_provided argument. This indicates to
     ! the filter that if it needs to generate perturbed states, it
-    ! may do so by adding a perturbation to each model state 
+    ! may do so by adding a perturbation to each model state
     ! variable independently. The interf_provided argument
     ! should be returned as .true. if the model wants to do its own
     ! perturbing of states.
     !------------------------------------------------------------------
     ! Currently only implemented as rondom perturbations
-    !------------------------------------------------------------------    
+    !------------------------------------------------------------------
 
     real(r8), intent(in)  :: state(:)
     real(r8), intent(out) :: pert_state(:)
@@ -1140,9 +1276,10 @@ contains
 
     integer               :: ikind,ilevel,i,istart,iend
     logical, save         :: random_seq_init = .false.
-    
+
+  call error_handler(E_ERR,'pert_model_state','routine not written',source,revision,revdate)
     if ( .not. module_initialized ) call static_init_model
-    
+
     interf_provided = .true.
 
     ! Initialize my random number sequence (no seed is submitted here!)
@@ -1150,7 +1287,7 @@ contains
       call init_random_seq(random_seq)
       random_seq_init = .true.
     endif
-    
+
     ! add some uncertainty to every state vector element
     do ikind=1,size(state_vector_vars)
       if (state_vector_vars(ikind)%is_present) then
@@ -1163,83 +1300,99 @@ contains
 
           do i=istart,iend
             pert_state(i) = random_gaussian(random_seq, state(i),model_perturbation_amplitude*stddev)
-          end do
+          enddo
           if ((ikind==KIND_SPECIFIC_HUMIDITY) .or. &
               (ikind==KIND_CLOUD_LIQUID_WATER) .or. &
               (ikind==KIND_CLOUD_ICE)) then
             where (pert_state(istart:iend)<0.)
               pert_state(istart:iend)=0.
             end where
-          end if
-        end do
-      end if
+          endif
+        enddo
+      endif
     enddo
 
     return
-    
+
   end subroutine pert_model_state
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine ens_mean_for_model(filter_ens_mean)
 
     real(r8), dimension(:), intent(in) :: filter_ens_mean
-    
+
+  call error_handler(E_ERR,'ens_mean_for_model','routine not written',source,revision,revdate)
+
     if ( .not. module_initialized ) call static_init_model
-    
+
     allocate(ens_mean(1:model_size))
     ens_mean(:) = filter_ens_mean(:)
 
-!  write(string,*) 'COSMO has no ensemble mean in storage.'
-!  call error_handler(E_ERR,'ens_mean_for_model',string,source,revision,revdate)
+!  write(string1,*) 'COSMO has no ensemble mean in storage.'
+!  call error_handler(E_ERR,'ens_mean_for_model',string1,source,revision,revdate)
 
   end subroutine ens_mean_for_model
 
 
+!------------------------------------------------------------------------
+!>
 
-  subroutine set_allowed_state_vector_vars()
-    ! set the information on which variables should go into the state vector
 
-    is_allowed_state_vector_var(:)=.FALSE.
-    is_allowed_non_state_var(:)=.FALSE.
+subroutine set_allowed_state_vector_vars()
+  ! set the information on which variables should go into the state vector
 
-    allowed_state_vector_vars(1)=KIND_U_WIND_COMPONENT
-     is_allowed_state_vector_var(KIND_U_WIND_COMPONENT)=.TRUE.
-    allowed_state_vector_vars(1)=KIND_U_WIND_COMPONENT
-     is_allowed_state_vector_var(KIND_U_WIND_COMPONENT)=.TRUE.
-    allowed_state_vector_vars(2)=KIND_V_WIND_COMPONENT
-     is_allowed_state_vector_var(KIND_V_WIND_COMPONENT)=.TRUE.
-    allowed_state_vector_vars(3)=KIND_VERTICAL_VELOCITY
-     is_allowed_state_vector_var(KIND_VERTICAL_VELOCITY)=.TRUE.
-    allowed_state_vector_vars(4)=KIND_TEMPERATURE
-     is_allowed_state_vector_var(KIND_TEMPERATURE)=.TRUE.
-    allowed_state_vector_vars(5)=KIND_PRESSURE
-     is_allowed_state_vector_var(KIND_PRESSURE)=.TRUE.
-    allowed_state_vector_vars(6)=KIND_SPECIFIC_HUMIDITY
-     is_allowed_state_vector_var(KIND_SPECIFIC_HUMIDITY)=.TRUE.
-    allowed_state_vector_vars(7)=KIND_CLOUD_LIQUID_WATER
-     is_allowed_state_vector_var(KIND_CLOUD_LIQUID_WATER)=.TRUE.
-    allowed_state_vector_vars(8)=KIND_CLOUD_ICE
-     is_allowed_state_vector_var(KIND_CLOUD_ICE)=.TRUE.
+  is_allowed_state_vector_var(:)=.FALSE.
+  is_allowed_non_state_var(:)=.FALSE.
 
-    ! set the information which variables are needed but will not go into the state vector
-    allowed_non_state_vars(1)=KIND_SURFACE_ELEVATION
-     is_allowed_non_state_var(KIND_SURFACE_ELEVATION)=.TRUE.
-    allowed_non_state_vars(2)=KIND_SURFACE_GEOPOTENTIAL
-     is_allowed_non_state_var(KIND_SURFACE_GEOPOTENTIAL)=.TRUE.
-    allowed_non_state_vars(3)=KIND_PRESSURE_PERTURBATION
-     is_allowed_non_state_var(KIND_PRESSURE_PERTURBATION)=.TRUE.
+  allowed_state_vector_vars(1)=KIND_U_WIND_COMPONENT
+   is_allowed_state_vector_var(KIND_U_WIND_COMPONENT)=.TRUE.
 
-    return
+  allowed_state_vector_vars(2)=KIND_V_WIND_COMPONENT
+   is_allowed_state_vector_var(KIND_V_WIND_COMPONENT)=.TRUE.
 
-  end subroutine set_allowed_state_vector_vars
+  allowed_state_vector_vars(3)=KIND_VERTICAL_VELOCITY
+   is_allowed_state_vector_var(KIND_VERTICAL_VELOCITY)=.TRUE.
 
+  allowed_state_vector_vars(4)=KIND_TEMPERATURE
+   is_allowed_state_vector_var(KIND_TEMPERATURE)=.TRUE.
+
+  allowed_state_vector_vars(5)=KIND_PRESSURE
+   is_allowed_state_vector_var(KIND_PRESSURE)=.TRUE.
+
+  allowed_state_vector_vars(6)=KIND_SPECIFIC_HUMIDITY
+   is_allowed_state_vector_var(KIND_SPECIFIC_HUMIDITY)=.TRUE.
+
+  allowed_state_vector_vars(7)=KIND_CLOUD_LIQUID_WATER
+   is_allowed_state_vector_var(KIND_CLOUD_LIQUID_WATER)=.TRUE.
+
+  allowed_state_vector_vars(8)=KIND_CLOUD_ICE
+   is_allowed_state_vector_var(KIND_CLOUD_ICE)=.TRUE.
+
+  ! set the information which variables are needed but will not go into the state vector
+  allowed_non_state_vars(1)=KIND_SURFACE_ELEVATION
+   is_allowed_non_state_var(KIND_SURFACE_ELEVATION)=.TRUE.
+  allowed_non_state_vars(2)=KIND_SURFACE_GEOPOTENTIAL
+   is_allowed_non_state_var(KIND_SURFACE_GEOPOTENTIAL)=.TRUE.
+  allowed_non_state_vars(3)=KIND_PRESSURE_PERTURBATION
+   is_allowed_non_state_var(KIND_PRESSURE_PERTURBATION)=.TRUE.
+
+  return
+
+end subroutine set_allowed_state_vector_vars
+
+
+!------------------------------------------------------------------------
+!>
 
 
   function ll_to_xyz_vector(lon,lat) RESULT (xyz)
-    
+
     ! Passed variables
-    
+
     real(r8),allocatable :: xyz(:,:)      ! result: x,z,y-coordinates
     real(r8),intent(in)  :: lat(:),lon(:) ! input:  lat/lon coordinates in degrees
 
@@ -1261,16 +1414,19 @@ contains
     xyz(1:n,1)=radius*sin(lat(1:n)*deg2rad)*cos(lon(1:n)*deg2rad)
     xyz(1:n,2)=radius*sin(lat(1:n)*deg2rad)*sin(lon(1:n)*deg2rad)
     xyz(1:n,3)=radius*cos(lat(1:n)*deg2rad)
-    
+
     return
   end function ll_to_xyz_vector
 
 
+!------------------------------------------------------------------------
+!>
+
 
   function ll_to_xyz_single(lon,lat) result (xyz)
-    
+
     ! Passed variables
-    
+
     real(r8)             :: xyz(1:3) ! result: x,z,y-coordinates
     real(r8),intent(in)  :: lat,lon  ! input:  lat/lon coordinates in degrees
 
@@ -1285,14 +1441,17 @@ contains
     xyz(1)=radius*sin(lat*deg2rad)*cos(lon*deg2rad)
     xyz(2)=radius*sin(lat*deg2rad)*sin(lon*deg2rad)
     xyz(3)=radius*cos(lat*deg2rad)
-    
+
     return
   end function ll_to_xyz_single
 
 
+!------------------------------------------------------------------------
+!>
+
 
   subroutine get_enclosing_grid_box(p,g,n,nx,ny,b,bw)
-    
+
     integer,intent(in)   :: n,nx,ny
     real(r8),intent(in)  :: p(1:3),g(1:n,1:3)
     integer,intent(out)  :: b(1:2,1:2)
@@ -1311,12 +1470,12 @@ contains
     do i=2,nx+1
       work(i,   1,1:3)=work(i,   2,1:3)-(work(i, 3,1:3)-work(i,   2,1:3))
       work(i,ny+2,1:3)=work(i,ny+1,1:3)-(work(i,ny,1:3)-work(i,ny+1,1:3))
-    end do
+    enddo
 
     do j=2,ny+1
       work(   1,j,1:3)=work(   2,j,1:3)-(work( 3,j,1:3)-work(   2,j,1:3))
       work(nx+2,j,1:3)=work(nx+1,j,1:3)-(work(nx,j,1:3)-work(nx+1,j,1:3))
-    end do
+    enddo
 
     work(   1,   1,1:3) = work(   2,   2,1:3) - 0.5_r8*(sqrt2*(work(   2,   2,1:3)-work(   1,   2,1:3)) + sqrt2*(work(   2,   2,1:3)-work(   2,   1,1:3)))
     work(   1,ny+2,1:3) = work(   2,ny+1,1:3) - 0.5_r8*(sqrt2*(work(   2,ny+1,1:3)-work(   1,ny+1,1:3)) + sqrt2*(work(   2,ny+1,1:3)-work(   2,ny+2,1:3)))
@@ -1326,8 +1485,8 @@ contains
     do i=1,nx+2
     do j=1,ny+2
         dist(i,j)=sqrt(sum((work(i,j,:)-p(:))**2))
-    end do
-    end do
+    enddo
+    enddo
 
     minidx(:)=minloc(dist)
 
@@ -1336,14 +1495,14 @@ contains
     if (minidx(1)==1 .or. minidx(1)==(nx+2) .or. minidx(2)==1 .or. minidx(2)==(ny+2)) then
       b(:,:)=-1
       return
-    end if
+    endif
 
 
     do i=0,1
     do j=0,1
         boxdist(i+1,j+1)=sum(dist(minidx(1)+i-1:minidx(1)+i,minidx(2)+j-1:minidx(2)+j))
-    end do
-    end do 
+    enddo
+    enddo
 
     boxidx=minloc(boxdist)-1
 
@@ -1357,27 +1516,30 @@ contains
       do i=1,2
       do j=1,2
           b(i,j)=((minidx(2)+(j-1)*(boxidx(2)-0.5)*2)*ny)+(minidx(1)+(i-1)*(2*(boxidx(1)-0.5)))
-      end do
-      end do
+      enddo
+      enddo
 
       do i=1,2
       do j=1,2
           boxdist(i,j)=dist(mod(b(i,j),ny),b(i,j)/ny)
-      end do
-      end do
+      enddo
+      enddo
 
       bw(:,:)=1./boxdist(:,:)
 !      bw(:,:)=(((1.-boxdist(:,:))/(1.1*maxval(boxdist)))**2)/((boxdist(:,:)/(1.1*maxval(boxdist)))**2)
       bw=bw/sum(bw)
       b(:,:)=b(:,:)-1
-    end if
+    endif
 
   end subroutine get_enclosing_grid_box
 
 
+!------------------------------------------------------------------------
+!>
+
 
   subroutine get_enclosing_grid_box_lonlat(lon,lat,p,n,nx,ny,b,bw)
-    
+
     integer, intent(in)  :: n,nx,ny
     real(r8),intent(in)  :: p(1:2),lon(1:n),lat(1:n)
     integer, intent(out) :: b(1:2,1:2)
@@ -1398,12 +1560,12 @@ contains
     do i=2,nx+1
       work(i,   1,1:2)=work(i,   2,1:2)-(work(i, 3,1:2)-work(i,   2,1:2))
       work(i,ny+2,1:2)=work(i,ny+1,1:2)-(work(i,ny,1:2)-work(i,ny+1,1:2))
-    end do
+    enddo
 
     do j=2,ny+1
       work(   1,j,1:2)=work(   2,j,1:2)-(work( 3,j,1:2)-work(   2,j,1:2))
       work(nx+2,j,1:2)=work(nx+1,j,1:2)-(work(nx,j,1:2)-work(nx+1,j,1:2))
-    end do
+    enddo
 
     work(   1,   1,1:2) = work(   2,   2,1:2) - 0.5_r8*(sqrt2*(work(   2,   2,1:2)-work(   1,   2,1:2))+sqrt2*(work(   2,   2,1:2)-work(   2,   1,1:2)))
     work(   1,ny+2,1:2) = work(   2,ny+1,1:2) - 0.5_r8*(sqrt2*(work(   2,ny+1,1:2)-work(   1,ny+1,1:2))+sqrt2*(work(   2,ny+1,1:2)-work(   2,ny+2,1:2)))
@@ -1414,8 +1576,8 @@ contains
     do j=1,ny+2
 !      dist(i,j)=sqrt(sum((work(i,j,:)-p(:))**2))
        dist(i,j) = 6173.0_r8*acos(cos(work(i,j,2)-pw(2))-cos(work(i,j,2))*cos(pw(2))*(1-cos(work(i,j,1)-pw(1))))
-    end do
-    end do
+    enddo
+    enddo
 
     minidx(:)=minloc(dist)
 
@@ -1424,10 +1586,10 @@ contains
     if (minidx(1)==1 .or. minidx(1)==(nx+2) .or. minidx(2)==1 .or. minidx(2)==(ny+2)) then
       b(:,:)=-1
       return
-    end if
+    endif
 
 !   open(21,file='/daten02/jkeller/testbox.bin',form='unformatted')
-!   iunit = open_file('testbox.bin',form='unformatted',action='write') 
+!   iunit = open_file('testbox.bin',form='unformatted',action='write')
 !   write(iunit) nx
 !   write(iunit) ny
 
@@ -1440,8 +1602,8 @@ contains
 !                 (minidx(2)+j),minidx(1)+i-1,&
 !                 (minidx(2)+j),minidx(1)+i
 !       write(iunit) boxdist(i+1,j+1)
-    end do
-    end do 
+    enddo
+    enddo
 
     boxidx=minloc(boxdist)-1
 
@@ -1456,41 +1618,45 @@ contains
       do j=1,2
           bx(i,j)=minidx(1)+(i-1)*(2*(boxidx(1)-0.5_r8))
           by(i,j)=minidx(2)+(j-1)*(2*(boxidx(2)-0.5_r8))
-      end do
-      end do
+      enddo
+      enddo
 
       do i=1,2
       do j=1,2
           boxdist(i,j)=dist(bx(i,j),by(i,j))
-      end do
-      end do
+      enddo
+      enddo
 
       bw(:,:)=1.0_r8/boxdist(:,:)
       bw=bw/sum(bw)
       bx=bx-1
       by=by-1
       b(:,:)=(by-1)*nx+bx
-    end if
+    endif
 
     return
 
   end subroutine get_enclosing_grid_box_lonlat
 
 
+!------------------------------------------------------------------------
+!>
+
+
   subroutine bilinear_interpolation(bv,blo,bla,p,v)
 
     ! Passed variables
-    
+
     real(r8),intent(in)  :: bv(2,2),blo(2,2),bla(2,2)
     real(r8),intent(in)  :: p(3)
     real(r8),intent(out) :: v
-    
+
     ! Local storage
-    
+
     real(r8)             :: x1,lo1,la1
     real(r8)             :: x2,lo2,la2
     real(r8)             :: d1,d2,d
-    
+
 !    write(*,'(3(F8.5,1X))') bv(1,1),blo(1,1),bla(1,1)
 !    write(*,'(3(F8.5,1X))') bv(2,1),blo(2,1),bla(2,1)
 
@@ -1516,6 +1682,9 @@ contains
 
   end subroutine bilinear_interpolation
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine linear_interpolation(lop,lap,x1,lo1,la1,x2,lo2,la2,x,lo,la)
@@ -1550,7 +1719,7 @@ contains
       d1=sqrt((mylo1-lo)**2+(la1-la)**2)
       d2=sqrt((mylo2-lo)**2+(la2-la)**2)
       d =sqrt((mylo1-mylo2)**2+(la1-la2)**2)
-    end if
+    endif
 
     if (lo < 0.0_r8) lo=lo+360.0_r8
 
@@ -1562,6 +1731,9 @@ contains
 
   end subroutine linear_interpolation
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine get_vertical_boundaries(hb,hw,otype,vcs,p,b,w,istatus)
@@ -1583,7 +1755,7 @@ contains
          (nint(vcs) == VERTISSCALEHEIGHT) ) then
       istatus=19
       return
-    end if
+    endif
 
 ! TJH    write(*,*)'non_state_data%pfl min max ',minval(non_state_data%pfl),maxval(non_state_data%pfl)
 ! TJH    write(*,*)' mean is ',sum(non_state_data%pfl)/(665.0_r8*657.0_r8*40.0_r8)
@@ -1601,7 +1773,7 @@ contains
 ! TJH    write(*,*)'x  is ',x1,x2,x3,x4
 ! TJH    write(*,*)'y  is ',y1,y2,y3,y4
 ! TJH    write(*,*)'hw is ',hw
-    
+
     if (otype .ne. KIND_VERTICAL_VELOCITY) then
       ! The variable exists on the 'full' levels
       nlevel=non_state_data%nfl
@@ -1638,30 +1810,30 @@ contains
              hw(2,1)*non_state_data%phl(x2,y2,:)+&
              hw(1,2)*non_state_data%phl(x3,y3,:)+&
              hw(2,2)*non_state_data%phl(x4,y4,:)
-    end if
+    endif
 
     u = -1.0_r8
     l = -1.0_r8
 
     do k=1,nlevel-1
 
-      ! Find the bounding levels for the respective coordinate system 
+      ! Find the bounding levels for the respective coordinate system
       if (nint(vcs) == VERTISLEVEL) then
         u=klevel(k+1)
         l=klevel(k)
-      end if
+      endif
       if (nint(vcs) == VERTISPRESSURE) then
       ! write(*,*)' vert is pressure '
       ! write(*,*)'plevel is ',plevel
         u=plevel(k+1)
         l=plevel(k)
-      end if
+      endif
       if (nint(vcs) == VERTISHEIGHT) then
       ! write(*,*)' vert is height '
       ! write(*,*)'hlevel is ',hlevel
         u=hlevel(k+1)
         l=hlevel(k)
-      end if
+      endif
 
 ! TJH write(*,*)'u p l',u,p,l
 
@@ -1671,14 +1843,17 @@ contains
         w(1)=1.0_r8-(p-l)/(u-l)
         w(2)=1.0_r8-(u-p)/(u-l)
         return
-      end if
+      endif
 
-    end do
+    enddo
 
     istatus=16 ! out of domain
     return
   end subroutine get_vertical_boundaries
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine sv_to_field_2d(f,x,v)
@@ -1698,6 +1873,9 @@ contains
   end subroutine sv_to_field_2d
 
 
+!------------------------------------------------------------------------
+!>
+
 
   subroutine sv_to_field_3d(f,x,v)
 
@@ -1711,17 +1889,22 @@ contains
       is=v%state_vector_sindex(iz)
       ie=is+v%nx*v%ny-1
       f(:,:,iz) = reshape(x(is:ie),(/ v%nx,v%ny /))
-    end do
-    
+    enddo
+
     return
 
   end subroutine sv_to_field_3d
 
 
+!------------------------------------------------------------------------
+!>
+
 
   function get_state_time() result (time)
     type(time_type) :: time
-    
+
+  call error_handler(E_ERR,'get_state_time','routine not written',source,revision,revdate)
+
     if ( .not. module_initialized ) call static_init_model
     time=cosmo_fc_time
 
@@ -1730,6 +1913,9 @@ contains
   end function get_state_time
 
 
+!------------------------------------------------------------------------
+!>
+
 
   function get_state_vector() result (sv)
 
@@ -1737,6 +1923,8 @@ contains
 
     integer              :: islab,ikind,nx,ny,sidx,eidx
     real(r8),allocatable :: mydata(:,:)
+
+  call error_handler(E_ERR,'get_state_vector','routine not written',source,revision,revdate)
 
     if ( .not. module_initialized ) call static_init_model
 
@@ -1749,14 +1937,14 @@ contains
           nx=state_vector_vars(ikind)%nx
           ny=state_vector_vars(ikind)%ny
           allocate(mydata(1:nx,1:ny))
-          mydata=get_data_from_binary(cosmo_filename,grib_header(islab),nx,ny)
+          mydata=get_data_from_binary(cosmo_restart_file,grib_header(islab),nx,ny)
           sidx=cosmo_slabs(islab)%dart_sindex
           eidx=cosmo_slabs(islab)%dart_eindex
           state_vector(sidx:eidx)=reshape(mydata,(/ (nx*ny) /))
           deallocate(mydata)
-        end if
-      end if
-    end do
+        endif
+      endif
+    enddo
 
     sv(:)=state_vector(:)
 
@@ -1764,6 +1952,9 @@ contains
 
   end function get_state_vector
 
+
+!------------------------------------------------------------------------
+!>
 
 
   subroutine write_grib_file(sv,nfile)
@@ -1785,6 +1976,7 @@ contains
 
     logical                       :: write_from_sv = .false.
 
+  call error_handler(E_ERR,'write_grib_file','routine not written',source,revision,revdate)
     if ( .not. module_initialized ) call static_init_model
 
     mylen=0
@@ -1795,7 +1987,7 @@ contains
     DO islab=1,nslabs
        recpos(islab)=grib_header(islab)%start_record
        bytpos(islab)=(grib_header(islab)%start_record-1)*4+1+grib_header(islab)%data_offset+4
-    END DO
+    enddo
     recpos(nslabs+1)=recpos(nslabs)+myrlen
     bytpos(nslabs+1)=bytpos(nslabs)+myblen
 
@@ -1805,7 +1997,7 @@ contains
 
     ! read all data from the input GRIB file
     gribunitin  = get_unit()
-    OPEN(gribunitin,FILE=TRIM(cosmo_filename),FORM='UNFORMATTED',ACCESS='DIRECT',RECL=record_length)
+    OPEN(gribunitin,FILE=TRIM(cosmo_restart_file),FORM='UNFORMATTED',ACCESS='DIRECT',RECL=record_length)
     irec=1
     lpos=1
 
@@ -1814,18 +2006,18 @@ contains
       irec=irec+1
       lpos=lpos+4
       bytearr(lpos:lpos+3)=bin4
-    end do
+    enddo
     griblen=lpos-1
 
     call close_file(gribunitin)
 
     ipos=bytpos(1)
 
-    if (verbose) write(*,*)'number of slabs is ',nslabs
+    if ( debug > 0 .and. do_output() ) write(*,*)'number of slabs is ',nslabs
 
     do islab=1,nslabs
 
-      if (verbose) write(*,'(A8,A,I4,A,I4,A,I12)')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", byte position is ",ipos
+      if ( debug > 0 .and. do_output() ) write(*,'(A8,A,I4,A,I4,A,I12)')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", byte position is ",ipos
 
       nx=cosmo_slabs(islab)%dims(1)
       ny=cosmo_slabs(islab)%dims(2)
@@ -1833,7 +2025,7 @@ contains
       idx=cosmo_slabs(islab)%dart_sindex
 
       ! check if variable is in state vector
-      
+
       write_from_sv = .false.
       if (idx >= 0) write_from_sv = .true.
 
@@ -1841,16 +2033,16 @@ contains
 
         ! if variable is in state vector
 
-        if (verbose) write(*,*)'         ... data is written to GRIB file from state vector'
+        if ( debug > 0 .and. do_output() ) write(*,*)'         ... data is written to GRIB file from state vector'
 
-        if (verbose) write(*,'(A8,A,I4,A,I4,A,2(1x,I12))')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", i1/i2 are ",idx,(idx+nx*ny-1)
+        if ( debug > 0 .and. do_output() ) write(*,'(A8,A,I4,A,I4,A,2(1x,I12))')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", i1/i2 are ",idx,(idx+nx*ny-1)
 
         allocate(mydata(1:nx,1:ny))
         mydata(:,:)=reshape(sv(idx:(idx+nx*ny-1)),(/ nx,ny /))
 
         if (cosmo_slabs(islab)%dart_kind==KIND_PRESSURE_PERTURBATION) then
           mydata(:,:)=mydata(:,:)-non_state_data%p0fl(:,:,cosmo_slabs(islab)%ilevel)
-        end if
+        endif
 
         ref_value=minval(mydata)
         bin4(1:4)=from_float1(ref_value,cosmo_slabs(islab)%ref_value_char)
@@ -1866,11 +2058,11 @@ contains
         ! get the binary scale factor
         CALL byte_to_word_signed(bytearr(bpos+4:bpos+5),ibsf,2)
         bsf=FLOAT(ibsf)
-        
+
         ! get the decimal scale factor
         CALL byte_to_word_signed(grib_header(islab)%pds(27:28),idsf,2)
         dsf=FLOAT(idsf)
-        
+
         ! allocate a temporal array to save the binary data values
         allocate(tmparr((nx*ny*2)))
         lpos=1
@@ -1879,30 +2071,30 @@ contains
           dval=int((mydata(ix,iy)-ref_value)*((10.**dsf)/(2.**bsf)))
           tmparr(lpos:lpos+1)=word_to_byte(dval)
           lpos=lpos+2
-        END DO
-        END DO
+        enddo
+        enddo
 
         deallocate(mydata)
 
         ! overwrite the old with new data
         bytearr(bpos+11:(bpos+nx*ny*2))=tmparr(1:(nx*ny*2))
-         
+
         deallocate(tmparr)
-       
+
         ipos=bytpos(islab+1)
 
       else
 
-        if (verbose) write(*,*)'         ... data is copied from old grib file'
-        
-        ! if variable is not in state vector then skip this slab
-        
-        ipos=bytpos(islab+1)
-                
-      end if
+        if ( debug > 0 .and. do_output() ) write(*,*)'         ... data is copied from old grib file'
 
-    END DO
-    
+        ! if variable is not in state vector then skip this slab
+
+        ipos=bytpos(islab+1)
+
+      endif
+
+    enddo
+
     ! write the new GRIB file
     gribunitout = get_unit()
     OPEN(gribunitout,FILE=TRIM(nfile),FORM='UNFORMATTED',ACCESS='stream')
@@ -1915,45 +2107,199 @@ contains
   end subroutine write_grib_file
 
 
-  function get_cosmo_filename()
-    character(len=256) :: get_cosmo_filename
-    character(len=256) :: lj_filename
-    
-    lj_filename        = adjustl(cosmo_filename)
-    get_cosmo_filename = trim(lj_filename)
-    
-  end function get_cosmo_filename
-  
-  
+!------------------------------------------------------------------------
+!>
+
+
+function get_cosmo_filename(filetype)
+character(len=*), optional, intent(in) :: filetype
+character(len=256) :: get_cosmo_filename
+character(len=256) :: lj_filename
+
+call error_handler(E_ERR,'get_cosmo_filename','routine not written',source,revision,revdate)
+
+lj_filename = adjustl(cosmo_restart_file)
+
+if (present(filetype)) then
+   if (trim(filetype) == 'netcdf') then
+      lj_filename = adjustl(cosmo_netcdf_file)
+   endif
+endif
+
+get_cosmo_filename = trim(lj_filename)
+
+end function get_cosmo_filename
+
+
+!------------------------------------------------------------------------
+!>
+
+
   subroutine write_state_times(iunit, statetime, advancetime)
     integer,         intent(in) :: iunit
     type(time_type), intent(in) :: statetime, advancetime
-    
-    character(len=32) :: timestring 
+
+    character(len=32) :: timestring
     integer           :: iyear, imonth, iday, ihour, imin, isec
     integer           :: ndays, nhours, nmins, nsecs
     type(time_type)   :: interval
-    
+
+  call error_handler(E_ERR,'write_state_times','routine not written',source,revision,revdate)
+
     call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
     write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
     write(iunit, "(A)") trim(timestring)
-    
+
     call get_date(advancetime, iyear, imonth, iday, ihour, imin, isec)
     write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
     write(iunit, "(A)") trim(timestring)
-    
+
     interval = advancetime - statetime
     call get_time(interval, nsecs, ndays)
     nhours = nsecs / (60*60)
     nsecs  = nsecs - (nhours * 60*60)
     nmins  = nsecs / 60
     nsecs  = nsecs - (nmins * 60)
-    
+
     write(timestring, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
     write(iunit, "(A)") trim(timestring)
-    
+
   end subroutine write_state_times
-  
-  
-  
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine get_cosmo_gridinfo(filename)
+
+character(len=*), intent(in) :: filename
+
+! Our little test case had these dimensions - only the names are important
+!       time = UNLIMITED ; // (1 currently)
+!       bnds = 2 ;
+!       rlon = 30 ;
+!       rlat = 20 ;
+!       srlon = 30 ;
+!       srlat = 20 ;
+!       level = 50 ;
+!       level1 = 51 ;
+!       soil = 7 ;
+!       soil1 = 8 ;
+
+integer :: ncid, io, dimid
+
+io = nf90_open(filename, NF90_NOWRITE, ncid)
+call nc_check(io, 'get_cosmo_gridinfo','open "'//trim(filename)//'"')
+
+write(string1,*) 'time: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'time', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=ntime)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'bnds: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'bnds', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nbnds)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'rlon: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'rlon', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nrlon)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'rlat: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'rlat', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nrlat)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'srlon: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'srlon', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nsrlon)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'srlat: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'srlat', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nsrlat)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'level: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'level', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nlevel)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'level1: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'level1', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nlevel1)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'soil: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'soil', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nsoil)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+write(string1,*) 'soil1: '//trim(filename)
+io = nf90_inq_dimid(ncid, 'soil1', dimid)
+call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+io = nf90_inquire_dimension(ncid, dimid, len=nsoil1)
+call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+
+call nc_check(nf90_close(ncid),'get_cosmo_gridinfo','close "'//trim(filename)//'"' )
+
+if ( debug > 5 .and. do_output() ) then
+
+   write(string1,*)'time   has dimension ',ntime
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'bnds   has dimension ',nbnds
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'rlon   has dimension ',nrlon
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'rlat   has dimension ',nrlat
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'srlon  has dimension ',nsrlon
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'srlat  has dimension ',nsrlat
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'level  has dimension ',nlevel
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'level1 has dimension ',nlevel1
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'soil   has dimension ',nsoil
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+   write(string1,*)'soil1  has dimension ',nsoil1
+   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+
+endif
+
+end subroutine get_cosmo_gridinfo
+
+
+!------------------------------------------------------------------------
+!>
+
+
 end module model_mod
+
+! <next few lines under version control, do not edit>
+! $URL:
+! $Id:
+! $Revision: $
+! $Date:
+
