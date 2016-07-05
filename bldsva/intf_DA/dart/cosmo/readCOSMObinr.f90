@@ -29,27 +29,48 @@ IMPLICIT NONE
  INTEGER, PARAMETER       :: dp = SELECTED_REAL_KIND(12,307) 
  INTEGER, PARAMETER       :: wp = dp
 
- INTEGER (KIND=intgribf),  PARAMETER      :: &
-               npds  = 321_intgribf, & ! product definition section 
-               ngds  = 626_intgribf    ! grid description section 
+ INTEGER (KIND=intgribf),  PARAMETER      ::   &
+               npds  = 321_intgribf, & ! dimension of product definition section 
+               ngds  = 626_intgribf    ! dimension of grid description section 
 
  INTEGER (KIND=iintegers), PARAMETER       ::  &
-               idim  = 30, &
-               jdim  = 20, &
-               kdim  = 50
- INTEGER (KIND=iintegers) :: nudat, izerr,iz_countl 
+               idim  = 30, &           ! dimesion of longitude
+               jdim  = 20, &           ! dimension of latitutde
+               kdim  = 50              ! dimension of vertical co-ordinate
 
- REAL(KIND=wp)            :: rbuf(idim*jdim)
- INTEGER(KIND=intgribf)   :: ipdsbuf(npds), igdsbuf(ngds)
+ INTEGER (KIND=iintegers)                  ::  &
+               nudat,      &           ! unit number
+               izerr,      &           ! error status
+               ivar,       &           ! variable reference number based on iver
+               iver,       &           ! version number of GRIB1 indicator table
+               iz_countl               ! counter for binary data
+
+ REAL(KIND=wp)                             ::  &
+               rbuf(idim*jdim),  &     ! data to be read
+               psm0,             &     ! initial value for mean surface pressure ps
+               dsem0,            &     ! initial value for mean dry static energy
+               msem0,            &     ! initial value for mean moist static energy
+               kem0,             &     ! initial value for mean kinetic energy
+               qcm0,             &     ! initial value for mean cloudwater content
+               refatm_p0sl,      &     ! constant reference pressure on sea-level
+               refatm_t0sl,      &     ! constant reference temperature on sea-level
+               refatm_dt0lp,     &     ! d (t0) / d (ln p0)
+               refatm_delta_t,   &     ! temperature difference between sea level and stratosphere (for irefatm=2)
+               refatm_h_scal,    &     ! scale height (for irefatm=2)
+               refatm_bvref,     &     ! constant Brund-Vaisala-frequency for irefatm=3
+               vcoord_vcflat,    &     ! coordinate where levels become flat
+               zvc_params(kdim+1)      ! vertical co-ordinate ?
+
  
- REAL(KIND=wp)            :: psm0, dsem0, msem0, kem0, qcm0
- INTEGER (KIND=iintegers) :: ntke
- INTEGER (KIND=iintegers) :: izvctype_read
- REAL(KIND=wp)            :: refatm_p0sl,   refatm_t0sl,   &
-                             refatm_dt0lp, refatm_delta_t, &
-                             refatm_h_scal, refatm_bvref,  &
-                             vcoord_vcflat, zvc_params(kdim+1)
- CHARACTER (LEN=*), PARAMETER       ::  &
+ INTEGER(KIND=intgribf)                    ::  &
+               ipdsbuf(npds),    &     ! pds: product definition section
+               igdsbuf(ngds)           ! gds: grid definition section
+ 
+ INTEGER (KIND=iintegers)                  ::  &
+               ntke,             &     ! time level for TKE
+               izvctype_read           ! check vertical coordinate type in restarts
+
+ CHARACTER (LEN=*), PARAMETER               ::  &
       datname = "/Users/pshrestha/work/ncl_current/DAtool/lrff00030000o"
 
 !------------------------------------------------------------------------------
@@ -59,7 +80,7 @@ IMPLICIT NONE
 !Section 1: INITIALIZE
 !------------------------------------------------------------------------------
  
- iz_countl = 0
+ iz_countl = 1 
  nudat  = 100
 
 !------------------------------------------------------------------------------
@@ -95,7 +116,10 @@ IMPLICIT NONE
 
    READ (nudat, IOSTAT=izerr) ipdsbuf, igdsbuf, rbuf
 
-   WRITE (*,*) iz_countl, igdsbuf(4), ipdsbuf(8), MINVAL(rbuf), MAXVAL(rbuf)
+   iver = ipdsbuf(2)
+   ivar = ipdsbuf(7)
+
+   WRITE (*,*) iver, ivar, MINVAL(rbuf), MAXVAL(rbuf)
 
    IF (izerr < 0) THEN
      WRITE (*,*) '       EOF REACHED'
