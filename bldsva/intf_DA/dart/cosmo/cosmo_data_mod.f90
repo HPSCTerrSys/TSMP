@@ -128,18 +128,22 @@ public :: cosmo_meta, &
           model_dims, &
           record_length
 
+!-----------------------------------------------------------------------
 CONTAINS
+!-----------------------------------------------------------------------
+
 
   SUBROUTINE get_cosmo_info(filename,v,h,header,allowed,tf)
 
     ! get_cosmo_info_and_data calls subroutines to read the data, extract the desired information
     ! and put the data into the state vector
 
-    CHARACTER(len=256),                INTENT(in)  :: filename
-    LOGICAL,                           INTENT(in)  :: allowed(:)
-    TYPE(cosmo_meta),ALLOCATABLE,      INTENT(out) :: v(:)
-    TYPE(cosmo_hcoord),                INTENT(out) :: h(3)
-    TYPE(grib_header_type),ALLOCATABLE,INTENT(out) :: header(:)
+    character(len=*),                    intent(in)  :: filename
+    type(cosmo_meta), allocatable,       intent(out) :: v(:)
+    type(cosmo_hcoord),                  intent(out) :: h(3)
+    type(grib_header_type), allocatable, intent(out) :: header(:)
+    logical,                             intent(in)  :: allowed(:)
+    type(time_type),                     intent(out) :: tf
 
 !   integer(kind=1),ALLOCATABLE,INTENT(out)  :: bdata(:)
 !   integer,ALLOCATABLE,INTENT(out)          :: bytepos(:,:) ! byte positions for  (1,:) beginning of GRIB record
@@ -149,7 +153,6 @@ CONTAINS
 !   integer,ALLOCATABLE,INTENT(out)          :: bytelen(:,:) ! byte length for the (2,:) PDS section
                                                              !                     (3,:) GDS section
                                                              !                     (4,:) data section
-    TYPE(time_type),INTENT(out)              :: tf
 
     integer                                  :: nvar
 

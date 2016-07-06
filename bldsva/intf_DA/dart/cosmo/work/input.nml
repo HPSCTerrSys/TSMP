@@ -158,6 +158,7 @@
 #    'NO_COPY_BACK' => do NOT update the variable in the restart file
 #    All these variables WILL be updated INTERNALLY IN DART.
 #    Only variables marked 'restart', 'UPDATE' will be modified for CLM.
+# since we read from netCDF and write to a binary, we need a lot of information, sorry.
 
 &model_nml
    cosmo_restart_file           = "../data/lrff00030000o"
@@ -167,29 +168,28 @@
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.1
    output_1D_state_vector       = .false.
-   model_dims                   = 665, 657, 40
-   record_length                = 1
    debug                        = 10
-   variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
-               '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
-               '2',  '40', 'W',  'KIND_VERTICAL_VELOCITY',  'NA' , 'NA' , 'UPDATE',
-               '2',  '11', 'T',  'KIND_TEMPERATURE',        '0.0', 'NA' , 'UPDATE',
-               '2',  '26', 'PP',  'KIND_PRESSURE_PERTURBATIONS',           'NA' , 'NA' , 'UPDATE',
-               '2',  '51', 'QV', 'KIND_SPECIFIC_HUMIDITY',  '0.0', 'NA' , 'UPDATE',
-             '201', '153', 'QC', 'KIND_CLOUD_LIQUID_WATER', '0.0', 'NA' , 'UPDATE',
-             '201', '154', 'QI', 'KIND_CLOUD_ICE',          '0.0', 'NA' , 'UPDATE',
+   variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
+               '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
+               '2',  '40', 'W',  'KIND_VERTICAL_VELOCITY',      'NA' , 'NA' , 'UPDATE',
+               '2',  '11', 'T',  'KIND_TEMPERATURE',            '0.0', 'NA' , 'UPDATE',
+             '201', '139', 'PP', 'KIND_PRESSURE_PERTURBATION',  'NA' , 'NA' , 'UPDATE',
+               '2',  '51', 'QV', 'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'UPDATE',
+             '201',  '31', 'QC', 'KIND_CLOUD_LIQUID_WATER',     '0.0', 'NA' , 'UPDATE',
+             '201',  '33', 'QI', 'KIND_CLOUD_ICE',              '0.0', 'NA' , 'UPDATE',
   /
 
-# In grib table 2
-GRIB_TABLE VALUE   PARAMETER                       UNITS   ABBREV.
-2          33      u-component of wind             m/s     UGRD
-2          34      v-component of wind             m/s     VGRD
-2          1       Pressure                        Pa      PRES    (looks like surface pressure to me)
-2          40      Vertical velocity (geometric)   m/s     DZDT
-2          51      Specific humidity               kg/kg   SPFH
-201       153      Cloud Mixing Ratio              kg/kg   CLWMR
-
-
+# This little table is supposed to help decode the grid codes and variables
+# This should not be the definitive list.
+(slab) GRIB_TABLE VALUE   PARAMETER                                   UNITS   ABBREV.
+(  10)     2         33   u-component of wind                         m/s     UGRD    (nlevel  levels)
+(  60)     2         34   v-component of wind                         m/s     VGRD    (nlevel  levels)
+( 110)     2         40   Vertical velocity (geometric)               m/s     DZDT    (nlevel1 levels)
+( 161)     2         11   Temperature                                 K       TMP     (nlevel  levels)
+( 211)   201        139   deviation of pressure from reference value  Pa      PP      (nlevel  levels)
+(1457)     2         51   Specific humidity                           kg/kg   Q       (nlevel  levels) LEVTYPE 110
+(1507)   201         31   Cloud Mixing Ratio                          kg/kg   QC      (nlevel  levels)
+(1557)   201         33   specific cloud ice content                  kg/kg   QI      (nlevel  levels)
 
 
 &cosmo_to_dart_nml

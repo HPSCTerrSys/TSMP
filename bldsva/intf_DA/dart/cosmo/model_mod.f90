@@ -7,12 +7,10 @@ module model_mod
 ! This module provides routines to work with COSMO data
 ! files in the DART framework
 !
-! Author: Jan D. Keller
+! Based on a version by : Jan D. Keller 2011-09-15
 !         Meteorological Institute, University of Bonn, Germany
-!         2011-09-15
-!
 
-use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,          &
+use        types_mod, only : i4, r4, r8, digits12, SECPERDAY, MISSING_R8,          &
                              rad2deg, deg2rad, PI, obstypelength
 
 use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
@@ -130,33 +128,41 @@ type dart_variable_info
    integer,allocatable  :: cosmo_state_index(:)   ! index in cosmo state of every vertical level
 end type dart_variable_info
 
+! Codes for restricting the range of a variable
+integer, parameter :: BOUNDED_NONE  = 0 ! ... unlimited range
+integer, parameter :: BOUNDED_BELOW = 1 ! ... minimum, but no maximum
+integer, parameter :: BOUNDED_ABOVE = 2 ! ... maximum, but no minimum
+integer, parameter :: BOUNDED_BOTH  = 3 ! ... minimum and maximum
+
 integer :: nfields
 integer, parameter :: max_state_variables = 80
-integer, parameter :: num_state_table_columns = 6
+integer, parameter :: num_state_table_columns = 7
 character(len=obstypelength) :: variable_table(max_state_variables, num_state_table_columns)
 
 ! Codes for interpreting the columns of the variable_table
-integer, parameter :: VT_GRIBVERSIONINDX = 1 ! ... variable name
-integer, parameter :: VT_VARNAMEINDX     = 2 ! ... variable name
-integer, parameter :: VT_KINDINDX        = 3 ! ... DART kind
-integer, parameter :: VT_MINVALINDX      = 4 ! ... minimum value if any
-integer, parameter :: VT_MAXVALINDX      = 5 ! ... maximum value if any
-integer, parameter :: VT_STATEINDX       = 6 ! ... update (state) or not
+integer, parameter :: VT_GRIBVERSIONINDX = 1 ! ... the version of the grib table being used
+integer, parameter :: VT_GRIBVARINDX     = 2 ! ... variable name
+integer, parameter :: VT_VARNAMEINDX     = 3 ! ... netcdf variable name
+integer, parameter :: VT_KINDINDX        = 4 ! ... DART kind
+integer, parameter :: VT_MINVALINDX      = 5 ! ... minimum value if any
+integer, parameter :: VT_MAXVALINDX      = 6 ! ... maximum value if any
+integer, parameter :: VT_STATEINDX       = 7 ! ... update (state) or not
 
 ! Everything needed to describe a variable
+!>@ TODO FIXME remove the unused netcdf bits ... we're working with binary only
 
 type progvartype
    private
    character(len=NF90_MAX_NAME) :: varname
    character(len=NF90_MAX_NAME) :: long_name
    character(len=NF90_MAX_NAME) :: units
-   character(len=obstypelength), dimension(NF90_MAX_VAR_DIMS) :: dimnames
-   integer, dimension(NF90_MAX_VAR_DIMS) :: dimlens
-   integer  :: gribtable
-   integer  :: gribvariablenumber
+   character(len=obstypelength) :: dimnames(NF90_MAX_VAR_DIMS)
+   integer  :: tableID     ! grib table version
+   integer  :: variableID  ! variable ID in grib table
+   integer  :: levtypeID   ! the kind of vertical coordinate system
+   integer  :: dimlens(NF90_MAX_VAR_DIMS)
    integer  :: numdims
    integer  :: maxlevels
-   integer  :: xtype
    integer  :: varsize     ! prod(dimlens(1:numdims))
    integer  :: index1      ! location in dart state vector of first occurrence
    integer  :: indexN      ! location in dart state vector of last  occurrence
@@ -164,13 +170,7 @@ type progvartype
    integer  :: rangeRestricted
    real(r8) :: minvalue
    real(r8) :: maxvalue
-   integer  :: spvalINT, missingINT
-   real(r4) :: spvalR4, missingR4
-   real(r8) :: spvalR8, missingR8
-   logical  :: has_fill_value      ! intended for future use
-   logical  :: has_missing_value   ! intended for future use
    character(len=paramname_length) :: kind_string
-   character(len=512) :: origin    ! the file it came from
    logical  :: update
 end type progvartype
 
@@ -229,9 +229,24 @@ end type verticalobject
 
 type(verticalobject) :: vcoord
 
+! track which variables to update
+! As the binary file gets read, we need to compare the 'slab' to see if
+! it is a slab we want to update.
+!>@ TODO FIXME after we populate progvar, ordered_update_list needs
+!> to be populated with the order to stride through progvar to
+!> write to the output file.
 
-integer,parameter              :: n_state_vector_vars=8
-integer,parameter              :: n_non_state_vars=1
+type update_items
+   private
+   integer :: tableID
+   integer :: variableID
+   integer :: levtype
+   integer :: nlevels
+end type update_items
+type(update_items) :: ordered_update_list(max_state_variables)
+
+integer, parameter             :: n_state_vector_vars=8
+integer, parameter             :: n_non_state_vars=1
 
 type(cosmo_meta),allocatable   :: cosmo_slabs(:)
 type(cosmo_hcoord)             :: cosmo_lonlat(3) ! 3 is for the stagger
@@ -342,19 +357,18 @@ call get_cosmo_grid(cosmo_netcdf_file)
 ! rectify the user input for the variables to include in the DART state vector
 call parse_variable_table(variables, nfields, variable_table)
 
-call error_handler(E_ERR,'static_init_model','routine not finished',source,revision,revdate)
-
-index1 = 1
-indexN = 0
-do ivar = 1,nfields
-
-!   shapes and such has to come from someplace ... what happens in get_cosmo_info
+! do ivar = 1,nfields
+do ivar = 1,1
 !   call set_variable_attributes(ivar)
-
+    call set_variable_binary_properties(ivar)
+    if (debug > 5 .and. do_output()) call progvar_summary()
 enddo
+
+call error_handler(E_ERR,'static_init_model','routine not finished',source,revision,revdate)
 
 call get_cosmo_info(cosmo_restart_file, cosmo_slabs, cosmo_lonlat, grib_header, &
                       is_allowed_state_vector_var, cosmo_fc_time)
+
 
 call set_allowed_state_vector_vars()
 
@@ -2363,7 +2377,7 @@ end subroutine get_cosmo_grid
 
 
 !------------------------------------------------------------------------
-!> all grid variables in the netCDF files are 2D 
+!> all grid variables in the netCDF files are 2D
 !> this does not handle scale, offset, missing_value, _FillValue etc.
 
 subroutine get_grid_var(ncid,varstring,expected_dim1,expected_dim2,filename)
@@ -2386,7 +2400,7 @@ call nc_check(nf90_inq_varid(ncid, trim(varstring), VarID), &
 call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
          'get_grid_var', 'inquire_variable '//trim(string3))
 
-!> @TODO more informative error message 
+!> @TODO more informative error message
 if (ndims /= 2) then
    call error_handler(E_ERR,'get_grid_var','wrong shape for '//string3, &
               source, revision, revdate)
@@ -2414,34 +2428,34 @@ endif
 select case (trim(varstring))
    case ("lon")
       allocate( lon(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, lon) 
+      io = nf90_get_var(ncid, VarID, lon)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case ("lat")
       allocate( lat(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, lat) 
+      io = nf90_get_var(ncid, VarID, lat)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case ("slonu")
       allocate( slonu(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, slonu) 
+      io = nf90_get_var(ncid, VarID, slonu)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case ("slatu")
       allocate( slatu(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, slatu) 
+      io = nf90_get_var(ncid, VarID, slatu)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case ("slonv")
       allocate( slonv(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, slonv) 
+      io = nf90_get_var(ncid, VarID, slonv)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case ("slatv")
       allocate( slatv(dimlens(1), dimlens(2)) )
-      io = nf90_get_var(ncid, VarID, slatv) 
+      io = nf90_get_var(ncid, VarID, slatv)
       call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
-      
+
    case default
       write(string1,*)'unsupported grid variable '
       call error_handler(E_ERR,'get_grid_var', string1, &
@@ -2471,7 +2485,7 @@ call nc_check(nf90_inq_varid(ncid, 'vcoord', VarID), &
 call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
          'get_vcoord', 'inquire_variable '//trim(string3))
 
-!> @TODO more informative error message 
+!> @TODO more informative error message
 if (ndims /= 1) then
    call error_handler(E_ERR,'get_vcoord','wrong shape for '//string3, &
               source, revision, revdate)
@@ -2488,7 +2502,7 @@ if (dimlens(1) .ne. nlevel1 ) then
 endif
 
 allocate( vcoord%level1(nlevel1) )
-io = nf90_get_var(ncid, VarID, vcoord%level1 ) 
+io = nf90_get_var(ncid, VarID, vcoord%level1 )
 call nc_check(io, 'get_vcoord', 'get_var '//trim(string3))
 
 io = nf90_get_att(ncid, VarID, 'long_name', vcoord%long_name)
@@ -2521,7 +2535,7 @@ call nc_check(io, 'get_vcoord', 'get_att delta_t '//trim(string3))
 io = nf90_get_att(ncid, VarID, 'h_scal', vcoord%h_scal)
 call nc_check(io, 'get_vcoord', 'get_att h_scal '//trim(string3))
 
-! Print a summary 
+! Print a summary
 if (debug > 5 .and. do_output()) then
    write(logfileunit,*)
    write(logfileunit,*)'vcoord long_name: ',trim(vcoord%long_name)
@@ -2573,13 +2587,14 @@ character(len=*), dimension(:),   intent(in)  :: state_variables
 integer,                          intent(out) :: ngood
 character(len=*), dimension(:,:), intent(out) :: table
 
-integer :: nrows, ncols, i, ivar
-character(len=NF90_MAX_NAME) :: gribtableversion ! column 1
-character(len=NF90_MAX_NAME) :: varname          ! column 2
-character(len=NF90_MAX_NAME) :: dartstr          ! column 3
-character(len=NF90_MAX_NAME) :: minvalstring     ! column 4
-character(len=NF90_MAX_NAME) :: maxvalstring     ! column 5
-character(len=NF90_MAX_NAME) :: state_or_aux     ! column 6
+integer :: nrows, ncols, ivar
+character(len=NF90_MAX_NAME) :: gribtableversion
+character(len=NF90_MAX_NAME) :: gribvar
+character(len=NF90_MAX_NAME) :: varname
+character(len=NF90_MAX_NAME) :: dartstr
+character(len=NF90_MAX_NAME) :: minvalstring
+character(len=NF90_MAX_NAME) :: maxvalstring
+character(len=NF90_MAX_NAME) :: state_or_aux
 
 nrows = size(table,1)
 ncols = size(table,2)
@@ -2589,32 +2604,34 @@ ncols = size(table,2)
 ! Determining which file to check is going to be more complicated.
 
 ngood = 0
-MyLoop : do i = 1, nrows
+MyLoop : do ivar = 1, nrows
 
-   gribtableversion = trim(state_variables(ncols*i - 5))
-   varname          = trim(state_variables(ncols*i - 4))
-   dartstr          = trim(state_variables(ncols*i - 3))
-   minvalstring     = trim(state_variables(ncols*i - 2))
-   maxvalstring     = trim(state_variables(ncols*i - 1))
-   state_or_aux     = trim(state_variables(ncols*i    ))
+   gribtableversion = trim(state_variables(ncols*ivar - 6))
+   gribvar          = trim(state_variables(ncols*ivar - 5))
+   varname          = trim(state_variables(ncols*ivar - 4))
+   dartstr          = trim(state_variables(ncols*ivar - 3))
+   minvalstring     = trim(state_variables(ncols*ivar - 2))
+   maxvalstring     = trim(state_variables(ncols*ivar - 1))
+   state_or_aux     = trim(state_variables(ncols*ivar    ))
 
    call to_upper(state_or_aux)
 
-   table(i,VT_GRIBVERSIONINDX) = trim(gribtableversion)
-   table(i,VT_VARNAMEINDX)     = trim(varname)
-   table(i,VT_KINDINDX)        = trim(dartstr)
-   table(i,VT_MINVALINDX)      = trim(minvalstring)
-   table(i,VT_MAXVALINDX)      = trim(maxvalstring)
-   table(i,VT_STATEINDX)       = trim(state_or_aux)
+   table(ivar,VT_GRIBVERSIONINDX) = trim(gribtableversion)
+   table(ivar,VT_GRIBVARINDX)     = trim(gribvar)
+   table(ivar,VT_VARNAMEINDX)     = trim(varname)
+   table(ivar,VT_KINDINDX)        = trim(dartstr)
+   table(ivar,VT_MINVALINDX)      = trim(minvalstring)
+   table(ivar,VT_MAXVALINDX)      = trim(maxvalstring)
+   table(ivar,VT_STATEINDX)       = trim(state_or_aux)
 
    ! If the first element is empty, we have found the end of the list.
-   if ( table(i,1) == ' ' ) exit MyLoop
+   if ( table(ivar,1) == ' ' ) exit MyLoop
 
    ! Any other condition is an error.
-   if ( any(table(i,:) == ' ') ) then
+   if ( any(table(ivar,:) == ' ') ) then
       string1 = 'input.nml &model_nml:variables not fully specified'
-      string2 = 'must be 6 entries per variable. Last known variable name is'
-      string3 = '['//trim(table(i,1))//'] ... (without the [], naturally)'
+      string2 = 'must be 7 entries per variable. Last known variable name is'
+      string3 = '['//trim(table(ivar,1))//'] ... (without the [], naturally)'
       call error_handler(E_ERR, 'parse_variable_table', string1, &
          source, revision, revdate, text2=string2, text3=string3)
    endif
@@ -2628,13 +2645,13 @@ MyLoop : do i = 1, nrows
 
    ! Record the contents of the DART state vector
 
-   if ((debug > 8) .and. do_output()) then
-      write(logfileunit,*)'variable ',i,' is ',trim(table(i,1)), ' ', trim(table(i,2)),' ', &
-                                               trim(table(i,3)), ' ', trim(table(i,4)),' ', &
-                                               trim(table(i,5)), ' ', trim(table(i,6))
-      write(     *     ,*)'variable ',i,' is ',trim(table(i,1)), ' ', trim(table(i,2)),' ', &
-                                               trim(table(i,3)), ' ', trim(table(i,4)),' ', &
-                                               trim(table(i,5)), ' ', trim(table(i,6))
+   if (debug > 8 .and. do_output()) then
+      write(logfileunit,*)'variable ',ivar,' is ',trim(table(ivar,1)), ' ', trim(table(ivar,2)),' ', &
+                                                  trim(table(ivar,3)), ' ', trim(table(ivar,4)),' ', &
+                                                  trim(table(ivar,5)), ' ', trim(table(ivar,6)),' ', trim(table(ivar,7))
+      write(     *     ,*)'variable ',ivar,' is ',trim(table(ivar,1)), ' ', trim(table(ivar,2)),' ', &
+                                                  trim(table(ivar,3)), ' ', trim(table(ivar,4)),' ', &
+                                                  trim(table(ivar,5)), ' ', trim(table(ivar,6)),' ', trim(table(ivar,7))
    endif
 
    ngood = ngood + 1
@@ -2649,10 +2666,338 @@ endif
 
 end subroutine parse_variable_table
 
-      
+
 !------------------------------------------------------------------------
 !>
 
+!> SetVariableAttributes() converts the information in the variable_table
+!> to the progvar structure for each variable.
+!> If the numerical limit does not apply, it is set to MISSING_R8, even if
+!> it is the maximum that does not apply.
+
+subroutine SetVariableAttributes(ivar)
+
+integer, intent(in) :: ivar
+
+integer  :: ios, ivalue
+real(r8) :: minvalue, maxvalue
+
+progvar(ivar)%varname     = trim(variable_table(ivar,VT_VARNAMEINDX))
+progvar(ivar)%kind_string = trim(variable_table(ivar,VT_KINDINDX))
+progvar(ivar)%dart_kind   = get_raw_obs_kind_index( progvar(ivar)%kind_string )
+progvar(ivar)%maxlevels   = 0
+progvar(ivar)%dimlens     = 0
+progvar(ivar)%dimnames    = ' '
+progvar(ivar)%rangeRestricted   = BOUNDED_NONE
+progvar(ivar)%minvalue          = MISSING_R8
+progvar(ivar)%maxvalue          = MISSING_R8
+progvar(ivar)%update            = .false.
+
+if (variable_table(ivar,VT_STATEINDX)  == 'UPDATE') progvar(ivar)%update = .true.
+
+! set the default values
+
+minvalue = MISSING_R8
+maxvalue = MISSING_R8
+progvar(ivar)%minvalue = MISSING_R8
+progvar(ivar)%maxvalue = MISSING_R8
+
+! If the character string can be interpreted as an r8, great.
+! If not, there is no value to be used.
+
+read(variable_table(ivar,VT_MINVALINDX),*,iostat=ios) minvalue
+if (ios == 0) progvar(ivar)%minvalue = minvalue
+
+read(variable_table(ivar,VT_MAXVALINDX),*,iostat=ios) maxvalue
+if (ios == 0) progvar(ivar)%maxvalue = maxvalue
+
+read(variable_table(ivar,VT_GRIBVERSIONINDX),*,iostat=ios) ivalue
+if (ios == 0) progvar(ivar)%tableID = ivalue
+
+read(variable_table(ivar,VT_GRIBVARINDX),*,iostat=ios) ivalue
+if (ios == 0) progvar(ivar)%variableID = ivalue
+
+! rangeRestricted == BOUNDED_NONE  == 0 ... unlimited range
+! rangeRestricted == BOUNDED_BELOW == 1 ... minimum, but no maximum
+! rangeRestricted == BOUNDED_ABOVE == 2 ... maximum, but no minimum
+! rangeRestricted == BOUNDED_BOTH  == 3 ... minimum and maximum
+
+if (   (progvar(ivar)%minvalue /= MISSING_R8) .and. &
+       (progvar(ivar)%maxvalue /= MISSING_R8) ) then
+   progvar(ivar)%rangeRestricted = BOUNDED_BOTH
+
+elseif (progvar(ivar)%maxvalue /= MISSING_R8) then
+   progvar(ivar)%rangeRestricted = BOUNDED_ABOVE
+
+elseif (progvar(ivar)%minvalue /= MISSING_R8) then
+   progvar(ivar)%rangeRestricted = BOUNDED_BELOW
+
+else
+   progvar(ivar)%rangeRestricted = BOUNDED_NONE
+
+endif
+
+! Check to make sure min is less than max if both are specified.
+
+if ( progvar(ivar)%rangeRestricted == BOUNDED_BOTH ) then
+   if (maxvalue < minvalue) then
+      write(string1,*)'&model_nml state_variable input error for ',trim(progvar(ivar)%varname)
+      write(string2,*)'minimum value (',minvalue,') must be less than '
+      write(string3,*)'maximum value (',maxvalue,')'
+      call error_handler(E_ERR,'SetVariableAttributes',string1, &
+         source,revision,revdate,text2=trim(string2),text3=trim(string3))
+   endif
+endif
+
+end subroutine SetVariableAttributes
+
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine set_variable_binary_properties(dartid)
+integer, intent(in) :: dartid
+
+! Table to decode the record contents of igdsbuf
+integer, parameter :: indx_numEW    =  5, &
+                      indx_numNS    =  6, &
+                      indx_startlat =  7, &
+                      indx_startlon =  8, &
+                      indx_endlat   = 10, &
+                      indx_endlon   = 11
+
+! Table to decode the record contents of ipdsbuf
+!> @TODO no seconds?
+integer, parameter :: indx_gribver   =   2, &
+                      indx_var       =   7, &
+                      indx_zlevtyp   =   8, &
+                      indx_zlevtop   =   9, &
+                      indx_zlevbot   =  10, &
+                      indx_year      =  11, &
+                      indx_mm        =  12, &
+                      indx_dd        =  13, &
+                      indx_hh        =  14, &
+                      indx_min       =  15, &
+                      indx_startstep =  17, &
+                      indx_endstep   =  18, &
+                      indx_nztri     =  19, &
+                      indx_cc        =  22
+
+integer, parameter :: NPDS  = 321   ! dimension of product definition section
+integer, parameter :: NGDS  = 626   ! dimension of grid description section
+
+integer(i4) :: ipdsbuf(NPDS)        ! pds: product definition section
+integer(i4) :: igdsbuf(NGDS)        ! gds: grid definition section
+
+integer(i4) :: nudat,      &        ! unit number
+               izerr,      &        ! error status
+               ivar,       &        ! variable reference number based on iver
+               iver,       &        ! version number of GRIB1 indicator table
+               iz_countl            ! counter for binary data
+
+real(r8) :: rbuf(nrlon*nrlat)       ! data to be read
+real(r8) :: zvc_params(nlevel1)     ! height levels
+
+real(r8) :: psm0,             &     ! initial value for mean surface pressure ps
+            dsem0,            &     ! initial value for mean dry static energy
+            msem0,            &     ! initial value for mean moist static energy
+            kem0,             &     ! initial value for mean kinetic energy
+            qcm0,             &     ! initial value for mean cloudwater content
+            refatm_p0sl,      &     ! constant reference pressure on sea-level
+            refatm_t0sl,      &     ! constant reference temperature on sea-level
+            refatm_dt0lp,     &     ! d (t0) / d (ln p0)
+            refatm_delta_t,   &     ! temperature difference between sea level and stratosphere (for irefatm=2)
+            refatm_h_scal,    &     ! scale height (for irefatm=2)
+            refatm_bvref,     &     ! constant Brund-Vaisala-frequency for irefatm=3
+            vcoord_vcflat           ! coordinate where levels become flat
+
+integer(i4) :: ntke,          &     ! time level for TKE
+               izvctype_read        ! check vertical coordinate type in restarts
+
+integer  :: fid, i, nx, ny, ilev, ilevp1, ilevtyp
+integer  :: icc, iyy, imm, idd, ihh, imin, iccyy
+integer  :: istartstep, iendstep, nztri
+real(r8) :: lat1, latN, lon1, lonN
+
+! variables that record what kind of variable is being read
+! must switch on change of variable 
+integer :: old_tableID, old_varID, old_izvctype
+
+!-----------------------------------------------------------------------
+
+fid = open_file(cosmo_restart_file, form='unformatted', action='read')
+
+read(fid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
+if (izerr /= 0) then
+   write(string1,*)'unable to read first record while searching for '//trim(progvar(dartid)%varname)
+   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+endif
+
+read(fid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
+                        refatm_dt0lp, vcoord_vcflat, zvc_params
+if (izerr /= 0) then
+   write(string1,*)'unable to read second record while searching for '//trim(progvar(dartid)%varname)
+   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+endif
+
+if     ( izvctype_read > 0 .and. izvctype_read <= 100 ) then
+   !write(*,*) "izvctype_read = ", izvctype_read
+   continue
+
+elseif ( (izvctype_read > 100) .and. (izvctype_read <= 200) ) then
+
+   read(fid, iostat=izerr) refatm_delta_t, refatm_h_scal
+   if (izerr /= 0) then
+      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_delta_t, refatm_h_scal"'
+      write(string2,*)'unable to read record while searching for '//trim(progvar(dartid)%varname)
+      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate, text2=string2)
+   endif
+
+elseif ( (izvctype_read > 200) .and. (izvctype_read <= 300) ) then
+
+   read(fid, iostat=izerr) refatm_bvref
+   if (izerr /= 0) then
+      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_bvref"'
+      write(string2,*)'unable to read record while searching for '//trim(progvar(dartid)%varname)
+      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate, text2=string2)
+   endif
+
+else
+   write(string1,*) 'izvctype_read is ',izvctype_read,' is unsupported.'
+   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+endif
+
+!------------------------------------------------------------------------------
+!Section 3: READ ALL RECORDS
+!------------------------------------------------------------------------------
+
+iz_countl    = 0
+old_tableID  = 0
+old_varID    = 0
+old_izvctype = 0
+
+read_loop: DO
+
+   read(fid, iostat=izerr) ipdsbuf, igdsbuf, rbuf
+
+   if (izerr < 0) then
+     exit read_loop
+   elseif (izerr > 0) then
+      write(string1,*) 'ERROR READING RESTART FILE around data record ',iz_countl
+      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+   endif
+
+   iz_countl = iz_countl + 1
+
+   ! Decode ipdsbuf
+
+   iver    = ipdsbuf(indx_gribver)
+   ivar    = ipdsbuf(indx_var)
+   ilevtyp = ipdsbuf(indx_zlevtyp)
+   ilev    = ipdsbuf(indx_zlevtop)
+   ilevp1  = ipdsbuf(indx_zlevbot)
+
+   icc     = ipdsbuf(indx_cc)-1
+   iyy     = ipdsbuf(indx_year)
+   iccyy   = iyy + icc*100
+   imm     = ipdsbuf(indx_mm)
+   idd     = ipdsbuf(indx_dd)
+   ihh     = ipdsbuf(indx_hh)
+   imin    = ipdsbuf(indx_min)
+
+   istartstep = ipdsbuf(indx_startstep)
+   iendstep   = ipdsbuf(indx_endstep)
+   nztri      = ipdsbuf(indx_nztri)
+
+   write(*,'(A,3x,i8,5(1x,i2),4(1x,i4))') 'time for iz_countl = ', &
+         iz_countl,icc,iyy,imm,idd,ihh,imin,nztri,istartstep,iendstep
+
+   ! Decode igdsbuf
+
+   nx   = igdsbuf(indx_numEW)
+   ny   = igdsbuf(indx_numNS)
+   lat1 = real(igdsbuf(indx_startlat),r8) * 0.001_r8
+   lon1 = real(igdsbuf(indx_startlon),r8) * 0.001_r8
+   latN = real(igdsbuf(indx_endlat  ),r8) * 0.001_r8
+   lonN = real(igdsbuf(indx_endlon  ),r8) * 0.001_r8
+
+   ! Since Fortran binary reads have no way to know if they fail or not
+   ! we are going to compare our input with the sizes encoded in the file.
+
+   if (nx .ne. nrlon .or. ny .ne. nrlat) then
+      write(string1,*) 'reading variable ',trim(progvar(dartid)%varname), ' from '//trim(cosmo_restart_file)
+      write(string2,*) '(file) nx /= nrlon ',nx,nrlon, ' or '
+      write(string3,*) '(file) ny /= nrlat ',ny,nrlat
+      call error_handler(E_ERR,'set_variable_binary_properties', string1, &
+                 source, revision, revdate, text2=string2, text3=string3)
+   endif
+
+   ! see if the slab we are reading defines the start of a new variable
+
+   if (old_tableID  .ne. iver .or. &
+       old_varID    .ne. ivar .or. &
+       old_izvctype .ne. ilevtyp) then
+      write (*,'(A,2x,8(1x,i4),2(1xf15.8))')'slab ',iz_countl, iver, ivar, nx, ny, &
+                ilev, ilevp1, ilevtyp, MINVAL(rbuf), MAXVAL(rbuf)
+      ! Check to see if the slab/variable/etc. is one we want
+      ! if so - count up the slabs, add to the variable size and keep moving
+   endif
+
+   old_tableID  = iver
+   old_varID    = ivar
+   old_izvctype = ilevtyp
+
+enddo read_loop
+
+close(fid, IOSTAT=izerr)
+if (izerr /= 0) then
+   write(string1,*) 'closing '//trim(cosmo_restart_file)//' while looking for ',trim(progvar(dartid)%varname)
+   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+endif
+
+end subroutine set_variable_binary_properties
+
+
+!------------------------------------------------------------------------
+!>
+
+subroutine progvar_summary
+
+integer :: ivar,i
+
+! only have 1 task write the report
+if ( .not. do_output() ) return
+
+do ivar = 1,nfields
+   write(*,*)
+   write(*,*)'variable ',ivar,' is ',trim(progvar(ivar)%varname)
+   write(*,*)'   long_name       ',  trim(progvar(ivar)%long_name)
+   write(*,*)'   units           ',  trim(progvar(ivar)%units)
+   write(*,*)'   tableID         ',       progvar(ivar)%tableID
+   write(*,*)'   variableID      ',       progvar(ivar)%variableID
+   write(*,*)'   levtypeID       ',       progvar(ivar)%levtypeID
+   write(*,*)'   maxlevels       ',       progvar(ivar)%maxlevels
+   write(*,*)'   varsize         ',       progvar(ivar)%varsize
+   write(*,*)'   index1          ',       progvar(ivar)%index1
+   write(*,*)'   indexN          ',       progvar(ivar)%indexN
+   write(*,*)'   dart_kind       ',       progvar(ivar)%dart_kind
+   write(*,*)'   rangeRestricted ',       progvar(ivar)%rangeRestricted
+   write(*,*)'   minvalue        ',       progvar(ivar)%minvalue
+   write(*,*)'   maxvalue        ',       progvar(ivar)%maxvalue
+   write(*,*)'   kind_string     ',trim(  progvar(ivar)%kind_string)
+   write(*,*)'   update          ',       progvar(ivar)%update
+   write(*,*)'   numdims         ',       progvar(ivar)%numdims
+   do i = 1,progvar(ivar)%numdims
+      write(*,*)'   dimension ',i,' has length ',progvar(ivar)%dimlens(i),' ',trim(progvar(ivar)%dimnames(i))
+   enddo
+enddo
+
+end subroutine progvar_summary
+
+!------------------------------------------------------------------------
+!>
 
 end module model_mod
 
