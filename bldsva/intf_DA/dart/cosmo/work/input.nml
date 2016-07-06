@@ -145,9 +145,10 @@
 # cosmo_filename = "~/cosmo_dart_test/test3.grb"
 # cosmo_filename = "/daten03/cosmonrw/cosmo/cosmoinput/in_2011-08-17-00/laf2011081700"
 
-# Each variable must have 6 entries.
+# Each variable must have 7 entries.
 # 1: grib table version used to encode/decode the COSMOS binary restart variables
 # 2: Character string defining grib-compatible variable names
+# 2: Character string defining netcdf variable names
 # 3: DART KIND for the variable
 # 4: minimum value - as a character string - if none, use 'NA'
 # 5: maximum value - as a character string - if none, use 'NA'
@@ -169,15 +170,26 @@
    model_dims                   = 665, 657, 40
    record_length                = 1
    debug                        = 10
-   variables = '2', 'U',      'KIND_U_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
-               '2', 'V',      'KIND_V_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
-               '2', 'W',      'KIND_VERTICAL_VELOCITY',  'NA' , 'NA' , 'UPDATE',
-               '2', 'T',      'KIND_TEMPERATURE',        '0.0', 'NA' , 'UPDATE',
-               '2', 'P',      'KIND_PRESSURE',           'NA' , 'NA' , 'UPDATE',
-               '2', 'Q',      'KIND_SPECIFIC_HUMIDITY',  '0.0', 'NA' , 'UPDATE',
-               '2', 'XXX',    'KIND_CLOUD_LIQUID_WATER', '0.0', 'NA' , 'UPDATE',
-               '2', 'YYY',    'KIND_CLOUD_ICE',          '0.0', 'NA' , 'UPDATE',
+   variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
+               '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',   'NA' , 'NA' , 'UPDATE',
+               '2',  '40', 'W',  'KIND_VERTICAL_VELOCITY',  'NA' , 'NA' , 'UPDATE',
+               '2',  '11', 'T',  'KIND_TEMPERATURE',        '0.0', 'NA' , 'UPDATE',
+               '2',  '26', 'PP',  'KIND_PRESSURE_PERTURBATIONS',           'NA' , 'NA' , 'UPDATE',
+               '2',  '51', 'QV', 'KIND_SPECIFIC_HUMIDITY',  '0.0', 'NA' , 'UPDATE',
+             '201', '153', 'QC', 'KIND_CLOUD_LIQUID_WATER', '0.0', 'NA' , 'UPDATE',
+             '201', '154', 'QI', 'KIND_CLOUD_ICE',          '0.0', 'NA' , 'UPDATE',
   /
+
+# In grib table 2
+GRIB_TABLE VALUE   PARAMETER                       UNITS   ABBREV.
+2          33      u-component of wind             m/s     UGRD
+2          34      v-component of wind             m/s     VGRD
+2          1       Pressure                        Pa      PRES    (looks like surface pressure to me)
+2          40      Vertical velocity (geometric)   m/s     DZDT
+2          51      Specific humidity               kg/kg   SPFH
+201       153      Cloud Mixing Ratio              kg/kg   CLWMR
+
+
 
 
 &cosmo_to_dart_nml

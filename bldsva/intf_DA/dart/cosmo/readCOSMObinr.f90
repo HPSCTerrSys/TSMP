@@ -45,6 +45,8 @@ IMPLICIT NONE
                iver,       &           ! version number of GRIB1 indicator table
                iz_countl               ! counter for binary data
 
+integer :: i, nx, ny, ilev, ilevp1, ilevtyp
+
  REAL(KIND=wp)                             ::  &
                rbuf(idim*jdim),  &     ! data to be read
                psm0,             &     ! initial value for mean surface pressure ps
@@ -71,7 +73,7 @@ IMPLICIT NONE
                izvctype_read           ! check vertical coordinate type in restarts
 
  CHARACTER (LEN=*), PARAMETER               ::  &
-      datname = "/Users/pshrestha/work/ncl_current/DAtool/lrff00030000o"
+      datname = "lrff00030000o"
 
 !------------------------------------------------------------------------------
 !Variable Defininiton Complete, program starts here
@@ -96,6 +98,9 @@ IMPLICIT NONE
 
  READ (nudat,IOSTAT=izerr) izvctype_read, refatm_p0sl,   refatm_t0sl,   &
                                  refatm_dt0lp, vcoord_vcflat, zvc_params
+ 
+! write(*,*)'zvc_params is ',zvc_params
+
  IF (izerr /= 0) STOP 
 
  IF     ( (izvctype_read >   0) .AND. (izvctype_read <= 100) ) THEN
@@ -106,6 +111,9 @@ IMPLICIT NONE
  ELSEIF ( (izvctype_read > 200) .AND. (izvctype_read <= 300) ) THEN
    READ (nudat,IOSTAT=izerr) refatm_bvref
    IF (izerr /= 0) STOP 
+ ELSEIF ( izvctype_read > 300 ) THEN
+   write(*,*)'ERROR: izvctype_read is ',izvctype_read,' which is greater than max expected (300)'
+   stop
  ENDIF 
 
 !------------------------------------------------------------------------------
@@ -116,10 +124,35 @@ IMPLICIT NONE
 
    READ (nudat, IOSTAT=izerr) ipdsbuf, igdsbuf, rbuf
 
-   iver = ipdsbuf(2)
-   ivar = ipdsbuf(7)
+   iver    = ipdsbuf(2)
+   ivar    = ipdsbuf(7)
+   ilevtyp = ipdsbuf(8)
+   ilev    = ipdsbuf(9)
+   ilevp1  = ipdsbuf(10)
 
-   WRITE (*,*) iver, ivar, MINVAL(rbuf), MAXVAL(rbuf)
+   nx = igdsbuf(5)
+   ny = igdsbuf(6)
+
+   ! Since Fortran binary reads have no way to know if they fail or not
+   ! we are going to compare our input with the sizes encoded in the file.
+
+   if (nx .ne. idim .or. ny .ne. jdim) then
+      write(*,*)'ERROR: (file) nx /= idim ',nx,idim, ' or '
+      write(*,*)'ERROR: (file) ny /= jdim ',ny,jdim
+      stop
+   endif
+
+   if (iver == 2 .and. ivar == 3300) then
+      do i = 1,npds
+         write(*,*)iver, ivar, 'ipdsbuf(',i,') = ',ipdsbuf(i)
+      enddo
+
+      do i = 1,ngds
+         write(*,*)iver, ivar, 'igdsbuf(',i,') = ',igdsbuf(i)
+      enddo
+   endif
+
+   write (*,'( 7(1x,i4),2(1xf15.8))') iver, ivar, nx, ny, ilev, ilevp1, ilevtyp, MINVAL(rbuf), MAXVAL(rbuf)
 
    IF (izerr < 0) THEN
      WRITE (*,*) '       EOF REACHED'
