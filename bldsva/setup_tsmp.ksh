@@ -107,7 +107,7 @@ setDefaults(){
   namelist_pfl=$def_namelist_pfl
   startDate=$def_startDate
   runhours=$def_runhours
-  initDate=$ref_initDate
+  initDate=$def_initDate
 
   withCESM="false"
 }
