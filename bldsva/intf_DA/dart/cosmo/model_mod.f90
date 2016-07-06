@@ -306,17 +306,19 @@ end function get_model_size
 
 
 !------------------------------------------------------------------------
-!> Called to do one time initialization of the model.
+!> Called to do one-time initialization of the model.
 !>
 !> All the grid information comes from the COSMOS netCDF file
+!>@ TODO FIXME All the variable information comes from all over the place
+!> Not actually reading in the state, that is done in get_state_vector()
 
 subroutine static_init_model()
 
 ! Local variables - all the important ones have module scope
 
+integer               :: ivar, index1, indexN
 integer               :: iunit, io, islab, ikind, sv_length
 real(r8), allocatable :: datmat(:,:)
-
 real(r8), parameter   :: g = 9.80665_r8
 
 if ( module_initialized ) return ! only need to do this once.
@@ -334,11 +336,22 @@ if (do_nml_term()) write(     *     , nml=model_nml)
 
 call set_calendar_type('Gregorian')
 
-! Get the dimensions of the grid from the netCDF file.
-
+! Get the dimensions of the grid and the grid variables from the netCDF file.
 call get_cosmo_grid(cosmo_netcdf_file)
 
-call error_handler(E_ERR,'static_init_model','routine not written',source,revision,revdate)
+! rectify the user input for the variables to include in the DART state vector
+call parse_variable_table(variables, nfields, variable_table)
+
+call error_handler(E_ERR,'static_init_model','routine not finished',source,revision,revdate)
+
+index1 = 1
+indexN = 0
+do ivar = 1,nfields
+
+!   shapes and such has to come from someplace ... what happens in get_cosmo_info
+!   call set_variable_attributes(ivar)
+
+enddo
 
 call get_cosmo_info(cosmo_restart_file, cosmo_slabs, cosmo_lonlat, grib_header, &
                       is_allowed_state_vector_var, cosmo_fc_time)
@@ -355,9 +368,11 @@ call set_allowed_state_vector_vars()
   sv_length = 0
   do islab = 1,nslabs
     ikind = cosmo_slabs(islab)%dart_kind
-    if (ikind>0) then
+    if ( ikind > 0) then
       if (is_allowed_state_vector_var(ikind).OR.(ikind==KIND_PRESSURE_PERTURBATION)) then
-        sv_length = sv_length+cosmo_slabs(islab)%dims(1)*cosmo_slabs(islab)%dims(2)
+
+        sv_length = sv_length + cosmo_slabs(islab)%dims(1)*cosmo_slabs(islab)%dims(2)
+
       endif
     endif
   enddo
@@ -2536,7 +2551,109 @@ endif
 end subroutine get_vcoord
 
 
+!------------------------------------------------------------------------
+
+!>  This routine checks the user input against the variables available in the
+!>  input netcdf file to see if it is possible to construct the DART state vector
+!>  specified by the input.nml:model_nml:clm_variables  variable.
+!>  Each variable must have 6 entries.
+!>  1: GRIB table version number
+!>  2: variable name
+!>  3: DART KIND
+!>  4: minimum value - as a character string - if none, use 'NA'
+!>  5: maximum value - as a character string - if none, use 'NA'
+!>  6: does the variable get updated in the restart file or not ...
+!>     all variables will be updated INTERNALLY IN DART
+!>     'UPDATE'       => update the variable in the restart file
+!>     'NO_COPY_BACK' => do not copy the variable back to the restart file
+
+subroutine parse_variable_table( state_variables, ngood, table )
+
+character(len=*), dimension(:),   intent(in)  :: state_variables
+integer,                          intent(out) :: ngood
+character(len=*), dimension(:,:), intent(out) :: table
+
+integer :: nrows, ncols, i, ivar
+character(len=NF90_MAX_NAME) :: gribtableversion ! column 1
+character(len=NF90_MAX_NAME) :: varname          ! column 2
+character(len=NF90_MAX_NAME) :: dartstr          ! column 3
+character(len=NF90_MAX_NAME) :: minvalstring     ! column 4
+character(len=NF90_MAX_NAME) :: maxvalstring     ! column 5
+character(len=NF90_MAX_NAME) :: state_or_aux     ! column 6
+
+nrows = size(table,1)
+ncols = size(table,2)
+
+! This loop just repackages the 1D array of values into a 2D array.
+! We can do some miniminal checking along the way.
+! Determining which file to check is going to be more complicated.
+
+ngood = 0
+MyLoop : do i = 1, nrows
+
+   gribtableversion = trim(state_variables(ncols*i - 5))
+   varname          = trim(state_variables(ncols*i - 4))
+   dartstr          = trim(state_variables(ncols*i - 3))
+   minvalstring     = trim(state_variables(ncols*i - 2))
+   maxvalstring     = trim(state_variables(ncols*i - 1))
+   state_or_aux     = trim(state_variables(ncols*i    ))
+
+   call to_upper(state_or_aux)
+
+   table(i,VT_GRIBVERSIONINDX) = trim(gribtableversion)
+   table(i,VT_VARNAMEINDX)     = trim(varname)
+   table(i,VT_KINDINDX)        = trim(dartstr)
+   table(i,VT_MINVALINDX)      = trim(minvalstring)
+   table(i,VT_MAXVALINDX)      = trim(maxvalstring)
+   table(i,VT_STATEINDX)       = trim(state_or_aux)
+
+   ! If the first element is empty, we have found the end of the list.
+   if ( table(i,1) == ' ' ) exit MyLoop
+
+   ! Any other condition is an error.
+   if ( any(table(i,:) == ' ') ) then
+      string1 = 'input.nml &model_nml:variables not fully specified'
+      string2 = 'must be 6 entries per variable. Last known variable name is'
+      string3 = '['//trim(table(i,1))//'] ... (without the [], naturally)'
+      call error_handler(E_ERR, 'parse_variable_table', string1, &
+         source, revision, revdate, text2=string2, text3=string3)
+   endif
+
+   ! Make sure DART kind is valid
+
+   if( get_raw_obs_kind_index(dartstr) < 0 ) then
+      write(string1,'(''there is no obs_kind <'',a,''> in obs_kind_mod.f90'')') trim(dartstr)
+      call error_handler(E_ERR,'parse_variable_table',string1,source,revision,revdate)
+   endif
+
+   ! Record the contents of the DART state vector
+
+   if ((debug > 8) .and. do_output()) then
+      write(logfileunit,*)'variable ',i,' is ',trim(table(i,1)), ' ', trim(table(i,2)),' ', &
+                                               trim(table(i,3)), ' ', trim(table(i,4)),' ', &
+                                               trim(table(i,5)), ' ', trim(table(i,6))
+      write(     *     ,*)'variable ',i,' is ',trim(table(i,1)), ' ', trim(table(i,2)),' ', &
+                                               trim(table(i,3)), ' ', trim(table(i,4)),' ', &
+                                               trim(table(i,5)), ' ', trim(table(i,6))
+   endif
+
+   ngood = ngood + 1
+
+enddo MyLoop
+
+if (ngood == nrows) then
+   string1 = 'WARNING: There is a possibility you need to increase ''max_state_variables'''
+   write(string2,'(''WARNING: you have specified at least '',i4,'' perhaps more.'')')ngood
+   call error_handler(E_MSG,'parse_variable_table',string1,text2=string2)
+endif
+
+end subroutine parse_variable_table
+
       
+!------------------------------------------------------------------------
+!>
+
+
 end module model_mod
 
 ! <next few lines under version control, do not edit>
