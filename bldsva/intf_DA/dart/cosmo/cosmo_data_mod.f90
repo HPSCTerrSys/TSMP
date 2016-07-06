@@ -8,130 +8,125 @@ MODULE cosmo_data_mod
 !         Meteorological Institute, University of Bonn, Germany
 !         2011-10-12
 !
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/cosmo_data_mod.f90 $
-! $Id: cosmo_data_mod.f90 5358 2011-10-14 16:09:17Z nancy $
-! $Revision: 5358 $
-! $Date: 2011-10-14 10:09:17 -0600 (Fri, 14 Oct 2011) $
+! DART $Id: cosmo_data_mod.f90 $
 
-  use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,      &
-                               rad2deg, deg2rad, PI
+use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,      &
+                             rad2deg, deg2rad, PI
 
-  use time_manager_mod, only : time_type, set_date, print_time, print_date,  &
-                               operator(*),  operator(+), operator(-),       &
-                               operator(>),  operator(<), operator(/),       &
-                               operator(/=), operator(<=)
+use time_manager_mod, only : time_type, set_date, print_time, print_date,  &
+                             operator(*),  operator(+), operator(-),       &
+                             operator(>),  operator(<), operator(/),       &
+                             operator(/=), operator(<=)
 
-  use    utilities_mod, only : register_module, error_handler,               &
-                               E_ERR, E_WARN, E_MSG, logfileunit, get_unit,  &
-                               open_file, close_file
+use    utilities_mod, only : register_module, error_handler,               &
+                             E_ERR, E_WARN, E_MSG, logfileunit, get_unit,  &
+                             open_file, close_file
 
-  use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,                        &
-                               KIND_V_WIND_COMPONENT,                        &
-                               KIND_VERTICAL_VELOCITY,                       &
-                               KIND_TEMPERATURE,                             &
-                               KIND_PRESSURE,                                &
-                               KIND_PRESSURE_PERTURBATION,                                &
-                               KIND_SPECIFIC_HUMIDITY,                       &
-                               KIND_CLOUD_LIQUID_WATER,                      &
-                               KIND_CLOUD_ICE,                               &
-                               KIND_SURFACE_ELEVATION,                       &
-                               KIND_SURFACE_GEOPOTENTIAL
+use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,                        &
+                             KIND_V_WIND_COMPONENT,                        &
+                             KIND_VERTICAL_VELOCITY,                       &
+                             KIND_TEMPERATURE,                             &
+                             KIND_PRESSURE,                                &
+                             KIND_PRESSURE_PERTURBATION,                   &
+                             KIND_SPECIFIC_HUMIDITY,                       &
+                             KIND_CLOUD_LIQUID_WATER,                      &
+                             KIND_CLOUD_ICE,                               &
+                             KIND_SURFACE_ELEVATION,                       &
+                             KIND_SURFACE_GEOPOTENTIAL
 
-  USE          byte_mod, ONLY: concat_bytes1,concat_bytes1_sign,to_positive, &
-                               byte_to_word_signed,to_float1,                &
-                               byte_to_word,get_word,get_characteristic
+USE          byte_mod, only: concat_bytes1,concat_bytes1_sign,to_positive, &
+                             byte_to_word_signed,to_float1,                &
+                             byte_to_word,get_word,get_characteristic
 
-  USE     grib_info_mod, ONLY: get_level,get_varname,get_dims,get_dart_kind
+USE     grib_info_mod, only: get_level,get_varname,get_dims,get_dart_kind
 
-  IMPLICIT none
+implicit none
+private
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: ", &
-   revision = "$Revision: 5358 $", &
-   revdate  = "$Date: 2011-10-14 10:09:17 -0600 (Fri, 14 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: cosmo_data_mod.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
-  type cosmo_meta
-    character(len=16)  :: varname_short
-    character(len=256) :: varname_long
-    character(len=32)  :: units
-    integer            :: grib_file_position
-    integer            :: grib_table
-    integer            :: grib_code
-    integer            :: grib_leveltype
-    integer            :: grib_level(2)
-    integer            :: grib_nlevels
-    integer            :: ilevel
-    integer            :: numdims
-    integer            :: dims(3)
-    integer            :: hcoord_type
-    integer            :: dart_sindex
-    integer            :: dart_eindex
-    integer            :: dart_kind
-    real(r8)           :: dart_level
-    integer(kind=1)    :: ref_value_char
-  end type cosmo_meta
+type cosmo_meta
+  character(len=16)  :: varname_short
+  character(len=256) :: varname_long
+  character(len=32)  :: units
+  integer            :: grib_file_position
+  integer            :: grib_table
+  integer            :: grib_code
+  integer            :: grib_leveltype
+  integer            :: grib_level(2)
+  integer            :: grib_nlevels
+  integer            :: ilevel
+  integer            :: numdims
+  integer            :: dims(3)
+  integer            :: hcoord_type
+  integer            :: dart_sindex
+  integer            :: dart_eindex
+  integer            :: dart_kind
+  real(r8)           :: dart_level
+  integer(kind=1)    :: ref_value_char
+end type cosmo_meta
 
-  type cosmo_non_state_data
-    real(r8),allocatable :: surface_orography(:,:)
-    real(r8),allocatable :: pressure_perturbation(:,:,:)
-    logical              :: vertical_coords_set
-    logical              :: orography_present
-    logical              :: pressure_perturbation_present
-    integer              :: nfl
-    integer              :: nhl
-    real(r8),allocatable :: vct_a(:)
-    real(r8),allocatable :: vct_b(:)
-    real(r8),allocatable :: hhl(:,:,:)
-    real(r8),allocatable :: hfl(:,:,:)
-    real(r8),allocatable :: phl(:,:,:)
-    real(r8),allocatable :: pfl(:,:,:)
-    real(r8),allocatable :: p0hl(:,:,:)
-    real(r8),allocatable :: p0fl(:,:,:)
-    real(r8)             :: p0sl
-    real(r8)             :: t0sl
-    real(r8)             :: dt0lp
-    real(r8)             :: vcflat
-  end type cosmo_non_state_data
+type cosmo_non_state_data
+  real(r8),allocatable :: surface_orography(:,:)
+  real(r8),allocatable :: pressure_perturbation(:,:,:)
+  logical              :: vertical_coords_set
+  logical              :: orography_present
+  logical              :: pressure_perturbation_present
+  integer              :: nfl
+  integer              :: nhl
+  real(r8),allocatable :: vct_a(:)
+  real(r8),allocatable :: vct_b(:)
+  real(r8),allocatable :: hhl(:,:,:)
+  real(r8),allocatable :: hfl(:,:,:)
+  real(r8),allocatable :: phl(:,:,:)
+  real(r8),allocatable :: pfl(:,:,:)
+  real(r8),allocatable :: p0hl(:,:,:)
+  real(r8),allocatable :: p0fl(:,:,:)
+  real(r8)             :: p0sl
+  real(r8)             :: t0sl
+  real(r8)             :: dt0lp
+  real(r8)             :: vcflat
+end type cosmo_non_state_data
 
-  type cosmo_hcoord
-    real(r8),allocatable :: lon(:)
-    real(r8),allocatable :: lat(:)
-  end type cosmo_hcoord
+type cosmo_hcoord
+  real(r8),allocatable :: lon(:)
+  real(r8),allocatable :: lat(:)
+end type cosmo_hcoord
 
-  type grib_header_type
-    integer                     :: start_record
-    integer                     :: start_offset
-    integer                     :: data_record
-    integer                     :: data_offset
-    integer                     :: data_length
-    integer(kind=1),allocatable :: pds(:)
-    integer(kind=1),allocatable :: gds(:)
-    integer(kind=1),allocatable :: bds(:)
-  end type grib_header_type
+type grib_header_type
+  integer                     :: start_record
+  integer                     :: start_offset
+  integer                     :: data_record
+  integer                     :: data_offset
+  integer                     :: data_length
+  integer(kind=1),allocatable :: pds(:)
+  integer(kind=1),allocatable :: gds(:)
+  integer(kind=1),allocatable :: bds(:)
+end type grib_header_type
 
-  INTEGER :: nmaxrec,nmaxvar,nhcoord
-  INTEGER :: model_dims(3)
-  INTEGER :: record_length
-  LOGICAL :: hcoord_read(3)
+integer :: nmaxrec,nmaxvar,nhcoord
+integer :: model_dims(3)
+integer :: record_length
+logical :: hcoord_read(3)
 
-  CHARACTER(len=256) :: string
+character(len=256) :: string
 
-  PARAMETER(nmaxrec=1000000000)
-  PARAMETER(nmaxvar=1000)
-  PARAMETER(nhcoord=3)
+PARAMETER(nmaxrec=1000000000)
+PARAMETER(nmaxvar=1000)
+PARAMETER(nhcoord=3)
 
-  public  :: get_cosmo_info
-  public  :: set_vertical_coords
-  private :: read_grib_data
-  private :: find_grib_records
-  private :: read_grib_header
-  private :: find_in_varlist
-  private :: read_variable_info
-  private :: read_hcoords
-  private :: read_lonlat
-  private :: read_time
+public :: cosmo_meta, &
+          cosmo_hcoord, &
+          cosmo_non_state_data, &
+          get_cosmo_info, &
+          get_data_from_binary, &
+          set_vertical_coords, &
+          grib_header_type, &
+          model_dims, &
+          record_length
 
 CONTAINS
 
@@ -146,17 +141,17 @@ CONTAINS
     TYPE(cosmo_hcoord),                INTENT(out) :: h(3)
     TYPE(grib_header_type),ALLOCATABLE,INTENT(out) :: header(:)
 
-!   INTEGER(kind=1),ALLOCATABLE,INTENT(out)  :: bdata(:)
-!   INTEGER,ALLOCATABLE,INTENT(out)          :: bytepos(:,:) ! byte positions for  (1,:) beginning of GRIB record
+!   integer(kind=1),ALLOCATABLE,INTENT(out)  :: bdata(:)
+!   integer,ALLOCATABLE,INTENT(out)          :: bytepos(:,:) ! byte positions for  (1,:) beginning of GRIB record
                                                              !                     (2,:) beginning of PDS section
                                                              !                     (3,:) beginning of GDS section
                                                              !                     (4,:) beginning of data section
-!   INTEGER,ALLOCATABLE,INTENT(out)          :: bytelen(:,:) ! byte length for the (2,:) PDS section
+!   integer,ALLOCATABLE,INTENT(out)          :: bytelen(:,:) ! byte length for the (2,:) PDS section
                                                              !                     (3,:) GDS section
                                                              !                     (4,:) data section
     TYPE(time_type),INTENT(out)              :: tf
 
-    INTEGER                                  :: nvar
+    integer                                  :: nvar
 
     CALL read_grib_header(filename,header,nvar)
 
@@ -182,13 +177,13 @@ CONTAINS
     IMPLICIT NONE
 
     CHARACTER(len=256),INTENT(in)           :: filename
-    INTEGER(kind=1),INTENT(out),ALLOCATABLE :: bdata(:)
-    INTEGER,INTENT(out)                     :: nbyte
+    integer(kind=1),INTENT(out),ALLOCATABLE :: bdata(:)
+    integer,INTENT(out)                     :: nbyte
 
-    INTEGER(kind=1)                         :: temp(1:nmaxrec)
-    INTEGER                                 :: ibyte,irec,istat,nrec
-    INTEGER(kind=4)                         :: word(4)
-    INTEGER(kind=1)                         :: bin1(4)
+    integer(kind=1)                         :: temp(1:nmaxrec)
+    integer                                 :: ibyte,irec,istat,nrec
+    integer(kind=4)                         :: word(4)
+    integer(kind=1)                         :: bin1(4)
     integer :: gribunit   
  
     gribunit = get_unit() 
@@ -216,17 +211,17 @@ CONTAINS
 
   SUBROUTINE find_grib_records(bdata,nbyte,nvar,bytepos,bytelen)
     
-    INTEGER,INTENT(in)              :: nbyte
-    INTEGER(kind=1),INTENT(in)      :: bdata(1:nbyte)
+    integer,INTENT(in)              :: nbyte
+    integer(kind=1),INTENT(in)      :: bdata(1:nbyte)
 
-    INTEGER,INTENT(out)             :: nvar
-    INTEGER,ALLOCATABLE,INTENT(out) :: bytepos(:,:)
-    INTEGER,ALLOCATABLE,INTENT(out) :: bytelen(:,:)
+    integer,INTENT(out)             :: nvar
+    integer,ALLOCATABLE,INTENT(out) :: bytepos(:,:)
+    integer,ALLOCATABLE,INTENT(out) :: bytelen(:,:)
 
-    INTEGER(kind=4)                 :: grib
-    INTEGER(kind=1)                 :: gribword(4)
-    INTEGER                         :: ibyte,ivar,len
-    INTEGER                         :: temppos(1:4,1:nmaxvar),templen(1:4,1:nmaxvar)
+    integer(kind=4)                 :: grib
+    integer(kind=1)                 :: gribword(4)
+    integer                         :: ibyte,ivar,len
+    integer                         :: temppos(1:4,1:nmaxvar),templen(1:4,1:nmaxvar)
 
     grib=ICHAR('G')*256**0+ICHAR('R')*256**1+ICHAR('I')*256**2+ICHAR('B')*256**3
     gribword(1)=ICHAR('G')
@@ -273,18 +268,18 @@ CONTAINS
 
     CHARACTER(len=256),                INTENT(in)  :: filename
     TYPE(grib_header_type),ALLOCATABLE,INTENT(out) :: header(:)
-    INTEGER,                           INTENT(out) :: nvar
+    integer,                           INTENT(out) :: nvar
 
     TYPE(grib_header_type)      :: temp(1:nmaxvar)
-    INTEGER                     :: irec,istat,irec2,ibyte,m
-    INTEGER(kind=1)             :: bin4(4),bin(4),bin8(8)
+    integer                     :: irec,istat,irec2,ibyte,m
+    integer(kind=1)             :: bin4(4),bin(4),bin8(8)
 
-    INTEGER(kind=1)             :: gribword(4)
-    INTEGER(kind=1),ALLOCATABLE :: bytearr(:)
-    INTEGER                     :: ivar,mylen,pdslen,gdslen,bdslen
-    INTEGER                     :: grib_start,ioff
+    integer(kind=1)             :: gribword(4)
+    integer(kind=1),ALLOCATABLE :: bytearr(:)
+    integer                     :: ivar,mylen,pdslen,gdslen,bdslen
+    integer                     :: grib_start,ioff
     LOGICAL                     :: foundoff
-    INTEGER                     :: gribunit
+    integer                     :: gribunit
     
 
     gribunit = get_unit()
@@ -405,12 +400,12 @@ CONTAINS
   END SUBROUTINE read_grib_header
 
   FUNCTION find_in_varlist(tab,code,ltype,varlist,nlist)
-    INTEGER            :: find_in_varlist
+    integer            :: find_in_varlist
 
-    INTEGER,INTENT(in) :: tab,code,ltype,nlist
-    INTEGER,INTENT(in) :: varlist(1:nmaxvar,1:4)
+    integer,INTENT(in) :: tab,code,ltype,nlist
+    integer,INTENT(in) :: varlist(1:nmaxvar,1:4)
     
-    INTEGER            :: i
+    integer            :: i
     
     find_in_varlist=nlist+1
     DO i=1,nlist
@@ -425,11 +420,11 @@ CONTAINS
   SUBROUTINE read_variable_info(header,nvar,v,allowed)
     
     TYPE(grib_header_type),INTENT(in)  :: header(1:nvar)
-    INTEGER,               INTENT(in)  :: nvar
+    integer,               INTENT(in)  :: nvar
     LOGICAL,               INTENT(in)  :: allowed(:)
     TYPE(cosmo_meta),      INTENT(out) :: v(1:nvar)
 
-    INTEGER                      :: ivar,level(1:3),indx,nlevels(200)
+    integer                      :: ivar,level(1:3),indx,nlevels(200)
     CHARACTER(len=256)           :: varname(3)
     LOGICAL                      :: is_allowed_kind
     indx=0
@@ -491,11 +486,11 @@ CONTAINS
   SUBROUTINE read_hcoords(header,nvar,v,h)
     
     TYPE(grib_header_type),INTENT(in)   :: header(1:nvar)
-    INTEGER,INTENT(in)             :: nvar
+    integer,INTENT(in)             :: nvar
     TYPE(cosmo_meta),INTENT(in)    :: v(1:nvar)
     TYPE(cosmo_hcoord),INTENT(out) :: h(1:3)
 
-    INTEGER                        :: ivar,nx,ny
+    integer                        :: ivar,nx,ny
     REAL(r8),ALLOCATABLE           :: lons(:,:),lats(:,:)
     
     hcoord_read(:)=.FALSE.
@@ -525,13 +520,13 @@ CONTAINS
 
   SUBROUTINE read_lonlat(gds,lons,lats,nx,ny)
 
-    INTEGER(kind=1),INTENT(in) :: gds(:)
-    INTEGER,INTENT(in)         :: nx,ny
+    integer(kind=1),INTENT(in) :: gds(:)
+    integer,INTENT(in)         :: nx,ny
     REAL(r8),INTENT(out)       :: lons(1:nx,1:ny),lats(1:nx,1:ny)
 
     REAL(r8)                   :: lat0,lon0,rlon1,rlat1,rlon2,rlat2
     REAL(r8)                   :: rlats(1:nx,1:ny),rlons(1:nx,1:ny)
-    INTEGER                    :: ix,iy
+    integer                    :: ix,iy
 
     rlat1=REAL(concat_bytes1_sign(gds(11:13),3,.FALSE.),r8)/1000.0_r8
     rlon1=REAL(concat_bytes1_sign(gds(14:16),3,.FALSE.),r8)/1000.0_r8
@@ -558,7 +553,7 @@ CONTAINS
 
   SUBROUTINE rlatlon2latlon(rlat,rlon,lat0, lon0, lat, lon, nx, ny)
     IMPLICIT NONE
-    INTEGER,INTENT(in)    :: nx,ny
+    integer,INTENT(in)    :: nx,ny
     REAL(r8),INTENT(in)   :: rlat(1:nx,1:ny),rlon(1:nx,1:ny),lon0,lat0
     REAL(r8),INTENT(out)  :: lon(1:nx,1:ny),lat(1:nx,1:ny)
 
@@ -610,12 +605,12 @@ CONTAINS
     REAL(r8)                             :: mydata(1:nx,1:ny)
     CHARACTER(len=256),      INTENT(in)  :: filename
     TYPE(grib_header_type),  INTENT(in)  :: header
-    INTEGER,                 INTENT(in)  :: nx,ny
+    integer,                 INTENT(in)  :: nx,ny
 
-    INTEGER(kind=1)               :: bin4(1:4)
-    INTEGER                       :: idsf,ibsf,dval,irec,ix,iy,istat,ibyte,is,ie
+    integer(kind=1)               :: bin4(1:4)
+    integer                       :: idsf,ibsf,dval,irec,ix,iy,istat,ibyte,is,ie
     REAL(r8)                      :: dsf,bsf,ref_value
-    INTEGER(kind=1),ALLOCATABLE   :: bytearr(:)
+    integer(kind=1),ALLOCATABLE   :: bytearr(:)
     integer :: gribunit
 
     ALLOCATE(bytearr(1:header%data_length+header%data_offset+8))
@@ -662,24 +657,24 @@ CONTAINS
 
     TYPE(cosmo_non_state_data),INTENT(inout) :: nsv
     TYPE(grib_header_type),    INTENT(in)    :: header
-    INTEGER,                   INTENT(in)    :: svidx(:)
+    integer,                   INTENT(in)    :: svidx(:)
     REAL(r8),                  INTENT(inout) :: sv(:)
 
     REAL(r8),PARAMETER                       :: g = 9.80665_r8
     REAL(r8),PARAMETER                       :: r = 287.05_r8
-    INTEGER                                  :: nhl,nfl,pos,sindex,eindex
-    INTEGER(kind=1)                          :: w(4)
+    integer                                  :: nhl,nfl,pos,sindex,eindex
+    integer(kind=1)                          :: w(4)
     REAL(r8),ALLOCATABLE                     :: ak(:),bk(:)
     REAL(r8),ALLOCATABLE                     :: vcoord(:)
     REAL(r8)                                 :: t0sl,p0sl,dt0lp,vcflat
     REAL(r8)                                 :: zgdrt,ztdbe,zbetf
-    INTEGER                                  :: k,kflat,nx,ny
+    integer                                  :: k,kflat,nx,ny
     REAL(r8),ALLOCATABLE                     :: hhl(:,:,:),p0hl(:,:,:)
     REAL(r8),ALLOCATABLE                     :: pp1(:,:),pp2(:,:)
 
     ! This routine calculates the vertical coordinate for the 3D grid
 
-    INTEGER :: ivctype
+    integer :: ivctype
 
     IF (.NOT. nsv%orography_present) THEN
       write(string,*) 'Cannot calculate vertical coordinates - neither surface orography nor geopotential could be found in input file.'
@@ -879,7 +874,7 @@ CONTAINS
     TYPE(grib_header_type),INTENT(in)  :: header
     TYPE(time_type),       INTENT(out) :: tf
     
-    INTEGER :: century,ye,mo,da,ho,mi
+    integer :: century,ye,mo,da,ho,mi
     
     ye=header%pds(13)
     mo=header%pds(14)
@@ -894,3 +889,9 @@ CONTAINS
   END SUBROUTINE read_time
   
 END MODULE cosmo_data_mod
+
+! <next few lines under version control, do not edit>
+! $URL: 
+! $Id: cosmo_data_mod.f90 $
+! $Revision: $
+! $Date: $

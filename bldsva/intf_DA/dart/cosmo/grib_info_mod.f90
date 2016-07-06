@@ -1,56 +1,50 @@
 MODULE grib_info_mod
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/grib_info_mod.f90 $
-! $Id: grib_info_mod.f90 5340 2011-10-11 21:24:27Z thoar $
-! $Revision: 5340 $
-! $Date: 2011-10-11 15:24:27 -0600 (Tue, 11 Oct 2011) $
+! DART $Id: grib_info_mod.f90 
 
 !----------------------------------------------------------------------
 ! purpose: test routines
 !----------------------------------------------------------------------
 
-  USE byte_mod, ONLY: concat_bytes1,to_positive
-  USE obs_kind_mod, only : KIND_CLOUD_FRACTION, &
-                           KIND_CLOUD_ICE, &
-                           KIND_CLOUD_LIQUID_WATER, &
-                           KIND_PRESSURE, &
-                           KIND_PRESSURE_PERTURBATION, &
-                           KIND_RELATIVE_HUMIDITY, &
-                           KIND_SEA_SURFACE_PRESSURE, &
-                           KIND_SOIL_MOISTURE, &
-                           KIND_SPECIFIC_HUMIDITY, &
-                           KIND_SURFACE_ELEVATION, &
-                           KIND_SURFACE_PRESSURE, &
-                           KIND_TEMPERATURE, &
-                           KIND_U_WIND_COMPONENT, &
-                           KIND_V_WIND_COMPONENT, &
-                           KIND_VERTICAL_VELOCITY,&
-                           KIND_SURFACE_GEOPOTENTIAL
+USE byte_mod, ONLY: concat_bytes1,to_positive
+USE obs_kind_mod, only : KIND_CLOUD_FRACTION, &
+                         KIND_CLOUD_ICE, &
+                         KIND_CLOUD_LIQUID_WATER, &
+                         KIND_PRESSURE, &
+                         KIND_PRESSURE_PERTURBATION, &
+                         KIND_RELATIVE_HUMIDITY, &
+                         KIND_SEA_SURFACE_PRESSURE, &
+                         KIND_SOIL_MOISTURE, &
+                         KIND_SPECIFIC_HUMIDITY, &
+                         KIND_SURFACE_ELEVATION, &
+                         KIND_SURFACE_PRESSURE, &
+                         KIND_TEMPERATURE, &
+                         KIND_U_WIND_COMPONENT, &
+                         KIND_V_WIND_COMPONENT, &
+                         KIND_VERTICAL_VELOCITY,&
+                         KIND_SURFACE_GEOPOTENTIAL
 
-  implicit none
+implicit none
+private
 
-  ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/grib_info_mod.f90 $", &
-   revision = "$Revision: 5340 $", &
-   revdate  = "$Date: 2011-10-11 15:24:27 -0600 (Tue, 11 Oct 2011) $"
+! version controlled file description for error handling, do not edit
+character(len=256), parameter :: source   = "$URL: grib_info_mod.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
-  TYPE varnames
-    CHARACTER(len=256) :: longname
-    CHARACTER(len=16)  :: shortname
-    CHARACTER(len=32)  :: unit
-  END TYPE varnames
+TYPE varnames
+  CHARACTER(len=256) :: longname
+  CHARACTER(len=16)  :: shortname
+  CHARACTER(len=32)  :: unit
+END TYPE varnames
 
-  TYPE(varnames) :: gribtab(1:255,1:4,1:22)
-  INTEGER        :: dartkinds(1:255,1:4,1:22)
+TYPE(varnames) :: gribtab(1:255,1:4,1:22)
+INTEGER        :: dartkinds(1:255,1:4,1:22)
 
-  private :: set_gribtab
-  private :: set_dartkinds
-  public :: get_varname
-  public :: get_dart_kind
-  public :: get_level
-  public :: get_dims
+public :: get_varname
+public :: get_dart_kind
+public :: get_level
+public :: get_dims
 
 CONTAINS
   
@@ -984,3 +978,9 @@ CONTAINS
   END FUNCTION get_dart_kind
 
 END MODULE grib_info_mod
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: grib_info_mod.f90 
+! $Revision: $
+! $Date: $

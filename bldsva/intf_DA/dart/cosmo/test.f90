@@ -1,52 +1,47 @@
 PROGRAM test
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/test.f90 $
-! $Id: test.f90 5306 2011-10-05 20:43:56Z thoar $
-! $Revision: 5306 $
-! $Date: 2011-10-05 14:43:56 -0600 (Wed, 05 Oct 2011) $
+! DART $Id: test.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: test routines
 !----------------------------------------------------------------------
 
-  use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,          &
-                               rad2deg, deg2rad, PI
+use        types_mod, only : r4, r8, digits12, SECPERDAY, MISSING_R8,          &
+                             rad2deg, deg2rad, PI
 
-  use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
-                               print_time, print_date, set_calendar_type,        &
-                               operator(*),  operator(+), operator(-),           &
-                               operator(>),  operator(<), operator(/),           &
-                               operator(/=), operator(<=)
+use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
+                             print_time, print_date, set_calendar_type,        &
+                             operator(*),  operator(+), operator(-),           &
+                             operator(>),  operator(<), operator(/),           &
+                             operator(/=), operator(<=)
 
-  use        model_mod, only : static_init_model,get_model_size,get_state_meta_data,&
-                               model_interpolate, state_vector,grib_to_sv
+use        model_mod, only : static_init_model,get_model_size,get_state_meta_data,&
+                             model_interpolate, state_vector,grib_to_sv
 
-  use     location_mod, only : location_type, get_dist, query_location,          &
-                               get_close_maxdist_init, get_close_type,           &
-                               set_location, get_location, horiz_dist_only,      & 
-                               vert_is_undef,    VERTISUNDEF,                    &
-                               vert_is_surface,  VERTISSURFACE,                  &
-                               vert_is_level,    VERTISLEVEL,                    &
-                               vert_is_pressure, VERTISPRESSURE,                 &
-                               vert_is_height,   VERTISHEIGHT,                   &
-                               get_close_obs_init, loc_get_close_obs => get_close_obs
+use     location_mod, only : location_type, get_dist, query_location,          &
+                             get_close_maxdist_init, get_close_type,           &
+                             set_location, get_location, horiz_dist_only,      & 
+                             vert_is_undef,    VERTISUNDEF,                    &
+                             vert_is_surface,  VERTISSURFACE,                  &
+                             vert_is_level,    VERTISLEVEL,                    &
+                             vert_is_pressure, VERTISPRESSURE,                 &
+                             vert_is_height,   VERTISHEIGHT,                   &
+                             get_close_obs_init, loc_get_close_obs => get_close_obs
 
-  IMPLICIT NONE
+IMPLICIT NONE
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/test.f90 $", &
-   revision = "$Revision: 5306 $", &
-   revdate  = "$Date: 2011-10-05 14:43:56 -0600 (Wed, 05 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: test.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
-  INTEGER :: var_type,index,istat,n,i
-  integer,allocatable :: seed(:)
-  TYPE(location_type) :: loc
-  REAL(r8) :: lo,la,h,val
-  REAL(r8),allocatable :: x(:)
-  REAL(r8) :: lop,lap,x1,lo1,la1,x2,lo2,la2,xo,loo,lao
-  TYPE(time_type) :: time
+INTEGER :: var_type,index,istat,n,i
+integer,allocatable :: seed(:)
+TYPE(location_type) :: loc
+REAL(r8) :: lo,la,h,val
+REAL(r8),allocatable :: x(:)
+REAL(r8) :: lop,lap,x1,lo1,la1,x2,lo2,la2,xo,loo,lao
+TYPE(time_type) :: time
 
 !  CALL static_init_model()
 !  print*,get_model_size()
@@ -107,3 +102,9 @@ STOP
   print*,istat
 
 END PROGRAM test
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: test.f90 $
+! $Revision: $
+! $Date: $

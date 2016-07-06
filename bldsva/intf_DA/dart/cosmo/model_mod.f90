@@ -1,6 +1,6 @@
 ! This code is not necessarily under the DART copyright ...
 !
-! $Id:
+! DART $Id: $
 
 module model_mod
 
@@ -70,7 +70,7 @@ implicit none
 private
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source = "$URL: $"
+character(len=256), parameter :: source   = "$URL: model_mod.f90 $"
 character(len=32 ), parameter :: revision = "$Revision: none $"
 character(len=128), parameter :: revdate  = "$Date: none $"
 
@@ -2298,8 +2298,8 @@ end subroutine get_cosmo_gridinfo
 end module model_mod
 
 ! <next few lines under version control, do not edit>
-! $URL:
-! $Id:
+! $URL: $
+! $Id: $
 ! $Revision: $
-! $Date:
+! $Date: $
 

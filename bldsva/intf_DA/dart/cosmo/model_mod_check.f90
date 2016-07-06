@@ -4,11 +4,7 @@
 
 program model_mod_check
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/model_mod_check.f90 $
-! $Id: model_mod_check.f90 5326 2011-10-07 17:52:25Z thoar $
-! $Revision: 5326 $
-! $Date: 2011-10-07 11:52:25 -0600 (Fri, 07 Oct 2011) $
+! $Id: model_mod_check.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: test routines
@@ -50,19 +46,19 @@ use typesizes
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/model_mod_check.f90 $", &
-   revision = "$Revision: 5326 $", &
-   revdate  = "$Date: 2011-10-07 11:52:25 -0600 (Fri, 07 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: model_mod_check.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
-character(len=256) :: string1, string2
+
+character(len=512) :: string1, string2
 
 !------------------------------------------------------------------
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 129)  :: dart_input_file      = 'dart.ics'
-character (len = 129)  :: output_file          = 'check_me'
+character(len=256)     :: dart_input_file      = 'dart.ics'
+character(len=256)     :: output_file          = 'check_me'
 logical                :: advance_time_present = .FALSE.
 logical                :: verbose              = .FALSE.
 integer                :: test1thru            = -1
@@ -96,7 +92,7 @@ type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
 
 character(len=metadatalength) :: state_meta(1)
-character(len=129)            :: cosmo_input_file
+character(len=256)            :: cosmo_input_file
 type(netcdf_file_type)        :: ncFileID
 type(location_type)           :: loc
 real(r8)                      :: interp_val
@@ -343,7 +339,6 @@ subroutine check_meta_data( iloc )
 integer, intent(in) :: iloc
 type(location_type) :: loc
 integer             :: var_type
-character(len=129)  :: string1
 
 call get_state_meta_data( iloc, loc, var_type)
 call write_location(0, loc, fform='formatted', charstring=string1)
@@ -608,3 +603,9 @@ test_interpolate = nfailed
 end function test_interpolate
 
 end program model_mod_check
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: model_mod_check.f90 $
+! $Revision: $
+! $Date: $

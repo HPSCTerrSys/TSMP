@@ -1,29 +1,27 @@
 MODULE byte_mod
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/byte_mod.f90 $
-! $Id: byte_mod.f90 5358 2011-10-14 16:09:17Z nancy $
-! $Revision: 5358 $
-! $Date: 2011-10-14 10:09:17 -0600 (Fri, 14 Oct 2011) $
+! DART $Id: byte_mod.f90 $
 
-  use        types_mod, only : r4, r8
+use types_mod, only : r4, r8
+
+implicit none
+private
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/byte_mod.f90 $", &
-   revision = "$Revision: 5358 $", &
-   revdate  = "$Date: 2011-10-14 10:09:17 -0600 (Fri, 14 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: byte_mod.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
-  public :: concat_bytes1
-  public :: concat_bytes1_sign
-  public :: to_positive
-  public :: byte_to_word_signed
-  public :: get_characteristic
-  public :: to_float1
-  public :: from_float1
-  public :: byte_to_word
-  public :: word_to_byte
-  public :: get_word
+public :: concat_bytes1
+public :: concat_bytes1_sign
+public :: to_positive
+public :: byte_to_word_signed
+public :: get_characteristic
+public :: to_float1
+public :: from_float1
+public :: byte_to_word
+public :: word_to_byte
+public :: get_word
   
 CONTAINS
 
@@ -42,7 +40,6 @@ CONTAINS
     DO i=0,n-1
       IF (work(i+1).LT.0) work(i+1)=256+work(i+1)
       iresult=iresult+work(i+1)*256**(maxexp-i)
-!      iresult=iresult+word(i+is)*256**(i)
     END DO
     IF (check_negative) THEN
       IF (iresult.LT.0) iresult=iresult+256
@@ -267,3 +264,10 @@ CONTAINS
   END FUNCTION get_word
 
 END MODULE byte_mod
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: byte_mod.f90 $
+! $Revision: $
+! $Date: $
+

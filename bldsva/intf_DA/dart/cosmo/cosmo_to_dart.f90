@@ -4,11 +4,7 @@
 
 program cosmo_to_dart
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/cosmo_to_dart.f90 $
-! $Id: cosmo_to_dart.f90 5367 2011-10-19 17:14:36Z nancy $
-! $Revision: 5367 $
-! $Date: 2011-10-19 11:14:36 -0600 (Wed, 19 Oct 2011) $
+! DART $Id: cosmo_to_dart.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: interface between cosmo and DART
@@ -41,10 +37,9 @@ use time_manager_mod, only : time_type, print_time, print_date
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/cosmo_to_dart.f90 $", &
-   revision = "$Revision: 5367 $", &
-   revdate  = "$Date: 2011-10-19 11:14:36 -0600 (Wed, 19 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: cosmo_to_dart.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
 !-----------------------------------------------------------------------
 ! namelist parameters with default values.
@@ -108,3 +103,9 @@ call print_time(model_time, str='cosmo_to_dart:DART  model time')
 call finalize_utilities()
 
 end program cosmo_to_dart
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: cosmo_to_dart.f90 $
+! $Revision: $
+! $Date: $

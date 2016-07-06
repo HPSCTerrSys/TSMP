@@ -4,11 +4,7 @@
 
 program dart_to_cosmo
 
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/dart_to_cosmo.f90 $
-! $Id: dart_to_cosmo.f90 5353 2011-10-13 21:23:59Z thoar $
-! $Revision: 5353 $
-! $Date: 2011-10-13 15:23:59 -0600 (Thu, 13 Oct 2011) $
+! DART $Id: dart_to_cosmo.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: interface between DART and the cosmo model
@@ -25,28 +21,34 @@ program dart_to_cosmo
 !----------------------------------------------------------------------
 
 use        types_mod, only : r8
+
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read, &
-                             logfileunit, open_file, close_file
+                             logfileunit, open_file, close_file, E_ERR, &
+                             E_MSG, error_handler
+
 use  assim_model_mod, only : open_restart_read, aread_state_restart, close_restart
-use time_manager_mod, only : time_type, print_time, print_date, operator(-), get_time, set_time
-use        model_mod, only : static_init_model, write_grib_file, get_model_size, write_state_times
+
+use time_manager_mod, only : time_type, print_time, print_date, operator(-), &
+                             get_time, set_time
+
+use        model_mod, only : static_init_model, write_grib_file, get_model_size, &
+                             write_state_times
 
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=128), parameter :: &
-   source   = "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/dart_to_cosmo.f90 $", &
-   revision = "$Revision: 5353 $", &
-   revdate  = "$Date: 2011-10-13 15:23:59 -0600 (Thu, 13 Oct 2011) $"
+character(len=256), parameter :: source   = "$URL: dart_to_cosmo.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: none $"
+character(len=128), parameter :: revdate  = "$Date: none $"
 
 !------------------------------------------------------------------
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 128) :: dart_output_file        = 'dart.ic'
-character (len = 128) :: new_cosmo_analysis_file = 'out.grb'
-logical               :: advance_time_present    = .true.
+character(len=256) :: dart_output_file        = 'dart.ic'
+character(len=256) :: new_cosmo_analysis_file = 'out.grb'
+logical            :: advance_time_present    = .true.
 
 namelist /dart_to_cosmo_nml/ dart_output_file,        &
                              new_cosmo_analysis_file, &
@@ -57,13 +59,12 @@ namelist /dart_to_cosmo_nml/ dart_output_file,        &
 integer               :: iunit, io, model_size
 type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: state_vector(:)
-logical               :: verbose = .false.
 
 !----------------------------------------------------------------------
 ! Read the namelist to get the output filename. 
 !----------------------------------------------------------------------
 
-call initialize_utilities(progname='dart_to_cosmo', output_flag=verbose)
+call initialize_utilities(progname='dart_to_cosmo')
 
 call find_namelist_in_file("input.nml", "dart_to_cosmo_nml", iunit)
 read(iunit, nml = dart_to_cosmo_nml, iostat = io)
@@ -131,3 +132,9 @@ endif
 call finalize_utilities()
 
 end program dart_to_cosmo
+
+! <next few lines under version control, do not edit>
+! $URL: $
+! $Id: dart_to_cosmo.f90 $
+! $Revision: $
+! $Date: $
