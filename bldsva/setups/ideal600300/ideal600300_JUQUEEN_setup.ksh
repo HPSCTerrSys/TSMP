@@ -61,10 +61,6 @@ initSetup(){
     fi
   fi
 
-
-  fn_finidat="$WORK/tsmp/TSMPForecastNRW$restDate-00/run/clmoas.clm2.r.${yyyy}-${mm}-${dd}-00000.nc"
-  pfbfilename="/work/slts/slts06/tsmp/TSMPForecastNRW$restDate-00/run/rurlaf.out.press.00024.pfb"
-
 }
 
 finalizeSetup(){

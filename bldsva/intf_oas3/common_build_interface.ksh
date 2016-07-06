@@ -432,8 +432,6 @@ comment "  sed restart file path to namelist"
 check
 
 
-    echo "${fn_finidat}" > $rpointer
-
 comment "  run clm namelist"
     $rundir/lnd.stdin >> $log_file 2>> $err_file
 check

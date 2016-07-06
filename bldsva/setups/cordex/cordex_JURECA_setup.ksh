@@ -62,13 +62,6 @@ initSetup(){
     fi
   fi
 
- 
-
-  restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDate")/run"
-  fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-43200.nc"
-  pfbfilename="$restDir/${pflrunname}.out.press.00024.pfb"
-
-
 }
 
 finalizeSetup(){
