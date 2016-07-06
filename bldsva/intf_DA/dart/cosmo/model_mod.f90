@@ -80,21 +80,21 @@ logical, save :: module_initialized = .false.
 ! these routines must be public and you cannot change
 ! the arguments - they will be called *from* the DART code.
 
-public :: get_model_size, &
-          adv_1step , &
-          get_state_meta_data , &
-          model_interpolate , &
-          get_model_time_step , &
-          static_init_model , &
-          end_model , &
-          init_time , &
-          init_conditions , &
-          nc_write_model_atts , &
-          nc_write_model_vars , &
-          pert_model_state , &
-          get_close_maxdist_init , &
-          get_close_obs_init , &
-          get_close_obs , &
+public :: get_model_size,         &
+          adv_1step,              &
+          get_state_meta_data,    &
+          model_interpolate,      &
+          get_model_time_step,    &
+          static_init_model,      &
+          end_model,              &
+          init_time,              &
+          init_conditions,        &
+          nc_write_model_atts,    &
+          nc_write_model_vars,    &
+          pert_model_state,       &
+          get_close_maxdist_init, &
+          get_close_obs_init,     &
+          get_close_obs,          &
           ens_mean_for_model
 
 ! generally useful routines for various support purposes.
@@ -103,9 +103,9 @@ public :: get_model_size, &
 !  public  :: grib_to_sv
 !  public  :: sv_to_grib
 
-public :: get_state_time, &
-          get_state_vector, &
-          write_grib_file, &
+public :: get_state_time,     &
+          get_state_vector,   &
+          write_grib_file,    &
           get_cosmo_filename, &
           write_state_times
 
@@ -188,6 +188,48 @@ integer :: nlevel1
 integer :: nsoil
 integer :: nsoil1
 
+!> @TODO FIXME ... check to make sure the storage order in netCDF is the
+!> same as the storage order of the binary variables.
+!> vcoord has units, etc. and will require a transformation
+
+real(r8), allocatable ::   lon(:,:) ! longitude degrees_east
+real(r8), allocatable ::   lat(:,:) ! latitude  degrees_north
+real(r8), allocatable :: slonu(:,:) ! staggered U-wind longitude degrees_east
+real(r8), allocatable :: slatu(:,:) ! staggered U-wind latitude  degrees_north
+real(r8), allocatable :: slonv(:,:) ! staggered V-wind longitude degrees_east
+real(r8), allocatable :: slatv(:,:) ! staggered V-wind latitude  degrees_north
+
+! just mimic what is in the netCDF variable
+!       float vcoord(level1) ;
+!               vcoord:long_name = "Height-based hybrid Gal-Chen coordinate" ;
+!               vcoord:units = "Pa" ;
+!               vcoord:ivctype = 2 ;
+!               vcoord:irefatm = 2 ;
+!               vcoord:p0sl = 100000. ;
+!               vcoord:t0sl = 300. ;
+!               vcoord:dt0lp = 42. ;
+!               vcoord:vcflat = 11000. ;
+!               vcoord:delta_t = 75. ;
+!               vcoord:h_scal = 10000. ;
+
+type verticalobject
+   private
+   real(r8), allocatable :: level1(:)
+   character(len=128)    :: long_name = "Height-based hybrid Gal-Chen coordinate"
+   character(len=32)     :: units = "Pa"
+   integer               :: ivctype = 2
+   integer               :: irefatm = 2
+   real(r8)              :: p0sl = 100000.
+   real(r8)              :: t0sl = 300.
+   real(r8)              :: dt0lp = 42.
+   real(r8)              :: vcflat = 11000.
+   real(r8)              :: delta_t = 75.
+   real(r8)              :: h_scal = 10000.
+end type verticalobject
+
+type(verticalobject) :: vcoord
+
+
 integer,parameter              :: n_state_vector_vars=8
 integer,parameter              :: n_non_state_vars=1
 
@@ -195,11 +237,14 @@ type(cosmo_meta),allocatable   :: cosmo_slabs(:)
 type(cosmo_hcoord)             :: cosmo_lonlat(3) ! 3 is for the stagger
 integer                        :: nslabs
 
+! things which can/should be in the model_nml
 
 character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
 character(len=256) :: cosmo_netcdf_file            = "cosmo_netcdf_file"
+integer            :: assimilation_period_days     = 0
+integer            :: assimilation_period_seconds  = 60
 integer            :: model_dt                     = 40
-logical            :: output_state_vector          = .FALSE.
+logical            :: output_1D_state_vector       = .FALSE.
 real(r8)           :: model_perturbation_amplitude = 0.1
 integer            :: debug                        = 0
 character(len=obstypelength) :: variables(max_state_variables*num_state_table_columns) = ' '
@@ -207,9 +252,11 @@ character(len=obstypelength) :: variables(max_state_variables*num_state_table_co
 namelist /model_nml/             &
    cosmo_restart_file,           &
    cosmo_netcdf_file,            &
+   assimilation_period_days,     &
+   assimilation_period_seconds,  &
    model_dt,                     &
    model_perturbation_amplitude, &
-   output_state_vector,          &
+   output_1D_state_vector,       &
    model_dims,                   &
    record_length,                &
    debug,                        &
@@ -289,7 +336,7 @@ call set_calendar_type('Gregorian')
 
 ! Get the dimensions of the grid from the netCDF file.
 
-call get_cosmo_gridinfo(cosmo_netcdf_file)
+call get_cosmo_grid(cosmo_netcdf_file)
 
 call error_handler(E_ERR,'static_init_model','routine not written',source,revision,revdate)
 
@@ -434,41 +481,41 @@ end subroutine static_init_model
 !>
 
 
-  subroutine get_state_meta_data(index_in,location,var_type)
+subroutine get_state_meta_data(index_in, location, var_type)
 
-    integer, intent(in)            :: index_in
-    type(location_type)            :: location
-    integer, optional, intent(out) :: var_type
+integer, intent(in)            :: index_in
+type(location_type)            :: location
+integer, optional, intent(out) :: var_type
 
-    integer                        :: islab,var,hindex,dims(3)
-    real(r8)                       :: lon,lat,vloc
+integer   :: islab,var,hindex,dims(3)
+real(r8)  :: mylon,mylat,vloc
 
-    call error_handler(E_ERR,'get_state_meta_data','routine not written',source,revision,revdate)
+call error_handler(E_ERR,'get_state_meta_data','routine not written',source,revision,revdate)
 
-    if (.NOT. module_initialized) CALL static_init_model()
+if (.NOT. module_initialized) CALL static_init_model()
 
-    var=-1
+var = -1
 
-    findindex : DO islab=1,nslabs
-      IF ((index_in >= cosmo_slabs(islab)%dart_sindex) .AND. (index_in <= cosmo_slabs(islab)%dart_eindex)) THEN
-        var      = islab
-        hindex   = index_in-cosmo_slabs(islab)%dart_sindex+1
-        var_type = cosmo_slabs(islab)%dart_kind
-        dims     = cosmo_slabs(islab)%dims
-        vloc     = cosmo_slabs(islab)%dart_level
-        lon      = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lon(hindex)
-        lat      = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lat(hindex)
-        location = set_location(lon,lat,vloc,VERTISLEVEL)
-        EXIT findindex
-      endif
-    enddo findindex
+findindex : DO islab=1,nslabs
+  IF ((index_in >= cosmo_slabs(islab)%dart_sindex) .AND. (index_in <= cosmo_slabs(islab)%dart_eindex)) THEN
+    var      = islab
+    hindex   = index_in - cosmo_slabs(islab)%dart_sindex + 1
+    var_type = cosmo_slabs(islab)%dart_kind
+    dims     = cosmo_slabs(islab)%dims
+    vloc     = cosmo_slabs(islab)%dart_level
+    mylon    = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lon(hindex)
+    mylat    = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lat(hindex)
+    location = set_location(mylon,mylat,vloc,VERTISLEVEL)
+    EXIT findindex
+  endif
+enddo findindex
 
-    IF( var == -1 ) THEN
-      write(string1,*) 'Problem, cannot find base_offset, index_in is: ', index_in
-      call error_handler(E_ERR,'get_state_meta_data',string1,source,revision,revdate)
-    ENDIF
+IF( var == -1 ) THEN
+  write(string1,*) 'Problem, cannot find base_offset, index_in is: ', index_in
+  call error_handler(E_ERR,'get_state_meta_data',string1,source,revision,revdate)
+ENDIF
 
-  end subroutine get_state_meta_data
+end subroutine get_state_meta_data
 
 
 !------------------------------------------------------------------------
@@ -596,92 +643,84 @@ end subroutine static_init_model
 
 !------------------------------------------------------------------------
 !>
+!> Returns a model state vector, x, that is some sort of appropriate
+!> initial condition for starting up a long integration of the model.
+!> At present, this is only used if the namelist parameter
+!> start_from_restart is set to .false. in the program perfect_model_obs.
+
+subroutine init_conditions(x)
+
+real(r8), intent(out) :: x(:)
+
+if ( .not. module_initialized ) call static_init_model
+
+write(string1,*)'Cannot initialize COSMO time via subroutine call.'
+write(string2,*)'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR, 'init_conditions', string1, &
+           source, revision, revdate, text2=string2)
+
+x = 0.0_r8  ! suppress compiler warnings about unused variables
+
+end subroutine init_conditions
 
 
-  subroutine init_conditions(x)
-  !------------------------------------------------------------------
-  ! Returns a model state vector, x, that is some sort of appropriate
-  ! initial condition for starting up a long integration of the model.
-  ! At present, this is only used if the namelist parameter
-  ! start_from_restart is set to .false. in the program perfect_model_obs.
+!------------------------------------------------------------------------
+!> Companion interface to init_conditions. Returns a time that is somehow
+!> appropriate for starting up a long integration of the model.
+!> At present, this is only used if the namelist parameter
+!> start_from_restart is set to .false. in the program perfect_model_obs.
 
-  real(r8), intent(out) :: x(:)
 
-  call error_handler(E_ERR,'init_conditions','routine not written',source,revision,revdate)
+subroutine init_time(time)
 
-  if ( .not. module_initialized ) call static_init_model
+type(time_type), intent(out) :: time
 
-  x = 0.0_r8  ! suppress compiler warnings about unused variables
+if ( .not. module_initialized ) call static_init_model
 
-  write(string1,*) 'Cannot initialize COSMO state via subroutine call; start_from_restart cannot be F'
-  call error_handler(E_ERR,'init_conditions',string1,source,revision,revdate)
+write(string1,*)'Cannot initialize COSMO time via subroutine call.'
+write(string2,*)'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR, 'init_time', string1, &
+           source, revision, revdate, text2=string2)
 
-  end subroutine init_conditions
+time = set_time(0,0) ! suppress compiler warnings about unused variables
+
+end subroutine init_time
+
+
+!------------------------------------------------------------------------
+!> As COSMO can only be advanced as a separate executable,
+!> this is a NULL INTERFACE and is a fatal error if invoked.
+
+subroutine adv_1step(x, time)
+
+real(r8),        intent(inout) :: x(:)
+type(time_type), intent(in)    :: time
+
+if ( .not. module_initialized ) call static_init_model
+
+if (do_output()) then
+    call print_time(time,'NULL interface adv_1step (no advance) DART time is')
+    call print_time(time,'NULL interface adv_1step (no advance) DART time is',logfileunit)
+endif
+
+write(string1,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
+call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
+
+end subroutine adv_1step
 
 
 !------------------------------------------------------------------------
 !>
 
 
-  subroutine init_time(time)
-  !------------------------------------------------------------------
-  ! Companion interface to init_conditions. Returns a time that is somehow
-  ! appropriate for starting up a long integration of the model.
-  ! At present, this is only used if the namelist parameter
-  ! start_from_restart is set to .false. in the program perfect_model_obs.
+subroutine end_model()
 
-  type(time_type), intent(out) :: time
+deallocate(cosmo_slabs)
+deallocate(state_vector)
+deallocate(lon,lat,slonu,slatu,slonv,slatv)
+deallocate(vcoord%level1)
 
-  call error_handler(E_ERR,'init_time','routine not written',source,revision,revdate)
-
-  if ( .not. module_initialized ) call static_init_model
-
-  time = set_time(0,0) ! suppress compiler warnings about unused variables
-
-  write(string1,*) 'Cannot initialize COSMO time via subroutine call; start_from_restart cannot be F'
-  call error_handler(E_ERR,'init_time',string1,source,revision,revdate)
-
-  end subroutine init_time
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine adv_1step(x, time)
-  !------------------------------------------------------------------
-  ! As COSMO can only be advanced as a separate executable,
-  ! this is a NULL INTERFACE.
-  !------------------------------------------------------------------
-
-  real(r8),        intent(inout) :: x(:)
-  type(time_type), intent(in)    :: time
-
-  call error_handler(E_ERR,'adv_1step','routine not written',source,revision,revdate)
-  if ( .not. module_initialized ) call static_init_model
-
-  if (do_output()) then
-      call print_time(time,'NULL interface adv_1step (no advance) DART time is')
-      call print_time(time,'NULL interface adv_1step (no advance) DART time is',logfileunit)
-  endif
-
-  write(string1,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
-  call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
-
-  end subroutine adv_1step
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine end_model()
-
-  call error_handler(E_ERR,'end_model','routine not written',source,revision,revdate)
-  deallocate(cosmo_slabs)
-  deallocate(state_vector)
-
-  end subroutine end_model
+end subroutine end_model
 
 
 !------------------------------------------------------------------------
@@ -792,7 +831,7 @@ end subroutine static_init_model
     ! complicated part.
     !-------------------------------------------------------------------------------
 
-    if ( output_state_vector ) then
+    if ( output_1D_state_vector ) then
 
       !----------------------------------------------------------------------------
       ! Create a variable for the state vector
@@ -1152,7 +1191,7 @@ end subroutine static_init_model
     call nc_check(nf90_inq_dimid(ncFileID, 'time', dimid=TimeDimID), &
      'nc_write_model_vars', 'inq_dimid time '//trim(filename))
 
-    if ( output_state_vector ) then
+    if ( output_1D_state_vector ) then
 
       call nc_check(NF90_inq_varid(ncFileID, 'state', VarID), &
        'nc_write_model_vars', 'state inq_varid '//trim(filename))
@@ -2171,7 +2210,7 @@ end function get_cosmo_filename
 !>
 
 
-subroutine get_cosmo_gridinfo(filename)
+subroutine get_cosmo_grid(filename)
 
 character(len=*), intent(in) :: filename
 
@@ -2190,111 +2229,314 @@ character(len=*), intent(in) :: filename
 integer :: ncid, io, dimid
 
 io = nf90_open(filename, NF90_NOWRITE, ncid)
-call nc_check(io, 'get_cosmo_gridinfo','open "'//trim(filename)//'"')
+call nc_check(io, 'get_cosmo_grid','open "'//trim(filename)//'"')
 
 write(string1,*) 'time: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'time', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=ntime)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'bnds: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'bnds', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nbnds)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'rlon: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'rlon', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nrlon)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'rlat: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'rlat', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nrlat)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'srlon: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'srlon', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nsrlon)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'srlat: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'srlat', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nsrlat)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'level: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'level', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nlevel)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'level1: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'level1', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nlevel1)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'soil: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'soil', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nsoil)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 write(string1,*) 'soil1: '//trim(filename)
 io = nf90_inq_dimid(ncid, 'soil1', dimid)
-call nc_check(io, 'get_cosmo_gridinfo','inq_dimid '//trim(string1))
+call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nsoil1)
-call nc_check(io, 'get_cosmo_gridinfo','inquire_dimension '//trim(string1))
-
-call nc_check(nf90_close(ncid),'get_cosmo_gridinfo','close "'//trim(filename)//'"' )
+call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
 if ( debug > 5 .and. do_output() ) then
 
    write(string1,*)'time   has dimension ',ntime
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'bnds   has dimension ',nbnds
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'rlon   has dimension ',nrlon
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'rlat   has dimension ',nrlat
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'srlon  has dimension ',nsrlon
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'srlat  has dimension ',nsrlat
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'level  has dimension ',nlevel
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'level1 has dimension ',nlevel1
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'soil   has dimension ',nsoil
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
    write(string1,*)'soil1  has dimension ',nsoil1
-   call error_handler(E_MSG,'get_cosmo_gridinfo',string1)
+   call error_handler(E_MSG,'get_cosmo_grid',string1)
 
 endif
 
-end subroutine get_cosmo_gridinfo
+call get_grid_var(ncid,  'lon' ,  nrlon,  nrlat, filename)
+call get_grid_var(ncid,  'lat' ,  nrlon,  nrlat, filename)
+call get_grid_var(ncid, 'slonu', nsrlon,  nrlat, filename)
+call get_grid_var(ncid, 'slatu', nsrlon,  nrlat, filename)
+call get_grid_var(ncid, 'slonv',  nrlon, nsrlat, filename)
+call get_grid_var(ncid, 'slatv',  nrlon, nsrlat, filename)
 
+where(lon <   0.0_r8) lon = lon + 360.0_r8
+where(lat < -90.0_r8) lat = -90.0_r8
+where(lat >  90.0_r8) lat =  90.0_r8
+
+if ( debug > 5 .and. do_output() ) then
+   ! call some sort of summary routine for min/max of grid vars
+endif
+
+call get_vcoord(ncid, filename)
+
+call nc_check(nf90_close(ncid),'get_cosmo_grid','close "'//trim(filename)//'"' )
+
+end subroutine get_cosmo_grid
+
+
+!------------------------------------------------------------------------
+!> all grid variables in the netCDF files are 2D 
+!> this does not handle scale, offset, missing_value, _FillValue etc.
+
+subroutine get_grid_var(ncid,varstring,expected_dim1,expected_dim2,filename)
+integer,          intent(in) :: ncid
+character(len=*), intent(in) :: varstring
+integer,          intent(in) :: expected_dim1
+integer,          intent(in) :: expected_dim2
+character(len=*), intent(in) :: filename
+
+integer, dimension(NF90_MAX_VAR_DIMS) :: dimIDs
+integer, dimension(NF90_MAX_VAR_DIMS) :: dimlens
+integer :: io, VarID, DimID, ndims
+integer :: i
+
+write(string3,*)trim(varstring)//' '//trim(filename)
+
+call nc_check(nf90_inq_varid(ncid, trim(varstring), VarID), &
+         'get_grid_var', 'inq_varid '//trim(string3))
+
+call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
+         'get_grid_var', 'inquire_variable '//trim(string3))
+
+!> @TODO more informative error message 
+if (ndims /= 2) then
+   call error_handler(E_ERR,'get_grid_var','wrong shape for '//string3, &
+              source, revision, revdate)
+endif
+
+DimensionLoop : do i = 1,ndims
+
+   write(string1,'(''inquire dimension'',i2,A)') i,trim(string3)
+
+   call nc_check(nf90_inquire_dimension(ncid, dimIDs(i), len=dimlens(i)), &
+                                       'get_grid_var', string1)
+
+enddo DimensionLoop
+
+! Check that the variable actual sizes match the expected sizes,
+
+if (dimlens(1) .ne. expected_dim1 .or. &
+    dimlens(2) .ne. expected_dim2 ) then
+   write(string1,*)'expected dimension 1 to be ',expected_dim1, 'was', dimlens(1)
+   write(string2,*)'expected dimension 2 to be ',expected_dim2, 'was', dimlens(2)
+   call error_handler(E_ERR, 'get_grid_var', string1, &
+              source, revision, revdate, text2=string2)
+endif
+
+select case (trim(varstring))
+   case ("lon")
+      allocate( lon(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, lon) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case ("lat")
+      allocate( lat(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, lat) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case ("slonu")
+      allocate( slonu(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, slonu) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case ("slatu")
+      allocate( slatu(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, slatu) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case ("slonv")
+      allocate( slonv(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, slonv) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case ("slatv")
+      allocate( slatv(dimlens(1), dimlens(2)) )
+      io = nf90_get_var(ncid, VarID, slatv) 
+      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      
+   case default
+      write(string1,*)'unsupported grid variable '
+      call error_handler(E_ERR,'get_grid_var', string1, &
+                 source, revision, revdate, text2=string3)
+
+end select
+
+
+end subroutine get_grid_var
 
 !------------------------------------------------------------------------
 !>
 
+subroutine get_vcoord(ncid, filename)
+integer,          intent(in) :: ncid
+character(len=*), intent(in) :: filename
 
+integer, dimension(NF90_MAX_VAR_DIMS) :: dimIDs
+integer, dimension(NF90_MAX_VAR_DIMS) :: dimlens
+integer :: io, VarID, DimID, ndims
+
+write(string3,*)' vcoord from '//trim(filename)
+
+call nc_check(nf90_inq_varid(ncid, 'vcoord', VarID), &
+         'get_vcoord', 'inq_varid '//trim(string3))
+
+call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
+         'get_vcoord', 'inquire_variable '//trim(string3))
+
+!> @TODO more informative error message 
+if (ndims /= 1) then
+   call error_handler(E_ERR,'get_vcoord','wrong shape for '//string3, &
+              source, revision, revdate)
+endif
+
+io = nf90_inquire_dimension(ncid, dimIDs(1), len=dimlens(1))
+call nc_check(io, 'get_vcoord', 'inquire_dimension '//trim(string3))
+
+! Check that the variable actual sizes match the expected sizes,
+
+if (dimlens(1) .ne. nlevel1 ) then
+   write(string1,*)'expected dimension to be ',nlevel1, 'was', dimlens(1)
+   call error_handler(E_ERR, 'get_vcoord', string1, source, revision, revdate)
+endif
+
+allocate( vcoord%level1(nlevel1) )
+io = nf90_get_var(ncid, VarID, vcoord%level1 ) 
+call nc_check(io, 'get_vcoord', 'get_var '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'long_name', vcoord%long_name)
+call nc_check(io, 'get_vcoord', 'get_att long_name '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'units', vcoord%units)
+call nc_check(io, 'get_vcoord', 'get_att units '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'ivctype', vcoord%ivctype)
+call nc_check(io, 'get_vcoord', 'get_att ivctype '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'irefatm', vcoord%irefatm)
+call nc_check(io, 'get_vcoord', 'get_att irefatm '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'p0sl', vcoord%p0sl)
+call nc_check(io, 'get_vcoord', 'get_att p0sl '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 't0sl', vcoord%t0sl)
+call nc_check(io, 'get_vcoord', 'get_att t0sl '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'dt0lp', vcoord%dt0lp)
+call nc_check(io, 'get_vcoord', 'get_att dt0lp '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'vcflat', vcoord%vcflat)
+call nc_check(io, 'get_vcoord', 'get_att vcflat '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'delta_t', vcoord%delta_t)
+call nc_check(io, 'get_vcoord', 'get_att delta_t '//trim(string3))
+
+io = nf90_get_att(ncid, VarID, 'h_scal', vcoord%h_scal)
+call nc_check(io, 'get_vcoord', 'get_att h_scal '//trim(string3))
+
+! Print a summary 
+if (debug > 5 .and. do_output()) then
+   write(logfileunit,*)
+   write(logfileunit,*)'vcoord long_name: ',trim(vcoord%long_name)
+   write(logfileunit,*)'vcoord     units: ',vcoord%units
+   write(logfileunit,*)'vcoord   ivctype: ',vcoord%ivctype
+   write(logfileunit,*)'vcoord   irefatm: ',vcoord%irefatm
+   write(logfileunit,*)'vcoord      p0sl: ',vcoord%p0sl
+   write(logfileunit,*)'vcoord      t0sl: ',vcoord%t0sl
+   write(logfileunit,*)'vcoord     dt0lp: ',vcoord%dt0lp
+   write(logfileunit,*)'vcoord    vcflat: ',vcoord%vcflat
+   write(logfileunit,*)'vcoord   delta_t: ',vcoord%delta_t
+   write(logfileunit,*)'vcoord    h_scal: ',vcoord%h_scal
+
+   write(*,*)
+   write(*,*)'vcoord long_name: ',trim(vcoord%long_name)
+   write(*,*)'vcoord     units: ',vcoord%units
+   write(*,*)'vcoord   ivctype: ',vcoord%ivctype
+   write(*,*)'vcoord   irefatm: ',vcoord%irefatm
+   write(*,*)'vcoord      p0sl: ',vcoord%p0sl
+   write(*,*)'vcoord      t0sl: ',vcoord%t0sl
+   write(*,*)'vcoord     dt0lp: ',vcoord%dt0lp
+   write(*,*)'vcoord    vcflat: ',vcoord%vcflat
+   write(*,*)'vcoord   delta_t: ',vcoord%delta_t
+   write(*,*)'vcoord    h_scal: ',vcoord%h_scal
+endif
+
+end subroutine get_vcoord
+
+
+      
 end module model_mod
 
 ! <next few lines under version control, do not edit>
