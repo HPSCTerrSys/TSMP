@@ -44,7 +44,7 @@ character (len = 129) :: output_file = 'check_me'
 logical               :: advance_time_present = .FALSE.
 logical               :: verbose              = .FALSE.
 integer               :: x_ind = -1
-real(r8)              :: loc_of_interest = -1.0_r8
+real(r8), dimension(3) :: loc_of_interest = -1.0_r8
 character(len=metadatalength) :: kind_of_interest = 'ANY'
 
 namelist /model_mod_check_nml/ input_file, output_file, &
@@ -157,7 +157,7 @@ call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize
 ! Checking for valid input is tricky ... we don't know much. 
 !----------------------------------------------------------------------
 
-if ( loc_of_interest >= 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
+if ( loc_of_interest(1) >= 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
 
 !----------------------------------------------------------------------
 ! Check the interpolation - print initially to STDOUT
@@ -204,7 +204,7 @@ end subroutine check_meta_data
 subroutine find_closest_gridpoint( loc_of_interest )
 ! Simple exhaustive search to find the indices into the 
 ! state vector of a particular location.
-real(r8), intent(in) :: loc_of_interest
+real(r8), intent(in) :: loc_of_interest(:)
 
 type(location_type) :: loc0, loc1
 integer  :: i, indx(1)

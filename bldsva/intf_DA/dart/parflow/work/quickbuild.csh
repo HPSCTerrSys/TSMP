@@ -80,7 +80,7 @@ endif
 # with MPI all the time, remove or comment out the entire section above.
 #----------------------------------------------------------------------
 
-\rm -f filter wakeup_filter
+\rm -f filter
 
 @ n = $n + 1
 echo
@@ -96,13 +96,6 @@ if ($status != 0) then
    echo
    exit $n
 endif
-
-@ n = $n + 1
-echo
-echo "---------------------------------------------------"
-echo "build number $n is mkmf_wakeup_filter"
-csh  mkmf_wakeup_filter -mpi
-make || exit $n
 
 \rm -f *.o *.mod input.nml*_default
 
