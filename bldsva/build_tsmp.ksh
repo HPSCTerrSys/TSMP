@@ -87,6 +87,9 @@ setDefaults(){
   options+=(["clm"]=${def_options["clm"]})
   options+=(["pfl"]=${def_options["pfl"]})
 
+#Da
+  options+=(["da"]="fresh")
+
 }
 
 
@@ -132,7 +135,8 @@ setSelection(){
   if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
   if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
-
+#DA
+  dadir=$rootdir/pdaf1_1_${platform}_${version}_${combination}
 
 }
 
@@ -158,6 +162,9 @@ setCombination(){
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi
+
+#DA
+withDA="true"
 
 }
 
@@ -271,6 +278,35 @@ route "${cblue}< c_compileParflow${cnormal}"
 }
 
 
+#DA
+compileDA(){
+route "${cblue}> c_compileParflow${cnormal}"
+  comment "  source da interface script"
+    . ${rootdir}/bldsva/intf_DA/pdaf1_1/arch/${platform}/build_interface_pdaf1_1_${platform}.ksh >> $log_file 2>> $err_file
+  check
+    always_da
+    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cblue}< c_compileDA${cnormal}" ;return  ;fi 
+    if [[ ${options["da"]} == "fresh" ]] ; then 
+  comment "  backup da dir to: $dadir"
+      rm -rf $dadir >> $log_file 2>> $err_file
+  check
+      cp -rf ${rootdir}/pdaf1_1 $dadir >> $log_file 2>> $err_file
+  check
+    fi  
+    if [[ ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      substitutions_da
+    fi  
+    if [[ ${options["da"]} == "configure" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      configure_da 
+    fi  
+
+    if [[ ${options["da"]} == "make" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      make_da
+    fi  
+route "${cblue}< c_compileDA${cnormal}"
+}
+
+
 runCompilation(){
 # run model compilation
   if [[ $withOAS == "true" ]] ; then ; compileOasis ; fi # must be called first bc of dependecies
@@ -278,6 +314,10 @@ runCompilation(){
   if [[ $withCLM == "true" ]] ; then ; compileClm ; fi
   if [[ $withCOS == "true" ]] ; then ; compileCosmo ; fi
   if [[ $withPFL == "true" ]] ; then ; compileParflow ; fi
+
+#DA
+  if [[ $withDA == "true" ]] ; then ; compileDA ; fi
+
 }
 
 interactive(){
