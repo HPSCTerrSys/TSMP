@@ -196,7 +196,7 @@
 
 &model_to_dart_nml
    model_to_dart_output_file = 'filter_ics'
-   model_restart_filename    = 'modelfile'
+   model_restart_filename    = '../data/rurlaf.out.press.00003.pfb'
    /
 
 &dart_to_model_nml 

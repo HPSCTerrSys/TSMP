@@ -17,7 +17,7 @@ use     location_mod, only : location_type,      get_close_maxdist_init, &
                              get_close_obs_init, get_close_obs, set_location, &
                              set_location_missing
 use    utilities_mod, only : register_module, error_handler, nc_check, &
-                             E_ERR, E_MSG
+                             get_unit, open_file, close_file, E_ERR, E_MSG
                              ! nmlfileunit, do_output, do_nml_file, do_nml_term,  &
                              ! find_namelist_in_file, check_namelist_read
 
@@ -47,7 +47,7 @@ public :: get_model_size,         &
 ! not required by DART but for larger models can be useful for
 ! utility programs that are tightly tied to the other parts of
 ! the model_mod code.
-public :: model_file_to_dart_vector, &
+public :: pfb_to_dart_vector, &
           dart_vector_to_model_file
 
 
@@ -97,7 +97,7 @@ call register_module(source, revision, revdate)
 
 
 ! Record the namelist values used for the run ...
-!if (do_nml_file()) write(nmlfileunit, nml=model_nml)
+!if (do_nml_file() write(nmlfileunit, nml=model_nml)
 !if (do_nml_term()) write(     *     , nml=model_nml)
 
 ! Create storage for locations
@@ -610,18 +610,29 @@ end subroutine ens_mean_for_model
 !==================================================================
 
 
-subroutine model_file_to_dart_vector(filename, state_vector, model_time)
+subroutine pfb_to_dart_vector(filename, state_vector, model_time)
 !------------------------------------------------------------------
 ! Reads the current time and state variables from a model data
 ! file and packs them into a dart state vector.
+implicit none
 
 character(len=*), intent(in)    :: filename
 real(r8),         intent(inout) :: state_vector(:)
 type(time_type),  intent(out)   :: model_time
+integer(kind=4)                 ::  &
+                   nx,              &     ! Longitude dimension
+                   ny,              &     ! Latitude dimension
+                   nz                    ! Vertical dimension
+real(r8)                        ::  &
+                   dx,              &     ! Grid Resolution in m
+                   dy,              &     ! Grid Resoultion in m
+                   dz                    ! Grid Resolution scale, check parflow namelist
 
 ! code goes here
+! First extract dimension of prognostic variable in the pfb file
+  call pfread_dim(filename,nx,ny,nz,dx,dy,dz)
 
-end subroutine model_file_to_dart_vector
+end subroutine pfb_to_dart_vector
 
 
 subroutine dart_vector_to_model_file(state_vector, filename, statedate)
@@ -637,7 +648,320 @@ type(time_type),  intent(in) :: statedate
 
 end subroutine dart_vector_to_model_file
 
+subroutine pfread_dim(filename,nx,ny,nz,dx,dy,dz)
+!------------------------------------------------------------------
+! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
+implicit none
 
+character(len=*), intent(in)   :: filename
+integer(kind=4),  intent(out)  ::  &
+                   nx,             &     ! Longitude dimension
+                   ny,             &     ! Latitude dimension
+                   nz                    ! Vertical dimension
+real(r8),         intent(out)  ::  &
+                   dx,             &     ! Grid Resolution in m
+                   dy,             &     ! Grid Resoultion in m
+                   dz                    ! Grid Resolution scale, check parflow namelist
+
+real(r8)                       :: x1, y1 ,z1
+integer(kind=4)                :: nudat, izerr 
+character(len=256)             :: errmsg
+
+! code starts here
+  nudat   = get_unit() 
+  open(nudat,file=trim(filename),form='unformatted',access='stream' , &
+                    convert='BIG_ENDIAN',status='old')         ! gfortran
+
+  !read in header infor
+  read(nudat, iostat=izerr) x1 !X
+  if (izerr /= 0) then
+    errmsg   = "unable to read X"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) y1 !Y
+  if (izerr /= 0) then
+    errmsg   = "unable to read Y"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) z1 !Z
+  if (izerr /= 0) then
+    errmsg   = "unable to read Z"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) nx !NX
+  if (izerr /= 0) then
+    errmsg   = "unable to read NX"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) ny !NY
+  if (izerr /= 0) then
+    errmsg   = "unable to read NY"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) nz !NZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read NZ"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) dx !dX
+  if (izerr /= 0) then
+    errmsg   = "unable to read dx"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dy !dY
+  if (izerr /= 0) then
+    errmsg   = "unable to read dy"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dz !dZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read dz"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  close(nudat)
+  return 
+end subroutine pfread_dim
+
+subroutine pfread_var(filename,nx,ny,nz,pfvar)
+!------------------------------------------------------------------
+! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
+implicit none
+
+character(len=*), intent(in)   :: filename
+integer(kind=4),  intent(in)   ::  &
+                   nx,             &     ! Longitude dimension
+                   ny,             &     ! Latitude dimension
+                   nz                    ! Vertical dimension
+real(r8),         intent(out)  ::  &
+                   pfvar(nx,ny,nz)       ! ParFlow pressure files 
+
+real(r8)                       :: x1, y1, z1 
+
+real(r8)                       ::  &
+                   dx,             &     ! Grid Resolution in m
+                   dy,             &     ! Grid Resoultion in m
+                   dz                    ! Grid Resolution scale, check parflow namelist
+
+integer(kind=4)                :: nudat, dummy, izerr
+integer(kind=4)                ::  &
+                   i, j, k,        &
+                   ix, iy, iz,     &
+                   is, ns,         &
+                   rx, ry, rz,     &
+                   nnx, nny, nnz
+character(len=256)             :: errmsg
+
+! code starts here
+  nudat   = get_unit()
+  open(nudat,file=trim(filename),form='unformatted',access='stream' , &
+                    convert='BIG_ENDIAN',status='old')         ! gfortran
+
+  !read in header infor
+  read(nudat, iostat=izerr) x1 !X
+  if (izerr /= 0) then
+    errmsg   = "unable to read X"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) y1 !Y
+  if (izerr /= 0) then
+    errmsg   = "unable to read Y"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) z1 !Z
+  if (izerr /= 0) then
+    errmsg   = "unable to read Z"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) dummy !NX
+  if (izerr /= 0) then
+    errmsg   = "unable to read NX"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dummy !NY
+  if (izerr /= 0) then
+    errmsg   = "unable to read NY"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dummy !NZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read NZ"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) dx !dX
+  if (izerr /= 0) then
+    errmsg   = "unable to read dx"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dy !dY
+  if (izerr /= 0) then
+    errmsg   = "unable to read dy"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dz !dZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read dz"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) ns !num_subgrids
+  if (izerr /= 0) then
+    errmsg   = "unable to read ns"
+    call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+  endif
+!
+! Start loop over number of subgrids
+  do is = 0, ns-1
+! Start: reading subgrid spatial information
+! ix, iy, iz
+   read(nudat, iostat=izerr) ix
+   if (izerr /= 0) then
+     errmsg   = "unable to read ix"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) iy
+   if (izerr /= 0) then
+     errmsg   = "unable to read ix"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) iz
+   if (izerr /= 0) then
+     errmsg   = "unable to read ix"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+
+! nnx. nny, nnz 
+   read(nudat, iostat=izerr) nnx
+   if (izerr /= 0) then
+     errmsg   = "unable to read nnx"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) nny
+   if (izerr /= 0) then
+     errmsg   = "unable to read nny"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) nnz
+   if (izerr /= 0) then
+     errmsg   = "unable to read nnz"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+
+! rx,ry,rz
+   read(nudat, iostat=izerr) rx
+   if (izerr /= 0) then
+     errmsg   = "unable to read rx"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) ry
+   if (izerr /= 0) then
+     errmsg   = "unable to read ry"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+   read(nudat, iostat=izerr) rz
+   if (izerr /= 0) then
+     errmsg   = "unable to read rz"
+     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
+   endif
+
+! Start reading in the data finally for each individual subgrid
+   ! Start: Read in data from each individual subgrid
+   do  k=iz +1 , iz + nnz
+   do  j=iy +1 , iy + nny
+   do  i=ix +1 , ix + nnx
+     read(nudat, iostat=izerr) pfvar(i,j,k)
+   end do
+   end do
+   end do
+   ! End: Read in data from each individual subgrid
+
+  end do
+! End: loop over number of sub grids
+
+  close(nudat)
+  return
+end subroutine pfread_var
+
+subroutine pfwrite_var(filename,nx,ny,nz,dx,dy,dz)
+!------------------------------------------------------------------
+! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
+implicit none
+
+character(len=*), intent(in)   :: filename
+integer(kind=4),  intent(out)  ::  &
+                   nx,             &     ! Longitude dimension
+                   ny,             &     ! Latitude dimension
+                   nz                    ! Vertical dimension
+real(r8),         intent(out)  ::  &
+                   dx,             &     ! Grid Resolution in m
+                   dy,             &     ! Grid Resoultion in m
+                   dz                    ! Grid Resolution scale, check parflow namelist
+
+real(r8)                       :: x1, y1, z1 
+integer(kind=4)                :: nudat, izerr
+character(len=256)             :: errmsg
+
+! code starts here
+  nudat   = get_unit()
+  open(nudat,file=trim(filename),form='unformatted',access='stream' , &
+                    convert='BIG_ENDIAN',status='old')         ! gfortran
+
+  !read in header infor
+  read(nudat, iostat=izerr) x1 !X
+  if (izerr /= 0) then
+    errmsg   = "unable to read X"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) y1 !Y
+  if (izerr /= 0) then
+    errmsg   = "unable to read Y"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) z1 !Z
+  if (izerr /= 0) then
+    errmsg   = "unable to read Z"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) nx !NX
+  if (izerr /= 0) then
+    errmsg   = "unable to read NX"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) ny !NY
+  if (izerr /= 0) then
+    errmsg   = "unable to read NY"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) nz !NZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read NZ"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  read(nudat, iostat=izerr) dx !dX
+  if (izerr /= 0) then
+    errmsg   = "unable to read dx"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dy !dY
+  if (izerr /= 0) then
+    errmsg   = "unable to read dy"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  read(nudat, iostat=izerr) dz !dZ
+  if (izerr /= 0) then
+    errmsg   = "unable to read dz"
+    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+
+  close(nudat)
+  return
+end subroutine pfwrite_var
 !===================================================================
 ! End of model_mod
 !===================================================================

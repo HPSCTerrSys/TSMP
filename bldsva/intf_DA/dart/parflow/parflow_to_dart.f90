@@ -26,7 +26,7 @@ program parflow_to_dart
 use        types_mod, only : r8
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read
-use        model_mod, only : get_model_size, model_file_to_dart_vector
+use        model_mod, only : get_model_size, pfb_to_dart_vector
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 use time_manager_mod, only : time_type, print_time, print_date
 
@@ -82,7 +82,7 @@ write(*,*) ' to DART file ', "'"//trim(model_to_dart_output_file)//"'"
 x_size = get_model_size()
 allocate(statevector(x_size))
 
-call model_file_to_dart_vector(model_restart_filename, statevector, model_time) 
+call pfb_to_dart_vector(model_restart_filename, statevector, model_time) 
 
 iunit = open_restart_write(model_to_dart_output_file)
 
