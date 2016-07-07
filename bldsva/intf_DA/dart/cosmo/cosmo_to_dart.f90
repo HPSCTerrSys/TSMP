@@ -95,6 +95,8 @@ iunit = open_restart_write(cosmo_to_dart_output_file)
 call awrite_state_restart(model_time, x, iunit)
 call close_restart(iunit)
 
+deallocate(x)
+
 !----------------------------------------------------------------------
 ! When called with 'end', timestamp will call finalize_utilities()
 !----------------------------------------------------------------------

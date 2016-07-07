@@ -232,7 +232,7 @@ type verticalobject
    real(r8)              :: h_scal = 10000.
 end type verticalobject
 
-type(verticalobject) :: vcoord
+type(verticalobject), save :: vcoord  ! some compilers require save if initializing a structure
 
 ! track which variables to update
 ! As the binary file gets read, we need to compare the 'slab' to see if
@@ -275,7 +275,7 @@ namelist /model_nml/             &
    debug,                        &
    variables
 
-integer                        :: model_size
+integer                        :: model_size = 0
 type(time_type)                :: model_timestep ! smallest time to adv model
 
 integer, parameter             :: n_max_kinds=400
@@ -353,10 +353,11 @@ call get_cosmo_grid(cosmo_netcdf_file)
 ! rectify the user input for the variables to include in the DART state vector
 call parse_variable_table(variables, nfields, variable_table)
 
-! now we have to actually read the input file to decode and confirm shapes of the variables
-! oh, how I wish for netCDF ...
+! Read the input file to decode and confirm shapes of the variables.
+! Without a second argument, read_binary_file just collects sizes.
+
 do ivar = 1,nfields
-    call set_variable_binary_properties(ivar)
+    call read_binary_file(ivar)
 enddo
 
 ! calculate how we store what we have in the DART state vector and fill
@@ -1852,37 +1853,18 @@ end subroutine set_allowed_state_vector_vars
 !>
 
 
-subroutine get_state_vector(sv,model_time)
+subroutine get_state_vector(statevector, model_time)
 
-real(r8),        intent(out) :: sv(1:model_size)
+real(r8),        intent(out) :: statevector(1:model_size)
 type(time_type), intent(out) :: model_time
 
-integer              :: islab,ikind,nx,ny,sidx,eidx
-real(r8),allocatable :: mydata(:,:)
-
-call error_handler(E_ERR,'get_state_vector','routine not written',source,revision,revdate)
+integer  :: ivar
 
 if ( .not. module_initialized ) call static_init_model
 
-call set_allowed_state_vector_vars()
-
-do islab=1,nslabs
-  ikind=cosmo_slabs(islab)%dart_kind
-  if (ikind>0) then
-    if (is_allowed_state_vector_var(ikind)) then
-      nx=state_vector_vars(ikind)%nx
-      ny=state_vector_vars(ikind)%ny
-      allocate(mydata(1:nx,1:ny))
-      mydata=get_data_from_binary(cosmo_restart_file,grib_header(islab),nx,ny)
-      sidx=cosmo_slabs(islab)%dart_sindex
-      eidx=cosmo_slabs(islab)%dart_eindex
-      state_vector(sidx:eidx)=reshape(mydata,(/ (nx*ny) /))
-      deallocate(mydata)
-    endif
-  endif
+do ivar=1,nfields
+   call read_binary_file(ivar, statevector, model_time)
 enddo
-
-sv(:)=state_vector(:)
 
 return
 
@@ -2609,17 +2591,11 @@ end subroutine parse_variable_table
 !> that the variables are stored contiguously so that if we encounter a 
 !> new variable type we can stop looking.
 
+subroutine read_binary_file(dartid, statevector, model_time)
 
-subroutine set_variable_binary_properties(dartid)
-integer, intent(in) :: dartid
-
-! Table to decode the record contents of igdsbuf
-integer, parameter :: indx_numEW    =  5, &
-                      indx_numNS    =  6, &
-                      indx_startlat =  7, &
-                      indx_startlon =  8, &
-                      indx_endlat   = 10, &
-                      indx_endlon   = 11
+integer,                   intent(in)  :: dartid
+real(r8),        optional, intent(out) :: statevector(:)
+type(time_type), optional, intent(out) :: model_time
 
 ! Table to decode the record contents of ipdsbuf
 !> @TODO no seconds?
@@ -2627,57 +2603,44 @@ integer, parameter :: indx_gribver   =   2, &
                       indx_var       =   7, &
                       indx_zlevtyp   =   8, &
                       indx_zlevtop   =   9, &
-                      indx_zlevbot   =  10, &
-                      indx_year      =  11, &
-                      indx_mm        =  12, &
-                      indx_dd        =  13, &
-                      indx_hh        =  14, &
-                      indx_min       =  15, &
-                      indx_startstep =  17, &
-                      indx_endstep   =  18, &
-                      indx_nztri     =  19, &
-                      indx_cc        =  22
+                      indx_zlevbot   =  10
 
-integer, parameter :: NPDS  = 321   ! dimension of product definition section
-integer, parameter :: NGDS  = 626   ! dimension of grid description section
+integer, parameter :: NPDS  = 321 ! dimension of product definition section
+integer, parameter :: NGDS  = 626 ! dimension of grid description section
 
-integer(i4) :: ipdsbuf(NPDS)        ! pds: product definition section
-integer(i4) :: igdsbuf(NGDS)        ! gds: grid definition section
+type(time_type) :: slab_time
 
-integer(i4) :: nudat,      &        ! unit number
-               izerr,      &        ! error status
-               ivar,       &        ! variable reference number based on iver
-               iver,       &        ! version number of GRIB1 indicator table
-               iz_countl            ! counter for binary data
+integer(i4) :: ipdsbuf(NPDS)     ! pds: product definition section
+integer(i4) :: igdsbuf(NGDS)     ! gds: grid definition section
+real(r8)    :: rbuf(nrlon*nrlat) ! data to be read
 
-real(r8) :: rbuf(nrlon*nrlat)       ! data to be read
-real(r8) :: zvc_params(nlevel1)     ! height levels
+integer :: izerr      ! error status
+integer :: iz_countl  ! read counter for binary data
+integer :: ivar       ! variable reference number based on iver
+integer :: iver       ! version number of GRIB1 indicator table
+integer :: ilevtyp    ! type of vertical coordinate system
 
-real(r8) :: psm0,             &     ! initial value for mean surface pressure ps
-            dsem0,            &     ! initial value for mean dry static energy
-            msem0,            &     ! initial value for mean moist static energy
-            kem0,             &     ! initial value for mean kinetic energy
-            qcm0,             &     ! initial value for mean cloudwater content
-            refatm_p0sl,      &     ! constant reference pressure on sea-level
-            refatm_t0sl,      &     ! constant reference temperature on sea-level
-            refatm_dt0lp,     &     ! d (t0) / d (ln p0)
-            refatm_delta_t,   &     ! temperature difference between sea level and stratosphere (for irefatm=2)
-            refatm_h_scal,    &     ! scale height (for irefatm=2)
-            refatm_bvref,     &     ! constant Brund-Vaisala-frequency for irefatm=3
-            vcoord_vcflat           ! coordinate where levels become flat
+integer :: fid, i, nx, ny, ilev, ilevp1
 
-integer(i4) :: ntke,          &     ! time level for TKE
-               izvctype_read        ! check vertical coordinate type in restarts
-
-integer  :: fid, i, nx, ny, ilev, ilevp1, ilevtyp
-integer  :: icc, iyy, imm, idd, ihh, imin, iccyy
-integer  :: istartstep, iendstep, nztri
 real(r8) :: lat1, latN, lon1, lonN
 
-! variables that record what kind of variable is being read
-! must switch on change of variable 
-integer :: old_tableID, old_varID, old_izvctype
 logical :: desired
+logical :: filling
+
+!-----------------------------------------------------------------------
+
+if (present(statevector) .and. model_size == 0) then
+   string1 = 'model_size unknown, cannot fill state vector yet.'
+   string2 = 'must call read_binary_file once to define model_size.'
+   call error_handler(E_ERR,'read_binary_file',string1, &
+              source, revision, revdate, text2=string2)
+endif
+
+if (present(statevector)) then
+   filling = .true.
+else
+   filling = .false.
+endif
 
 !-----------------------------------------------------------------------
 
@@ -2686,58 +2649,17 @@ fid = open_file(cosmo_restart_file, form='unformatted', action='read')
 if (debug > 99 .and. do_output()) then
    write(string1,*)'searching for '//trim(progvar(dartid)%varname), &
                    progvar(dartid)%tableID, progvar(dartid)%variableID
-   call error_handler(E_MSG,'set_variable_binary_properties', string1, source, revision, revdate)
+   call error_handler(E_MSG,'read_binary_file', string1, source, revision, revdate)
 endif
 
-read(fid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
-if (izerr /= 0) then
-   write(string1,*)'unable to read first record while searching for '//trim(progvar(dartid)%varname)
-   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
-endif
-
-read(fid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
-                        refatm_dt0lp, vcoord_vcflat, zvc_params
-if (izerr /= 0) then
-   write(string1,*)'unable to read second record while searching for '//trim(progvar(dartid)%varname)
-   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
-endif
-
-if     ( izvctype_read > 0 .and. izvctype_read <= 100 ) then
-   !write(*,*) "izvctype_read = ", izvctype_read
-   continue
-
-elseif ( (izvctype_read > 100) .and. (izvctype_read <= 200) ) then
-
-   read(fid, iostat=izerr) refatm_delta_t, refatm_h_scal
-   if (izerr /= 0) then
-      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_delta_t, refatm_h_scal"'
-      write(string2,*)'unable to read record while searching for '//trim(progvar(dartid)%varname)
-      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate, text2=string2)
-   endif
-
-elseif ( (izvctype_read > 200) .and. (izvctype_read <= 300) ) then
-
-   read(fid, iostat=izerr) refatm_bvref
-   if (izerr /= 0) then
-      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_bvref"'
-      write(string2,*)'unable to read record while searching for '//trim(progvar(dartid)%varname)
-      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate, text2=string2)
-   endif
-
-else
-   write(string1,*) 'izvctype_read is ',izvctype_read,' is unsupported.'
-   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
-endif
+call read_binary_header(fid, dartid)
 
 !------------------------------------------------------------------------------
 !Section 3: READ ALL RECORDS
 !------------------------------------------------------------------------------
 
-iz_countl    = 0   ! keep track of the 'slab index'
-old_tableID  = 0
-old_varID    = 0
-old_izvctype = 0
-desired      = .false.  ! presume we do not want this slab
+iz_countl = 0        ! keep track of the 'slab index'
+desired   = .false.  ! presume we do not want this slab
 
 read_loop: DO
 
@@ -2747,12 +2669,12 @@ read_loop: DO
      exit read_loop
    elseif (izerr > 0) then
       write(string1,*) 'ERROR READING RESTART FILE around data record ',iz_countl
-      call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+      call error_handler(E_ERR,'read_binary_file', string1, source, revision, revdate)
    endif
 
    iz_countl = iz_countl + 1
 
-   ! Decode ipdsbuf
+   ! Determine table ID, variable ID, the vertical coordinate system, etc.
 
    iver    = ipdsbuf(indx_gribver)
    ivar    = ipdsbuf(indx_var)
@@ -2760,38 +2682,17 @@ read_loop: DO
    ilev    = ipdsbuf(indx_zlevtop)
    ilevp1  = ipdsbuf(indx_zlevbot)
 
-   icc     = ipdsbuf(indx_cc)-1
-   iyy     = ipdsbuf(indx_year)
-   iccyy   = iyy + icc*100
-   imm     = ipdsbuf(indx_mm)
-   idd     = ipdsbuf(indx_dd)
-   ihh     = ipdsbuf(indx_hh)
-   imin    = ipdsbuf(indx_min)
-
-   istartstep = ipdsbuf(indx_startstep)
-   iendstep   = ipdsbuf(indx_endstep)
-   nztri      = ipdsbuf(indx_nztri)
-
-!  write(*,'(A,3x,i8,5(1x,i2),4(1x,i4))') 'time for iz_countl = ', &
-!        iz_countl,icc,iyy,imm,idd,ihh,imin,nztri,istartstep,iendstep
-
-   ! Decode igdsbuf
-
-   nx   = igdsbuf(indx_numEW)
-   ny   = igdsbuf(indx_numNS)
-   lat1 = real(igdsbuf(indx_startlat),r8) * 0.001_r8
-   lon1 = real(igdsbuf(indx_startlon),r8) * 0.001_r8
-   latN = real(igdsbuf(indx_endlat  ),r8) * 0.001_r8
-   lonN = real(igdsbuf(indx_endlon  ),r8) * 0.001_r8
+   call decode_location(igdsbuf, nx, ny, lat1, lon1, latN, lonN)
 
    ! Since Fortran binary reads have no way to know if they fail or not
    ! we are going to compare our input with the sizes encoded in the file.
+   ! nrlon and nrlat come from the netCDF file. They are our expectation.
 
    if (nx .ne. nrlon .or. ny .ne. nrlat) then
       write(string1,*) 'reading variable ',trim(progvar(dartid)%varname), ' from '//trim(cosmo_restart_file)
       write(string2,*) '(file) nx /= nrlon ',nx,nrlon, ' or '
       write(string3,*) '(file) ny /= nrlat ',ny,nrlat
-      call error_handler(E_ERR,'set_variable_binary_properties', string1, &
+      call error_handler(E_ERR,'read_binary_file', string1, &
                  source, revision, revdate, text2=string2, text3=string3)
    endif
 
@@ -2803,13 +2704,13 @@ read_loop: DO
 
    if (progvar(dartid)%tableID == iver .and. progvar(dartid)%variableID == ivar ) then
 
-      ! special case - naturally - specific humidity occurs twice - one with
+      ! special case - specific humidity occurs twice - one with
       ! ilevtyp = 1 (surface) and again with ilevtyp = 110 - a 3D variable
       if (progvar(dartid)%tableID == 2 .and. progvar(dartid)%variableID == 51 .and.  ilevtyp < 109 ) then
          cycle read_loop
       endif
 
-      ! special case - naturally - temperature occurs twice - one with
+      ! special case - temperature occurs twice - one with
       ! ilevtyp = 1 (surface) and again with ilevtyp = 110 - a 3D variable
       if (progvar(dartid)%tableID == 2 .and. progvar(dartid)%variableID == 11 .and.  ilevtyp < 109 ) then
          cycle read_loop
@@ -2818,6 +2719,8 @@ read_loop: DO
       if (.not. desired) then
          ! This is the first slab of the variable we want
          progvar(dartid)%slab1 = iz_countl
+         call decode_time(ipdsbuf,slab_time)
+         if (present(model_time)) model_time = slab_time
       endif
 
       desired = .true.
@@ -2833,59 +2736,31 @@ read_loop: DO
       else
       endif
 
-      ! some things get reset with every slab
-
-      if (    ilevtyp == 109) then
-         progvar(dartid)%numZ       = ilevp1
-         progvar(dartid)%numdims    = 3
-      elseif (ilevtyp == 110) then
-         progvar(dartid)%numZ       = ilev
-         progvar(dartid)%numdims    = 3
-      elseif (ilevtyp == 1) then
-         progvar(dartid)%numdims    = 2
+      if ( filling ) then
+         call insert_slab_in_state(dartid, iz_countl, nx, ny, rbuf, statevector)
       else
-         write(string1,*)'unsupported vertical coordinate system of ',ilevtyp
-         write(string2,*)'trying to find ',progvar(dartid)%varname
-         write(string3,*)'grib table ',progvar(dartid)%tableID, ' grib variable ',progvar(dartid)%variableID
-         call error_handler(E_ERR, 'set_variable_binary_properties', string1, &
-                    source, revision, revdate, text2=string2, text3=string3)
+         call record_sizes(dartid, nx, ny, iz_countl, ilevtyp, ilev, ilevp1)
       endif
-
-      progvar(dartid)%levtypeID  = ilevtyp
-      progvar(dartid)%numEW      = nrlon
-      progvar(dartid)%numNS      = nrlat
-      progvar(dartid)%slabN      = iz_countl
-      progvar(dartid)%varsize    = progvar(dartid)%numEW * &
-                                   progvar(dartid)%numNS * &
-                                   progvar(dartid)%numZ
 
    elseif (desired) then
       ! If we wanted the last slab but the new slab is not of the same variable - we are done.
       exit read_loop
    endif
 
-   ! see if the slab we are reading defines the start of a new variable
-
-   if (old_tableID  .ne. iver .or. &
-       old_varID    .ne. ivar .or. &
-       old_izvctype .ne. ilevtyp) then
-!     write (*,'(A,2x,8(1x,i4),2(1xf15.8))')'slab ',iz_countl, iver, ivar, nx, ny, &
-!               ilev, ilevp1, ilevtyp, MINVAL(rbuf), MAXVAL(rbuf)
-   endif
-
-   old_tableID  = iver
-   old_varID    = ivar
-   old_izvctype = ilevtyp
-
 enddo read_loop
 
 close(fid, iostat=izerr)
 if (izerr /= 0) then
    write(string1,*) 'closing '//trim(cosmo_restart_file)//' while looking for ',trim(progvar(dartid)%varname)
-   call error_handler(E_ERR,'set_variable_binary_properties', string1, source, revision, revdate)
+   call error_handler(E_ERR,'read_binary_file', string1, source, revision, revdate)
 endif
 
-end subroutine set_variable_binary_properties
+if (.not. desired) then
+   write(string1,*) 'never found '//trim(progvar(dartid)%varname)//' in '//trim(cosmo_restart_file)
+   call error_handler(E_ERR,'read_binary_file', string1, source, revision, revdate)
+endif
+
+end subroutine read_binary_file
 
 !------------------------------------------------------------------------
 !>
@@ -2948,12 +2823,283 @@ do ivar = 1,nfields
    write(*,*)'   maxvalue        ',       progvar(ivar)%maxvalue
    write(*,*)'   kind_string     ',  trim(progvar(ivar)%kind_string)
    write(*,*)'   update          ',       progvar(ivar)%update
+   write(*,*)
+
+   write(logfileunit,*)
+   write(logfileunit,*)'variable ',ivar,' is ',trim(progvar(ivar)%varname)
+   write(logfileunit,*)'   long_name       ',  trim(progvar(ivar)%long_name)
+   write(logfileunit,*)'   units           ',  trim(progvar(ivar)%units)
+   write(logfileunit,*)'   tableID         ',       progvar(ivar)%tableID
+   write(logfileunit,*)'   variableID      ',       progvar(ivar)%variableID
+   write(logfileunit,*)'   levtypeID       ',       progvar(ivar)%levtypeID
+   write(logfileunit,*)'   numdims         ',       progvar(ivar)%numdims
+   write(logfileunit,*)'   numEW           ',       progvar(ivar)%numEW
+   write(logfileunit,*)'   numNS           ',       progvar(ivar)%numNS
+   write(logfileunit,*)'   numZ            ',       progvar(ivar)%numZ
+   write(logfileunit,*)'   varsize         ',       progvar(ivar)%varsize
+   write(logfileunit,*)'   slab1           ',       progvar(ivar)%slab1
+   write(logfileunit,*)'   slabN           ',       progvar(ivar)%slabN
+   write(logfileunit,*)'   index1          ',       progvar(ivar)%index1
+   write(logfileunit,*)'   indexN          ',       progvar(ivar)%indexN
+   write(logfileunit,*)'   dart_kind       ',       progvar(ivar)%dart_kind
+   write(logfileunit,*)'   rangeRestricted ',       progvar(ivar)%rangeRestricted
+   write(logfileunit,*)'   minvalue        ',       progvar(ivar)%minvalue
+   write(logfileunit,*)'   maxvalue        ',       progvar(ivar)%maxvalue
+   write(logfileunit,*)'   kind_string     ',  trim(progvar(ivar)%kind_string)
+   write(logfileunit,*)'   update          ',       progvar(ivar)%update
+   write(logfileunit,*)
 enddo
 
 end subroutine progvar_summary
 
 !------------------------------------------------------------------------
 !>
+
+subroutine decode_time(ipdsbuf, model_time)
+
+integer,         intent(in)  :: ipdsbuf(:)
+type(time_type), intent(out) :: model_time
+
+integer  :: icc, iyy, imm, idd, ihh, imin, iccyy
+integer  :: istartstep, iendstep, nztri
+type(time_type) :: base_time
+type(time_type) :: run_length
+
+! Table to decode the record contents of ipdsbuf
+!> @TODO no seconds?
+integer, parameter :: indx_year      =  11, &
+                      indx_mm        =  12, &
+                      indx_dd        =  13, &
+                      indx_hh        =  14, &
+                      indx_min       =  15, &
+                      indx_startstep =  17, &
+                      indx_endstep   =  18, &
+                      indx_nztri     =  19, &
+                      indx_cc        =  22
+
+icc   = ipdsbuf(indx_cc)-1
+iyy   = ipdsbuf(indx_year)
+iccyy = iyy + icc*100
+imm   = ipdsbuf(indx_mm)
+idd   = ipdsbuf(indx_dd)
+ihh   = ipdsbuf(indx_hh)
+imin  = ipdsbuf(indx_min)
+
+base_time = set_date(iccyy,imm,idd,ihh,imin,0)
+
+istartstep = ipdsbuf(indx_startstep) ! number of hours into the run
+iendstep   = ipdsbuf(indx_endstep)   ! not needed by DART, I think
+nztri      = ipdsbuf(indx_nztri)
+
+!> @TODO confirm that if nztri /= 0, we do nothing
+if (nztri == 0) then
+   run_length = set_time(istartstep*60*60,0)
+else
+   ! In the absence of more information, we are going to error out.
+   write(string1,*)'cannot decode model time. expected nztri = 0, it was ',nztri
+   call error_handler(E_ERR, 'decode_time', string1, source, revision, revdate)
+endif
+
+model_time = base_time + run_length
+
+if (debug > 99 .and. do_output()) then
+   call print_time(model_time,'model time is ')
+   call print_date(model_time,'model date is ')
+
+!  write(*,'(A,6(1x,i2),3(1x,i4))') 'time as read = ', &
+!         icc,iyy,imm,idd,ihh,imin, nztri,istartstep,iendstep
+endif
+
+end subroutine decode_time
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine read_binary_header(fid, ivar)
+
+! some of these might be useful, but not at the moment.
+! just need to skip the header to get to the records.
+
+integer, intent(in) :: fid
+integer, intent(in) :: ivar
+
+real(r8)    :: psm0                ! initial value for mean surface pressure ps
+real(r8)    :: dsem0               ! initial value for mean dry static energy
+real(r8)    :: msem0               ! initial value for mean moist static energy
+real(r8)    :: kem0                ! initial value for mean kinetic energy
+real(r8)    :: qcm0                ! initial value for mean cloudwater content
+integer(i4) :: ntke                ! time level for TKE
+
+integer(i4) :: izvctype_read       ! check vertical coordinate type in restarts
+real(r8)    :: refatm_p0sl         ! constant reference pressure on sea-level
+real(r8)    :: refatm_t0sl         ! constant reference temperature on sea-level
+real(r8)    :: refatm_dt0lp        ! d (t0) / d (ln p0)
+real(r8)    :: vcoord_vcflat       ! coordinate where levels become flat
+real(r8)    :: zvc_params(nlevel1) ! height levels
+
+real(r8) :: refatm_delta_t ! temperature difference between sea level and stratosphere (for irefatm=2)
+real(r8) :: refatm_h_scal  ! scale height (for irefatm=2)
+real(r8) :: refatm_bvref   ! constant Brund-Vaisala-frequency for irefatm=3
+
+integer :: izerr
+
+read(fid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
+if (izerr /= 0) then
+   write(string1,*)'unable to read first record while searching for '//trim(progvar(ivar)%varname)
+   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+endif
+
+read(fid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
+                        refatm_dt0lp, vcoord_vcflat, zvc_params
+if (izerr /= 0) then
+   write(string1,*)'unable to read second record while searching for '//trim(progvar(ivar)%varname)
+   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+endif
+
+if     ( izvctype_read > 0 .and. izvctype_read <= 100 ) then
+   !write(*,*) "izvctype_read = ", izvctype_read
+   continue
+
+elseif ( (izvctype_read > 100) .and. (izvctype_read <= 200) ) then
+
+   read(fid, iostat=izerr) refatm_delta_t, refatm_h_scal
+   if (izerr /= 0) then
+      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_delta_t, refatm_h_scal"'
+      write(string2,*)'unable to read record while searching for '//trim(progvar(ivar)%varname)
+      call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate, text2=string2)
+   endif
+
+elseif ( (izvctype_read > 200) .and. (izvctype_read <= 300) ) then
+
+   read(fid, iostat=izerr) refatm_bvref
+   if (izerr /= 0) then
+      write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_bvref"'
+      write(string2,*)'unable to read record while searching for '//trim(progvar(ivar)%varname)
+      call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate, text2=string2)
+   endif
+
+else
+   write(string1,*) 'izvctype_read is ',izvctype_read,' is unsupported.'
+   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+endif
+
+end subroutine read_binary_header
+
+
+!------------------------------------------------------------------------
+!>
+
+subroutine decode_location(igdsbuf, nx, ny, lat1, lon1, latN, lonN)
+
+integer(i4), intent(in)  :: igdsbuf(:)
+integer,     intent(out) :: nx
+integer,     intent(out) :: ny
+real(r8),    intent(out) :: lat1
+real(r8),    intent(out) :: lon1
+real(r8),    intent(out) :: latN
+real(r8),    intent(out) :: lonN
+
+! Table to decode the record contents of igdsbuf
+integer, parameter :: indx_numEW    =  5, &
+                      indx_numNS    =  6, &
+                      indx_startlat =  7, &
+                      indx_startlon =  8, &
+                      indx_endlat   = 10, &
+                      indx_endlon   = 11
+
+nx   = igdsbuf(indx_numEW)
+ny   = igdsbuf(indx_numNS)
+
+lat1 = real(igdsbuf(indx_startlat),r8) * 0.001_r8
+lon1 = real(igdsbuf(indx_startlon),r8) * 0.001_r8
+latN = real(igdsbuf(indx_endlat  ),r8) * 0.001_r8
+lonN = real(igdsbuf(indx_endlon  ),r8) * 0.001_r8
+
+end subroutine decode_location
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine record_sizes(ivar, nx, ny, iz_countl, ilevtyp, ilev, ilevp1)
+
+integer, intent(in) :: ivar
+integer, intent(in) :: nx
+integer, intent(in) :: ny
+integer, intent(in) :: iz_countl
+integer, intent(in) :: ilevtyp
+integer, intent(in) :: ilev
+integer, intent(in) :: ilevp1
+
+if (    ilevtyp == 109) then
+   progvar(ivar)%numZ       = ilevp1
+   progvar(ivar)%numdims    = 3
+elseif (ilevtyp == 110) then
+   progvar(ivar)%numZ       = ilev
+   progvar(ivar)%numdims    = 3
+elseif (ilevtyp == 1) then
+   progvar(ivar)%numZ       = 1
+   progvar(ivar)%numdims    = 2
+else
+   write(string1,*)'unsupported vertical coordinate system of ',ilevtyp
+   write(string2,*)'trying to find ',progvar(ivar)%varname
+   write(string3,*)'grib table ',progvar(ivar)%tableID, ' grib variable ',progvar(ivar)%variableID
+   call error_handler(E_ERR, 'record_sizes', string1, &
+              source, revision, revdate, text2=string2, text3=string3)
+endif
+
+progvar(ivar)%levtypeID  = ilevtyp
+progvar(ivar)%numEW      = nx
+progvar(ivar)%numNS      = ny
+progvar(ivar)%slabN      = iz_countl
+progvar(ivar)%varsize    = progvar(ivar)%numEW * &
+                           progvar(ivar)%numNS * &
+                           progvar(ivar)%numZ
+
+end subroutine record_sizes
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine insert_slab_in_state(ivar, slabID, nx, ny, rbuf, statevector)
+
+integer,  intent(in)    :: ivar
+integer,  intent(in)    :: slabID      ! index of slice we have in rbuf
+integer,  intent(in)    :: nx
+integer,  intent(in)    :: ny
+real(r8), intent(in)    :: rbuf(nx,ny)
+real(r8), intent(inout) :: statevector(:)
+
+integer :: islab, istart, iend
+
+if ( slabID < progvar(ivar)%slab1 .or. slabID > progvar(ivar)%slabN ) then
+   write(string1,*)'slab out-of-range for ',trim(progvar(ivar)%varname)
+   write(string2,*)'slab1 = ', progvar(ivar)%slab1, ', slab = ',slabID, &
+                 ', slabN = ', progvar(ivar)%slabN
+   call error_handler(E_ERR,'insert_slab_in_state', string1, &
+              source, revision, revdate, text2=string2)
+endif
+
+islab  = slabID - progvar(ivar)%slab1 + 1
+istart = progvar(ivar)%index1 + (islab -1)*nx*ny
+iend   = istart + nx*ny - 1
+
+if (debug > 99 .and. do_output()) &
+   write(*,*)'stuffing slab ',slabID,' into ',istart, iend
+
+statevector(istart:iend) = reshape(rbuf, (/ nx*ny /))
+
+end subroutine insert_slab_in_state
+
+
+!------------------------------------------------------------------------
+!>
+
 
 end module model_mod
 
