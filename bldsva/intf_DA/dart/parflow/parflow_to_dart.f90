@@ -25,8 +25,9 @@ program parflow_to_dart
 
 use        types_mod, only : r8
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
-                             find_namelist_in_file, check_namelist_read
-use        model_mod, only : get_model_size, pfb_to_dart_vector
+                             find_namelist_in_file, check_namelist_read, &
+                             E_ERR, E_MSG, error_handler
+use        model_mod, only : get_model_size, pfb_to_dart_vector, get_parflow_filename
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 use time_manager_mod, only : time_type, print_time, print_date
 
@@ -43,24 +44,24 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 !-----------------------------------------------------------------------
 
 character(len=128) :: model_to_dart_output_file  = 'dart_ics'
-character(len=256) :: model_restart_filename     = 'model_restartfile'
 
 namelist /model_to_dart_nml/    &
-     model_to_dart_output_file, &
-     model_restart_filename
+     model_to_dart_output_file
 
 !----------------------------------------------------------------------
 ! global storage
 !----------------------------------------------------------------------
 
+character(len=256) :: model_restart_filename
 logical               :: verbose = .TRUE.
 integer               :: io, iunit, x_size
 type(time_type)       :: model_time
 real(r8), allocatable :: statevector(:)
+character(len=512)   :: string1, string2
 
 !======================================================================
 
-call initialize_utilities(progname='parflow_to_dart', output_flag=verbose)
+call initialize_utilities(progname='parflow_to_dart')
 
 !----------------------------------------------------------------------
 ! Read the namelist to get the output filename.
@@ -70,14 +71,16 @@ call find_namelist_in_file("input.nml", "model_to_dart_nml", iunit)
 read(iunit, nml = model_to_dart_nml, iostat = io)
 call check_namelist_read(iunit, io, "model_to_dart_nml") ! closes, too.
 
-write(*,*)
-write(*,*) 'model_to_dart: converting model restart data in file ', &
-           "'"//trim(model_restart_filename)//"'" 
-write(*,*) ' to DART file ', "'"//trim(model_to_dart_output_file)//"'"
+write(string1,*) 'converting parflow file "'//trim(model_restart_filename)//'"'
+write(string2,*) ' to DART file "'//trim(model_to_dart_output_file)//'"'
+call error_handler(E_MSG,'parflow_to_dart',string1,text2=string2)
 
 !----------------------------------------------------------------------
 ! get to work
 !----------------------------------------------------------------------
+
+call static_init_model()
+model_restart_filename = get_parflow_filename()
 
 x_size = get_model_size()
 allocate(statevector(x_size))

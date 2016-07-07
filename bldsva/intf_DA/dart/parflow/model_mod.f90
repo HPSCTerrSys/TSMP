@@ -17,9 +17,9 @@ use     location_mod, only : location_type,      get_close_maxdist_init, &
                              get_close_obs_init, get_close_obs, set_location, &
                              set_location_missing
 use    utilities_mod, only : register_module, error_handler, nc_check, &
-                             get_unit, open_file, close_file, E_ERR, E_MSG
-                             ! nmlfileunit, do_output, do_nml_file, do_nml_term,  &
-                             ! find_namelist_in_file, check_namelist_read
+                             get_unit, open_file, close_file, E_ERR, E_MSG, &
+                             nmlfileunit, do_output, do_nml_file, do_nml_term,  &
+                             find_namelist_in_file, check_namelist_read
 
 implicit none
 private
@@ -48,8 +48,8 @@ public :: get_model_size,         &
 ! utility programs that are tightly tied to the other parts of
 ! the model_mod code.
 public :: pfb_to_dart_vector, &
+          get_parflow_filename, &
           dart_vector_to_model_file
-
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
@@ -57,21 +57,31 @@ character(len=256), parameter :: source   = &
 character(len=32 ), parameter :: revision = "$Revision: 6256 $"
 character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
 
+character(len=256) :: string1, string2, string3
+logical, save :: module_initialized = .false.
+
 ! EXAMPLE: define model parameters here
-integer, parameter               :: model_size = 3
+integer, parameter               :: model_size = 0
 type(time_type)                  :: time_step
 type(location_type), allocatable :: state_loc(:)
 
 ! EXAMPLE: perhaps a namelist here 
-logical  :: output_state_vector = .true.
-integer  :: time_step_days      = 0
-integer  :: time_step_seconds   = 3600
-namelist /model_nml/ output_state_vector, time_step_days, time_step_seconds
+character(len=256) :: parflow_file = 'parflow_input_file'
+logical  :: output_state_vector_as_1D    = .false.
+integer  :: assimilation_period_days     = 0
+integer  :: assimilation_period_seconds  = 21400
+integer  :: debug = 0 
+
+namelist /model_nml/ parflow_file, &
+                     output_state_vector_as_1D, &
+                     assimilation_period_days, &
+                     assimilation_period_seconds, &
+                     debug
 
 contains
 
-!==================================================================
 
+!==================================================================
 
 
 subroutine static_init_model()
@@ -83,22 +93,29 @@ subroutine static_init_model()
 ! spherical harmonic weights, these would also be computed here.
 ! Can be a NULL INTERFACE for the simplest models.
 
- real(r8) :: x_loc
- integer  :: i
-!integer  :: iunit, io
+real(r8) :: x_loc
+integer  :: i
+integer  :: iunit, io
+
+if ( module_initialized ) return ! only need to do this once.
+
+! Since this routine calls other routines that could call this routine
+! we'll say we've been initialized pretty dang early.
+module_initialized = .true.
 
 ! Print module information to log file and stdout.
 call register_module(source, revision, revdate)
 
 ! This is where you would read a namelist, for example.
-!call find_namelist_in_file("input.nml", "model_nml", iunit)
-!read(iunit, nml = model_nml, iostat = io)
-!call check_namelist_read(iunit, io, "model_nml")
-
+call find_namelist_in_file("input.nml", "model_nml", iunit)
+read(iunit, nml = model_nml, iostat = io)
+call check_namelist_read(iunit, io, "model_nml")
 
 ! Record the namelist values used for the run ...
-!if (do_nml_file() write(nmlfileunit, nml=model_nml)
-!if (do_nml_term()) write(     *     , nml=model_nml)
+if (do_nml_file()) write(nmlfileunit, nml=model_nml)
+if (do_nml_term()) write(     *     , nml=model_nml)
+
+call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -114,7 +131,7 @@ do i = 1, model_size
 end do
 
 ! The time_step in terms of a time type must also be initialized.
-time_step = set_time(time_step_seconds, time_step_days)
+time_step = set_time(assimilation_period_seconds, assimilation_period_days)
 
 end subroutine static_init_model
 
@@ -135,6 +152,9 @@ subroutine init_conditions(x)
 
 real(r8), intent(out) :: x(:)
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'init_conditions','routine not tested',source, revision,revdate)
 x = MISSING_R8
 
 end subroutine init_conditions
@@ -161,6 +181,9 @@ subroutine adv_1step(x, time)
 real(r8),        intent(inout) :: x(:)
 type(time_type), intent(in)    :: time
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'adv_1step','routine not tested',source, revision,revdate)
 end subroutine adv_1step
 
 
@@ -173,8 +196,11 @@ function get_model_size()
 
 integer :: get_model_size
 
+if ( .not. module_initialized ) call static_init_model
+
 get_model_size = model_size
 
+call error_handler(E_ERR,'get_model_size','routine not tested',source, revision,revdate)
 end function get_model_size
 
 
@@ -192,6 +218,9 @@ subroutine init_time(time)
 
 type(time_type), intent(out) :: time
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'init_time','routine not tested',source, revision,revdate)
 ! for now, just set to 0
 time = set_time(0,0)
 
@@ -220,6 +249,9 @@ integer,             intent(in) :: itype
 real(r8),           intent(out) :: obs_val
 integer,            intent(out) :: istatus
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'model_interpolate','routine not tested',source, revision,revdate)
 ! This should be the result of the interpolation of a
 ! given kind (itype) of variable at the given location.
 obs_val = MISSING_R8
@@ -244,6 +276,9 @@ function get_model_time_step()
 
 type(time_type) :: get_model_time_step
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'get_model_time_step','routine not tested',source, revision,revdate)
 get_model_time_step = time_step
 
 end function get_model_time_step
@@ -264,6 +299,9 @@ integer,             intent(in)            :: index_in
 type(location_type), intent(out)           :: location
 integer,             intent(out), optional :: var_type
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'get_state_meta_data','routine not tested',source, revision,revdate)
 ! these should be set to the actual location and obs kind
 location = set_location_missing()
 if (present(var_type)) var_type = 0  
@@ -278,6 +316,9 @@ subroutine end_model()
 ! Does any shutdown and clean-up needed for model. Can be a NULL
 ! INTERFACE if the model has no need to clean up storage, etc.
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'end_model','routine not tested',source, revision,revdate)
 ! good style ... perhaps you could deallocate stuff (from static_init_model?).
 ! deallocate(state_loc)
 
@@ -353,6 +394,9 @@ character(len=NF90_MAX_NAME) :: str1
 
 integer :: i
 
+if ( .not. module_initialized ) call static_init_model
+
+call error_handler(E_ERR,'nc_write_model_atts','routine not tested',source, revision,revdate)
 !-------------------------------------------------------------------------------
 ! make sure ncFileID refers to an open netCDF file, 
 ! and then put into define mode.
@@ -414,7 +458,7 @@ call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, "model","template"), &
 ! complicated part.
 !-------------------------------------------------------------------------------
 
-if ( output_state_vector ) then
+if ( output_state_vector_as_1D ) then
 
    !----------------------------------------------------------------------------
    ! Create a variable for the state vector
@@ -511,12 +555,15 @@ integer :: StateVarID
 ! make sure ncFileID refers to an open netCDF file, 
 !-------------------------------------------------------------------------------
 
+if ( .not. module_initialized ) call static_init_model
+call error_handler(E_ERR,'nc_write_model_vars','routine not tested',source, revision,revdate)
+
 ierr = -1 ! assume things go poorly
 
 call nc_check(nf90_inquire(ncFileID,nDimensions,nVariables,nAttributes,unlimitedDimID), &
                           "nc_write_model_vars", "inquire")
 
-if ( output_state_vector ) then
+if ( output_state_vector_as_1D ) then
 
    call nc_check(nf90_inq_varid(ncFileID, "state", StateVarID), &
                                "nc_write_model_vars", "inq_varid state" )
@@ -585,6 +632,9 @@ real(r8), intent(in)  :: state(:)
 real(r8), intent(out) :: pert_state(:)
 logical,  intent(out) :: interf_provided
 
+if ( .not. module_initialized ) call static_init_model
+call error_handler(E_ERR,'pert_model_state','routine not tested',source, revision,revdate)
+
 pert_state      = state
 interf_provided = .false.
 
@@ -599,6 +649,9 @@ subroutine ens_mean_for_model(ens_mean)
 
 real(r8), intent(in) :: ens_mean(:)
 
+if ( .not. module_initialized ) call static_init_model
+call error_handler(E_ERR,'ens_mean_for_model','routine not tested',source, revision,revdate)
+
 end subroutine ens_mean_for_model
 
 
@@ -609,12 +662,11 @@ end subroutine ens_mean_for_model
 ! with predefined file formats and control structures.)
 !==================================================================
 
+!------------------------------------------------------------------
+!> Reads the current time and state variables from a model data
+!> file and packs them into a dart state vector.
 
 subroutine pfb_to_dart_vector(filename, state_vector, model_time)
-!------------------------------------------------------------------
-! Reads the current time and state variables from a model data
-! file and packs them into a dart state vector.
-implicit none
 
 character(len=*), intent(in)    :: filename
 real(r8),         intent(inout) :: state_vector(:)
@@ -628,30 +680,53 @@ real(r8)                        ::  &
                    dy,              &     ! Grid Resoultion in m
                    dz                    ! Grid Resolution scale, check parflow namelist
 
+if ( .not. module_initialized ) call static_init_model
+call error_handler(E_ERR,'pfb_to_dart_vector','routine not tested',source, revision,revdate)
+
 ! code goes here
 ! First extract dimension of prognostic variable in the pfb file
   call pfread_dim(filename,nx,ny,nz,dx,dy,dz)
 
 end subroutine pfb_to_dart_vector
 
+!------------------------------------------------------------------
+!> Writes the current time and state variables from a dart state
+!> vector (1d array) into a ncommas netcdf restart file.
 
 subroutine dart_vector_to_model_file(state_vector, filename, statedate)
-!------------------------------------------------------------------
-! Writes the current time and state variables from a dart state
-! vector (1d array) into a ncommas netcdf restart file.
-!
+
 real(r8),         intent(in) :: state_vector(:)
 character(len=*), intent(in) :: filename
 type(time_type),  intent(in) :: statedate
+
+if ( .not. module_initialized ) call static_init_model
+call error_handler(E_ERR,'dart_vector_to_model_file','routine not tested',source, revision,revdate)
 
 ! code goes here
 
 end subroutine dart_vector_to_model_file
 
-subroutine pfread_dim(filename,nx,ny,nz,dx,dy,dz)
+
 !------------------------------------------------------------------
-! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
-implicit none
+!> Reads the current time and state variables from a model data
+!> file and packs them into a dart state vector.
+
+
+function get_parflow_filename()
+
+character(len=256) :: get_parflow_filename
+
+if ( .not. module_initialized ) call static_init_model
+
+get_parflow_filename = trim(parflow_file)
+
+end function get_parflow_filename
+
+
+!------------------------------------------------------------------
+!> Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
+
+subroutine pfread_dim(filename,nx,ny,nz,dx,dy,dz)
 
 character(len=*), intent(in)   :: filename
 integer(kind=4),  intent(out)  ::  &
@@ -728,7 +803,6 @@ end subroutine pfread_dim
 subroutine pfread_var(filename,nx,ny,nz,pfvar)
 !------------------------------------------------------------------
 ! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
-implicit none
 
 character(len=*), intent(in)   :: filename
 integer(kind=4),  intent(in)   ::  &
@@ -889,7 +963,6 @@ end subroutine pfread_var
 subroutine pfwrite_var(filename,nx,ny,nz,dx,dy,dz)
 !------------------------------------------------------------------
 ! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
-implicit none
 
 character(len=*), intent(in)   :: filename
 integer(kind=4),  intent(out)  ::  &

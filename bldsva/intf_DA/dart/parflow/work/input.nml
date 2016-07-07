@@ -116,20 +116,19 @@
    /
 
 &model_nml
-   output_state_vector = .true.
-   time_step_days      = 0
-   time_step_seconds   = 3600
+   parflow_file = '../data/rurlaf.out.press.00003.pfb'
+   output_state_vector_as_1D     = .true.
+   assimilation_period_days      = 1
+   assimilation_period_seconds   = 0
    /
 
 &model_to_dart_nml
-   model_to_dart_output_file = 'filter_ics'
-   model_restart_filename    = '../data/rurlaf.out.press.00003.pfb'
+   model_to_dart_output_file = 'dart_prior'
    /
 
 &dart_to_model_nml
-   dart_to_model_input_file = 'filter_restart'
+   dart_to_model_input_file = 'dart_posterior'
    advance_time_present     = .false.
-   model_restart_filename   = 'modelfile'
    /
 
 &utilities_nml
