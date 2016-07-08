@@ -29,7 +29,7 @@ use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read, &
                              E_ERR, E_MSG, error_handler
 
-use        model_mod, only : get_model_size, pfb_to_dart_vector, &
+use        model_mod, only : get_model_size, get_state_vector, &
                              get_parflow_filename, static_init_model
 
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
@@ -48,20 +48,20 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! namelist parameters with default values.
 !-----------------------------------------------------------------------
 
-character(len=128) :: model_to_dart_output_file  = 'dart_ics'
+character(len=128) :: pfb_to_dart_output_file  = 'dart_ics'
 
-namelist /model_to_dart_nml/    &
-     model_to_dart_output_file
+namelist /pfb_to_dart_nml/    &
+     pfb_to_dart_output_file
 
 !----------------------------------------------------------------------
 ! global storage
 !----------------------------------------------------------------------
 
-character(len=256) :: model_restart_filename
+character(len=256)    :: parflow_filename
 logical               :: verbose = .TRUE.
 integer               :: io, iunit, x_size
 type(time_type)       :: model_time
-real(r8), allocatable :: statevector(:)
+real(r8), allocatable :: x(:)               !statevector
 character(len=512)   :: string1, string2
 
 !======================================================================
@@ -72,12 +72,14 @@ call initialize_utilities(progname='parflow_to_dart')
 ! Read the namelist to get the output filename.
 !----------------------------------------------------------------------
 
-call find_namelist_in_file("input.nml", "model_to_dart_nml", iunit)
-read(iunit, nml = model_to_dart_nml, iostat = io)
-call check_namelist_read(iunit, io, "model_to_dart_nml") ! closes, too.
+call find_namelist_in_file("input.nml", "pfb_to_dart_nml", iunit)
+read(iunit, nml = pfb_to_dart_nml, iostat = io)
+call check_namelist_read(iunit, io, "pfb_to_dart_nml") ! closes, too.
 
-write(string1,*) 'converting parflow file "'//trim(model_restart_filename)//'"'
-write(string2,*) ' to DART file "'//trim(model_to_dart_output_file)//'"'
+parflow_filename = get_parflow_filename()
+
+write(string1,*) 'converting parflow file "'//trim(parflow_filename)//'"'
+write(string2,*) ' to DART file "'//trim(pfb_to_dart_output_file)//'"'
 call error_handler(E_MSG,'parflow_to_dart',string1,text2=string2)
 
 !----------------------------------------------------------------------
@@ -85,16 +87,15 @@ call error_handler(E_MSG,'parflow_to_dart',string1,text2=string2)
 !----------------------------------------------------------------------
 
 call static_init_model()
-model_restart_filename = get_parflow_filename()
 
 x_size = get_model_size()
-allocate(statevector(x_size))
+allocate( x(x_size) )
 
-call pfb_to_dart_vector(model_restart_filename, statevector, model_time) 
+call get_state_vector(x, model_time) 
 
-iunit = open_restart_write(model_to_dart_output_file)
+iunit = open_restart_write(pfb_to_dart_output_file)
 
-call awrite_state_restart(model_time, statevector, iunit)
+call awrite_state_restart(model_time, x, iunit)
 call close_restart(iunit)
 
 !----------------------------------------------------------------------

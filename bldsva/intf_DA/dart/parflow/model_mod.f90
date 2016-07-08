@@ -12,10 +12,14 @@ module model_mod
 
 ! Modules that are absolutely required for use are listed
 use        types_mod, only : r8, MISSING_R8
-use time_manager_mod, only : time_type, set_time
+
+use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
+                             print_time, print_date, set_calendar_type
+
 use     location_mod, only : location_type,      get_close_maxdist_init, &
                              get_close_obs_init, get_close_obs, set_location, &
                              set_location_missing
+
 use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
@@ -47,7 +51,7 @@ public :: get_model_size,         &
 ! not required by DART but for larger models can be useful for
 ! utility programs that are tightly tied to the other parts of
 ! the model_mod code.
-public :: pfb_to_dart_vector, &
+public :: get_state_vector, &
           get_parflow_filename, &
           dart_vector_to_model_file
 
@@ -60,23 +64,34 @@ character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (W
 character(len=256) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
+! Dimension and grid resolution from PFB file
+integer(kind=4)                ::  &
+                   nx,             &     ! Longitude dimension
+                   ny,             &     ! Latitude dimension
+                   nz                    ! Vertical dimension
+real(r8)                       ::  &
+                   dx,             &     ! Grid Resolution in m
+                   dy,             &     ! Grid Resoultion in m
+                   dz                    ! Grid Resolution scale, check parflow namelist
+
 ! EXAMPLE: define model parameters here
-integer, parameter               :: model_size = 0
+integer                          :: model_size
 type(time_type)                  :: time_step
 type(location_type), allocatable :: state_loc(:)
 
 ! EXAMPLE: perhaps a namelist here 
-character(len=256) :: parflow_file = 'parflow_input_file'
-logical  :: output_state_vector_as_1D    = .false.
-integer  :: assimilation_period_days     = 0
-integer  :: assimilation_period_seconds  = 21400
-integer  :: debug = 0 
+character(len=256) :: parflow_file                 = 'parflow_file'
+logical            :: output_state_vector_as_1D    = .false.
+integer            :: assimilation_period_days     = 0
+integer            :: assimilation_period_seconds  = 21400
+integer            :: debug = 0 
 
-namelist /model_nml/ parflow_file, &
-                     output_state_vector_as_1D, &
-                     assimilation_period_days, &
-                     assimilation_period_seconds, &
-                     debug
+namelist /model_nml/                &
+      parflow_file,                 &
+      output_state_vector_as_1D,    &
+      assimilation_period_days,     &
+      assimilation_period_seconds,  &
+      debug
 
 contains
 
@@ -115,7 +130,18 @@ call check_namelist_read(iunit, io, "model_nml")
 if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
-call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
+call set_calendar_type('Gregorian')
+
+! Get the dimensions of the grid and the grid variables from the netCDF file.
+call pfread_dim(parflow_file)
+
+if (debug > 0 .and. do_output()) write(*,*) '   ... pfb dimensions are ' , nx, ny, nz
+if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid resoluion are ', dx, dy, dz
+
+
+model_size = nx*ny*nz
+
+!CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -200,7 +226,6 @@ if ( .not. module_initialized ) call static_init_model
 
 get_model_size = model_size
 
-call error_handler(E_ERR,'get_model_size','routine not tested',source, revision,revdate)
 end function get_model_size
 
 
@@ -666,28 +691,27 @@ end subroutine ens_mean_for_model
 !> Reads the current time and state variables from a model data
 !> file and packs them into a dart state vector.
 
-subroutine pfb_to_dart_vector(filename, state_vector, model_time)
+subroutine get_state_vector(sv, model_time)
 
-character(len=*), intent(in)    :: filename
-real(r8),         intent(inout) :: state_vector(:)
+real(r8),         intent(inout) :: sv(1:model_size)
 type(time_type),  intent(out)   :: model_time
-integer(kind=4)                 ::  &
-                   nx,              &     ! Longitude dimension
-                   ny,              &     ! Latitude dimension
-                   nz                    ! Vertical dimension
-real(r8)                        ::  &
-                   dx,              &     ! Grid Resolution in m
-                   dy,              &     ! Grid Resoultion in m
-                   dz                    ! Grid Resolution scale, check parflow namelist
+real(r8),allocatable            :: pfbdata(:,:,:)
+ 
+!
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'pfb_to_dart_vector','routine not tested',source, revision,revdate)
 
-! code goes here
-! First extract dimension of prognostic variable in the pfb file
-  call pfread_dim(filename,nx,ny,nz,dx,dy,dz)
+allocate(pfbdata(nx,ny,nz))
 
-end subroutine pfb_to_dart_vector
+call pfread_var(parflow_file,pfbdata) 
+
+sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
+
+if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
+   
+deallocate(pfbdata)
+
+end subroutine get_state_vector
 
 !------------------------------------------------------------------
 !> Writes the current time and state variables from a dart state
@@ -726,17 +750,9 @@ end function get_parflow_filename
 !------------------------------------------------------------------
 !> Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
 
-subroutine pfread_dim(filename,nx,ny,nz,dx,dy,dz)
+subroutine pfread_dim(filename)
 
 character(len=*), intent(in)   :: filename
-integer(kind=4),  intent(out)  ::  &
-                   nx,             &     ! Longitude dimension
-                   ny,             &     ! Latitude dimension
-                   nz                    ! Vertical dimension
-real(r8),         intent(out)  ::  &
-                   dx,             &     ! Grid Resolution in m
-                   dy,             &     ! Grid Resoultion in m
-                   dz                    ! Grid Resolution scale, check parflow namelist
 
 real(r8)                       :: x1, y1 ,z1
 integer(kind=4)                :: nudat, izerr 
@@ -797,27 +813,20 @@ character(len=256)             :: errmsg
   endif
 
   close(nudat)
-  return 
 end subroutine pfread_dim
 
-subroutine pfread_var(filename,nx,ny,nz,pfvar)
+subroutine pfread_var(filename,pfvar)
 !------------------------------------------------------------------
 ! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
 
 character(len=*), intent(in)   :: filename
-integer(kind=4),  intent(in)   ::  &
-                   nx,             &     ! Longitude dimension
-                   ny,             &     ! Latitude dimension
-                   nz                    ! Vertical dimension
 real(r8),         intent(out)  ::  &
                    pfvar(nx,ny,nz)       ! ParFlow pressure files 
 
 real(r8)                       :: x1, y1, z1 
 
 real(r8)                       ::  &
-                   dx,             &     ! Grid Resolution in m
-                   dy,             &     ! Grid Resoultion in m
-                   dz                    ! Grid Resolution scale, check parflow namelist
+                   dummyRes              ! Grid Resolution in m
 
 integer(kind=4)                :: nudat, dummy, izerr
 integer(kind=4)                ::  &
@@ -866,17 +875,17 @@ character(len=256)             :: errmsg
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
 
-  read(nudat, iostat=izerr) dx !dX
+  read(nudat, iostat=izerr) dummyRes !dX
   if (izerr /= 0) then
     errmsg   = "unable to read dx"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) dy !dY
+  read(nudat, iostat=izerr) dummyRes !dY
   if (izerr /= 0) then
     errmsg   = "unable to read dy"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) dz !dZ
+  read(nudat, iostat=izerr) dummyRes !dZ
   if (izerr /= 0) then
     errmsg   = "unable to read dz"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
