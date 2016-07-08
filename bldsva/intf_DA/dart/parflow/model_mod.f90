@@ -81,6 +81,7 @@ type(location_type), allocatable :: state_loc(:)
 
 ! EXAMPLE: perhaps a namelist here 
 character(len=256) :: parflow_file                 = 'parflow_file'
+character(len=256) :: pfidb_file                   = 'pfidb_file'
 logical            :: output_state_vector_as_1D    = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -88,6 +89,7 @@ integer            :: debug = 0
 
 namelist /model_nml/                &
       parflow_file,                 &
+      pfidb_file,                   &
       output_state_vector_as_1D,    &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -141,6 +143,8 @@ if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid res
 
 model_size = nx*ny*nz
 
+! Get the vertical co-ordinate
+call pfidb_read(pfidb_file)
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 
 ! Create storage for locations
@@ -746,6 +750,31 @@ get_parflow_filename = trim(parflow_file)
 
 end function get_parflow_filename
 
+!------------------------------------------------------------------
+!> Reads pfidb files to extract vertical co-ordinate and time
+
+subroutine pfidb_read(filename)
+
+character(len=*), intent(in)   :: filename
+
+integer(kind=4)                :: nudat, izerr
+character(len=256)             :: errmsg, pfidb_string
+
+! code starts here
+  nudat   = get_unit()
+  open(nudat,file=trim(filename),form='unformatted',status='old') 
+  read_loop: DO
+    read(nudat, '(A)',iostat=izerr) pfidb_string
+    if (izerr < 0) then
+      exit read_loop
+    elseif (izerr > 0) then
+      write(errmsg,*) 'ERROR READING pfidb file '
+      call error_handler(E_ERR,'read_binary_file', errmsg, source, revision, revdate)
+    endif
+    if (debug > 0 .and. do_output()) write(*,*) '   ... pfidb ' , pfidb_string 
+  enddo read_loop
+
+end subroutine pfidb_read
 
 !------------------------------------------------------------------
 !> Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
