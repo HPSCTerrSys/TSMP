@@ -37,7 +37,7 @@ use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              operator(-)
 
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
-                             get_state_time, get_state_vector, get_cosmo_filename, &
+                             get_state_vector, get_cosmo_filename, &
                              model_interpolate
 
 use netcdf
@@ -49,7 +49,6 @@ implicit none
 character(len=256), parameter :: source   = "$URL: model_mod_check.f90 $"
 character(len=32 ), parameter :: revision = "$Revision: none $"
 character(len=128), parameter :: revdate  = "$Date: none $"
-
 
 character(len=512) :: string1, string2
 
@@ -290,8 +289,7 @@ cosmo_input_file = get_cosmo_filename()
 write(*,*)
 write(*,*)'Reading restart files from  '//trim(cosmo_input_file)
 
-statevector = get_state_vector()
-model_time  = get_state_time()
+call get_state_vector(statevector, model_time)
 
 write(*,*)
 write(*,*)'Writing data into '//trim(output_file)
