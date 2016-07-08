@@ -24,11 +24,16 @@ program parflow_to_dart
 !----------------------------------------------------------------------
 
 use        types_mod, only : r8
+
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read, &
                              E_ERR, E_MSG, error_handler
-use        model_mod, only : get_model_size, pfb_to_dart_vector, get_parflow_filename
+
+use        model_mod, only : get_model_size, pfb_to_dart_vector, &
+                             get_parflow_filename, static_init_model
+
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
+
 use time_manager_mod, only : time_type, print_time, print_date
 
 implicit none
