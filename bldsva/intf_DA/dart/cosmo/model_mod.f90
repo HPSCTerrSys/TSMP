@@ -276,10 +276,6 @@ type(time_type)                :: model_timestep ! smallest time to adv model
 
 integer, parameter             :: n_max_kinds=400
 
-integer                        :: allowed_state_vector_vars(n_state_vector_vars)
-integer                        :: allowed_non_state_vars(1:n_max_kinds)
-logical                        :: is_allowed_state_vector_var(n_max_kinds)
-logical                        :: is_allowed_non_state_var(n_max_kinds)
 type(dart_variable_info)       :: state_vector_vars(1:n_max_kinds)
 type(cosmo_non_state_data)     :: non_state_data
 
@@ -289,6 +285,7 @@ real(r8),allocatable           :: ens_mean(:)
 
 type(random_seq_type) :: random_seq
 
+!> TODO ... do we need these
 type(time_type)                :: cosmo_fc_time
 type(time_type)                :: cosmo_an_time
 
@@ -349,6 +346,7 @@ call parse_variable_table(variables, nfields, variable_table)
 ! Read the input file to decode and confirm shapes of the variables.
 ! Without a second argument, read_binary_file just collects sizes.
 
+!>@ do we need the model time here ... 
 do ivar = 1,nfields
     call read_binary_file(ivar)
 enddo
@@ -368,42 +366,77 @@ end subroutine static_init_model
 
 
 !------------------------------------------------------------------------
-!>
+!> Given an index into the DART state vector, return the location and
+!> (optionally) what kind of variable ... KIND_TEMPERATURE, KIND_U_WIND_COMPONENT, etc.
 
 
 subroutine get_state_meta_data(index_in, location, var_type)
 
-integer, intent(in)            :: index_in
-type(location_type)            :: location
-integer, optional, intent(out) :: var_type
+integer,             intent(in)  :: index_in
+type(location_type), intent(out) :: location
+integer, optional,   intent(out) :: var_type
 
-integer   :: islab,var,hindex,dims(3)
-real(r8)  :: mylon,mylat,vloc
+real(r8) :: mylon,mylat,vloc
+integer  :: nx, ny, nz
+integer  :: local_ind
+integer  :: iloc, jloc, kloc
+integer  :: ivar
 
-call error_handler(E_ERR,'get_state_meta_data','routine not written',source,revision,revdate)
+if (.not. module_initialized) call static_init_model()
 
-if (.NOT. module_initialized) CALL static_init_model()
+ivar = Find_Variable_by_index(index_in,'get_state_meta_data')
 
-var = -1
+! Determine the i,j,k location of interest
 
-findindex : DO islab=1,nslabs
-  IF ((index_in >= cosmo_slabs(islab)%dart_sindex) .AND. (index_in <= cosmo_slabs(islab)%dart_eindex)) THEN
-    var      = islab
-    hindex   = index_in - cosmo_slabs(islab)%dart_sindex + 1
-    var_type = cosmo_slabs(islab)%dart_kind
-    dims     = cosmo_slabs(islab)%dims
-    vloc     = cosmo_slabs(islab)%dart_level
-    mylon    = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lon(hindex)
-    mylat    = cosmo_lonlat(cosmo_slabs(islab)%hcoord_type)%lat(hindex)
-    location = set_location(mylon,mylat,vloc,VERTISLEVEL)
-    EXIT findindex
-  endif
-enddo findindex
+local_ind = index_in - progvar(ivar)%index1
 
-IF( var == -1 ) THEN
-  write(string1,*) 'Problem, cannot find base_offset, index_in is: ', index_in
-  call error_handler(E_ERR,'get_state_meta_data',string1,source,revision,revdate)
-ENDIF
+nx = progvar(ivar)%dimlens(1)
+ny = progvar(ivar)%dimlens(2)
+nz = progvar(ivar)%dimlens(3)  ! may or may not be needed
+
+if     (progvar(ivar)%numdims == 2) then
+   kloc =  1
+   jloc =  local_ind / nx + 1
+   iloc =  local_ind - (jloc-1)*nx + 1
+elseif (progvar(ivar)%numdims == 3) then
+   kloc =  local_ind / (nx*ny) + 1
+   jloc = (local_ind - (kloc-1)*nx*ny)/nx + 1
+   iloc =  local_ind - (kloc-1)*nx*ny - (jloc-1)*nx + 1
+else
+
+   write(string1,*) 'Can not calculate indices for variable ', &
+      trim(progvar(ivar)%varname), ' ndims = ', progvar(ivar)%numdims
+   call error_handler(E_ERR, 'get_state_meta_data',string1)
+
+endif
+
+write(*,*)'gsmd: index_in ',index_in,' local_ind is ',local_ind + 1, ' and dereferences to ',iloc,jloc,kloc
+
+! Now that we know the i,j,k we have to index the right set of
+! coordinate arrays
+
+if     (progvar(ivar)%dart_kind == KIND_U_WIND_COMPONENT) then
+   mylon = slonu(iloc,jloc)
+   mylat = slatu(iloc,jloc)
+elseif (progvar(ivar)%dart_kind == KIND_V_WIND_COMPONENT) then
+   mylon = slonv(iloc,jloc)
+   mylat = slatv(iloc,jloc)
+else
+   mylon = lon(iloc,jloc)
+   mylat = lat(iloc,jloc)
+endif
+
+if (progvar(ivar)%dart_kind == KIND_VERTICAL_VELOCITY) then
+   vloc = vcoord%level1(kloc)
+else
+   vloc = (vcoord%level1(kloc) + vcoord%level1(kloc+1)) / 2.0_r8
+endif
+
+location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
+
+if (present(var_type)) then
+   var_type = progvar(ivar)%dart_kind
+endif
 
 end subroutine get_state_meta_data
 
@@ -1005,15 +1038,19 @@ end function nc_write_model_atts
 
 function nc_write_model_vars( ncFileID, state_vec, copyindex, timeindex ) result (ierr)
 
-integer,                intent(in) :: ncFileID      ! netCDF file identifier
-real(r8), dimension(:), intent(in) :: state_vec
-integer,                intent(in) :: copyindex
-integer,                intent(in) :: timeindex
-integer                            :: ierr          ! return value of function
+integer,  intent(in) :: ncFileID
+real(r8), intent(in) :: state_vec(:)
+integer,  intent(in) :: copyindex
+integer,  intent(in) :: timeindex
+integer              :: ierr          ! return value of function
 
-integer, dimension(NF90_MAX_VAR_DIMS) :: dimIDs, ncstart, nccount
-character(len=NF90_MAX_NAME)          :: varname
-integer :: io, i, ivar, VarID, ncNdims, dimlen, ndims, vardims(3)
+
+character(len=NF90_MAX_NAME) :: varname
+integer ::  dimIDs(NF90_MAX_VAR_DIMS)
+integer :: ncstart(NF90_MAX_VAR_DIMS)
+integer :: nccount(NF90_MAX_VAR_DIMS)
+
+integer :: io, i, ivar, VarID, ndims, dimlen
 integer :: index1, indexN
 integer :: TimeDimID, CopyDimID
 
@@ -1042,7 +1079,7 @@ call nc_check(io, 'nc_write_model_vars', 'inq_dimid time '//trim(filename))
 
 if ( output_1D_state_vector ) then
 
-  ! blast out the DART vector as a 1D array.
+   ! blast out the DART vector as a 1D array.
 
    io = nf90_inq_varid(ncFileID, 'state', VarID)
    call nc_check(io, 'nc_write_model_vars', 'state inq_varid '//trim(filename))
@@ -1052,7 +1089,7 @@ if ( output_1D_state_vector ) then
 
 else
 
-  ! write out the DART vector as the native variables and shapes
+   ! write out the DART vector as the native variables and shapes
 
    do ivar = 1,nfields  ! Very similar to loop in sv_to_restart_file
 
@@ -1066,7 +1103,7 @@ else
       call nc_check(nf90_inq_varid(ncFileID, varname, VarID), &
             'nc_write_model_vars', 'inq_varid '//trim(string2))
 
-      call nc_check(nf90_inquire_variable(ncFileID,VarID,dimids=dimIDs,ndims=ncNdims), &
+      call nc_check(nf90_inquire_variable(ncFileID,VarID,dimids=dimIDs,ndims=ndims), &
             'nc_write_model_vars', 'inquire '//trim(string2))
 
       ncstart = 1   ! These are arrays, actually
@@ -1097,16 +1134,18 @@ else
       where(dimIDs == TimeDimID) nccount = 1
 
       if ((debug > 0) .and. do_output()) then
-         write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ncNdims)
-         write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ncNdims)
+         write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ndims)
+         write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ndims)
       endif
+
+      ! revelation - no need to reshape the state vector before nf90_put_var
 
       index1 = progvar(ivar)%index1
       indexN = progvar(ivar)%indexN
       call nc_check(nf90_put_var(ncFileID, VarID, state_vec(index1:indexN), &
-                   start = ncstart(1:ncNdims), count=nccount(1:ncNdims)), &
+                   start = ncstart(1:ndims), count=nccount(1:ndims)), &
                    'nc_write_model_vars', 'put_var '//trim(string2))
- enddo
+   enddo
 
 endif
 
@@ -1202,53 +1241,6 @@ ens_mean(:) = filter_ens_mean(:)
 !  call error_handler(E_ERR,'ens_mean_for_model',string1,source,revision,revdate)
 
 end subroutine ens_mean_for_model
-
-
-!------------------------------------------------------------------------
-!>
-
-
-!subroutine set_allowed_state_vector_vars()
-!  ! set the information on which variables should go into the state vector
-!
-!  is_allowed_state_vector_var(:)=.FALSE.
-!  is_allowed_non_state_var(:)=.FALSE.
-!
-!  allowed_state_vector_vars(1)=KIND_U_WIND_COMPONENT
-!   is_allowed_state_vector_var(KIND_U_WIND_COMPONENT)=.TRUE.
-!
-!  allowed_state_vector_vars(2)=KIND_V_WIND_COMPONENT
-!   is_allowed_state_vector_var(KIND_V_WIND_COMPONENT)=.TRUE.
-!
-!  allowed_state_vector_vars(3)=KIND_VERTICAL_VELOCITY
-!   is_allowed_state_vector_var(KIND_VERTICAL_VELOCITY)=.TRUE.
-!
-!  allowed_state_vector_vars(4)=KIND_TEMPERATURE
-!   is_allowed_state_vector_var(KIND_TEMPERATURE)=.TRUE.
-!
-!  allowed_state_vector_vars(5)=KIND_PRESSURE
-!   is_allowed_state_vector_var(KIND_PRESSURE)=.TRUE.
-!
-!  allowed_state_vector_vars(6)=KIND_SPECIFIC_HUMIDITY
-!   is_allowed_state_vector_var(KIND_SPECIFIC_HUMIDITY)=.TRUE.
-!
-!  allowed_state_vector_vars(7)=KIND_CLOUD_LIQUID_WATER
-!   is_allowed_state_vector_var(KIND_CLOUD_LIQUID_WATER)=.TRUE.
-!
-!  allowed_state_vector_vars(8)=KIND_CLOUD_ICE
-!   is_allowed_state_vector_var(KIND_CLOUD_ICE)=.TRUE.
-!
-!  ! set the information which variables are needed but will not go into the state vector
-!  allowed_non_state_vars(1)=KIND_SURFACE_ELEVATION
-!   is_allowed_non_state_var(KIND_SURFACE_ELEVATION)=.TRUE.
-!  allowed_non_state_vars(2)=KIND_SURFACE_GEOPOTENTIAL
-!   is_allowed_non_state_var(KIND_SURFACE_GEOPOTENTIAL)=.TRUE.
-!  allowed_non_state_vars(3)=KIND_PRESSURE_PERTURBATION
-!   is_allowed_non_state_var(KIND_PRESSURE_PERTURBATION)=.TRUE.
-!
-!  return
-!
-!end subroutine set_allowed_state_vector_vars
 
 
 !------------------------------------------------------------------------
@@ -3085,6 +3077,34 @@ end subroutine define_var_dims
 
 !------------------------------------------------------------------------
 !>
+
+function Find_Variable_by_index(myindx, msgstring)
+! Given an index into the DART state vector, return the index of metadata
+! variable 'progvar' responsible for this portion of the state vector
+integer,          intent(in) :: myindx
+character(len=*), intent(in) :: msgstring
+integer                      :: Find_Variable_by_index
+
+integer :: ivar
+
+Find_Variable_by_index = -1
+
+FindIndex : do ivar = 1,nfields
+   if ((myindx >= progvar(ivar)%index1)  .and. &
+       (myindx <= progvar(ivar)%indexN)) then
+      Find_Variable_by_index = ivar
+      exit FindIndex
+   endif
+enddo FindIndex
+
+if (Find_Variable_by_index < 0) then
+   write(string1,*)'index ',myindx,' is out of range of all variables.'
+   write(string2,*)'model size is ',model_size
+   call error_handler(E_ERR, 'Find_Variable_by_index'//trim(msgstring), string1, &
+                      source, revision, revdate, text2=string2 )
+endif
+
+end function Find_Variable_by_index
 
 
 end module model_mod
