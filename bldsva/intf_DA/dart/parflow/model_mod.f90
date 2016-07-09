@@ -751,28 +751,39 @@ get_parflow_filename = trim(parflow_file)
 end function get_parflow_filename
 
 !------------------------------------------------------------------
-!> Reads pfidb files to extract vertical co-ordinate and time
+!> Reads pfidb ascii file to extract vertical co-ordinate
 
 subroutine pfidb_read(filename)
 
 character(len=*), intent(in)   :: filename
 
-integer(kind=4)                :: nudat, izerr
-character(len=256)             :: errmsg, pfidb_string
+integer(kind=4)                :: nudat, izerr, iz
+character(len=256)             :: errmsg, fmt
+real(r8)                       :: pfb_dz(nz), pfb_vcoord(nz) 
 
 ! code starts here
   nudat   = get_unit()
-  open(nudat,file=trim(filename),form='unformatted',status='old') 
-  read_loop: DO
-    read(nudat, '(A)',iostat=izerr) pfidb_string
+  write(*,*) filename
+  open(nudat, file=trim(filename),status='old') 
+  do iz = 1, nz
+    read(nudat,'(F5.2)',iostat=izerr) pfb_dz(iz)
     if (izerr < 0) then
-      exit read_loop
-    elseif (izerr > 0) then
-      write(errmsg,*) 'ERROR READING pfidb file '
-      call error_handler(E_ERR,'read_binary_file', errmsg, source, revision, revdate)
+       write(errmsg,*) 'ERROR READING pfidb_dz file ', iz
+       call error_handler(E_ERR,'pfidb_read', errmsg, source, revision, revdate)
     endif
-    if (debug > 0 .and. do_output()) write(*,*) '   ... pfidb ' , pfidb_string 
-  enddo read_loop
+  end do
+
+  do iz = nz, 1, -1
+    if (iz == nz) then
+      pfb_vcoord(iz) = 0.5_r8 * pfb_dz(iz) 
+    else
+      pfb_vcoord(iz) = pfb_vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
+    end if
+    if (debug > 0 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
+                                         iz, pfb_dz(iz), pfb_vcoord(iz)
+  end do
+
+  close(nudat)
 
 end subroutine pfidb_read
 
