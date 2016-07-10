@@ -118,6 +118,7 @@
 &model_nml
    parflow_file                  = '../data/rurlaf.out.press.00003.pfb'
    pfidb_file                    = '../data/pfidb_dz'
+   grid_file                     = '../data/grids.nc'
    output_state_vector_as_1D     = .true.
    assimilation_period_days      = 1
    assimilation_period_seconds   = 0

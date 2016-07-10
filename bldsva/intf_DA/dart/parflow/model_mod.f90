@@ -24,6 +24,7 @@ use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
                              find_namelist_in_file, check_namelist_read
+use netcdf
 
 implicit none
 private
@@ -79,9 +80,37 @@ integer                          :: model_size
 type(time_type)                  :: time_step
 type(location_type), allocatable :: state_loc(:)
 
+! Everything needed to describe a variable
+
+type progvartype
+   private
+   character(len=NF90_MAX_NAME) :: varname
+   character(len=NF90_MAX_NAME) :: long_name
+   character(len=NF90_MAX_NAME) :: units
+   integer  :: numdims
+   integer  :: numEW
+   integer  :: numNS
+   integer  :: numZ
+   integer  :: varsize     ! prod(dimlens(1:numdims))
+   integer  :: index1      ! location in dart state vector of first occurrence
+   integer  :: indexN      ! location in dart state vector of last  occurrence
+   integer  :: rangeRestricted
+   real(r8) :: minvalue
+   real(r8) :: maxvalue
+   character(len=256) :: kind_string
+   logical  :: update
+end type progvartype
+
+type(progvartype)     :: progvar
+
+real(r8), allocatable ::   lon(:,:) ! longitude degrees_east
+real(r8), allocatable ::   lat(:,:) ! latitude  degrees_north
+
+
 ! EXAMPLE: perhaps a namelist here 
 character(len=256) :: parflow_file                 = 'parflow_file'
 character(len=256) :: pfidb_file                   = 'pfidb_file'
+character(len=256) :: grid_file                    = 'grid_file'
 logical            :: output_state_vector_as_1D    = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -90,6 +119,7 @@ integer            :: debug = 0
 namelist /model_nml/                &
       parflow_file,                 &
       pfidb_file,                   &
+      grid_file,                    &
       output_state_vector_as_1D,    &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -140,11 +170,21 @@ call pfread_dim(parflow_file)
 if (debug > 0 .and. do_output()) write(*,*) '   ... pfb dimensions are ' , nx, ny, nz
 if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid resoluion are ', dx, dy, dz
 
-
 model_size = nx*ny*nz
 
 ! Get the vertical co-ordinate
 call pfidb_read(pfidb_file)
+
+! Get the geo-locaion
+allocate(lon(nx,ny))
+allocate(lat(nx,ny))
+
+call grid_read(grid_file)
+if (debug > 0 .and. do_output()) then
+   write(*, '(A,2(1X,F9.2))') '    ...parflow lon', minval(lon), maxval(lon)
+   write(*, '(A,2(1X,F9.2))') '    ...parflow lat', minval(lat), maxval(lat)
+end if
+
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 
 ! Create storage for locations
@@ -787,6 +827,57 @@ real(r8)                       :: pfb_dz(nz), pfb_vcoord(nz)
 
 end subroutine pfidb_read
 
+!------------------------------------------------------------------
+!> Reads the oasis grids.nc file to extract parflow geo-location 
+
+subroutine grid_read(filename)
+
+! gpfl.lon(y_gpfl,x_gpfl)
+! gpfl.lat(y_gpfl,x_gpfl)
+
+character(len=*), intent(in)   :: filename
+integer :: ncid, io, nlon, nlat, dimid(2), varid(2) 
+
+io = nf90_open(filename, NF90_NOWRITE, ncid)
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR opening',source, revision,revdate) 
+
+io = nf90_inq_dimid(ncid, "x_gpfl", dimid(1))
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR inq nlon',source, revision,revdate)
+
+io = nf90_inq_dimid(ncid, "y_gpfl", dimid(2))
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR inq nlat',source, revision,revdate)
+
+io = nf90_inq_varid(ncid, "gpfl.lon", varid(1))
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR inq lon',source, revision,revdate)
+
+io = nf90_inq_varid(ncid, "gpfl.lat", varid(2))
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR inq lat',source, revision,revdate)
+
+!
+io = nf90_inquire_dimension(ncid, dimid(1), string1, nlon)
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR get nlon',source, revision,revdate)
+
+io = nf90_inquire_dimension(ncid, dimid(2), string1, nlat)
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR get nlat',source, revision,revdate)
+
+if (nlon /= nx .or. nlat /=ny) then
+  write(*, *) 'Dimensions ...', nlon, nx, nlat, ny
+  call error_handler(E_ERR,'grid_read','ERR dimension mismatch',source, revision,revdate)
+end if
+
+io = nf90_get_var(ncid, varid(1), lon)
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR get lon',source, revision,revdate)
+
+io = nf90_get_var(ncid, varid(2), lat)
+if (io /= nf90_noerr) call error_handler(E_ERR,'grid_read','ERR get lat',source, revision,revdate)
+
+where(lon <   0.0_r8) lon = lon + 360.0_r8
+where(lat < -90.0_r8) lat = -90.0_r8
+where(lat >  90.0_r8) lat =  90.0_r8
+
+io = nf90_close(ncid)
+
+end subroutine grid_read
 !------------------------------------------------------------------
 !> Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
 
