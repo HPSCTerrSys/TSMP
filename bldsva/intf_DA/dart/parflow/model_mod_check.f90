@@ -11,21 +11,29 @@ program model_mod_check
 !----------------------------------------------------------------------
 
 use        types_mod, only : r8, digits12, metadatalength
+
 use    utilities_mod, only : initialize_utilities, finalize_utilities, nc_check, &
                              open_file, close_file, find_namelist_in_file, &
                              check_namelist_read
 use     location_mod, only : location_type, set_location, write_location, get_dist, &
-                             query_location, LocationDims, get_location
+                             query_location, LocationDims, get_location,            &
+                             VERTISHEIGHT
+
 use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index
+
 use  assim_model_mod, only : open_restart_read, open_restart_write, close_restart, &
                              aread_state_restart, awrite_state_restart, &
                              netcdf_file_type, aoutput_diagnostics, &
                              init_diag_output, finalize_diag_output, static_init_assim_model
-use time_manager_mod, only : time_type, set_calendar_type, NO_CALENDAR, &
+
+use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              read_time, get_time, set_time,  &
                              print_time, write_time, operator(-)
+
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
-                             model_interpolate
+                             get_state_vector, get_parflow_filename, model_interpolate
+use netcdf
+use typesizes
 
 implicit none
 
@@ -39,17 +47,19 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 129) :: input_file  = 'dart_ics'
-character (len = 129) :: output_file = 'check_me'
-logical               :: advance_time_present = .FALSE.
-logical               :: verbose              = .FALSE.
-integer               :: x_ind = -1
-real(r8), dimension(3) :: loc_of_interest = -1.0_r8
-character(len=metadatalength) :: kind_of_interest = 'ANY'
+character (len = 129) :: dart_input_file               = 'dart_ics'
+character (len = 129) :: output_file                   = 'check_me'
+logical               :: advance_time_present          = .FALSE.
+logical               :: verbose                       = .FALSE.
+integer               :: x_ind                         = -1
+real(r8), dimension(3) :: loc_of_interest              = -1.0_r8
+character(len=metadatalength) :: kind_of_interest      = 'ANY'
+character(len=metadatalength) :: interp_test_vertcoord = 'VERTISHEIGHT'
 
-namelist /model_mod_check_nml/ input_file, output_file, &
-                        advance_time_present, x_ind,    &
-                        loc_of_interest, kind_of_interest, verbose
+namelist /model_mod_check_nml/ dart_input_file, output_file,        &
+                        advance_time_present, x_ind,                &
+                        loc_of_interest, kind_of_interest, verbose, &
+                        interp_test_vertcoord
 
 !----------------------------------------------------------------------
 ! integer :: numlons, numlats, numlevs
@@ -73,7 +83,7 @@ real(r8) :: interp_val
 !----------------------------------------------------------------------
 
 call initialize_utilities(progname='model_mod_check')
-call set_calendar_type(NO_CALENDAR)
+call set_calendar_type(GREGORIAN)
 
 write(*,*)
 write(*,*)'Reading the namelist to get the input filename.'
@@ -119,9 +129,9 @@ call print_time( model_time,'model_mod_check:model time')
 !----------------------------------------------------------------------
 
 write(*,*)
-write(*,*)'Reading '//trim(input_file)
+write(*,*)'Reading '//trim(dart_input_file)
 
-iunit = open_restart_read(input_file)
+iunit = open_restart_read(dart_input_file)
 if ( advance_time_present ) then
    call aread_state_restart(model_time, statevector, iunit, adv_to_time)
 else

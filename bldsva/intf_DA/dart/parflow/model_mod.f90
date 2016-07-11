@@ -415,6 +415,8 @@ call error_handler(E_ERR,'end_model','routine not tested',source, revision,revda
 end subroutine end_model
 
 
+!------------------------------------------------------------------------
+!> 
 
 function nc_write_model_atts( ncFileID ) result (ierr)
 !------------------------------------------------------------------
@@ -471,6 +473,10 @@ integer :: TimeDimID       ! netCDF pointer to time dimension           (unlimit
 integer :: StateVarVarID   ! netCDF pointer to state variable coordinate array
 integer :: StateVarID      ! netCDF pointer to 3D [state,copy,time] array
 
+integer :: lonDimID
+integer :: latDimID
+integer :: levelDimID
+
 character(len=129)    :: errstring
 
 ! we are going to need these to record the creation date in the netCDF file.
@@ -482,7 +488,7 @@ character(len=5)      :: crzone      ! needed by F90 DATE_AND_TIME intrinsic
 integer, dimension(8) :: values      ! needed by F90 DATE_AND_TIME intrinsic
 character(len=NF90_MAX_NAME) :: str1
 
-integer :: i
+integer :: io, ndims, i
 
 if ( .not. module_initialized ) call static_init_model
 
@@ -588,6 +594,81 @@ else
    ! This block is a stub for something more complicated.
    ! Usually, the control for the execution of this block is a namelist variable.
    ! Take a peek at the bgrid model_mod.f90 for a (rather complicated) example.
+
+   io = nf90_def_dim(ncid=ncFileID, name='lon', len=nx, dimid = lonDimID)
+   call nc_check(io, 'nc_write_model_atts', 'lon def_dim '//trim(filename))
+
+   io = nf90_def_dim(ncid=ncFileID, name='lat', len=ny, dimid = latDimID)
+   call nc_check(io, 'nc_write_model_atts', 'lat def_dim '//trim(filename))
+
+   io = nf90_def_dim(ncid=ncFileID, name='level', len=nz, dimid = levelDimID)
+   call nc_check(io, 'nc_write_model_atts', 'level def_dim '//trim(filename))
+
+! Standard Grid Longitudes
+   call nc_check(nf90_def_var(ncFileID,name='lon', xtype=nf90_real, &
+                 dimids=(/ lonDimID, latDimID /), varid=VarID),&
+                 'nc_write_model_atts', 'lon def_var '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'long_name', 'longitude'), &
+                 'nc_write_model_atts', 'lon long_name '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'cartesian_axis', 'X'),  &
+                 'nc_write_model_atts', 'lon cartesian_axis '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'units', 'degrees_east'), &
+                 'nc_write_model_atts', 'lon units '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'valid_range', (/ 0.0_r8, 360.0_r8 /)), &
+                 'nc_write_model_atts', 'lon valid_range '//trim(filename))
+
+! Standard Grid Latitudes
+   call nc_check(nf90_def_var(ncFileID,name='lat', xtype=nf90_real, &
+                 dimids=(/ lonDimID, latDimID /), varid=VarID),&
+                 'nc_write_model_atts', 'lat def_var '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'long_name', 'latitudes of grid'), &
+                 'nc_write_model_atts', 'lat long_name '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'cartesian_axis', 'Y'),  &
+                 'nc_write_model_atts', 'lat cartesian_axis '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'units', 'degrees_east'), &
+                 'nc_write_model_atts', 'lat units '//trim(filename))
+   call nc_check(nf90_put_att(ncFileID,  VarID, 'valid_range', (/ -90.0_r8, 90.0_r8 /)), &
+                 'nc_write_model_atts', 'lat valid_range '//trim(filename))
+! vcoord
+
+   io = nf90_def_var(ncFileID,name='vcoord', xtype=nf90_real, &
+                 dimids=(/ level1DimID /), varid=vcoordVarID)
+   call nc_check(io, 'nc_write_model_atts', 'vcoord def_var '//trim(filename))
+   io = nf90_put_att(ncFileID, vcoordVarID,'long_name', 'vertical height')
+   call nc_check(io, 'nc_write_model_atts', 'vcoord long_name '//trim(filename))
+
+   io = nf90_put_att(ncFileID, vcoordVarID, 'units', 'm ')
+   call nc_check(io, 'nc_write_model_atts', 'vcoord units '//trim(filename))
+
+   !----------------------------------------------------------------------------
+   ! Create the (empty) Prognostic Variables and the Attributes
+   !----------------------------------------------------------------------------
+
+   do ivar=1, 1 
+
+      varname = trim(progvar(ivar)%varname)
+      string1 = trim(filename)//' '//trim(varname)
+
+      ! match shape of the variable to the dimension IDs
+
+      call define_var_dims(ivar, ncFileID, MemberDimID, unlimitedDimID, ndims, mydimids)
+
+      ! define the variable and set the attributes
+
+      io = nf90_def_var(ncid=ncFileID, name=trim(varname), xtype=nf90_double, &
+                    dimids = mydimids(1:ndims), varid=VarID)
+      call nc_check(io, 'nc_write_model_atts', trim(string1)//' def_var' )
+
+      io = nf90_put_att(ncFileID, VarID, 'long_name', trim(progvar(ivar)%long_name))
+      call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att long_name' )
+
+      io = nf90_put_att(ncFileID, VarID, 'DART_kind', trim(progvar(ivar)%kind_string))
+      call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att dart_kind' )
+
+      io = nf90_put_att(ncFileID, VarID, 'units', trim(progvar(ivar)%units))
+      call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att units' )
+
+   enddo
 
    call nc_check(nf90_enddef(ncfileID), "nc_write_model_atts", "prognostic enddef")
 

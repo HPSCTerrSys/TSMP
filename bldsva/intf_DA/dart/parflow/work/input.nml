@@ -243,12 +243,13 @@
    /
 
 &model_mod_check_nml
-   input_file            = 'allones.ics'
-   output_file           = 'check_me'
-   advance_time_present  = .false.
-   x_ind                 = 100
-   kind_of_interest      = 'ANY'
-   verbose               = .false.
-   loc_of_interest       = 287.5, 82.48, 0.35
+   dart_input_file            = 'dart_prior'
+   output_file                = 'check_me'
+   advance_time_present       = .false.
+   x_ind                      = 100
+   kind_of_interest           = 'ANY'
+   verbose                    = .false.
+   loc_of_interest            = 5.6, 49.8, 0.5
+   interp_test_vertcoord      = 'VERTISHEIGHT'
    /
 
