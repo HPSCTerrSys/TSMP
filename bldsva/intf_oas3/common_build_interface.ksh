@@ -67,6 +67,37 @@ route "${cblue}>>> c_substitutions_cos${cnormal}"
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/* $cosdir/src >> $log_file 2>> $err_file
   check
 
+#DA
+  if [[ $withPDAF == "true" ]] ; then
+    comment "    sed PDAF fix into cosmo files "  
+     # data_parallel.f90   --> new variable 'cosmo_input_suffix'
+     sed "/END\s*MODULE/ i\
+  ! input file suffix\\
+  integer :: cosmo_input_suffix\\
+" -i $cosdir/src/data_parallel.f90 >> $log_file 2>> $err_fil
+    check
+    # organize_data.f90   --> changes for reading 'INPUT_IO_xxxxx'
+    sed "/IMPLICIT\s*NONE/ i\
+  use data_parallel, only: cosmo_input_suffix\\
+" -i $cosdir/src/organize_data.f90 >> $log_file 2>> $err_fil
+    check
+    lntmp=$(grep -nm 1 -B 1 yinput $cosdir/src/organize_data.f90 | head -n 1 | cut -f1 -d-)
+    sed "${lntmp}s/8/14/" -i $cosdir/src/organize_data.f90 >> $log_file 2>> $err_fil
+    check
+    lntmp=$(grep -n yinput $cosdir/src/organize_data.f90 | grep INPUT_IO | cut -f1 -d:)
+    sed "${lntmp}s/yinput/!yinput/" -i $cosdir/src/organize_data.f90 >> $log_file 2>> $err_fil
+    check
+    sed "${lntmp} a\
+  write(yinput,'(a,i5.5)') 'INPUT_IO_',cosmo_input_suffix\\
+" -i $cosdir/src/organize_data.f90 >> $log_file 2>> $err_fil
+    check
+    # src_meanvalues.f90  --> changes for 'YU*' output files
+    sed "s/NEW/REPLACE/g" -i $cosdir/src/src_meanvalues.f90 >> $log_file 2>> $err_fil
+    check
+    # src_setup.f90       --> changes for 'YU*' output files
+    sed "s/NEW/REPLACE/g" -i $cosdir/src/src_setup.f90  >> $log_file 2>> $err_fil
+    check
+  fi
 route "${cblue}<<< c_substitutions_cos${cnormal}"
 }
 
@@ -206,6 +237,13 @@ route "${cblue}>>> c_substitutions_oas${cnormal}"
   comment "    sed usermakefile to make.inc"
     sed -i "s@include.*@include $oasdir/util/make_dir/make.oas3@" ${oasdir}/util/make_dir/make.inc >> $log_file 2>> $err_file
   check
+
+#DA
+  if [[ $withPDAF == "true" ]] ; then
+     comment "    cp PDAF fix to ${oasdir}/lib/psmile/src"
+       cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*  ${oasdir}/lib/psmile/src
+     check
+  fi
 route "${cblue}<<< c_substitutions_oas${cnormal}"
 }
 
@@ -388,6 +426,16 @@ route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    replace hydrology. Add files to clm/bld/usr.src "
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/* $clmdir/bld/usr.src >> $log_file 2>> $err_file
   check
+#DA
+  if [[ $withPDAF == "true" ]] ; then
+  comment "    copy PDAF fix to $clmdir/bld/usr.src "
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
+  check
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
+  check
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/iniTimeConst.F90 $clmdir/bld/usr.src	
+  check
+  fi	
 route "${cblue}<<< c_substitutions_clm${cnormal}"
 }
 
@@ -449,14 +497,23 @@ c_configure_pfl(){
 
 
 route "${cblue}>>> c_configure_pfl${cnormal}"
-
+#DA
+#    comment "    clean $pfldir/lib"
+#      rm $pfldir/lib/*
+#    check
 
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
     else 
-      flagsSim+="--with-amps=mpi1 " 
-      flagsTools+="--with-amps=mpi1 "
+#DA
+      if [[ $withPDAF == "true" ]] ; then
+        flagsSim+="--with-amps=da " 
+        flagsTools+="--with-amps=da "
+      else
+        flagsSim+="--with-amps=mpi1 " 
+        flagsTools+="--with-amps=mpi1 "
+      fi
     fi
 
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
@@ -519,11 +576,16 @@ check
 comment "    make install pftools"
   make -f $pfldir/pftools/Makefile install >> $log_file 2>> $err_file
 check
-
-comment "    cp binary to $bindir"
-  cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
-check
-
+#DA
+  if [[ $withPDAF == "true" ]]; then
+    comment "    cp libs to $dadir/libs"
+      cp $pfldir/pfsimulator/lib/* $dadir/libs >> $log_file 2>> $err_file
+    check
+  else
+    comment "    cp binary to $bindir"
+      cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
+    check
+  fi
 route "${cblue}<<< c_make_pfl${cnormal}"
 }
 
@@ -537,6 +599,23 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
   check
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/pf_pfmg* $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
   check
+#DA
+  if [[ $withPDAF == "true" ]]; then
+    comment "    copy fix for PDAF into $pfldir"
+      cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parlow_lib >> $log_file 2>> $err_file
+    check
+      cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/solver_richards.c $pfldir/pfsimulator/parlow_lib >> $log_file 2>> $err_file
+    check
+      cp -r $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/da $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
+    check
+      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parlow_lib/pf_pfmg.c
+    check
+      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parlow_lib/pf_pfmg_octree.c
+    check
+      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parlow_lib/pf_smg.c
+    check
+  fi
+
 route "${cblue}<<< c_substitutions_pfl${cnormal}"
 }
 

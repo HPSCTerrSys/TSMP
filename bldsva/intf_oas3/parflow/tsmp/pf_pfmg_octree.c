@@ -34,6 +34,7 @@
 
 #ifdef HAVE_HYPRE
 #include "hypre_dependences.h"
+#define ndim 3
 
 typedef struct
 {

@@ -164,7 +164,8 @@ setCombination(){
   fi
 
 #DA
-withDA="true"
+withDA="false"
+withPDAF="false"
 
 }
 
