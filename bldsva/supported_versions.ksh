@@ -89,6 +89,6 @@ setupsAvail+=(
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
 	["CLUMA2"]=" nrw idealRTD "
 	["AGROCLUSTER"]=" nrw "
-        ["CCA2"]=" nrw "
+        ["CCA2"]=" nrw cordex "
 )
 
