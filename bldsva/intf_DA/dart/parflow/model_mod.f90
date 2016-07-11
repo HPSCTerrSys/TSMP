@@ -13,12 +13,13 @@ module model_mod
 ! Modules that are absolutely required for use are listed
 use        types_mod, only : r8, MISSING_R8
 
-use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
+use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, &
                              print_time, print_date, set_calendar_type
 
-use     location_mod, only : location_type,      get_close_maxdist_init, &
-                             get_close_obs_init, get_close_obs, set_location, &
-                             set_location_missing
+use     location_mod, only : location_type,      get_close_maxdist_init,        &
+                             get_close_obs_init, get_close_obs, set_location,   &
+                             set_location,                                      &
+                             vert_is_height,       VERTISHEIGHT
 
 use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
@@ -103,9 +104,10 @@ end type progvartype
 
 type(progvartype)     :: progvar
 
-real(r8), allocatable ::   lon(:,:) ! longitude degrees_east
-real(r8), allocatable ::   lat(:,:) ! latitude  degrees_north
-
+real(r8), allocatable ::   lon(:,:)      ! longitude degrees_east
+real(r8), allocatable ::   lat(:,:)      ! latitude  degrees_north
+real(r8), allocatable ::   vcoord(:)     ! vertical co-ordinate in m
+type(time_type)       ::   parflow_time  ! parflow ouptut time
 
 ! EXAMPLE: perhaps a namelist here 
 character(len=256) :: parflow_file                 = 'parflow_file'
@@ -173,6 +175,7 @@ if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid res
 model_size = nx*ny*nz
 
 ! Get the vertical co-ordinate
+allocate(vcoord(nz))
 call pfidb_read(pfidb_file)
 
 ! Get the geo-locaion
@@ -253,7 +256,9 @@ type(time_type), intent(in)    :: time
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'adv_1step','routine not tested',source, revision,revdate)
+write(string1,*) 'Cannot advance ParFlow with a subroutine call; async cannot equal 0'
+call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
+
 end subroutine adv_1step
 
 
@@ -352,27 +357,43 @@ get_model_time_step = time_step
 
 end function get_model_time_step
 
-
+!------------------------------------------------------------------------
+!> Given an index into the DART state vector, return the location and
+!> (optionally) what kind of variable. This  optional argument kind
+!> can be returned if the model has more than one type of field (for
+!> instance temperature and zonal wind component). This interface is
+!> required for all filter applications as it is required for computing
+!> the distance between observations and state variables.
 
 subroutine get_state_meta_data(index_in, location, var_type)
-!------------------------------------------------------------------
-!
-! Given an integer index into the state vector structure, returns the
-! associated location. A second intent(out) optional argument kind
-! can be returned if the model has more than one type of field (for
-! instance temperature and zonal wind component). This interface is
-! required for all filter applications as it is required for computing
-! the distance between observations and state variables.
 
 integer,             intent(in)            :: index_in
 type(location_type), intent(out)           :: location
 integer,             intent(out), optional :: var_type
 
+real(r8) :: mylon,mylat,vloc
+integer  :: iloc, jloc, kloc
+integer  :: local_ind 
+
 if ( .not. module_initialized ) call static_init_model
+
+local_ind = index_in
+
+kloc =  local_ind / (nx*ny) + 1
+jloc = (local_ind - (kloc-1)*nx*ny)/nx + 1
+iloc =  local_ind - (kloc-1)*nx*ny - (jloc-1)*nx + 1
+
+write(*,*)'.. index_in ',index_in, ' and dereferences to ',iloc,jloc,kloc
+
+! Now that we know the i,j,k we have to index the right set of
+! coordinate arrays
+mylon = lon(iloc,jloc)
+mylat = lat(iloc,jloc)
+vloc  = vcoord(kloc)
 
 call error_handler(E_ERR,'get_state_meta_data','routine not tested',source, revision,revdate)
 ! these should be set to the actual location and obs kind
-location = set_location_missing()
+location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
 if (present(var_type)) var_type = 0  
 
 end subroutine get_state_meta_data
@@ -737,9 +758,9 @@ end subroutine ens_mean_for_model
 
 subroutine get_state_vector(sv, model_time)
 
-real(r8),         intent(inout) :: sv(1:model_size)
-type(time_type),  intent(out)   :: model_time
-real(r8),allocatable            :: pfbdata(:,:,:)
+real(r8),         intent(inout)           :: sv(1:model_size)
+type(time_type),  intent(out), optional   :: model_time
+real(r8),allocatable                      :: pfbdata(:,:,:)
  
 !
 
@@ -750,6 +771,8 @@ allocate(pfbdata(nx,ny,nz))
 call pfread_var(parflow_file,pfbdata) 
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
+
+model_time = parflow_time
 
 if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
    
@@ -791,7 +814,7 @@ get_parflow_filename = trim(parflow_file)
 end function get_parflow_filename
 
 !------------------------------------------------------------------
-!> Reads pfidb ascii file to extract vertical co-ordinate
+!> Reads pfidb ascii file to extract time and vertical co-ordinate
 
 subroutine pfidb_read(filename)
 
@@ -799,12 +822,24 @@ character(len=*), intent(in)   :: filename
 
 integer(kind=4)                :: nudat, izerr, iz
 character(len=256)             :: errmsg, fmt
-real(r8)                       :: pfb_dz(nz), pfb_vcoord(nz) 
+real(r8)                       :: pfb_dz(nz)
+integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
 
 ! code starts here
   nudat   = get_unit()
   write(*,*) filename
-  open(nudat, file=trim(filename),status='old') 
+  open(nudat, file=trim(filename),status='old')
+ 
+  read(nudat,*,iostat=izerr) yyyy, mm, dd, ts 
+  if (izerr < 0) call error_handler(E_ERR,'pfidb_read','error time', source, revision, revdate)
+  if (debug > 0 .and. do_output()) write(*,*) '  ...parflow time ',yyyy, mm, dd, ts 
+
+  hh = int(ts/3600._r8)
+  mn = int(ts - hh*3600)
+  ss = mod(ts, 60)  
+
+  parflow_time = set_date(yyyy,mm,dd,hh,mn,ss) 
+
   do iz = 1, nz
     read(nudat,'(F5.2)',iostat=izerr) pfb_dz(iz)
     if (izerr < 0) then
@@ -815,12 +850,12 @@ real(r8)                       :: pfb_dz(nz), pfb_vcoord(nz)
 
   do iz = nz, 1, -1
     if (iz == nz) then
-      pfb_vcoord(iz) = 0.5_r8 * pfb_dz(iz) 
+      vcoord(iz) = 0.5_r8 * pfb_dz(iz) 
     else
-      pfb_vcoord(iz) = pfb_vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
+      vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
     end if
     if (debug > 0 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
-                                         iz, pfb_dz(iz), pfb_vcoord(iz)
+                                         iz, pfb_dz(iz), vcoord(iz)
   end do
 
   close(nudat)
