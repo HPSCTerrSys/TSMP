@@ -193,12 +193,20 @@ integer :: nsoil1
 !> same as the storage order of the binary variables.
 !> vcoord has units, etc. and will require a transformation
 
-real(r8), allocatable ::   lon(:,:) ! longitude degrees_east
-real(r8), allocatable ::   lat(:,:) ! latitude  degrees_north
+real(r8), allocatable ::   lon(:,:) !                  longitude degrees_east
+real(r8), allocatable ::   lat(:,:) !                  latitude  degrees_north
 real(r8), allocatable :: slonu(:,:) ! staggered U-wind longitude degrees_east
 real(r8), allocatable :: slatu(:,:) ! staggered U-wind latitude  degrees_north
 real(r8), allocatable :: slonv(:,:) ! staggered V-wind longitude degrees_east
 real(r8), allocatable :: slatv(:,:) ! staggered V-wind latitude  degrees_north
+
+! variables pertaining to the computational grid
+real(r8), allocatable ::  rlon(:) !           rotated longitude degrees
+real(r8), allocatable ::  rlat(:) !           rotated latitude  degrees
+real(r8), allocatable :: srlon(:) ! staggered rotated longitude degrees
+real(r8), allocatable :: srlat(:) ! staggered rotated latitude  degrees
+real(r8) :: north_pole_latitude
+real(r8) :: north_pole_longitude
 
 ! just mimic what is in the netCDF variable
 !       float vcoord(level1) ;
@@ -290,6 +298,12 @@ type(time_type)                :: cosmo_fc_time
 type(time_type)                :: cosmo_an_time
 
 type(grib_header_type),allocatable  :: grib_header(:)
+
+INTERFACE get_grid_var
+      MODULE PROCEDURE get_1d_grid_var
+      MODULE PROCEDURE get_2d_grid_var
+END INTERFACE
+
 
 contains
 
@@ -467,39 +481,47 @@ end subroutine get_state_meta_data
 !>
 
 
-  subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
+subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
 
-  ! Error codes:
-  ! istatus = 99 : unknown error
-  ! istatus = 10 : observation type is not in state vector
-  ! istatus = 15 : observation lies outside the model domain (horizontal)
-  ! istatus = 16 : observation lies outside the model domain (vertical)
-  ! istatus = 19 : observation vertical coordinate is not supported
+! Error codes:
+! istatus = 99 : unknown error
+! istatus = 10 : observation type is not in state vector
+! istatus = 15 : observation lies outside the model domain (horizontal)
+! istatus = 16 : observation lies outside the model domain (vertical)
+! istatus = 19 : observation vertical coordinate is not supported
 
-  ! Passed variables
+! Passed variables
 
-  real(r8),            intent(in)  :: x(:)
-  type(location_type), intent(in)  :: location
-  integer,             intent(in)  :: obs_type
-  real(r8),            intent(out) :: interp_val
-  integer,             intent(out) :: istatus
+real(r8),            intent(in)  :: x(:)
+type(location_type), intent(in)  :: location
+integer,             intent(in)  :: obs_type
+real(r8),            intent(out) :: interp_val
+integer,             intent(out) :: istatus
 
-  ! Local storage
+! Local storage
 
-  real(r8)             :: point_coords(1:3)
+real(r8) :: point_coords(1:3)
+integer  :: i,j,hbox(2,2),n,vbound(2),sindex
+real(r8) :: hbox_weight(2,2),hbox_val(2,2),hbox_lon(2,2),hbox_lat(2,2)
+real(r8) :: vbound_weight(2),val1,val2
 
-  integer              :: i,j,hbox(2,2),n,vbound(2),sindex
-  real(r8)             :: hbox_weight(2,2),hbox_val(2,2),hbox_lon(2,2),hbox_lat(2,2)
-  real(r8)             :: vbound_weight(2),val1,val2
+IF ( .not. module_initialized ) call static_init_model
 
-  call error_handler(E_ERR,'model_interpolate','routine not written',source,revision,revdate)
+interp_val = MISSING_R8     ! the DART bad value flag
+istatus = 99                ! unknown error
 
-  IF ( .not. module_initialized ) call static_init_model
+! If identity observation (obs_type < 0), then no need to interpolate
+! identity observation -> -(obs_type) = DART state vector index
+! obtain "interpolated" value directly from state using (abs(obs_type))
 
-  interp_val = MISSING_R8     ! the DART bad value flag
-  istatus = 99                ! unknown error
+if ( obs_type < 0 ) then
+   interp_val = x(-1*obs_type)
+   istatus = 0
+   return
+endif
 
-  ! FIXME ... want some sort of error message here?
+
+  ! FIXME ... convert this to progvar
   if ( .not. state_vector_vars(obs_type)%is_present) then
      istatus=10
      return
@@ -642,6 +664,7 @@ deallocate(cosmo_slabs)
 deallocate(state_vector)
 deallocate(lon,lat,slonu,slatu,slonv,slatv)
 deallocate(vcoord%level1)
+deallocate(rlon,rlat,srlon,srlat)
 
 end subroutine end_model
 
@@ -1404,20 +1427,21 @@ end subroutine ens_mean_for_model
     real(r8),intent(out) :: bw(1:2,1:2)
 
 !    real(r8)            :: work(1:nx,1:ny,1:3),dist(1:nx,1:ny),boxdist(1:2,1:2)
-    real(r8)             :: work(1:nx+2,1:ny+2,1:2),dist(1:nx+2,1:ny+2),boxdist(1:2,1:2),pw(2)
+
+    real(r8) :: work(1:nx+2, 1:ny+2, 1:2), dist(1:nx+2,1:ny+2), boxdist(1:2,1:2),pw(2)
 
     integer  :: i,j,minidx(2),boxidx(2),xb,yb,bx(2,2),by(2,2)
     real(r8) :: sqrt2
 
     sqrt2 = sqrt(2.0_r8)
 
-    work(2:nx+1,2:ny+1,1)=reshape(lon,(/ nx,ny /))*deg2rad
-    work(2:nx+1,2:ny+1,2)=reshape(lat,(/ nx,ny /))*deg2rad
+    work(2:nx+1, 2:ny+1, 1) = reshape(lon, (/ nx,ny /))*deg2rad
+    work(2:nx+1, 2:ny+1, 2) = reshape(lat, (/ nx,ny /))*deg2rad
     pw=p*deg2rad
 
     do i=2,nx+1
-      work(i,   1,1:2)=work(i,   2,1:2)-(work(i, 3,1:2)-work(i,   2,1:2))
-      work(i,ny+2,1:2)=work(i,ny+1,1:2)-(work(i,ny,1:2)-work(i,ny+1,1:2))
+      work(i,   1,1:2) = work(i,   2,1:2)-(work(i, 3,1:2)-work(i,   2,1:2))
+      work(i,ny+2,1:2) = work(i,ny+1,1:2)-(work(i,ny,1:2)-work(i,ny+1,1:2))
     enddo
 
     do j=2,ny+1
@@ -1982,7 +2006,7 @@ character(len=*), intent(in) :: filename
 !       soil = 7 ;
 !       soil1 = 8 ;
 
-integer :: ncid, io, dimid
+integer :: ncid, io, dimid, VarID
 
 io = nf90_open(filename, NF90_NOWRITE, ncid)
 call nc_check(io, 'get_cosmo_grid','open "'//trim(filename)//'"')
@@ -2081,6 +2105,8 @@ if ( debug > 5 .and. do_output() ) then
 
 endif
 
+! Get the geographic grid information
+
 call get_grid_var(ncid,  'lon' ,  nrlon,  nrlat, filename)
 call get_grid_var(ncid,  'lat' ,  nrlon,  nrlat, filename)
 call get_grid_var(ncid, 'slonu', nsrlon,  nrlat, filename)
@@ -2098,16 +2124,110 @@ endif
 
 call get_vcoord(ncid, filename)
 
+! Get the rotated grid information
+
+call get_grid_var(ncid, 'rlon',   nrlon, filename)
+call get_grid_var(ncid, 'rlat',   nrlat, filename)
+call get_grid_var(ncid, 'srlon', nsrlon, filename)
+call get_grid_var(ncid, 'srlat', nsrlat, filename)
+
+io = nf90_inq_varid(ncid, 'rotated_pole', VarID)
+call nc_check(io, 'get_cosmo_grid', 'rotated_pole inq_varid '//trim(filename))
+
+io = nf90_get_att(ncid, VarID, 'grid_north_pole_latitude', north_pole_latitude)
+call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_latitude get_att '//trim(filename))
+
+io = nf90_get_att(ncid, VarID, 'grid_north_pole_longitude', north_pole_longitude)
+call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_longitude get_att '//trim(filename))
+
+! close up
+
 call nc_check(nf90_close(ncid),'get_cosmo_grid','close "'//trim(filename)//'"' )
 
 end subroutine get_cosmo_grid
 
 
 !------------------------------------------------------------------------
-!> all grid variables in the netCDF files are 2D
+!> get the 1D grid variables in the netCDF file
 !> this does not handle scale, offset, missing_value, _FillValue etc.
 
-subroutine get_grid_var(ncid,varstring,expected_dim1,expected_dim2,filename)
+
+subroutine get_1d_grid_var(ncid,varstring,expected_dim1,filename)
+integer,          intent(in) :: ncid
+character(len=*), intent(in) :: varstring
+integer,          intent(in) :: expected_dim1
+character(len=*), intent(in) :: filename
+
+integer :: dimIDs(NF90_MAX_VAR_DIMS)
+integer :: dimlens
+integer :: io, VarID, ndims
+integer :: i
+
+write(string3,*)trim(varstring)//' '//trim(filename)
+
+call nc_check(nf90_inq_varid(ncid, trim(varstring), VarID), &
+         'get_1d_grid_var', 'inq_varid '//trim(string3))
+
+call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
+         'get_1d_grid_var', 'inquire_variable '//trim(string3))
+
+!> @TODO more informative error message
+if (ndims /= 1) then
+   call error_handler(E_ERR,'get_1d_grid_var','wrong shape for '//string3, &
+              source, revision, revdate)
+endif
+
+write(string1,'(''inquire dimension'',i2,A)') i,trim(string3)
+
+call nc_check(nf90_inquire_dimension(ncid, dimIDs(1), len=dimlens), &
+                                    'get_1d_grid_var', string1)
+
+! Check that the variable actual size matches the expected size
+
+if (dimlens .ne. expected_dim1 ) then
+   write(string1,*)'expected dimension 1 to be ',expected_dim1, 'was', dimlens
+   call error_handler(E_ERR, 'get_1d_grid_var', string1, &
+              source, revision, revdate, text2=string2)
+endif
+
+! finally allocate and fill the desired variable
+
+select case (trim(varstring))
+   case ("rlon")
+      allocate( rlon(dimlens) )
+      io = nf90_get_var(ncid, VarID, rlon)
+      call nc_check(io, 'get_1d_grid_var', 'get_var '//trim(string3))
+
+   case ("rlat")
+      allocate( rlat(dimlens) )
+      io = nf90_get_var(ncid, VarID, rlat)
+      call nc_check(io, 'get_1d_grid_var', 'get_var '//trim(string3))
+
+   case ("srlon")
+      allocate( srlon(dimlens) )
+      io = nf90_get_var(ncid, VarID, srlon)
+      call nc_check(io, 'get_1d_grid_var', 'get_var '//trim(string3))
+
+   case ("srlat")
+      allocate( srlat(dimlens) )
+      io = nf90_get_var(ncid, VarID, srlat)
+      call nc_check(io, 'get_1d_grid_var', 'get_var '//trim(string3))
+
+   case default
+      write(string1,*)'unsupported grid variable '
+      call error_handler(E_ERR,'get_1d_grid_var', string1, &
+                 source, revision, revdate, text2=string3)
+
+end select
+
+end subroutine get_1d_grid_var
+
+!------------------------------------------------------------------------
+!> get the 2D grid variables in the netCDF file
+!> this does not handle scale, offset, missing_value, _FillValue etc.
+
+
+subroutine get_2d_grid_var(ncid,varstring,expected_dim1,expected_dim2,filename)
 integer,          intent(in) :: ncid
 character(len=*), intent(in) :: varstring
 integer,          intent(in) :: expected_dim1
@@ -2122,14 +2242,14 @@ integer :: i
 write(string3,*)trim(varstring)//' '//trim(filename)
 
 call nc_check(nf90_inq_varid(ncid, trim(varstring), VarID), &
-         'get_grid_var', 'inq_varid '//trim(string3))
+         'get_2d_grid_var', 'inq_varid '//trim(string3))
 
 call nc_check(nf90_inquire_variable(ncid, VarID, dimids=dimIDs, ndims=ndims), &
-         'get_grid_var', 'inquire_variable '//trim(string3))
+         'get_2d_grid_var', 'inquire_variable '//trim(string3))
 
 !> @TODO more informative error message
 if (ndims /= 2) then
-   call error_handler(E_ERR,'get_grid_var','wrong shape for '//string3, &
+   call error_handler(E_ERR,'get_2d_grid_var','wrong shape for '//string3, &
               source, revision, revdate)
 endif
 
@@ -2138,7 +2258,7 @@ DimensionLoop : do i = 1,ndims
    write(string1,'(''inquire dimension'',i2,A)') i,trim(string3)
 
    call nc_check(nf90_inquire_dimension(ncid, dimIDs(i), len=dimlens(i)), &
-                                       'get_grid_var', string1)
+                                       'get_2d_grid_var', string1)
 
 enddo DimensionLoop
 
@@ -2148,7 +2268,7 @@ if (dimlens(1) .ne. expected_dim1 .or. &
     dimlens(2) .ne. expected_dim2 ) then
    write(string1,*)'expected dimension 1 to be ',expected_dim1, 'was', dimlens(1)
    write(string2,*)'expected dimension 2 to be ',expected_dim2, 'was', dimlens(2)
-   call error_handler(E_ERR, 'get_grid_var', string1, &
+   call error_handler(E_ERR, 'get_2d_grid_var', string1, &
               source, revision, revdate, text2=string2)
 endif
 
@@ -2156,42 +2276,42 @@ select case (trim(varstring))
    case ("lon")
       allocate( lon(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, lon)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case ("lat")
       allocate( lat(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, lat)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case ("slonu")
       allocate( slonu(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, slonu)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case ("slatu")
       allocate( slatu(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, slatu)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case ("slonv")
       allocate( slonv(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, slonv)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case ("slatv")
       allocate( slatv(dimlens(1), dimlens(2)) )
       io = nf90_get_var(ncid, VarID, slatv)
-      call nc_check(io, 'get_grid_var', 'get_var '//trim(string3))
+      call nc_check(io, 'get_2d_grid_var', 'get_var '//trim(string3))
 
    case default
       write(string1,*)'unsupported grid variable '
-      call error_handler(E_ERR,'get_grid_var', string1, &
+      call error_handler(E_ERR,'get_2d_grid_var', string1, &
                  source, revision, revdate, text2=string3)
 
 end select
 
 
-end subroutine get_grid_var
+end subroutine get_2d_grid_var
 
 !------------------------------------------------------------------------
 !>
