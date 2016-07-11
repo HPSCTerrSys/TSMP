@@ -11,7 +11,7 @@ module model_mod
 ! Based on DART template directory
 
 ! Modules that are absolutely required for use are listed
-use        types_mod, only : r8, MISSING_R8
+use        types_mod, only : r8, obstypelength, MISSING_R8
 
 use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, &
                              print_time, print_date, set_calendar_type
@@ -89,13 +89,13 @@ type progvartype
    character(len=NF90_MAX_NAME) :: varname
    character(len=NF90_MAX_NAME) :: long_name
    character(len=NF90_MAX_NAME) :: units
+   character(len=obstypelength) :: dimnames(NF90_MAX_VAR_DIMS)
+   integer  :: dimlens(NF90_MAX_VAR_DIMS)
    integer  :: numdims
    integer  :: numEW
    integer  :: numNS
    integer  :: numZ
    integer  :: varsize     ! prod(dimlens(1:numdims))
-   integer  :: index1      ! location in dart state vector of first occurrence
-   integer  :: indexN      ! location in dart state vector of last  occurrence
    integer  :: rangeRestricted
    real(r8) :: minvalue
    real(r8) :: maxvalue
@@ -188,6 +188,7 @@ call grid_read(grid_file)
 if (debug > 0 .and. do_output()) then
    write(*, '(A,2(1X,F9.2))') '    ...parflow lon', minval(lon), maxval(lon)
    write(*, '(A,2(1X,F9.2))') '    ...parflow lat', minval(lat), maxval(lat)
+   write(*, *) '-------------------------------'
 end if
 
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
@@ -196,19 +197,16 @@ ivar = 1
 progvar(ivar)%varname         = "psi"
 progvar(ivar)%long_name       = "Pressure Head"
 progvar(ivar)%units           = "m"
+progvar(ivar)%numdims         = 3
+progvar(ivar)%dimnames(1)     = 'pfl_lon'
+progvar(ivar)%dimnames(2)     = 'pfl_lat'
+progvar(ivar)%dimnames(3)     = 'level'
+progvar(ivar)%dimlens(1)      = nx
+progvar(ivar)%dimlens(2)      = ny
+progvar(ivar)%dimlens(3)      = nz
 
 ! Create storage for locations
 allocate(state_loc(model_size))
-
-! Define the locations of the model state variables
-! naturally, this can be done VERY differently for more complicated models.
-! set_location() is different for 1D vs. 3D models, not surprisingly.
-do i = 1, model_size
-   x_loc = (i - 1.0_r8) / model_size
-   ! must do one of these:
-   !state_loc(i) =  set_location(x_loc)
-   !state_loc(i) =  set_location(x_loc,y_loc,v_loc,v_type)
-end do
 
 ! The time_step in terms of a time type must also be initialized.
 time_step = set_time(assimilation_period_seconds, assimilation_period_days)
@@ -399,7 +397,7 @@ mylon = lon(iloc,jloc)
 mylat = lat(iloc,jloc)
 vloc  = vcoord(kloc)
 
-call error_handler(E_ERR,'get_state_meta_data','routine not tested',source, revision,revdate)
+!CPS call error_handler(E_ERR,'get_state_meta_data','routine not tested',source, revision,revdate)
 ! these should be set to the actual location and obs kind
 location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
 if (present(var_type)) var_type = 0  
@@ -586,11 +584,11 @@ else
    ! Usually, the control for the execution of this block is a namelist variable.
    ! Take a peek at the bgrid model_mod.f90 for a (rather complicated) example.
 
-   io = nf90_def_dim(ncid=ncFileID, name='lon', len=nx, dimid = lonDimID)
-   call nc_check(io, 'nc_write_model_atts', 'lon def_dim '//trim(filename))
+   io = nf90_def_dim(ncid=ncFileID, name='pfl_lon', len=nx, dimid = lonDimID)
+   call nc_check(io, 'nc_write_model_atts', 'pfl_lon def_dim '//trim(filename))
 
-   io = nf90_def_dim(ncid=ncFileID, name='lat', len=ny, dimid = latDimID)
-   call nc_check(io, 'nc_write_model_atts', 'lat def_dim '//trim(filename))
+   io = nf90_def_dim(ncid=ncFileID, name='pfl_lat', len=ny, dimid = latDimID)
+   call nc_check(io, 'nc_write_model_atts', 'pfl_lat def_dim '//trim(filename))
 
    io = nf90_def_dim(ncid=ncFileID, name='level', len=nz, dimid = levelDimID)
    call nc_check(io, 'nc_write_model_atts', 'level def_dim '//trim(filename))
@@ -639,8 +637,10 @@ else
 
       varname = trim(progvar(ivar)%varname)
       string1 = trim(filename)//' '//trim(varname)
-      write(*,*) varname
+
       ! match shape of the variable to the dimension IDs
+      call define_var_dims(ivar, ncFileID, MemberDimID, unlimitedDimID, ndims, mydimids)
+
       io = nf90_def_var(ncid=ncFileID, name=trim(varname), xtype=nf90_double, &
                     dimids = mydimids(1:ndims), varid=VarID)
       call nc_check(io, 'nc_write_model_atts', trim(string1)//' def_var' )
@@ -687,21 +687,12 @@ ierr = 0 ! If we got here, things went well.
 end function nc_write_model_atts
 
 
+!------------------------------------------------------------------------
+!>
+!> Writes the model variables to a netCDF file.
+!> All errors are fatal, so the return code is always '0 == normal'.
 
 function nc_write_model_vars( ncFileID, statevec, copyindex, timeindex ) result (ierr)         
-!------------------------------------------------------------------
-! TJH 24 Oct 2006 -- Writes the model variables to a netCDF file.
-!
-! TJH 29 Jul 2003 -- for the moment, all errors are fatal, so the
-! return code is always '0 == normal', since the fatal errors stop execution.
-!
-! For the lorenz_96 model, each state variable is at a separate location.
-! that's all the model-specific attributes I can think of ...
-!
-! assim_model_mod:init_diag_output uses information from the location_mod
-!     to define the location dimension and variable ID. All we need to do
-!     is query, verify, and fill ...
-!
 ! Typical sequence for adding new dimensions,variables,attributes:
 ! NF90_OPEN             ! open existing netCDF dataset
 !    NF90_redef         ! put into define mode
@@ -721,7 +712,15 @@ integer,                intent(in) :: copyindex
 integer,                intent(in) :: timeindex
 integer                            :: ierr          ! return value of function
 
-integer :: nDimensions, nVariables, nAttributes, unlimitedDimID
+character(len=NF90_MAX_NAME) :: varname
+integer ::  dimIDs(NF90_MAX_VAR_DIMS)
+integer :: ncstart(NF90_MAX_VAR_DIMS)
+integer :: nccount(NF90_MAX_VAR_DIMS)
+
+integer :: io, i, ivar, VarID, ndims, dimlen
+integer :: TimeDimID, CopyDimID
+
+character(len=256) :: filename
 
 integer :: StateVarID
 
@@ -730,48 +729,82 @@ integer :: StateVarID
 !-------------------------------------------------------------------------------
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'nc_write_model_vars','routine not tested',source, revision,revdate)
 
 ierr = -1 ! assume things go poorly
 
-call nc_check(nf90_inquire(ncFileID,nDimensions,nVariables,nAttributes,unlimitedDimID), &
-                          "nc_write_model_vars", "inquire")
+write(filename,*) 'ncFileID', ncFileID
+
+! make sure ncFileID refers to an open netCDF file,
+
+io = nf90_inq_dimid(ncFileID, 'copy', dimid=CopyDimID)
+call nc_check(io, 'nc_write_model_vars', 'inq_dimid copy '//trim(filename))
+
+io = nf90_inq_dimid(ncFileID, 'time', dimid=TimeDimID)
+call nc_check(io, 'nc_write_model_vars', 'inq_dimid time '//trim(filename))
 
 if ( output_1D_state_vector ) then
 
-   call nc_check(nf90_inq_varid(ncFileID, "state", StateVarID), &
-                               "nc_write_model_vars", "inq_varid state" )
-   call nc_check(nf90_put_var(ncFileID, StateVarID, statevec,  &
-                              start=(/ 1, copyindex, timeindex /)), &
-                             "nc_write_model_vars", "put_var state")                   
+   io = nf90_inq_varid(ncFileID, 'state', VarID)
+   call nc_check(io, 'nc_write_model_vars', 'state inq_varid '//trim(filename))
+
+   io = nf90_put_var(ncFileID,VarID,statevec,start=(/1,copyindex,timeindex/))
+   call nc_check(io, 'nc_write_model_vars', 'state put_var '//trim(filename))
 
 else
 
    !----------------------------------------------------------------------------
    ! We need to process the prognostic variables.
    !----------------------------------------------------------------------------
+   do ivar = 1,1
 
-   ! This block is a stub for something more complicated.
-   ! Usually, the control for the execution of this block is a namelist variable.
-   ! Take a peek at the bgrid model_mod.f90 for a (rather complicated) example.
-   !
-   ! Generally, it is necessary to take the statevec and decompose it into 
-   ! the separate prognostic variables. In this (commented out) example,
-   ! global_Var is a user-defined type that has components like:
-   ! global_Var%ps, global_Var%t, ... etc. Each of those can then be passed
-   ! directly to the netcdf put_var routine. This may cause a huge storage
-   ! hit, so large models may want to avoid the duplication if possible.
+      varname = trim(progvar(ivar)%varname)
+      string2 = trim(filename)//' '//trim(varname)
 
-   ! call vector_to_prog_var(statevec, get_model_size(), global_Var)
+      call nc_check(nf90_inq_varid(ncFileID, varname, VarID), &
+            'nc_write_model_vars', 'inq_varid '//trim(string2))
 
-   ! the 'start' array is crucial. In the following example, 'ps' is a 2D
-   ! array, and the netCDF variable "ps" is a 4D array [lat,lon,copy,time]
+      call nc_check(nf90_inquire_variable(ncFileID,VarID,dimids=dimIDs,ndims=ndims), &
+            'nc_write_model_vars', 'inquire '//trim(string2))
 
-   ! call nc_check(nf90_inq_varid(ncFileID, "ps", psVarID), &
-   !                             "nc_write_model_vars",  "inq_varid ps")
-   ! call nc_check(nf90_put_var( ncFileID, psVarID, global_Var%ps, &
-   !                             start=(/ 1, 1, copyindex, timeindex /)), &
-   !                            "nc_write_model_vars", "put_var ps")
+      ncstart = 1   ! These are arrays, actually
+      nccount = 1
+      DimCheck : do i = 1,progvar(ivar)%numdims
+
+         write(string1,'(a,i2,A)') 'inquire dimension ',i,trim(string2)
+         call nc_check(nf90_inquire_dimension(ncFileID, dimIDs(i), len=dimlen), &
+               'nc_write_model_vars', trim(string1))
+
+         if (progvar(ivar)%dimnames(i) == 'time') cycle DimCheck
+
+         if ( dimlen /= progvar(ivar)%dimlens(i) ) then
+            write(string1,*)trim(string2),' dim/dimlen ',i,dimlen, &
+                            ' not ',progvar(ivar)%dimlens(i)
+            write(string2,*)' but it should be.'
+            call error_handler(E_ERR, 'nc_write_model_vars', trim(string1), &
+                            source, revision, revdate, text2=trim(string2))
+         endif
+
+         nccount(i) = dimlen
+
+      enddo DimCheck
+
+      where(dimIDs == CopyDimID) ncstart = copyindex
+      where(dimIDs == CopyDimID) nccount = 1
+      where(dimIDs == TimeDimID) ncstart = timeindex
+      where(dimIDs == TimeDimID) nccount = 1
+
+      if ((debug > 0) .and. do_output()) then
+         write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ndims)
+         write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ndims)
+      endif
+
+      ! revelation - no need to reshape the state vector before nf90_put_var
+
+      call nc_check(nf90_put_var(ncFileID, VarID, statevec,          &
+                   start = ncstart(1:ndims), count=nccount(1:ndims)), &
+                   'nc_write_model_vars', 'put_var '//trim(string2))
+   enddo
+
 
 endif
 
@@ -782,6 +815,8 @@ endif
 call nc_check(nf90_sync(ncFileID), "nc_write_model_vars", "sync")
 
 ierr = 0 ! If we got here, things went well.
+
+!CPS call error_handler(E_ERR,'nc_write_model_vars','routine not tested',source, revision,revdate)
 
 end function nc_write_model_vars
 
@@ -1294,6 +1329,50 @@ character(len=256)             :: errmsg
   close(nudat)
   return
 end subroutine pfwrite_var
+
+!------------------------------------------------------------------------
+!>
+
+!>  define_var_dims() takes the N-dimensional variable and appends the DART
+!>  dimensions of 'copy' and 'time'. If the variable initially had a 'time'
+!>  dimension, it is ignored because (by construction) it is a singleton
+!>  dimension.
+
+subroutine define_var_dims(ivar, ncid, memberdimid, unlimiteddimid, ndims, dimids)
+
+integer,               intent(in)  :: ivar, ncid, memberdimid, unlimiteddimid
+integer,               intent(out) :: ndims
+integer, dimension(:), intent(out) :: dimids
+
+character(len=NF90_MAX_NAME),dimension(NF90_MAX_VAR_DIMS) :: dimnames
+
+integer :: i, io, mydimid
+
+ndims = 0
+
+DIMLOOP : do i = 1,progvar(ivar)%numdims
+
+   if (progvar(ivar)%dimnames(i) == 'time') cycle DIMLOOP
+
+   io = nf90_inq_dimid(ncid=ncid, name=progvar(ivar)%dimnames(i), dimid=mydimid)
+   call nc_check(io, 'define_var_dims','inq_dimid '//trim(progvar(ivar)%dimnames(i)))
+
+   ndims         = ndims + 1
+   dimids(ndims) = mydimid
+   dimnames(ndims) = progvar(ivar)%dimnames(i)
+
+enddo DIMLOOP
+
+! The last two dimensions are always 'copy' and 'time'
+ndims           = ndims + 1
+dimids(ndims)   = memberdimid
+dimnames(ndims) = 'copy'
+ndims           = ndims + 1
+dimids(ndims)   = unlimitedDimid
+dimnames(ndims) = 'time'
+
+return
+end subroutine define_var_dims
 !===================================================================
 ! End of model_mod
 !===================================================================
