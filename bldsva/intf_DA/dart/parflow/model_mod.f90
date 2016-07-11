@@ -82,6 +82,7 @@ type(time_type)                  :: time_step
 type(location_type), allocatable :: state_loc(:)
 
 ! Everything needed to describe a variable
+integer, parameter :: max_state_variables = 2   !ParFlow has two ouputs 
 
 type progvartype
    private
@@ -102,7 +103,7 @@ type progvartype
    logical  :: update
 end type progvartype
 
-type(progvartype)     :: progvar
+type(progvartype), dimension(max_state_variables)     :: progvar
 
 real(r8), allocatable ::   lon(:,:)      ! longitude degrees_east
 real(r8), allocatable ::   lat(:,:)      ! latitude  degrees_north
@@ -113,7 +114,7 @@ type(time_type)       ::   parflow_time  ! parflow ouptut time
 character(len=256) :: parflow_file                 = 'parflow_file'
 character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
-logical            :: output_state_vector_as_1D    = .false.
+logical            :: output_1D_state_vector       = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
 integer            :: debug = 0 
@@ -122,7 +123,7 @@ namelist /model_nml/                &
       parflow_file,                 &
       pfidb_file,                   &
       grid_file,                    &
-      output_state_vector_as_1D,    &
+      output_1D_state_vector,       &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
       debug
@@ -145,6 +146,7 @@ subroutine static_init_model()
 real(r8) :: x_loc
 integer  :: i
 integer  :: iunit, io
+integer  :: ivar
 
 if ( module_initialized ) return ! only need to do this once.
 
@@ -189,6 +191,11 @@ if (debug > 0 .and. do_output()) then
 end if
 
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
+! TODO, var_type could switch between 1 and 2 for pressure and sat
+ivar = 1
+progvar(ivar)%varname         = "psi"
+progvar(ivar)%long_name       = "Pressure Head"
+progvar(ivar)%units           = "m"
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -374,6 +381,7 @@ integer,             intent(out), optional :: var_type
 real(r8) :: mylon,mylat,vloc
 integer  :: iloc, jloc, kloc
 integer  :: local_ind 
+integer  :: ivar
 
 if ( .not. module_initialized ) call static_init_model
 
@@ -425,29 +433,6 @@ function nc_write_model_atts( ncFileID ) result (ierr)
 !     the model state vector. We do have to allocate SPACE for the model
 !     state vector, but that variable gets filled as the model advances.
 !
-! As it stands, this routine will work for ANY model, with no modification.
-!
-! The simplest possible netCDF file would contain a 3D field
-! containing the state of 'all' the ensemble members. This requires
-! three coordinate variables -- one for each of the dimensions 
-! [model_size, ensemble_member, time]. A little metadata is useful, 
-! so we can also create some 'global' attributes. 
-! This is what is implemented here.
-!
-! Once the simplest case is working, this routine (and nc_write_model_vars)
-! can be extended to create a more logical partitioning of the state vector,
-! fundamentally creating a netCDF file with variables that are easily 
-! plotted. The bgrid model_mod is perhaps a good one to view, keeping
-! in mind it is complicated by the fact it has two coordinate systems. 
-! There are stubs in this template, but they are only stubs.
-!
-! TJH 29 Jul 2003 -- for the moment, all errors are fatal, so the
-! return code is always '0 == normal', since the fatal errors stop execution.
-!
-! assim_model_mod:init_diag_output uses information from the location_mod
-!     to define the location dimension and variable ID. All we need to do
-!     is query, verify, and fill ...
-!
 ! Typical sequence for adding new dimensions,variables,attributes:
 ! NF90_OPEN             ! open existing netCDF dataset
 !    NF90_redef         ! put into define mode 
@@ -469,6 +454,8 @@ integer :: nDimensions, nVariables, nAttributes, unlimitedDimID
 integer :: StateVarDimID   ! netCDF pointer to state variable dimension (model size)
 integer :: MemberDimID     ! netCDF pointer to dimension of ensemble    (ens_size)
 integer :: TimeDimID       ! netCDF pointer to time dimension           (unlimited)
+integer :: vcoordVarID
+integer :: VarID
 
 integer :: StateVarVarID   ! netCDF pointer to state variable coordinate array
 integer :: StateVarID      ! netCDF pointer to 3D [state,copy,time] array
@@ -479,6 +466,8 @@ integer :: levelDimID
 
 character(len=129)    :: errstring
 
+character(len=256)   :: filename
+
 ! we are going to need these to record the creation date in the netCDF file.
 ! This is entirely optional, but nice.
 
@@ -488,11 +477,13 @@ character(len=5)      :: crzone      ! needed by F90 DATE_AND_TIME intrinsic
 integer, dimension(8) :: values      ! needed by F90 DATE_AND_TIME intrinsic
 character(len=NF90_MAX_NAME) :: str1
 
-integer :: io, ndims, i
+integer, dimension(NF90_MAX_VAR_DIMS) :: mydimids
+character(len=NF90_MAX_NAME) :: varname
+
+integer :: io, ndims, ivar, i
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'nc_write_model_atts','routine not tested',source, revision,revdate)
 !-------------------------------------------------------------------------------
 ! make sure ncFileID refers to an open netCDF file, 
 ! and then put into define mode.
@@ -554,7 +545,7 @@ call nc_check(nf90_put_att(ncFileID, NF90_GLOBAL, "model","template"), &
 ! complicated part.
 !-------------------------------------------------------------------------------
 
-if ( output_state_vector_as_1D ) then
+if ( output_1D_state_vector ) then
 
    !----------------------------------------------------------------------------
    ! Create a variable for the state vector
@@ -632,7 +623,7 @@ else
 ! vcoord
 
    io = nf90_def_var(ncFileID,name='vcoord', xtype=nf90_real, &
-                 dimids=(/ level1DimID /), varid=vcoordVarID)
+                 dimids=(/ levelDimID /), varid=vcoordVarID)
    call nc_check(io, 'nc_write_model_atts', 'vcoord def_var '//trim(filename))
    io = nf90_put_att(ncFileID, vcoordVarID,'long_name', 'vertical height')
    call nc_check(io, 'nc_write_model_atts', 'vcoord long_name '//trim(filename))
@@ -648,22 +639,14 @@ else
 
       varname = trim(progvar(ivar)%varname)
       string1 = trim(filename)//' '//trim(varname)
-
+      write(*,*) varname
       ! match shape of the variable to the dimension IDs
-
-      call define_var_dims(ivar, ncFileID, MemberDimID, unlimitedDimID, ndims, mydimids)
-
-      ! define the variable and set the attributes
-
       io = nf90_def_var(ncid=ncFileID, name=trim(varname), xtype=nf90_double, &
                     dimids = mydimids(1:ndims), varid=VarID)
       call nc_check(io, 'nc_write_model_atts', trim(string1)//' def_var' )
 
       io = nf90_put_att(ncFileID, VarID, 'long_name', trim(progvar(ivar)%long_name))
       call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att long_name' )
-
-      io = nf90_put_att(ncFileID, VarID, 'DART_kind', trim(progvar(ivar)%kind_string))
-      call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att dart_kind' )
 
       io = nf90_put_att(ncFileID, VarID, 'units', trim(progvar(ivar)%units))
       call nc_check(io, 'nc_write_model_atts', trim(string1)//' put_att units' )
@@ -672,14 +655,34 @@ else
 
    call nc_check(nf90_enddef(ncfileID), "nc_write_model_atts", "prognostic enddef")
 
+   !----------------------------------------------------------------------------
+   ! Fill the coordinate variables - reshape the 1D arrays to the 2D shape
+   !----------------------------------------------------------------------------
+
+   io = nf90_inq_varid(ncFileID, 'lon', VarID)
+   call nc_check(io, 'nc_write_model_atts', 'lon inq_varid '//trim(filename))
+   io = nf90_put_var(ncFileID, VarID, lon)
+   call nc_check(io, 'nc_write_model_atts', 'lon put_var '//trim(filename))
+
+   io = nf90_inq_varid(ncFileID, 'lat', VarID)
+   call nc_check(io, 'nc_write_model_atts', 'lat inq_varid '//trim(filename))
+   io = nf90_put_var(ncFileID, VarID, lat )
+   call nc_check(io, 'nc_write_model_atts', 'lat put_var '//trim(filename))
+
+   io = nf90_inq_varid(ncFileID, 'vcoord', VarID)
+   call nc_check(io, 'nc_write_model_atts', 'vcoord inq_varid '//trim(filename))
+   io = nf90_put_var(ncFileID, VarID, vcoord )
+   call nc_check(io, 'nc_write_model_atts', 'vcoord put_var '//trim(filename))
 endif
 
 !-------------------------------------------------------------------------------
 ! Flush the buffer and leave netCDF file open
 !-------------------------------------------------------------------------------
+
 call nc_check(nf90_sync(ncFileID),"nc_write_model_atts", "sync")
 
 ierr = 0 ! If we got here, things went well.
+!CPS call error_handler(E_ERR,'nc_write_model_atts','routine not tested',source, revision,revdate)
 
 end function nc_write_model_atts
 
@@ -734,7 +737,7 @@ ierr = -1 ! assume things go poorly
 call nc_check(nf90_inquire(ncFileID,nDimensions,nVariables,nAttributes,unlimitedDimID), &
                           "nc_write_model_vars", "inquire")
 
-if ( output_state_vector_as_1D ) then
+if ( output_1D_state_vector ) then
 
    call nc_check(nf90_inq_varid(ncFileID, "state", StateVarID), &
                                "nc_write_model_vars", "inq_varid state" )

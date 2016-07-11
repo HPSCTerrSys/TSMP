@@ -119,7 +119,7 @@
    parflow_file                  = '../data/rurlaf.out.press.00003.pfb'
    pfidb_file                    = '../data/pfidb_dz'
    grid_file                     = '../data/grids.nc'
-   output_state_vector_as_1D     = .true.
+   output_1D_state_vector        = .false.
    assimilation_period_days      = 1
    assimilation_period_seconds   = 0
    debug                         = 100 
@@ -249,6 +249,7 @@
    x_ind                      = 100
    kind_of_interest           = 'ANY'
    verbose                    = .false.
+   test1thru                  = 10
    loc_of_interest            = 5.6, 49.8, 0.5
    interp_test_vertcoord      = 'VERTISHEIGHT'
    /

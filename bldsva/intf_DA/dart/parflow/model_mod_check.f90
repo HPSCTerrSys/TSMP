@@ -51,13 +51,14 @@ character (len = 129) :: dart_input_file               = 'dart_ics'
 character (len = 129) :: output_file                   = 'check_me'
 logical               :: advance_time_present          = .FALSE.
 logical               :: verbose                       = .FALSE.
+integer                :: test1thru                    = -1
 integer               :: x_ind                         = -1
 real(r8), dimension(3) :: loc_of_interest              = -1.0_r8
 character(len=metadatalength) :: kind_of_interest      = 'ANY'
 character(len=metadatalength) :: interp_test_vertcoord = 'VERTISHEIGHT'
 
 namelist /model_mod_check_nml/ dart_input_file, output_file,        &
-                        advance_time_present, x_ind,                &
+                        advance_time_present, test1thru, x_ind,     &
                         loc_of_interest, kind_of_interest, verbose, &
                         interp_test_vertcoord
 
@@ -71,6 +72,8 @@ integer :: secs, days
 
 type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
+
+integer :: i, skip
 
 character(len=metadatalength) :: state_meta(1)
 type(netcdf_file_type) :: ncFileID
@@ -92,12 +95,23 @@ call find_namelist_in_file("input.nml", "model_mod_check_nml", iunit)
 read(iunit, nml = model_mod_check_nml, iostat = io)
 call check_namelist_read(iunit, io, "model_mod_check_nml")
 
-! This harvests all kinds of initialization information
-call static_init_assim_model()
+!CPSloc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
+!CPSmykindindex = get_raw_obs_kind_index(kind_of_interest)
 
+if (test1thru < 1) goto 999
+
+write(*,*)
+write(*,*)'static_init_model test STARTING ...'
+call static_init_model()
+write(*,*)'static_init_model test COMPLETE ...'
+
+if (test1thru < 2) goto 999
+
+write(*,*)
+write(*,*)'get_model_size test STARTING ...'
 x_size = get_model_size()
-write(*,'(''state vector has length'',i10)') x_size
-allocate(statevector(x_size))
+write(*,*)'get_model_size test : state vector has length',x_size
+write(*,*)'get_model_size test COMPLETE ...'
 
 !----------------------------------------------------------------------
 ! Write a supremely simple restart file. Most of the time, I just use
@@ -105,28 +119,18 @@ allocate(statevector(x_size))
 ! values with something more complicated.
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Writing a trivial restart file.'
+if (test1thru < 3) goto 999
+
+allocate(statevector(x_size))
 
 statevector = 1.0_r8;
-model_time  = set_time(0, 10)
-
-iunit = open_restart_write('allones.ics')
-call awrite_state_restart(model_time, statevector, iunit)
-call close_restart(iunit)
-
-!----------------------------------------------------------------------
-! Reads the valid time from the header.rst file
-!----------------------------------------------------------------------
-
-!model_time = get_state_time('../testdata1')
-model_time = set_time(0, 10)
-call print_time( model_time,'model_mod_check:model time')
+model_time  = set_time(21600, 149446)   ! 06Z 4 March 2010
 
 !----------------------------------------------------------------------
 ! Open a test DART initial conditions file.
 ! Reads the valid time, the state, and (possibly) a target time.
 !----------------------------------------------------------------------
+if (test1thru < 4) goto 999
 
 write(*,*)
 write(*,*)'Reading '//trim(dart_input_file)
@@ -140,6 +144,7 @@ endif
 
 call close_restart(iunit)
 call print_time( model_time,'model_mod_check:model time')
+call print_time( model_time,'model_mod_check:model time')
 
 !----------------------------------------------------------------------
 ! Output the state vector to a netCDF file ...
@@ -148,6 +153,8 @@ call print_time( model_time,'model_mod_check:model time')
 ! aoutput_diagnostics()
 ! finalize_diag_output()
 !----------------------------------------------------------------------
+
+if (test1thru < 5) goto 999
 
 write(*,*)
 write(*,*)'Exercising the netCDF routines.'
@@ -160,19 +167,34 @@ call aoutput_diagnostics(ncFileID, model_time, statevector, 1)
 
 call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize')
 
-!if ( x_ind > 0 .and. x_ind <= x_size ) call check_meta_data( x_ind )
+
+!----------------------------------------------------------------------
+! Checking get_state_meta_data (and get_state_indices, get_state_kind)
+!----------------------------------------------------------------------
+
+write(*,*)
+write(*,*)'Checking metadata routines.'
+
+if (test1thru < 6) goto 999
+
+skip = 1000000
+
+do i = 1, x_size, skip
+   if ( i > 0 .and. i <= x_size ) call check_meta_data( i )
+enddo
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
 ! Checking for valid input is tricky ... we don't know much. 
 !----------------------------------------------------------------------
 
+if (test1thru < 7) goto 999
+
 if ( loc_of_interest(1) >= 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
 
 !----------------------------------------------------------------------
 ! Check the interpolation - print initially to STDOUT
 !----------------------------------------------------------------------
-
 
 write(*,*)
 write(*,*)'Testing model_interpolate ...'
@@ -184,6 +206,8 @@ if ( ios_out == 0 ) then
 else
    write(*,*)'model_interpolate ERROR: model_interpolate failed with error code ',ios_out
 endif
+
+ 999 continue
 
 call finalize_utilities()
 
