@@ -17,8 +17,10 @@ indexN = 1200;
 
 figure(1); orient landscape
 
-title('geographic grid for U stagger')
 plot(ulon(index1:indexN),ulat(index1:indexN),'x')
+title('geographic grid for U stagger')
+xlabel('longitude')
+ylabel('latitude')
 
 for i = 601:1200
    h = text(ulon(i),ulat(i),sprintf('%d',i));
@@ -29,8 +31,10 @@ grid
 
 figure(2); orient landscape
 
-title('rotated grid for U stagger')
 plot(rlon(index1:indexN),rlat(index1:indexN),'x')
+title('rotated grid for U stagger')
+xlabel('rotated longitude')
+ylabel('rotated latitude')
 
 for i = 601:1200
    h = text(rlon(i),rlat(i),sprintf('%d',i));

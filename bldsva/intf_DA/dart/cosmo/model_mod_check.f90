@@ -83,8 +83,8 @@ namelist /model_mod_check_nml/ dart_input_file, output_file, &
 !----------------------------------------------------------------------
 ! integer :: numlons, numlats, numlevs
 
-integer :: ios_out, iunit, io, i
-integer :: x_size, skip
+integer :: ios_out, iunit, io
+integer :: x_size
 integer :: mykindindex, vertcoord
 
 type(time_type)       :: model_time, adv_to_time
@@ -212,6 +212,9 @@ call check_meta_data( x_ind )
 
 if (test1thru < 7) goto 999
 
+write(*,*)
+write(*,*)'Finding the closest gridpoint to ',loc_of_interest
+
 if ( loc_of_interest(1) > 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
 
 !----------------------------------------------------------------------
@@ -247,7 +250,7 @@ select case(trim(interp_test_vertcoord))
 end select
 
 write(*,*)
-write(*,*)'Testing single model_interpolate with ',trim(kind_of_interest),' ...'
+write(*,*)'Testing single model_interpolate with ',trim(kind_of_interest),mykindindex,' ...'
 write(*,*)'at ', loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), vertcoord
 
 loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), vertcoord)
@@ -265,11 +268,7 @@ write(*,*)'Rigorous test of model_interpolate ...'
 
 ios_out = test_interpolate()
 
-if ( ios_out == 0 ) then 
-   write(*,*)'Rigorous model_interpolate SUCCESS.'
-else
-   write(*,*)'Rigorous model_interpolate ERROR: model_interpolate had ', ios_out, ' errors'
-endif
+write(*,*)'Rigorous test : had ', ios_out, ' interpolation failures.'
 
 !----------------------------------------------------------------------
 ! convert model data into a dart state vector and write it into a
@@ -490,7 +489,7 @@ do ilon = 1, nlon
          loc = set_location(lon(ilon), lat(jlat), vert(kvert), vertcoord)
 
          call model_interpolate(statevector, loc, mykindindex, field(ilon,jlat,kvert), ios_out)
-         write(iunit,*) field(ilon,jlat,kvert)
+         write(iunit,*) lon(ilon), lat(jlat), vert(kvert), vertcoord, mykindindex, field(ilon,jlat,kvert), ios_out
 
          if (ios_out /= 0) then
            if (verbose) then

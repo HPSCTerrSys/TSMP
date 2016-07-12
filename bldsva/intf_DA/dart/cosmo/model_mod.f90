@@ -1,4 +1,6 @@
-! This code is not necessarily under the DART copyright ...
+! DART software - Copyright 2004 - 2016 UCAR. This open source software is
+! provided by UCAR, "as is", without charge, subject to all terms of use at
+! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
 ! DART $Id: $
 
@@ -6,9 +8,6 @@ module model_mod
 
 ! This module provides routines to work with COSMO data
 ! files in the DART framework
-!
-! Based on a version by : Jan D. Keller 2011-09-15
-!         Meteorological Institute, University of Bonn, Germany
 
 use        types_mod, only : i4, r4, r8, digits12, SECPERDAY, MISSING_R8,          &
                              rad2deg, deg2rad, PI, obstypelength
@@ -529,7 +528,6 @@ integer  :: ileft, iright, jbot, jtop
 real(r8) :: ifrac, jfrac, levelfrac
 
 real(r8) :: value_above, value_below
-real(r8) :: vbound_weight(2),val1,val2
 
 IF ( .not. module_initialized ) call static_init_model
 
@@ -579,7 +577,7 @@ height  = point_coords(3) ! whatever
 rotated_lat = phi2phirot( geo_lat, geo_lon, north_pole_latitude, north_pole_longitude)
 rotated_lon = rla2rlarot( geo_lat, geo_lon, north_pole_latitude, north_pole_longitude, polgam)
 
-if (debug > 5 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
    write(*,*)
    write(*,*)'The geographic longitude then rotated longitude is ',geo_lon, rotated_lon
    write(*,*)'The geographic  latitude then rotated  latitude is ',geo_lat, rotated_lat
@@ -595,7 +593,7 @@ endif
 
 if (istatus /= 0) return   ! and pass on the failed istatus of get_corners()
 
-call get_level_indices(height, dart_kind, iabove, ibelow, levelfrac, istatus)
+call get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istatus)
 
 if (istatus /= 0) return   ! and pass on the failed istatus of get_level_indices()
 
@@ -604,14 +602,22 @@ call horizontal_interpolate(x, ivar, ibelow, ileft, iright, ifrac, jbot, jtop, j
 
 ! vertically interpolate the layers to the desired height
 
-               ! Linearly interpolate between grid points
-!              obs_val = dzm*fld(1) + dz*fld(2)
+if (debug > 99 .and. do_output()) then
+   ! to test, use model_mod_check_nml and pick a level that is a known distance
+   value_above = 10.0_r8
+   value_below = 20.0_r8
+   
+   interp_val = value_below*levelfrac + value_above*(1.0_r8 - levelfrac)
+   
+   write(*,*)'level above, level, level below ',vcoord%level(iabove), height, vcoord%level(ibelow)
+   write(*,*)'    distances ',vcoord%level(iabove) - height,  height - vcoord%level(ibelow)
+   write(*,*)'    fractions ',levelfrac, 1.0_r8 - levelfrac
+   write(*,*)'    values above, below ',value_above, value_below
+   write(*,*)' final interpolated value is ',interp_val
+endif
 
-! interp_val = val1*vbound_weight(1) + val2*vbound_weight(2)
-
-stop
-
-istatus=0
+interp_val = value_below*levelfrac + value_above*(1.0_r8 - levelfrac)
+istatus    = 0
 
 return
 
@@ -1650,7 +1656,7 @@ call nc_check(io, 'get_cosmo_grid','inq_dimid '//trim(string1))
 io = nf90_inquire_dimension(ncid, dimid, len=nsoil1)
 call nc_check(io, 'get_cosmo_grid','inquire_dimension '//trim(string1))
 
-if ( debug > 5 .and. do_output() ) then
+if ( debug > 99 .and. do_output() ) then
 
    write(string1,*)'time   has dimension ',ntime
    call error_handler(E_MSG,'get_cosmo_grid',string1)
@@ -1696,10 +1702,6 @@ call get_grid_var(ncid, 'slatv',  nrlon, nsrlat, filename)
 where(lon <   0.0_r8) lon = lon + 360.0_r8
 where(lat < -90.0_r8) lat = -90.0_r8
 where(lat >  90.0_r8) lat =  90.0_r8
-
-if ( debug > 5 .and. do_output() ) then
-   ! call some sort of summary routine for min/max of grid vars
-endif
 
 call get_vcoord(ncid, filename)
 
@@ -2011,7 +2013,7 @@ io = nf90_get_att(ncid, VarID, 'h_scal', vcoord%h_scal)
 call nc_check(io, 'get_vcoord', 'get_att h_scal '//trim(string3))
 
 ! Print a summary
-if (debug > 5 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
    write(logfileunit,*)
    write(logfileunit,*)'vcoord long_name: ',trim(vcoord%long_name)
    write(logfileunit,*)'vcoord     units: ',vcoord%units
@@ -2187,7 +2189,7 @@ MyLoop : do ivar = 1, nrows
       endif
    endif
 
-   if (debug > 8 .and. do_output()) then
+   if (debug > 99 .and. do_output()) then
       write(logfileunit,*) &
          'variable ',ivar,' is ',trim(table(ivar,1)), ' ', trim(table(ivar,2)),' ', &
                                  trim(table(ivar,3)), ' ', trim(table(ivar,4)),' ', &
@@ -2398,7 +2400,7 @@ integer :: ivar
 
 call index_sort(progvar(1:nfields)%slab1, write_order(1:nfields), nfields)
 
-if (debug > 5 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
    do ivar = 1,nfields
       write(*,*)'variable ',write_order(ivar), ' starts at slab ', &
                     progvar(write_order(ivar))%slab1, &
@@ -3095,7 +3097,7 @@ endif
 
 istatus = 0
 
-if (debug > 5 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
    write(*,*)
    write(*,*)'longitude index to the  west and  east are ',ileft, iright
    write(*,*)'latitude  index to the south and north are ',jbot, jtop
@@ -3142,14 +3144,6 @@ lowerright = ijk_to_dart(ivar, iright, jbot, level_index)
 upperright = ijk_to_dart(ivar, iright, jtop, level_index) 
 upperleft  = ijk_to_dart(ivar, ileft,  jtop, level_index)
 
-if (debug > 5 .and. do_output()) then
-   write(*,*)
-   write(*,*)' ileft, jbot, level_index decompose to ',lowerleft
-   write(*,*)'iright, jbot, level_index decompose to ',lowerright
-   write(*,*)'iright, jtop, level_index decompose to ',upperright
-   write(*,*)' ileft, jtop, level_index decompose to ',upperleft
-endif
-
 ! apply the weights
 
 jfracrem = 1.0_r8 - jfrac
@@ -3157,6 +3151,15 @@ ifracrem = 1.0_r8 - ifrac
 
 layervalue =  jfracrem * ( ifracrem*x(lowerleft) + ifrac*x(lowerright) ) + &
               jfrac    * ( ifracrem*x(upperleft) + ifrac*x(upperright) )
+
+if (debug > 99 .and. do_output()) then
+   write(*,*)
+   write(*,*)' ileft, jbot, level_index decompose to ', lowerleft, x( lowerleft), ifracrem
+   write(*,*)'iright, jbot, level_index decompose to ',lowerright, x(lowerright), ifrac
+   write(*,*)'iright, jtop, level_index decompose to ',upperright, x(upperright), jfracrem
+   write(*,*)' ileft, jtop, level_index decompose to ', upperleft, x( upperleft), jfrac
+   write(*,*)' horizontal value is ',layervalue
+endif
 
 return
 
@@ -3274,7 +3277,6 @@ else
          endif
       enddo VERT
 
-      write(*,*)'height is ',height, 'iabove is ',indarr(1)
       iabove = indarr(1)
       ibelow = iabove + 1
       dz     = vcoord%level(iabove) - height
@@ -3282,7 +3284,7 @@ else
       levelfrac = dz / dztot
    endif
 
-   if (debug > 5 .and. do_output()) then
+   if (debug > 99 .and. do_output()) then
       write(*,*)
       write(*,*)'computine vertical levels for DART kind ',dart_kind
       write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove

@@ -322,14 +322,18 @@
    1   1   1      1 geo lon,lat,vert 5.434346199  49.809848785  21500.0 rlon,rlat -2.944520340 -0.100272288
   30   1   1     30 geo lon,lat,vert 5.837852001  49.825073242  21500.0 rlon,rlat -2.683723516 -0.100249408
    1   2   1     31 geo lon,lat,vert 5.433496475  49.818824768  21500.0 rlon,rlat -2.944520227 -0.091279574
-  10   4   2    700 geo lon,lat,vert 5.557064056  49.841651917  20514.285156250 rlon,rlat -2.863583308 -0.073289498
+  10   4   2    700 geo lon,lat,vert 5.557064056  49.841651917  20514.2852 rlon,rlat -2.863583308 -0.073289498
+   6   8   2    816 geo lon,lat,vert 5.498032093  49.875408173  20514.2852 rlon,rlat -2.899555455 -0.037320180
 
    loc_of_interest = 5.434346199, 49.809848785, 21500.0
    loc_of_interest = 5.837852001  49.825073242  21500.0
    loc_of_interest = 5.433496475  49.818824768  21500.0
    loc_of_interest = 5.557064056  49.841651917  20514.285156250
 
-   loc_of_interest = 5.5  49.88  20514.285156250   should have surrounding box 816-817-847-846  (ll-lr-ur-ul)
+   loc_of_interest = 5.5  49.88   20514.285156250   should have surrounding box 816-817-847-846  (ll-lr-ur-ul)
+   loc_of_interest = 5.5  49.875  20514.285156250  786-787-817-816  and be almost exactly 816
+
+   25% of the way from level 1 (21500.0) to level 2 () is  ... 21253.57128906250
 
 &model_mod_check_nml
    dart_input_file      = 'dart_prior'
@@ -337,14 +341,14 @@
    advance_time_present = .FALSE.
    verbose              = .FALSE.
    test1thru            =  10
-   x_ind                = 700
+   x_ind                = 816
    interp_test_dlon     = 0.001
    interp_test_dlat     = 0.001
-   interp_test_dvert    = 100.0
+   interp_test_dvert    = 1000.0
    interp_test_latrange =  49.809, 49.996
    interp_test_lonrange =   5.434,  5.824
    interp_test_vertrange = 0.0, 21500.0
-   loc_of_interest = 5.5  49.88  20514.285156250
+   loc_of_interest = 5.498032093,  49.875408173,  20514.2852
    kind_of_interest      = 'KIND_U_WIND_COMPONENT'
    interp_test_vertcoord = 'VERTISHEIGHT'
    /
