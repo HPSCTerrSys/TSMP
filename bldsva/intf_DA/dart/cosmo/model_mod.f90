@@ -224,6 +224,9 @@ real(r8) :: north_pole_longitude
 type verticalobject
    private
    real(r8), allocatable :: level1(:)
+   integer               :: nlevel1
+   real(r8), allocatable :: level(:)
+   integer               :: nlevel
    character(len=128)    :: long_name = "Height-based hybrid Gal-Chen coordinate"
    character(len=32)     :: units = "Pa"
    integer               :: ivctype = 2
@@ -424,6 +427,7 @@ else
 
 endif
 
+if (debug > 99 .and. do_output()) &
 write(*,*)'gsmd: index_in ',index_in,' local_ind is ',local_ind + 1, ' and dereferences to ',iloc,jloc,kloc
 
 ! Now that we know the i,j,k we have to index the right set of
@@ -489,6 +493,11 @@ subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
 ! istatus = 15 : observation lies outside the model domain (horizontal)
 ! istatus = 16 : observation lies outside the model domain (vertical)
 ! istatus = 19 : observation vertical coordinate is not supported
+!
+! The third argument would be more accurately called 'DART_KIND', but
+! cannot/should not be changed as this is a mandatory interface.
+! consequently, the first thing we will do is to assign the value
+! to a variable that is more appropriately named ... 'dart_kind'
 
 ! Passed variables
 
@@ -498,92 +507,113 @@ integer,             intent(in)  :: obs_type
 real(r8),            intent(out) :: interp_val
 integer,             intent(out) :: istatus
 
+integer, parameter :: NO_KIND_IN_STATE     = 10
+integer, parameter :: VERTICAL_UNSUPPORTED = 19
+
 ! Local storage
+
+integer :: dart_kind
+integer :: ivar  ! index into the progvar structure for this dart_kind
 
 real(r8) :: point_coords(1:3)
 integer  :: i,j,hbox(2,2),n,vbound(2),sindex
 real(r8) :: hbox_weight(2,2),hbox_val(2,2),hbox_lon(2,2),hbox_lat(2,2)
 real(r8) :: vbound_weight(2),val1,val2
 
+real(r8), parameter :: polgam = 0.0_r8 ! angle between the north poles of the systems
+
+real(r8) :: geo_lat, geo_lon, height
+real(r8) :: rotated_lat, rotated_lon
+
+integer  :: iabove, ibelow
+integer  :: ileft, iright, jbot, jtop
+real(r8) :: ifrac, jfrac, levelfrac
+
+real(r8) :: value_above, value_below
+
 IF ( .not. module_initialized ) call static_init_model
 
 interp_val = MISSING_R8     ! the DART bad value flag
 istatus = 99                ! unknown error
 
-! If identity observation (obs_type < 0), then no need to interpolate
-! identity observation -> -(obs_type) = DART state vector index
-! obtain "interpolated" value directly from state using (abs(obs_type))
+dart_kind = obs_type  ! compensate for a poor original choice of varname
 
-if ( obs_type < 0 ) then
-   interp_val = x(-1*obs_type)
+! If identity observation (dart_kind < 0), then no need to interpolate
+! identity observation -> -(dart_kind) = DART state vector index
+! obtain "interpolated" value directly from state using (abs(dart_kind))
+
+if ( dart_kind < 0 ) then
+   interp_val = x(-1*dart_kind)
    istatus = 0
    return
 endif
 
+! Determine if this dart_kind exists in the DART state vector
+! Sometimes special action needs to happen to interpolate to model levels.
+! To determine the number of model levels, one can try to interpolate
+! KIND_GEOPOTENTIAL_HEIGHT, KIND_GEOMETRIC_HEIGHT ... which are not 
+! normally part of the state, so this next test will have to be modified.
 
-  ! FIXME ... convert this to progvar
-  if ( .not. state_vector_vars(obs_type)%is_present) then
-     istatus=10
-     return
-  endif
+ivar = -1
+FoundIt: do i = 1,nfields
+   if (progvar(i)%dart_kind == dart_kind) then
+      ivar = i
+      exit FoundIt
+   endif
+enddo FoundIt
 
-  ! horizontal interpolation
+if ( ivar < 0 ) then
+   istatus = NO_KIND_IN_STATE
+   return
+endif
 
-  n = size(cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lon,1)
+! Carry on
 
-  point_coords(1:3) = get_location(location)
+point_coords(1:3) = get_location(location)
+geo_lon = point_coords(1) ! degrees East
+geo_lat = point_coords(2) ! degrees North
+height  = point_coords(3) ! whatever
 
-  ! Find grid indices of box enclosing the observation location
-  call get_enclosing_grid_box_lonlat(cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lon,&
-                                     cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lat,&
-                                     point_coords(1:2),n,state_vector_vars(obs_type)%nx,                 &
-                                     state_vector_vars(obs_type)%ny, hbox, hbox_weight)
+! Determine the rotated lat & lon of the desired location
 
-  if (hbox(1,1)==-1) then
-     istatus=15
-     return
-  endif
+rotated_lat = phi2phirot( geo_lat, geo_lon, north_pole_latitude, north_pole_longitude)
+rotated_lon = rla2rlarot( geo_lat, geo_lon, north_pole_latitude, north_pole_longitude, polgam)
 
-  ! determine vertical level above and below obsevation
-  call get_vertical_boundaries(hbox, hbox_weight, obs_type, query_location(location,'which_vert'),&
-                               point_coords(3), vbound, vbound_weight, istatus)
+if (debug > 5 .and. do_output()) then
+   write(*,*)
+   write(*,*)'The geographic longitude then rotated longitude is ',geo_lon, rotated_lon
+   write(*,*)'The geographic  latitude then rotated  latitude is ',geo_lat, rotated_lat
+endif
 
-  ! check if observation is in vertical domain and vertical coordinate system is supported
-  ! FIXME istatus value?
-  if (vbound(1)==-1) then
-     return
-  endif
+if (    dart_kind == KIND_U_WIND_COMPONENT ) then
+   call get_corners(rotated_lon, rotated_lat, nsrlon,  nrlat, srlon,  rlat, ileft, iright, ifrac, jbot, jtop, jfrac, istatus)
+elseif ( dart_kind == KIND_V_WIND_COMPONENT ) then
+   call get_corners(rotated_lon, rotated_lat,  nrlon, nsrlat,  rlon, srlat, ileft, iright, ifrac, jbot, jtop, jfrac, istatus)
+else
+   call get_corners(rotated_lon, rotated_lat,  nrlon,  nrlat,  rlon,  rlat, ileft, iright, ifrac, jbot, jtop, jfrac, istatus)
+endif
 
-  ! Perform a bilinear interpolation from the grid box to the desired location
-  ! for the level above and below the observation
+if (istatus /= 0) return   ! and pass on the failed istatus of get_corners()
 
-  sindex=state_vector_vars(obs_type)%state_vector_sindex(vbound(1))
+call get_level_indices(height, dart_kind, iabove, ibelow, levelfrac, istatus)
 
-  do i=1,2
-  do j=1,2
-     hbox_val(i,j)=x(sindex+hbox(i,j)-1)
-     hbox_lon(i,j)=cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lon(hbox(i,j))
-     hbox_lat(i,j)=cosmo_lonlat(state_vector_vars(obs_type)%horizontal_coordinate)%lat(hbox(i,j))
-  enddo
-  enddo
+if (istatus /= 0) return   ! and pass on the failed istatus of get_level_indices()
 
-  call bilinear_interpolation(hbox_val,hbox_lon,hbox_lat,point_coords,val1)
+call horizontal_interpolate(x, ivar, iabove, ileft, iright, ifrac, jbot, jtop, jfrac, value_above, istatus) 
+call horizontal_interpolate(x, ivar, ibelow, ileft, iright, ifrac, jbot, jtop, jfrac, value_below, istatus) 
 
-  sindex=state_vector_vars(obs_type)%state_vector_sindex(vbound(2))
-  do i=1,2
-  do j=1,2
-     hbox_val(i,j)=x(sindex+hbox(i,j)-1)
-  enddo
-  enddo
+! vertically interpolate the layers to the desired height
 
-  call bilinear_interpolation(hbox_val,hbox_lon,hbox_lat,point_coords,val2)
+               ! Linearly interpolate between grid points
+!              obs_val = dzm*fld(1) + dz*fld(2)
 
-  ! vertical interpolation of horizontally interpolated values
+! interp_val = val1*vbound_weight(1) + val2*vbound_weight(2)
 
-  interp_val=val1*vbound_weight(1)+val2*vbound_weight(2)
-  istatus=0
+stop
 
-  end subroutine model_interpolate
+istatus=0
+
+end subroutine model_interpolate
 
 
 !------------------------------------------------------------------------
@@ -663,7 +693,7 @@ subroutine end_model()
 deallocate(cosmo_slabs)
 deallocate(state_vector)
 deallocate(lon,lat,slonu,slatu,slonv,slatv)
-deallocate(vcoord%level1)
+deallocate(vcoord%level1, vcoord%level) 
 deallocate(rlon,rlat,srlon,srlat)
 
 end subroutine end_model
@@ -1156,7 +1186,7 @@ else
       where(dimIDs == TimeDimID) ncstart = timeindex
       where(dimIDs == TimeDimID) nccount = 1
 
-      if ((debug > 0) .and. do_output()) then
+      if ((debug > 99) .and. do_output()) then
          write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ndims)
          write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ndims)
       endif
@@ -2007,6 +2037,9 @@ character(len=*), intent(in) :: filename
 !       soil1 = 8 ;
 
 integer :: ncid, io, dimid, VarID
+integer :: i, j, k, iii, iunit, iunitm
+
+real(r8) :: rotated_lon, rotated_lat
 
 io = nf90_open(filename, NF90_NOWRITE, ncid)
 call nc_check(io, 'get_cosmo_grid','open "'//trim(filename)//'"')
@@ -2143,6 +2176,39 @@ call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_longitude get_att '//trim(f
 ! close up
 
 call nc_check(nf90_close(ncid),'get_cosmo_grid','close "'//trim(filename)//'"' )
+
+! this should only be done once, if at all
+if (debug > 9 .and. do_output()) then
+
+   iunit = open_file('exhaustive_grid_table.txt',form='formatted')
+   write(iunit,'(''This is for the U grid only.'')')
+
+   iunitm = open_file('exhaustive_grid.m',form='formatted')
+
+   iii = 0
+
+   do k = 1,nlevel
+   do j = 1,nrlat
+   do i = 1,nrlon
+      iii = iii + 1
+      
+      rotated_lat = phi2phirot( lat(i,j), slonu(i,j), north_pole_latitude, north_pole_longitude)
+      rotated_lon = rla2rlarot( lat(i,j), slonu(i,j), north_pole_latitude, north_pole_longitude, 0.0_r8)
+
+      write(iunit,100) i, j, k, iii, slonu(i,j), lat(i,j), vcoord%level(k), rotated_lon, rotated_lat
+      write(iunitm,200) i, j, k, iii, slonu(i,j), lat(i,j), vcoord%level(k), rotated_lon, rotated_lat
+      
+   enddo
+   enddo
+   enddo
+
+   close(iunit)
+   close(iunitm)
+
+ 100 format(3(1x,i3),1x,i6,1x,'geo lon,lat,vert',2(1x,f14.9),1x,f12.4,' rlon,rlat ',2(1x,f14.9))
+ 200 format(3(1x,i3),1x,i6,1x,2(1x,f14.9),1x,f12.4,2(1x,f16.11))
+
+endif
 
 end subroutine get_cosmo_grid
 
@@ -2322,7 +2388,7 @@ character(len=*), intent(in) :: filename
 
 integer, dimension(NF90_MAX_VAR_DIMS) :: dimIDs
 integer, dimension(NF90_MAX_VAR_DIMS) :: dimlens
-integer :: io, VarID, ndims
+integer :: io, VarID, ndims, i
 
 write(string3,*)' vcoord from '//trim(filename)
 
@@ -2348,9 +2414,18 @@ if (dimlens(1) .ne. nlevel1 ) then
    call error_handler(E_ERR, 'get_vcoord', string1, source, revision, revdate)
 endif
 
+vcoord%nlevel1 = nlevel1
+vcoord%nlevel  = nlevel 
+
 allocate( vcoord%level1(nlevel1) )
+allocate( vcoord%level( nlevel ) )
+
 io = nf90_get_var(ncid, VarID, vcoord%level1 )
 call nc_check(io, 'get_vcoord', 'get_var '//trim(string3))
+
+do i = 1,nlevel
+   vcoord%level(i) = (vcoord%level1(i) + vcoord%level1(i+1))/2.0_r8
+enddo
 
 io = nf90_get_att(ncid, VarID, 'long_name', vcoord%long_name)
 call nc_check(io, 'get_vcoord', 'get_att long_name '//trim(string3))
@@ -3170,7 +3245,7 @@ ndims           = ndims + 1
 dimids(ndims)   = unlimitedDimid
 dimnames(ndims) = 'time'
 
-if (debug > 5 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
 
    write(logfileunit,*)
    write(logfileunit,*)'define_var_dims knowledge'
@@ -3193,7 +3268,6 @@ endif
 
 return
 end subroutine define_var_dims
-
 
 !------------------------------------------------------------------------
 !>
@@ -3226,6 +3300,423 @@ endif
 
 end function Find_Variable_by_index
 
+!------------------------------------------------------------------------
+!>
+
+
+
+!------------------------------------------------------------------------------
+!> COSMO utilities (5.21)
+
+FUNCTION  phi2phirot ( phi, rla, polphi, pollam )
+
+!------------------------------------------------------------------------------
+! Description:
+!   This routine converts phi from the real geographical system to phi
+!   in the rotated system.
+!
+! Method:
+!   Transformation formulas for converting between these two systems.
+!
+! Originally part of geo2rotated_cosmo.f90 ...  
+!------------------------------------------------------------------------------
+
+integer, parameter :: wp=r8   ! to save on changing DART kind to COSMO kind
+
+! Parameter list:
+REAL (KIND=wp),     INTENT (IN)      ::        &
+  polphi,  & ! latitude of the rotated north pole
+  pollam,  & ! longitude of the rotated north pole
+  phi,     & ! latitude in the geographical system
+  rla        ! longitude in the geographical system
+
+REAL (KIND=wp)                       ::        &
+  phi2phirot ! latitude in the rotated system
+
+! Local variables
+REAL (KIND=wp)                           ::    &
+  zsinpol, zcospol, zlampol, zphi, zrla, zarg1, zarg2, zrla1
+
+REAL (KIND=wp),     PARAMETER            ::    &
+  zrpi18 = 57.2957795_wp,                      & !
+  zpir18 = 0.0174532925_wp
+
+!------------------------------------------------------------------------------
+
+! Begin function phi2phirot
+
+  zsinpol  = SIN (zpir18 * polphi)
+  zcospol  = COS (zpir18 * polphi)
+  zlampol  =      zpir18 * pollam
+  zphi     =      zpir18 * phi
+  IF (rla > 180.0_wp) THEN
+    zrla1  = rla - 360.0_wp
+  ELSE
+    zrla1  = rla
+  ENDIF
+  zrla     = zpir18 * zrla1
+
+  zarg1    = SIN (zphi) * zsinpol
+  zarg2    = COS (zphi) * zcospol * COS (zrla - zlampol)
+
+  phi2phirot = zrpi18 * ASIN (zarg1 + zarg2)
+
+END FUNCTION phi2phirot
+
+!==============================================================================
+!==============================================================================
+
+! polgam = 0.0
+
+FUNCTION  rla2rlarot ( phi, rla, polphi, pollam, polgam )
+
+!------------------------------------------------------------------------------
+!
+! Description:
+!   This routine converts lambda from the real geographical system to lambda 
+!   in the rotated system.
+!
+! Method:
+!   Transformation formulas for converting between these two systems.
+!
+!------------------------------------------------------------------------------
+
+integer, parameter :: wp=r8   ! to save on changing DART kind to COSMO kind
+
+! Parameter list:
+REAL (KIND=wp),     INTENT (IN)      ::        &
+  polphi,  & ! latitude of the rotated north pole
+  pollam,  & ! longitude of the rotated north pole
+  phi,     & ! latitude in geographical system
+  rla        ! longitude in geographical system
+
+REAL (KIND=wp),     INTENT (IN)      ::        &
+  polgam      ! angle between the north poles of the systems
+
+REAL (KIND=wp)                       ::        &
+  rla2rlarot ! longitude in the the rotated system
+
+! Local variables
+REAL (KIND=wp)                           ::    &
+  zsinpol, zcospol, zlampol, zphi, zrla, zarg1, zarg2, zrla1
+
+REAL (KIND=wp),     PARAMETER            ::    &
+  zrpi18 = 57.2957795_wp,                      & !
+  zpir18 = 0.0174532925_wp
+
+!------------------------------------------------------------------------------
+
+! Begin function rla2rlarot
+
+  zsinpol  = SIN (zpir18 * polphi)
+  zcospol  = COS (zpir18 * polphi)
+  zlampol  =      zpir18 * pollam
+  zphi     =      zpir18 * phi
+  IF (rla > 180.0_wp) THEN
+    zrla1  = rla - 360.0_wp
+  ELSE
+    zrla1  = rla
+  ENDIF
+  zrla     = zpir18 * zrla1
+
+  zarg1    = - SIN (zrla-zlampol) * COS(zphi)
+  zarg2    = - zsinpol * COS(zphi) * COS(zrla-zlampol) + zcospol * SIN(zphi)
+
+  IF (zarg2 == 0.0_wp) zarg2 = 1.0E-20_wp
+
+  rla2rlarot = zrpi18 * ATAN2 (zarg1,zarg2)
+
+  IF (polgam /= 0.0_wp) THEN
+    rla2rlarot = polgam + rla2rlarot
+    IF (rla2rlarot > 180._wp) rla2rlarot = rla2rlarot -360._wp
+  ENDIF
+
+END FUNCTION rla2rlarot
+
+
+!------------------------------------------------------------------------
+!>
+
+subroutine get_corners(lon, lat, nx, ny, gridlons, gridlats,  &
+                ileft, iright, ifrac, jbot, jtop, jfrac, istatus)
+
+real(r8), intent(in)  :: lon
+real(r8), intent(in)  :: lat
+integer,  intent(in)  :: nx
+integer,  intent(in)  :: ny
+real(r8), intent(in)  :: gridlons(nx)
+real(r8), intent(in)  :: gridlats(ny)
+
+integer,  intent(out) :: ileft
+integer,  intent(out) :: iright
+real(r8), intent(out) :: ifrac
+integer,  intent(out) :: jbot
+integer,  intent(out) :: jtop
+real(r8), intent(out) :: jfrac
+integer,  intent(out) :: istatus
+
+integer, parameter :: OUTSIDE_HORIZONTALLY = 15
+
+real(r8) :: dlon1, dlonT
+real(r8) :: dlat1, dlatT
+
+integer :: indarr(1)
+
+! set output to facilitate early failed returns. 
+! If all goes well, these get replaced.
+ileft    = -1
+iright   = -1
+ifrac    = 0.0_r8
+jbot     = -1
+jtop     = -1
+jfrac    = 0.0_r8
+istatus  = 99
+
+! check to make sure the location is within the domain
+
+if ( lon < gridlons(1) .or.  lon > gridlons(nx) .or. &
+     lat < gridlats(1) .or.  lat > gridlats(ny) )then
+   istatus = OUTSIDE_HORIZONTALLY
+   return
+endif
+
+!    | ............ dlonT ............. |
+!    | .. dlon .. |
+!    |------------|---------------------|
+! lonleft       lon                  lonright
+
+if (lon == gridlons(nx)) then
+   ileft  = nx-1
+   iright = nx
+   ifrac  = 0.0_r8  ! fractional distance to min
+else
+   indarr = maxloc(gridlons , gridlons <= lon)
+   ileft  = indarr(1)
+   iright = ileft + 1
+   dlon1  =     lon          - gridlons(ileft)
+   dlonT  = gridlons(iright) - gridlons(ileft)
+   ifrac  = dlon1 / dlonT 
+endif
+
+! latitudes are arranged 'south' to 'north', i.e. -90 to 90  (albeit rotated)
+!
+!    | ............ dlatT ............. |
+!    | .. dlat .. |
+!    |------------|---------------------|
+! latbot         lat                  lattop
+
+if (lat == gridlats(ny)) then
+   jbot  = ny-1
+   jtop  = ny
+   jfrac = 0.0_r8
+else
+   indarr = maxloc( gridlats,  gridlats <= lat)
+   jbot   = indarr(1)
+   jtop   = jbot + 1
+   dlat1  =     lat        - gridlats(jbot)
+   dlatT  = gridlats(jtop) - gridlats(jbot)
+   jfrac  = dlat1 / dlatT
+endif
+
+istatus = 0
+
+if (debug > 5 .and. do_output()) then
+   write(*,*)
+   write(*,*)'longitude index to the  west and  east are ',ileft, iright
+   write(*,*)'latitude  index to the south and north are ',jbot, jtop
+   write(*,*)'lon  west, lon, lon  east',gridlons(ileft),lon,gridlons(iright)
+   write(*,*)'lat south, lat, lat north',gridlats(jbot), lat,gridlats(jtop)
+endif
+
+end subroutine get_corners
+
+
+!------------------------------------------------------------------------
+!>
+
+subroutine horizontal_interpolate(x, ivar, level_index, ileft, iright, ifrac, jbot, jtop, jfrac, &
+                      layervalue, istatus) 
+
+real(r8), intent(in) :: x(:)
+integer,  intent(in) :: ivar
+integer,  intent(in) :: level_index
+integer,  intent(in) :: ileft
+integer,  intent(in) :: iright
+real(r8), intent(in) :: ifrac
+integer,  intent(in) :: jbot
+integer,  intent(in) :: jtop
+real(r8), intent(in) :: jfrac
+
+real(r8), intent(out) :: layervalue
+integer,  intent(out) :: istatus
+
+integer :: lowerleft
+integer :: lowerright
+integer :: upperright
+integer :: upperleft
+real(r8) :: ifracrem
+real(r8) :: jfracrem
+
+! figure out the dart state vector indices of the locations of interest
+
+lowerleft  = ijk_to_dart(ivar, ileft,  jbot, level_index) 
+lowerright = ijk_to_dart(ivar, iright, jbot, level_index)
+upperright = ijk_to_dart(ivar, iright, jtop, level_index) 
+upperleft  = ijk_to_dart(ivar, ileft,  jtop, level_index)
+
+if (debug > 5 .and. do_output()) then
+   write(*,*)
+   write(*,*)' ileft, jbot, level_index decompose to ',lowerleft
+   write(*,*)'iright, jbot, level_index decompose to ',lowerright
+   write(*,*)'iright, jtop, level_index decompose to ',upperright
+   write(*,*)' ileft, jtop, level_index decompose to ',upperleft
+endif
+
+! apply the weights
+
+jfracrem = 1.0_r8 - jfrac
+ifracrem = 1.0_r8 - ifrac
+
+layervalue =  jfracrem * ( ifracrem*x(lowerleft) + ifrac*x(lowerright) ) + &
+              jfrac    * ( ifracrem*x(upperleft) + ifrac*x(upperright) )
+
+end subroutine horizontal_interpolate
+
+
+!------------------------------------------------------------------------
+!>
+
+function ijk_to_dart(ivar, i, j, k) result(dartindex)
+
+integer, intent(in) :: ivar
+integer, intent(in) :: i
+integer, intent(in) :: j
+integer, intent(in) :: k
+integer             :: dartindex
+
+if (progvar(ivar)%numdims == 3) then
+   dartindex = progvar(ivar)%index1 + (i-1) + & 
+               (j-1) * (progvar(ivar)%dimlens(1)) + &
+               (k-1) * (progvar(ivar)%dimlens(1) * progvar(ivar)%dimlens(2))
+
+elseif (progvar(ivar)%numdims == 2) then
+   dartindex = progvar(ivar)%index1 + (i-1) + & 
+               (j-1) * (progvar(ivar)%dimlens(1))
+
+elseif (progvar(ivar)%numdims == 1) then
+   dartindex = progvar(ivar)%index1 + (i-1)
+
+endif
+
+
+end function
+
+
+!------------------------------------------------------------------------
+!>
+
+subroutine get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istatus)
+
+! The heights in the vcoord array are from the top of the atmosphere down.
+! vcoord%level1(   1   ) = top of atmosphere
+! vcoord%level1(nlevel1) = bottom level of model, earth surface
+!
+!         space <--------------------------------------------| surface
+! layer     0 ... 10                                 11  ... 51
+!                 | ............ dztot ............. |
+!                 | ... dz ... |
+!                 |------------|---------------------|
+!               ztop         height                 zbot
+!              iabove                              ibelow
+!              big numbers                      small numbers
+
+!         space <--------------------------------------------| surface
+! layer     0 ... 1                                  2   ... 51
+!                 | ............ dztot ............. |
+!                 | ... dz ... |
+!                 |------------|---------------------|
+!               22000        height                21000
+!               iabove                             ibelow
+
+real(r8), intent(in)  :: height
+integer,  intent(in)  :: dart_kind
+integer,  intent(out) :: ibelow
+integer,  intent(out) :: iabove
+real(r8), intent(out) :: levelfrac
+integer,  intent(out) :: istatus
+
+integer, parameter :: OUTSIDE_VERTICALLY   = 16
+
+integer :: indarr(1), i
+real(r8) :: dz, dztot
+
+if ( dart_kind == KIND_VERTICAL_VELOCITY ) then
+
+   if (height > vcoord%level1(1) .or. height < vcoord%level1(nlevel1)) then
+      istatus = OUTSIDE_VERTICALLY
+      return
+   endif
+
+   if (height == vcoord%level1(1)) then
+      iabove = 1
+      ibelow = 2
+      levelfrac = 0.0
+   else
+      indarr  = maxloc( vcoord%level1,  vcoord%level1 >= height )
+      iabove = indarr(1)
+      ibelow = iabove - 1
+      dz     = vcoord%level1(iabove) - height
+      dztot  = vcoord%level1(iabove) - vcoord%level1(ibelow)
+      levelfrac = dz / dztot
+   endif
+
+else
+
+   if (height > vcoord%level(1) .or. height < vcoord%level(nlevel)) then
+      istatus = OUTSIDE_VERTICALLY
+      return
+   endif
+
+   if (height == vcoord%level(1)) then
+      iabove = 1
+      ibelow = 2
+      levelfrac = 0.0
+   else
+
+!     DO NOT UNDERSTAND WHY THE MAXLOC IS NOT WORKING
+!     indarr  = maxloc( vcoord%level,  vcoord%level >= height )
+
+      VERT : do i = 1,vcoord%nlevel
+ ! DEBUG   write(*,*)'vcoord',i,vcoord%level(i),vcoord%level(i) >= height
+         if (vcoord%level(i) < height) then
+            indarr(1) = i-1
+            exit VERT
+         endif
+      enddo VERT
+
+      write(*,*)'height is ',height, 'iabove is ',indarr(1)
+      iabove = indarr(1)
+      ibelow = iabove + 1
+      dz     = vcoord%level(iabove) - height
+      dztot  = vcoord%level(iabove) - vcoord%level(ibelow)
+      levelfrac = dz / dztot
+   endif
+
+   if (debug > 5 .and. do_output()) then
+      write(*,*)
+      write(*,*)'computine vertical levels for DART kind ',dart_kind
+      write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
+      write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
+      write(*,*)
+   endif
+endif
+
+istatus = 0
+
+end subroutine get_level_indices
+
+!------------------------------------------------------------------------
+!>
 
 end module model_mod
 

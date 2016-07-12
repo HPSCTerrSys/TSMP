@@ -198,16 +198,12 @@ call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize
 ! Checking get_state_meta_data (and get_state_indices, get_state_kind)
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Checking metadata routines.'
-
 if (test1thru < 6) goto 999
 
-skip = 1000000
+write(*,*)
+write(*,*)'Checking metadata routine for dart index ',x_ind
 
-do i = 1, x_size, skip
-   if ( i > 0 .and. i <= x_size ) call check_meta_data( i )
-enddo
+call check_meta_data( x_ind )
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
