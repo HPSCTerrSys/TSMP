@@ -18,13 +18,19 @@ use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, 
 
 use     location_mod, only : location_type,      get_close_maxdist_init,        &
                              get_close_obs_init, get_close_obs, set_location,   &
-                             set_location,                                      &
+                             set_location,  get_location,                       &
                              vert_is_height,       VERTISHEIGHT
 
 use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
                              find_namelist_in_file, check_namelist_read
+
+use     obs_kind_mod, only : KIND_SOIL_MOISTURE,          &
+                             paramname_length,            &
+                             get_raw_obs_kind_index,      &
+                             get_raw_obs_kind_name
+
 use netcdf
 
 implicit none
@@ -97,6 +103,7 @@ type progvartype
    integer  :: numZ
    integer  :: varsize     ! prod(dimlens(1:numdims))
    integer  :: rangeRestricted
+   integer  :: pfb_kind
    real(r8) :: minvalue
    real(r8) :: maxvalue
    character(len=256) :: kind_string
@@ -204,6 +211,7 @@ progvar(ivar)%dimnames(3)     = 'level'
 progvar(ivar)%dimlens(1)      = nx
 progvar(ivar)%dimlens(2)      = ny
 progvar(ivar)%dimlens(3)      = nz
+progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !Need pedotransfer function 
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -305,35 +313,86 @@ time = set_time(0,0)
 
 end subroutine init_time
 
+!------------------------------------------------------------------------
+!>Given a state vector, a location, and a model state variable type,
+!>interpolates the state variable field to that location and returns
+!>the value in obs_val. The istatus variable should be returned as
+!>0 unless there is some problem in computing the interpolation in
+!>which case an alternate value should be returned. The obs_type variable
+!>is a model specific integer that specifies the type of field .
 
-
-subroutine model_interpolate(x, location, itype, obs_val, istatus)
+subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
 !------------------------------------------------------------------
 !
-! Given a state vector, a location, and a model state variable type,
-! interpolates the state variable field to that location and returns
-! the value in obs_val. The istatus variable should be returned as
-! 0 unless there is some problem in computing the interpolation in
-! which case an alternate value should be returned. The itype variable
-! is a model specific integer that specifies the type of field (for
-! instance temperature, zonal wind component, etc.). In low order
-! models that have no notion of types of variables, this argument can
-! be ignored. For applications in which only perfect model experiments
-! with identity observations (i.e. only the value of a particular
-! state variable is observed), this can be a NULL INTERFACE.
+! Error codes:
+! istatus = 99 : unknown error
+! istatus = 10 : observation type is not in state vector
+! istatus = 15 : observation lies outside the model domain (horizontal)
+! istatus = 16 : observation lies outside the model domain (vertical)
+! istatus = 19 : observation vertical coordinate is not supported
 
 real(r8),            intent(in) :: x(:)
 type(location_type), intent(in) :: location
-integer,             intent(in) :: itype
-real(r8),           intent(out) :: obs_val
+integer,             intent(in) :: obs_type
+real(r8),           intent(out) :: interp_val
 integer,            intent(out) :: istatus
 
+integer, parameter :: NO_KIND_IN_STATE     = 10
+integer, parameter :: VERTICAL_UNSUPPORTED = 19
+
+! Local Variables
+
+integer  :: pfb_kind
+integer  :: i, ivar
+integer  :: geo_inds(4), hgt_inds(2)
+real(r8) :: geo_wgts(4), hgt_wgt
+real(r8) :: point_coords(1:3)
+real(r8) :: geo_lon, geo_lat, geo_hgt
+
+! Variable Definition Complete
+
 if ( .not. module_initialized ) call static_init_model
+
+interp_val = MISSING_R8     ! the DART bad value flag
+istatus = 99                ! unknown error
+
+pfb_kind = obs_type
+
+if ( pfb_kind < 0 ) then
+   interp_val = x(-1*pfb_kind)
+   istatus = 0
+   return
+endif
+
+! Determine if this pfb_kind exists in ParFlow state vector
+! Unnecessary but who knows if ivar will increase in future
+
+ivar = -1
+FoundIt: do i = 1, max_state_variables     ! we do not yet define nfields in input_nml
+   if (progvar(i)%pfb_kind == pfb_kind) then
+      ivar = i
+      exit FoundIt
+   endif
+enddo FoundIt
+
+! Get the geo-location
+point_coords(1:3) = get_location(location)
+geo_lon = point_coords(1) ! degrees East
+geo_lat = point_coords(2) ! degrees North
+geo_hgt  = point_coords(3) ! depth in meters 
+
+call get_corners(geo_lon, geo_lat, nx, ny, lon(1:nx,1), lat(1,1:ny), geo_inds, geo_wgts, istatus) 
+
+if (istatus /= 0) return
+
+call get_level_indices(geo_hgt, hgt_inds, hgt_wgt, istatus)
+
+if (istatus /= 0) return
 
 call error_handler(E_ERR,'model_interpolate','routine not tested',source, revision,revdate)
 ! This should be the result of the interpolation of a
 ! given kind (itype) of variable at the given location.
-obs_val = MISSING_R8
+interp_val = MISSING_R8
 
 ! The return code for successful return should be 0. 
 ! Any positive number is an error.
@@ -383,7 +442,7 @@ integer  :: ivar
 
 if ( .not. module_initialized ) call static_init_model
 
-local_ind = index_in
+local_ind = index_in - 1    !CPS offset for algorithm below
 
 kloc =  local_ind / (nx*ny) + 1
 jloc = (local_ind - (kloc-1)*nx*ny)/nx + 1
@@ -400,6 +459,7 @@ vloc  = vcoord(kloc)
 !CPS call error_handler(E_ERR,'get_state_meta_data','routine not tested',source, revision,revdate)
 ! these should be set to the actual location and obs kind
 location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
+
 if (present(var_type)) var_type = 0  
 
 end subroutine get_state_meta_data
@@ -1373,6 +1433,103 @@ dimnames(ndims) = 'time'
 
 return
 end subroutine define_var_dims
+
+!------------------------------------------------------------------------
+!> Get model corners for the observed location
+!> Adapted from cosmo interp routines
+
+subroutine get_corners(lon, lat, nx, ny, gridlons, gridlats, ij_inds, &
+                        ij_wgts, istatus)
+
+real(r8), intent(in)  :: lon
+real(r8), intent(in)  :: lat
+integer,  intent(in)  :: nx
+integer,  intent(in)  :: ny
+real(r8), intent(in)  :: gridlons(nx)
+real(r8), intent(in)  :: gridlats(ny)
+
+integer,  intent(out) :: ij_inds(4) ! ileft, iright, jbot, jtop
+real(r8), intent(out) :: ij_wgts(2)    ! ifrac, jfrac
+
+!Local Variables
+integer               :: istatus, indarr(1)
+integer, parameter    :: OUTSIDE_HORIZONTALLY = 15
+real(r8)              :: dlon, dlonT, dlat, dlatT
+
+! Initialize
+ij_inds    = -1
+ij_wgts    = 0.0_r8
+istatus    = 99
+
+! check to make sure the location is within the domain
+
+if ( lon < gridlons(1) .or.  lon > gridlons(nx) .or. &
+     lat < gridlats(1) .or.  lat > gridlats(ny) )then
+   istatus = OUTSIDE_HORIZONTALLY
+   return
+endif
+
+!    | ............ dlonT ............. |
+!    | .. dlon .. |
+!    |------------|---------------------|
+! lonleft       lon                  lonright
+! ij_inds(1)                         ij_inds(2)
+
+if (lon == gridlons(nx)) then
+   ij_inds(1)  = nx-1
+   ij_inds(2)  = nx
+   ij_wgts(1)  = 0.0_r8  ! fractional distance to min
+else
+   indarr = maxloc(gridlons , gridlons <= lon)
+   ij_inds(1)  = indarr(1)
+   ij_inds(2)  = ij_inds(1) + 1
+   dlon        =     lon          - gridlons(ij_inds(1))
+   dlonT       = gridlons(ij_inds(2)) - gridlons(ij_inds(1))
+   ij_wgts(1)  = dlon / dlonT
+endif
+
+! latitudes are arranged 'south' to 'north', i.e. -90 to 90  (albeit rotated)
+!
+!    | ............ dlatT ............. |
+!    | .. dlat .. |
+!    |------------|---------------------|
+! latbot         lat                  lattop
+! ij_inds(3)                         ij_inds(4)
+
+if (lat == gridlats(ny)) then
+   ij_inds(3) = ny-1
+   ij_inds(4) = ny
+   ij_wgts(2) = 0.0_r8
+else
+   indarr = maxloc( gridlats,  gridlats <= lat)
+   ij_inds(3)   = indarr(1)
+   ij_inds(4)   = ij_inds(3) + 1
+   dlat         =     lat        - gridlats(ij_inds(3))
+   dlatT        = gridlats(ij_inds(4)) - gridlats(ij_inds(3))
+   ij_wgts(2)   = dlat / dlatT
+endif
+
+istatus = 0
+
+if (debug > 5 .and. do_output()) then
+   write(*,*)
+   write(*,*)'longitude index to the  west and  east are ',ij_inds(1:2)
+   write(*,*)'latitude  index to the south and north are ',ij_inds(3:4) 
+   write(*,*)'lon  west, lon, lon  east',gridlons(ij_inds(1)),lon,gridlons(ij_inds(2))
+   write(*,*)'lat south, lat, lat north',gridlats(ij_inds(3)), lat,gridlats(ij_inds(4))
+endif
+
+end subroutine get_corners
+
+
+!------------------------------------------------------------------------
+!> Get bottom and top model levels  for the observed location
+!> Adapted from cosmo interp routines
+
+subroutine get_level_indices(geo_hgt, kk_inds, kk_wgts, istatus)
+
+end subroutine get_level_indices
+
 !===================================================================
 ! End of model_mod
 !===================================================================

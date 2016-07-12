@@ -69,6 +69,7 @@ integer :: in_unit, out_unit, ios_out, iunit, io, offset
 integer :: x_size
 integer :: year, month, day, hour, minute, second
 integer :: secs, days
+integer :: myobsIndex           !Observation Type to use in interpolation
 
 type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
@@ -95,12 +96,13 @@ call find_namelist_in_file("input.nml", "model_mod_check_nml", iunit)
 read(iunit, nml = model_mod_check_nml, iostat = io)
 call check_namelist_read(iunit, io, "model_mod_check_nml")
 
-!CPSloc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
-!CPSmykindindex = get_raw_obs_kind_index(kind_of_interest)
+loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
+myobsIndex = get_raw_obs_kind_index(kind_of_interest)
 
 if (test1thru < 1) goto 999
 
 write(*,*)
+write(*,*)'model_mod_check ....1'
 write(*,*)'static_init_model test STARTING ...'
 call static_init_model()
 write(*,*)'static_init_model test COMPLETE ...'
@@ -108,6 +110,7 @@ write(*,*)'static_init_model test COMPLETE ...'
 if (test1thru < 2) goto 999
 
 write(*,*)
+write(*,*)'model_mod_check ....2'
 write(*,*)'get_model_size test STARTING ...'
 x_size = get_model_size()
 write(*,*)'get_model_size test : state vector has length',x_size
@@ -122,9 +125,12 @@ write(*,*)'get_model_size test COMPLETE ...'
 if (test1thru < 3) goto 999
 
 allocate(statevector(x_size))
-
+write(*,*)
+write(*,*)'model_mod_check ....3'
+write(*,*)'initialize statevector and set_time'
 statevector = 1.0_r8;
 model_time  = set_time(21600, 149446)   ! 06Z 4 March 2010
+write(*,*)'set_time complete ...'
 
 !----------------------------------------------------------------------
 ! Open a test DART initial conditions file.
@@ -133,6 +139,7 @@ model_time  = set_time(21600, 149446)   ! 06Z 4 March 2010
 if (test1thru < 4) goto 999
 
 write(*,*)
+write(*,*)'model_mod_check ....4'
 write(*,*)'Reading '//trim(dart_input_file)
 
 iunit = open_restart_read(dart_input_file)
@@ -157,6 +164,7 @@ call print_time( model_time,'model_mod_check:model time')
 if (test1thru < 5) goto 999
 
 write(*,*)
+write(*,*)'model_mod_check ....5'
 write(*,*)'Exercising the netCDF routines.'
 write(*,*)'Creating '//trim(output_file)//'.nc'
 
@@ -172,16 +180,13 @@ call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize
 ! Checking get_state_meta_data (and get_state_indices, get_state_kind)
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Checking metadata routines.'
-
 if (test1thru < 6) goto 999
 
-skip = 1000000
+write(*,*)
+write(*,*)'model_mod_check ....6'
+write(*,*)'Checking metadata routines for dart index ....'
 
-do i = 1, x_size, skip
-   if ( i > 0 .and. i <= x_size ) call check_meta_data( i )
-enddo
+call check_meta_data( x_ind )
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
@@ -190,22 +195,39 @@ enddo
 
 if (test1thru < 7) goto 999
 
+write(*,*)
+write(*,*)'model_mod_check ....7'
+write(*,*)'Find location of state vector...'
+
 if ( loc_of_interest(1) >= 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
 
 !----------------------------------------------------------------------
 ! Check the interpolation - print initially to STDOUT
 !----------------------------------------------------------------------
 
+if (test1thru < 8) goto 999
+
 write(*,*)
+write(*,*)'model_mod_check ....8'
 write(*,*)'Testing model_interpolate ...'
 
-call model_interpolate(statevector, loc, 1 , interp_val, ios_out)
+if ( myobsIndex < 0 ) then
+   write(*,*)'WARNING'
+   write(*,*)'WARNING - input.nml:model_mod_check does not have a known "kind_of_interest"'
+   write(*,*)'WARNING - skipping the model_interpolate tests.'
+   write(*,*)'WARNING'
+   goto 200 
+endif
+
+call model_interpolate(statevector, loc, myobsIndex , interp_val, ios_out)
 
 if ( ios_out == 0 ) then 
    write(*,*)'model_interpolate SUCCESS: The interpolated value is ',interp_val
 else
    write(*,*)'model_interpolate ERROR: model_interpolate failed with error code ',ios_out
 endif
+
+ 200 continue
 
  999 continue
 
@@ -215,6 +237,8 @@ call finalize_utilities()
 
 contains
 
+!---------------------------------------------------------
+!> Checking meta data for the given location in state vector
 
 subroutine check_meta_data( iloc )
 
@@ -234,28 +258,34 @@ write(*,*)' indx ',iloc,' is type ',var_type,trim(string1)
 end subroutine check_meta_data
 
 
+!---------------------------------------------------------
+!>Simple exhaustive search to find the indices into the
+!>state vector of a particular location.
 
 subroutine find_closest_gridpoint( loc_of_interest )
-! Simple exhaustive search to find the indices into the 
-! state vector of a particular location.
-real(r8), intent(in) :: loc_of_interest(:)
+
+real(r8), dimension(:), intent(in) :: loc_of_interest
 
 type(location_type) :: loc0, loc1
-integer  :: i, indx(1)
+integer  :: i, which_vert, var_type
+real(r8) :: plon, plat, plev, vals(3)
 real(r8) :: closest
 character(len=129)  :: string1
 real(r8), allocatable, dimension(:) :: thisdist
-
-loc0 = set_location(loc_of_interest)
+logical :: matched
 
 write(*,*)
 write(*,'(''Checking for the index in the state vector that is closest to '')')
-call write_location(0, loc0, charstring=string1)
-write(*,*) trim(string1)
+write(*,'(''lon/lat/lev'',3(1x,f14.5))')loc_of_interest(1:LocationDims)
 
 allocate( thisdist(get_model_size()) )
 thisdist  = 9999999999.9_r8         ! really far away 
+matched   = .false.
+!
 
+plon = loc_of_interest(1)
+plat = loc_of_interest(2)
+plev = loc_of_interest(3)
 
 
 ! Since there can be multiple variables with
@@ -267,16 +297,42 @@ do i = 1,get_model_size()
    ! grid and set our target location to have the same.
    ! Then, compute the distance and compare.
 
-   call get_state_meta_data(i, loc1)
-   thisdist(i) = get_dist( loc1, loc0)
-
+   call get_state_meta_data(i, loc1, var_type)
+   which_vert  = nint( query_location(loc1) )
+   loc0        = set_location(plon, plat, plev, which_vert)
+   thisdist(i) = get_dist( loc1, loc0, no_vert=.false.)
+   matched    = .true.
 enddo
 
-indx = minloc(thisdist)
+if (.not. matched) then
+   write(*,*)'No state vector elements of type '//trim(kind_of_interest)
+   return
+endif
 
 ! Now that we know  ... report 
 
-write(*, *) 'closest to the given location is index ', indx(1)
+closest = minval(thisdist)
+if (closest == 9999999999.9_r8) then
+   write(*,*)'No closest gridpoint found'
+   return
+endif
+
+matched = .false.
+do i = 1,get_model_size()
+
+   if ( thisdist(i) == closest ) then
+      call get_state_meta_data(i, loc1)
+      vals = get_location(loc1)
+      write(*,'(3(1x,f14.5),i3)') vals, i
+      matched = .true.
+   endif
+
+enddo
+
+if ( .not. matched ) then
+   write(*,*)'Nothing matched the closest gridpoint'
+endif
+
 
 deallocate( thisdist )
 

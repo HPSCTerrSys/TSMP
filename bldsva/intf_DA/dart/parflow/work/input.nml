@@ -129,6 +129,16 @@
    pfb_to_dart_output_file = 'dart_prior'
    /
 
+&location_nml
+   horiz_dist_only             = .true.
+   vert_normalization_height   = 10000.0
+   vert_normalization_level    = 20.0
+   approximate_distance        = .false.
+   nlon                        = 71
+   nlat                        = 36
+   output_box_info             = .true.
+  /
+
 &dart_to_pfb_nml
    dart_to_pfb_input_file = 'dart_posterior'
    advance_time_present     = .false.
@@ -247,10 +257,10 @@
    output_file                = 'check_me'
    advance_time_present       = .false.
    x_ind                      = 100
-   kind_of_interest           = 'ANY'
+   kind_of_interest           = 'KIND_SOIL_MOISTURE'
    verbose                    = .false.
    test1thru                  = 10
-   loc_of_interest            = 5.6, 49.8, 0.5
+   loc_of_interest            = 5.5, 49.88, 0.5
    interp_test_vertcoord      = 'VERTISHEIGHT'
    /
 
