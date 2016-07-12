@@ -254,7 +254,6 @@ integer, parameter             :: n_state_vector_vars=8
 integer, parameter             :: n_non_state_vars=1
 
 type(cosmo_meta),allocatable   :: cosmo_slabs(:)
-type(cosmo_hcoord)             :: cosmo_lonlat(3) ! 3 is for the stagger
 integer                        :: nslabs
 
 ! things which can/should be in the model_nml
@@ -310,7 +309,6 @@ END INTERFACE
 
 contains
 
-
 !------------------------------------------------------------------------
 !>
 
@@ -332,6 +330,7 @@ end function get_model_size
 !> All the grid information comes from the COSMOS netCDF file
 !>@ TODO FIXME All the variable information comes from all over the place
 !> Not actually reading in the state, that is done in get_state_vector()
+
 
 subroutine static_init_model()
 
@@ -379,6 +378,7 @@ if (debug > 5 .and. do_output()) call progvar_summary()
 ! ens_mean_for_model, that sort of thing
 
 return
+
 end subroutine static_init_model
 
 
@@ -456,29 +456,31 @@ if (present(var_type)) then
    var_type = progvar(ivar)%dart_kind
 endif
 
+return
+
 end subroutine get_state_meta_data
 
 
 !------------------------------------------------------------------------
-!>
+!> Returns the smallest increment of time that we want to advance the model.
+!> This defines the minimum assimilation interval.
+!> It is NOT the dynamical timestep of the model.
 
 
-  function get_model_time_step()
-  ! Returns the smallest increment of time that we want to advance the model.
-  ! This defines the minimum assimilation interval.
-  ! It is NOT the dynamical timestep of the model.
+function get_model_time_step()
 
-    type(time_type) :: get_model_time_step
+type(time_type) :: get_model_time_step
 
-    call error_handler(E_ERR,'get_model_time_step','routine not written',source,revision,revdate)
+call error_handler(E_ERR,'get_model_time_step','routine not written',source,revision,revdate)
 
-    if ( .not. module_initialized ) call static_init_model
+if ( .not. module_initialized ) call static_init_model
 
-    model_timestep      = set_time(model_dt)
-    get_model_time_step = model_timestep
-    return
+model_timestep      = set_time(model_dt)
+get_model_time_step = model_timestep
 
-  end function get_model_time_step
+return
+
+end function get_model_time_step
 
 
 !------------------------------------------------------------------------
@@ -516,20 +518,18 @@ integer :: dart_kind
 integer :: ivar  ! index into the progvar structure for this dart_kind
 
 real(r8) :: point_coords(1:3)
-integer  :: i,j,hbox(2,2),n,vbound(2),sindex
-real(r8) :: hbox_weight(2,2),hbox_val(2,2),hbox_lon(2,2),hbox_lat(2,2)
-real(r8) :: vbound_weight(2),val1,val2
 
 real(r8), parameter :: polgam = 0.0_r8 ! angle between the north poles of the systems
 
 real(r8) :: geo_lat, geo_lon, height
 real(r8) :: rotated_lat, rotated_lon
 
-integer  :: iabove, ibelow
+integer  :: i, iabove, ibelow
 integer  :: ileft, iright, jbot, jtop
 real(r8) :: ifrac, jfrac, levelfrac
 
 real(r8) :: value_above, value_below
+real(r8) :: vbound_weight(2),val1,val2
 
 IF ( .not. module_initialized ) call static_init_model
 
@@ -613,6 +613,8 @@ stop
 
 istatus=0
 
+return
+
 end subroutine model_interpolate
 
 
@@ -635,6 +637,8 @@ call error_handler(E_ERR, 'init_conditions', string1, &
            source, revision, revdate, text2=string2)
 
 x = 0.0_r8  ! suppress compiler warnings about unused variables
+
+return
 
 end subroutine init_conditions
 
@@ -659,6 +663,8 @@ call error_handler(E_ERR, 'init_time', string1, &
 
 time = set_time(0,0) ! suppress compiler warnings about unused variables
 
+return
+
 end subroutine init_time
 
 
@@ -681,6 +687,8 @@ endif
 write(string1,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
 call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
 
+return
+
 end subroutine adv_1step
 
 
@@ -695,6 +703,8 @@ deallocate(state_vector)
 deallocate(lon,lat,slonu,slatu,slonv,slatv)
 deallocate(vcoord%level1, vcoord%level) 
 deallocate(rlon,rlat,srlon,srlat)
+
+return
 
 end subroutine end_model
 
@@ -1293,6 +1303,8 @@ ens_mean(:) = filter_ens_mean(:)
 !  write(string1,*) 'COSMO has no ensemble mean in storage.'
 !  call error_handler(E_ERR,'ens_mean_for_model',string1,source,revision,revdate)
 
+return
+
 end subroutine ens_mean_for_model
 
 
@@ -1300,485 +1312,17 @@ end subroutine ens_mean_for_model
 !>
 
 
-  function ll_to_xyz_vector(lon,lat) RESULT (xyz)
+function get_state_time() result (time)
+type(time_type) :: time
 
-    ! Passed variables
+call error_handler(E_ERR,'get_state_time','routine not written',source,revision,revdate)
 
-    real(r8),allocatable :: xyz(:,:)      ! result: x,z,y-coordinates
-    real(r8),intent(in)  :: lat(:),lon(:) ! input:  lat/lon coordinates in degrees
+if ( .not. module_initialized ) call static_init_model
+time=cosmo_fc_time
 
-    real(r8)             :: radius
-    integer              :: n
+return
 
-    ! define output vector size to be the same as the input vector size
-    ! second dimension (3) is x,y,z
-
-    n=SIZE(lat,1)
-    ALLOCATE(xyz(1:n,1:3))
-
-    ! as we are interested in relative distances we set the radius to 1 - may be changed later
-
-    radius=1.0_r8
-
-    ! caclulate the x,y,z-coordinates
-
-    xyz(1:n,1)=radius*sin(lat(1:n)*deg2rad)*cos(lon(1:n)*deg2rad)
-    xyz(1:n,2)=radius*sin(lat(1:n)*deg2rad)*sin(lon(1:n)*deg2rad)
-    xyz(1:n,3)=radius*cos(lat(1:n)*deg2rad)
-
-    return
-  end function ll_to_xyz_vector
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  function ll_to_xyz_single(lon,lat) result (xyz)
-
-    ! Passed variables
-
-    real(r8)             :: xyz(1:3) ! result: x,z,y-coordinates
-    real(r8),intent(in)  :: lat,lon  ! input:  lat/lon coordinates in degrees
-
-    real(r8)             :: radius
-
-    ! as we are interested in relative distances we set the radius to 1 - may be changed later
-
-    radius=1.0_r8
-
-    ! caclulate the x,y,z-coordinates
-
-    xyz(1)=radius*sin(lat*deg2rad)*cos(lon*deg2rad)
-    xyz(2)=radius*sin(lat*deg2rad)*sin(lon*deg2rad)
-    xyz(3)=radius*cos(lat*deg2rad)
-
-    return
-  end function ll_to_xyz_single
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine get_enclosing_grid_box(p,g,n,nx,ny,b,bw)
-
-    integer,intent(in)   :: n,nx,ny
-    real(r8),intent(in)  :: p(1:3),g(1:n,1:3)
-    integer,intent(out)  :: b(1:2,1:2)
-    real(r8),intent(out) :: bw(1:2,1:2)
-
-!    real(r8)             :: work(1:nx,1:ny,1:3),dist(1:nx,1:ny),boxdist(1:2,1:2)
-    real(r8)             :: work(1:nx+2,1:ny+2,1:3),dist(1:nx+2,1:ny+2),boxdist(1:2,1:2)
-    integer              :: i,j,minidx(2),boxidx(2),xb,yb
-
-    real(r8) :: sqrt2
-
-    sqrt2 = sqrt(2.0_r8)
-
-    work(2:nx+1,2:ny+1,1:3)=RESHAPE( g, (/ nx,ny,3 /))
-
-    do i=2,nx+1
-      work(i,   1,1:3)=work(i,   2,1:3)-(work(i, 3,1:3)-work(i,   2,1:3))
-      work(i,ny+2,1:3)=work(i,ny+1,1:3)-(work(i,ny,1:3)-work(i,ny+1,1:3))
-    enddo
-
-    do j=2,ny+1
-      work(   1,j,1:3)=work(   2,j,1:3)-(work( 3,j,1:3)-work(   2,j,1:3))
-      work(nx+2,j,1:3)=work(nx+1,j,1:3)-(work(nx,j,1:3)-work(nx+1,j,1:3))
-    enddo
-
-    work(   1,   1,1:3) = work(   2,   2,1:3) - 0.5_r8*(sqrt2*(work(   2,   2,1:3)-work(   1,   2,1:3)) + sqrt2*(work(   2,   2,1:3)-work(   2,   1,1:3)))
-    work(   1,ny+2,1:3) = work(   2,ny+1,1:3) - 0.5_r8*(sqrt2*(work(   2,ny+1,1:3)-work(   1,ny+1,1:3)) + sqrt2*(work(   2,ny+1,1:3)-work(   2,ny+2,1:3)))
-    work(nx+2,   1,1:3) = work(nx+1,   2,1:3) - 0.5_r8*(sqrt2*(work(nx+1,   2,1:3)-work(nx+2,   2,1:3)) + sqrt2*(work(nx+1,   2,1:3)-work(nx+1,   1,1:3)))
-    work(nx+2,ny+2,1:3) = work(nx+1,ny+1,1:3) - 0.5_r8*(sqrt2*(work(nx+1,ny+1,1:3)-work(nx+2,ny+1,1:3)) + sqrt2*(work(nx+1,ny+1,1:3)-work(nx+1,ny+2,1:3)))
-
-    do i=1,nx+2
-    do j=1,ny+2
-        dist(i,j)=sqrt(sum((work(i,j,:)-p(:))**2))
-    enddo
-    enddo
-
-    minidx(:)=minloc(dist)
-
-    ! watch for out of area values
-
-    if (minidx(1)==1 .or. minidx(1)==(nx+2) .or. minidx(2)==1 .or. minidx(2)==(ny+2)) then
-      b(:,:)=-1
-      return
-    endif
-
-
-    do i=0,1
-    do j=0,1
-        boxdist(i+1,j+1)=sum(dist(minidx(1)+i-1:minidx(1)+i,minidx(2)+j-1:minidx(2)+j))
-    enddo
-    enddo
-
-    boxidx=minloc(boxdist)-1
-
-    xb=minidx(1)+(2*(boxidx(1)-0.5))
-    yb=minidx(2)+(2*(boxidx(2)-0.5))
-
-    if (xb==1 .or. xb==(nx+2) .or. yb==1 .or. yb==(ny+2)) then
-      b(:,:)=-1
-      return
-    else
-      do i=1,2
-      do j=1,2
-          b(i,j)=((minidx(2)+(j-1)*(boxidx(2)-0.5)*2)*ny)+(minidx(1)+(i-1)*(2*(boxidx(1)-0.5)))
-      enddo
-      enddo
-
-      do i=1,2
-      do j=1,2
-          boxdist(i,j)=dist(mod(b(i,j),ny),b(i,j)/ny)
-      enddo
-      enddo
-
-      bw(:,:)=1./boxdist(:,:)
-!      bw(:,:)=(((1.-boxdist(:,:))/(1.1*maxval(boxdist)))**2)/((boxdist(:,:)/(1.1*maxval(boxdist)))**2)
-      bw=bw/sum(bw)
-      b(:,:)=b(:,:)-1
-    endif
-
-  end subroutine get_enclosing_grid_box
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine get_enclosing_grid_box_lonlat(lon,lat,p,n,nx,ny,b,bw)
-
-    integer, intent(in)  :: n,nx,ny
-    real(r8),intent(in)  :: p(1:2),lon(1:n),lat(1:n)
-    integer, intent(out) :: b(1:2,1:2)
-    real(r8),intent(out) :: bw(1:2,1:2)
-
-!    real(r8)            :: work(1:nx,1:ny,1:3),dist(1:nx,1:ny),boxdist(1:2,1:2)
-
-    real(r8) :: work(1:nx+2, 1:ny+2, 1:2), dist(1:nx+2,1:ny+2), boxdist(1:2,1:2),pw(2)
-
-    integer  :: i,j,minidx(2),boxidx(2),xb,yb,bx(2,2),by(2,2)
-    real(r8) :: sqrt2
-
-    sqrt2 = sqrt(2.0_r8)
-
-    work(2:nx+1, 2:ny+1, 1) = reshape(lon, (/ nx,ny /))*deg2rad
-    work(2:nx+1, 2:ny+1, 2) = reshape(lat, (/ nx,ny /))*deg2rad
-    pw=p*deg2rad
-
-    do i=2,nx+1
-      work(i,   1,1:2) = work(i,   2,1:2)-(work(i, 3,1:2)-work(i,   2,1:2))
-      work(i,ny+2,1:2) = work(i,ny+1,1:2)-(work(i,ny,1:2)-work(i,ny+1,1:2))
-    enddo
-
-    do j=2,ny+1
-      work(   1,j,1:2)=work(   2,j,1:2)-(work( 3,j,1:2)-work(   2,j,1:2))
-      work(nx+2,j,1:2)=work(nx+1,j,1:2)-(work(nx,j,1:2)-work(nx+1,j,1:2))
-    enddo
-
-    work(   1,   1,1:2) = work(   2,   2,1:2) - 0.5_r8*(sqrt2*(work(   2,   2,1:2)-work(   1,   2,1:2))+sqrt2*(work(   2,   2,1:2)-work(   2,   1,1:2)))
-    work(   1,ny+2,1:2) = work(   2,ny+1,1:2) - 0.5_r8*(sqrt2*(work(   2,ny+1,1:2)-work(   1,ny+1,1:2))+sqrt2*(work(   2,ny+1,1:2)-work(   2,ny+2,1:2)))
-    work(nx+2,   1,1:2) = work(nx+1,   2,1:2) - 0.5_r8*(sqrt2*(work(nx+1,   2,1:2)-work(nx+2,   2,1:2))+sqrt2*(work(nx+1,   2,1:2)-work(nx+1,   1,1:2)))
-    work(nx+2,ny+2,1:2) = work(nx+1,ny+1,1:2) - 0.5_r8*(sqrt2*(work(nx+1,ny+1,1:2)-work(nx+2,ny+1,1:2))+sqrt2*(work(nx+1,ny+1,1:2)-work(nx+1,ny+2,1:2)))
-
-    do i=1,nx+2
-    do j=1,ny+2
-!      dist(i,j)=sqrt(sum((work(i,j,:)-p(:))**2))
-       dist(i,j) = 6173.0_r8*acos(cos(work(i,j,2)-pw(2))-cos(work(i,j,2))*cos(pw(2))*(1-cos(work(i,j,1)-pw(1))))
-    enddo
-    enddo
-
-    minidx(:)=minloc(dist)
-
-    ! watch for out of area values
-
-    if (minidx(1)==1 .or. minidx(1)==(nx+2) .or. minidx(2)==1 .or. minidx(2)==(ny+2)) then
-      b(:,:)=-1
-      return
-    endif
-
-!   open(21,file='/daten02/jkeller/testbox.bin',form='unformatted')
-!   iunit = open_file('testbox.bin',form='unformatted',action='write')
-!   write(iunit) nx
-!   write(iunit) ny
-
-    do i=0,1
-    do j=0,1
-        boxdist(i+1,j+1)=sum(dist(minidx(1)+i-1:minidx(1)+i,minidx(2)+j-1:minidx(2)+j))/4.0_r8
-!       write(*,'(4(I5))') minidx(1)+i-1,minidx(1)+i,minidx(2)+j-1,minidx(2)+j
-!       write(iunit) (minidx(2)+j-1),minidx(1)+i-1,&
-!                 (minidx(2)+j-1),minidx(1)+i,&
-!                 (minidx(2)+j),minidx(1)+i-1,&
-!                 (minidx(2)+j),minidx(1)+i
-!       write(iunit) boxdist(i+1,j+1)
-    enddo
-    enddo
-
-    boxidx=minloc(boxdist)-1
-
-    xb=minidx(1)+(2*(boxidx(1)-0.5_r8))
-    yb=minidx(2)+(2*(boxidx(2)-0.5_r8))
-
-    if (xb==1 .or. xb==(nx+2) .or. yb==1 .or. yb==(ny+2)) then
-      b(:,:)=-1
-      return
-    else
-      do i=1,2
-      do j=1,2
-          bx(i,j)=minidx(1)+(i-1)*(2*(boxidx(1)-0.5_r8))
-          by(i,j)=minidx(2)+(j-1)*(2*(boxidx(2)-0.5_r8))
-      enddo
-      enddo
-
-      do i=1,2
-      do j=1,2
-          boxdist(i,j)=dist(bx(i,j),by(i,j))
-      enddo
-      enddo
-
-      bw(:,:)=1.0_r8/boxdist(:,:)
-      bw=bw/sum(bw)
-      bx=bx-1
-      by=by-1
-      b(:,:)=(by-1)*nx+bx
-    endif
-
-    return
-
-  end subroutine get_enclosing_grid_box_lonlat
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine bilinear_interpolation(bv,blo,bla,p,v)
-
-    ! Passed variables
-
-    real(r8),intent(in)  :: bv(2,2),blo(2,2),bla(2,2)
-    real(r8),intent(in)  :: p(3)
-    real(r8),intent(out) :: v
-
-    ! Local storage
-
-    real(r8)             :: x1,lo1,la1
-    real(r8)             :: x2,lo2,la2
-    real(r8)             :: d1,d2,d
-
-!    write(*,'(3(F8.5,1X))') bv(1,1),blo(1,1),bla(1,1)
-!    write(*,'(3(F8.5,1X))') bv(2,1),blo(2,1),bla(2,1)
-
-    call linear_interpolation(p(1),p(2),bv(1,1),blo(1,1),bla(1,1),&
-                                        bv(2,1),blo(2,1),bla(2,1),&
-                                        x1,lo1,la1)
-
-!    write(*,'(3(F8.5,1X))') x1,lo1,la1
-
-    call linear_interpolation(p(1),p(2),bv(1,2),blo(1,2),bla(1,2),&
-                                        bv(2,2),blo(2,2),bla(2,2),&
-                                        x2,lo2,la2)
-
-!    write(*,'(3(F8.5,1X))') x2,lo2,la2
-
-    d1=sqrt((lo1-p(1))**2+(la1-p(2))**2)
-    d2=sqrt((lo2-p(1))**2+(la2-p(2))**2)
-    d =sqrt((lo1-lo2 )**2+(la1-la2 )**2)
-
-    v=(1.0_r8-(d1/d))*x1+(1.0_r8-(d2/d))*x2
-
-    return
-
-  end subroutine bilinear_interpolation
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine linear_interpolation(lop,lap,x1,lo1,la1,x2,lo2,la2,x,lo,la)
-
-    real(r8),intent(in)  :: lo1,lo2,la1,la2,x1,x2,lop,lap
-    real(r8),intent(out) :: lo,la,x
-
-    real(r8)             :: m1,m2,n1,n2,d1,d2,d,mylo1,mylo2,mylop,w1,w2
-
-    mylo1=lo1
-    mylo2=lo2
-    mylop=lop
-
-    if (lo1>180.0_r8) mylo1=lo1-360.0_r8
-    if (lo2>180.0_r8) mylo2=lo2-360.0_r8
-    if (lop>180.0_r8) mylop=lop-360.0_r8
-
-    m1=(la2-la1)/(mylo2-mylo1)
-    if (m1 .ne. 0.0_r8) then
-      n1=la1-mylo1*m1
-      m2=-1.0_r8/m1
-      n2=lap-mylop*m2
-      lo=(n2-n1)/(m1-m2)
-      la=lo*m1+n1
-      d1=sqrt((mylo1-lo)**2+(la1-la)**2)
-      d2=sqrt((mylo2-lo)**2+(la2-la)**2)
-      d =sqrt((mylo1-mylo2)**2+(la1-la2)**2)
-    else
-      la=la1
-      lo=mylop
-
-      d1=sqrt((mylo1-lo)**2+(la1-la)**2)
-      d2=sqrt((mylo2-lo)**2+(la2-la)**2)
-      d =sqrt((mylo1-mylo2)**2+(la1-la2)**2)
-    endif
-
-    if (lo < 0.0_r8) lo=lo+360.0_r8
-
-    w1=abs(1.0_r8-(d1/d))
-    w2=abs(1.0_r8-(d2/d))
-    x=w1*x1+w2*x2
-
-    return
-
-  end subroutine linear_interpolation
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  subroutine get_vertical_boundaries(hb,hw,otype,vcs,p,b,w,istatus)
-
-    real(r8), intent(in)  :: hw(2,2),p,vcs
-    integer,  intent(in)  :: hb(2,2),otype
-    integer,  intent(out) :: b(2),istatus
-    real(r8), intent(out) :: w(2)
-
-    integer               :: k,nlevel,x1,x2,x3,x4,y1,y2,y3,y4
-    real(r8)              :: u,l
-    real(r8),allocatable  :: klevel(:),hlevel(:),plevel(:)
-
-    b(:)=-1
-
-    ! coordinate system not implemented
-    if ( (nint(vcs) == VERTISUNDEF)        .or. &
-         (nint(vcs) == VERTISSURFACE)      .or. &
-         (nint(vcs) == VERTISSCALEHEIGHT) ) then
-      istatus=19
-      return
-    endif
-
-! TJH    write(*,*)'non_state_data%pfl min max ',minval(non_state_data%pfl),maxval(non_state_data%pfl)
-! TJH    write(*,*)' mean is ',sum(non_state_data%pfl)/(665.0_r8*657.0_r8*40.0_r8)
-
-    x1 = mod(hb(1,1),size(non_state_data%pfl,1))
-    x2 = mod(hb(2,1),size(non_state_data%pfl,1))
-    x3 = mod(hb(1,2),size(non_state_data%pfl,1))
-    x4 = mod(hb(2,2),size(non_state_data%pfl,1))
-    y1 =     hb(1,1)/size(non_state_data%pfl,1)
-    y2 =     hb(2,1)/size(non_state_data%pfl,1)
-    y3 =     hb(1,2)/size(non_state_data%pfl,1)
-    y4 =     hb(2,2)/size(non_state_data%pfl,1)
-
-! TJH    write(*,*)'hb is ',hb
-! TJH    write(*,*)'x  is ',x1,x2,x3,x4
-! TJH    write(*,*)'y  is ',y1,y2,y3,y4
-! TJH    write(*,*)'hw is ',hw
-
-    if (otype .ne. KIND_VERTICAL_VELOCITY) then
-      ! The variable exists on the 'full' levels
-      nlevel=non_state_data%nfl
-      allocate(klevel(1:nlevel))
-      allocate(hlevel(1:nlevel))
-      allocate(plevel(1:nlevel))
-      klevel=state_vector_vars(otype)%vertical_level(:)
-      hlevel=hw(1,1)*non_state_data%hfl(x1,y1,:)+&
-             hw(2,1)*non_state_data%hfl(x2,y2,:)+&
-             hw(1,2)*non_state_data%hfl(x3,y3,:)+&
-             hw(2,2)*non_state_data%hfl(x4,y4,:)
-      plevel=hw(1,1)*non_state_data%pfl(x1,y1,:)+&
-             hw(2,1)*non_state_data%pfl(x2,y2,:)+&
-             hw(1,2)*non_state_data%pfl(x3,y3,:)+&
-             hw(2,2)*non_state_data%pfl(x4,y4,:)
-
-! TJH write(*,*)non_state_data%pfl(x1,y1,:)
-! TJH write(*,*)non_state_data%pfl(x2,y2,:)
-! TJH write(*,*)non_state_data%pfl(x3,y3,:)
-! TJH write(*,*)non_state_data%pfl(x4,y4,:)
-
-    else
-      ! The variable exists on the 'half' levels
-      nlevel=non_state_data%nhl
-      allocate(klevel(1:nlevel))
-      allocate(hlevel(1:nlevel))
-      allocate(plevel(1:nlevel))
-      klevel=state_vector_vars(otype)%vertical_level(:)
-      hlevel=hw(1,1)*non_state_data%hhl(x1,y1,:)+&
-             hw(2,1)*non_state_data%hhl(x2,y2,:)+&
-             hw(1,2)*non_state_data%hhl(x3,y3,:)+&
-             hw(2,2)*non_state_data%hhl(x4,y4,:)
-      plevel=hw(1,1)*non_state_data%phl(x1,y1,:)+&
-             hw(2,1)*non_state_data%phl(x2,y2,:)+&
-             hw(1,2)*non_state_data%phl(x3,y3,:)+&
-             hw(2,2)*non_state_data%phl(x4,y4,:)
-    endif
-
-    u = -1.0_r8
-    l = -1.0_r8
-
-    do k=1,nlevel-1
-
-      ! Find the bounding levels for the respective coordinate system
-      if (nint(vcs) == VERTISLEVEL) then
-        u=klevel(k+1)
-        l=klevel(k)
-      endif
-      if (nint(vcs) == VERTISPRESSURE) then
-      ! write(*,*)' vert is pressure '
-      ! write(*,*)'plevel is ',plevel
-        u=plevel(k+1)
-        l=plevel(k)
-      endif
-      if (nint(vcs) == VERTISHEIGHT) then
-      ! write(*,*)' vert is height '
-      ! write(*,*)'hlevel is ',hlevel
-        u=hlevel(k+1)
-        l=hlevel(k)
-      endif
-
-! TJH write(*,*)'u p l',u,p,l
-
-      if (u>=p .and. l<=p) then
-        b(1)=k
-        b(2)=k+1
-        w(1)=1.0_r8-(p-l)/(u-l)
-        w(2)=1.0_r8-(u-p)/(u-l)
-        return
-      endif
-
-    enddo
-
-    istatus=16 ! out of domain
-    return
-  end subroutine get_vertical_boundaries
-
-
-!------------------------------------------------------------------------
-!>
-
-
-  function get_state_time() result (time)
-    type(time_type) :: time
-
-  call error_handler(E_ERR,'get_state_time','routine not written',source,revision,revdate)
-
-    if ( .not. module_initialized ) call static_init_model
-    time=cosmo_fc_time
-
-    return
-
-  end function get_state_time
+end function get_state_time
 
 
 !------------------------------------------------------------------------
@@ -1993,7 +1537,7 @@ end function get_cosmo_filename
     integer           :: ndays, nhours, nmins, nsecs
     type(time_type)   :: interval
 
-  call error_handler(E_ERR,'write_state_times','routine not written',source,revision,revdate)
+    call error_handler(E_ERR,'write_state_times','routine not written',source,revision,revdate)
 
     call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
     write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
@@ -2012,6 +1556,8 @@ end function get_cosmo_filename
 
     write(timestring, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
     write(iunit, "(A)") trim(timestring)
+
+    return
 
   end subroutine write_state_times
 
@@ -2210,6 +1756,8 @@ if (debug > 9 .and. do_output()) then
 
 endif
 
+return
+
 end subroutine get_cosmo_grid
 
 
@@ -2285,6 +1833,8 @@ select case (trim(varstring))
                  source, revision, revdate, text2=string3)
 
 end select
+
+return
 
 end subroutine get_1d_grid_var
 
@@ -2376,11 +1926,14 @@ select case (trim(varstring))
 
 end select
 
+return
 
 end subroutine get_2d_grid_var
 
+
 !------------------------------------------------------------------------
 !>
+
 
 subroutine get_vcoord(ncid, filename)
 integer,          intent(in) :: ncid
@@ -2488,7 +2041,6 @@ end subroutine get_vcoord
 
 
 !------------------------------------------------------------------------
-
 !>  This routine checks the user input against the variables available in the
 !>  input netcdf file to see if it is possible to construct the DART state vector
 !>  specified by the input.nml:model_nml:clm_variables  variable.
@@ -2502,6 +2054,7 @@ end subroutine get_vcoord
 !>     all variables will be updated INTERNALLY IN DART
 !>     'UPDATE'       => update the variable in the restart file
 !>     'NO_COPY_BACK' => do not copy the variable back to the restart file
+
 
 subroutine parse_variable_table( state_variables, ngood, table )
 
@@ -2654,6 +2207,8 @@ if (ngood == nrows) then
    write(string2,'(''WARNING: you have specified at least '',i4,'' perhaps more.'')')ngood
    call error_handler(E_MSG,'parse_variable_table',string1,text2=string2)
 endif
+
+return
 
 end subroutine parse_variable_table
 
@@ -2828,10 +2383,14 @@ if (.not. desired) then
    call error_handler(E_ERR,'read_binary_file', string1, source, revision, revdate)
 endif
 
+return
+
 end subroutine read_binary_file
+
 
 !------------------------------------------------------------------------
 !>
+
 
 subroutine determine_variable_order()
 
@@ -2858,8 +2417,10 @@ enddo
 
 end subroutine determine_variable_order
 
+
 !------------------------------------------------------------------------
-!>
+!> utility to report on the metadata for the composition of the DART state 
+
 
 subroutine progvar_summary
 
@@ -2924,8 +2485,10 @@ enddo
 
 end subroutine progvar_summary
 
+
 !------------------------------------------------------------------------
 !>
+
 
 subroutine decode_time(ipdsbuf, model_time)
 
@@ -3063,6 +2626,7 @@ end subroutine read_binary_header
 !------------------------------------------------------------------------
 !>
 
+
 subroutine decode_location(igdsbuf, nx, ny, lat1, lon1, latN, lonN)
 
 integer(i4), intent(in)  :: igdsbuf(:)
@@ -3166,6 +2730,8 @@ progvar(ivar)%varsize    = progvar(ivar)%numEW * &
                            progvar(ivar)%numNS * &
                            progvar(ivar)%numZ
 
+return
+
 end subroutine record_sizes
 
 
@@ -3200,6 +2766,8 @@ if (debug > 99 .and. do_output()) &
    write(*,*)'stuffing slab ',slabID,' into ',istart, iend
 
 statevector(istart:iend) = reshape(rbuf, (/ nx*ny /))
+
+return
 
 end subroutine insert_slab_in_state
 
@@ -3267,10 +2835,13 @@ if (debug > 99 .and. do_output()) then
 endif
 
 return
+
 end subroutine define_var_dims
+
 
 !------------------------------------------------------------------------
 !>
+
 
 function Find_Variable_by_index(myindx, msgstring)
 ! Given an index into the DART state vector, return the index of metadata
@@ -3300,13 +2871,12 @@ endif
 
 end function Find_Variable_by_index
 
-!------------------------------------------------------------------------
-!>
 
 
-
-!------------------------------------------------------------------------------
+!##############################################################################
+!> Both phi2phirot and rla2rlarot are part of the 
 !> COSMO utilities (5.21)
+!##############################################################################
 
 FUNCTION  phi2phirot ( phi, rla, polphi, pollam )
 
@@ -3433,9 +3003,14 @@ REAL (KIND=wp),     PARAMETER            ::    &
 
 END FUNCTION rla2rlarot
 
+!##############################################################################
+! Both phi2phirot and rla2rlarot are part of the 
+! COSMO utilities (5.21)
+!##############################################################################
 
 !------------------------------------------------------------------------
 !>
+
 
 subroutine get_corners(lon, lat, nx, ny, gridlons, gridlats,  &
                 ileft, iright, ifrac, jbot, jtop, jfrac, istatus)
@@ -3528,11 +3103,14 @@ if (debug > 5 .and. do_output()) then
    write(*,*)'lat south, lat, lat north',gridlats(jbot), lat,gridlats(jtop)
 endif
 
+return
+
 end subroutine get_corners
 
 
 !------------------------------------------------------------------------
 !>
+
 
 subroutine horizontal_interpolate(x, ivar, level_index, ileft, iright, ifrac, jbot, jtop, jfrac, &
                       layervalue, istatus) 
@@ -3580,6 +3158,8 @@ ifracrem = 1.0_r8 - ifrac
 layervalue =  jfracrem * ( ifracrem*x(lowerleft) + ifrac*x(lowerright) ) + &
               jfrac    * ( ifracrem*x(upperleft) + ifrac*x(upperright) )
 
+return
+
 end subroutine horizontal_interpolate
 
 
@@ -3608,12 +3188,12 @@ elseif (progvar(ivar)%numdims == 1) then
 
 endif
 
-
 end function
 
 
 !------------------------------------------------------------------------
 !>
+
 
 subroutine get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istatus)
 
@@ -3713,10 +3293,14 @@ endif
 
 istatus = 0
 
+return
+
 end subroutine get_level_indices
+
 
 !------------------------------------------------------------------------
 !>
+
 
 end module model_mod
 
