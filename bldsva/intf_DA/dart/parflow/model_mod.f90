@@ -1526,7 +1526,62 @@ end subroutine get_corners
 !> Get bottom and top model levels  for the observed location
 !> Adapted from cosmo interp routines
 
-subroutine get_level_indices(geo_hgt, kk_inds, kk_wgts, istatus)
+subroutine get_level_indices(height, kk_inds, kk_wgt, istatus)
+
+! The height for vcoord array is from bottom to top
+! vcoord (1) = bottom of the subsurface
+! vcoord (nz) = top of the subsurface
+
+!         bottom <--------------------------------------------| surface
+! layer     1 ... 10                                 11  ... nz 
+!                 | ............ dztot ............. |
+!                 | ... dz ... |
+!                 |------------|---------------------|
+!               ztop         height                 zbot
+!              iabove                              ibelow
+!              kk_inds(1)                          kk_inds(2) 
+
+
+real(r8), intent(in)  :: height
+integer,  intent(out) :: kk_inds(2) 
+real(r8), intent(out) :: kk_wgt 
+integer,  intent(out) :: istatus
+
+integer, parameter :: OUTSIDE_VERTICALLY   = 16
+
+integer :: indarr(1), i
+real(r8) :: dz, dztot
+
+! Variable definition complete
+if (height > vcoord(1) .or. height < vcoord(nz)) then
+  istatus = OUTSIDE_VERTICALLY
+  return
+endif
+
+if (height == vcoord(1)) then
+  kk_inds(1) = 1
+  kk_inds(2) = 2
+  kk_wgt     = 0._r8
+else
+  indarr  = minloc( vcoord,  vcoord >= height )
+  write(*,*) "CPS",vcoord
+  write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
+  kk_inds(1) = indarr(1)
+  kk_inds(2) = kk_inds(1) + 1
+  dz     = vcoord(kk_inds(1)) - height
+  dztot  = vcoord(kk_inds(1)) - vcoord(kk_inds(2))
+  kk_wgt = dz / dztot
+endif
+
+if (debug > 99 .and. do_output()) then
+  write(*,*)
+  write(*,*)'vertical levels for ParFlow '
+  write(*,*)'iabove, levelfrac, ibelow ', kk_inds(1), kk_wgt, kk_inds(2)
+  write(*,*)'iabove, height, ibelow ', vcoord(kk_inds(1)), height, vcoord(kk_inds(2))
+  write(*,*)
+endif
+
+istatus = 0
 
 end subroutine get_level_indices
 
