@@ -466,6 +466,7 @@ write(txtfilename,'(a,a)')trim(output_file),'_interptest.m'
 nlat  = nint(( interp_test_latrange(2) -  interp_test_latrange(1))/interp_test_dlat) + 1
 nlon  = nint(( interp_test_lonrange(2) -  interp_test_lonrange(1))/interp_test_dlon) + 1
 nvert = nint((interp_test_vertrange(2) - interp_test_vertrange(1))/interp_test_dvert) + 1
+nvert = 50
 
 iunit = open_file(trim(txtfilename), action='write')
 write(iunit,'(''missingvals = '',f12.4,'';'')')MISSING_R8
@@ -477,14 +478,28 @@ write(iunit,'(''interptest = [ ... '')')
 allocate(lon(nlon), lat(nlat), vert(nvert), field(nlon,nlat,nvert))
 nfailed = 0
 
+vert = (/ 21500.000000000000, 20514.285156250000, 19556.964843750000, 18627.679687500000, &
+          17726.070312500000, 16851.785156250000, 16004.464843750000, 15183.750000000000, &
+          14389.285156250000, 13620.714843750000, 12877.679687500000, 12159.818359375000, &
+          11466.783203125000, 10798.214843750000, 10153.750000000000, 9533.0351562500000, &
+          8935.7148437500000, 8361.4296875000000, 7809.8183593750000, 7280.5332031250000, &
+          6773.2148437500000, 6287.5000000000000, 5823.0332031250000, 5379.4628906250000, &
+          4956.4296875000000, 4553.5683593750000, 4170.5333251953125, 3806.9649658203125, &
+          3462.5000000000000, 3136.7850341796875, 2829.4650878906250, 2540.1800537109375, &
+          2268.5699462890625, 2014.2849121093750, 1776.9649658203125, 1556.2500000000000, &
+          1351.7849121093750, 1163.2148437500000, 990.17993164062500, 832.31994628906250, &
+          689.28491210937500, 560.71496582031250, 446.25000000000000, 345.53491210937500, &
+          258.21491241455078, 183.93000030517578, 122.31999969482422, 73.034996032714844, &
+          35.714996337890625, 10.000000000000000 /)
+
 do ilon = 1, nlon
    lon(ilon) = interp_test_lonrange(1) + real(ilon-1,r8) * interp_test_dlon
    write(*,*)'Interpolating lon row ',ilon,' of ',nlon
 
    do jlat = 1, nlat
       lat(jlat) = interp_test_latrange(1) + real(jlat-1,r8) * interp_test_dlat
-      do kvert = 1, nvert
-         vert(kvert) = interp_test_vertrange(1) + real(kvert-1,r8) * interp_test_dvert
+      do kvert = 1,nvert
+!        vert(kvert) = interp_test_vertrange(1) + real(kvert-1,r8) * interp_test_dvert
 
          loc = set_location(lon(ilon), lat(jlat), vert(kvert), vertcoord)
 

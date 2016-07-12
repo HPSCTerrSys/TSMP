@@ -32,8 +32,8 @@ use  assim_model_mod, only : open_restart_read, aread_state_restart, close_resta
 use time_manager_mod, only : time_type, print_time, print_date, operator(-), &
                              get_time, set_time
 
-use        model_mod, only : static_init_model, write_grib_file, get_model_size, &
-                             write_state_times
+use        model_mod, only : get_model_size, static_init_model, &
+                             write_cosmo_file, write_state_times
 
 implicit none
 
@@ -46,9 +46,9 @@ character(len=128), parameter :: revdate  = "$Date: none $"
 ! The namelist variables
 !------------------------------------------------------------------
 
-character(len=256) :: dart_output_file        = 'dart.ic'
-character(len=256) :: new_cosmo_analysis_file = 'out.grb'
-logical            :: advance_time_present    = .true.
+character(len=256) :: dart_output_file        = 'dart_posterior'
+character(len=256) :: new_cosmo_analysis_file = 'cosmo_restart'
+logical            :: advance_time_present    = .false.
 
 namelist /dart_to_cosmo_nml/ dart_output_file,        &
                              new_cosmo_analysis_file, &
@@ -100,12 +100,16 @@ endif
 call close_restart(iunit)
 
 !----------------------------------------------------------------------
-! update the current cosmo state vector
+! update the current cosmo state vector.
+! The original restart file comes from input.nml:model_nml:cosmo_restart_file
+! The DART posteriors come from the 'dart_output_file'.
+! The intersection of the two is written as the 'new_cosmo_analysis_file'
+!
 ! Convey the amount of time to integrate the model ...
 ! time_manager_nml: stop_option, stop_count increments
 !----------------------------------------------------------------------
 
-call write_grib_file(state_vector, new_cosmo_analysis_file)
+call write_cosmo_file(state_vector, dart_output_file, new_cosmo_analysis_file)
 
 if ( advance_time_present ) then
    iunit = open_file('times', action='write')
@@ -118,9 +122,9 @@ endif
 !----------------------------------------------------------------------
 
 call print_date( model_time,'dart_to_cosmo:cosmo model date')
-call print_time( model_time,'dart_to_cosmo:DART model time')
+call print_time( model_time,'dart_to_cosmo:DART  model time')
 call print_date( model_time,'dart_to_cosmo:cosmo model date',logfileunit)
-call print_time( model_time,'dart_to_cosmo:DART model time',logfileunit)
+call print_time( model_time,'dart_to_cosmo:DART  model time',logfileunit)
 
 if ( advance_time_present ) then
 call print_time(adv_to_time,'dart_to_cosmo:advance_to time')

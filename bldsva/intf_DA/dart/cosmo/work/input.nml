@@ -137,7 +137,7 @@
 
 
 &assim_model_nml
-   write_binary_restart_files = .true.
+   write_binary_restart_files = .false.
    netCDF_large_file_support  = .true.
   /
 
@@ -202,7 +202,7 @@
 &dart_to_cosmo_nml
    dart_output_file           = 'dart_posterior'
    advance_time_present       = .false.
-   new_cosmo_analysis_file    = 'out.grb'
+   new_cosmo_analysis_file    = 'cosmo_restart'
   /
 
 
@@ -348,7 +348,7 @@
    interp_test_latrange =  49.809, 49.996
    interp_test_lonrange =   5.434,  5.824
    interp_test_vertrange = 0.0, 21500.0
-   loc_of_interest = 5.498032093,  49.875408173,  20514.2852
+   loc_of_interest = 5.498032093,  49.875408173,  2000.0
    kind_of_interest      = 'KIND_U_WIND_COMPONENT'
    interp_test_vertcoord = 'VERTISHEIGHT'
    /

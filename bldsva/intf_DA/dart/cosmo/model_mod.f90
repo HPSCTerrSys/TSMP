@@ -18,11 +18,6 @@ use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time,&
                              operator(>),  operator(<), operator(/),           &
                              operator(/=), operator(<=)
 
-use   cosmo_data_mod, only : cosmo_meta, cosmo_hcoord, cosmo_non_state_data,   &
-                             get_cosmo_info, get_data_from_binary,             &
-                             set_vertical_coords, grib_header_type,            &
-                             model_dims, record_length
-
 use     location_mod, only : location_type, get_dist, query_location,          &
                              get_close_maxdist_init, get_close_type,           &
                              set_location, get_location, horiz_dist_only,      &
@@ -60,8 +55,6 @@ use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,       &
 use    random_seq_mod, only: random_seq_type, init_random_seq, random_gaussian
 
 use          sort_mod, only: index_sort
-
-use byte_mod, only: to_float1,from_float1,word_to_byte,byte_to_word_signed,concat_bytes1
 
 use netcdf
 
@@ -104,7 +97,7 @@ public :: get_model_size,         &
 
 public :: get_state_time,     &
           get_state_vector,   &
-          write_grib_file,    &
+          write_cosmo_file,    &
           get_cosmo_filename, &
           write_state_times
 
@@ -249,10 +242,6 @@ type(verticalobject), save :: vcoord  ! some compilers require save if initializ
 
 integer :: write_order(max_state_variables)
 
-integer, parameter             :: n_state_vector_vars=8
-integer, parameter             :: n_non_state_vars=1
-
-type(cosmo_meta),allocatable   :: cosmo_slabs(:)
 integer                        :: nslabs
 
 ! things which can/should be in the model_nml
@@ -275,30 +264,22 @@ namelist /model_nml/             &
    model_dt,                     &
    model_perturbation_amplitude, &
    output_1D_state_vector,       &
-   model_dims,                   &
-   record_length,                &
    debug,                        &
    variables
 
-integer                        :: model_size = 0
-type(time_type)                :: model_timestep ! smallest time to adv model
+integer         :: model_size = 0
+type(time_type) :: model_timestep ! smallest time to adv model
 
-integer, parameter             :: n_max_kinds=400
+integer, parameter       :: n_max_kinds=400
+type(dart_variable_info) :: state_vector_vars(1:n_max_kinds)
 
-type(dart_variable_info)       :: state_vector_vars(1:n_max_kinds)
-type(cosmo_non_state_data)     :: non_state_data
-
-real(r8),allocatable           :: state_vector(:)
-
-real(r8),allocatable           :: ens_mean(:)
+real(r8), allocatable :: ens_mean(:)
 
 type(random_seq_type) :: random_seq
 
 !> TODO ... do we need these
-type(time_type)                :: cosmo_fc_time
-type(time_type)                :: cosmo_an_time
-
-type(grib_header_type),allocatable  :: grib_header(:)
+type(time_type) :: cosmo_fc_time
+type(time_type) :: cosmo_an_time
 
 INTERFACE get_grid_var
       MODULE PROCEDURE get_1d_grid_var
@@ -446,7 +427,7 @@ endif
 if (progvar(ivar)%dart_kind == KIND_VERTICAL_VELOCITY) then
    vloc = vcoord%level1(kloc)
 else
-   vloc = (vcoord%level1(kloc) + vcoord%level1(kloc+1)) / 2.0_r8
+   vloc = vcoord%level(kloc)
 endif
 
 location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
@@ -704,8 +685,6 @@ end subroutine adv_1step
 
 subroutine end_model()
 
-deallocate(cosmo_slabs)
-deallocate(state_vector)
 deallocate(lon,lat,slonu,slatu,slonv,slatv)
 deallocate(vcoord%level1, vcoord%level) 
 deallocate(rlon,rlat,srlon,srlat)
@@ -1357,154 +1336,110 @@ end subroutine get_state_vector
 !>
 
 
-  subroutine write_grib_file(sv,nfile)
+subroutine write_cosmo_file(sv, dart_file, newfile)
 
-    real(r8),intent(in)           :: sv(:)
-    character(len=128),intent(in) :: nfile
+real(r8),         intent(in) :: sv(:)
+character(len=*), intent(in) :: dart_file
+character(len=*), intent(in) :: newfile
 
-    integer                       :: istat = 0
-    integer                       :: islab,ipos,lpos,bpos,griblen
-    integer                       :: mylen,hlen,ix,iy,nx,ny,idx
-    integer                       :: dval,ibsf,idsf
-    real(r8)                      :: bsf,dsf
-    integer(kind=1)               :: bin4(4)
-    integer(kind=1),allocatable   :: bytearr(:),tmparr(:)
-    real(r8),allocatable          :: mydata(:,:)
-    real(r8)                      :: ref_value
-    integer                       :: gribunitin, gribunitout,irec
-    integer                       :: recpos(nslabs+1),bytpos(nslabs+1),myrlen,myblen
+integer :: istat = 0
+integer :: index1,indexN
+integer :: iunit_in, iunit_out, irec
 
-    logical                       :: write_from_sv = .false.
+logical :: desired = .false.
 
-  call error_handler(E_ERR,'write_grib_file','routine not written',source,revision,revdate)
-    if ( .not. module_initialized ) call static_init_model
+!> @TODO some of these code segments are also present in read_binary_file - consolidate
 
-    mylen=0
+! Table to decode the record contents of ipdsbuf
+!> @TODO no seconds?
+integer, parameter :: indx_gribver   =   2, &
+                      indx_var       =   7, &
+                      indx_zlevtyp   =   8, &
+                      indx_zlevtop   =   9, &
+                      indx_zlevbot   =  10
 
-    ! read information on record and byte positions in GRIB file
-    myrlen=(grib_header(2)%start_record-grib_header(1)%start_record)
-    myblen=(grib_header(2)%start_record-grib_header(1)%start_record)*4+grib_header(2)%data_offset
-    DO islab=1,nslabs
-       recpos(islab)=grib_header(islab)%start_record
-       bytpos(islab)=(grib_header(islab)%start_record-1)*4+1+grib_header(islab)%data_offset+4
-    enddo
-    recpos(nslabs+1)=recpos(nslabs)+myrlen
-    bytpos(nslabs+1)=bytpos(nslabs)+myblen
+integer, parameter :: NPDS  = 321 ! dimension of product definition section
+integer, parameter :: NGDS  = 626 ! dimension of grid description section
 
-    ! generate byte_array to write
-    ALLOCATE(bytearr(1:bytpos(nslabs+1)+100))
-    bytearr(:)=0
+type(time_type) :: slab_time
 
-    ! read all data from the input GRIB file
-    gribunitin  = get_unit()
-    OPEN(gribunitin,FILE=TRIM(cosmo_restart_file),FORM='UNFORMATTED',ACCESS='DIRECT',RECL=record_length)
-    irec=1
-    lpos=1
+integer(i4) :: ipdsbuf(NPDS)     ! pds: product definition section
+integer(i4) :: igdsbuf(NGDS)     ! gds: grid definition section
+real(r8)    :: rbuf(nrlon*nrlat) ! data to be read
 
-    do while (istat==0)
-      read(gribunitin,rec=irec,iostat=istat) bin4
-      irec=irec+1
-      lpos=lpos+4
-      bytearr(lpos:lpos+3)=bin4
-    enddo
-    griblen=lpos-1
+integer :: izerr      ! error status
+integer :: iz_countl  ! read counter for binary data
+integer :: ivar       ! variable reference number based on iver
+integer :: iver       ! version number of GRIB1 indicator table
+integer :: ilevtyp    ! type of vertical coordinate system
+integer :: ilev
+integer :: ilevp1
 
-    call close_file(gribunitin)
+if ( .not. module_initialized ) call static_init_model
 
-    ipos=bytpos(1)
+write(string1,*)'..  The (untouched) input cosmos restart file is "'//trim(cosmo_restart_file)//'"'
+write(string2,*)    'The DART posterior file is "'//trim(dart_file)//'"'
+write(string3,*)    'The new (posterior) cosmos restart file is "'//trim(newfile)//'"'
+call error_handler(E_MSG, 'write_cosmo_file', string1, &
+           source, revision, revdate, text2=string2, text3=string3)
 
-    if ( debug > 0 .and. do_output() ) write(*,*)'number of slabs is ',nslabs
+! The idea is to read the original input file and check to see if the record data needs
+! to be replaced with the DART posterior or not. We can use the progvar(ivar)%slab1, etc.
+! information to do this.
 
-    do islab=1,nslabs
+! prepare all data from the input binary file
+iunit_in  = open_file(cosmo_restart_file, form='unformatted', action='read')
+iunit_out = open_file(newfile,            form='unformatted', action='write')
 
-      if ( debug > 0 .and. do_output() ) write(*,'(A8,A,I4,A,I4,A,I12)')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", byte position is ",ipos
+call copy_binary_header(iunit_in, iunit_out)
 
-      nx=cosmo_slabs(islab)%dims(1)
-      ny=cosmo_slabs(islab)%dims(2)
+irec  = 1
+istat = 0
 
-      idx=cosmo_slabs(islab)%dart_sindex
+iz_countl = 0        ! keep track of the 'slab index'
+desired   = .false.  ! presume we do not want this slab
 
-      ! check if variable is in state vector
+COPY_LOOP: do
 
-      write_from_sv = .false.
-      if (idx >= 0) write_from_sv = .true.
+   read(iunit_in, iostat=izerr) ipdsbuf, igdsbuf, rbuf   ! read a 'slab'
+   if (izerr < 0) then
+      exit COPY_LOOP
+   elseif (izerr > 0) then
+      write(string1,*) 'reading input cosmos file around data record ',iz_countl
+      call error_handler(E_ERR,'write_cosmo_file', string1, source, revision, revdate)
+   endif
 
-      if (write_from_sv) then
+   iz_countl = iz_countl + 1
 
-        ! if variable is in state vector
+   call get_dart_indices(iz_countl, index1, indexN, desired)
 
-        if ( debug > 0 .and. do_output() ) write(*,*)'         ... data is written to GRIB file from state vector'
+   if (desired) then
 
-        if ( debug > 0 .and. do_output() ) write(*,'(A8,A,I4,A,I4,A,2(1x,I12))')cosmo_slabs(islab)%varname_short," is GRIB record ",islab," of ",nslabs,", i1/i2 are ",idx,(idx+nx*ny-1)
+   ! do something stellar here
 
-        allocate(mydata(1:nx,1:ny))
-        mydata(:,:)=reshape(sv(idx:(idx+nx*ny-1)),(/ nx,ny /))
-
-        if (cosmo_slabs(islab)%dart_kind==KIND_PRESSURE_PERTURBATION) then
-          mydata(:,:)=mydata(:,:)-non_state_data%p0fl(:,:,cosmo_slabs(islab)%ilevel)
-        endif
-
-        ref_value=minval(mydata)
-        bin4(1:4)=from_float1(ref_value,cosmo_slabs(islab)%ref_value_char)
-
-        hlen=size(grib_header(islab)%pds)+size(grib_header(islab)%gds)
-
-        ! offset to binary data section in GRIB data, 8 because of indicator section
-        bpos=ipos+hlen+8
-
-        ! set new reference value in GRIB data
-        bytearr(bpos+6:bpos+9)=bin4
-
-        ! get the binary scale factor
-        CALL byte_to_word_signed(bytearr(bpos+4:bpos+5),ibsf,2)
-        bsf=FLOAT(ibsf)
-
-        ! get the decimal scale factor
-        CALL byte_to_word_signed(grib_header(islab)%pds(27:28),idsf,2)
-        dsf=FLOAT(idsf)
-
-        ! allocate a temporal array to save the binary data values
-        allocate(tmparr((nx*ny*2)))
-        lpos=1
-        DO iy=1,ny
-        DO ix=1,nx
-          dval=int((mydata(ix,iy)-ref_value)*((10.**dsf)/(2.**bsf)))
-          tmparr(lpos:lpos+1)=word_to_byte(dval)
-          lpos=lpos+2
-        enddo
-        enddo
-
-        deallocate(mydata)
-
-        ! overwrite the old with new data
-        bytearr(bpos+11:(bpos+nx*ny*2))=tmparr(1:(nx*ny*2))
-
-        deallocate(tmparr)
-
-        ipos=bytpos(islab+1)
-
-      else
-
-        if ( debug > 0 .and. do_output() ) write(*,*)'         ... data is copied from old grib file'
-
-        ! if variable is not in state vector then skip this slab
-
-        ipos=bytpos(islab+1)
-
+   else
+      write(iunit_out, iostat=izerr) ipdsbuf, igdsbuf, rbuf   ! write a 'slab'
+      if (izerr /= 0) then
+         write(string1,*) 'writing posterior cosmos file around data record ',iz_countl
+         call error_handler(E_ERR,'write_cosmo_file', string1, source, revision, revdate)
       endif
+   endif 
 
-    enddo
+enddo COPY_LOOP
 
-    ! write the new GRIB file
-    gribunitout = get_unit()
-    OPEN(gribunitout,FILE=TRIM(nfile),FORM='UNFORMATTED',ACCESS='stream')
-    WRITE(gribunitout) bytearr(5:griblen)
+call close_file(iunit_in)
+call close_file(iunit_out)
 
-    call close_file(gribunitout)
 
-    return
+if ( debug > 0 .and. do_output() ) then ! more checking to come
+   write(*,*)'number of slabs is ',iz_countl
+endif
 
-  end subroutine write_grib_file
+call error_handler(E_ERR,'write_cosmo_file','routine not written',source,revision,revdate)
+
+return
+
+end subroutine write_cosmo_file
 
 
 !------------------------------------------------------------------------
@@ -1981,6 +1916,8 @@ call nc_check(io, 'get_vcoord', 'get_var '//trim(string3))
 do i = 1,nlevel
    vcoord%level(i) = (vcoord%level1(i) + vcoord%level1(i+1))/2.0_r8
 enddo
+
+write(*,*)'debug vcoord%level ',vcoord%level
 
 io = nf90_get_att(ncid, VarID, 'long_name', vcoord%long_name)
 call nc_check(io, 'get_vcoord', 'get_att long_name '//trim(string3))
@@ -2629,6 +2566,23 @@ end subroutine read_binary_header
 !>
 
 
+subroutine copy_binary_header(fid1,fid2)
+!>@ maybe we can just give read_binary_header an optional argument of the fid2
+!> and just have it do the copy there ...
+integer, intent(in) :: fid1
+integer, intent(in) :: fid2
+
+call error_handler(E_ERR,'copy_binary_header','routine not written',source,revision,revdate)
+
+return
+
+end subroutine copy_binary_header
+
+
+!------------------------------------------------------------------------
+!>
+
+
 subroutine decode_location(igdsbuf, nx, ny, lat1, lon1, latN, lonN)
 
 integer(i4), intent(in)  :: igdsbuf(:)
@@ -2874,7 +2828,7 @@ endif
 end function Find_Variable_by_index
 
 
-
+!>@ TODO FIXME put these in a separate module to indicate they came from COSMO
 !##############################################################################
 !> Both phi2phirot and rla2rlarot are part of the 
 !> COSMO utilities (5.21)
@@ -3220,6 +3174,12 @@ subroutine get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istat
 !                 |------------|---------------------|
 !               22000        height                21000
 !               iabove                             ibelow
+!
+! A note about the use of the minloc() function. I struggled with the logic
+! on this one and could not get maxloc() to work despite the fact I thought
+! it was the right choice. Using minloc() _worked_ despite the fact I thought
+! it was the wrong choice. Perhaps the fact that the array is descending
+! rather than ascending made it invert the logic. TJH
 
 real(r8), intent(in)  :: height
 integer,  intent(in)  :: dart_kind
@@ -3245,7 +3205,7 @@ if ( dart_kind == KIND_VERTICAL_VELOCITY ) then
       ibelow = 2
       levelfrac = 0.0
    else
-      indarr  = maxloc( vcoord%level1,  vcoord%level1 >= height )
+      indarr = minloc( vcoord%level1,  vcoord%level1 >= height )
       iabove = indarr(1)
       ibelow = iabove - 1
       dz     = vcoord%level1(iabove) - height
@@ -3260,25 +3220,25 @@ else
       return
    endif
 
+!>@ TODO FIXME check the logic of ibelow ... when it was 'iabove - 1',
+!   I thought it was doing the right thing ... however, when given the exact
+!   height of layer(50), it tried to generate ibelow of level 51, which does not exist.
+!   I also changed the vcoord%level >= height to a strictly > ... mistake?
+
    if (height == vcoord%level(1)) then
       iabove = 1
       ibelow = 2
       levelfrac = 0.0
+!     write(*,*)
+!     write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
+!     write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
    else
-
-!     DO NOT UNDERSTAND WHY THE MAXLOC IS NOT WORKING
-!     indarr  = maxloc( vcoord%level,  vcoord%level >= height )
-
-      VERT : do i = 1,vcoord%nlevel
- ! DEBUG   write(*,*)'vcoord',i,vcoord%level(i),vcoord%level(i) >= height
-         if (vcoord%level(i) < height) then
-            indarr(1) = i-1
-            exit VERT
-         endif
-      enddo VERT
-
+      indarr = minloc( vcoord%level,  vcoord%level > height )
       iabove = indarr(1)
       ibelow = iabove + 1
+!     write(*,*)
+!     write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
+!     write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
       dz     = vcoord%level(iabove) - height
       dztot  = vcoord%level(iabove) - vcoord%level(ibelow)
       levelfrac = dz / dztot
@@ -3298,6 +3258,25 @@ istatus = 0
 return
 
 end subroutine get_level_indices
+
+
+!------------------------------------------------------------------------
+!>
+
+
+subroutine get_dart_indices(slab_index, index1, indexN, desired)
+integer, intent(in)  :: slab_index
+integer, intent(out) :: index1
+integer, intent(out) :: indexN
+logical, intent(out) :: desired
+
+desired = .false.
+
+call error_handler(E_ERR,'get_dart_indices','routine not written',source,revision,revdate)
+
+return
+
+end subroutine get_dart_indices
 
 
 !------------------------------------------------------------------------
