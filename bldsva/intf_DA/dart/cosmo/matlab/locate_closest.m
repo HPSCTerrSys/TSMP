@@ -15,10 +15,27 @@ rlat   = cosmogrid(:,9);
 index1 = 601;
 indexN = 1200;
 
-plot(ulon(index1:indexN),ulat(index1:indexN),'o')
+figure(1); orient landscape
+
+title('geographic grid for U stagger')
+plot(ulon(index1:indexN),ulat(index1:indexN),'x')
 
 for i = 601:1200
-   text(ulon(i),ulat(i),sprintf('%d',i));
+   h = text(ulon(i),ulat(i),sprintf('%d',i));
+   set(h,'HorizontalAlignment','center','VerticalAlignment','bottom')
 end
 
+grid
+
+figure(2); orient landscape
+
+title('rotated grid for U stagger')
+plot(rlon(index1:indexN),rlat(index1:indexN),'x')
+
+for i = 601:1200
+   h = text(rlon(i),rlat(i),sprintf('%d',i));
+   set(h,'HorizontalAlignment','center','VerticalAlignment','bottom')
+end
+
+grid
 
