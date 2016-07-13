@@ -263,6 +263,12 @@ else
    write(*,*)'model_interpolate ERROR: model_interpolate failed with error code ',ios_out
 endif
 
+!----------------------------------------------------------------------
+! Exhaustive test of model_interpolate.
+!----------------------------------------------------------------------
+
+if (test1thru < 9 ) goto 999
+
 write(*,*)
 write(*,*)'Rigorous test of model_interpolate ...'
 
@@ -277,7 +283,7 @@ write(*,*)'Rigorous test : had ', ios_out, ' interpolation failures.'
 
 200 continue
 
-if (test1thru < 9) goto 999
+if (test1thru < 10) goto 999
 
 cosmo_input_file = get_cosmo_filename()
 
@@ -297,7 +303,7 @@ call close_restart(iunit)
 ! Reads the valid time, the state, and (possibly) a target time.
 !----------------------------------------------------------------------
 
-if (test1thru < 10) goto 999
+if (test1thru < 11) goto 999
 
 write(*,*)
 write(*,*)'Reading '//trim(output_file)

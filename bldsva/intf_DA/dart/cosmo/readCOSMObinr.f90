@@ -67,7 +67,7 @@ INTEGER (KIND=intgribf),  PARAMETER ::  &
 INTEGER (KIND=iintegers), PARAMETER ::  &
               idim  = 30, &           ! dimesion of longitude
               jdim  = 20, &           ! dimension of latitutde
-              kdim  = 50              ! dimension of vertical co-ordinate
+              kdim  = 249              ! dimension of vertical co-ordinate
 
 INTEGER (KIND=iintegers) ::  &
               nudat,      &           ! unit number
@@ -137,6 +137,8 @@ IF (izerr /= 0) then
    STOP
 endif
 
+write(*,*)'first record had ', psm0, dsem0, msem0, kem0, qcm0, ntke
+
 READ (nudat,IOSTAT=izerr) izvctype_read, refatm_p0sl,   refatm_t0sl,   &
                                 refatm_dt0lp, vcoord_vcflat, zvc_params
 IF (izerr /= 0) then
@@ -144,13 +146,18 @@ IF (izerr /= 0) then
    STOP
 endif
 
+write(*,*)'second record had', izvctype_read, refatm_p0sl,   refatm_t0sl,   &
+                                refatm_dt0lp, vcoord_vcflat, zvc_params
+
 IF     ( (izvctype_read >   0) .AND. (izvctype_read <= 100) ) THEN
   PRINT*, "izvctype_read = ", izvctype_read 
 ELSEIF ( (izvctype_read > 100) .AND. (izvctype_read <= 200) ) THEN
   READ (nudat,IOSTAT=izerr) refatm_delta_t, refatm_h_scal
+  write(*,*)'aux record was ',refatm_delta_t, refatm_h_scal
   IF (izerr /= 0) STOP 
 ELSEIF ( (izvctype_read > 200) .AND. (izvctype_read <= 300) ) THEN
   READ (nudat,IOSTAT=izerr) refatm_bvref
+  write(*,*)'aux record was ', refatm_bvref
   IF (izerr /= 0) STOP 
 ELSEIF ( izvctype_read > 300 ) THEN
   write(*,*)'ERROR: izvctype_read is ',izvctype_read,' which is greater than max expected (300)'
@@ -161,7 +168,7 @@ ENDIF
 !Section 3: READ ALL RECORDS
 !------------------------------------------------------------------------------
 
-iz_countl = 1 
+iz_countl = 0 
 
 read_loop: DO
 

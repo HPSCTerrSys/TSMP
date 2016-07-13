@@ -340,7 +340,7 @@
    output_file          = 'check_me'
    advance_time_present = .FALSE.
    verbose              = .FALSE.
-   test1thru            =  10
+   test1thru            =  8
    x_ind                = 816
    interp_test_dlon     = 0.001
    interp_test_dlat     = 0.001
@@ -348,7 +348,7 @@
    interp_test_latrange =  49.809, 49.996
    interp_test_lonrange =   5.434,  5.824
    interp_test_vertrange = 0.0, 21500.0
-   loc_of_interest = 5.498032093,  49.875408173,  2000.0
+   loc_of_interest = 5.498032093,  49.875408173,  21253.57128906250
    kind_of_interest      = 'KIND_U_WIND_COMPONENT'
    interp_test_vertcoord = 'VERTISHEIGHT'
    /

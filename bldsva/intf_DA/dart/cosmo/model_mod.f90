@@ -233,15 +233,6 @@ end type verticalobject
 
 type(verticalobject), save :: vcoord  ! some compilers require save if initializing a structure
 
-! track which variables to update
-! As the binary file gets read, we need to compare the 'slab' to see if
-! it is a slab we want to update.
-!>@ TODO FIXME after we populate progvar, write_order needs
-!> to be populated with the order to stride through progvar to
-!> write to the output file.
-
-integer :: write_order(max_state_variables)
-
 ! things which can/should be in the model_nml
 
 character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
@@ -345,11 +336,9 @@ do ivar = 1,nfields
     call read_binary_file(ivar)
 enddo
 
-! calculate how we store what we have in the DART state vector and fill
-! an array that will tell us the storage order of the variables in the
-! binary file so we parsimoniously stride through them for the write.
+! calculate how we store what we have in the DART state vector
 
-call determine_variable_order()
+call set_variable_layout()
 
 if (debug > 5 .and. do_output()) call progvar_summary()
 
@@ -588,11 +577,13 @@ if (debug > 99 .and. do_output()) then
    
    interp_val = value_below*levelfrac + value_above*(1.0_r8 - levelfrac)
    
-   write(*,*)'level above, level, level below ',vcoord%level(iabove), height, vcoord%level(ibelow)
-   write(*,*)'    distances ',vcoord%level(iabove) - height,  height - vcoord%level(ibelow)
-   write(*,*)'    fractions ',levelfrac, 1.0_r8 - levelfrac
-   write(*,*)'    values above, below ',value_above, value_below
+   write(*,*)
+   write(*,*)' level above, level, level below ',vcoord%level(iabove), height, vcoord%level(ibelow)
+   write(*,*)' distances   ',vcoord%level(iabove) - height,  height - vcoord%level(ibelow)
+   write(*,*)' fractions   ',levelfrac, 1.0_r8 - levelfrac
+   write(*,*)' layervalues ',value_above, value_below
    write(*,*)' final interpolated value is ',interp_val
+   write(*,*)
 endif
 
 interp_val = value_below*levelfrac + value_above*(1.0_r8 - levelfrac)
@@ -2292,24 +2283,13 @@ end subroutine read_binary_file
 
 
 !------------------------------------------------------------------------
-!>
+!> determine where to unwrap each of the variables into a DART 1D vector
 
 
-subroutine determine_variable_order()
+subroutine set_variable_layout()
 
 integer :: ivar
 
-call index_sort(progvar(1:nfields)%slab1, write_order(1:nfields), nfields)
-
-if (debug > 99 .and. do_output()) then
-   do ivar = 1,nfields
-      write(*,*)'variable ',write_order(ivar), ' starts at slab ', &
-                    progvar(write_order(ivar))%slab1, &
-               trim(progvar(write_order(ivar))%varname)
-   enddo
-endif
-
-! also determine where to unwrap each of the variables into a DART 1D vector
 model_size = 0
 
 do ivar = 1,nfields
@@ -2318,7 +2298,7 @@ do ivar = 1,nfields
    model_size = progvar(ivar)%indexN
 enddo
 
-end subroutine determine_variable_order
+end subroutine set_variable_layout
 
 
 !------------------------------------------------------------------------
@@ -3147,9 +3127,12 @@ subroutine get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istat
 ! The heights in the vcoord array are from the top of the atmosphere down.
 ! vcoord%level1(   1   ) = top of atmosphere
 ! vcoord%level1(nlevel1) = bottom level of model, earth surface
+! Only W is staggered to use all nlevel1 dimensions.
+! All other variables use the level midpoints, stored in vcoord%level
+!
 !
 !         space <--------------------------------------------| surface
-! layer     0 ... 10                                 11  ... 51
+! layer     0 ... 10                                 11 .... 51
 !                 | ............ dztot ............. |
 !                 | ... dz ... |
 !                 |------------|---------------------|
@@ -3158,10 +3141,10 @@ subroutine get_level_indices(height, dart_kind, ibelow, iabove, levelfrac, istat
 !              big numbers                      small numbers
 
 !         space <--------------------------------------------| surface
-! layer     0 ... 1                                  2   ... 51
+! layer     0 ... 1                                  2 ..... 51
 !                 | ............ dztot ............. |
 !                 | ... dz ... |
-!                 |------------|---------------------|
+!                 |------------|---------------------| ...... 0
 !               22000        height                21000
 !               iabove                             ibelow
 !
@@ -3190,14 +3173,14 @@ if ( dart_kind == KIND_VERTICAL_VELOCITY ) then
       return
    endif
 
-   if (height == vcoord%level1(1)) then
-      iabove = 1
-      ibelow = 2
-      levelfrac = 0.0
+   if (height == vcoord%level1(nlevel1)) then
+      iabove = nlevel1
+      ibelow = nlevel1
+      levelfrac = 1.0_r8
    else
       indarr = minloc( vcoord%level1,  vcoord%level1 >= height )
       iabove = indarr(1)
-      ibelow = iabove - 1
+      ibelow = iabove + 1
       dz     = vcoord%level1(iabove) - height
       dztot  = vcoord%level1(iabove) - vcoord%level1(ibelow)
       levelfrac = dz / dztot
@@ -3210,25 +3193,14 @@ else
       return
    endif
 
-!>@ TODO FIXME check the logic of ibelow ... when it was 'iabove - 1',
-!   I thought it was doing the right thing ... however, when given the exact
-!   height of layer(50), it tried to generate ibelow of level 51, which does not exist.
-!   I also changed the vcoord%level >= height to a strictly > ... mistake?
-
-   if (height == vcoord%level(1)) then
-      iabove = 1
-      ibelow = 2
-      levelfrac = 0.0
-!     write(*,*)
-!     write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
-!     write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
+   if (height == vcoord%level(nlevel)) then
+      iabove = nlevel
+      ibelow = nlevel
+      levelfrac = 1.0_r8
    else
-      indarr = minloc( vcoord%level,  vcoord%level > height )
+      indarr = minloc( vcoord%level,  vcoord%level >= height )
       iabove = indarr(1)
       ibelow = iabove + 1
-!     write(*,*)
-!     write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
-!     write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
       dz     = vcoord%level(iabove) - height
       dztot  = vcoord%level(iabove) - vcoord%level(ibelow)
       levelfrac = dz / dztot
@@ -3237,8 +3209,8 @@ else
    if (debug > 99 .and. do_output()) then
       write(*,*)
       write(*,*)'computine vertical levels for DART kind ',dart_kind
-      write(*,*)'ibelow, levelfrac, iabove ', ibelow, levelfrac, iabove
-      write(*,*)'below, height, above ', vcoord%level(ibelow), height, vcoord%level(iabove)
+      write(*,*)'iabove, levelfrac, ibelow ', iabove, levelfrac, ibelow
+      write(*,*)'above, height, below ', vcoord%level(iabove), height, vcoord%level(ibelow)
       write(*,*)
    endif
 endif
