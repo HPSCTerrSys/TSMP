@@ -92,9 +92,6 @@ public :: get_model_size,         &
 ! generally useful routines for various support purposes.
 ! the interfaces here can be changed as appropriate.
 
-!  public  :: grib_to_sv
-!  public  :: sv_to_grib
-
 public :: get_state_time,     &
           get_state_vector,   &
           write_cosmo_file,    &
@@ -136,6 +133,9 @@ integer, parameter :: VT_KINDINDX        = 4 ! ... DART kind
 integer, parameter :: VT_MINVALINDX      = 5 ! ... minimum value if any
 integer, parameter :: VT_MAXVALINDX      = 6 ! ... maximum value if any
 integer, parameter :: VT_STATEINDX       = 7 ! ... update (state) or not
+
+integer, parameter :: NPDS  = 321 ! dimension of product definition section
+integer, parameter :: NGDS  = 626 ! dimension of grid description section
 
 ! Everything needed to describe a variable
 !>@ TODO FIXME remove the unused netcdf bits ... we're working with binary only
@@ -241,8 +241,6 @@ type(verticalobject), save :: vcoord  ! some compilers require save if initializ
 !> write to the output file.
 
 integer :: write_order(max_state_variables)
-
-integer                        :: nslabs
 
 ! things which can/should be in the model_nml
 
@@ -1338,42 +1336,20 @@ end subroutine get_state_vector
 
 subroutine write_cosmo_file(sv, dart_file, newfile)
 
-real(r8),         intent(in) :: sv(:)
-character(len=*), intent(in) :: dart_file
-character(len=*), intent(in) :: newfile
-
-integer :: istat = 0
-integer :: index1,indexN
-integer :: iunit_in, iunit_out, irec
-
-logical :: desired = .false.
-
-!> @TODO some of these code segments are also present in read_binary_file - consolidate
-
-! Table to decode the record contents of ipdsbuf
-!> @TODO no seconds?
-integer, parameter :: indx_gribver   =   2, &
-                      indx_var       =   7, &
-                      indx_zlevtyp   =   8, &
-                      indx_zlevtop   =   9, &
-                      indx_zlevbot   =  10
-
-integer, parameter :: NPDS  = 321 ! dimension of product definition section
-integer, parameter :: NGDS  = 626 ! dimension of grid description section
-
-type(time_type) :: slab_time
+real(r8),         intent(in) :: sv(:)      ! the DART posterior
+character(len=*), intent(in) :: dart_file  ! where the posterior came from
+character(len=*), intent(in) :: newfile    ! the name of the new cosmo restart
 
 integer(i4) :: ipdsbuf(NPDS)     ! pds: product definition section
 integer(i4) :: igdsbuf(NGDS)     ! gds: grid definition section
 real(r8)    :: rbuf(nrlon*nrlat) ! data to be read
 
+logical :: desired = .false.
+integer :: index1, indexN
+integer :: iunit_in, iunit_out
+
 integer :: izerr      ! error status
 integer :: iz_countl  ! read counter for binary data
-integer :: ivar       ! variable reference number based on iver
-integer :: iver       ! version number of GRIB1 indicator table
-integer :: ilevtyp    ! type of vertical coordinate system
-integer :: ilev
-integer :: ilevp1
 
 if ( .not. module_initialized ) call static_init_model
 
@@ -1391,10 +1367,11 @@ call error_handler(E_MSG, 'write_cosmo_file', string1, &
 iunit_in  = open_file(cosmo_restart_file, form='unformatted', action='read')
 iunit_out = open_file(newfile,            form='unformatted', action='write')
 
-call copy_binary_header(iunit_in, iunit_out)
+! Can call rw_binary_header with ivar = 1 just to get past the header.
+! With the third argument, whatever is read in the first file will
+! be written to the output file.
 
-irec  = 1
-istat = 0
+call rw_binary_header(iunit_in, 1, iunit_out)
 
 iz_countl = 0        ! keep track of the 'slab index'
 desired   = .false.  ! presume we do not want this slab
@@ -1413,29 +1390,18 @@ COPY_LOOP: do
 
    call get_dart_indices(iz_countl, index1, indexN, desired)
 
-   if (desired) then
+   if (desired) rbuf = sv(index1:indexN)
 
-   ! do something stellar here
-
-   else
-      write(iunit_out, iostat=izerr) ipdsbuf, igdsbuf, rbuf   ! write a 'slab'
-      if (izerr /= 0) then
-         write(string1,*) 'writing posterior cosmos file around data record ',iz_countl
-         call error_handler(E_ERR,'write_cosmo_file', string1, source, revision, revdate)
-      endif
-   endif 
+   write(iunit_out, iostat=izerr) ipdsbuf, igdsbuf, rbuf   ! write a 'slab'
+   if (izerr /= 0) then
+      write(string1,*) 'writing posterior cosmos file around data record ',iz_countl
+      call error_handler(E_ERR,'write_cosmo_file', string1, source, revision, revdate)
+   endif
 
 enddo COPY_LOOP
 
 call close_file(iunit_in)
 call close_file(iunit_out)
-
-
-if ( debug > 0 .and. do_output() ) then ! more checking to come
-   write(*,*)'number of slabs is ',iz_countl
-endif
-
-call error_handler(E_ERR,'write_cosmo_file','routine not written',source,revision,revdate)
 
 return
 
@@ -1661,7 +1627,7 @@ call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_longitude get_att '//trim(f
 call nc_check(nf90_close(ncid),'get_cosmo_grid','close "'//trim(filename)//'"' )
 
 ! this should only be done once, if at all
-if (debug > 9 .and. do_output()) then
+if (debug > 99 .and. do_output()) then
 
    iunit = open_file('exhaustive_grid_table.txt',form='formatted')
    write(iunit,'(''This is for the U grid only.'')')
@@ -1917,7 +1883,8 @@ do i = 1,nlevel
    vcoord%level(i) = (vcoord%level1(i) + vcoord%level1(i+1))/2.0_r8
 enddo
 
-write(*,*)'debug vcoord%level ',vcoord%level
+! write(*,*)'debug vcoord%level1 ',vcoord%level1
+! write(*,*)'debug vcoord%level ',vcoord%level
 
 io = nf90_get_att(ncid, VarID, 'long_name', vcoord%long_name)
 call nc_check(io, 'get_vcoord', 'get_att long_name '//trim(string3))
@@ -2174,9 +2141,6 @@ integer, parameter :: indx_gribver   =   2, &
                       indx_zlevtop   =   9, &
                       indx_zlevbot   =  10
 
-integer, parameter :: NPDS  = 321 ! dimension of product definition section
-integer, parameter :: NGDS  = 626 ! dimension of grid description section
-
 type(time_type) :: slab_time
 
 integer(i4) :: ipdsbuf(NPDS)     ! pds: product definition section
@@ -2221,7 +2185,7 @@ if (debug > 99 .and. do_output()) then
    call error_handler(E_MSG,'read_binary_file', string1, source, revision, revdate)
 endif
 
-call read_binary_header(fid, dartid)
+call rw_binary_header(fid, dartid)
 
 !------------------------------------------------------------------------------
 !Section 3: READ ALL RECORDS
@@ -2491,13 +2455,16 @@ end subroutine decode_time
 !>
 
 
-subroutine read_binary_header(fid, ivar)
+subroutine rw_binary_header(rfid, ivar, wfid)
 
 ! some of these might be useful, but not at the moment.
 ! just need to skip the header to get to the records.
 
-integer, intent(in) :: fid
-integer, intent(in) :: ivar
+integer,           intent(in) :: rfid    ! The file handle to read from
+integer,           intent(in) :: ivar
+integer, optional, intent(in) :: wfid    ! the file handle to write to
+
+integer, parameter :: KHMAX = 250
 
 real(r8)    :: psm0                ! initial value for mean surface pressure ps
 real(r8)    :: dsem0               ! initial value for mean dry static energy
@@ -2511,7 +2478,7 @@ real(r8)    :: refatm_p0sl         ! constant reference pressure on sea-level
 real(r8)    :: refatm_t0sl         ! constant reference temperature on sea-level
 real(r8)    :: refatm_dt0lp        ! d (t0) / d (ln p0)
 real(r8)    :: vcoord_vcflat       ! coordinate where levels become flat
-real(r8)    :: zvc_params(nlevel1) ! height levels
+real(r8)    :: zvc_params(KHMAX)   ! height levels
 
 real(r8) :: refatm_delta_t ! temperature difference between sea level and stratosphere (for irefatm=2)
 real(r8) :: refatm_h_scal  ! scale height (for irefatm=2)
@@ -2519,64 +2486,87 @@ real(r8) :: refatm_bvref   ! constant Brund-Vaisala-frequency for irefatm=3
 
 integer :: izerr
 
-read(fid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
+! first record
+read(rfid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
+
 if (izerr /= 0) then
    write(string1,*)'unable to read first record while searching for '//trim(progvar(ivar)%varname)
-   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+   call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate)
 endif
 
-read(fid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
+if (present(wfid)) then
+   write(wfid, iostat=izerr) psm0, dsem0, msem0, kem0, qcm0, ntke
+
+   if (izerr /= 0) then
+      write(string1,*)'unable to write first record while searching for '//trim(progvar(ivar)%varname)
+      call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate)
+   endif
+endif
+
+! second record
+read(rfid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
                         refatm_dt0lp, vcoord_vcflat, zvc_params
 if (izerr /= 0) then
    write(string1,*)'unable to read second record while searching for '//trim(progvar(ivar)%varname)
-   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+   call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate)
 endif
 
+if (present(wfid)) then
+   write(wfid, iostat=izerr) izvctype_read, refatm_p0sl, refatm_t0sl,   &
+                           refatm_dt0lp, vcoord_vcflat, zvc_params
+   if (izerr /= 0) then
+      write(string1,*)'unable to write second record while searching for '//trim(progvar(ivar)%varname)
+      call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate)
+   endif
+endif
+
+! auxiliary record
 if     ( izvctype_read > 0 .and. izvctype_read <= 100 ) then
    !write(*,*) "izvctype_read = ", izvctype_read
    continue
 
 elseif ( (izvctype_read > 100) .and. (izvctype_read <= 200) ) then
 
-   read(fid, iostat=izerr) refatm_delta_t, refatm_h_scal
+   read(rfid, iostat=izerr) refatm_delta_t, refatm_h_scal
    if (izerr /= 0) then
       write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_delta_t, refatm_h_scal"'
       write(string2,*)'unable to read record while searching for '//trim(progvar(ivar)%varname)
-      call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate, text2=string2)
+      call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate, text2=string2)
+   endif
+
+   if (present(wfid)) then
+      write(wfid, iostat=izerr) refatm_delta_t, refatm_h_scal
+      if (izerr /= 0) then
+         write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to write "refatm_delta_t, refatm_h_scal"'
+         write(string2,*)'unable to write record while searching for '//trim(progvar(ivar)%varname)
+         call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate, text2=string2)
+      endif
    endif
 
 elseif ( (izvctype_read > 200) .and. (izvctype_read <= 300) ) then
 
-   read(fid, iostat=izerr) refatm_bvref
+   read(rfid, iostat=izerr) refatm_bvref
    if (izerr /= 0) then
       write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to read "refatm_bvref"'
       write(string2,*)'unable to read record while searching for '//trim(progvar(ivar)%varname)
-      call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate, text2=string2)
+      call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate, text2=string2)
+   endif
+
+   if (present(wfid)) then
+      write(wfid, iostat=izerr) refatm_bvref
+      if (izerr /= 0) then
+         write(string1,*)'izvctype_read is ',izvctype_read, 'requiring us to write "refatm_bvref"'
+         write(string2,*)'unable to write record while searching for '//trim(progvar(ivar)%varname)
+         call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate, text2=string2)
+      endif
    endif
 
 else
    write(string1,*) 'izvctype_read is ',izvctype_read,' is unsupported.'
-   call error_handler(E_ERR,'read_binary_header', string1, source, revision, revdate)
+   call error_handler(E_ERR,'rw_binary_header', string1, source, revision, revdate)
 endif
 
-end subroutine read_binary_header
-
-
-!------------------------------------------------------------------------
-!>
-
-
-subroutine copy_binary_header(fid1,fid2)
-!>@ maybe we can just give read_binary_header an optional argument of the fid2
-!> and just have it do the copy there ...
-integer, intent(in) :: fid1
-integer, intent(in) :: fid2
-
-call error_handler(E_ERR,'copy_binary_header','routine not written',source,revision,revdate)
-
-return
-
-end subroutine copy_binary_header
+end subroutine rw_binary_header
 
 
 !------------------------------------------------------------------------
@@ -3190,7 +3180,7 @@ integer,  intent(out) :: istatus
 
 integer, parameter :: OUTSIDE_VERTICALLY   = 16
 
-integer :: indarr(1), i
+integer :: indarr(1)
 real(r8) :: dz, dztot
 
 if ( dart_kind == KIND_VERTICAL_VELOCITY ) then
@@ -3270,9 +3260,25 @@ integer, intent(out) :: index1
 integer, intent(out) :: indexN
 logical, intent(out) :: desired
 
-desired = .false.
+integer :: ivar, kindex
 
-call error_handler(E_ERR,'get_dart_indices','routine not written',source,revision,revdate)
+desired = .false.
+index1  = -1
+indexN  = -1
+
+IndexLoop : do ivar = 1,nfields
+
+   if ( slab_index < progvar(ivar)%slab1 .or. slab_index > progvar(ivar)%slabN ) cycle IndexLoop
+
+   desired = .true.
+   kindex  = slab_index - progvar(ivar)%slab1 + 1
+
+   index1  = progvar(ivar)%index1 + (kindex -1) * progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2)
+   indexN  =               index1 +               progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2) - 1
+
+!  write(*,*)'slab ',slab_index,' is level ',kindex,' of variable ',ivar,' index1,N are ',index1, indexN
+
+enddo IndexLoop
 
 return
 
