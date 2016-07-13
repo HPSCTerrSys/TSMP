@@ -54,8 +54,6 @@ use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,       &
 
 use    random_seq_mod, only: random_seq_type, init_random_seq, random_gaussian
 
-use          sort_mod, only: index_sort
-
 use netcdf
 
 implicit none
@@ -322,6 +320,8 @@ if (do_nml_term()) write(     *     , nml=model_nml)
 
 call set_calendar_type('Gregorian')
 
+model_timestep = set_time(assimilation_period_seconds, assimilation_period_days)
+
 ! Get the dimensions of the grid and the grid variables from the netCDF file.
 call get_cosmo_grid(cosmo_netcdf_file)
 
@@ -340,7 +340,7 @@ enddo
 
 call set_variable_layout()
 
-if (debug > 5 .and. do_output()) call progvar_summary()
+if (debug > 2 .and. do_output()) call progvar_summary()
 
 ! ens_mean_for_model, that sort of thing
 
@@ -438,11 +438,8 @@ function get_model_time_step()
 
 type(time_type) :: get_model_time_step
 
-call error_handler(E_ERR,'get_model_time_step','routine not written',source,revision,revdate)
-
 if ( .not. module_initialized ) call static_init_model
 
-model_timestep      = set_time(model_dt)
 get_model_time_step = model_timestep
 
 return
