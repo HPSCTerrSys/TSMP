@@ -6,32 +6,18 @@
 #
 # DART $Id: assimilate.csh 7195 2014-10-03 17:01:29Z thoar $
 
-#-------------------------------------------------------------------------
-# Block 1, 
-# Setup the terrsysmp version, reference setup to use, and ensemble numbers
-# and the machine to use
-#-------------------------------------------------------------------------
-set tsmpver       = "1.2.0MCT"
-set refsetup      = "idealRTD"
-set ensemble_size =  16
-set machine       = "CLUMA2"
-set tsmpdir       = $HOME/terrsysmp/bldsva
-echo "`date` -- BEGIN terrsysmp assimilation with dart"
-
-cd $tsmpdir
-./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -N $ensemble_size
-exit 0
-#set nonomatch       # suppress "rm" warnings if wildcard does not match anything
-
+set ensemble_size = 2 
 
 #-------------------------------------------------------------------------
 # Determine time of model state ... from file name of first member
 # of the form "./${CASE}.clm2_${ensemble_member}.r.2000-01-06-00000.nc"
-#
+# ./clmoas.clm2.r.2008-05-08-10818.nc 
 # Piping stuff through 'bc' strips off any preceeding zeros.
 #-------------------------------------------------------------------------
+set rundir = "/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart01/tsmp_instance_0"
+cd $rundir
 
-set FILE = `head -n 1 rpointer.lnd_0001`
+set FILE = `head -n 1 lnd.clmoas.rpointer`
 set FILE = $FILE:r
 set LND_DATE_EXT = `echo $FILE:e`
 set LND_DATE     = `echo $FILE:e | sed -e "s#-# #g"`
@@ -44,6 +30,7 @@ set LND_HOUR     = `echo $LND_DATE[4] / 3600 | bc`
 echo "valid time of model is $LND_YEAR $LND_MONTH $LND_DAY $LND_SECONDS (seconds)"
 echo "valid time of model is $LND_YEAR $LND_MONTH $LND_DAY $LND_HOUR (hours)"
 
+exit 0
 #-------------------------------------------------------------------------
 # Create temporary working directory for the assimilation and go there
 #-------------------------------------------------------------------------
