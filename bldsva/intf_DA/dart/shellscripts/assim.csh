@@ -1,3 +1,16 @@
+#echo "`date` -- Start initial run"
+#qsub tsmp_pbs_run.ksh
+#while (1)
+#  if (-f "ready.txt") then
+#    echo "`date` -- END initial run"
+#    echo " "
+#    break
+#  else
+#    echo "Job is running..."
+#    sleep 10 
+#  endif
+#end
+
 ./quickbuild.csh -mpi
 rm input.nml.*
 #
