@@ -10,8 +10,20 @@
 
 export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart01"
 export DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
-cd /home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart01
 
+# Grab the date/time of the cosmo state so we know which 
+# observation sequence file to use.
+
+datestring=`grep clmext ../tsmp_instance_0/cosmo_prior_time.txt`
+obstime=$datestring[2]
+
+echo "I think the observation file we need is obs_seq.$obstime"
+
+exit
+
+cd $LOGNAME
+
+# Cleanup---------------
 rm filter_ics.*
 rm P*Diag.nc
 rm filter_res*
@@ -20,14 +32,19 @@ rm obs_seq.out
 rm log_file
 rm err_file
 
+# Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
 cp $DART_DIR/filter .
 cp $DART_DIR/dart_to_cosmo .
 cp $DART_DIR/cosmo_to_dart .
 cp $DART_DIR/obs_seq.perfect obs_seq.out
 
-
+#COSMO asimilation--------------------
+#TODO
+cosrbin="lrff01000000o"
+coshist="lfff01000000.nc" 
 numInst=16
+#TODO
 
 for instance in {0..$(($numInst-1))}
 do
@@ -38,8 +55,8 @@ do
   rm cosmo_prior
 
   ln -s ../input.nml .
-  ln -s cosrst/lrff01000000o cosmo_prior
-  ln -s cosout/lfff01000000.nc cosmo.nc
+  ln -s cosrst/$cosrbin cosmo_prior
+  ln -s cosout/$coshist cosmo.nc
   ../cosmo_to_dart || exit 1
   dartinstance=$(( $instance + 1 ))
   filterName=`printf ../filter_ics.%04d $dartinstance`

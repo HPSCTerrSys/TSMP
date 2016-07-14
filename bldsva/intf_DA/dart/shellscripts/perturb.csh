@@ -1,5 +1,6 @@
 #!/bin/csh
 #
+# Usage: ./perturb.csh rundir ensemble_szie
 #-------------------------------------------------------------------------
 # Block 2, 
 # Create perturbation for the ensemble runs 

@@ -1,5 +1,7 @@
 #!/bin/csh
 
+# usage: ./archive_hist.csh $rundir $ensemble_size
+#
 echo "-------------------------------------------------------------------"
 echo "Block 6: History files will be archived in the "$HOME" directory"
 echo "-------------------------------------------------------------------"
@@ -52,4 +54,4 @@ foreach instance (`seq 0 $numInst`)
   endif
   echo "Processed output " $dir
 end
-
+exit 0
