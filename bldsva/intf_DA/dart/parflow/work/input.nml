@@ -116,7 +116,8 @@
    /
 
 &model_nml
-   parflow_file                  = '../data/rurlaf.out.press.00003.pfb'
+   parflow_press_file            = '../data/rurlaf.out.press.00003.pfb'
+   parflow_satur_file            = '../data/rurlaf.out.satur.00003.pfb' 
    pfidb_file                    = '../data/pfidb_dz'
    grid_file                     = '../data/grids.nc'
    output_1D_state_vector        = .false.

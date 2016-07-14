@@ -7,11 +7,13 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set ensemble_size = 2 
+set ensemble_size = 16 
 set machine       = "CLUMA2"
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
+set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
+
 echo " "
 echo "`date` -- BEGIN terrsysmp assimilation with dart"
 echo " "
@@ -34,47 +36,9 @@ cd $tsmpdir/bldsva
 set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
 set rundir        = $tsmpdir"/run/"$temp_dir
 
-#-------------------------------------------------------------------------
-# Block 2, 
-# Create perturbation for the ensemble runs 
-#-------------------------------------------------------------------------
-echo "-------------------------------------------------------------------"
-echo "Block 2: Perturbing the parameters of clm and cosmo ...."
-echo "-------------------------------------------------------------------"
-echo " "
 #
-cd $rundir
-
-set numInst = `echo "($ensemble_size - 1)" | bc`
-
-foreach instance (`seq 0 $numInst`)
- echo " "
- echo "tsmp_instance_"$instance
- echo " "
- #parflow
- cd tsmp_instance_$instance
- cp /daten01/z4/database/ParFlow/idealRTD/rur_ic_press_Sv06.pfb ./rur_ic_press.pfb
- tclsh ascii2pfb.tcl
- cd ..
-
- #clm
- cd tsmp_instance_$instance
- cp /daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 ./pft-physiology_$instance
- set leafcn = `echo "(40.-$instance*2.)" | bc` 
-
- echo "TODO, I ADD DECIMAL HERE >>>"
- echo " "
- sed "s,0.00000 25.0 0.100,0.00000 $leafcn.0 0.100," -i  pft-physiology_$instance
- sed "s,fpftcon        = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207',fpftcon        = './pft-physiology_$instance'," -i lnd.stdin
- cd ..
- 
- #cosmo
- set turlength = `echo "(400.-$instance*20.)" | bc`
- cd tsmp_instance_$instance
- sed "s,tur_len=150,tur_len=$turlength," -i lmrun_uc 
- ./lmrun_uc execluma
- cd .. 
-end
+# Perturb
+$shellpath/perturb.csh $rundir $ensemble_size
 
 #-------------------------------------------------------------------------
 # Block 3, 
@@ -85,20 +49,20 @@ echo "Block 3: Integrating terrsysmp"
 echo "-------------------------------------------------------------------"
 echo " "
 #
-cd $rundir
+#cd $rundir
 
-echo "`date` -- Start initial run"
-qsub tsmp_pbs_run.ksh
-while (1)
-  if (-f "ready.txt") then
-    echo "`date` -- END initial run"
-    echo " "
-    break
-  else
-    echo "Job is running..."
-    sleep 10 
-  endif
-end
+#echo "`date` -- Start initial run"
+#qsub tsmp_pbs_run.ksh
+#while (1)
+#  if (-f "ready.txt") then
+#    echo "`date` -- END initial run"
+#    echo " "
+#    break
+#  else
+#    echo "Job is running..."
+#    sleep 10 
+#  endif
+#end
 
 #-------------------------------------------------------------------------
 # Block 4, 
@@ -111,7 +75,7 @@ echo "-------------------------------------------------------------------"
 echo " "
 
 #-------------------------------------------------------------------------
-# Block 4, 
+# Block 5, 
 # Restart runs 
 #-------------------------------------------------------------------------
 
@@ -122,14 +86,14 @@ echo " "
 #
 #TODO
 set defaultStartDate = "2008-05-08 00"
-set defaultInitDate  = "2008-05-08 03"
+set defaultInitDate  = "2008-05-09 00"
 set sdate = "dart02"
 
 #Use the last rundir
 #TODO
-set clmrstfil = "$rundir/tsmp_instance_X/clmoas.clm2.r.2008-05-08-10800.nc"
-set cosrstfil = "$rundir/tsmp_instance_X/cosrst/lrff00030000o"
-set pflrstfil = "$rundir/tsmp_instance_X/rurlaf.out.press.00003.pfb"
+set clmrstfil = "$rundir/tsmp_instance_X/clmoas.clm2.r.2008-05-09-00000.nc"
+set cosrstfil = "$rundir/tsmp_instance_X/cosrst/lrff01000000o"
+set pflrstfil = "$rundir/tsmp_instance_X/rurlaf.out.press.00024.pfb"
 
 cd $tsmpdir/bldsva
 
@@ -142,7 +106,7 @@ echo " "
 #
 #CPS
 set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
-set cosmo_rfile    = "lrff00030000o"   #TODO 
+set cosmo_rfile    = "lrff01000000o"   #TODO 
 #
 cd $tsmpdir"/run/"$temp_dir/
 #
@@ -160,19 +124,23 @@ end
 
 #Update run dir
 set rundir = $tsmpdir"/run/"$temp_dir
-cd $rundir
-echo "`date` -- Start restart run"
-qsub tsmp_pbs_run.ksh
-while (1)
-  if (-f "ready.txt") then
-    echo "`date` -- END restart run"
-    echo " "
-    break
-  else
-    echo "Job is running..."
-    sleep 10
-  endif
-end
+
+# Perturb
+$shellpath/perturb.csh $rundir $ensemble_size
+#cd $rundir
+#echo "`date` -- Start restart run"
+#qsub tsmp_pbs_run.ksh
+#while (1)
+#  if (-f "ready.txt") then
+#    echo "`date` -- END restart run"
+#    echo " "
+#    break
+#  else
+#    echo "Job is running..."
+#    sleep 10
+#  endif
+#end
+
 
 exit 0
 #-------------------------------------------------------------------------
@@ -183,6 +151,8 @@ echo "-------------------------------------------------------------------"
 echo "Block 6: History files will be archived in the "$HOME" directory"
 echo "-------------------------------------------------------------------"
 echo " "
+set numInst = `echo "($ensemble_size - 1)" | bc`
+
 foreach instance (`seq 0 $numInst`)
   set dir = tsmp_instance_$instance
   if ( -d ./$dir ) then

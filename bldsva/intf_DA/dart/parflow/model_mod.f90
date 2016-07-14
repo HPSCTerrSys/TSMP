@@ -118,7 +118,8 @@ real(r8), allocatable ::   vcoord(:)     ! vertical co-ordinate in m
 type(time_type)       ::   parflow_time  ! parflow ouptut time
 
 ! EXAMPLE: perhaps a namelist here 
-character(len=256) :: parflow_file                 = 'parflow_file'
+character(len=256) :: parflow_press_file           = 'parflow_press_file'
+character(len=256) :: parflow_satur_file           = 'parflow_satur_file'
 character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
 logical            :: output_1D_state_vector       = .false.
@@ -127,7 +128,8 @@ integer            :: assimilation_period_seconds  = 21400
 integer            :: debug = 0 
 
 namelist /model_nml/                &
-      parflow_file,                 &
+      parflow_press_file,           &
+      parflow_satur_file,           &
       pfidb_file,                   &
       grid_file,                    &
       output_1D_state_vector,       &
@@ -176,7 +178,7 @@ if (do_nml_term()) write(     *     , nml=model_nml)
 call set_calendar_type('Gregorian')
 
 ! Get the dimensions of the grid and the grid variables from the netCDF file.
-call pfread_dim(parflow_file)
+call pfread_dim(parflow_press_file)
 
 if (debug > 0 .and. do_output()) write(*,*) '   ... pfb dimensions are ' , nx, ny, nz
 if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid resoluion are ', dx, dy, dz
@@ -947,7 +949,7 @@ if ( .not. module_initialized ) call static_init_model
 
 allocate(pfbdata(nx,ny,nz))
 
-call pfread_var(parflow_file,pfbdata) 
+call pfread_var(parflow_press_file,pfbdata) 
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
@@ -988,7 +990,7 @@ character(len=256) :: get_parflow_filename
 
 if ( .not. module_initialized ) call static_init_model
 
-get_parflow_filename = trim(parflow_file)
+get_parflow_filename = trim(parflow_press_file)
 
 end function get_parflow_filename
 
