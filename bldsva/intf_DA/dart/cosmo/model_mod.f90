@@ -253,6 +253,7 @@ namelist /model_nml/             &
 
 integer         :: model_size = 0
 type(time_type) :: model_timestep ! smallest time to adv model
+type(time_type) :: start_date     ! start date of the experiment (according to the netCDF file)
 
 !>@TODO remove the need for state_vector_vars and n_max_kinds
 integer, parameter       :: n_max_kinds=400
@@ -1586,6 +1587,8 @@ call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_latitude get_att '//trim(fi
 
 io = nf90_get_att(ncid, VarID, 'grid_north_pole_longitude', north_pole_longitude)
 call nc_check(io, 'get_cosmo_grid', 'grid_north_pole_longitude get_att '//trim(filename))
+
+start_date = get_start_time(ncid)
 
 ! close up
 
@@ -3271,6 +3274,50 @@ end function apply_clamping
 !------------------------------------------------------------------------
 !>
 
+function get_start_time(ncid) result(start_time)
+integer, intent(in) :: ncid
+type(time_type)     :: start_time
+
+character(len=NF90_MAX_NAME) :: attvalue
+integer :: io, VarID
+integer :: iyear, imonth, iday, ihour, imin, isec
+
+io = nf90_inq_varid(ncid, 'time', VarID)
+call nc_check(io, 'get_start_time', 'inq_varid time')
+io = nf90_get_att(ncid, VarID, 'units', attvalue)
+call nc_check(io, 'get_start_time', 'time get_att units')
+
+! time:units = "seconds since 2004-01-01 00:00:00" ;
+!               12345678901234
+
+if (attvalue(1:13) /= 'seconds since') then
+   write(string1,*)'expecting time units of [seconds since ... ]'
+   write(string2,*)'read time units of ['//trim(attvalue)//']'
+   call error_handler(E_ERR, 'get_start_time', string1, &
+          source, revision, revdate, text2=string2)
+endif
+
+read(attvalue,'(14x,i4,5(1x,i2))',iostat=io)iyear,imonth,iday,ihour,imin,isec
+if (io /= 0) then
+   write(string1,*)'Unable to parse time units. Error status was ',io
+   write(string2,*)'expected "seconds since YYYY-MM-DD HH:MM:SS"'
+   write(string3,*)'was      "'//trim(attvalue)//'"'
+   call error_handler(E_ERR, 'get_start_time', string1, &
+          source, revision, revdate, text2=string2, text3=string3)
+endif
+
+start_time = set_date(iyear, imonth, iday, ihour, imin, isec)
+
+if (debug > 0 .and. do_output()) then
+   call print_date(start_time,'cosmo start date was ')
+   call print_time(start_time,'cosmo start time was ')
+endif
+
+end function get_start_time
+
+
+!------------------------------------------------------------------------
+!>
 
 end module model_mod
 
