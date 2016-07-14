@@ -652,8 +652,9 @@ if (do_output()) then
     call print_time(time,'NULL interface adv_1step (no advance) DART time is',logfileunit)
 endif
 
-write(string1,*) 'Cannot advance COSMO with a subroutine call; async cannot equal 0'
-call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
+write(string1,*) 'This version of COSMO/DART does not provide the capability to advance COSMO.'
+write(string2,*) 'Apparently the model time and the time of the observations are not consistent.'
+call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate, text2=string2)
 
 return
 
@@ -1404,19 +1405,19 @@ integer,                   intent(in) :: iunit
 type(time_type),           intent(in) :: statetime
 type(time_type), optional, intent(in) :: advancetime
 
-character(len=32) :: timestring
 integer           :: iyear, imonth, iday, ihour, imin, isec
 integer           :: ndays, nhours, nmins, nsecs
 type(time_type)   :: interval
 
 call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
-write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
-write(iunit, "(A)") trim(timestring)
+nsecs = (ihour*60 + imin)*60 + isec
+write(iunit, '(I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+
+write(iunit, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
 
 if (present(advancetime)) then
    call get_date(advancetime, iyear, imonth, iday, ihour, imin, isec)
-   write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
-   write(iunit, "(A)") trim(timestring)
+   write(iunit, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
 
    interval = advancetime - statetime
    call get_time(interval, nsecs, ndays)
@@ -1425,8 +1426,7 @@ if (present(advancetime)) then
    nmins  = nsecs / 60
    nsecs  = nsecs - (nmins * 60)
 
-   write(timestring, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
-   write(iunit, "(A)") trim(timestring)
+   write(iunit, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
 endif
 
 return

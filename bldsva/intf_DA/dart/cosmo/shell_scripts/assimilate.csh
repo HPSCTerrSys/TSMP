@@ -6,6 +6,77 @@
 #
 # DART $Id: assimilate.csh 7195 2014-10-03 17:01:29Z thoar $
 
+# This block is an attempt to localize all the machine-specific
+# changes to this script such that the same script can be used
+# on multiple platforms. This will help us maintain the script.
+
+echo "`date` -- BEGIN CLM_ASSIMILATE"
+
+set nonomatch       # suppress "rm" warnings if wildcard does not match anything
+
+# The FORCE options are not optional.
+# The VERBOSE options are useful for debugging though
+# some systems don't like the -v option to any of the following
+switch ("`hostname`")
+   case be*:
+      # NCAR "bluefire"
+      set   MOVE = '/usr/local/bin/mv -fv'
+      set   COPY = '/usr/local/bin/cp -fv --preserve=timestamps'
+      set   LINK = '/usr/local/bin/ln -fvs'
+      set REMOVE = '/usr/local/bin/rm -fr'
+
+      set BASEOBSDIR = /glade/proj3/image/Observations/FluxTower
+      set  LAUNCHCMD = mpirun.lsf
+   breaksw
+
+   case ys*:
+      # NCAR "yellowstone"
+      set   MOVE = 'mv -fv'
+      set   COPY = 'cp -fv --preserve=timestamps'
+      set   LINK = 'ln -fvs'
+      set REMOVE = 'rm -fr'
+      set TASKS_PER_NODE = `echo $LSB_SUB_RES_REQ | sed -ne '/ptile/s#.*\[ptile=\([0-9][0-9]*\)]#\1#p'`
+      setenv MP_DEBUG_NOTIMEOUT yes
+
+      set BASEOBSDIR = /glade/p/image/Observations/land
+      set  LAUNCHCMD = mpirun.lsf
+   breaksw
+
+   case lone*:
+      # UT lonestar
+      set   MOVE = '/bin/mv -fv'
+      set   COPY = '/bin/cp -fv --preserve=timestamps'
+      set   LINK = '/bin/ln -fvs'
+      set REMOVE = '/bin/rm -fr'
+
+      set BASEOBSDIR = ${WORK}/DART/observations/snow/work/obs_seqs
+      set  LAUNCHCMD = mpirun.lsf
+   breaksw
+
+   case la*:
+      # LBNL "lawrencium"
+      set   MOVE = 'mv -fv'
+      set   COPY = 'cp -fv --preserve=timestamps'
+      set   LINK = 'ln -fvs'
+      set REMOVE = 'rm -fr'
+      set TASKS_PER_NODE = $MAX_TASKS_PER_NODE
+
+      set BASEOBSDIR = /your/observation/directory/here
+      set  LAUNCHCMD = "mpiexec -n $NTASKS"
+   breaksw
+
+   default:
+      # NERSC "hopper"
+      set   MOVE = 'mv -fv'
+      set   COPY = 'cp -fv --preserve=timestamps'
+      set   LINK = 'ln -fvs'
+      set REMOVE = 'rm -fr'
+
+      set BASEOBSDIR = /scratch/scratchdirs/nscollin/ACARS
+      set  LAUNCHCMD = "aprun -n $NTASKS"
+   breaksw
+endsw
+
 #-------------------------------------------------------------------------
 # Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
@@ -21,8 +92,10 @@ echo "`date` -- BEGIN terrsysmp assimilation with dart"
 cd $tsmpdir
 ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -N $ensemble_size
 exit 0
+
 #set nonomatch       # suppress "rm" warnings if wildcard does not match anything
 
+set ensemble_size = ${NINST_LND}
 
 #-------------------------------------------------------------------------
 # Determine time of model state ... from file name of first member

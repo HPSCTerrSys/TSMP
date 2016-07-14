@@ -25,10 +25,11 @@ use        types_mod, only : r8
 
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read, &
-                             E_MSG, E_ERR, error_handler
+                             open_file, E_MSG, E_ERR, error_handler
 
 use        model_mod, only : get_model_size, get_state_vector, &
-                             get_cosmo_filename, static_init_model
+                             get_cosmo_filename, static_init_model, &
+                             write_state_times
 
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 
@@ -97,9 +98,8 @@ call close_restart(iunit)
 
 deallocate(x)
 
-!----------------------------------------------------------------------
-! When called with 'end', timestamp will call finalize_utilities()
-!----------------------------------------------------------------------
+iunit = open_file('cosmo_prior_time.txt',form='formatted')
+call write_state_times(iunit, model_time)
 
 call print_date(model_time, str='cosmo_to_dart:cosmo model date')
 call print_time(model_time, str='cosmo_to_dart:DART  model time')
