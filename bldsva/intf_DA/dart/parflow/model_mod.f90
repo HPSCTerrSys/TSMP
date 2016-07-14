@@ -101,6 +101,7 @@ type progvartype
    integer  :: numEW
    integer  :: numNS
    integer  :: numZ
+   integer  :: index1      ! location in dart state vector of first occurrence
    integer  :: varsize     ! prod(dimlens(1:numdims))
    integer  :: rangeRestricted
    integer  :: pfb_kind
@@ -214,6 +215,7 @@ progvar(ivar)%dimlens(1)      = nx
 progvar(ivar)%dimlens(2)      = ny
 progvar(ivar)%dimlens(3)      = nz
 progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !Need pedotransfer function 
+progvar(ivar)%index1          = 1
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -350,6 +352,7 @@ integer  :: geo_inds(4), hgt_inds(2)
 real(r8) :: geo_wgts(4), hgt_wgt
 real(r8) :: point_coords(1:3)
 real(r8) :: geo_lon, geo_lat, geo_hgt
+real(r8) :: interp_h_var(2)
 
 ! Variable Definition Complete
 
@@ -390,6 +393,10 @@ if (istatus /= 0) return
 call get_level_indices(geo_hgt, hgt_inds, hgt_wgt, istatus)
 
 if (istatus /= 0) return
+
+! Horizontal interpolation at two levels given by hgt_inds
+call horizontal_interpolate(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
+
 
 call error_handler(E_ERR,'model_interpolate','routine not tested',source, revision,revdate)
 ! This should be the result of the interpolation of a
@@ -1435,6 +1442,80 @@ dimnames(ndims) = 'time'
 
 return
 end subroutine define_var_dims
+
+!------------------------------------------------------------------------
+!> Horizontal interpolation at two height indices
+
+subroutine horizontal_interpolate(x, ivar, kk_inds, ij_inds, ij_wgts, interp_val, istatus)
+
+real(r8), intent(in)  :: x(:)
+integer,  intent(in)  :: ivar
+integer,  intent(in)  :: kk_inds(2)
+integer,  intent(in)  :: ij_inds(4)     ! ileft, iright, jbot, jtop
+real(r8), intent(in)  :: ij_wgts(2)     ! ifrac, jfrac
+real(r8), intent(out) :: interp_val(2)  ! at two height levels 
+integer,  intent(out) :: istatus
+
+integer  :: k, ll, lr, ur, ul
+real(r8) :: ij_rwgts(2)
+
+! Location of dart_indices
+ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
+lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
+ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
+ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
+
+! Interpolate
+ij_rwgts(1) = 1.0_r8 - ij_wgts(1)  !ifrac
+ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
+
+do k = 1, 2 
+
+ interp_val(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
+                 ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
+
+end do
+
+if (debug > 99 .and. do_output()) then
+   write(*,*)
+   write(*,*)' ileft, jbot, level_index decompose to ', ll, x( ll), ij_rwgts(1)  
+   write(*,*)'iright, jbot, level_index decompose to ',lr, x(lr), ij_wgts(1)
+   write(*,*)'iright, jtop, level_index decompose to ',ur, x(ur), ij_rwgts(2)  
+   write(*,*)' ileft, jtop, level_index decompose to ', ul, x( ul),ij_rwgts(2) 
+   write(*,*)' horizontal value is ', kk_inds(1), interp_val(1)
+   write(*,*)' horizontal value is ', kk_inds(2), interp_val(2)
+endif
+
+return
+
+end subroutine horizontal_interpolate
+
+!------------------------------------------------------------------------
+!>  Adapted from COSMO
+
+function ijk_to_dart(ivar, i, j, k) result(dartindex)
+
+integer, intent(in) :: ivar
+integer, intent(in) :: i
+integer, intent(in) :: j
+integer, intent(in) :: k
+integer             :: dartindex
+
+if (progvar(ivar)%numdims == 3) then
+   dartindex = progvar(ivar)%index1 + (i-1) + &
+               (j-1) * (progvar(ivar)%dimlens(1)) + &
+               (k-1) * (progvar(ivar)%dimlens(1) * progvar(ivar)%dimlens(2))
+
+elseif (progvar(ivar)%numdims == 2) then
+   dartindex = progvar(ivar)%index1 + (i-1) + &
+               (j-1) * (progvar(ivar)%dimlens(1))
+
+elseif (progvar(ivar)%numdims == 1) then
+   dartindex = progvar(ivar)%index1 + (i-1)
+
+endif
+
+end function
 
 !------------------------------------------------------------------------
 !> Get model corners for the observed location
