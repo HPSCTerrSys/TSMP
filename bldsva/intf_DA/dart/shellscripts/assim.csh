@@ -12,6 +12,7 @@ cat set_def.out
 cat obs_seq.in
 ./cosmo_to_dart
 #creates dart_prior
+# change namelist 
 ./perfect_model_obs
 # creates 3 files including obs_seq.perfect 
 

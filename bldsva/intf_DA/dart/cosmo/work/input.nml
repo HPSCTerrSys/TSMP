@@ -9,7 +9,7 @@
    last_obs_days         = -1
    last_obs_seconds      = -1
    output_interval       = 1
-   restart_in_file_name  = "perfect_ics"
+   restart_in_file_name  = "dart_prior"
    restart_out_file_name = "perfect_restart"
    obs_seq_in_file_name  = "obs_seq.in"
    obs_seq_out_file_name = "obs_seq.perfect"
@@ -23,10 +23,10 @@
 
 
 &filter_nml
-   async                    = 4
+   async                    = 0 
    adv_ens_command          = "./advance_model.csh"
-   ens_size                 =  3
-   start_from_restart       = .false.
+   ens_size                 = 16 
+   start_from_restart       = .true.
    output_restart           = .true.
    obs_sequence_in_name     = "obs_seq.out"
    obs_sequence_out_name    = "obs_seq.final"
@@ -38,8 +38,8 @@
    first_obs_seconds        = -1
    last_obs_days            = -1
    last_obs_seconds         = -1
-   num_output_state_members = 3
-   num_output_obs_members   = 3
+   num_output_state_members = 16 
+   num_output_obs_members   = 16
    output_interval          = 1
    num_groups               = 1
    input_qc_threshold       =  3.0
@@ -79,7 +79,7 @@
 # cutoff of 0.03 (radians) is about 200km
 &assim_tools_nml
    filter_kind                     = 1
-   cutoff                          = 0.20
+   cutoff                          = 0.00010
    sort_obs_inc                    = .true.
    spread_restoration              = .false.
    sampling_error_correction       = .false.
@@ -91,7 +91,7 @@
 
 
 &ensemble_manager_nml
-   single_restart_file_in  = .true.
+   single_restart_file_in  = .false.
    single_restart_file_out = .false.
    perturbation_amplitude  = 0.2
   /
@@ -161,13 +161,13 @@
 # since we read from netCDF and write to a binary, we need a lot of information, sorry.
 
 &model_nml
-   cosmo_restart_file           = "../data/lrff00030000o"
-   cosmo_netcdf_file            = "../data/lfff00030000.nc"
+   cosmo_restart_file           = "cosmo_prior"
+   cosmo_netcdf_file            = "cosmo.nc"
    assimilation_period_days     = 0
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.1
    output_1D_state_vector       = .false.
-   debug                        = 10
+   debug                        = 1 
    variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
                '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
                '2',  '40', 'W',  'KIND_VERTICAL_VELOCITY',      'NA' , 'NA' , 'UPDATE',
