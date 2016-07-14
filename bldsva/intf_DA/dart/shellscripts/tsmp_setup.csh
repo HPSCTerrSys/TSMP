@@ -40,7 +40,7 @@ set icycle = $1
 #foreach icycle (`seq 1 $runcycle`)
 
 
-  set sdate = `printf dart_cycle_%02d $icycle`
+  set sdate = `printf dart_%02d $icycle`
 
   if ($icycle == 1) then
     #
@@ -75,7 +75,7 @@ set icycle = $1
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
-    set oldsdate  = `printf dart_cycle_%02d $oldicycle`
+    set oldsdate  = `printf dart_%02d $oldicycle`
     set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
     set oldrundir = $tsmpdir"/run/"$temp_dir
     #

@@ -1411,8 +1411,8 @@ type(time_type)   :: interval
 
 call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
 nsecs = (ihour*60 + imin)*60 + isec
-write(iunit, '('' clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
-write(iunit, '('' defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
+write(iunit, '(''clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
 
 interval = statetime - start_date
 
@@ -1428,7 +1428,7 @@ write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, ns
 write(iunit, '(''pflhist '',I5.5)') ndays*24 + nhours
 
 call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
-write(iunit, '('' defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
+write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
 
 return
 
