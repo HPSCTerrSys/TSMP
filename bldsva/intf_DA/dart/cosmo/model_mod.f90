@@ -1400,11 +1400,10 @@ end function get_cosmo_filename
 !>
 
 
-subroutine write_state_times(iunit, statetime, advancetime)
+subroutine write_state_times(iunit, statetime)
 
 integer,                   intent(in) :: iunit
 type(time_type),           intent(in) :: statetime
-type(time_type), optional, intent(in) :: advancetime
 
 integer           :: iyear, imonth, iday, ihour, imin, isec
 integer           :: ndays, nhours, nmins, nsecs
@@ -1412,23 +1411,24 @@ type(time_type)   :: interval
 
 call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
 nsecs = (ihour*60 + imin)*60 + isec
-write(iunit, '(I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+write(iunit, '('' clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+write(iunit, '('' defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
 
-write(iunit, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
+interval = statetime - start_date
 
-if (present(advancetime)) then
-   call get_date(advancetime, iyear, imonth, iday, ihour, imin, isec)
-   write(iunit, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
+call get_time(interval, nsecs, ndays)
 
-   interval = advancetime - statetime
-   call get_time(interval, nsecs, ndays)
-   nhours = nsecs / (60*60)
-   nsecs  = nsecs - (nhours * 60*60)
-   nmins  = nsecs / 60
-   nsecs  = nsecs - (nmins * 60)
+nhours = nsecs / (60*60)
+nsecs  = nsecs - (nhours * 60*60)
+nmins  = nsecs / 60
+nsecs  = nsecs - (nmins * 60)
 
-   write(iunit, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
-endif
+write(iunit, '(''cosrbin '',''lrff'',4(I2.2),''o'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''pflhist '',I5.5)') ndays*24 + nhours
+
+call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
+write(iunit, '('' defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
 
 return
 

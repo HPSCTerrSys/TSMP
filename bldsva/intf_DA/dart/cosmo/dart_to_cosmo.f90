@@ -111,15 +111,9 @@ call close_restart(iunit)
 
 call write_cosmo_file(state_vector, dart_output_file, new_cosmo_analysis_file)
 
-if ( advance_time_present ) then
-   iunit = open_file('dart_posterior_times.txt', action='write')
-   call write_state_times(iunit, model_time, adv_to_time)
-   call close_file(iunit)
-else
-   iunit = open_file('dart_posterior_times.txt', action='write')
-   call write_state_times(iunit, model_time)
-   call close_file(iunit)
-endif
+iunit = open_file('dart_posterior_times.txt', action='write')
+call write_state_times(iunit, model_time)
+call close_file(iunit)
 
 !----------------------------------------------------------------------
 ! Log what we think we're doing, and exit.

@@ -1,14 +1,14 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# Usage: ./tsmp_setup.csh cycle
+# usage: ./tsmp_setup.csh cycle
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
 # --- defaultInitDate  = "2008-05-09 00"
 # --- clmext  = "2008-05-09-00000"
-# --- cosext  = "01000000o"
-# --- pflext  = "00024" 
+# --- cosrbin  = "lrff01000000o"
+# --- pflhist  = "00024" 
 #
 #-------------------------------------------------------------------------
 # User Settings
@@ -37,15 +37,6 @@ set icycle = $1
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
 
-#TODO needed for restart
-set defaultStartDate = "2008-05-08 00"
-set defaultInitDate  = "2008-05-09 00"
-
-set clmext  = "2008-05-09-00000"
-set cosext  = "01000000o"
-set pflext  = "00024"
-#TODO
-
 #foreach icycle (`seq 1 $runcycle`)
 
 
@@ -71,6 +62,16 @@ set pflext  = "00024"
     echo "Block 2: Make the restart runs ....TODO dates !!!!"
     echo "-------------------------------------------------------------------"
     echo " "
+    # Date manager
+    set timefile_path = "./"
+    set defaultStartDate = `grep defaultStartDate $timefile_path/cosmo_prior_time.txt`
+    set defaultInitDate = `grep defaultInitDate $timefile_path/cosmo_prior_time.txt`
+    set clmext = `grep clmext $timefile_path/cosmo_prior_time.txt`
+    set cosrbin = `grep cosrbin $timefile_path/cosmo_prior_time.txt`
+    set pflhist = `grep pflhist $timefile_path/cosmo_prior_time.txt`
+
+#TODO
+
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
@@ -78,14 +79,13 @@ set pflext  = "00024"
     set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
     set oldrundir = $tsmpdir"/run/"$temp_dir
     #
-    set cosmo_rfile    = "lrff$cosext" 
-    set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext.nc"
-    set cosrstfil = "$oldrundir/tsmp_instance_X/cosrst/$cosmo_rfile"
-    set pflrstfil = "$oldrundir/tsmp_instance_X/rurlaf.out.press.$pflext.pfb"
+    set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc"
+    set cosrstfil = "$oldrundir/tsmp_instance_X/cosrst/$cosrbin[2]"
+    set pflrstfil = "$oldrundir/tsmp_instance_X/rurlaf.out.press.$pflhist[2].pfb"
 
     cd $tsmpdir/bldsva
 
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -s "$defaultInitDate" -S "$defaultStartDate"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
 
     echo " "
     echo " Update the restart files for the corresponding instances ..."
@@ -104,7 +104,7 @@ set pflext  = "00024"
     foreach instance (`seq 0 $numInst`)
       cd  "tsmp_instance_"$instance
       #COSMO
-      ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosmo_rfile ./cosmo_in/$cosmo_rfile
+      ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
       #CLM
       sed "s,tsmp_instance_X,tsmp_instance_$instance," -i lnd.stdin
       #ParFlow
