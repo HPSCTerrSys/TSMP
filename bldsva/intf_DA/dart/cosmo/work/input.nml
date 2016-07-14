@@ -163,7 +163,6 @@
 &model_nml
    cosmo_restart_file           = "../data/lrff00030000o"
    cosmo_netcdf_file            = "../data/lfff00030000.nc"
-   model_dt                     = 40
    assimilation_period_days     = 0
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.1

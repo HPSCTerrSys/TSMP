@@ -90,9 +90,8 @@ public :: get_model_size,         &
 ! generally useful routines for various support purposes.
 ! the interfaces here can be changed as appropriate.
 
-public :: get_state_time,     &
-          get_state_vector,   &
-          write_cosmo_file,    &
+public :: get_state_vector,   &
+          write_cosmo_file,   &
           get_cosmo_filename, &
           write_state_times
 
@@ -237,7 +236,6 @@ character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
 character(len=256) :: cosmo_netcdf_file            = "cosmo_netcdf_file"
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 60
-integer            :: model_dt                     = 40
 logical            :: output_1D_state_vector       = .FALSE.
 real(r8)           :: model_perturbation_amplitude = 0.1
 integer            :: debug                        = 0
@@ -248,7 +246,6 @@ namelist /model_nml/             &
    cosmo_netcdf_file,            &
    assimilation_period_days,     &
    assimilation_period_seconds,  &
-   model_dt,                     &
    model_perturbation_amplitude, &
    output_1D_state_vector,       &
    debug,                        &
@@ -257,16 +254,13 @@ namelist /model_nml/             &
 integer         :: model_size = 0
 type(time_type) :: model_timestep ! smallest time to adv model
 
+!>@TODO remove the need for state_vector_vars and n_max_kinds
 integer, parameter       :: n_max_kinds=400
 type(dart_variable_info) :: state_vector_vars(1:n_max_kinds)
 
 real(r8), allocatable :: ens_mean(:)
 
 type(random_seq_type) :: random_seq
-
-!> TODO ... do we need these
-type(time_type) :: cosmo_fc_time
-type(time_type) :: cosmo_an_time
 
 INTERFACE get_grid_var
       MODULE PROCEDURE get_1d_grid_var
@@ -294,9 +288,10 @@ end function get_model_size
 !------------------------------------------------------------------------
 !> Called to do one-time initialization of the model.
 !>
-!> All the grid information comes from the COSMOS netCDF file
-!>@ TODO FIXME All the variable information comes from all over the place
-!> Not actually reading in the state, that is done in get_state_vector()
+!> All the grid information comes from the COSMOS netCDF file.
+!> The variable information comes from several places, including a 
+!> representative binary restart file. Not actually using that state,
+!> but we need the sizes and to determine if the variables are present.
 
 
 subroutine static_init_model()
@@ -340,7 +335,7 @@ enddo
 
 call set_variable_layout()
 
-if (debug > 2 .and. do_output()) call progvar_summary()
+if (debug > 5 .and. do_output()) call progvar_summary()
 
 ! ens_mean_for_model, that sort of thing
 
@@ -674,6 +669,7 @@ subroutine end_model()
 deallocate(lon,lat,slonu,slatu,slonv,slatv)
 deallocate(vcoord%level1, vcoord%level) 
 deallocate(rlon,rlat,srlon,srlat)
+if ( allocated(ens_mean) ) deallocate(ens_mean)
 
 return
 
@@ -1264,36 +1260,15 @@ subroutine ens_mean_for_model(filter_ens_mean)
 
 real(r8), dimension(:), intent(in) :: filter_ens_mean
 
-call error_handler(E_ERR,'ens_mean_for_model','routine not written',source,revision,revdate)
-
 if ( .not. module_initialized ) call static_init_model
 
-allocate(ens_mean(1:model_size))
-ens_mean(:) = filter_ens_mean(:)
-
-!  write(string1,*) 'COSMO has no ensemble mean in storage.'
-!  call error_handler(E_ERR,'ens_mean_for_model',string1,source,revision,revdate)
+! not needed, but if at some point it is needed, this is it:
+! allocate(ens_mean(1:model_size))
+! ens_mean(:) = filter_ens_mean(:)
 
 return
 
 end subroutine ens_mean_for_model
-
-
-!------------------------------------------------------------------------
-!>
-
-
-function get_state_time() result (time)
-type(time_type) :: time
-
-call error_handler(E_ERR,'get_state_time','routine not written',source,revision,revdate)
-
-if ( .not. module_initialized ) call static_init_model
-time=cosmo_fc_time
-
-return
-
-end function get_state_time
 
 
 !------------------------------------------------------------------------
@@ -1333,7 +1308,7 @@ integer(i4) :: igdsbuf(NGDS)     ! gds: grid definition section
 real(r8)    :: rbuf(nrlon*nrlat) ! data to be read
 
 logical :: desired = .false.
-integer :: index1, indexN
+integer :: ivar, index1, indexN
 integer :: iunit_in, iunit_out
 
 integer :: izerr      ! error status
@@ -1376,9 +1351,9 @@ COPY_LOOP: do
 
    iz_countl = iz_countl + 1
 
-   call get_dart_indices(iz_countl, index1, indexN, desired)
+   call get_dart_indices(iz_countl, ivar, index1, indexN, desired)
 
-   if (desired) rbuf = sv(index1:indexN)
+   if (desired) rbuf = apply_clamping(ivar, sv(index1:indexN))
 
    write(iunit_out, iostat=izerr) ipdsbuf, igdsbuf, rbuf   ! write a 'slab'
    if (izerr /= 0) then
@@ -1423,38 +1398,40 @@ end function get_cosmo_filename
 !>
 
 
-  subroutine write_state_times(iunit, statetime, advancetime)
-    integer,         intent(in) :: iunit
-    type(time_type), intent(in) :: statetime, advancetime
+subroutine write_state_times(iunit, statetime, advancetime)
 
-    character(len=32) :: timestring
-    integer           :: iyear, imonth, iday, ihour, imin, isec
-    integer           :: ndays, nhours, nmins, nsecs
-    type(time_type)   :: interval
+integer,                   intent(in) :: iunit
+type(time_type),           intent(in) :: statetime
+type(time_type), optional, intent(in) :: advancetime
 
-    call error_handler(E_ERR,'write_state_times','routine not written',source,revision,revdate)
+character(len=32) :: timestring
+integer           :: iyear, imonth, iday, ihour, imin, isec
+integer           :: ndays, nhours, nmins, nsecs
+type(time_type)   :: interval
 
-    call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
-    write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
-    write(iunit, "(A)") trim(timestring)
+call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
+write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
+write(iunit, "(A)") trim(timestring)
 
-    call get_date(advancetime, iyear, imonth, iday, ihour, imin, isec)
-    write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
-    write(iunit, "(A)") trim(timestring)
+if (present(advancetime)) then
+   call get_date(advancetime, iyear, imonth, iday, ihour, imin, isec)
+   write(timestring, "(I4,5(1X,I2))") iyear, imonth, iday, ihour, imin, isec
+   write(iunit, "(A)") trim(timestring)
 
-    interval = advancetime - statetime
-    call get_time(interval, nsecs, ndays)
-    nhours = nsecs / (60*60)
-    nsecs  = nsecs - (nhours * 60*60)
-    nmins  = nsecs / 60
-    nsecs  = nsecs - (nmins * 60)
+   interval = advancetime - statetime
+   call get_time(interval, nsecs, ndays)
+   nhours = nsecs / (60*60)
+   nsecs  = nsecs - (nhours * 60*60)
+   nmins  = nsecs / 60
+   nsecs  = nsecs - (nmins * 60)
 
-    write(timestring, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
-    write(iunit, "(A)") trim(timestring)
+   write(timestring, "(I4,3(1X,I2))") ndays, nhours, nmins, nsecs
+   write(iunit, "(A)") trim(timestring)
+endif
 
-    return
+return
 
-  end subroutine write_state_times
+end subroutine write_state_times
 
 
 !------------------------------------------------------------------------
@@ -3223,35 +3200,72 @@ end subroutine get_level_indices
 !>
 
 
-subroutine get_dart_indices(slab_index, index1, indexN, desired)
+subroutine get_dart_indices(slab_index, varindex, index1, indexN, desired)
+
 integer, intent(in)  :: slab_index
+integer, intent(out) :: varindex
 integer, intent(out) :: index1
 integer, intent(out) :: indexN
 logical, intent(out) :: desired
 
 integer :: ivar, kindex
 
-desired = .false.
-index1  = -1
-indexN  = -1
+desired  = .false.
+index1   = -1
+indexN   = -1
+varindex = -1
 
 IndexLoop : do ivar = 1,nfields
 
    if ( slab_index < progvar(ivar)%slab1 .or. slab_index > progvar(ivar)%slabN ) cycle IndexLoop
 
-   desired = .true.
-   kindex  = slab_index - progvar(ivar)%slab1 + 1
+   ! some variables may not need to be updated, but we're going to calculate their indices anyway
+   desired = progvar(ivar)%update
 
-   index1  = progvar(ivar)%index1 + (kindex -1) * progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2)
-   indexN  =               index1 +               progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2) - 1
+   kindex   = slab_index - progvar(ivar)%slab1 + 1
+   index1   = progvar(ivar)%index1 + (kindex -1) * progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2)
+   indexN   =               index1 +               progvar(ivar)%dimlens(1)*progvar(ivar)%dimlens(2) - 1
+   varindex = ivar
 
 !  write(*,*)'slab ',slab_index,' is level ',kindex,' of variable ',ivar,' index1,N are ',index1, indexN
+
+   exit IndexLoop
 
 enddo IndexLoop
 
 return
 
 end subroutine get_dart_indices
+
+
+!------------------------------------------------------------------------
+!> replace the posterior values that are outside physical limits with
+!> the limit 
+
+
+function apply_clamping(ivar, posterior) result (slab)
+
+integer,  intent(in) :: ivar
+real(r8), intent(in) :: posterior(:)
+real(r8)             :: slab(size(posterior))
+
+slab = posterior
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_ABOVE ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then
+   where ((slab /= MISSING_R8) .and. &
+          (slab > progvar(ivar)%maxvalue)) &
+           slab = progvar(ivar)%maxvalue
+endif
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_BELOW ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then
+   where ((slab /= MISSING_R8) .and. &
+          (slab < progvar(ivar)%minvalue)) &
+           slab = progvar(ivar)%minvalue
+endif
+
+end function apply_clamping
 
 
 !------------------------------------------------------------------------
