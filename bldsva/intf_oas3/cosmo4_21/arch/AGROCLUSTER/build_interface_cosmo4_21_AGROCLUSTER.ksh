@@ -15,6 +15,7 @@ check
     cplFlag="-DCOUP_OAS_COS" 
   fi 
   if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi 
+  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -cpp -DGRIBDWD -DNETCDF $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
 check

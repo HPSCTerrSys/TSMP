@@ -2,13 +2,12 @@
 
 initSetup(){
   defaultFDCLM="/perm/ms/spde/de5j/inputdata/cordex11.testcase/clm"
-  defaultFDCOS="/scratch/ms/spde/de5j/bound4eur11/20030801"
+  defaultFDCOS="/scratch/ms/spde/de5j/bound4eur11/20020828"
   defaultFDOAS="/scratch/ms/spde/de5j/juq2ecmwf/rmp"
-  #defaultFDOAS="/perm/ms/spde/de5j/inputdata/cordex11.testcase/juqrmp"
   defaultFDPFL="/perm/ms/spde/de5j/inputdata/cordex11.testcase/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin_jk 
-  defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc 
+  defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc_jk 
   defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas_jk.tcl 
 
   defaultNppn=36
@@ -41,7 +40,7 @@ initSetup(){
   gy_pfl=424
   dt_pfl=1.0
   pflrunname="cordex0.11"
-  base_pfl=1.0
+  base_pfl=0.001
 
   cplfreq1=3600
   cplfreq2=3600

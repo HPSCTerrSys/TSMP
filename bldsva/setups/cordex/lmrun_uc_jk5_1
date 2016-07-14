@@ -14,7 +14,7 @@ nsteps=nstop_cos_bldsva
 #
 lmworkdir_cluma=__rundir__
 lmoutdir_cluma=__rundir__/cosmo_out
-lmindir_cluma=__forcingdir__/
+lmindir_cluma=/scratch/ms/spde/de5j/bound4eur11/${INIT_Y}${INIT_M}${INIT_D}
 lmrestdir_cluma=__rundir__/cosmo_rest
 #lmworkdir_sx9=/e/uhome/xxxx/cosmo/
 #lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
