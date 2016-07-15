@@ -40,7 +40,7 @@ set icycle = $1
 #foreach icycle (`seq 1 $runcycle`)
 
 
-  set sdate = `printf dart_%02d $icycle`
+  set sdate = `printf dart%02d $icycle`
 
   if ($icycle == 1) then
     #
@@ -75,7 +75,7 @@ set icycle = $1
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
-    set oldsdate  = `printf dart_%02d $oldicycle`
+    set oldsdate  = `printf dart%02d $oldicycle`
     set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
     set oldrundir = $tsmpdir"/run/"$temp_dir
     #
@@ -104,7 +104,11 @@ set icycle = $1
     foreach instance (`seq 0 $numInst`)
       cd  "tsmp_instance_"$instance
       #COSMO
+      #TODO for normal restart run without assimilation
       ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
+      # for restart run with assimilation
+      rm cosmo_in/$cosrbin[2]
+      ln -sf $oldrundir/"tsmp_instance_"$instance/cosmo_restart ./cosmo_in/$cosrbin[2]
       #CLM
       sed "s,tsmp_instance_X,tsmp_instance_$instance," -i lnd.stdin
       #ParFlow

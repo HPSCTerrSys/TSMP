@@ -105,7 +105,7 @@ INTEGER(KIND=iintegers) :: &
              ntke,         &          ! time level for TKE
              izvctype_read            ! check vertical coordinate type in restarts
 
-CHARACTER(LEN=*), PARAMETER :: datname = "lrff00030000o"
+CHARACTER(LEN=*), PARAMETER :: datname = "data/lrff00030000o"
 
 !------------------------------------------------------------------------------
 !Variable Defininiton Complete, program starts here

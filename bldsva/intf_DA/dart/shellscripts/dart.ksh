@@ -50,14 +50,15 @@ do
   cosout=`ls -1 cosout/lfff* | tail -n -1`
   ln -s $cosrst cosmo_prior
   ln -s $cosout cosmo.nc
-  ../cosmo_to_dart || exit 1
+  ../cosmo_to_dart & || exit 1
+
   dartinstance=$(( $instance + 1 ))
   filterName=`printf ../filter_ics.%04d $dartinstance`
   mv dart_prior $filterName 
   cd ..
 done
 
-echo " CPS 1"
+wait
 
 # Grab the date/time of the cosmo state so we know which 
 # observation sequence file to use.
@@ -82,10 +83,13 @@ for instance in {0..$(($numInst-1))}
 do
   cd tsmp_instance_$instance
   dartinstance=$(( $instance + 1 ))
-  ln -s ../filter_restart.000$dartinstance dart_posterior 
-  ../dart_to_cosmo
+  filterRestartName=`printf ../filter_restart.%04d $dartinstance`
+  ln -s $filterRestartName dart_posterior 
+  ../dart_to_cosmo & || exit 4
   cd ..
 done
+
+wait
 
 echo "ready" > ready.txt
 exit 0
