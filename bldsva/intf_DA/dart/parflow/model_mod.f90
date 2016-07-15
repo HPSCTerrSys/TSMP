@@ -1094,6 +1094,7 @@ where(lat >  90.0_r8) lat =  90.0_r8
 io = nf90_close(ncid)
 
 end subroutine grid_read
+
 !------------------------------------------------------------------
 !> Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
 
@@ -1162,9 +1163,9 @@ character(len=256)             :: errmsg
   close(nudat)
 end subroutine pfread_dim
 
+!> Reads pfb binary file, based on tr32-z4-tools work of P. Shrestha
+!>
 subroutine pfread_var(filename,pfvar)
-!------------------------------------------------------------------
-! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
 
 character(len=*), intent(in)   :: filename
 real(r8),         intent(out)  ::  &
@@ -1316,77 +1317,179 @@ character(len=256)             :: errmsg
   return
 end subroutine pfread_var
 
-subroutine pfwrite_var(filename,nx,ny,nz,dx,dy,dz)
-!------------------------------------------------------------------
-! Reads pbf dimensions. based on tr32-z4-tools work of P. Shrestha
+!> Writes pfb binary file, based on tr32-z4-tools work of P. Shrestha
+!>
+subroutine pfwrite_var(filename,nx,ny,nz,dx,dy,dz,xd,yd,zd,nxs,nys,pfvar)
 
 character(len=*), intent(in)   :: filename
-integer(kind=4),  intent(out)  ::  &
+integer(kind=4),  intent(in)   ::  &
                    nx,             &     ! Longitude dimension
                    ny,             &     ! Latitude dimension
-                   nz                    ! Vertical dimension
-real(r8),         intent(out)  ::  &
+                   nz,             &                    ! Vertical dimension
+                   nxs, nys
+real(r8),         intent(in)   ::  &
                    dx,             &     ! Grid Resolution in m
                    dy,             &     ! Grid Resoultion in m
-                   dz                    ! Grid Resolution scale, check parflow namelist
-
-real(r8)                       :: x1, y1, z1 
+                   dz,             &    ! Grid Resolution scale, check parflow namelist
+                   xd,yd,zd
+real(r8),         intent(in)   ::  &
+                   pfvar(nx,ny,nz)       ! ParFlow pressure files 
 integer(kind=4)                :: nudat, izerr
 character(len=256)             :: errmsg
+integer(kind=4)                :: i,j,k, ix, iy, iz, is, ns,       &
+                                  rx, ry, rz, nnx, nny, nnz,       &
+                                  ixs, iys
 
 ! code starts here
   nudat   = get_unit()
   open(nudat,file=trim(filename),form='unformatted',access='stream' , &
-                    convert='BIG_ENDIAN',status='old')         ! gfortran
+                    convert='BIG_ENDIAN',status='new')         ! gfortran
 
   !read in header infor
-  read(nudat, iostat=izerr) x1 !X
+  write(nudat, iostat=izerr) xd !X
   if (izerr /= 0) then
-    errmsg   = "unable to read X"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write  X"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) y1 !Y
+  write(nudat, iostat=izerr) yd !Y
   if (izerr /= 0) then
-    errmsg   = "unable to read Y"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write Y"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) z1 !Z
+  write(nudat, iostat=izerr) zd !Z
   if (izerr /= 0) then
-    errmsg   = "unable to read Z"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
-  endif
-
-  read(nudat, iostat=izerr) nx !NX
-  if (izerr /= 0) then
-    errmsg   = "unable to read NX"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
-  endif
-  read(nudat, iostat=izerr) ny !NY
-  if (izerr /= 0) then
-    errmsg   = "unable to read NY"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
-  endif
-  read(nudat, iostat=izerr) nz !NZ
-  if (izerr /= 0) then
-    errmsg   = "unable to read NZ"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write  Z"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
 
-  read(nudat, iostat=izerr) dx !dX
+  write(nudat, iostat=izerr) nx !NX
   if (izerr /= 0) then
-    errmsg   = "unable to read dx"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write NX"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) dy !dY
+  write(nudat, iostat=izerr) ny !NY
   if (izerr /= 0) then
-    errmsg   = "unable to read dy"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write NY"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) dz !dZ
+  write(nudat, iostat=izerr) nz !NZ
   if (izerr /= 0) then
-    errmsg   = "unable to read dz"
-    call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+    errmsg   = "unable to write NZ"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
   endif
+
+  write(nudat, iostat=izerr) dx !dX
+  if (izerr /= 0) then
+    errmsg   = "unable to write  dx"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+  endif
+  write(nudat, iostat=izerr) dy !dY
+  if (izerr /= 0) then
+    errmsg   = "unable to write dy"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+  endif
+  write(nudat, iostat=izerr) dz !dZ
+  if (izerr /= 0) then
+    errmsg   = "unable to write  dz"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+  endif
+
+  ns = int(nxs*nys)
+  write(nudat,iostat=izerr)  ns !num_subgrids
+  if (izerr /= 0) then
+    errmsg   = "unable to write  ns"
+    call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+  endif
+! End: Writing of domain spatial information
+
+! Start: loop over number of sub grids
+  nnx = int(nx/nxs)
+  nny = int(ny/nys)
+  nnz = nz
+  iz = 0
+!
+  do iys = 0, nys-1
+  do ixs = 0, nxs-1
+
+! Start: Writing of sub-grid spatial information
+
+    ix = int(nnx*ixs)
+    iy = int(nny*iys)
+
+    write(nudat,iostat=izerr) ix
+    if (izerr /= 0) then
+      errmsg   = "unable to write  ix"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) iy
+    if (izerr /= 0) then
+      errmsg   = "unable to write  iy"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) iz
+    if (izerr /= 0) then
+      errmsg   = "unable to write  iz"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) nnx
+    if (izerr /= 0) then
+      errmsg   = "unable to write  nnx"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) nny
+    if (izerr /= 0) then
+      errmsg   = "unable to write  nny"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) nnz
+    if (izerr /= 0) then
+      errmsg   = "unable to write  nnz"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    rx = 0; ry = 0; rz=0
+    write(nudat,iostat=izerr) rx
+    if (izerr /= 0) then
+      errmsg   = "unable to write  rx"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) ry
+    if (izerr /= 0) then
+      errmsg   = "unable to write  ry"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+    write(nudat,iostat=izerr) rz
+    if (izerr /= 0) then
+      errmsg   = "unable to write  rz"
+      call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+    endif
+
+! End: Writing of sub-grid spatial information
+
+    ! Start: Write in data from each individual subgrid
+    do  k=iz +1 , iz + nnz
+    do  j=iy +1 , iy + nny
+    do  i=ix +1 , ix + nnx
+      write(nudat,iostat=izerr) pfvar(i,j,k)
+      if (izerr /= 0) then
+        errmsg   = "unable to write  pfvar"
+        call error_handler(E_ERR,'pfwrite_var',errmsg,source,revision,revdate)
+      endif
+    end do
+    end do
+    end do 
+
+! End: Write in data from each individual subgrid
+  end do 
+  end do 
+! End: loop over number of sub grids
 
   close(nudat)
   return
