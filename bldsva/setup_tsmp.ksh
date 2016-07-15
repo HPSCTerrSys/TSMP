@@ -13,7 +13,6 @@ getDefaults(){
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$exp_id if empty
   def_exp_id=""				
-  def_pfldir=""
   def_numInst=""
   def_startInst=""
   # following parameters  will be set to tested platform defaults if empty
@@ -64,7 +63,6 @@ setDefaults(){
   exp_id=$def_exp_id
   profiling=$def_profiling
   rootdir=$def_rootdir
-  pfldir=$def_pfldir
 
   cplscheme=$def_cplscheme
   if [[ $cplscheme == "" ]] then ; cplscheme="true" ; fi #We need a hard default here
@@ -140,7 +138,6 @@ clearSetupSelection(){
 clearPathSelection(){
   rundir=""
   bindir=""
-  pfldir=""
   namelist_clm=""
   namelist_cos=""
   namelist_pfl=""
@@ -196,7 +193,6 @@ setSelection(){
   if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
   if [[ ${mList[2]} == cosmo5_1  ]] ; then ; namelist_cos+=5_1 ; fi
 
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
 
 }
 
@@ -472,19 +468,18 @@ interactive(){
                   if [[ $numb == 24 ]] ; then ; read forcingdir_pfl ; fi
                   if [[ $numb == 25 ]] ; then ; read namelist_oas ; fi
                   if [[ $numb == 26 ]] ; then ; read forcingdir_oas ; fi
-		  if [[ $numb == 27 ]] ; then ; read pfldir ; fi
-                  if [[ $numb == 28 ]] ; then ; read profiling ; fi
-                  if [[ $numb == 29 ]] ; then ; read numInst ; fi
-  		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
-                  if [[ $numb == 31 ]] ; then ; read initDate ; fi
-		  if [[ $numb == 32 ]] ; then ; read cplscheme ; fi
-   		  if [[ $numb == 33 ]] ; then ; read exp_id ; fi
-		  if [[ $numb == 34 ]] ; then ; read restfile_pfl ; fi
-		  if [[ $numb == 35 ]] ; then ; read restfile_clm ; fi
-		  if [[ $numb == 36 ]] ; then ; read restfile_cos ; fi
-                  if [[ $numb == 37 ]] ; then ; read dump_pfl ; fi
-                  if [[ $numb == 38 ]] ; then ; read dump_clm ; fi
-                  if [[ $numb == 39 ]] ; then ; read dump_cos ; fi
+                  if [[ $numb == 27 ]] ; then ; read profiling ; fi
+                  if [[ $numb == 28 ]] ; then ; read numInst ; fi
+  		  if [[ $numb == 29 ]] ; then ; read startInst ; fi
+                  if [[ $numb == 30 ]] ; then ; read initDate ; fi
+		  if [[ $numb == 31 ]] ; then ; read cplscheme ; fi
+   		  if [[ $numb == 32 ]] ; then ; read exp_id ; fi
+		  if [[ $numb == 33 ]] ; then ; read restfile_pfl ; fi
+		  if [[ $numb == 34 ]] ; then ; read restfile_clm ; fi
+		  if [[ $numb == 35 ]] ; then ; read restfile_cos ; fi
+                  if [[ $numb == 36 ]] ; then ; read dump_pfl ; fi
+                  if [[ $numb == 37 ]] ; then ; read dump_clm ; fi
+                  if [[ $numb == 38 ]] ; then ; read dump_cos ; fi
                 done
                 interactive
           ;;
@@ -530,20 +525,19 @@ printState(){
   print "${cred}(25)${cnormal} namelist dir for oas (default='$def_namelist_oas'): ${cgreen}$namelist_oas${cnormal}"
   print "${cred}(26)${cnormal} forcing dir for oas (default='$def_forcingdir_oas'): ${cgreen}$forcingdir_oas${cnormal}"
   print ""
-  print "${cred}(27)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${def_platform}_$combination): ${cgreen}$pfldir${cnormal}"
-  print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
-  print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
-  print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
-  print "${cred}(31)${cnormal} init Date (default=$def_initDate): ${cgreen}$initDate${cnormal}"
-  print "${cred}(32)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
-  print "${cred}(33)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
+  print "${cred}(27)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
+  print "${cred}(28)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
+  print "${cred}(29)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
+  print "${cred}(30)${cnormal} init Date (default=$def_initDate): ${cgreen}$initDate${cnormal}"
+  print "${cred}(31)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
+  print "${cred}(32)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
   print ""
-  print "${cred}(34)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
-  print "${cred}(35)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
-  print "${cred}(36)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
-  print "${cred}(37)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
-  print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
-  print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
+  print "${cred}(33)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
+  print "${cred}(34)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
+  print "${cred}(35)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
+  print "${cred}(36)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
+  print "${cred}(37)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
+  print "${cred}(38)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
 
 }
 
@@ -638,7 +632,6 @@ getRoot(){
   USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
   USAGE+="[V:refsetup?Reference setup. This is a setup that is supported and tested on a certain machine. No further inputs are needed for this setup. If you leave it '' the machine default will be taken.]:[refsetup:='$def_refSetup']"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$platform']"
-  USAGE+="[z:pfldir?Source directory for Parflow. parflow_MACHINE_DATE will be taken if ''.]:[pfldir:='${def_pfldir}']"
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
@@ -718,7 +711,6 @@ getRoot(){
     I)  exp_id="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
-    z)  pfldir="$OPTARG"; args=1 ;;
 
     l)  restfile_pfl="$OPTARG"; args=1 ;;
     j)  restfile_clm="$OPTARG"; args=1 ;;

@@ -24,6 +24,10 @@ initSetup(){
   defaultInitDate="2008-05-08 00"
   defaultRunhours=3
 
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1 
+
   gx_clm=24
   gy_clm=14
   dt_clm=36
@@ -98,7 +102,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
           sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check

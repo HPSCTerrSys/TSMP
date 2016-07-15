@@ -142,7 +142,7 @@ setSelection(){
 
 finalizeSelection(){
 comment "  create bindir: $bindir"
-  mkdir -p $bindir >> $log_file 2>> $err_file
+  mkdir -p $bindir/libs >> $log_file 2>> $err_file
 check
 
 }
@@ -164,8 +164,8 @@ setCombination(){
   fi
 
 #DA
-withDA="false"
-withPDAF="false"
+withDA="true"
+withPDAF="true"
 
 }
 

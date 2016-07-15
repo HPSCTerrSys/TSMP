@@ -24,6 +24,10 @@ initSetup(){
   defaultInitDate="2008-05-08 00"
   defaultRunhours=3
 
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1 
+
   gx_clm=2400
   gy_clm=2400
   dt_clm=900

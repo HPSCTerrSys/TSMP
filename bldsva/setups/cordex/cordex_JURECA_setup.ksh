@@ -24,6 +24,10 @@ initSetup(){
   defaultInitDate="2016-05-01 12"
   defaultRunhours=3
 
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1 
+
   gx_clm=436
   gy_clm=424
   dt_clm=3600
@@ -96,7 +100,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/slope*.sa  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
@@ -114,7 +118,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/pfl_ind.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
