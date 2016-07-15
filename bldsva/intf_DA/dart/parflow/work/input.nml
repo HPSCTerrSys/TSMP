@@ -260,7 +260,7 @@
    x_ind                      = 100
    kind_of_interest           = 'KIND_SOIL_MOISTURE'
    verbose                    = .false.
-   test1thru                  = 10
+   test1thru                  = 11
    loc_of_interest            = 5.5, 49.88, 0.5
    interp_test_vertcoord      = 'VERTISHEIGHT'
    /

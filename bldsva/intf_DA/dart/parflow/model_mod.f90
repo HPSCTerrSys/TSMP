@@ -397,18 +397,11 @@ if (istatus /= 0) return
 ! Horizontal interpolation at two levels given by hgt_inds
 call horizontal_interpolate(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
 
+interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
 
-call error_handler(E_ERR,'model_interpolate','routine not tested',source, revision,revdate)
-! This should be the result of the interpolation of a
-! given kind (itype) of variable at the given location.
-interp_val = MISSING_R8
+istatus = 0
 
-! The return code for successful return should be 0. 
-! Any positive number is an error.
-! Negative values are reserved for use by the DART framework.
-! Using distinct positive values for different types of errors can be
-! useful in diagnosing problems.
-istatus = 1
+return 
 
 end subroutine model_interpolate
 
@@ -1446,14 +1439,14 @@ end subroutine define_var_dims
 !------------------------------------------------------------------------
 !> Horizontal interpolation at two height indices
 
-subroutine horizontal_interpolate(x, ivar, kk_inds, ij_inds, ij_wgts, interp_val, istatus)
+subroutine horizontal_interpolate(x, ivar, kk_inds, ij_inds, ij_wgts, interp_hv, istatus)
 
 real(r8), intent(in)  :: x(:)
 integer,  intent(in)  :: ivar
 integer,  intent(in)  :: kk_inds(2)
 integer,  intent(in)  :: ij_inds(4)     ! ileft, iright, jbot, jtop
 real(r8), intent(in)  :: ij_wgts(2)     ! ifrac, jfrac
-real(r8), intent(out) :: interp_val(2)  ! at two height levels 
+real(r8), intent(out) :: interp_hv(2)  ! at two height levels 
 integer,  intent(out) :: istatus
 
 integer  :: k, ll, lr, ur, ul
@@ -1471,7 +1464,7 @@ ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
 
 do k = 1, 2 
 
- interp_val(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
+ interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
                  ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
 
 end do
@@ -1482,8 +1475,8 @@ if (debug > 99 .and. do_output()) then
    write(*,*)'iright, jbot, level_index decompose to ',lr, x(lr), ij_wgts(1)
    write(*,*)'iright, jtop, level_index decompose to ',ur, x(ur), ij_rwgts(2)  
    write(*,*)' ileft, jtop, level_index decompose to ', ul, x( ul),ij_rwgts(2) 
-   write(*,*)' horizontal value is ', kk_inds(1), interp_val(1)
-   write(*,*)' horizontal value is ', kk_inds(2), interp_val(2)
+   write(*,*)' horizontal value is ', kk_inds(1), interp_hv(1)
+   write(*,*)' horizontal value is ', kk_inds(2), interp_hv(2)
 endif
 
 return

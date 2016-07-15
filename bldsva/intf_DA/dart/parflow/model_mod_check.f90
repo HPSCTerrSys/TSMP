@@ -28,7 +28,7 @@ use  assim_model_mod, only : open_restart_read, open_restart_write, close_restar
 
 use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              read_time, get_time, set_time,  &
-                             print_time, write_time, operator(-)
+                             print_time, print_date, write_time, operator(-)
 
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
                              get_state_vector, get_parflow_filename, model_interpolate
@@ -77,6 +77,7 @@ real(r8), allocatable :: statevector(:)
 integer :: i, skip
 
 character(len=metadatalength) :: state_meta(1)
+character(len=256)            :: parflow_input_file
 type(netcdf_file_type) :: ncFileID
 type(location_type) :: loc
 
@@ -227,7 +228,56 @@ else
    write(*,*)'model_interpolate ERROR: model_interpolate failed with error code ',ios_out
 endif
 
+!----------------------------------------------------------------------
+! Exhaustive test of model_interpolate.
+!----------------------------------------------------------------------
+
+if (test1thru < 9 ) goto 999
+
+write(*,*)
+write(*,*)'Exhaustive test of model interpolate not written yet ...'
+
  200 continue
+
+!----------------------------------------------------------------------
+! Writing dart output file.
+!----------------------------------------------------------------------
+
+if (test1thru < 10) goto 999
+
+parflow_input_file = get_parflow_filename()
+
+write(*,*)
+write(*,*)'Reading restart files from  '//trim(parflow_input_file)
+
+call get_state_vector(statevector, model_time)
+
+write(*,*)
+write(*,*)'Writing data into '//trim(output_file)
+iunit = open_restart_write(output_file)
+call awrite_state_restart(model_time, statevector, iunit)
+call close_restart(iunit)
+
+!----------------------------------------------------------------------
+! Open a test DART initial conditions file.
+! Reads the valid time, the state, and (possibly) a target time.
+!----------------------------------------------------------------------
+
+if (test1thru < 11) goto 999
+
+write(*,*)
+write(*,*)'Reading '//trim(output_file)
+
+iunit = open_restart_read(output_file)
+if ( advance_time_present ) then
+   call aread_state_restart(model_time, statevector, iunit, adv_to_time)
+else
+   call aread_state_restart(model_time, statevector, iunit)
+endif
+call close_restart(iunit)
+
+call print_date( model_time,'model_mod_check:model date')
+call print_time( model_time,'model_mod_check:model time')
 
  999 continue
 
