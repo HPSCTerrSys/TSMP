@@ -50,7 +50,7 @@ do
   cosout=`ls -1 cosout/lfff* | tail -n -1`
   ln -s $cosrst cosmo_prior
   ln -s $cosout cosmo.nc
-  ../cosmo_to_dart & || exit 1
+  ../cosmo_to_dart || exit 1
 
   dartinstance=$(( $instance + 1 ))
   filterName=`printf ../filter_ics.%04d $dartinstance`
@@ -85,7 +85,7 @@ do
   dartinstance=$(( $instance + 1 ))
   filterRestartName=`printf ../filter_restart.%04d $dartinstance`
   ln -s $filterRestartName dart_posterior 
-  ../dart_to_cosmo & || exit 4
+  ../dart_to_cosmo || exit 4
   cd ..
 done
 

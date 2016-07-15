@@ -62,22 +62,21 @@ set icycle = $1
     echo "Block 2: Make the restart runs ....TODO dates !!!!"
     echo "-------------------------------------------------------------------"
     echo " "
-    # Date manager
-    set timefile_path = "./"
-    set defaultStartDate = `grep defaultStartDate $timefile_path/cosmo_prior_time.txt`
-    set defaultInitDate = `grep defaultInitDate $timefile_path/cosmo_prior_time.txt`
-    set clmext = `grep clmext $timefile_path/cosmo_prior_time.txt`
-    set cosrbin = `grep cosrbin $timefile_path/cosmo_prior_time.txt`
-    set pflhist = `grep pflhist $timefile_path/cosmo_prior_time.txt`
-
-#TODO
-
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
     set oldsdate  = `printf dart%02d $oldicycle`
     set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
     set oldrundir = $tsmpdir"/run/"$temp_dir
+    #
+    # Date manager
+    set timefile_path = $oldrundir"/tsmp_instance_0"
+    set defaultStartDate = `grep defaultStartDate $timefile_path/cosmo_prior_time.txt`
+    set defaultInitDate = `grep defaultInitDate $timefile_path/cosmo_prior_time.txt`
+    set clmext = `grep clmext $timefile_path/cosmo_prior_time.txt`
+    set cosrbin = `grep cosrbin $timefile_path/cosmo_prior_time.txt`
+    set pflhist = `grep pflhist $timefile_path/cosmo_prior_time.txt`
+    #
     #
     set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc"
     set cosrstfil = "$oldrundir/tsmp_instance_X/cosrst/$cosrbin[2]"
@@ -104,6 +103,7 @@ set icycle = $1
     foreach instance (`seq 0 $numInst`)
       cd  "tsmp_instance_"$instance
       #COSMO
+      rm cosmo_in/raso_IdealSnd_0000LT_*
       #TODO for normal restart run without assimilation
       ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
       # for restart run with assimilation
