@@ -54,8 +54,8 @@ set icycle = $1
     set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     set rundir        = $tsmpdir"/run/"$temp_dir
     #
-    # Perturb
-    $shellpath/perturb.csh $rundir $ensemble_size
+    # Perturb the model state
+    $shellpath/perturb_model_state.csh $rundir $ensemble_size
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
@@ -117,8 +117,6 @@ set icycle = $1
       cd ..
     end
 
-    # Perturb
-    $shellpath/perturb.csh $rundir $ensemble_size
   else
     echo "ERROR : icycle < 1"
     exit 1
