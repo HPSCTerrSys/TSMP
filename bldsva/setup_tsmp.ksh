@@ -840,7 +840,12 @@ check
 comment "  source oas build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh  >> $log_file 2>> $err_file
 check
-      setup_oas 
+      setup_oas
+#DA
+comment "  cp pfl exe to $origrundir"
+    cp $bindir/tsmp-pdaf-pfclm $origrundir  >> $log_file 2>> $err_file
+check 
+
     if [[ $withOASMCT == "false" ]] ; then 
 comment "  cp oas exe to $origrundir"
 	 cp $bindir/oasis3.MPI1.x $origrundir  >> $log_file 2>> $err_file

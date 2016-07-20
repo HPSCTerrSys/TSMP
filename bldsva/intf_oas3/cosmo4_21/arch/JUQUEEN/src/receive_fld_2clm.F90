@@ -73,7 +73,7 @@ USE data_runcontrol , ONLY :                &
           nnow  ,       & ! corresponds to ntstep
           nnew  ,       & ! corresponds to ntstep + 1
           nstop ,       & ! last time step of the forecast period
-          ntstep
+          ntstep,       & 
           nstart,       & !KGo
           hstart ,      & !KGo
           hstop           !KGo
