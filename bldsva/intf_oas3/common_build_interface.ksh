@@ -132,7 +132,7 @@ comment "  create input dir for cosmo"
   mkdir -p $rundir/cosmo_in >> $log_file 2>> $err_file
 check
 comment "  fill cosmo input dir with softlinks from cosmo forcing dir"
-  ln -s $forcingdir_cos/* $rundir/cosmo_in >> $log_file 2>> $err_file
+  ln -sf $forcingdir_cos/* $rundir/cosmo_in >> $log_file 2>> $err_file
 check
 
 comment "  sed forcingdir to namelist"
@@ -189,6 +189,9 @@ comment "  run lmrun_uc exe"
   $rundir/lmrun_uc execluma >> $log_file 2>> $err_file
 check
 
+if [[ $withPDAF == "true" ]] ; then
+  cp $rundir/INPUT_IO $rundir/INPUT_IO_$(printf "%05d" $(($instance-$startInst)))     
+fi
 
 route "${cblue}<<< c_setup_cos${cnormal}"
 }
@@ -500,6 +503,10 @@ comment "  run clm namelist"
     $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 
+if [[ $withPDAF == "true" ]] ; then
+  cp $rundir/lnd.stdin $rundir/lnd.stdin_$(printf "%05d" $(($instance-$startInst)))     
+fi
+
 route "${cblue}<<< c_setup_clm${cnormal}"
 }
 
@@ -714,4 +721,40 @@ route "${cblue}<<< c_setup_pfl${cnormal}"
 }
 
 
+############################ 
+#PDAF interface methods
+############################
 
+
+c_setup_pdaf(){
+route "${cblue}>>> c_setup_da${cnormal}"
+  comment "   copy parflow namelist to rundir."
+    cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+  comment "   sed num instances into pdaf namelist."
+    sed "s/__ninst__/$(($numInst-$startInst))/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed pflname into pdaf namelist."
+    sed "s/__pflname__/$pflrunname/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed pflproc into pdaf namelist."
+    sed "s/__pflproc__/$nproc_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed dt into pdaf namelist."
+    sed "s/__dt__/$dt_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed endtime into pdaf namelist."
+    sed "s/__endtime__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed clmproc into pdaf namelist."
+    sed "s/__clmproc__/$nproc_clm/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed cosproc into pdaf namelist."
+    sed "s/__cosproc__/$nproc_cos/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+  comment "   sed dtmult into pdaf namelist."
+    sed "s/__dtmult__/$(python -c "print ${dt_pfl} * 3600 / ${dt_cos}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+
+route "${cblue}<<< c_setup_da${cnormal}"
+}

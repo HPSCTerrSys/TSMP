@@ -222,11 +222,17 @@ comment "   sed executables and processors into mapping file for instance $insta
   check
 
 
+if [[ $withPDAF == "true" ]] ; then
+  runjob="runjob -p $nppn -n $mpitasks $runflags : ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -delt_obs $delta_obs -rms_obs 0 -obs_filename noname"
+else
+  runjob="runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe"
+fi
+
 
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
 date
-runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe 
+$runjob
 date
 
 echo "ready" > ready.txt

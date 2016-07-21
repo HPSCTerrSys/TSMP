@@ -4,12 +4,12 @@ initSetup(){
   defaultFDCLM="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std"
   defaultFDCOS="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/cosmo/int2lm_output.20080508"
   defaultFDOAS="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/oasis3"
-  defaultFDPFL="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW"
-
+  defaultFDPFL="/work/slts/slts00/tsmp/TerrSysMPdb/testdata_NRW_std/ParFlow/Rur_NRW"   
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
+  defaultNLDA=$rootdir/bldsva/setups/nrw/DA-nl
 
   defaultNppn=48
   defaultCLMProcX=2
@@ -46,6 +46,8 @@ initSetup(){
   cplfreq1=900
   cplfreq2=900
 
+  delta_obs=90000
+ 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_a1

@@ -10,7 +10,7 @@ initSetup(){
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl 
-
+  defaultNLDA=$rootdir/bldsva/setups/nrw/DA-nl
 
   defaultNppn=16
   defaultCLMProcX=8
@@ -44,6 +44,8 @@ initSetup(){
   dt_pfl=0.25
   pflrunname="rurlaf"
   base_pfl=0.0025
+
+  delta_obs=90000
 
   cplfreq1=900
   cplfreq2=900

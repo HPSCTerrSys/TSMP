@@ -161,7 +161,7 @@ if [[ ($cmd = cleancluma) || ($cmd = cleansx9) ]]; then
   rm mon.out.*
   rm -f *~
   rm -f YU*
-  rm -f INPUT_*
+#  rm -f INPUT_*
   rm -f ${jobname}*
   rm -f output/*
   rm -f $OUTPUT/*

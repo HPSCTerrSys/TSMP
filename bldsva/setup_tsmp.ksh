@@ -23,6 +23,9 @@ getDefaults(){
   def_namelist_cos=""
   def_namelist_oas=""
   def_namelist_pfl=""
+#DA
+  def_namelist_da=""
+
   def_forcingdir_clm=""
   def_forcingdir_cos=""
   def_forcingdir_oas=""
@@ -103,6 +106,9 @@ setDefaults(){
   namelist_cos=$def_namelist_cos
   namelist_oas=$def_namelist_oas
   namelist_pfl=$def_namelist_pfl
+#DA
+  namelist_da=$def_namelist_da
+
   startDate=$def_startDate
   runhours=$def_runhours
   initDate=$def_initDate
@@ -142,6 +148,8 @@ clearPathSelection(){
   namelist_cos=""
   namelist_pfl=""
   namelist_oas=""
+#DA
+  namelist_da=""
 }
 
 setSelection(){
@@ -165,6 +173,8 @@ setSelection(){
   if [[ $namelist_cos == "" ]] then ; namelist_cos=$defaultNLCOS ; fi
   if [[ $namelist_oas == "" ]] then ; namelist_oas=$defaultNLOAS ; fi
   if [[ $namelist_pfl == "" ]] then ; namelist_pfl=$defaultNLPFL ; fi
+#DA
+  if [[ $namelist_da == "" ]] then ; namelist_da=$defaultNLDA ; fi
 
   if [[ $startDate == "" ]] then ; startDate=$defaultStartDate ; fi
   if [[ $initDate == "" ]] then ; initDate=$defaultInitDate ; fi
@@ -204,6 +214,9 @@ setCombination(){
   withCLM="false"
   withOASMCT="false"
   withPCLM="false"
+#DA
+  withDA="false"
+  withPDAF="false"
 
   case "$combination" in *clm*) withCLM="true" ;; esac
   case "$combination" in *cos*) withCOS="true" ;; esac
@@ -212,7 +225,8 @@ setCombination(){
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi  
-
+#DA
+  case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
 }
 
 finalizeSelection(){
@@ -468,18 +482,19 @@ interactive(){
                   if [[ $numb == 24 ]] ; then ; read forcingdir_pfl ; fi
                   if [[ $numb == 25 ]] ; then ; read namelist_oas ; fi
                   if [[ $numb == 26 ]] ; then ; read forcingdir_oas ; fi
-                  if [[ $numb == 27 ]] ; then ; read profiling ; fi
-                  if [[ $numb == 28 ]] ; then ; read numInst ; fi
-  		  if [[ $numb == 29 ]] ; then ; read startInst ; fi
-                  if [[ $numb == 30 ]] ; then ; read initDate ; fi
-		  if [[ $numb == 31 ]] ; then ; read cplscheme ; fi
-   		  if [[ $numb == 32 ]] ; then ; read exp_id ; fi
-		  if [[ $numb == 33 ]] ; then ; read restfile_pfl ; fi
-		  if [[ $numb == 34 ]] ; then ; read restfile_clm ; fi
-		  if [[ $numb == 35 ]] ; then ; read restfile_cos ; fi
-                  if [[ $numb == 36 ]] ; then ; read dump_pfl ; fi
-                  if [[ $numb == 37 ]] ; then ; read dump_clm ; fi
-                  if [[ $numb == 38 ]] ; then ; read dump_cos ; fi
+		  if [[ $numb == 27 ]] ; then ; read namelist_da ; fi
+                  if [[ $numb == 28 ]] ; then ; read profiling ; fi
+                  if [[ $numb == 29 ]] ; then ; read numInst ; fi
+  		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
+                  if [[ $numb == 31 ]] ; then ; read initDate ; fi
+		  if [[ $numb == 32 ]] ; then ; read cplscheme ; fi
+   		  if [[ $numb == 33 ]] ; then ; read exp_id ; fi
+		  if [[ $numb == 34 ]] ; then ; read restfile_pfl ; fi
+		  if [[ $numb == 35 ]] ; then ; read restfile_clm ; fi
+		  if [[ $numb == 36 ]] ; then ; read restfile_cos ; fi
+                  if [[ $numb == 37 ]] ; then ; read dump_pfl ; fi
+                  if [[ $numb == 38 ]] ; then ; read dump_clm ; fi
+                  if [[ $numb == 39 ]] ; then ; read dump_cos ; fi
                 done
                 interactive
           ;;
@@ -524,20 +539,21 @@ printState(){
   print "${cred}(24)${cnormal} forcing dir for pfl (default='$def_forcingdir_pfl'): ${cgreen}$forcingdir_pfl${cnormal}"
   print "${cred}(25)${cnormal} namelist dir for oas (default='$def_namelist_oas'): ${cgreen}$namelist_oas${cnormal}"
   print "${cred}(26)${cnormal} forcing dir for oas (default='$def_forcingdir_oas'): ${cgreen}$forcingdir_oas${cnormal}"
+  print "${cred}(27)${cnormal} namelist dir for data assimilation (default='$def_namelist_da'): ${cgreen}$namelist_da${cnormal}"
   print ""
-  print "${cred}(27)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
-  print "${cred}(28)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
-  print "${cred}(29)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
-  print "${cred}(30)${cnormal} init Date (default=$def_initDate): ${cgreen}$initDate${cnormal}"
-  print "${cred}(31)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
-  print "${cred}(32)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
+  print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
+  print "${cred}(29)${cnormal} number of TerrSysMP instances (default=$def_numInst): ${cgreen}$numInst${cnormal}"
+  print "${cred}(30)${cnormal} counter to start TerrSysMP instances with (default=$def_startInst): ${cgreen}$startInst${cnormal}"
+  print "${cred}(31)${cnormal} init Date (default=$def_initDate): ${cgreen}$initDate${cnormal}"
+  print "${cred}(32)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
+  print "${cred}(33)${cnormal} Experiment ID. DATE will be taken if ''. (default=$def_exp_id): ${cgreen}$exp_id ${cnormal}"
   print ""
-  print "${cred}(33)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
-  print "${cred}(34)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
-  print "${cred}(35)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
-  print "${cred}(36)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
-  print "${cred}(37)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
-  print "${cred}(38)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
+  print "${cred}(34)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
+  print "${cred}(35)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
+  print "${cred}(36)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
+  print "${cred}(37)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
+  print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
+  print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
 
 }
 
@@ -656,6 +672,8 @@ getRoot(){
   USAGE+="[f:namcos? Namelist for Cosmo. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namcos:='']"
   USAGE+="[F:forcedircos? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcedircos:='']"
   USAGE+="[g:nampfl? Namelist for ParFlow. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[nampfl:='']"
+  USAGE+="[h:namda? Namelist for data assimilation. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namda:='']"
+
   USAGE+="[G:forcedirpfl? Forcing directory for ParFlow. This will replace the default forcing dir from the reference setup.]:[forcedirpfl:='']"
   USAGE+="[j:restfileclm? Restart file for CLM. No restart for CLM if ''.]:[restfileclm:='$def_restfile_clm']"
   USAGE+="[k:restfilecos? Restart file for Cosmo. No restart for Cosmo if ''.]:[restfilecos:='$def_restfile_cos']"
@@ -697,6 +715,7 @@ getRoot(){
     F)  forcingdir_cos=$OPTARG ; args=1 ;;
     g)  namelist_pfl=$OPTARG ; args=1 ;;
     G)  forcingdir_pfl=$OPTARG ; args=1 ;;
+    h)  namelist_da=$OPTARG ; args=1 ;;
 
     w)  px_clm=$OPTARG ; args=1 ;;
     W)  py_clm=$OPTARG ; args=1 ;;
@@ -780,82 +799,114 @@ check
   check
 
 #  start setup
-origrundir=$rundir
-orignamelist_cos=$namelist_cos
-orignamelist_clm=$namelist_clm
-orignamelist_pfl=$namelist_pfl
-for instance in {$startInst..$(($startInst+$numInst-1))}
-do
-route ${cblue}"> creating instance: $instance"${cnormal}
-if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) ]] ; then 
-rundir=$origrundir/tsmp_instance_$instance
-comment "  mkdir sub-directory for instance"
-  mkdir -p $rundir >> $log_file 2>> $err_file
-check
-  if [[ -e "${orignamelist_cos}_${instance}" ]] ; then 
-	namelist_cos="${orignamelist_cos}_${instance}"
-  else
-        namelist_cos="$orignamelist_cos"	
-  fi
-  if [[ -e "${orignamelist_clm}_${instance}" ]] ; then
-        namelist_clm="${orignamelist_clm}_${instance}"
-  else
-        namelist_clm="$orignamelist_clm"
-  fi
-  if [[ -e "${orignamelist_pfl}_${instance}" ]] ; then
-        namelist_pfl="${orignamelist_pfl}_${instance}"
-  else
-        namelist_pfl="$orignamelist_pfl"
-  fi
-fi
-
+  origrundir=$rundir
+  orignamelist_cos=$namelist_cos
+  orignamelist_clm=$namelist_clm
+  orignamelist_pfl=$namelist_pfl
   if [[ $withCLM == "true" ]] ; then 
-comment "  source clm build interface for $platform"
+    comment "  source clm build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
-check
-      setup_clm
-comment "  cp clm exe to $origrundir" 
-    cp $bindir/clm $origrundir >> $log_file 2>> $err_file
-check
+    check
+    if [[ $withPDAF == "false" ]] ; then
+      comment "  cp clm exe to $rundir" 
+        cp $bindir/clm $rundir >> $log_file 2>> $err_file
+      check
+    fi
   fi
   if [[ $withCOS == "true" ]] ; then
-comment "  source cos build interface for $platform"
+    comment "  source cos build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
-check
-      setup_cos 
-comment "  cp cos exe and starter to $origrundir"
-    cp $bindir/lmparbin_pur $origrundir  >> $log_file 2>> $err_file
-check
+    check
+    if [[ $withPDAF == "false" ]] ; then
+      comment "  cp cos exe to $rundir"
+        cp $bindir/lmparbin_pur $rundir  >> $log_file 2>> $err_file
+      check
+    fi
   fi
-  if [[ $withPFL == "true" ]] ; then 
-comment "  source pfl build interface for $platform"
+  if [[ $withPFL == "true" ]] ; then
+    comment "  source pfl build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
-check
-      setup_pfl 
-comment "  cp pfl exe to $origrundir"
-    cp $bindir/parflow $origrundir  >> $log_file 2>> $err_file
-check
+    check
+    if [[ $withPDAF == "false" ]] ; then
+      comment "  cp pfl exe to $rundir"
+        cp $bindir/parflow $rundir  >> $log_file 2>> $err_file
+      check
+    fi
   fi
-  if [[ $withOAS == "true" ]] ; then 
-comment "  source oas build interface for $platform"
+  if [[ $withOAS == "true" ]] ; then
+    comment "  source oas build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh  >> $log_file 2>> $err_file
-check
-      setup_oas
-#DA
-comment "  cp pfl exe to $origrundir"
-    cp $bindir/tsmp-pdaf-pfclm $origrundir  >> $log_file 2>> $err_file
-check 
-
-    if [[ $withOASMCT == "false" ]] ; then 
-comment "  cp oas exe to $origrundir"
-	 cp $bindir/oasis3.MPI1.x $origrundir  >> $log_file 2>> $err_file
-check
+    check
+    if [[ $withOASMCT == "false" ]] ; then
+      comment "  cp oas exe to $rundir"
+         cp $bindir/oasis3.MPI1.x $rundir  >> $log_file 2>> $err_file
+      check
     fi
   fi
 
-  finalizeSetup
-route ${cblue}"< creating instance: $instance"${cnormal}
-done
+#DA
+  if [[ $withPDAF == "true" ]] ; then
+    comment "  source PDAF build interface for $platform"
+      . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh  >> $log_file 2>> $err_file
+    check
+    comment "  cp da exe to $rundir"
+      cp $bindir/tsmp-pdaf $rundir  >> $log_file 2>> $err_file
+    check
+  fi
+
+
+
+  for instance in {$startInst..$(($startInst+$numInst-1))}
+  do
+  route ${cblue}"> creating instance: $instance"${cnormal}
+    # Ensemble only creation
+    if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) && $withPDAF == "false" ]] ; then 
+      rundir=$origrundir/tsmp_instance_$instance
+      comment "  mkdir sub-directory for instance"
+        mkdir -p $rundir >> $log_file 2>> $err_file
+      check
+      if [[ -e "${orignamelist_cos}_${instance}" ]] ; then 
+	namelist_cos="${orignamelist_cos}_${instance}"
+      else
+        namelist_cos="$orignamelist_cos"	
+      fi
+      if [[ -e "${orignamelist_clm}_${instance}" ]] ; then
+        namelist_clm="${orignamelist_clm}_${instance}"
+      else
+        namelist_clm="$orignamelist_clm"
+      fi
+      if [[ -e "${orignamelist_pfl}_${instance}" ]] ; then
+        namelist_pfl="${orignamelist_pfl}_${instance}"
+      else
+        namelist_pfl="$orignamelist_pfl"
+      fi
+    fi
+
+ #DA
+    #PDAF creation
+    if [[ $withPDAF == "true" ]] ; then
+	namelist_cos="${orignamelist_cos}_${instance}"
+        namelist_clm="${orignamelist_clm}_${instance}"
+        namelist_pfl="${orignamelist_pfl}_${instance}"
+    fi
+
+    if [[ $withCLM == "true" ]] ; then ; setup_clm ;  fi
+    if [[ $withCOS == "true" ]] ; then ; setup_cos ;  fi
+    if [[ $withPFL == "true" ]] ; then ; setup_pfl ;  fi
+    if [[ $withOAS == "true" ]] ; then ; setup_oas ;  fi
+
+    if [[ $withPDAF == "false" ]] ; then
+      finalizeSetup
+    fi
+  route ${cblue}"< creating instance: $instance"${cnormal}
+  done
+
+#DA
+  if [[ $withPDAF == "true" ]] ; then
+    setup_da
+    finalizeSetup
+  fi
+
   rundir=$origrundir
   namelist_cos="$orignamelist_cos"
   namelist_clm="$orignamelist_clm"
