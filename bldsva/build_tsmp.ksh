@@ -713,6 +713,11 @@ check
   finalizeMachine
   runCompilation
 
+  echo "Git:" >> $log_file
+  git rev-parse --abbrev-ref HEAD >> $log_file
+  git rev-parse HEAD >> $log_file
+  
+  echo "Selection:" >> $log_file
   printState >> $log_file
 
   #remove special charecters for coloring from logfiles
@@ -726,6 +731,7 @@ check
   sed -i "s,.\[34m,,g" $stdout_file
   sed -i "s,.[(]B.\[m,,g" $stdout_file
 
+  echo "Call:" >> $log_file
   print "$call $*">> $log_file
   mv -f $err_file $bindir
   mv -f $log_file $bindir

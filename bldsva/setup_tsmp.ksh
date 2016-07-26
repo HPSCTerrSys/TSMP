@@ -866,7 +866,12 @@ done
 
   createRunscript
 
+  echo "Git:" >> $log_file
+  git rev-parse --abbrev-ref HEAD >> $log_file
+  git rev-parse HEAD >> $log_file
+  echo "Selection:" >> $log_file
   printState >> $log_file
+  echo "Call:" >> $log_file
   print "$call $*">> $log_file
   #remove special charecters for coloring from logfiles
   sed -i "s,.\[32m,,g" $log_file
