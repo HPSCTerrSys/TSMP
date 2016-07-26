@@ -75,7 +75,12 @@ REAL(KIND=8), ALLOCATABLE                  :: lclon(:,:,:),      &!
 
 REAL                                       ::  dlat, dlon
 !
-INTEGER                                    ::  readclm = 1        ! 1 or 0 to read clm grid
+#ifdef READCLM
+INTEGER                         :: readclm = 1         ! 1 or 0 to read clm mask
+#else
+INTEGER                         :: readclm = 0         ! 1 or 0 to read clm mask
+#endif
+
 REAL(KIND=8), ALLOCATABLE                  ::  clmlon(:,:),        &! 
                                                clmlat(:,:)          ! Global Grid Centres
 INTEGER                                    ::  status, pflncid,  &!

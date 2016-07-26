@@ -22,6 +22,11 @@ initSetup(){
 
   defaultStartDate="2016-05-01 12"
   defaultInitDate="2016-05-01 12"
+  
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1
+  
   defaultRunhours=3
 
   gx_clm=436

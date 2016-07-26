@@ -100,7 +100,11 @@ INTEGER(KIND=iintegers)         :: nlei_tot, nlej_tot  ! upper halo limits on a 
 INTEGER(KIND=iintegers)         :: jih_tot, jjh_tot    ! global subdomain size without halo
 REAL(KIND=wp)               :: start_lonc, start_latc
 
+#ifdef READCLM
+INTEGER                         :: readclm = 1         ! 1 or 0 to read clm mask
+#else
 INTEGER                         :: readclm = 0         ! 1 or 0 to read clm mask
+#endif
 INTEGER                         :: status, cosncid, cosvarid(7)
 
 !------------------------------------------------------------------------------

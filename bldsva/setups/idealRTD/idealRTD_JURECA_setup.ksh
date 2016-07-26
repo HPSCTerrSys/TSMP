@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/RTDsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
+  defaultFDCLM="/homea/slts/slts06/forcings/idealRTD"
+  defaultFDCOS="/homea/slts/slts06/forcings/idealRTD/cosmo/RTDsounding"
+  defaultFDOAS="/homea/slts/slts06/forcings/idealRTD/oasis3/mapping_matrix_idealRTD"
+  defaultFDPFL="/homea/slts/slts06/forcings/idealRTD/ParFlow/idealRTD"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
@@ -12,7 +12,7 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
-  defaultNppn=64
+  defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=2
   defaultCOSProcX=2
