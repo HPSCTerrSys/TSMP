@@ -52,9 +52,6 @@ route "${cblue}>> substitutions_cos${cnormal}"
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj* $cosdir >> $log_file 2>> $err_file
   check
 
- comment "   currently a fixed receive_fld2clm.F90 is necessary"
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
- check
 
 
 # comment "   a fixed mpe_io.f90 for MPICH MPIs is necessary"

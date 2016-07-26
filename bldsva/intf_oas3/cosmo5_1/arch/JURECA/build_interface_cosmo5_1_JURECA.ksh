@@ -50,9 +50,6 @@ route "${cblue}>> substitutions_cos${cnormal}"
  comment "   cp ObjFiles & ObjDependencies in $cosdir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj* $cosdir >> $log_file 2>> $err_file
  check
- comment "   currently a fixed receive_fld2clm.F90 is necessary"
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
- check
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"
        sed -i "s/mod_prism_proto/mod_prism/" $cosdir/src/oas3/oas_cos_vardef.F90 >> $log_file 2>> $err_file

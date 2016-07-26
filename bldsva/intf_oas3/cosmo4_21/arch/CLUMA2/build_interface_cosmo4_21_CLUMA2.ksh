@@ -45,9 +45,6 @@ substitutions_cos(){
 route "${cblue}>> substitutions_cos${cnormal}"
  c_substitutions_cos
 
- comment "   currently a fixed receive_fld2clm.F90 is necessary"
-   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/$platform/src/receive_fld_2clm.F90 $cosdir/src/oas3 >> $log_file 2>> $err_file
- check
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"
        sed -i "s/mod_prism_proto/mod_prism/" $cosdir/src/oas3/oas_cos_vardef.F90 >> $log_file 2>> $err_file

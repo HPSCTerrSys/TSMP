@@ -209,6 +209,13 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
    int         *fdir;
    int          ipatch, ival;
    int          dir = 0;
+
+
+   int         freedrain = 0;  
+#ifdef FREEDRAINAGE
+   freedrain = 1;
+   printf("free drainage BC used \n");
+#endif
    
    VectorUpdateCommHandle  *handle;
 
@@ -859,7 +866,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
        z_mult_sub = VectorSubvector(z_mult, is);
        /* @RMM added to provide variable dz */
        z_mult_dat = SubvectorData(z_mult_sub);
-       
+      
        
 
       for (ipatch = 0; ipatch < BCStructNumPatches(bc_struct); ipatch++)
@@ -1286,12 +1293,15 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
                   fp[ip] -= dt * dir * u_old;
                   /* Add the correct boundary term */
                   /* JKe: 1D-Free-Drainage:    (new, 1D free drainage by hydraulic conductivity)  */
-#ifdef FREEDRAINAGE
-                  u_new = u_new * rpp[ip]*permzp[ip]*bc_patch_values[ival];
-#else
-		  u_new = u_new * bc_patch_values[ival];
-#endif
+
+
+		  if (freedrain)
+                    u_new = u_new * rpp[ip]*permzp[ip]*bc_patch_values[ival];
+		  else
+		    u_new = u_new * bc_patch_values[ival];
+                  
                   fp[ip] += dt * dir * u_new;
+
 
 	       });
 

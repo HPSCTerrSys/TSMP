@@ -241,29 +241,30 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    ENDIF
 
 
-   cplfreq = NINT ( hincrad * 3600.0_ireals)        !CPS
-
-!CPS   IF (isec <= cplfreq ) THEN
-!CPS     frcv(:,:,jps_taux) =   0._ireals                      !CPS bandaid
-!CPS     frcv(:,:,jps_tauy) =   0._ireals                      !CPS bandaid 
-!CPS     frcv(:,:,jps_lat ) =   0._ireals                      !CPS bandaid
-!CPS     frcv(:,:,jps_sens) =   0._ireals                      !CPS bandaid 
-!CPS     frcv(:,:,jps_ir  ) = 350.05_ireals                    !CPS bandaid 
-!CPS     frcv(:,:,jps_albd) = 0.2_ireals                       !CPS bandaid
-!CPS     frcv(:,:,jps_albi) = 0.2_ireals                       !CPS bandaid
+!   cplfreq = NINT ( hincrad * 3600.0_ireals)        !CPS
+! FG the bandaid is still needed to initialize the halo. 
+! Cells inside the domain are getting overwritten in the first coupling.
+   IF (isec <= cplfreq ) THEN
+     frcv(:,:,jps_taux) =   0._ireals                      !CPS bandaid
+     frcv(:,:,jps_tauy) =   0._ireals                      !CPS bandaid 
+     frcv(:,:,jps_lat ) =   0._ireals                      !CPS bandaid
+     frcv(:,:,jps_sens) =   0._ireals                      !CPS bandaid 
+     frcv(:,:,jps_ir  ) = 350.05_ireals                    !CPS bandaid 
+     frcv(:,:,jps_albd) = 0.2_ireals                       !CPS bandaid
+     frcv(:,:,jps_albi) = 0.2_ireals                       !CPS bandaid
 !MU (18.09.12)
-!CPS     frcv(:,:,jps_co2fl)=   0._ireals
+     frcv(:,:,jps_co2fl)=   0._ireals
 !MU (18.09.12)
-!CPS     frcv(:,:,jps_ram1 )=   100._ireals
-!CPS     frcv(:,:,jps_rah1 )=   100._ireals
-!CPS     frcv(:,:,jps_raw1 )=   100._ireals
-!CPS     frcv(:,:,jps_tsf1 )=   283._ireals
-!CPS     frcv(:,:,jps_qsf1 )=   0.005_ireals
+     frcv(:,:,jps_ram1 )=   100._ireals
+     frcv(:,:,jps_rah1 )=   100._ireals
+     frcv(:,:,jps_raw1 )=   100._ireals
+     frcv(:,:,jps_tsf1 )=   283._ireals
+     frcv(:,:,jps_qsf1 )=   0.005_ireals
 !MU (12.04.13)
-!CPS     frcv(:,:,jps_fpsn)=   0._ireals
-!CPS     frcv(:,:,jps_fplres)=   0._ireals
+     frcv(:,:,jps_fpsn)=   0._ireals
+     frcv(:,:,jps_fplres)=   0._ireals
 !MU (12.04.13)
-!CPS   END IF
+   END IF
 
    cplstop = INT((nstop*dt+cplfreq)/cplfreq) - 1 !CPS
 
@@ -280,7 +281,6 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    ! frcv keep values from previous coupling (array from module) at other time step
    DO jn = 1, krcv
      IF( srcv(jn)%laction )   CALL oas_cos_rcv( jn, isec, ztmp1(:,:), nrcvinfo(jn) )   !CPS fix
-!CPS     IF( nrcvinfo(jn) == OASIS_Rcv .and. isec>= cplfreq ) THEN
      IF( nrcvinfo(jn) == OASIS_Rcv) THEN
         frcv(nldi:nlei, nldj:nlej, jn)=ztmp1(nldi:nlei, nldj:nlej) 
      ENDIF
