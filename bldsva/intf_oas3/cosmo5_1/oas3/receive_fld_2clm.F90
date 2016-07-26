@@ -241,16 +241,12 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    nrcvinfo = OASIS_idle
    ztmp1=0._wp
 
-!FG   isec = ntstep * dt
-   IF ( hstart > 0 ) THEN    
       isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
-   ELSE    
-      isec = ntstep * dt    
-   ENDIF
 
 
 
-!   cplfreq = NINT ( hincrad * 3600.0_wp)        !CPS
+!   cplfreq = NINT ( hincrad * 3600.0_wp)        !CPS   !FG Why should  this
+!   be necessary? cplfreq should come correctly from oasis
 !  CPS new values to remove kinks for startup from midnight
 ! FG the bandaid is still needed to initialize the halo. 
 ! Cells inside the domain are getting overwritten in the first coupling.
