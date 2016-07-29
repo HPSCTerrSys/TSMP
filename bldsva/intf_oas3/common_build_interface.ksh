@@ -520,11 +520,6 @@ c_configure_pfl(){
 
 
 route "${cblue}>>> c_configure_pfl${cnormal}"
-#DA
-#    comment "    clean $pfldir/lib"
-#      rm $pfldir/lib/*
-#    check
-
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -627,6 +622,13 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
   check
 #DA
   if [[ $withPDAF == "true" ]]; then
+    comment "    sed DA amps into configure"
+      sed "/\"\$with_amps\" in\s*/ a\
+  da\)\\
+    AMPS=da\\
+  ;;
+      " -i $pfldir/pfsimulator/configure $pfldir/pftools/configure >> $log_file 2>> $err_file
+    check
     comment "    copy fix for PDAF into $pfldir"
       cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
     check
