@@ -292,12 +292,12 @@ warning(){
 
 hardSanityCheck(){
   if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '.$call --man' for help"
+      print "The selected version '${version}' is not available. run '$call --man' for help"
       terminate
   fi
 
   if [[ "${platforms[${platform}]}" == ""  ]] then
-      print "The selected platform '${platform}' is not available. run '.$call --man' for help"
+      print "The selected platform '${platform}' is not available. run '$call --man' for help"
       terminate
   fi
 
@@ -598,13 +598,22 @@ listTutorial(){
 
 getRoot(){
   #automatically determine root dir
-  call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
-  cpwd=`pwd` 
-  call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
-  call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
-  curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /    
-  call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
-  estdir=`echo "/$curr$call" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+  cpwd=`pwd`
+  if [[ "$0" == '/'*  ]] ; then
+    #absolut path
+    estdir=`echo "$0" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call=$0
+  else
+    #relative path
+    call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
+    call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
+    call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
+    curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /   
+    call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
+    estdir=`echo "/$curr$call" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call="$estdir/bldsva$call"
+  fi 
+  
 }
 
 #######################################
@@ -867,6 +876,7 @@ done
   createRunscript
 
   echo "Git:" >> $log_file
+  cd $rootdir
   git rev-parse --abbrev-ref HEAD >> $log_file
   git rev-parse HEAD >> $log_file
   echo "Selection:" >> $log_file
@@ -891,5 +901,5 @@ done
   print ${cgreen}"install script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"
   print "Bindir: ${bindir}"
-  print "Rundir: ${rundir}"
+  print "Rundir: ${rundir}" 
 
