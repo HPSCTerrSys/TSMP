@@ -113,7 +113,7 @@ pfset TimingInfo.StartTime		 0.0
 pfset TimingInfo.StopTime		 __stop_pfl_bldsva__
 pfset TimeStep.Type			 Constant
 pfset TimeStep.Value			 __dt_pfl_bldsva__
-pfset TimingInfo.DumpInterval		 1.0
+pfset TimingInfo.DumpInterval		 __dump_pfl_interval__
 
 #-----------------------------------------------------------------------------
 # Time Cycles
