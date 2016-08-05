@@ -1406,7 +1406,7 @@ integer,                   intent(in) :: iunit
 type(time_type),           intent(in) :: statetime
 
 integer           :: iyear, imonth, iday, ihour, imin, isec
-integer           :: ndays, nhours, nmins, nsecs
+integer           :: ndays, nhours, nmins, nsecs,nfreq
 type(time_type)   :: interval
 
 call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
@@ -1422,10 +1422,11 @@ nhours = nsecs / (60*60)
 nsecs  = nsecs - (nhours * 60*60)
 nmins  = nsecs / 60
 nsecs  = nsecs - (nmins * 60)
+nfreq  = 3   !PFL SPECIFIC
 
 write(iunit, '(''cosrbin '',''lrff'',4(I2.2),''o'')') ndays, nhours, nmins, nsecs
 write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, nsecs
-write(iunit, '(''pflhist '',I5.5)') ndays*24 + nhours
+write(iunit, '(''pflhist '',I5.5)') (ndays*24 + nhours)/nfreq
 
 call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
 write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 

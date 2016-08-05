@@ -1,8 +1,10 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle
+# usage: ./tsmp_setup.csh cycle nrst
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
+#  nrst   = 0 for normal restart
+#  nrst   = 1 for restart with assimilation
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
 # --- defaultInitDate  = "2008-05-09 00"
@@ -17,7 +19,7 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set ensemble_size = 16 
+set ensemble_size = 48 
 set machine       = "CLUMA2"
 # paths 
 set tsmpdir       = $HOME/terrsysmp
@@ -31,6 +33,7 @@ echo "`date` -- BEGIN setup of terrsysmp for assimilation with dart"
 echo " "
 
 set icycle = $1
+set inrst  = $2
 #-------------------------------------------------------------------------
 # Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
@@ -104,11 +107,17 @@ set icycle = $1
       cd  "tsmp_instance_"$instance
       #COSMO
       rm cosmo_in/raso_IdealSnd_0000LT_*
-      #TODO for normal restart run without assimilation
-      ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
-      # for restart run with assimilation
-      rm cosmo_in/$cosrbin[2]
-      ln -sf $oldrundir/"tsmp_instance_"$instance/cosmo_restart ./cosmo_in/$cosrbin[2]
+      if ($inrst == 0) then 
+        #TODO for normal restart run without assimilation
+        ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
+      else if ($inrst == 1) then 
+        # for restart run with assimilation
+        rm cosmo_in/$cosrbin[2]
+        ln -sf $oldrundir/"tsmp_instance_"$instance/cosmo_restart ./cosmo_in/$cosrbin[2]
+      else
+        echo "Code not written for inrst = ", $inrst
+        exit
+      endif
       #CLM
       sed "s,tsmp_instance_X,tsmp_instance_$instance," -i lnd.stdin
       #ParFlow

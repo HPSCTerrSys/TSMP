@@ -21,7 +21,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default Processor settings
-  defaultwtime="00:90:00"
+  defaultwtime="00:300:00"
   defaultQ="batch"
 
 route "${cblue}<< getMachineDefaults${cnormal}"

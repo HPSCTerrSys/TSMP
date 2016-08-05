@@ -39,6 +39,7 @@ initSetup(){
   dt_pfl=0.005
   pflrunname="rurlaf"
   base_pfl=0.0025
+  dump_pfl=3.0
 
   cplfreq1=18
   cplfreq2=18
