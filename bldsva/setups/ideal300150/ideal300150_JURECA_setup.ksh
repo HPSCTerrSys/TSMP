@@ -26,7 +26,7 @@ initSetup(){
 
   defaultDumpCLM=1
   defaultDumpCOS=1
-  defaultDumpPFL=1 
+  defaultDumpPFL=1
 
   gx_clm=300
   gy_clm=300

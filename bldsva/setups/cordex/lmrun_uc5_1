@@ -16,9 +16,9 @@ lmworkdir_cluma=__rundir__
 lmoutdir_cluma=__rundir__/cosmo_out
 lmindir_cluma=__forcingdir__/
 lmrestdir_cluma=__rundir__/cosmo_rest
-lmworkdir_sx9=/e/uhome/xxxx/cosmo/
-lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
-lmindir_sx9=/e/uscratch/xxxx/cosmo/
+#lmworkdir_sx9=/e/uhome/xxxx/cosmo/
+#lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
+#lmindir_sx9=/e/uscratch/xxxx/cosmo/
 #
 #################################################
 # host detection
@@ -159,7 +159,7 @@ if [[ ($cmd = cleancluma) || ($cmd = cleansx9) ]]; then
   rm mon.out.*
   rm -f *~
   rm -f YU*
-#  rm -f INPUT_*
+  rm -f INPUT_*
   rm -f ${jobname}*
   rm -f output/*
   rm -f $OUTPUT/*
@@ -233,7 +233,6 @@ end_input_sat
 cat > INPUT_IO  << end_input_io
  &IOCTL
   lasync_io=.FALSE., ngribout=1,
-   ydir_restart='$RESTAR',
    nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
    ytunit_restart='f',
 
@@ -247,7 +246,8 @@ cat > INPUT_IO  << end_input_io
   lan_t_so0  = .TRUE., lan_t_cl  = .TRUE., lan_w_cl   = .TRUE., lan_vio3     = .TRUE.,
   lan_hmo3   = .TRUE., lan_plcov = .TRUE., lan_lai    = .TRUE., lan_rootdp   = .TRUE.,
   lan_t_snow = .TRUE., lan_w_i   = .TRUE., lan_w_snow = .TRUE., lan_rho_snow = .TRUE.,
-  hincbound  = 1.0,
+  lan_w_so   = .TRUE.,
+  hincbound  = 3.0,
   lchkini    = .TRUE., lchkbd    = .TRUE., lbdana     = .FALSE.,
   lana_qi    = .TRUE., llb_qi    = .TRUE., lana_rho_snow=.FALSE., lana_qr_qs = .FALSE.,
   llb_qr_qs  = .FALSE., lana_qg   = .FALSE., llb_qg     = .FALSE.,
@@ -262,9 +262,6 @@ cat > INPUT_IO  << end_input_io
     lwrite_const=.true.,
     l_p_filter=.true.,
     l_z_filter=.true.,
-    ysystem='file',
-    yvarpl='FI','RELHUM','T',
-    plev=500,700,850,
     yvarml='PS        ','P         ','PMSL      ','T_G       ',
            'QV_2M     ','RELHUM_2M ',
            'T_S       ','T_2M      ','T         ','FI',
@@ -284,33 +281,30 @@ cat > INPUT_IO  << end_input_io
 !           'TRACER001 ','TRACER002 ',
     ydir = '$OUTPUT',
  /
-!&GRIBOUT
-   ! Following output can be used to restart COSMO
-!    ncomb=0,$nsteps,60,
-    !ncomb=0,$nsteps,1440,
-    !ncomb=0,$nsteps,720,
-!    lanalysis=.true.,
-!    lcheck=.true.,
-!    yform_write='grb1',
-!    lwrite_const=.true.,
-!    l_p_filter=.true.,
-!    l_z_filter=.true.,
-!    ysystem='file',
-!    yvarml='PS        ','P         ','PMSL      ','T_G       ',
-!           'FIS       ','QV_2M     ','RELHUM_2M ','QV_S      ',
-!           'T_S       ','T_2M      ','T         ','TD_2M     ',
-!           'U_10M     ','V_10M     ','U         ','V         ',
-!           'OMEGA     ','W         ','TCM       ','TCH       ',
- !          'QV        ','QC        ','QI        ',
-!           'QR        ','QS        ','QG        ','RELHUM    ',
-!           'TKVM      ','TKVH      ','ALB_RAD   ','ASOB_S    ',
-!           'T_SO',    'RAIN_GSP','SNOW_GSP', 'RAIN_CON', 'SNOW_CON','PRR_CON','PRS_CON','PRR_GSP','PRS_GSP',
-!           'TOT_PREC  ','CLCT      ','RUNOFF_S  ','RUNOFF_G  ',
-!           'RAIN_GSP  ','SNOW_GSP  ','RAIN_CON  ','SNOW_CON  ',
-!           'HSURF     ','FR_LAND   ','Z0        ','SOILTYP   ',
-!           'PLCOV     ','LAI       ','ROOTDP    ','VIO3      ',
-!           'HMO3      ','PP        ','T_SNOW    ','W_I       ',
-!           'W_SNOW    ','W_SO      ','FOR_E     ','FOR_D     ',
+&GRIBOUT
+ ! Following output can be used to restart COSMO
+    ncomb=0,$nsteps,60,
+    lanalysis=.true.,
+    lcheck=.true.,
+    yform_write='grb1',
+    lwrite_const=.true.,
+    l_p_filter=.true.,
+    l_z_filter=.true.,
+    yvarml='PS        ','P         ','PMSL      ','T_G       ',
+           'FIS       ','QV_2M     ','RELHUM_2M ','QV_S      ',
+           'T_S       ','T_2M      ','T         ','TD_2M     ',
+           'U_10M     ','V_10M     ','U         ','V         ',
+           'OMEGA     ','W         ','TCM       ','TCH       ',
+           'QV        ','QC        ','QI        ',
+           'QR        ','QS        ','QG        ','RELHUM    ',
+           'TKVM      ','TKVH      ','ALB_RAD   ','ASOB_S    ',
+           'T_SO',    'RAIN_GSP','SNOW_GSP', 'RAIN_CON', 'SNOW_CON','PRR_CON','PRS_CON','PRR_GSP','PRS_GSP',
+           'TOT_PREC  ','CLCT      ','RUNOFF_S  ','RUNOFF_G  ',
+           'RAIN_GSP  ','SNOW_GSP  ','RAIN_CON  ','SNOW_CON  ',
+           'HSURF     ','FR_LAND   ','Z0        ','SOILTYP   ',
+           'PLCOV     ','LAI       ','ROOTDP    ','VIO3      ',
+           'HMO3      ','PP        ','T_SNOW    ','W_I       ',
+           'W_SNOW    ','W_SO      ','FOR_E     ','FOR_D     ',
 !   ydir= '$RESTAR',
 !/
 end_input_io
@@ -321,15 +315,14 @@ cat > INPUT_DYN << end_input_dyn
   irunge_kutta= 1,       irk_order  = 3,         iadv_order  = 5,
   y_scalar_advect = 'BOTT2',
   betasw      = 0.4,    epsass      = 0.15,
-  hd_corr_q_bd=0.0, hd_corr_t_bd=0.75, hd_corr_u_bd=0.75, hd_corr_p_bd=0.75,
-  hd_corr_q_in=0.0, hd_corr_t_in=0.0,  hd_corr_u_in=0.1,  hd_corr_p_in=0.0,
+!  hd_corr_q_bd=0.0, hd_corr_t_bd=0.75, hd_corr_u_bd=0.75, hd_corr_p_bd=0.75,
+!  hd_corr_q_in=0.0, hd_corr_t_in=0.0,  hd_corr_u_in=0.1,  hd_corr_p_in=0.0,
   hd_dhmax    = 50.,   itype_hdiff = 2,       lcond     = .TRUE., lspubc    = .TRUE.,
   rlwidth     = 150000.0, itype_lbc_qrsg = 2,
   rdheight    = 14000., xkd         = 0.1,
 ! from operational COSMO-NRW script:
   itype_outflow_qrsg=2, nrdtau = 5,
   ldyn_bbc=.TRUE., ldiabf_lh=.TRUE.,
-  lexpl_lbc=.TRUE.,
   itype_bbc_w=2,
  /
 end_input_dyn
@@ -347,8 +340,8 @@ end_input_tracer
 cat > INPUT_PHY << end_input_phy
  &PHYCTL
     lgsp=.TRUE.,
-      lprogprec=.TRUE.,
-      ltrans_prec=.TRUE.,
+!      lprogprec=.TRUE.,
+!      ltrans_prec=.TRUE.,
       itype_gscp=4,
     lrad=.TRUE.,
       nradcoarse=1,
@@ -372,20 +365,16 @@ cat > INPUT_PHY << end_input_phy
       icldm_turb=2,
       icldm_tran=0,
       itype_synd=2,
-    lsoil=.TRUE.,
       itype_evsl=2,
       itype_trvg=2,
-      lmulti_layer=.TRUE.,
-      lmelt=.TRUE.,
-      lmelt_var=.TRUE.,
-      ke_soil = 7,
-      czml_soil = 0.005, 0.02, 0.06, 0.18, 0.54, 1.62, 4.86, 14.58,
+      lmelt=.FALSE.,
+      lmelt_var=.FALSE.,
     lconv=.TRUE.,
       nincconv=10,
       itype_conv=$CONV_SCHEME,
       lcape=.FALSE.,
-!   lsso=.FALSE.,
-!     ltkesso=.TRUE.,
+    llake=.FALSE.,
+    lseaice=.FALSE.,
  /
 end_input_phy
 

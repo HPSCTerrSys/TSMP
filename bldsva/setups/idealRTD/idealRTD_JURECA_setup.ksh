@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/RTDsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
+  defaultFDCLM="/homea/slts/slts06/forcings/idealRTD"
+  defaultFDCOS="/homea/slts/slts06/forcings/idealRTD/cosmo/RTDsounding"
+  defaultFDOAS="/homea/slts/slts06/forcings/idealRTD/oasis3/mapping_matrix_idealRTD"
+  defaultFDPFL="/homea/slts/slts06/forcings/idealRTD/ParFlow/idealRTD"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
@@ -12,7 +12,7 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
-  defaultNppn=64
+  defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=2
   defaultCOSProcX=2
@@ -103,7 +103,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
-          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
           sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
