@@ -130,14 +130,6 @@ setSelection(){
   if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
 
 
-  set -A mList ${modelVersion[$version]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
-  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
-
-
 }
 
 finalizeSelection(){
@@ -148,6 +140,14 @@ check
 }
 
 setCombination(){
+  set -A mList ${modelVersion[$version]}
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
+  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
+
+
   withOAS="false"
   withCOS="false"
   withPFL="false"
@@ -350,6 +350,7 @@ interactive(){
                                 set -A array ${combinations[$version]}
                                 combination=${array[0]} ;;
                         esac
+			clearPathSelection
  			setCombination
 		  fi
 		  if [[ $numb == 3 ]] ; then  
@@ -359,13 +360,14 @@ interactive(){
                         done
                         print "Please type in your desired value..."
 			read combination
+		        clearPathSelection
 			setCombination 
 		  fi
 		  if [[ $numb == 4 ]] ; then ; read val ;options+=(["oas"]="$val") ; fi
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
-		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setSelection; fi
+		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
 		  if [[ $numb == 9 ]] ; then ; read bindir ; fi
 		  if [[ $numb == 10 ]] ; then ; read oasdir ; fi
 		  if [[ $numb == 11 ]] ; then ; read clmdir ; fi
