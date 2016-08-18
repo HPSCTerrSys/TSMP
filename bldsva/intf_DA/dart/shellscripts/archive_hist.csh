@@ -19,7 +19,6 @@ echo $outputdir
 cd $HOME
 mkdir $outputdir
 cd $outputdir
-exit 0
 
 foreach instance (`seq 0 $numInst`)
   set dir = tsmp_instance_$instance

@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart01"
+export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart13"
 export DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
 
 cd $LOGNAME

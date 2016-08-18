@@ -1,8 +1,8 @@
 #!/bin/ksh
 
 #Job Submission to Cluma
-#PBS -N TerrSysMP_run
-#PBS -l walltime=00:30:00
+#PBS -N TerrSysMP-DART
+#PBS -l walltime=00:90:00
 #PBS -l nodes=1:ppn=64
 #PBS -V 
 #PBS -u pshrestha
@@ -11,7 +11,7 @@
 #PBS -e tsmp.err
 
 
-export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart05"
+export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart09"
 export DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
 export LD_LIBRARY_PATH=/daten01/z4/netcdf4.1.3_gfortran_4.2.1/lib/
 
@@ -35,7 +35,7 @@ cp $DART_DIR/filter .
 cp $DART_DIR/dart_to_cosmo .
 cp $DART_DIR/cosmo_to_dart .
 
-numInst=16
+numInst=48
 
 for instance in {0..$(($numInst-1))}
 do
@@ -66,10 +66,11 @@ timefile_path="tsmp_instance_0"
 cosrbin=`grep cosrbin $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
 coshist=`grep coshist $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
 clmext=`grep clmext $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
+dIndat=`grep defaultInitDate $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
 
 echo $clmext $cosrbin $coshist
 
-ln -s $DART_DIR/obs_seq.$clmext obs_seq.out || exit 2
+ln -s $DART_DIR/obs_seq.$dIndat obs_seq.out || exit 2
 
 ln -s tsmp_instance_0/cosrst/$cosrbin cosmo_prior
 ln -s tsmp_instance_0/cosout/$coshist cosmo.nc
