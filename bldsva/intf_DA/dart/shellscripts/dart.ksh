@@ -11,7 +11,7 @@
 #PBS -e tsmp.err
 
 
-export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart09"
+export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart13"
 export DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
 export LD_LIBRARY_PATH=/daten01/z4/netcdf4.1.3_gfortran_4.2.1/lib/
 

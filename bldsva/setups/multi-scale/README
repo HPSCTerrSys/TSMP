@@ -1,0 +1,13 @@
+P. Shrestha, Aug 19 2016
+;Default setup creates run with 960 m resolution
+./setup_tsmp.ksh -v 1.2.0MCT -V "multi-scale" -c "clm-pfl"
+
+# To change grid resolution
+Each folder 
+d120  d240  d480  d960	
+contains a setup script specific to the grid resolution:
+
+#Copy this script to the outside folder and run setup, e.g, for 120 m resolution:
+cp d120/multi-scale_CLUMA2_setup.ksh .
+>>This will switch the grid resolution you want to use for the run!
+ 
