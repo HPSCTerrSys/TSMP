@@ -1,7 +1,9 @@
 P. Shrestha, Aug 19 2016
 ;Default setup creates run with 960 m resolution
-./setup_tsmp.ksh -v 1.2.0MCT -V "multi-scale" -c "clm-pfl"
-
+./build_tsmp.ksh -v 1.2.0MCT -c "clm-pfl" -m "XXXX"
+./setup_tsmp.ksh -v 1.2.0MCT -V "multi-scale" -c "clm-pfl" -m "XXXX"
+#Restart
+./setup_tsmp.ksh -v 1.2.0MCT -V "multi-scale" -c "clm-pfl" -s "2009-01-01 00" -S "$rstDate"  -j "$clmrstfil" -l "$pflrstfil" -m "XXXX"
 # To change grid resolution
 Each folder 
 d120  d240  d480  d960	

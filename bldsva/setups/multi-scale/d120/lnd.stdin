@@ -17,9 +17,9 @@ cat << EOF > __rundir__/lnd.stdin
  fatmgrid       = '__forcingdir__/griddata___gridsize__.nc'
  fatmlndfrc     = '__forcingdir__/fracdata___gridsize__.nc'
  fatmtopo       = ''
- fpftcon        = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
- offline_atmdir = '/daten01/z4/database/clm3.5/Rur_NRW/atm_forcing/'
- frivinp_rtm    = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+ fpftcon        = '/homea/hbn33/hbn331/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ offline_atmdir = '/homea/hbn33/hbn331/database/clm3.5/half_rain/atm_forcing/'
+ frivinp_rtm    = '/homea/hbn33/hbn331/database/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
 
  hist_dov2xy    = .true.
  hist_avgflag_pertape = 'A'
