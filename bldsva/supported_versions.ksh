@@ -86,7 +86,7 @@ setups+=(
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex multi-scale "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
 	["CLUMA2"]=" nrw idealRTD multi-scale "
 	["AGROCLUSTER"]=" nrw "
