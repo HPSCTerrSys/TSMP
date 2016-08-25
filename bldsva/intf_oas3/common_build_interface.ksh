@@ -146,6 +146,8 @@ cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / $
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
+sed "s/__dump_cos_interval__/$(($dump_cos*(3600/$dt_cos)))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
 
 if [[ $restfile_cos != "" ]] then
 comment "  softlink restart file to input dir"
@@ -585,7 +587,7 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
 
   comment "   sed start counter to pfl namelist."
       cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))))
-      cnt=$(python -c "print $cnt/3600.")
+      cnt=$(python -c "print $cnt/($dump_pfl*3600.)")
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 

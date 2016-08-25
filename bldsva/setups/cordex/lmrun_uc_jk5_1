@@ -255,10 +255,7 @@ cat > INPUT_IO  << end_input_io
   ydirbd     = '$BD_DIR',
  /
  &GRIBOUT
-    ncomb=__ncomb_start__,$nsteps,60,
-    !ncomb=0,$nsteps,1440,
-    !ncomb=0,$nsteps,360,
-    !ncomb=__ncomb_start__,$nsteps,360,
+    ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
     lanalysis=.false.,
     lcheck=.true.,
     yform_write='ncdf',

@@ -267,7 +267,7 @@ cat > INPUT_IO  << end_input_io
   ydirbd='$BD_DIR',
  /
  &GRIBOUT
-    ncomb=__ncomb_start__,$nsteps,360,
+    ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
     luvmasspoint=.true.,
     lanalysis=.FALSE.,
     lcheck=.TRUE.,
