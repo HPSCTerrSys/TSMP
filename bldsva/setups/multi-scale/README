@@ -1,5 +1,7 @@
 P. Shrestha, Aug 19 2016
 ;Default setup creates run with 960 m resolution
+;These runs are done with scaled precipitation forcing ...
+
 ./build_tsmp.ksh -v 1.2.0MCT -c "clm-pfl" -m "XXXX"
 ./setup_tsmp.ksh -v 1.2.0MCT -V "multi-scale" -c "clm-pfl" -m "XXXX"
 #Restart
