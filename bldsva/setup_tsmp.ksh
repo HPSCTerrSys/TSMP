@@ -12,7 +12,7 @@ getDefaults(){
   def_refSetup=""
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$exp_id if empty
-  def_exp_id=""				
+  def_exp_id="__DATE__"				
   def_pfldir=""
   def_numInst=""
   def_startInst=""
@@ -177,14 +177,14 @@ setSelection(){
   if [[ $dump_cos == "" ]] then ; dump_cos=$defaultDumpCOS ; fi
   if [[ $dump_pfl == "" ]] then ; dump_pfl=$defaultDumpPFL ; fi
 
-  if [[ $exp_id == "" ]] then
-     exp_id=${date}
+  if [[ $exp_id == "__DATE__" ]] then
+     exp_id="_${date}"
   fi
 
   if [[ $rundir == "" ]] then
      rundir="$rootdir/run/${platform}_${version}_${combination}_${refSetup}"
   fi
-  rundir="${rundir}_${exp_id}"
+  rundir="${rundir}${exp_id}"
 
 
   if [[ $bindir == "" ]] then
