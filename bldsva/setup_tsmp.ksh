@@ -86,7 +86,7 @@ setDefaults(){
   queue=$def_queue
   wtime=$def_wtime
   px_clm=$def_px_clm
-  py_clm=$def_py_cl
+  py_clm=$def_py_clm
   px_cos=$def_px_cos
   py_cos=$def_py_cos
   px_pfl=$def_px_pfl
