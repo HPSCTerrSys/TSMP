@@ -587,11 +587,7 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
 
   comment "   sed start counter to pfl namelist."
       cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))))
-<<<<<<< HEAD
-      cnt=$(python -c "print $cnt/$dump_pfl/3600.")
-=======
       cnt=$(python -c "print $cnt/($dump_pfl*3600.)")
->>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
