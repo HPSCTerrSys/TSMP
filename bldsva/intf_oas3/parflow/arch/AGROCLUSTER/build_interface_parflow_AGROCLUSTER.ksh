@@ -17,10 +17,13 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplInc="$incpsmile"
     fi  
 
+    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
+
     flagsSim+="CC=$mpiPath/bin/mpicc  CXX=$mpiPath/bin/mpic++ FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
     flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
+    if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"

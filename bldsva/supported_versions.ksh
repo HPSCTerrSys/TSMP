@@ -71,7 +71,7 @@ combinations+=(
 
 )
 
-#list of supported testcases for a certain machine. (first is default)
+#list of supported testcases for a certain machine.
 setups+=(
         ["cordex"]="444x432 (12km res) atmosphere 436x424 (12km res) land domain of Europe and northern Afrika"
 	["nrw"]="150x150 (1km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
@@ -86,10 +86,16 @@ setups+=(
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
+<<<<<<< HEAD
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex multi-scale "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
 	["CLUMA2"]=" nrw idealRTD multi-scale "
+=======
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
+        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
+	["CLUMA2"]=" nrw idealRTD "
+>>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
 	["AGROCLUSTER"]=" nrw "
-        ["CCA2"]=" nrw "
+        ["CCA2"]=" nrw cordex "
 )
 

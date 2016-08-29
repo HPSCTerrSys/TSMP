@@ -28,6 +28,8 @@ getDefaults(){
 
   def_mode="0" #0: let flags decide, 1:batch, 2:interactive
   def_cplscheme="true"
+  def_readCLM="false"
+  def_freeDrain="false"
 
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
@@ -74,6 +76,8 @@ setDefaults(){
   siloPath=$def_siloPath
   combination=$def_combination
 
+  freeDrain=$def_freeDrain
+  readCLM=$def_readCLM
   cplscheme=$def_cplscheme
   mode=$def_mode
 
@@ -126,14 +130,6 @@ setSelection(){
   if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
 
 
-  set -A mList ${modelVersion[$version]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
-  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
-
-
 }
 
 finalizeSelection(){
@@ -144,6 +140,14 @@ check
 }
 
 setCombination(){
+  set -A mList ${modelVersion[$version]}
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
+  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
+
+
   withOAS="false"
   withCOS="false"
   withPFL="false"
@@ -346,6 +350,7 @@ interactive(){
                                 set -A array ${combinations[$version]}
                                 combination=${array[0]} ;;
                         esac
+			clearPathSelection
  			setCombination
 		  fi
 		  if [[ $numb == 3 ]] ; then  
@@ -355,13 +360,14 @@ interactive(){
                         done
                         print "Please type in your desired value..."
 			read combination
+		        clearPathSelection
 			setCombination 
 		  fi
 		  if [[ $numb == 4 ]] ; then ; read val ;options+=(["oas"]="$val") ; fi
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
-		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setSelection; fi
+		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
 		  if [[ $numb == 9 ]] ; then ; read bindir ; fi
 		  if [[ $numb == 10 ]] ; then ; read oasdir ; fi
 		  if [[ $numb == 11 ]] ; then ; read clmdir ; fi
@@ -379,6 +385,8 @@ interactive(){
 		  if [[ $numb == 22 ]] ; then ; read optComp ; fi
 		  if [[ $numb == 23 ]] ; then ; read profiling ; fi
 		  if [[ $numb == 24 ]] ; then ; read cplscheme ; fi
+                  if [[ $numb == 25 ]] ; then ; read readCLM ; fi
+		  if [[ $numb == 26 ]] ; then ; read freeDrain ; fi
 		done	
 		interactive
 	  ;;
@@ -419,6 +427,8 @@ printState(){
   print "${cred}(22)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
   print "${cred}(23)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(24)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
+  print "${cred}(25)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
+  print "${cred}(26${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
 }
 
 check(){
@@ -467,12 +477,12 @@ warning(){
 hardSanityCheck(){
 
   if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '.$call --man' for help"
+      print "The selected version '${version}' is not available. run '$call --man' for help"
       terminate
   fi
 
   if [[ "${platforms[${platform}]}" == ""  ]] then
-      print "The selected platform '${platform}' is not available. run '.$call --man' for help"
+      print "The selected platform '${platform}' is not available. run '$call --man' for help"
       terminate
   fi
 
@@ -535,15 +545,25 @@ listTutorial(){
   exit 0
 }
 
+
 getRoot(){
   #automatically determine root dir
-  call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
-  cpwd=`pwd` 
-  call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
-  call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
-  curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /    
-  call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
-  estdir=`echo "/$curr$call" | sed 's@/bldsva/build_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+  cpwd=`pwd`
+  if [[ "$0" == '/'*  ]] ; then
+    #absolut path
+    estdir=`echo "$0" | sed 's@/bldsva/build_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call=$0
+  else
+    #relative path
+    call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
+    call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
+    call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
+    curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /   
+    call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
+    estdir=`echo "/$curr$call" | sed 's@/bldsva/build_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call="$estdir/bldsva$call"
+  fi  
+  
 }
 
 #######################################
@@ -582,6 +602,9 @@ getRoot(){
   USAGE+="[o:optimization?Compiler optimisation flags.]:[optimization:='$def_optComp']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
+  USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
+  USAGE+="[d:freedrain? Compiles ParFlow with free drainage feature.]:[freedrain:='$def_freeDrain']"
+
   USAGE+="[W:optoas?Build option for Oasis.]:[optoas:='${def_options["oas"]}']{"
   USAGE+=$(printf "[?%-12s #%s]" "fresh" "build from scratch in a new folder")
   USAGE+=$(printf "[?%-12s #%s]" "build" "build clean")
@@ -626,6 +649,8 @@ getRoot(){
     B)  bindir="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
+    r)  readCLM="$OPTARG" ; args=1 ;;
+    d)  freeDrain="$OPTARG" ; args=1 ;;
 
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
     Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
@@ -700,6 +725,12 @@ check
   finalizeMachine
   runCompilation
 
+  echo "Git:" >> $log_file
+  cd $rootdir
+  git rev-parse --abbrev-ref HEAD >> $log_file
+  git rev-parse HEAD >> $log_file
+  
+  echo "Selection:" >> $log_file
   printState >> $log_file
 
   #remove special charecters for coloring from logfiles
@@ -713,6 +744,7 @@ check
   sed -i "s,.\[34m,,g" $stdout_file
   sed -i "s,.[(]B.\[m,,g" $stdout_file
 
+  echo "Call:" >> $log_file
   print "$call $*">> $log_file
   mv -f $err_file $bindir
   mv -f $log_file $bindir

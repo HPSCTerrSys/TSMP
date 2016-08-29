@@ -16,11 +16,13 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
     fi  
+    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
 
     flagsSim+="CC=cc  CXX=cc FC=ftn F77=ftn "
     flagsTools+="CC=cc FC=ftn F77=ftn "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
+    if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
     c_configure_pfl
 
 

@@ -16,7 +16,8 @@ check
   if [[ $withOAS == "true" ]]; then
     cplFlag="-DCOUP_OAS_COS " 
   fi
-  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi 
+  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi
+  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
   file=$cosdir/Fopts 
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -ffree-line-length-0 -I$ncdfPath/include $cplInc -cpp -DGRIBDWD -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
@@ -50,6 +51,7 @@ route "${cblue}>> substitutions_cos${cnormal}"
   comment "   cp ObjFiles & ObjDependencies in $cosdir"
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj* $cosdir >> $log_file 2>> $err_file
   check
+
 
 
 # comment "   a fixed mpe_io.f90 for MPICH MPIs is necessary"

@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/RTDsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
+  defaultFDCLM="/homea/slts/slts06/forcings/idealRTD"
+  defaultFDCOS="/homea/slts/slts06/forcings/idealRTD/cosmo/RTDsounding"
+  defaultFDOAS="/homea/slts/slts06/forcings/idealRTD/oasis3/mapping_matrix_idealRTD"
+  defaultFDPFL="/homea/slts/slts06/forcings/idealRTD/ParFlow/idealRTD"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
@@ -12,17 +12,17 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
-  defaultNppn=64
-  defaultCLMProcX=1
-  defaultCLMProcY=1
+  defaultNppn=48
+  defaultCLMProcX=2
+  defaultCLMProcY=2
   defaultCOSProcX=2
-  defaultCOSProcY=1
-  defaultPFLProcX=1
-  defaultPFLProcY=1
+  defaultCOSProcY=2
+  defaultPFLProcX=2
+  defaultPFLProcY=2
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRunhours=24
+  defaultRunhours=3
 
   defaultDumpCLM=1
   defaultDumpCOS=1
@@ -31,7 +31,7 @@ initSetup(){
 
   gx_clm=24
   gy_clm=14
-  dt_clm=18
+  dt_clm=36
   res="0014x0024"
 
   gx_cos=30
@@ -41,13 +41,12 @@ initSetup(){
 
   gx_pfl=24
   gy_pfl=14
-  dt_pfl=0.005
+  dt_pfl=0.01
   pflrunname="rurlaf"
   base_pfl=0.0025
-  dump_pfl=3.0
 
-  cplfreq1=18
-  cplfreq2=18
+  cplfreq1=36
+  cplfreq2=36
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
@@ -110,7 +109,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        comment "   create slope pfb with tclsh"
+        comment "   create sloap pfb with tclsh"
           tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
         check
               

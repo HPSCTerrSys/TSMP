@@ -21,7 +21,12 @@ initSetup(){
   defaultPFLProcY=8
 
   defaultStartDate="2016-05-01 12"
-  defaultRestDate=""
+  defaultInitDate="2016-05-01 12"
+  
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1
+  
   defaultRunhours=3
 
   gx_clm=436
@@ -61,13 +66,6 @@ initSetup(){
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
     fi
   fi
-
- 
-
-  restDir="/work/slts/slts15/tsmp/TSMPForecastEU$(date '+%Y-%m-%d-%H' -d "$restDate")/run"
-  fn_finidat="$restDir/clmoas.clm2.r.$(date '+%Y-%m-%d' -d "$startDate")-43200.nc"
-  pfbfilename="$restDir/${pflrunname}.out.press.00024.pfb"
-
 
 }
 

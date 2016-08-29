@@ -459,6 +459,7 @@ USE data_runcontrol , ONLY :   &
     nold  ,       & ! corresponds to ntstep - 1
     nnow  ,       & ! corresponds to ntstep 
     nnew  ,       & ! corresponds to ntstep + 1
+    hstart,       & 
 
 ! 3. controlling the physics
 ! --------------------------
@@ -3118,11 +3119,24 @@ CHARACTER (LEN=14), INTENT(IN)     ::   &
 
           zalso_rn  (i)     = zalso    (i,js)
 #ifdef COUP_OAS_COS
+<<<<<<< HEAD
 !CPSr          IF (ntstep>0) THEN        !At start, trad_clm = 0.0
 !CPSr            zti_rn    (i,ke1) = trad_clm (i,js)   !LongWave Closure CPS
 !CPSr          ELSE
             zti_rn    (i,ke1) = zti    (i,js,ke1)
 !CPSr          ENDIF
+=======
+
+           IF (( ntstep * dt ) - (  hstart * 3600.0 )>0) THEN        !At start, trad_clm = 0.0
+             zti_rn    (i,ke1) = trad_clm (i,js)   !LongWave Closure CPS
+           ELSEIF (hstart > 0 .and. ( ntstep * dt ) - (  hstart * 3600.0 ) == 0) THEN
+             zti_rn    (i,ke1) = zti    (i,js,ke1)
+           ELSE
+             zti_rn    (i,ke1) = zti    (i,js,ke1)
+           ENDIF
+
+
+>>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
           zpalp_rn  (i)     = zpalp    (i,js)
 #endif 
           zalth_rn  (i)     = zalth    (i,js)
