@@ -241,37 +241,36 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    nrcvinfo = OASIS_idle
    ztmp1=0._wp
 
-!FG   isec = ntstep * dt
-   IF ( hstart > 0 ) THEN    
       isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
-   ELSE    
-      isec = ntstep * dt    
-   ENDIF
 
 
-   cplfreq = NINT ( hincrad * 3600.0_wp)        !CPS
+
+!   cplfreq = NINT ( hincrad * 3600.0_wp)        !CPS   !FG Why should  this
+!   be necessary? cplfreq should come correctly from oasis
 !  CPS new values to remove kinks for startup from midnight
-!CPS   IF (isec <= cplfreq ) THEN
-!CPS     frcv(:,:,jps_taux) =   -0.00009_wp                     !CPS bandaid
-!CPS     frcv(:,:,jps_tauy) =   -0.00009_wp                      !CPS bandaid 
-!CPS     frcv(:,:,jps_lat ) =   4._wp                      !CPS bandaid
-!CPS     frcv(:,:,jps_sens) =   -11.0_wp                      !CPS bandaid 
-!CPS     frcv(:,:,jps_ir  ) = 386.079_wp                    !CPS bandaid 
-!CPS     frcv(:,:,jps_albd) = 1._wp                       !CPS bandaid
-!CPS     frcv(:,:,jps_albi) = 1._wp                       !CPS bandaid
+! FG the bandaid is still needed to initialize the halo. 
+! Cells inside the domain are getting overwritten in the first coupling.
+   IF (isec <= cplfreq ) THEN
+     frcv(:,:,jps_taux) =   -0.00009_wp                     !CPS bandaid
+     frcv(:,:,jps_tauy) =   -0.00009_wp                      !CPS bandaid 
+     frcv(:,:,jps_lat ) =   4._wp                      !CPS bandaid
+     frcv(:,:,jps_sens) =   -11.0_wp                      !CPS bandaid 
+     frcv(:,:,jps_ir  ) = 386.079_wp                    !CPS bandaid 
+     frcv(:,:,jps_albd) = 1._wp                       !CPS bandaid
+     frcv(:,:,jps_albi) = 1._wp                       !CPS bandaid
 !MU (18.09.12)
-!CPS     frcv(:,:,jps_co2fl)=   0._wp
+     frcv(:,:,jps_co2fl)=   0._wp
 !MU (18.09.12)
-!CPS     frcv(:,:,jps_ram1 )=   1089.77_wp
-!CPS     frcv(:,:,jps_rah1 )=   1089.77_wp
-!CPS     frcv(:,:,jps_raw1 )=   1089.77_wp
-!CPS     frcv(:,:,jps_tsf1 )=   287.589_wp
-!CPS     frcv(:,:,jps_qsf1 )=   0.010_wp
+     frcv(:,:,jps_ram1 )=   1089.77_wp
+     frcv(:,:,jps_rah1 )=   1089.77_wp
+     frcv(:,:,jps_raw1 )=   1089.77_wp
+     frcv(:,:,jps_tsf1 )=   287.589_wp
+     frcv(:,:,jps_qsf1 )=   0.010_wp
 !MU (12.04.13)
-!CPS     frcv(:,:,jps_fpsn)=   0._wp
-!CPS     frcv(:,:,jps_fplres)=   0._wp
+     frcv(:,:,jps_fpsn)=   0._wp
+     frcv(:,:,jps_fplres)=   0._wp
 !MU (12.04.13)
-!CPS   END IF
+   END IF
 
    cplstop = INT((nstop*dt+cplfreq)/cplfreq) - 1 !CPS
 
@@ -288,10 +287,8 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    ! frcv keep values from previous coupling (array from module) at other time step
    DO jn = 1, krcv
      IF( srcv(jn)%laction )   CALL oas_cos_rcv( jn, isec, ztmp1(:,:), nrcvinfo(jn) )   !CPS fix
-!CPS_removebandaid     IF( nrcvinfo(jn) == OASIS_Rcv .and. isec>= cplfreq ) THEN
      IF( nrcvinfo(jn) == OASIS_Rcv) THEN
-!CPS       frcv(nldi:nlei, nldj:nlej, jn)=ztmp1(nldi:nlei, nldj:nlej) 
-        frcv(:,:,jn) = ztmp1(:,:)
+       frcv(nldi:nlei, nldj:nlej, jn)=ztmp1(nldi:nlei, nldj:nlej) 
      ENDIF
    ENDDO
 
@@ -573,6 +570,8 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
 
        ENDIF                      ! Type of coupling scheme
 
+       ELSE
+        t_g(i,j,nnew) = t_s(i,j,nx)
        ENDIF                      ! CPS MASK for land-points only
      ENDDO                        ! i loop 
    ENDDO                          ! j loop

@@ -17,7 +17,8 @@ check
   if [[ $withOAS == "true" ]]; then
     cplFlag="-WF,-DCOUP_OAS_COS " 
   fi
-  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -WF,-DCPL_SCHEME_F " ; fi 
+  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -WF,-DCPL_SCHEME_F " ; fi
+  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
   file=$cosdir/Fopts  
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -qextname=flush -qsuffix=cpp=f90 -WF,-DGRIBDWD -WF,-DNETCDF -WF,-D__COSMO__ $cplFlag -WF,-DHYMACS@" $file >> $log_file 2>> $err_file
@@ -50,7 +51,6 @@ route "${cblue}>> substitutions_cos${cnormal}"
  comment "   cp ObjFiles & ObjDependencies in $cosdir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj* $cosdir >> $log_file 2>> $err_file
  check
-
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"
        sed -i "s/mod_prism_proto/mod_prism/" $cosdir/src/oas3/oas_cos_vardef.F90 >> $log_file 2>> $err_file

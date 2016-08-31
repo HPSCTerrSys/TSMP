@@ -1,0 +1,44 @@
+# Archiving ensemble runs
+archive_hist.csh
+Usage: ./archive_hist.csh rundir ensemble_size
+#
+# Archiving single runs
+copy.csh
+Usage: ./copy.csh rundir
+# Utility
+filestrip.csh
+Usage: ./filestrip.csh
+#
+# Perturb model parameter
+perturb_model_param.csh
+Usage:./perturb_model_param.csh rundir ensemble_size
+#
+# Perturb model state
+perturb_model_state.csh
+Usage: ./perturb_model_state.csh rundir ensemble_size
+#
+# Extract time stamp
+timeFile.ksh
+Usage: ./timeFile.ksh rundir
+#
+# Perfect model observations
+assim.csh
+Usage: ./assim.csh O    [N=0, compile, N = 1 pre-compiled]
+#
+# DART run 
+dart.ksh
+Usage: qsub dart.ksh 
+>> rundir needs to be edited
+#
+# Perfect Model Setup
+perfect_tsmp_setup.csh
+Usage: ./perfect_tsmp_setup.csh n  [n = 1, N]
+#
+# Ensemble Model Setup
+tsmp_setup.csh
+Usage: ./tsmp_setup.csh cycle nrst
+#  cycle  = 1 for initial run
+#  cycle  > 1 for restart run
+#  nrst   = 0 for normal restart
+#  nrst   = 1 for restart with assimilation
+#

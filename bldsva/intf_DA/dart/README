@@ -1,3 +1,38 @@
 Log: P. Shrestha, July 4 2016
 DART interface with component models of TerrSysMP
 
+So you can follow the following steps to download the code on your machine:
+
+git clone https://git.meteo.uni-bonn.de/git/terrsysmp
+cd terrsysmp 
+git checkout -b issue428
+
+We want to have the terrsysmp-dart interfaces in the following folder:
+~/terrsysmp/bldsva/intf_DA/dart/
+
+Regards,
+Prabhakar
+PS: The wiki also has some notes on the git usage. 
+We have just moved into a new configuration tool for terrsysmp interface.
+The git only maintains the terrsysmp interface now, not the source codes 
+of the component models, which can be downloaded from the respective servers 
+of the component models.
+
+
+----------------------------------------------------------------------
+The terrsysmp/bldsva/intf_DA/dart directories and files are intended 
+to be 'installed' (i.e. recusively copied) to the DART/models/terrsysmp  directory. 
+
+----------------------------------------------------------------------
+When you get your local repository to the point you want to share it with
+me or the other people on the project, you can 'push' this to the terrsysmp
+server:
+
+git push origin issue428
+
+----------------------------------------------------------------------
+When you want to make sure your local repository is up-to-date with respect 
+to the central server, you need to 'pull' to get the latest, greatest.
+
+git pull --rebase origin issue428
+

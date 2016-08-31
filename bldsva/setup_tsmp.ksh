@@ -12,7 +12,7 @@ getDefaults(){
   def_refSetup=""
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_rundir=""  			#Will be set to $rootdir/run/$platform_${version}_$combination_$refSetup_$exp_id if empty
-  def_exp_id=""				
+  def_exp_id="__DATE__"				
   def_pfldir=""
   def_numInst=""
   def_startInst=""
@@ -86,7 +86,7 @@ setDefaults(){
   queue=$def_queue
   wtime=$def_wtime
   px_clm=$def_px_clm
-  py_clm=$def_py_cl
+  py_clm=$def_py_clm
   px_cos=$def_px_cos
   py_cos=$def_py_cos
   px_pfl=$def_px_pfl
@@ -177,14 +177,14 @@ setSelection(){
   if [[ $dump_cos == "" ]] then ; dump_cos=$defaultDumpCOS ; fi
   if [[ $dump_pfl == "" ]] then ; dump_pfl=$defaultDumpPFL ; fi
 
-  if [[ $exp_id == "" ]] then
-     exp_id=${date}
+  if [[ $exp_id == "__DATE__" ]] then
+     exp_id="_${date}"
   fi
 
   if [[ $rundir == "" ]] then
      rundir="$rootdir/run/${platform}_${version}_${combination}_${refSetup}"
   fi
-  rundir="${rundir}_${exp_id}"
+  rundir="${rundir}${exp_id}"
 
 
   if [[ $bindir == "" ]] then
@@ -292,12 +292,12 @@ warning(){
 
 hardSanityCheck(){
   if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '.$call --man' for help"
+      print "The selected version '${version}' is not available. run '$call --man' for help"
       terminate
   fi
 
   if [[ "${platforms[${platform}]}" == ""  ]] then
-      print "The selected platform '${platform}' is not available. run '.$call --man' for help"
+      print "The selected platform '${platform}' is not available. run '$call --man' for help"
       terminate
   fi
 
@@ -598,13 +598,22 @@ listTutorial(){
 
 getRoot(){
   #automatically determine root dir
-  call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
-  cpwd=`pwd` 
-  call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
-  call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
-  curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /    
-  call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
-  estdir=`echo "/$curr$call" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+  cpwd=`pwd`
+  if [[ "$0" == '/'*  ]] ; then
+    #absolut path
+    estdir=`echo "$0" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call=$0
+  else
+    #relative path
+    call=`echo $0 | sed 's@^\.@@'`                    #clean call from leading dot
+    call=`echo $call | sed 's@^/@@'`                  #clean call from leading /
+    call=`echo "/$call" | sed 's@^/\./@/\.\./@'`      #if script is called without leading ./ replace /./ by /../
+    curr=`echo $cpwd | sed 's@^/@@'`                   #current directory without leading /   
+    call=`echo $call | sed "s@$curr@@"`               #remove current directory from call if absolute path was called
+    estdir=`echo "/$curr$call" | sed 's@/bldsva/setup_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
+    call="$estdir/bldsva$call"
+  fi 
+  
 }
 
 #######################################
@@ -647,8 +656,8 @@ getRoot(){
   USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
   USAGE+="[Q:wtime? Wallclocktime for your run. If you leave it '' the machine default will be taken.]:[wtime:='$def_wtime']"
-  USAGE+="[s:startdate? Date for your model run. Must be given in the format: 'YYYY-MM-DD_HH' () ]:[startdate:='$def_startDate']"
-  USAGE+="[S:initdate? Restart date for your model run. Must be given in the format: 'YYYY-MM-DD_HH']:[initdate:='$def_initDate']" 
+  USAGE+="[s:startdate? (Restart-) Date for your model run. Must be given in the format: 'YYYY-MM-DD_HH']:[startdate:='$def_startDate']"
+  USAGE+="[S:initdate? Initial date for your model (restart) runs. Must be given in the format: 'YYYY-MM-DD_HH']:[initdate:='$def_initDate']" 
   USAGE+="[T:runhours? Number of simulated hours.]:[runhours:='$def_runhours']" 
   USAGE+="[w:pxclm? Number of tasks for clm in X direction. If you leave it '' the machine default will be taken.]:[pxclm:='$def_px_clm']"
   USAGE+="[W:pyclm? Number of tasks for clm in Y direction. If you leave it '' the machine default will be taken.]:[pyclm:='$def_py_clm']"
@@ -866,7 +875,13 @@ done
 
   createRunscript
 
+  echo "Git:" >> $log_file
+  cd $rootdir
+  git rev-parse --abbrev-ref HEAD >> $log_file
+  git rev-parse HEAD >> $log_file
+  echo "Selection:" >> $log_file
   printState >> $log_file
+  echo "Call:" >> $log_file
   print "$call $*">> $log_file
   #remove special charecters for coloring from logfiles
   sed -i "s,.\[32m,,g" $log_file
@@ -886,5 +901,5 @@ done
   print ${cgreen}"install script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"
   print "Bindir: ${bindir}"
-  print "Rundir: ${rundir}"
+  print "Rundir: ${rundir}" 
 

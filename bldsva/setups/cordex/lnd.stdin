@@ -17,9 +17,9 @@ cat << EOF > __rundir__/lnd.stdin
  fatmgrid       = '__forcingdir__/clm3.5/griddata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
  fatmlndfrc     = '__forcingdir__/clm3.5/fracdata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
  fatmtopo       = ''
- fpftcon        = '/homea/slts/slts06/forcings/testdata_NRW_std/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ fpftcon        = '__forcingdir__/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
  offline_atmdir = '__forcingdir__/clm3.5/forc'
- frivinp_rtm    = '/homea/slts/slts06/forcings/testdata_NRW_std/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+ frivinp_rtm    = '__forcingdir__/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
 
  hist_empty_htapes = .true.
  hist_dov2xy    = .true.

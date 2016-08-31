@@ -48,6 +48,9 @@ route "${cblue}<<< c_configure_cos${cnormal}"
 
 c_make_cos(){
 route "${cblue}>>> c_make_cos${cnormal}"
+  comment "    cd to cosmo dir"
+    cd $cosdir >> $log_file 2>> $err_file
+  check
   comment "    make cosmo"
     make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
@@ -142,6 +145,8 @@ check
 cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / ${dt_cos} ))
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+sed "s/__dump_cos_interval__/$(($dump_cos*(3600/$dt_cos)))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -474,7 +479,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
-    $pfldir/pfsimulator/configure $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" >> $log_file 2>> $err_file
+    $pfldir/pfsimulator/configure $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
   check
   comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file
@@ -532,6 +537,11 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
   check
+
+  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
+  check
+
   comment "    copy fix for hardwired MPI_COMM_WORLD in amps "
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps* $pfldir/pfsimulator/amps/mpi1 >> $log_file 2>> $err_file
   check
@@ -577,7 +587,7 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
 
   comment "   sed start counter to pfl namelist."
       cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))))
-      cnt=$(python -c "print $cnt/3600.")
+      cnt=$(python -c "print $cnt/($dump_pfl*3600.)")
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 

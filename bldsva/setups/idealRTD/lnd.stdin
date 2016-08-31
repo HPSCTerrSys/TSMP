@@ -23,7 +23,11 @@ cat << EOF > __rundir__/lnd.stdin
 
  hist_dov2xy    = .true.
  hist_avgflag_pertape = 'A'
- hist_nhtfrq    =  -1 
+<<<<<<< HEAD
+ hist_nhtfrq    =  -3 
+=======
+ hist_nhtfrq    =  -__dump_clm_interval__ 
+>>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
  hist_mfilt     =  1
  hist_crtinic   = 'NONE'
  mss_irt        =  0 

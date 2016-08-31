@@ -1,0 +1,41 @@
+#! /bin/ksh
+
+
+cat << EOF > __rundir__/lnd.stdin 
+&clm_inparm
+ caseid         = 'clmoas'
+ ctitle         = 'clmoas'
+ nsrest         =  0
+ nelapse        =  __runstep_clm_bldsva__ 
+ dtime          =  __dt_clm_bldsva__
+ start_ymd      =  __yyyymmdd_bldsva__
+ start_tod      =  __seconds_clm_bldsva__
+
+ finidat        = '__finidat__'
+ flndtopo       = '__forcingdir__/topodata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
+ fsurdat        = '__forcingdir__/surfdata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
+ fatmgrid       = '__forcingdir__/griddata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
+ fatmlndfrc     = '__forcingdir__/fracdata_CLM_cordex0.11_436x424_cosmomask_varpft_noice.nc'
+ fatmtopo       = ''
+ fpftcon        = '__forcingdir__/pft-physiology.c070207'
+ offline_atmdir = '__forcingdir__/forc'
+ frivinp_rtm    = '__forcingdir__/rdirc.05.061026'
+
+ hist_empty_htapes = .true.
+ hist_dov2xy    = .true.
+ hist_avgflag_pertape = 'A'
+ hist_nhtfrq    =  -__dump_clm_interval__
+ hist_mfilt     =  1
+ hist_crtinic   = 'NONE'
+ mss_irt        =  0 
+ hist_fincl1     = 'H2OSOI','SOILLIQ','WT','FSH','FSDS','FLDS','FGR','FGEV','FCTR','FCEV','FSR','FIRA','TBOT','TSA','QFLX_RAIN_GRND','QFLX_SNOW_GRND','QFLX_EVAP_TOT'
+
+ irad           =  1
+ wrtdia         = .true.
+ archive_dir    = ''
+ rest_flag      = .true. 
+ rpntpath       = '__rundir_rpointerdir__'
+/
+ &prof_inparm
+ /
+EOF

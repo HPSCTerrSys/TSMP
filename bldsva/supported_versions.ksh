@@ -71,7 +71,7 @@ combinations+=(
 
 )
 
-#list of supported testcases for a certain machine. (first is default)
+#list of supported testcases for a certain machine.
 setups+=(
         ["cordex"]="444x432 (12km res) atmosphere 436x424 (12km res) land domain of Europe and northern Afrika"
 	["nrw"]="150x150 (1km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
@@ -80,15 +80,16 @@ setups+=(
 	["ideal1200600"]="idealized domain with gridsize scaled to 600x600 (atmosphere) 1200x1200 (land)"
 	["ideal24001200"]="idealized domain with gridsize scaled to 1200x1200 (atmosphere) 2400x2400 (land)"
         ["idealRTD"]="idealized domain 20x20 (atmosphere) 16x16 (land) for land-atmosphere-interaction and DA test"
+        ["multi-scale"]="real data simulation over multiple scale Rur subcatchment simulation"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
-        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex "
-	["CLUMA2"]=" nrw idealRTD "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale "
+        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD"
+	["CLUMA2"]=" nrw idealRTD multi-scale "
 	["AGROCLUSTER"]=" nrw "
-        ["CCA2"]=" nrw "
+        ["CCA2"]=" nrw cordex "
 )
 

@@ -1,0 +1,37 @@
+PDS   DESCRIPTION
+2     GRIB1 table number
+8     izlevtyp
+9     izlevtop
+10    izlevbot
+IF (ilevtyp == 109) THEN
+   ilevel = ilevbot
+ELSEIF (ilevtyp == 110) THEN
+   ilevel = ilevtop
+ELSE
+   ilevel = 1
+ENDIF
+
+----------------
+ipds_out(11,12,13,14,15,16,17,18,19,22) !Time and Date
+
+icc  = ipdsbuf(22)-1
+iyy  = ipdsbuf(11)
+iccyy= iyy + icc*100
+imm  = ipdsbuf(12)
+idd  = ipdsbuf(13)
+ihh  = ipdsbuf(14)
+imin = ipdsbuf(15)
+WRITE(*,'(6i2.2)') icc,iyy,imm,idd,ihh,imin
+----------------
+
+ipdsbuf(17) = istartstep
+ipdsbuf(18) = iendstep
+ipdsbuf(19) = nztri
+
+---------------------
+ie_grib        =      igds( 5)
+je_grib        =      igds( 6)
+zstartlat_grib = REAL(igds( 7), wp)*0.001_wp
+zstartlon_grib = REAL(igds( 8), wp)*0.001_wp
+zendlat_grib   = REAL(igds(10), wp)*0.001_wp
+zendlon_grib   = REAL(igds(11), wp)*0.001_wp
