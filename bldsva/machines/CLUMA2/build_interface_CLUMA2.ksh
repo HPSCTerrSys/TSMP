@@ -93,7 +93,7 @@ cd $rundir
 rm -rf  YU*
 
 export LD_LIBRARY_PATH=$defaultNcdfPath/lib/
-
+echo "started" > started.txt
 date
 $exel >> log_file 2>> err_file
 date
