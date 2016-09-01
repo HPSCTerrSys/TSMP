@@ -80,7 +80,7 @@ comment "  cp namelist to rundir"
   cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
-nstop_cos=$((  ($runhours*3600 + ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) )  /$dt_cos  ))
+nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
 #if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 
 comment "  sed dt to namelist"
@@ -130,7 +130,7 @@ check
   sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
-cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))/3600))
+cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))/3600))
 comment "  sed start hour to namelist"
 sed "s/__hstart__/$cnt/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
@@ -142,7 +142,7 @@ check
 sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
-cnts=$(( ( $(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}")) / ${dt_cos} ))
+cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos} ))
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
@@ -586,16 +586,13 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
   check
 
   comment "   sed start counter to pfl namelist."
-      cnt=$(( ($(date '+%s' -d "${startDate}") - $(date '+%s' -d "${initDate}"))))
+      cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))))
       cnt=$(python -c "print $cnt/($dump_pfl*3600.)")
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
 
     if [[ $restfile_pfl == "" ]] then
-  comment "   sed start counter to pfl namelist."
-    sed "s/__start_cnt_pfl__/0/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
   comment "   sed initial condition to pfl namelist."
       sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
   check
