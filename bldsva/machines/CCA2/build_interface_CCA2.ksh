@@ -113,11 +113,11 @@ cd $rundir
 
 rm -rf  YU*
 
-
+echo "started" > started.txt
 date
 $exel 
 date
-
+echo "ready" > ready.txt
 exit 0
 
 EOF
