@@ -539,6 +539,7 @@ printState(){
   print "${cred}(24)${cnormal} forcing dir for pfl (default='$def_forcingdir_pfl'): ${cgreen}$forcingdir_pfl${cnormal}"
   print "${cred}(25)${cnormal} namelist dir for oas (default='$def_namelist_oas'): ${cgreen}$namelist_oas${cnormal}"
   print "${cred}(26)${cnormal} forcing dir for oas (default='$def_forcingdir_oas'): ${cgreen}$forcingdir_oas${cnormal}"
+#DA
   print "${cred}(27)${cnormal} namelist dir for data assimilation (default='$def_namelist_da'): ${cgreen}$namelist_da${cnormal}"
   print ""
   print "${cred}(28)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling${cnormal}"
@@ -681,6 +682,7 @@ getRoot(){
   USAGE+="[f:namcos? Namelist for Cosmo. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namcos:='']"
   USAGE+="[F:forcedircos? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcedircos:='']"
   USAGE+="[g:nampfl? Namelist for ParFlow. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[nampfl:='']"
+#DA
   USAGE+="[h:namda? Namelist for data assimilation. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namda:='']"
 
   USAGE+="[G:forcedirpfl? Forcing directory for ParFlow. This will replace the default forcing dir from the reference setup.]:[forcedirpfl:='']"
@@ -724,6 +726,7 @@ getRoot(){
     F)  forcingdir_cos=$OPTARG ; args=1 ;;
     g)  namelist_pfl=$OPTARG ; args=1 ;;
     G)  forcingdir_pfl=$OPTARG ; args=1 ;;
+#DA
     h)  namelist_da=$OPTARG ; args=1 ;;
 
     w)  px_clm=$OPTARG ; args=1 ;;
