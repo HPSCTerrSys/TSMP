@@ -231,6 +231,7 @@ fi
 
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
+echo "started" > started.txt
 date
 $runjob
 date

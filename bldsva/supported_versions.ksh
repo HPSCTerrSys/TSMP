@@ -83,14 +83,15 @@ setups+=(
 	["ideal1200600"]="idealized domain with gridsize scaled to 600x600 (atmosphere) 1200x1200 (land)"
 	["ideal24001200"]="idealized domain with gridsize scaled to 1200x1200 (atmosphere) 2400x2400 (land)"
         ["idealRTD"]="idealized domain 20x20 (atmosphere) 16x16 (land) for land-atmosphere-interaction and DA test"
+        ["multi-scale"]="real data simulation over multiple scale Rur subcatchment simulation"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
-        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
-	["CLUMA2"]=" nrw idealRTD "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale "
+        ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD"
+	["CLUMA2"]=" nrw idealRTD multi-scale "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "
 )

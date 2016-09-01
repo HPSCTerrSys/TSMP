@@ -1,0 +1,351 @@
+&perfect_model_obs_nml
+   start_from_restart    = .true.
+   output_restart        = .true.
+   async                 = 0
+   init_time_days        = -1
+   init_time_seconds     = -1
+   first_obs_days        = -1
+   first_obs_seconds     = -1
+   last_obs_days         = -1
+   last_obs_seconds      = -1
+   output_interval       = 1
+   restart_in_file_name  = "dart_prior"
+   restart_out_file_name = "perfect_restart"
+   obs_seq_in_file_name  = "obs_seq.in"
+   obs_seq_out_file_name = "obs_seq.perfect"
+   adv_ens_command       = "./no_way_to_advance"
+   output_timestamps     = .false.
+   trace_execution       = .true.
+   output_forward_op_errors = .false.
+   print_every_nth_obs   = -1
+   silence               = .false.
+  /
+
+
+&filter_nml
+   async                    = 0
+   adv_ens_command          = "./no_way_to_advance"
+   ens_size                 = 48 
+   start_from_restart       = .true.
+   output_restart           = .true.
+   obs_sequence_in_name     = "obs_seq.out"
+   obs_sequence_out_name    = "obs_seq.final"
+   restart_in_file_name     = "filter_ics"
+   restart_out_file_name    = "filter_restart"
+   init_time_days           = -1
+   init_time_seconds        = -1
+   first_obs_days           = -1
+   first_obs_seconds        = -1
+   last_obs_days            = -1
+   last_obs_seconds         = -1
+   num_output_state_members = 48
+   num_output_obs_members   = 48
+   output_interval          = 1
+   num_groups               = 1
+   input_qc_threshold       =  3.0
+   outlier_threshold        =  -1.0
+   output_forward_op_errors = .false.
+   output_timestamps        = .false.
+   output_inflation         = .true.
+   trace_execution          = .true.
+   silence                  = .false.
+
+   inf_flavor                  = 0,                       0
+   inf_initial_from_restart    = .false.,                 .false.
+   inf_sd_initial_from_restart = .false.,                 .false.
+   inf_output_restart          = .true.,                  .true.
+   inf_deterministic           = .true.,                  .true.
+   inf_in_file_name            = 'prior_inflate_ics',     'post_inflate_ics'
+   inf_out_file_name           = 'prior_inflate_restart', 'post_inflate_restart'
+   inf_diag_file_name          = 'prior_inflate_diag',    'post_inflate_diag'
+   inf_initial                 = 1.0,                     1.0
+   inf_sd_initial              = 0.0,                     0.0
+   inf_damping                 = 1.0,                     1.0
+   inf_lower_bound             = 1.0,                     1.0
+   inf_upper_bound             = 1000000.0,               1000000.0
+   inf_sd_lower_bound          = 0.0,                     0.0
+  /
+
+
+&smoother_nml
+   num_lags              = 0
+   start_from_restart    = .false.
+   output_restart        = .false.
+   restart_in_file_name  = 'smoother_ics'
+   restart_out_file_name = 'smoother_restart'
+  /
+
+
+# cutoff of 0.03 (radians) is about 200km
+&assim_tools_nml
+   filter_kind                     = 1
+   cutoff                          = 0.00010
+   sort_obs_inc                    = .false.
+   spread_restoration              = .false.
+   sampling_error_correction       = .false.
+   adaptive_localization_threshold = -1
+   output_localization_diagnostics = .false.
+   localization_diagnostics_file   = 'localization_diagnostics'
+   print_every_nth_obs             = 0
+  /
+
+
+&ensemble_manager_nml
+   single_restart_file_in  = .false.
+   single_restart_file_out = .false.
+   perturbation_amplitude  = 0.2
+  /
+
+
+&cov_cutoff_nml
+   select_localization = 1
+  /
+
+
+&reg_factor_nml
+   select_regression    = 1
+   input_reg_file       = "time_mean_reg"
+   save_reg_diagnostics = .false.
+   reg_diagnostics_file = "reg_diagnostics"
+  /
+
+
+&obs_sequence_nml
+   write_binary_obs_sequence = .false.
+  /
+
+
+&preprocess_nml
+    input_obs_kind_mod_file = '../../../../obs_kind/DEFAULT_obs_kind_mod.F90'
+   output_obs_kind_mod_file = '../../../../obs_kind/obs_kind_mod.f90'
+     input_obs_def_mod_file = '../../../../obs_def/DEFAULT_obs_def_mod.F90'
+    output_obs_def_mod_file = '../../../../obs_def/obs_def_mod.f90'
+   input_files              = '../../../../obs_def/obs_def_reanalysis_bufr_mod.f90',
+                              '../../../../obs_def/obs_def_radar_mod.f90',
+                              '../../../../obs_def/obs_def_metar_mod.f90'
+   /
+
+
+&obs_kind_nml
+   assimilate_these_obs_types = 'RADIOSONDE_TEMPERATURE',
+                                'RADIOSONDE_U_WIND_COMPONENT',
+                                'RADIOSONDE_V_WIND_COMPONENT',
+                                'SAT_U_WIND_COMPONENT',
+                                'SAT_V_WIND_COMPONENT',
+   evaluate_these_obs_types   = 'RADIOSONDE_SPECIFIC_HUMIDITY'
+   /
+
+
+&assim_model_nml
+   write_binary_restart_files = .false.
+   netCDF_large_file_support  = .true.
+  /
+
+
+# cosmo_filename = "~/cosmo_dart_test/test3.grb"
+# cosmo_filename = "/daten03/cosmonrw/cosmo/cosmoinput/in_2011-08-17-00/laf2011081700"
+
+# Each variable must have 7 entries.
+# 1: grib table version used to encode/decode the COSMOS binary restart variables
+# 2: Character string defining grib-compatible variable names
+# 2: Character string defining netcdf variable names
+# 3: DART KIND for the variable
+# 4: minimum value - as a character string - if none, use 'NA'
+# 5: maximum value - as a character string - if none, use 'NA'
+# 6: does the variable get updated in the restart file or not ...
+#    only variables from restart files may be updated.
+#    'UPDATE'       =>        update the variable in the restart file
+#    'NO_COPY_BACK' => do NOT update the variable in the restart file
+#    All these variables WILL be updated INTERNALLY IN DART.
+#    Only variables marked 'restart', 'UPDATE' will be modified for CLM.
+# since we read from netCDF and write to a binary, we need a lot of information, sorry.
+
+&model_nml
+   cosmo_restart_file           = "cosmo_prior"
+   cosmo_netcdf_file            = "cosmo.nc"
+   assimilation_period_days     = 0
+   assimilation_period_seconds  = 21400
+   model_perturbation_amplitude = 0.1
+   output_1D_state_vector       = .false.
+   debug                        = 1 
+   variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
+               '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
+               '2',  '40', 'W',  'KIND_VERTICAL_VELOCITY',      'NA' , 'NA' , 'UPDATE',
+               '2',  '11', 'T',  'KIND_TEMPERATURE',            '0.0', 'NA' , 'UPDATE',
+             '201', '139', 'PP', 'KIND_PRESSURE_PERTURBATION',  'NA' , 'NA' , 'UPDATE',
+               '2',  '51', 'QV', 'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'UPDATE',
+             '201',  '31', 'QC', 'KIND_CLOUD_LIQUID_WATER',     '0.0', 'NA' , 'UPDATE',
+             '201',  '33', 'QI', 'KIND_CLOUD_ICE',              '0.0', 'NA' , 'UPDATE',
+  /
+
+# This little table is supposed to help decode the grid codes and variables
+# This should not be the definitive list.
+(slab) GRIB_TABLE VALUE   PARAMETER                                   UNITS   ABBREV.
+(  10)     2         33   u-component of wind                         m/s     UGRD    (nlevel  levels)
+(  60)     2         34   v-component of wind                         m/s     VGRD    (nlevel  levels)
+( 110)     2         40   Vertical velocity (geometric)               m/s     DZDT    (nlevel1 levels)
+( 161)     2         11   Temperature                                 K       TMP     (nlevel  levels)
+( 211)   201        139   deviation of pressure from reference value  Pa      PP      (nlevel  levels)
+(1457)     2         51   Specific humidity                           kg/kg   Q       (nlevel  levels) LEVTYPE 110
+(1507)   201         31   Cloud Mixing Ratio                          kg/kg   QC      (nlevel  levels)
+(1557)   201         33   specific cloud ice content                  kg/kg   QI      (nlevel  levels)
+
+
+&cosmo_to_dart_nml
+   cosmo_to_dart_output_file  = 'dart_prior'
+  /
+
+
+# in production ... dart_output_file is usually 'dart.ic'
+# in production ... advance_time_present is usually .TRUE.
+&dart_to_cosmo_nml
+   dart_output_file           = 'dart_posterior'
+   advance_time_present       = .false.
+   new_cosmo_analysis_file    = 'cosmo_restart'
+  /
+
+
+&location_nml
+   horiz_dist_only             = .true.
+   vert_normalization_pressure = 100000.0
+   vert_normalization_height   = 10000.0
+   vert_normalization_level    = 20.0
+   approximate_distance        = .false.
+   nlon                        = 71
+   nlat                        = 36
+   output_box_info             = .true.
+  /
+
+
+&utilities_nml
+   TERMLEVEL = 1
+   module_details = .true.
+   logfilename = 'dart_log.out'
+   nmlfilename = 'dart_log.nml'
+   write_nml   = 'file'
+  /
+
+
+&mpi_utilities_nml
+   reverse_task_layout = .true.
+   /
+
+
+# Gregorian: 12 Z 1 January 1996 <==> DART: 144270 days 43200 seconds
+# Gregorian: 12 Z 1 January 2000 <==> DART: 145731 days 43200 seconds
+
+&restart_file_tool_nml
+   input_file_name              = "filter_restart"
+   output_file_name             = "filter_updated_restart"
+   ens_size                     = 1
+   single_restart_file_in       = .true.
+   single_restart_file_out      = .true.
+   write_binary_restart_files   = .true.
+   overwrite_data_time          = .false.
+   new_data_days                = -1
+   new_data_secs                = -1
+   input_is_model_advance_file  = .false.
+   output_is_model_advance_file = .false.
+   overwrite_advance_time       = .false.
+   new_advance_days             = -1
+   new_advance_secs             = -1
+   gregorian_cal                = .true.
+  /
+
+
+# The times in the namelist for the obs_diag program are vectors
+# that follow the following sequence:
+# year   month   day   hour   minute   second
+# max_num_bins can be used to specify a fixed number of bins
+# in which case last_bin_center should be safely in the future.
+#
+# Acceptable latitudes range from  [-90,  90]
+# Acceptable longitudes range from [  0, Inf]
+
+&obs_diag_nml
+   obs_sequence_name = ''
+   obs_sequence_list = 'obs_file_list.txt'
+   first_bin_center =  2008, 5, 9, 0, 0, 0
+   last_bin_center  =  2008, 5, 13, 0, 0, 0
+   bin_separation   =     0, 0, 1, 0, 0, 0
+   bin_width        =     0, 0, 1, 0, 0, 0
+   time_to_skip     =     0, 0, 0, 0, 0, 0
+   max_num_bins     = 1000
+   Nregions   = 4
+   lonlim1    = 5.59,  5.46, 5.72, 5.46 
+   lonlim2    = 5.63,  5.50, 5.79, 5.50 
+   latlim1    = 49.88, 49.88, 49.88, 49.84  
+   latlim2    = 49.92, 49.92, 49.92, 49.87 
+   reg_names  = 'Center', 'Left', 'Right', 'Bottom'
+   print_mismatched_locs = .false.
+   verbose               = .true.
+   hlevel =  10.0,  20.0,   30.0,   40.0,  100.0
+            200.0, 500.0, 1000.0, 2000.0
+  /
+
+
+&schedule_nml
+   calendar        = 'Gregorian'
+   first_bin_start =  1997, 12, 31, 12, 0, 0
+   first_bin_end   =  1998,  1,  7, 12, 0, 0
+   last_bin_end    =  1998,  2,  1, 12, 0, 0
+   bin_interval_days    = 7
+   bin_interval_seconds = 0
+   max_num_bins         = 1000
+   print_table          = .true.
+  /
+
+
+&obs_seq_to_netcdf_nml
+   obs_sequence_name = 'obs_seq.final'
+   obs_sequence_list = ''
+   append_to_netcdf  = .false.
+   lonlim1    =    0.0
+   lonlim2    =  360.0
+   latlim1    =  -90.0
+   latlim2    =   90.0
+   verbose    = .false.
+  /
+
+&dart_to_cosmo_nml
+   dart_output_file = '/home/jkeller/DART/models/cosmo/work/dart.ud'
+   new_cosmo_analysis_file  = "/daten02/jkeller/laftest.grb"
+  /
+
+# some nice values to test with ... U variable staggering
+
+   kind_of_interest      = 'ANY'
+   1   1   1      1 geo lon,lat,vert 5.434346199  49.809848785  21500.0 rlon,rlat -2.944520340 -0.100272288
+  30   1   1     30 geo lon,lat,vert 5.837852001  49.825073242  21500.0 rlon,rlat -2.683723516 -0.100249408
+   1   2   1     31 geo lon,lat,vert 5.433496475  49.818824768  21500.0 rlon,rlat -2.944520227 -0.091279574
+  10   4   2    700 geo lon,lat,vert 5.557064056  49.841651917  20514.2852 rlon,rlat -2.863583308 -0.073289498
+   6   8   2    816 geo lon,lat,vert 5.498032093  49.875408173  20514.2852 rlon,rlat -2.899555455 -0.037320180
+
+   loc_of_interest = 5.434346199, 49.809848785, 21500.0
+   loc_of_interest = 5.837852001  49.825073242  21500.0
+   loc_of_interest = 5.433496475  49.818824768  21500.0
+   loc_of_interest = 5.557064056  49.841651917  20514.285156250
+
+   loc_of_interest = 5.5  49.88   20514.285156250   should have surrounding box 816-817-847-846  (ll-lr-ur-ul)
+   loc_of_interest = 5.5  49.875  20514.285156250  786-787-817-816  and be almost exactly 816
+
+   25% of the way from level 1 (21500.0) to level 2 () is  ... 21253.57128906250
+
+&model_mod_check_nml
+   dart_input_file      = 'dart_prior'
+   output_file          = 'check_me'
+   advance_time_present = .FALSE.
+   verbose              = .FALSE.
+   test1thru            =  8
+   x_ind                = 816
+   interp_test_dlon     = 0.001
+   interp_test_dlat     = 0.001
+   interp_test_dvert    = 1000.0
+   interp_test_latrange =  49.809, 49.996
+   interp_test_lonrange =   5.434,  5.824
+   interp_test_vertrange = 0.0, 21500.0
+   loc_of_interest = 5.498032093,  49.875408173,  21253.57128906250
+   kind_of_interest      = 'KIND_U_WIND_COMPONENT'
+   interp_test_vertcoord = 'VERTISHEIGHT'
+   /
+

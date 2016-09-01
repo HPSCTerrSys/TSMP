@@ -3128,7 +3128,6 @@ CHARACTER (LEN=14), INTENT(IN)     ::   &
              zti_rn    (i,ke1) = zti    (i,js,ke1)
            ENDIF
 
-
           zpalp_rn  (i)     = zpalp    (i,js)
 #endif 
           zalth_rn  (i)     = zalth    (i,js)

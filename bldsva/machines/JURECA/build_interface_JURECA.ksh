@@ -73,6 +73,7 @@ USAGE="sbatch <scriptname>"
 
 source $rundir/loadenvs
 date
+echo "started" > started.txt
 rm -rf YU*
 $srun
 date

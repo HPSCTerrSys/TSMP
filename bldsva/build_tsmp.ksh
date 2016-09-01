@@ -408,18 +408,13 @@ interactive(){
                         done
                         print "Please type in your desired value..."
 			read combination
-<<<<<<< HEAD
-                        clearPathSelection
-=======
 		        clearPathSelection
->>>>>>> origin/master
 			setCombination 
 		  fi
 		  if [[ $numb == 4 ]] ; then ; read val ;options+=(["oas"]="$val") ; fi
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
-<<<<<<< HEAD
 #DA
                   if [[ $numb == 8 ]] ; then ; read val ;options+=(["da"]="$val") ; fi
 		  if [[ $numb == 9 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
@@ -442,28 +437,9 @@ interactive(){
 		  if [[ $numb == 24 ]] ; then ; read optComp ; fi
 		  if [[ $numb == 25 ]] ; then ; read profiling ; fi
 		  if [[ $numb == 26 ]] ; then ; read cplscheme ; fi
-=======
-		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
-		  if [[ $numb == 9 ]] ; then ; read bindir ; fi
-		  if [[ $numb == 10 ]] ; then ; read oasdir ; fi
-		  if [[ $numb == 11 ]] ; then ; read clmdir ; fi
-		  if [[ $numb == 12 ]] ; then ; read cosdir ; fi
-		  if [[ $numb == 13 ]] ; then ; read pfldir ; fi
-		  if [[ $numb == 14 ]] ; then ; read mpiPath ; fi
-		  if [[ $numb == 15 ]] ; then ; read siloPath ; fi
-		  if [[ $numb == 16 ]] ; then ; read hyprePath ; fi
-	 	  if [[ $numb == 17 ]] ; then ; read tclPath ; fi
-		  if [[ $numb == 18 ]] ; then ; read grib1Path ; fi
-		  if [[ $numb == 19 ]] ; then ; read ncdfPath ; fi
- 		  if [[ $numb == 20 ]] ; then ; read pncdfPath ; fi
-		  if [[ $numb == 21 ]] ; then ; read lapackPath ; fi
 
-		  if [[ $numb == 22 ]] ; then ; read optComp ; fi
-		  if [[ $numb == 23 ]] ; then ; read profiling ; fi
-		  if [[ $numb == 24 ]] ; then ; read cplscheme ; fi
-                  if [[ $numb == 25 ]] ; then ; read readCLM ; fi
-		  if [[ $numb == 26 ]] ; then ; read freeDrain ; fi
->>>>>>> origin/master
+                  if [[ $numb == 27 ]] ; then ; read readCLM ; fi
+		  if [[ $numb == 28 ]] ; then ; read freeDrain ; fi
 		done	
 		interactive
 	  ;;
@@ -505,17 +481,11 @@ printState(){
   print "${cred}(22)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
   print "${cred}(23)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
   print ""
-<<<<<<< HEAD
   print "${cred}(24)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
   print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
-=======
-  print "${cred}(22)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
-  print "${cred}(23)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
-  print "${cred}(24)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
-  print "${cred}(25)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
-  print "${cred}(26${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
->>>>>>> origin/master
+  print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
+  print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
 }
 
 check(){
@@ -739,14 +709,10 @@ getRoot(){
     B)  bindir="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
-<<<<<<< HEAD
-#DA
-    U)  options+=(["da"]="$OPTARG") ; args=1 ;;
-=======
     r)  readCLM="$OPTARG" ; args=1 ;;
     d)  freeDrain="$OPTARG" ; args=1 ;;
-
->>>>>>> origin/master
+#DA
+    U)  options+=(["da"]="$OPTARG") ; args=1 ;;
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
     Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
     X)  options+=(["clm"]="$OPTARG") ; args=1 ;;

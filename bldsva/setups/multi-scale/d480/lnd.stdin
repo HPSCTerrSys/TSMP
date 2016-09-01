@@ -1,0 +1,37 @@
+#! /bin/ksh
+
+
+cat << EOF > __rundir__/lnd.stdin
+ &clm_inparm
+ caseid         = 'clmoas'
+ ctitle         = 'clmoas'
+ nsrest         =  0
+ nelapse        =  __runstep_clm_bldsva__ 
+ dtime          =  __dt_clm_bldsva__
+ start_ymd      =  __yyyymmdd_bldsva__ 
+ start_tod      =  __seconds_clm_bldsva__
+
+ finidat        = '__finidat__'
+ flndtopo       = '__forcingdir__/topodata___gridsize__.nc'
+ fsurdat        = '__forcingdir__/surfdata___gridsize__.nc'
+ fatmgrid       = '__forcingdir__/griddata___gridsize__.nc'
+ fatmlndfrc     = '__forcingdir__/fracdata___gridsize__.nc'
+ fatmtopo       = ''
+ fpftcon        = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ offline_atmdir = '/daten01/z4/database/clm3.5/half_rain/atm_forcing/'
+ frivinp_rtm    = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+
+ hist_dov2xy    = .true.
+ hist_avgflag_pertape = 'A'
+ hist_nhtfrq    =  -120 
+ hist_mfilt     =  1
+ hist_crtinic   = 'NONE'
+ mss_irt        =  0 
+
+ irad           =  1
+ wrtdia         = .true.
+ rest_flag      = .true. 
+/
+ &prof_inparm
+ /
+EOF

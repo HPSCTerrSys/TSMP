@@ -21,7 +21,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
 
   # Default Processor settings
-  defaultwtime="00:30:00"
+  defaultwtime="00:300:00"
   defaultQ="batch"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
@@ -93,7 +93,7 @@ cd $rundir
 rm -rf  YU*
 
 export LD_LIBRARY_PATH=$defaultNcdfPath/lib/
-
+echo "started" > started.txt
 date
 $exel >> log_file 2>> err_file
 date
