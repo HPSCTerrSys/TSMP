@@ -9,8 +9,8 @@ configure_clm(){
 route "${cblue}>> configure_clm${cnormal}"
   cplLib="-lnetcdff "
   flags=""
-  flags+="-cc $mpiPath/bin/mpicc "
-  flags+="-fc $mpiPath/bin/mpif90 "
+  ccc="$mpiPath/bin/mpicc "
+  cfc="$mpiPath/bin/mpif90 "
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

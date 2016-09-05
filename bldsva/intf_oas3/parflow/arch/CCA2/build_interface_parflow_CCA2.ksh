@@ -18,7 +18,12 @@ route "${cblue}>> configure_pfl${cnormal}"
     fi  
     if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
 
-    flagsSim+="CC=cc  CXX=cc FC=ftn F77=ftn "
+    flagsSim=" "
+    pcc="cc"
+    pfc="ftn"
+    pf77="ftn"
+    pcxx="cc"
+
     flagsTools+="CC=cc FC=ftn F77=ftn "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "

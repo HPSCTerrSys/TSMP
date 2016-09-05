@@ -18,7 +18,11 @@ route "${cblue}>> configure_pfl${cnormal}"
 
     if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
 
-    flagsSim+="CC=$mpiPath/bin/mpixlc_r  CXX=$mpiPath/bin/mpixlcxx_r FC=$mpiPath/bin/mpixlf90_r F77=$mpiPath/bin/mpixlf77_r "
+    flagsSim=" "
+    pcc="${profComp} $mpiPath/bin/mpixlc_r"
+    pfc="${profComp} $mpiPath/bin/mpixlf90_r"
+    pf77="${profComp} $mpiPath/bin/mpixlf77_r"
+    pcxx="${profComp} $mpiPath/bin/mpixlcxx_r"
     flagsTools+="CC=gcc FC=gfortran F77=gfortran "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdf"
     fcflagsSim="-qfree=f90 -qsuffix=cpp=F90 -qnoextname $cplInc -WF,-Duse_libMPI -WF,-Duse_netCDF -WF,-Duse_comm_MPI1 -WF,-DVERBOSE -WF,-DDEBUG -WF,-DTREAT_OVERLAY -I$ncdfPath/include "

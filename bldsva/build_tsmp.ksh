@@ -34,7 +34,7 @@ getDefaults(){
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
 
-  #profiling ("yes" , "no") - will use machine standard
+  #profiling
   def_profiling="no"
 
   # fresh build clean in new folder
@@ -91,6 +91,11 @@ setDefaults(){
   options+=(["clm"]=${def_options["clm"]})
   options+=(["pfl"]=${def_options["pfl"]})
 
+  #profiling
+  profComp=""
+  profRun=""
+  profVar=""
+
 }
 
 
@@ -134,6 +139,7 @@ setSelection(){
 
 finalizeSelection(){
 comment "  create bindir: $bindir"
+  
   mkdir -p $bindir >> $log_file 2>> $err_file
 check
 
@@ -640,7 +646,7 @@ getRoot(){
     i)  mode=2 ;;  
     b)  mode=1 ;;
     m)  platform="$OPTARG" ; args=1 ;;
-    p)  profling="${OPTARG}" ; args=1 ;;
+    p)  profiling="${OPTARG}" ; args=1 ;;
     o)  optComp="${OPTARG}" ; args=1 ;; 
     v)  version="$OPTARG"  ;  args=1 ;;
     a)  listA="true" ;;

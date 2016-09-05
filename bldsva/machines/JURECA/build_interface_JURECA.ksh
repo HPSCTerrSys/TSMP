@@ -25,6 +25,9 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
+  profilingImpl=" scalasca "  
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="scalasca -instrument" ; profRun="scalasca -analyze" ; profVar="ESD_BUFFER_SIZE=300000"  ;fi
+
   # Default Processor settings
   defaultwtime="01:00:00"
   defaultQ="batch"
@@ -70,6 +73,8 @@ source $rundir/loadenvs
 date
 echo "started" > started.txt
 rm -rf YU*
+
+export $profVar
 srun --multi-prog slm_multiprog_mapping.conf
 date
 echo "ready" > ready.txt
@@ -136,13 +141,13 @@ comment "   sed executables and processors into mapping file"
         if [[ $withCLM == "false" ]] then ; sed "s/__clm__//" -i $rundir/slm_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
 
 
-sed "s/__oas__/$start_oas  \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__oas__/$start_oas  $profRun \.\/oasis3.MPI1.x/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-sed "s/__cos__/$start_cos-$end_cos  \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__cos__/$start_cos-$end_cos  $profRun \.\/lmparbin_pur/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-sed "s/__pfl__/$start_pfl-$end_pfl  \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__pfl__/$start_pfl-$end_pfl  $profRun \.\/parflow $pflrunname/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-sed "s/__clm__/$start_clm-$end_clm  \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
+sed "s/__clm__/$start_clm-$end_clm  $profRun \.\/clm/" -i $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 
 

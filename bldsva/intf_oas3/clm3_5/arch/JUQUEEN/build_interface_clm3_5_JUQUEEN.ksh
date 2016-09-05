@@ -8,8 +8,8 @@ route "${cblue}<< always_clm${cnormal}"
 configure_clm(){
 route "${cblue}>> configure_clm${cnormal}"
   flags=""
-  flags+="-cc $mpiPath/bin/mpixlc_r "
-  flags+="-fc $mpiPath/bin/mpixlf90_r "
+  ccc="$mpiPath/bin/mpixlc_r "
+  cfc="$mpiPath/bin/mpixlf90_r "
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

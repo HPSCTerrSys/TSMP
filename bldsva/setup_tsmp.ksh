@@ -109,6 +109,11 @@ setDefaults(){
   runhours=$def_runhours
   initDate=$def_initDate
 
+  #profiling
+  profComp=""
+  profRun=""
+  profVar=""
+
   withCESM="false"
 }
 
@@ -691,7 +696,7 @@ getRoot(){
     i)  mode=2 ;;
     b)  mode=1 ;;
     m)  platform="$OPTARG" ; args=1 ;; 
-    p)  profling="${OPTARG}" ; args=1 ;;
+    p)  profiling="${OPTARG}" ; args=1 ;;
     v)  version="$OPTARG"  ;  args=1 ;;
     V)  refSetup="$OPTARG"  ;  args=1 ;; 
     a)  listA="true" ;;
