@@ -225,6 +225,7 @@ comment "   sed executables and processors into mapping file for instance $insta
 
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
+echo "started" > started.txt
 date
 runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe 
 date

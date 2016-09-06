@@ -189,18 +189,16 @@ cat > INPUT_ORG << end_input_org
  &LMGRID
   ! Definition of the grid structure:
   ! dlon = dx / earthradius * (180 / PI); in degrees
-    dlon=0.00899289282,
+    dlon=0.00179857856,
   ! dlat = dy / earthradius * (180 / PI); in degrees
-    dlat=0.00899289282,
+    dlat=0.00179857856,
     ie_tot=ie_tot_bldsva,
     je_tot=je_tot_bldsva,
-    ke_tot=50,
-    startlat_tot = -0.100, startlon_tot = -2.949,
-    pollat       = 40.0,          pollon = -170.0,
-    !startlon_tot=7.117,
-    !startlat_tot=50.709,
-    !pollon=-180.00,
-    !pollat=90.00,
+    ke_tot=64,
+    startlon_tot=-0.11151187094,
+    startlat_tot=-0.11151187094,
+    pollon=-180.00,
+    pollat=90.00,
  /
  &RUNCTL
     ! Idealized run with artificial initial and lateral boundary conditions and
@@ -272,8 +270,8 @@ cat > INPUT_ORG << end_input_org
   ! Tuning factor for the N0 parameter of the assumed rain DSD:
   rain_n0_factor = 0.1,
   ! pat_len: Length scale (m) of subscale surface patterns over land.
-  pat_len=500.0, 
-  tur_len=150.0,
+  pat_len=250.0, 
+  !tur_len=150.0,
   z0m_dia=0.2,
   ! rlam_heat: scaling factor for the thickness of the laminar boundary layer for heat (default=-1.0)
   rlam_heat=1.0,
@@ -353,7 +351,11 @@ cat > INPUT_IO  << end_input_io
   ! hcomb = 0.0, 6.0, 0.1 means: from hour 0 to hour 6 in steps of 6 minutes
   ! (Several triples may be given one after another!)
   !hcomb=0.0, 20.0, 0.25,
+<<<<<<< HEAD
+  ncomb=__ncomb_start__,$nsteps,600,
+=======
   ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
+>>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
   nrbit=16,
   ! Indikator for the time unit in grib-output (0=min, 1=stunde) - 0 no more possible since COSMO 5.0:
 !  nunit_of_time=1,
@@ -432,7 +434,7 @@ cat > INPUT_DYN << end_input_dyn
     ! Include/ exclude cloud water condensation and evaporation (effective only for itype_gscp < 100):
     lcond=.true.,
     ! Parameters for the artificial fourth-order diffusion terms:
-    lhordiff=.true.,
+    lhordiff=.false.,
       itype_hdiff=2,
       hd_corr_u_bd = 1.00,
       hd_corr_t_bd = 0.75,
@@ -535,7 +537,7 @@ cat > INPUT_PHY << end_input_phy
     itype_gscp=4,
       ldiniprec=.false.,
     ! Radiation scheme:
-    lrad=.true.,
+    lrad=.false.,
     hincrad=0.25,
       lradf_avg=.false.,
       nradcoarse=1,
@@ -544,7 +546,7 @@ cat > INPUT_PHY << end_input_phy
     ! Master switch for turbulent diffusion:
     ltur=.true.,
       ! type of turbulent diffusion parametrization 3=progrnostic TKE-based standard scheme; 7=LES-Scheme, 100=const. diff. coeff.:
-      itype_turb=3,
+      itype_turb=8,
       ! prognostic treatment of TKE (for itype_turb=5/7)
       lprog_tke=.true.,
       limpltkediff = .FALSE.,
@@ -588,7 +590,7 @@ cat > INPUT_PHY << end_input_phy
       ! itype_synd: type of diagnosis of synoptic station values:
       itype_synd=2,
     ! Master switch for the soil model
-    lsoil=.true.,
+    lsoil=.false.,
       lmulti_layer=.true.,
       lmelt=.true.,
       lmelt_var=.true.,
@@ -718,9 +720,21 @@ cat > INPUT_IDEAL << end_input_artifctl
   !  rhgr_poly =  0.001,0.000 ,1.0E-5,0.000 ,1.0E-4 , 0.0, 
    ! u_infty   = 0.5,
  linitw_followeta = .true.,
+ lsensiflux_fix = .true.,
+ sensiflux_c = 300.0,
+ llatentflux_fix = .true.,
+ latentflux_LzuS = 0.4,
+ H0_rel_noise = 0.05,
+ iseed_noise_H0 = 381,
  lnosurffluxes_m = .false.,
  lnosurffluxes_h = .false.,
  ltempdist = .false., .false., .false.,.false.,
+ !Noise at lowest 100 hPa of atmosphere in boundary layer
+ ladd_noise_t = .true.,
+ dT_noise = 0.02, !K
+ iseed_noise_t = 606,
+ dW_noise = 0.02, !m/s
+ iseed_noise_w = 607,
 /
 end_input_artifctl
 

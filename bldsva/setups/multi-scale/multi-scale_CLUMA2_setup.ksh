@@ -12,7 +12,7 @@ initSetup(){
 
   defaultNppn=64
   defaultCLMProcX=2
-  defaultCLMProcY=7
+  defaultCLMProcY=5
   defaultPFLProcX=10
   defaultPFLProcY=10
 
