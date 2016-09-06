@@ -29,6 +29,13 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   # Default Compiler/Linker optimization
   defaultOptC="-O2 -qhot -qarch=qp -qtune=qp"
 
+  profilingImpl=" no scalasca "
+  if [[ $profiling == "scalasca" ]] ; then ;
+    comment "   load scalasca module" 
+      module load UNITE scalasca >> $log_file 2>> $err_file
+    check
+    profComp="scalasca -instrument" ; profRun="scalasca -analyze" ; profVar="ESD_BUFFER_SIZE=300000"  
+  fi
 
   # Default Processor settings
   defaultwtime="00:30:00"
@@ -58,7 +65,7 @@ bgs_pfl=`echo "scale = 2; $numInst * $nproc_pfl / $nppn" | bc | perl -nl -MPOSIX
 
 errorname='$(job_name).$(jobid).err'
 outputname='$(job_name).$(jobid).out'
-runflags="--envs LOGNAME=$rundir"
+runflags="--envs LOGNAME=$rundir --envs $profVar "
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
 #!/bin/ksh
@@ -75,6 +82,9 @@ cat << EOF >> $rundir/tsmp_ll_run.ksh
 #@ $queue
 
 cd $rundir
+
+eval \`tclsh /usr/local/module/modulecmd.tcl sh autoinit\`
+module load UNITE scalasca
 
 sed -i -r '/^[ ]/d' ll_multiprog_mapping.conf
 rm -rf partinfos.txt base YU*
@@ -187,6 +197,10 @@ __clm3__
 
 EOF
 
+if [[ $withCLM == "true" ]] then ; exe=clm ; fi
+if [[ $withPFL == "true" ]] then ; exe=parflow ; fi
+if [[ $withCOS == "true" ]] then ; exe=lmparbin_pur ; fi
+
 comment "   sed executables and processors into mapping file for instance $instance"
   if [[ $withOAS == "false" ||  $withOASMCT == "true" ]] then ; sed "s/__oas.__//" -i $rundir/ll_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
   if [[ $withCOS == "false" ]] then ; sed "s/__cos.__//" -i $rundir/ll_multiprog_mapping.conf  >> $log_file 2>> $err_file; check; fi
@@ -227,7 +241,7 @@ comment "   sed executables and processors into mapping file for instance $insta
 cat << EOF >> $rundir/tsmp_ll_run.ksh
 echo "started" > started.txt
 date
-runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./dummy.exe 
+$profRun runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./$exe
 date
 
 echo "ready" > ready.txt

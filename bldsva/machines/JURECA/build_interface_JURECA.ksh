@@ -25,7 +25,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
-  profilingImpl=" scalasca "  
+  profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="scalasca -instrument" ; profRun="scalasca -analyze" ; profVar="ESD_BUFFER_SIZE=300000"  ;fi
 
   # Default Processor settings
