@@ -52,7 +52,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
     cd $cosdir >> $log_file 2>> $err_file
   check
   comment "    make cosmo"
-    make -f $cosdir/Makefile >> $log_file 2>> $err_file
+    make -j 8 -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
   comment "    cp cosmo binary to $bindir"
     cp $cosdir/lmparbin_pur $bindir >> $log_file 2>> $err_file
@@ -374,7 +374,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
-    gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -j 8 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
   comment "    cp clm binary to $bindir"
     cp $clmdir/build/clm $bindir >> $log_file 2>> $err_file

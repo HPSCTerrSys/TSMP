@@ -32,10 +32,10 @@ route "${cblue}>> configure_pfl${cnormal}"
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
   comment "   sed correct linker command in pftools"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
 check
 
 
