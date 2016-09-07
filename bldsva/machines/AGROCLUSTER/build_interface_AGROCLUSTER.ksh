@@ -83,7 +83,7 @@ exel=${exel%?} #remove trailing ":"
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
 
 #Job Submission to Agrocluster
-#PBS -S /bin/csh
+#PBS -S /bin/ksh
 #PBS -N TerrSysMP_run
 #PBS -l walltime=$wtime
 #PBS -l nodes=$nnodes:ppn=$nppn
@@ -95,6 +95,8 @@ cat << EOF >> $rundir/tsmp_pbs_run.ksh
 cd $rundir
 
 rm -rf  YU*
+
+export LD_LIBRARY_PATH=$defaultTclPath/lib64/:/home/f.gasper/local/libs/netcdf/lib
 
 echo "started" > started.txt
 
