@@ -47,6 +47,8 @@ initSetup(){
   cplfreq1=900
   cplfreq2=900
 
+  delta_obs=90000
+
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_a1
