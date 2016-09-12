@@ -1,32 +1,32 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database/multi-scale/D0480subcatchment"
-  defaultFDOAS="/daten01/z4/database/multi-scale/D0480subcatchment"
-  defaultFDPFL="/daten01/z4/database/multi-scale/D0480subcatchment"
+  defaultFDCLM="/daten01/z4/database/multi-scale/D0120subcatchment"
+  defaultFDOAS="/daten01/z4/database/multi-scale/D0120subcatchment"
+  defaultFDPFL="/daten01/z4/database/multi-scale/D0120subcatchment"
 
 
-  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d480/lnd.stdin 
-  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d480/coup_oas.tcl
+  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d120/lnd.stdin 
+  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d120/coup_oas.tcl
 
 
   defaultNppn=64
   defaultCLMProcX=2
-  defaultCLMProcY=5
-  defaultPFLProcX=10
+  defaultCLMProcY=1
+  defaultPFLProcX=19
   defaultPFLProcY=10
 
   defaultStartDate="2009-01-01 00"
   defaultInitDate="2009-01-01 00"
   defaultRunhours=8760
 
-  gx_clm=50
-  gy_clm=70
+  gx_clm=190
+  gy_clm=220
   dt_clm=3600
-  res="0070x0050"
+  res="0220x0190"
 
-  gx_pfl=50
-  gy_pfl=70
+  gx_pfl=190
+  gy_pfl=220
   dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=1.0

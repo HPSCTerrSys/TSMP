@@ -14,7 +14,7 @@ lmoutdir_cluma=__rundir__/cosout
 lmrestdir_cluma=__rundir__/cosrst
 lmindir_cluma=__forcingdir__/
 #
-rasoinput=__forcingdir__/raso_IdealSnd_0000LT.dat
+rasoinput=__forcingdir__/raso_CBL_1200LT.dat
 #
 lmworkdir_sx9=/e/uhome/xxxx/cosmo/
 lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
@@ -194,7 +194,7 @@ cat > INPUT_ORG << end_input_org
     dlat=0.00179857856,
     ie_tot=ie_tot_bldsva,
     je_tot=je_tot_bldsva,
-    ke_tot=64,
+    ke_tot=50,
     startlon_tot=-0.11151187094,
     startlat_tot=-0.11151187094,
     pollon=-180.00,
@@ -351,11 +351,7 @@ cat > INPUT_IO  << end_input_io
   ! hcomb = 0.0, 6.0, 0.1 means: from hour 0 to hour 6 in steps of 6 minutes
   ! (Several triples may be given one after another!)
   !hcomb=0.0, 20.0, 0.25,
-<<<<<<< HEAD
-  ncomb=__ncomb_start__,$nsteps,600,
-=======
   ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
->>>>>>> c0ff3d759d1a2df5ef8b850adbb9484032d18834
   nrbit=16,
   ! Indikator for the time unit in grib-output (0=min, 1=stunde) - 0 no more possible since COSMO 5.0:
 !  nunit_of_time=1,
@@ -707,10 +703,10 @@ cat > INPUT_IDEAL << end_input_artifctl
   w_i_c     = 0.0,      ! interception storage on plants in m H2O
   t_ice_c   = -1.0,     ! T at the snow-ice or air-ice interf. in K (if < 0, t_s is taken instead) 
   t_water_c = -1.0,     ! T at the water-ice or water-air interface in K (if < 0, t_s is taken instead)
- itype_artifprofiles = 1, 
+ itype_artifprofiles = 4,  !U analytic
  rasofile = '$rasoinput',
  ! itype_anaprof_tqv = 2, 
-  !itype_anaprof_uv = 3,
+  itype_anaprof_uv = 3,
   !  nlayers_poly = 6,
   !  p_base_poly = 1e5,
   !  h_poly    =    0.0,300.  ,1500.0,5000.0,10000  ,13000.0,
@@ -718,23 +714,23 @@ cat > INPUT_IDEAL << end_input_artifctl
   !  tgr_poly  =  0.00,0.000 , 0.0052,0.0066,0.008 , -0.0007,
   !  rh_poly   =  0.656,0.356 , 0.356,0.321 ,0.321  , 0.021,
   !  rhgr_poly =  0.001,0.000 ,1.0E-5,0.000 ,1.0E-4 , 0.0, 
-   ! u_infty   = 0.5,
+   u_infty   = 2.,    !rolls 15.
  linitw_followeta = .true.,
  lsensiflux_fix = .true.,
- sensiflux_c = 300.0,
+ sensiflux_c = 280.0,   !rolls 80.0
  llatentflux_fix = .true.,
- latentflux_LzuS = 0.4,
- H0_rel_noise = 0.05,
- iseed_noise_H0 = 381,
+ latentflux_LzuS = 0.4, !rolls 1.0
+ !H0_rel_noise = 0.05,
+ !iseed_noise_H0 = 381,
  lnosurffluxes_m = .false.,
  lnosurffluxes_h = .false.,
  ltempdist = .false., .false., .false.,.false.,
  !Noise at lowest 100 hPa of atmosphere in boundary layer
  ladd_noise_t = .true.,
- dT_noise = 0.02, !K
+ dT_noise = 0.002, !K
  iseed_noise_t = 606,
- dW_noise = 0.02, !m/s
- iseed_noise_w = 607,
+ !dW_noise = 0.02, !m/s
+ !iseed_noise_w = 607,
 /
 end_input_artifctl
 
