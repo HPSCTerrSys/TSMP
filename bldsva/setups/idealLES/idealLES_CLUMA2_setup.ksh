@@ -1,11 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/LESCBLsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
-
+  defaultFDCLM="/daten01/z4/database/TestCases/idealLES/clm"
+  defaultFDCOS="/daten01/z4/database/TestCases/idealLES/cosmo"
+  defaultFDOAS="/daten01/z4/database/TestCases/idealLES/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/idealLES/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/idealLES/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealLES/lmrun_uc 
@@ -37,7 +36,7 @@ initSetup(){
   gy_cos=120
   dt_cos=6
   nbndlines=3
-  dump_cos=0.0833333
+  dump_cos=0.0833333333333333333333333333
 
   gx_pfl=116
   gy_pfl=116

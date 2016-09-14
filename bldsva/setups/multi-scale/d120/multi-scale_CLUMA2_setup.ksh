@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database/multi-scale/D0120subcatchment"
-  defaultFDOAS="/daten01/z4/database/multi-scale/D0120subcatchment"
-  defaultFDPFL="/daten01/z4/database/multi-scale/D0120subcatchment"
+  defaultFDCLM="/daten01/z4/database/TestCases/multi-scale/D0120subcatchment/clm"
+  defaultFDOAS="/daten01/z4/database/TestCases/multi-scale/D0120subcatchment/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/multi-scale/D0120subcatchment/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d120/lnd.stdin 
@@ -80,6 +80,10 @@ route "${cblue}>> finalizeSetup${cnormal}"
 
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
+        check
+
+        comment "   copy pfsol to  rundir"
+          cp $forcingdir_pfl/*.pfsol $rundir >> $log_file 2>> $err_file
         check
 
         comment "   copy slopes and slope script into rundir"
