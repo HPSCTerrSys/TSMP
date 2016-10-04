@@ -1,8 +1,8 @@
 #!/bin/csh
 #
 set DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
-set MODEL_PATH="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
-set num_days = 14 
+set MODEL_PATH="/daten01/z4/database/dart/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
+set num_days = 14
 #
 cd $DART_DIR 
 if ($1 == 0) then
@@ -33,10 +33,11 @@ ln -sf $cosout cosmo.nc
 ln -sf $cosrst cosmo_prior
 #&model_nml has the above names for restart and netcdf file
 
-#./create_obs_sequence
+if ($irun == 1) then
+./create_obs_sequence
 #CPS Already generated set_def.out
 #5.6 E, 49.8976 N, creates set_def.out
-
+endif
 
 #creates obs_seq.in, do it for one restart time 
 set defaultInitDate  = `grep defaultInitDate $model_dir/cosmo_prior_time.txt`
