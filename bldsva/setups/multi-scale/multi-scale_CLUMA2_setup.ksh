@@ -1,32 +1,32 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database/multi-scale/D0480subcatchment"
-  defaultFDOAS="/daten01/z4/database/multi-scale/D0480subcatchment"
-  defaultFDPFL="/daten01/z4/database/multi-scale/D0480subcatchment"
+  defaultFDCLM="/daten01/z4/database/TestCases/multi-scale/D0960subcatchment/clm"
+  defaultFDOAS="/daten01/z4/database/TestCases/multi-scale/D0960subcatchment/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/multi-scale/D0960subcatchment/parflow"
 
 
-  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d480/lnd.stdin 
-  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d480/coup_oas.tcl
+  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d960/lnd.stdin 
+  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d960/coup_oas.tcl
 
 
   defaultNppn=64
-  defaultCLMProcX=2
-  defaultCLMProcY=7
+  defaultCLMProcX=1
+  defaultCLMProcY=1
   defaultPFLProcX=10
-  defaultPFLProcY=10
+  defaultPFLProcY=6
 
   defaultStartDate="2009-01-01 00"
   defaultInitDate="2009-01-01 00"
   defaultRunhours=8760
 
-  gx_clm=50
-  gy_clm=70
+  gx_clm=20
+  gy_clm=30
   dt_clm=3600
-  res="0070x0050"
+  res="0030x0020"
 
-  gx_pfl=50
-  gy_pfl=70
+  gx_pfl=20
+  gy_pfl=30
   dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=1.0
@@ -80,6 +80,10 @@ route "${cblue}>> finalizeSetup${cnormal}"
 
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
+        check
+
+        comment "   copy pfsol to  rundir"
+          cp $forcingdir_pfl/*.pfsol $rundir >> $log_file 2>> $err_file
         check
 
         comment "   copy slopes and slope script into rundir"

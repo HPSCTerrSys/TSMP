@@ -1,53 +1,52 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database/TestCases/idealRTD/clm"
-  defaultFDCOS="/daten01/z4/database/TestCases/idealRTD/cosmo"
-  defaultFDOAS="/daten01/z4/database/TestCases/idealRTD/oasis3"
-  defaultFDPFL="/daten01/z4/database/TestCases/idealRTD/parflow"
+  defaultFDCLM="/daten01/z4/database/TestCases/idealLES/clm"
+  defaultFDCOS="/daten01/z4/database/TestCases/idealLES/cosmo"
+  defaultFDOAS="/daten01/z4/database/TestCases/idealLES/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/idealLES/parflow"
 
-
-  defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
-  defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
+  defaultNLCLM=$rootdir/bldsva/setups/idealLES/lnd.stdin 
+  defaultNLCOS=$rootdir/bldsva/setups/idealLES/lmrun_uc 
+  defaultNLPFL=$rootdir/bldsva/setups/idealLES/coup_oas.tcl
 
 
   defaultNppn=64
   defaultCLMProcX=1
   defaultCLMProcY=1
-  defaultCOSProcX=2
-  defaultCOSProcY=1
+  defaultCOSProcX=8
+  defaultCOSProcY=8
   defaultPFLProcX=1
   defaultPFLProcY=1
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRunhours=24
+  defaultRunhours=2
 
   defaultDumpCLM=1
   defaultDumpCOS=1
   defaultDumpPFL=1
 
+  gx_clm=116
+  gy_clm=116
+  dt_clm=6
+  res="0116x0116"
 
-  gx_clm=24
-  gy_clm=14
-  dt_clm=18
-  res="0014x0024"
-
-  gx_cos=30
-  gy_cos=20
-  dt_cos=18
+  gx_cos=120
+  gy_cos=120
+  dt_cos=6
   nbndlines=3
+  dump_cos=0.0833333333333333333333333333
 
-  gx_pfl=24
-  gy_pfl=14
-  dt_pfl=0.005
+  gx_pfl=116
+  gy_pfl=116
+  dt_pfl=0.00166667
   pflrunname="rurlaf"
-  base_pfl=0.0025
+  base_pfl=0.00166667
   dump_pfl=3.0
 
-  cplfreq1=18
-  cplfreq2=18
+  cplfreq1=6
+  cplfreq2=6
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
@@ -74,7 +73,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/clm3.5/idealLES/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"
@@ -104,7 +103,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
-          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
           sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check

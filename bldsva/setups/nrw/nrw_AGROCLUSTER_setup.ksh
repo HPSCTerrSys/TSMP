@@ -9,7 +9,7 @@ initSetup(){
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
-  defaultNLCLM=$rootdir/bldsva/setups/nrw/coup_oas.tcl 
+  defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl 
 
 
   defaultNppn=64

@@ -1,32 +1,32 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/arch/hbn33/hbn331/database/multi-scale/D0120subcatchment"
-  defaultFDOAS="/arch/hbn33/hbn331/database/multi-scale/D0120subcatchment"
-  defaultFDPFL="/arch/hbn33/hbn331/database/multi-scale/D0120subcatchment"
+  defaultFDCLM="/arch/hbn33/hbn331/multi-scale/D0960subcatchment"
+  defaultFDOAS="/arch/hbn33/hbn331/multi-scale/D0960subcatchment"
+  defaultFDPFL="/arch/hbn33/hbn331/multi-scale/D0960subcatchment"
 
 
-  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d120/lnd.stdin 
-  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d120/coup_oas.tcl
+  defaultNLCLM=$rootdir/bldsva/setups/multi-scale/d960/lnd.stdin 
+  defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d960/coup_oas.tcl
 
 
   defaultNppn=48
-  defaultCLMProcX=2
-  defaultCLMProcY=5
-  defaultPFLProcX=5
-  defaultPFLProcY=22
+  defaultCLMProcX=1
+  defaultCLMProcY=1
+  defaultPFLProcX=10
+  defaultPFLProcY=6
 
   defaultStartDate="2009-01-01 00"
   defaultInitDate="2009-01-01 00"
   defaultRunhours=8760
 
-  gx_clm=190
-  gy_clm=220
+  gx_clm=20
+  gy_clm=30
   dt_clm=3600
-  res="0220x0190"
+  res="0030x0020"
 
-  gx_pfl=190
-  gy_pfl=220
+  gx_pfl=20
+  gy_pfl=30
   dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=1.0
