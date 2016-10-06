@@ -394,7 +394,6 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-nc_lib $ncdfPath/lib "
     flags+="-nc_mod $ncdfPath/include "
     flags+="-mpi_inc $mpiPath/include "
-    flags+="-mpi_lib $mpiPath/lib "
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
@@ -737,7 +736,7 @@ route "${cblue}<<< c_setup_pfl${cnormal}"
 
 c_setup_pdaf(){
 route "${cblue}>>> c_setup_da${cnormal}"
-  comment "   copy parflow namelist to rundir."
+  comment "   copy pdaf namelist to rundir."
     cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
   comment "   sed num instances into pdaf namelist."
