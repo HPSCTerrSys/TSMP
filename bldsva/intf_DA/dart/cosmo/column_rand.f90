@@ -26,12 +26,13 @@ character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (W
 integer  :: level, num_cols, num_levs,num_dates, i,k, iunit
 real(r8) :: lat, lon, t_err_var, uv_err_var, ps_err_var
 real(r8) :: lat_data(10), lon_data(10), level_data(5)
-integer  :: yyyy, mm, dd_data(6), hh, mn, ss
+integer  :: yyyy, mm, dd_data(13), hh, mn, ss
+character(len=1024) :: filename
 
 data  lat_data/49.93, 49.90, 49.87, 49.90, 49.93, 49.90, 49.87, 40.90, 49.93, 49.90/
 data  lon_data/ 5.43,  5.45,  5.47,  5.49,  5.51,  5.53,  5.55,  5.57,  5.59,  5.60/
 data  level_data/10.0, 100.0, 200.0, 500., 1000./
-data  dd_data/8, 9, 10, 11, 12, 13/
+data  dd_data/9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21/
 
 !Pre Specified Date
 yyyy = 2008
@@ -49,7 +50,7 @@ read(*, *) num_cols
 write(*, *) 'input the number of model levels:5'
 read(*, *) num_levs
 
-write(*, *) 'input the number of dates:6'
+write(*, *) 'input the number of dates:13'
 read(*, *) num_dates
 
 ! Output the total number of obs
@@ -92,6 +93,25 @@ end do
 
 write(iunit, *) -1                        !CPS_write
 write(iunit, *) 'set_def.out'             !CPS_write
+close(iunit)
+
+!CPS added for export
+do k = 1, num_dates
+  iunit = get_unit()
+  if (k .le. 9) then
+    write (filename, "(A19,I1)") "column_export_out_0",k 
+  else
+    write (filename, "(A18,I2)") "column_export_out_",k
+  endif
+  open(unit = iunit, file = trim(filename))
+  write(iunit, *) 'set_def.out'             !CPS_write
+  write(iunit, *) 1                         !CPS_write
+  write(iunit, *) 1                         !CPS_write
+  write(iunit, *) yyyy,mm,dd_data(k),hh,mn,ss        !CPS_write
+  write(iunit, *) 0,0                         !CPS_write
+  write(iunit, *) 'obs_seq.in'             !CPS_write
+  close(iunit)
+end do
 
 end program column_rand
 
