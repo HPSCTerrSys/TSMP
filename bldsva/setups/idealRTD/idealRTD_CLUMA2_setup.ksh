@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/RTDsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
+  defaultFDCLM="/daten01/z4/database/TestCases/idealRTD/clm"
+  defaultFDCOS="/daten01/z4/database/TestCases/idealRTD/cosmo"
+  defaultFDOAS="/daten01/z4/database/TestCases/idealRTD/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/idealRTD/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
@@ -74,7 +74,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/idealRTD/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"

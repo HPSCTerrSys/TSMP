@@ -22,7 +22,7 @@ foreach instance (`seq 0 $numInst`)
  echo "tsmp_instance_"$instance
  echo " "
  cd tsmp_instance_$instance
- cp /daten01/z4/database/ParFlow/idealRTD/rur_ic_press_Sv06.pfb ./rur_ic_press.pfb
+ cp $HOME/database/idealRTD/parflow/rur_ic_press_Sv06.pfb ./rur_ic_press.pfb
  tclsh ascii2pfb.tcl
  cd ..
 
@@ -31,7 +31,7 @@ foreach instance (`seq 0 $numInst`)
  set rasonum = `printf raso_IdealSnd_0000LT_%02d $instance`
  sed "s,raso_IdealSnd_0000LT.dat,$rasonum.dat," -i lmrun_uc
  rm cosmo_in/raso_IdealSnd_0000LT_* 
- cp /daten01/z4/database/cosmo/RTDsounding/$rasonum.dat cosmo_in/
+ cp $HOME/database/idealRTD/cosmo/$rasonum.dat cosmo_in/
  ./lmrun_uc execluma
  cd ..
 end

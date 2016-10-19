@@ -10,7 +10,7 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/multi-scale/d240/coup_oas.tcl
 
 
-  defaultNppn=48
+  defaultNppn=64
   defaultCLMProcX=2
   defaultCLMProcY=5
   defaultPFLProcX=10

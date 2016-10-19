@@ -13,7 +13,7 @@ initSetup(){
   defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=5
-  defaultPFLProcX=10
+  defaultPFLProcX=5
   defaultPFLProcY=22
 
   defaultStartDate="2009-01-01 00"

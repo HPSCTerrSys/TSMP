@@ -1,6 +1,6 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle nrst
+# usage: ./tsmp_setup.csh cycle nrst machine
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
@@ -20,7 +20,6 @@
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
 set ensemble_size = 48 
-set machine       = "CLUMA2"
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
@@ -32,8 +31,9 @@ echo " "
 echo "`date` -- BEGIN setup of terrsysmp for assimilation with dart"
 echo " "
 
-set icycle = $1
-set inrst  = $2
+set icycle  = $1
+set inrst   = $2
+set machine = $3
 #-------------------------------------------------------------------------
 # Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
@@ -53,24 +53,26 @@ set inrst  = $2
     echo " "
     #
     cd $tsmpdir/bldsva
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size
-    set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
-    set rundir        = $tsmpdir"/run/"$temp_dir
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+    set rundir         = $WORK/run$sdate
+    #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
+    #set rundir        = $tsmpdir"/run/"$temp_dir
     #
     # Perturb the model state
     $shellpath/perturb_model_state.csh $rundir $ensemble_size
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
-    echo "Block 2: Make the restart runs ....TODO dates !!!!"
+    echo "Block 2 Make the restart runs ....TODO dates "
     echo "-------------------------------------------------------------------"
     echo " "
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
     set oldsdate  = `printf dart%02d $oldicycle`
-    set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
-    set oldrundir = $tsmpdir"/run/"$temp_dir
+    set oldrundir = $WORK/run$oldsdate
+    #set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
+    #set oldrundir = $tsmpdir"/run/"$temp_dir
     #
     # Date manager
     set timefile_path = $oldrundir"/tsmp_instance_0"
@@ -87,19 +89,19 @@ set inrst  = $2
 
     cd $tsmpdir/bldsva
 
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil" -r $WORK/run
 
     echo " "
     echo " Update the restart files for the corresponding instances ..."
     echo " "
     #
-    set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
+    #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #
     # Update the new rundir
-    set rundir = $tsmpdir"/run/"$temp_dir
+    set rundir = $WORK/"run"$sdate
     cd $rundir
     #
-    echo "Moving into " $tsmpdir"/run/"$temp_dir/
+    echo "Moving into " $WORK/"run"$sdate 
 
     set numInst = `echo "($ensemble_size - 1)" | bc`
     #
@@ -125,7 +127,10 @@ set inrst  = $2
       tclsh coup_oas.tcl
       cd ..
     end
-
+    #Move the prior and posterior dart debug files
+    if ($inrst == 1) then
+      mv $oldrundir/Posterior_Diag.nc $rundir/
+      mv $oldrundir/Prior_Diag.nc $rundir/
   else
     echo "ERROR : icycle < 1"
     exit 1
