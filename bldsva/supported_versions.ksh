@@ -82,12 +82,13 @@ setups+=(
         ["idealRTD"]="idealized domain 20x20 (atmosphere) 16x16 (land) for land-atmosphere-interaction and DA test"
         ["multi-scale"]="real data simulation over multiple scale Rur subcatchment simulation"
         ["idealLES"]="idealized LES runs"
+        ["rur"]="Reanalysis over Rur"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale "
+	["JURECA"]=" rur nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD"
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "

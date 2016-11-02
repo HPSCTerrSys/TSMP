@@ -7,9 +7,9 @@ dart_log.*
 Makefile
 input*default
 advance_time
-cosmo_to_dart
+clm_to_dart
 create_obs_sequence
-dart_to_cosmo
+dart_to_clm
 fill_inflation_restart
 filter
 model_mod_check
@@ -18,8 +18,8 @@ perfect_model_obs
 preprocess
 EndOfText
 
-set DEST = $HOME/DART/lanai/models/terrsysmp/cosmo/
-set SOURCE = $HOME/terrsysmp/bldsva/intf_DA/dart/cosmo/
+set DEST = $HOME/DART/lanai/models/terrsysmp/clm/
+set SOURCE = $HOME/terrsysmp/bldsva/intf_DA/dart/clm/
 
 rsync -Cavzr --exclude-from=exclude-list.txt ${SOURCE} ${DEST}
 

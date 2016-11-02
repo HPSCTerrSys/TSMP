@@ -1,3 +1,6 @@
+#MACHINE for JURECA
+#source $HOME/DART/lanai/mkmf/loadenvs
+#
 # Archiving ensemble runs
 archive_hist.csh
 Usage: ./archive_hist.csh rundir ensemble_size
