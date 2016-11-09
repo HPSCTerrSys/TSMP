@@ -24,7 +24,7 @@ use     location_mod, only : location_type,      get_close_maxdist_init,        
 use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
-                             find_namelist_in_file, check_namelist_read
+                             find_namelist_in_file, file_exist, check_namelist_read
 
 use     obs_kind_mod, only : KIND_SOIL_MOISTURE,          &
                              paramname_length,            &
@@ -85,6 +85,7 @@ real(r8)                       ::  &
 ! EXAMPLE: define model parameters here
 integer                          :: model_size
 type(time_type)                  :: time_step
+
 type(location_type), allocatable :: state_loc(:)
 
 ! Everything needed to describe a variable
@@ -123,6 +124,7 @@ character(len=256) :: parflow_press_file           = 'parflow_press_file'
 character(len=256) :: parflow_satur_file           = 'parflow_satur_file'
 character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
+character(len=256) :: clm_file                     = 'clmoash0_file'
 logical            :: output_1D_state_vector       = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -133,6 +135,7 @@ namelist /model_nml/                &
       parflow_satur_file,           &
       pfidb_file,                   &
       grid_file,                    &
+      clm_file,                     &
       output_1D_state_vector,       &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -243,10 +246,11 @@ subroutine init_conditions(x)
 real(r8), intent(out) :: x(:)
 
 if ( .not. module_initialized ) call static_init_model
-
-call error_handler(E_ERR,'init_conditions','routine not tested',source, revision,revdate)
+write(string1,*) 'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR,'init_conditions',string1,source, revision,revdate)
 x = MISSING_R8
 
+return
 end subroutine init_conditions
 
 
@@ -311,7 +315,8 @@ type(time_type), intent(out) :: time
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'init_time','routine not tested',source, revision,revdate)
+write(string1,*)'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR,'init_time',string1,source, revision,revdate)
 ! for now, just set to 0
 time = set_time(0,0)
 
@@ -418,8 +423,11 @@ type(time_type) :: get_model_time_step
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'get_model_time_step','routine not tested',source, revision,revdate)
 get_model_time_step = time_step
+
+return
+!call error_handler(E_ERR,'get_model_time_step','routine not tested',source, revision,revdate)
+!get_model_time_step = time_step
 
 end function get_model_time_step
 
@@ -942,7 +950,7 @@ subroutine get_state_vector(sv, model_time)
 real(r8),         intent(inout)           :: sv(1:model_size)
 type(time_type),  intent(out), optional   :: model_time
 real(r8),allocatable                      :: pfbdata(:,:,:)
- 
+integer                                   :: ncid 
 !
 
 if ( .not. module_initialized ) call static_init_model
@@ -953,9 +961,19 @@ call pfread_var(parflow_press_file,pfbdata)
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
-model_time = parflow_time
+if ( .not. file_exist(clm_file) ) then 
+   write(string1,*) 'cannot open file ', trim(clm_file),' for reading.'
+   call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+endif
 
-if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
+call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
+              'restart_file_to_sv','open '//trim(clm_file))
+
+model_time = get_state_time_ncid(ncid)
+
+!CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
+
+if (debug > 2 .and. do_output()) write(*,*) '   ... data written to state_vector'
    
 deallocate(pfbdata)
 
@@ -1008,12 +1026,12 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
 
 ! code starts here
   nudat   = get_unit()
-  write(*,*) filename
+  if (debug > 3 .and. do_output()) write(*,*) filename
   open(nudat, file=trim(filename),status='old')
  
   read(nudat,*,iostat=izerr) yyyy, mm, dd, ts 
   if (izerr < 0) call error_handler(E_ERR,'pfidb_read','error time', source, revision, revdate)
-  if (debug > 0 .and. do_output()) write(*,*) '  ...parflow time ',yyyy, mm, dd, ts 
+  if (debug > 3 .and. do_output()) write(*,*) ' DUMMY ...parflow time ',yyyy, mm, dd, ts 
 
   hh = int(ts/3600._r8)
   mn = int(ts - hh*3600)
@@ -1035,7 +1053,7 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
     else
       vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
     end if
-    if (debug > 0 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
+    if (debug > 3 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
                                          iz, pfb_dz(iz), vcoord(iz)
   end do
 
@@ -1132,6 +1150,10 @@ character(len=256)             :: errmsg
   if (izerr /= 0) then
     errmsg   = "unable to read NX"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  if (nx > 9999 ) then
+     errmsg   = "problem readng NX (NX>9999), check pfb file"
+     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
   read(nudat, iostat=izerr) ny !NY
   if (izerr /= 0) then
@@ -1743,8 +1765,8 @@ if (height == vcoord(1)) then
   kk_wgt     = 0._r8
 else
   indarr  = minloc( vcoord,  vcoord >= height )
-  write(*,*) "CPS",vcoord
-  write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
+  !write(*,*) "CPS",vcoord
+  !write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
   kk_inds(1) = indarr(1)
   kk_inds(2) = kk_inds(1) + 1
   dz     = vcoord(kk_inds(1)) - height
@@ -1763,6 +1785,47 @@ endif
 istatus = 0
 
 end subroutine get_level_indices
+
+!------------------------------------------------------------------
+function get_state_time_ncid( ncid )
+!------------------------------------------------------------------
+! The restart netcdf files have the time of the state.
+
+type(time_type) :: get_state_time_ncid
+integer, intent(in) :: ncid 
+
+integer :: VarID
+integer :: rst_curr_ymd, rst_curr_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_curr_ymd', VarID),'get_state_time_ncid', &
+&  'inq_varid timemgr_rst_curr_ymd'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_curr_ymd),'get_state_time_ncid', &
+&            'get_var rst_curr_ymd'//trim(clm_file))
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_curr_tod', VarID),'get_state_time_ncid', &
+&  'inq_varid timemgr_rst_curr_tod'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_curr_tod),'get_state_time_ncid', &
+&            'get_var rst_curr_tod'//trim(clm_file))
+
+year     = rst_curr_ymd/10000
+leftover = rst_curr_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_curr_tod/3600
+leftover = rst_curr_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_state_time_ncid = set_date(year, month, day, hour, minute, second)
+
+end function get_state_time_ncid
+
+!------------------------------------------------------------------
+
 
 !===================================================================
 ! End of model_mod

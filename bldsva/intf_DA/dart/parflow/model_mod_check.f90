@@ -47,7 +47,7 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 129) :: dart_input_file               = 'dart_ics'
+character (len = 256) :: dart_input_file               = 'dart_ics'
 character (len = 129) :: output_file                   = 'check_me'
 logical               :: advance_time_present          = .FALSE.
 logical               :: verbose                       = .FALSE.
