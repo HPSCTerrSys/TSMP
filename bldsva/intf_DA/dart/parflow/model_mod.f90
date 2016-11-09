@@ -498,11 +498,10 @@ subroutine end_model()
 ! Does any shutdown and clean-up needed for model. Can be a NULL
 ! INTERFACE if the model has no need to clean up storage, etc.
 
-if ( .not. module_initialized ) call static_init_model
-
-call error_handler(E_ERR,'end_model','routine not tested',source, revision,revdate)
-! good style ... perhaps you could deallocate stuff (from static_init_model?).
-! deallocate(state_loc)
+deallocate(lon,lat)
+deallocate(vcoord)
+deallocate(state_loc)
+!if ( allocated(ens_mean) ) deallocate(ens_mean)
 
 end subroutine end_model
 
@@ -945,7 +944,11 @@ subroutine ens_mean_for_model(ens_mean)
 real(r8), intent(in) :: ens_mean(:)
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'ens_mean_for_model','routine not tested',source, revision,revdate)
+
+!not needed
+! allocate(ens_mean(1:model_size))
+! ens_mean(:) = filter_ens_mean(:)
+!call error_handler(E_ERR,'ens_mean_for_model','routine not tested',source, revision,revdate)
 
 end subroutine ens_mean_for_model
 
@@ -1006,7 +1009,8 @@ character(len=*), intent(in) :: filename
 type(time_type),  intent(in) :: statedate
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'dart_vector_to_model_file','routine not tested',source, revision,revdate)
+!not needed at the moment
+!call error_handler(E_ERR,'dart_vector_to_model_file','routine not tested',source, revision,revdate)
 
 ! code goes here
 

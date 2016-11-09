@@ -14,7 +14,7 @@ program dart_to_parflow
 !         file called model_in.DART is created with a time_manager_nml namelist 
 !         appropriate to advance model to the requested time.
 !
-!         The dart_to_model_nml namelist setting for advance_time_present 
+!         The dart_to_pfb_nml namelist setting for advance_time_present 
 !         determines whether or not the input file has an 'advance_to_time'.
 !         Typically, only temporary files like 'assim_model_state_ic' have
 !         an 'advance_to_time'.
@@ -44,11 +44,11 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 128) :: dart_to_model_input_file = 'dart_restart'
+character (len = 128) :: dart_to_pfb_input_file = 'dart_restart'
 logical               :: advance_time_present     = .false.
 character(len=256)    :: model_restart_filename   = 'model_restartfile'
 
-namelist /dart_to_model_nml/ dart_to_model_input_file, &
+namelist /dart_to_pfb_nml/  dart_to_pfb_input_file, &
                             advance_time_present,    &
                             model_restart_filename
 
@@ -75,19 +75,19 @@ allocate(statevector(x_size))
 
 ! Read the namelist to get the input filename. 
 
-call find_namelist_in_file("input.nml", "dart_to_model_nml", iunit)
-read(iunit, nml = dart_to_model_nml, iostat = io)
-call check_namelist_read(iunit, io, "dart_to_model_nml")
+call find_namelist_in_file("input.nml", "dart_to_pfb_nml", iunit)
+read(iunit, nml = dart_to_pfb_nml, iostat = io)
+call check_namelist_read(iunit, io, "dart_to_pfb_nml")
 
 write(*,*)
-write(*,*) 'dart_to_parflow: converting DART file ', "'"//trim(dart_to_model_input_file)//"'"
+write(*,*) 'dart_to_parflow: converting DART file ', "'"//trim(dart_to_pfb_input_file)//"'"
 write(*,*) 'to model restart files named        ', "'"//trim(model_restart_filename)//"'" 
 
 !----------------------------------------------------------------------
 ! Reads the valid time, the state, and the target time.
 !----------------------------------------------------------------------
 
-iunit = open_restart_read(dart_to_model_input_file)
+iunit = open_restart_read(dart_to_pfb_input_file)
 
 if ( advance_time_present ) then
    call aread_state_restart(model_time, statevector, iunit, adv_to_time)

@@ -15,7 +15,7 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart1"
+export LOGNAME="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
@@ -23,6 +23,7 @@ source $LOGNNAME/loadenvs
 
 # Cleanup---------------
 rm input.nml
+rm pfidb_dz
 rm filter_ics.*
 rm P*Diag.nc
 rm filter_res*
@@ -38,6 +39,7 @@ rm clm_restart.nc
 
 # Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
+cp $DART_DIR/pfidb_dz .
 cp $DART_DIR/filter .
 cp $DART_DIR/dart_to_parflow .
 cp $DART_DIR/parflow_to_dart .
@@ -47,6 +49,9 @@ numInst=48
 for instance in {0..$(($numInst-1))}
 do
   cd tsmp_instance_$instance
+
+  rm input.nml
+  rm pfidb_dz
   rm dart_log.*
   rm dart_posterior
   rm pfl_press.pfb
@@ -54,11 +59,13 @@ do
   rm pflgrid.nc
   rm clm_restart.nc
 
+
   ln -s ../input.nml .
   prspfb=`ls -1 rurlaf.out.press*.pfb | tail -n -1` 
   satpfb=`ls -1 rurlaf.out.satur*.pfb | tail -n -1`
   clmrst=`ls -1 clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
   pflgrd=`ls grids.nc`
+  ln -s ../pfidb_dz .
   ln -s $prspfb pfl_press.pfb 
   ln -s $satpfb pfl_satur.pfb
   ln -s $pflgrd pflgrid.nc
@@ -74,7 +81,8 @@ done
 wait
 
 # GRAB PARFLOW TIME FOR ASSIMILATION
-dIndat=`grep defaultInitDate $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
+timefile_path="tsmp_instance_0"
+dIndat=`grep defaultInitDate $timefile_path/parflow_prior_time.txt | cut -d' ' -f2`
 
 ln -s $DART_DIR/obs_seq.$dIndat obs_seq.out || exit 2
 
