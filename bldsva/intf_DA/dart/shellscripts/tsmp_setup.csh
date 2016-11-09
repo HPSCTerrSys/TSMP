@@ -131,6 +131,7 @@ set machine = $3
     if ($inrst == 1) then
       mv $oldrundir/Posterior_Diag.nc $rundir/
       mv $oldrundir/Prior_Diag.nc $rundir/
+    endif
   else
     echo "ERROR : icycle < 1"
     exit 1

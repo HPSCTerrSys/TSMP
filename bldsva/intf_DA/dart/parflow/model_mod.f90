@@ -54,6 +54,7 @@ public :: get_model_size,         &
           get_close_maxdist_init, &
           get_close_obs_init,     &
           get_close_obs,          &
+          write_state_times,      &
           ens_mean_for_model
 
 ! not required by DART but for larger models can be useful for
@@ -283,6 +284,20 @@ call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
 end subroutine adv_1step
 
 
+subroutine write_state_times(iunit, statetime)
+
+integer,                   intent(in) :: iunit
+type(time_type),           intent(in) :: statetime
+
+integer           :: iyear, imonth, iday, ihour, imin, isec 
+integer           :: ndays, nhours, nmins, nsecs,nfreq
+type(time_type)   :: interval
+
+call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
+write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour
+
+return 
+end subroutine write_state_times
 
 function get_model_size()
 !------------------------------------------------------------------

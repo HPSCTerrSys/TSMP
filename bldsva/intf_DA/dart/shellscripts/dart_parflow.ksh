@@ -1,4 +1,5 @@
 #!/bin/ksh
+#ParFlow DART JOB SUBMISSION
 
 USAGE="sbatch <scriptname>"
 # JUROPATEST module load intel-para/2014.11
@@ -14,8 +15,8 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart13"
-export DART_DIR="$HOME/DART/lanai/models/terrsysmp/cosmo/work"
+export LOGNAME="$WORK/rundart1"
+export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
 source $LOGNNAME/loadenvs
@@ -30,14 +31,16 @@ rm obs_seq.*
 rm log_file
 rm err_file
 rm ready.txt
-rm cosmo.nc
-rm cosmo_prior
+rm pfl_press.pfb 
+rm pfl_satur.pfb
+rm pflgrid.nc
+rm clm_restart.nc
 
 # Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
 cp $DART_DIR/filter .
-cp $DART_DIR/dart_to_cosmo .
-cp $DART_DIR/cosmo_to_dart .
+cp $DART_DIR/dart_to_parflow .
+cp $DART_DIR/parflow_to_dart .
 
 numInst=48
 
@@ -46,15 +49,21 @@ do
   cd tsmp_instance_$instance
   rm dart_log.*
   rm dart_posterior
-  rm cosmo.nc
-  rm cosmo_prior
+  rm pfl_press.pfb
+  rm pfl_satur.pfb
+  rm pflgrid.nc
+  rm clm_restart.nc
 
   ln -s ../input.nml .
-  cosrst=`ls -1 cosrst/lrff* | tail -n -1`
-  cosout=`ls -1 cosout/lfff* | tail -n -1`
-  ln -s $cosrst cosmo_prior
-  ln -s $cosout cosmo.nc
-  ../cosmo_to_dart || exit 1
+  prspfb=`ls -1 rurlaf.out.press*.pfb | tail -n -1` 
+  satpfb=`ls -1 rurlaf.out.satur*.pfb | tail -n -1`
+  clmrst=`ls -1 clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+  pflgrd=`ls grids.nc`
+  ln -s $prspfb pfl_press.pfb 
+  ln -s $satpfb pfl_satur.pfb
+  ln -s $pflgrd pflgrid.nc
+  ln -s $clmrst clm_restart.nc
+  ../parflow_to_dart || exit 1
 
   dartinstance=$(( $instance + 1 ))
   filterName=`printf ../filter_ics.%04d $dartinstance`
@@ -64,21 +73,16 @@ done
 
 wait
 
-# Grab the date/time of the cosmo state so we know which 
-# observation sequence file to use.
-timefile_path="tsmp_instance_0"
-cosrbin=`grep cosrbin $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
-coshist=`grep coshist $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
-clmext=`grep clmext $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
+# GRAB PARFLOW TIME FOR ASSIMILATION
 dIndat=`grep defaultInitDate $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
-
-echo $clmext $cosrbin $coshist
 
 ln -s $DART_DIR/obs_seq.$dIndat obs_seq.out || exit 2
 
 #for filter?
-ln -s tsmp_instance_0/cosrst/$cosrbin cosmo_prior
-ln -s tsmp_instance_0/cosout/$coshist cosmo.nc
+ln -s tsmp_instance_0/$prspfb pfl_press.pfb 
+ln -s tsmp_instance_0/$satpfb pfl_satur.pfb
+ln -s tsmp_instance_0/$pflgrd pflgrid.nc
+ln -s tsmp_instance_0/$clmrst clm_restart.nc
 echo "CPS 2"
 #for filter?
 
@@ -92,7 +96,7 @@ do
   dartinstance=$(( $instance + 1 ))
   filterRestartName=`printf ../filter_restart.%04d $dartinstance`
   ln -s $filterRestartName dart_posterior 
-  ../dart_to_cosmo || exit 4
+  ../dart_to_parflow || exit 4
   cd ..
 done
 

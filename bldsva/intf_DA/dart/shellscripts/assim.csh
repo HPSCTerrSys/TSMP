@@ -49,7 +49,8 @@ if ($2 == "parflow") then
 set model_dir = `printf $MODEL_PATH%02d $irun`
 set prspfb = `ls -1 $model_dir/rurlaf.out.press*.pfb | tail -n -1`
 set satpfb = `ls -1 $model_dir/rurlaf.out.satur*.pfb | tail -n -1`
-set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -1`
+set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+echo $clmrst
 set pflgrd = `ls $model_dir/grids.nc`
  
 set colum_exp = `printf column_export_out_%02d $irun`

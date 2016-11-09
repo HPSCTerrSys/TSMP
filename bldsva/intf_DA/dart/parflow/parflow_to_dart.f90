@@ -27,10 +27,10 @@ use        types_mod, only : r8
 
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read, &
-                             E_ERR, E_MSG, error_handler
+                             open_file, close_file,E_ERR, E_MSG, error_handler
 
 use        model_mod, only : get_model_size, get_state_vector, &
-                             get_parflow_filename, static_init_model
+                             write_state_times,get_parflow_filename, static_init_model
 
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 
@@ -97,6 +97,12 @@ iunit = open_restart_write(pfb_to_dart_output_file)
 
 call awrite_state_restart(model_time, x, iunit)
 call close_restart(iunit)
+
+deallocate(x)
+
+iunit = open_file('parflow_prior_time.txt',form='formatted')
+call write_state_times(iunit, model_time)
+call close_file(iunit)
 
 !----------------------------------------------------------------------
 ! finish up
