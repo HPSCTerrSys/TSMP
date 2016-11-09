@@ -18,7 +18,7 @@ use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, 
 
 use     location_mod, only : location_type,      get_close_maxdist_init,        &
                              get_close_obs_init, get_close_obs, set_location,   &
-                             set_location,  get_location,                       &
+                             get_location,                       &
                              vert_is_height,       VERTISHEIGHT
 
 use    utilities_mod, only : register_module, error_handler, nc_check, &
@@ -198,7 +198,7 @@ allocate(lon(nx,ny))
 allocate(lat(nx,ny))
 
 call grid_read(grid_file)
-if (debug > 0 .and. do_output()) then
+if (debug > 1 .and. do_output()) then
    write(*, '(A,2(1X,F9.2))') '    ...parflow lon', minval(lon), maxval(lon)
    write(*, '(A,2(1X,F9.2))') '    ...parflow lat', minval(lat), maxval(lat)
    write(*, *) '-------------------------------'
@@ -458,8 +458,9 @@ kloc =  local_ind / (nx*ny) + 1
 jloc = (local_ind - (kloc-1)*nx*ny)/nx + 1
 iloc =  local_ind - (kloc-1)*nx*ny - (jloc-1)*nx + 1
 
-write(*,*)'.. index_in ',index_in, ' and dereferences to ',iloc,jloc,kloc
-
+if ((debug > 5) .and. do_output()) then
+  write(*,*)'.. index_in ',index_in, ' and dereferences to i,j,k ',iloc,jloc,kloc
+end if
 ! Now that we know the i,j,k we have to index the right set of
 ! coordinate arrays
 mylon = lon(iloc,jloc)
@@ -863,7 +864,7 @@ else
       where(dimIDs == TimeDimID) ncstart = timeindex
       where(dimIDs == TimeDimID) nccount = 1
 
-      if ((debug > 0) .and. do_output()) then
+      if ((debug > 10) .and. do_output()) then
          write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ndims)
          write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ndims)
       endif
@@ -973,7 +974,7 @@ model_time = get_state_time_ncid(ncid)
 
 !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
 
-if (debug > 2 .and. do_output()) write(*,*) '   ... data written to state_vector'
+if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
    
 deallocate(pfbdata)
 
@@ -1026,12 +1027,12 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
 
 ! code starts here
   nudat   = get_unit()
-  if (debug > 3 .and. do_output()) write(*,*) filename
+  if (debug > 1 .and. do_output()) write(*,*) filename
   open(nudat, file=trim(filename),status='old')
  
   read(nudat,*,iostat=izerr) yyyy, mm, dd, ts 
   if (izerr < 0) call error_handler(E_ERR,'pfidb_read','error time', source, revision, revdate)
-  if (debug > 3 .and. do_output()) write(*,*) ' DUMMY ...parflow time ',yyyy, mm, dd, ts 
+  if (debug > 10 .and. do_output()) write(*,*) ' DUMMY ...parflow time ',yyyy, mm, dd, ts 
 
   hh = int(ts/3600._r8)
   mn = int(ts - hh*3600)
@@ -1053,7 +1054,7 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
     else
       vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
     end if
-    if (debug > 3 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
+    if (debug > 10 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
                                          iz, pfb_dz(iz), vcoord(iz)
   end do
 

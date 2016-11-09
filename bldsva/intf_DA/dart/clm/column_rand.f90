@@ -29,8 +29,9 @@ real(r8) :: lat_data(10), lon_data(10), level_data(5)
 integer  :: yyyy, mm, dd_data(13), hh, mn, ss
 character(len=1024) :: filename
 
-data  lat_data/49.87, 49.95, 49.87, 49.95, 49.87, 49.95, 49.87, 49.95, 49.87, 49.95/
-data  lon_data/ 5.48,  5.48,  5.55,  5.55,  5.62,  5.62,  5.69,  5.69,  5.75,  5.75/
+!This is based in CLM grids
+data  lat_data/49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92/
+data  lon_data/ 5.45,  5.45,  5.48,  5.48,  5.51,  5.51,  5.55,  5.55, 5.59,  5.59/
 data  level_data/0.06, 0.130, 0.54 /
 data  dd_data/9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21/
 
