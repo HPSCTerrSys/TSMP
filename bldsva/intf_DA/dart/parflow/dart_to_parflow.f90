@@ -29,8 +29,8 @@ use    utilities_mod, only : initialize_utilities, finalize_utilities, &
 use  assim_model_mod, only : open_restart_read, aread_state_restart, close_restart
 use time_manager_mod, only : time_type, print_time, print_date, operator(-), &
                              get_time, get_date
-use        model_mod, only : static_init_model, dart_vector_to_model_file, &
-                             get_model_size
+use        model_mod, only : static_init_model, write_parflow_file, &
+                             get_model_size, write_state_times
 
 implicit none
 
@@ -46,11 +46,11 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 
 character (len = 128) :: dart_to_pfb_input_file = 'dart_restart'
 logical               :: advance_time_present     = .false.
-character(len=256)    :: model_restart_filename   = 'model_restartfile'
+character(len=256)    :: pfb_restart_filename   = 'model_restartfile'
 
 namelist /dart_to_pfb_nml/  dart_to_pfb_input_file, &
                             advance_time_present,    &
-                            model_restart_filename
+                            pfb_restart_filename
 
 !----------------------------------------------------------------------
 
@@ -71,7 +71,7 @@ call initialize_utilities(progname='dart_to_parflow', output_flag=verbose)
 call static_init_model()
 
 x_size = get_model_size()
-allocate(statevector(x_size))
+allocate(statevector(1:x_size))
 
 ! Read the namelist to get the input filename. 
 
@@ -81,7 +81,7 @@ call check_namelist_read(iunit, io, "dart_to_pfb_nml")
 
 write(*,*)
 write(*,*) 'dart_to_parflow: converting DART file ', "'"//trim(dart_to_pfb_input_file)//"'"
-write(*,*) 'to model restart files named        ', "'"//trim(model_restart_filename)//"'" 
+write(*,*) 'to model restart files named        ', "'"//trim(pfb_restart_filename)//"'" 
 
 !----------------------------------------------------------------------
 ! Reads the valid time, the state, and the target time.
@@ -96,19 +96,18 @@ else
 endif
 call close_restart(iunit)
 
-print *, 'read state vector'
 !----------------------------------------------------------------------
 ! update the current model state vector
 ! Convey the amount of time to integrate the model ...
 ! time_manager_nml: stop_option, stop_count increments
 !----------------------------------------------------------------------
 
-print *, 'calling sv to restart file'
-call dart_vector_to_model_file(statevector, model_restart_filename, model_time)
+print *, 'calling write_parflow_file to restart file'
+call write_parflow_file(statevector, dart_to_pfb_input_file, pfb_restart_filename)
 
-if ( advance_time_present ) then
-   call write_model_time_control(model_time, adv_to_time)
-endif
+iunit = open_file('dart_posterior_times.txt', action='write')
+call write_state_times(iunit, model_time)
+call close_file(iunit)
 
 !----------------------------------------------------------------------
 ! Log what we think we're doing, and exit.
@@ -127,63 +126,6 @@ call print_date(adv_to_time,'dart_to_parflow:advance_to date',logfileunit)
 endif
 
 call finalize_utilities()
-
-!======================================================================
-contains
-!======================================================================
-
-subroutine write_model_time_control(model_time, adv_to_time)
-! Write a text file that the model can use to figure out how
-! far to run until.  Could be as simple as a text file containing: 
-!    YYYYMMDD hh:mm:ss
-! or for something a bit more complicated, here's another example:
-!
-!#TIMESTART
-!2003            year
-!06              month
-!21              day
-!00              hour
-!00              minute
-!00              second
-!
-!#TIMEEND
-!2003            year
-!07              month
-!21              day
-!00              hour
-!00              minute
-!00              second
-!
-
-type(time_type), intent(in) :: model_time, adv_to_time
-integer :: iyear,imonth,iday,ihour,imin,isec
-
-iunit = open_file('DART_model_time_control.txt', action='write')
-write(iunit,*)
-
-call get_date(model_time,iyear,imonth,iday,ihour,imin,isec)
-write(iunit,'(''#TIMESTART'')') 
-write(iunit,'(i4.4,10x,''year''  )')iyear
-write(iunit,'(i2.2,12x,''month'' )')imonth
-write(iunit,'(i2.2,12x,''day''   )')iday
-write(iunit,'(i2.2,12x,''hour''  )')ihour
-write(iunit,'(i2.2,12x,''minute'')')imin
-write(iunit,'(i2.2,12x,''second'')')isec
-write(iunit,*)
-
-call get_date(adv_to_time,iyear,imonth,iday,ihour,imin,isec)
-write(iunit,'(''#TIMEEND'')') 
-write(iunit,'(i4.4,10x,''year''  )')iyear
-write(iunit,'(i2.2,12x,''month'' )')imonth
-write(iunit,'(i2.2,12x,''day''   )')iday
-write(iunit,'(i2.2,12x,''hour''  )')ihour
-write(iunit,'(i2.2,12x,''minute'')')imin
-write(iunit,'(i2.2,12x,''second'')')isec
-write(iunit,*)
-
-call close_file(iunit)
-end subroutine write_model_time_control
-
 
 end program dart_to_parflow
 

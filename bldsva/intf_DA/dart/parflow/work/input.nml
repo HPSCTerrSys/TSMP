@@ -155,7 +155,7 @@
 
 &dart_to_pfb_nml
    dart_to_pfb_input_file = 'dart_posterior'
-   model_restart_filename = 'parflow_restart'
+   pfb_restart_filename = 'parflow_restart'
    advance_time_present     = .false.
    /
 

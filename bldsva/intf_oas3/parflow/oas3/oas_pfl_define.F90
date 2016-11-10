@@ -74,12 +74,12 @@ REAL(KIND=8), ALLOCATABLE                  :: lclon(:,:,:),      &!
                                               lclat(:,:,:)        ! Global Grid Corners 
 
 REAL                                       ::  dlat, dlon
-!
-#ifdef READCLM
+!CPS PARFLOW HAS NO GRID INFORMATION
+!CPS #ifdef READCLM
 INTEGER                         :: readclm = 1         ! 1 or 0 to read clm mask
-#else
-INTEGER                         :: readclm = 0         ! 1 or 0 to read clm mask
-#endif
+!CPS #else
+!INTEGER                         :: readclm = 0         ! 1 or 0 to read clm mask
+!CPS #endif
 
 REAL(KIND=8), ALLOCATABLE                  ::  clmlon(:,:),        &! 
                                                clmlat(:,:)          ! Global Grid Centres

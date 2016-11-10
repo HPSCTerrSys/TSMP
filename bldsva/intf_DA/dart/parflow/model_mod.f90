@@ -62,7 +62,7 @@ public :: get_model_size,         &
 ! the model_mod code.
 public :: get_state_vector, &
           get_parflow_filename, &
-          dart_vector_to_model_file
+          write_parflow_file
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
@@ -82,12 +82,20 @@ real(r8)                       ::  &
                    dx,             &     ! Grid Resolution in m
                    dy,             &     ! Grid Resoultion in m
                    dz                    ! Grid Resolution scale, check parflow namelist
+real(r8)                       :: xdpfb, ydpfb, zdpfb            ! ParFlow PFB file
+
 
 ! EXAMPLE: define model parameters here
 integer                          :: model_size
 type(time_type)                  :: time_step
 
 type(location_type), allocatable :: state_loc(:)
+
+! Codes for restricting the range of a variable
+integer, parameter :: BOUNDED_NONE  = 0 ! ... unlimited range
+integer, parameter :: BOUNDED_BELOW = 1 ! ... minimum, but no maximum
+integer, parameter :: BOUNDED_ABOVE = 2 ! ... maximum, but no minimum
+integer, parameter :: BOUNDED_BOTH  = 3 ! ... minimum and maximum
 
 ! Everything needed to describe a variable
 integer, parameter :: max_state_variables = 2   !ParFlow has two ouputs 
@@ -207,7 +215,8 @@ end if
 
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 ! TODO, var_type could switch between 1 and 2 for pressure and sat
-ivar = 1
+
+ivar                          = 1             !ONLY READING PFB FILE NOW, CPS
 progvar(ivar)%varname         = "psi"
 progvar(ivar)%long_name       = "Pressure Head"
 progvar(ivar)%units           = "m"
@@ -220,6 +229,9 @@ progvar(ivar)%dimlens(2)      = ny
 progvar(ivar)%dimlens(3)      = nz
 progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !Need pedotransfer function 
 progvar(ivar)%index1          = 1
+progvar(ivar)%rangeRestricted = BOUNDED_NONE          !Maybe needed later?
+progvar(ivar)%minvalue        = MISSING_R8
+progvar(ivar)%maxvalue        = MISSING_R8
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -1002,19 +1014,140 @@ end subroutine get_state_vector
 !> Writes the current time and state variables from a dart state
 !> vector (1d array) into a ncommas netcdf restart file.
 
-subroutine dart_vector_to_model_file(state_vector, filename, statedate)
+subroutine write_parflow_file(sv, dart_file, newfile)
 
-real(r8),         intent(in) :: state_vector(:)
-character(len=*), intent(in) :: filename
-type(time_type),  intent(in) :: statedate
+real(r8),         intent(in) :: sv(:)           ! the DART posterior
+character(len=*), intent(in) :: dart_file       ! the filename
+character(len=*), intent(in) :: newfile         ! the name of the new parflow restart
+
+real(r8)                     :: rbuf(nx*ny*nz) ! data to be read
+logical                      :: desired = .false.
+integer                      :: ivar
+
+!pfb
+real(r8)                     :: pfvar(nx,ny,nz)       ! ParFlow pressure files 
+integer(kind=4)              :: iunit
+
+integer(kind=4)              ::  i, j, k,               &
+                                 ix, iy, iz, ixs, iys,  &
+                                 is, ns, nnx, nny, nnz
+integer(kind=4), parameter   :: nxs = 1
+integer(kind=4), parameter   :: nys = 1
+integer(kind=4), parameter   :: rx  = 0
+integer(kind=4), parameter   :: ry  = 0
+integer(kind=4), parameter   :: rz  = 0
+!pfb
+!----------------------------------------------------
 
 if ( .not. module_initialized ) call static_init_model
-!not needed at the moment
-!call error_handler(E_ERR,'dart_vector_to_model_file','routine not tested',source, revision,revdate)
 
-! code goes here
+write(string1,*)    'The DART posterior file is "'//trim(dart_file)//'"'
+write(string2,*)    'The new (posterior) parflow restart file is "'//trim(newfile)//'"'
+call error_handler(E_MSG,'write_parflow_file ',string1,source,revision,revdate,text2=string2)
 
-end subroutine dart_vector_to_model_file
+if ( .not. file_exist(dart_file) ) then 
+   write(string1,*) 'cannot open file ', trim(dart_file),' for reading.'
+   call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+endif
+
+if (desired) rbuf = apply_clamping(ivar, sv)    ! For future CPS
+
+iunit  = get_unit() 
+open(iunit,file=trim(newfile),status='new',access='stream',convert='BIG_ENDIAN',form='unformatted')
+
+write(iunit) xdpfb !X
+write(iunit) ydpfb !Y
+write(iunit) zdpfb !Z
+
+write(iunit) nx !NX
+write(iunit) ny !NY
+write(iunit) nz !NZ
+
+write(iunit) dx !DX
+write(iunit) dy !DY
+write(iunit) dz !DZ
+
+ns = INT(nxs*nys)
+write(iunit) ns !num_subgrids
+! End: Writing of domain spatial information
+
+! Start: loop over number of sub grids
+nnx = INT(nx/nxs)
+nny = INT(ny/nys)
+nnz = nz
+iz = 0
+!
+do iys = 0, nys-1
+do ixs = 0, nxs-1
+
+! Start: Writing of sub-grid spatial information
+
+  ix = INT(nnx*ixs)
+  iy = INT(nny*iys)
+
+  write(iunit) ix
+  write(iunit) iy
+  write(iunit) iz
+
+  write(iunit) nnx
+  write(iunit) nny
+  write(iunit) nnz
+
+  write(iunit) rx
+  write(iunit) ry
+  write(iunit) rz
+
+! End: Writing of sub-grid spatial information
+
+! Start: Write in data from each individual subgrid
+  do  k=iz +1 , iz + nnz
+  do  j=iy +1 , iy + nny
+  do  i=ix +1 , ix + nnx
+    write(iunit) pfvar(i,j,k)
+  end do
+  end do
+  end do
+! End: Write in data from each individual subgrid
+
+end do
+end do
+! End: loop over number of sub grids
+
+close(iunit)
+
+return
+
+end subroutine write_parflow_file
+
+
+!------------------------------------------------------------------
+!>replace the posterior values that are outside physical limits with
+!> the limit 
+
+
+function apply_clamping(ivar, posterior) result (slab)
+
+integer,  intent(in) :: ivar 
+real(r8), intent(in) :: posterior(:)
+real(r8)             :: slab(size(posterior))
+
+slab = posterior
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_ABOVE ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then 
+   where ((slab /= MISSING_R8) .and. &
+          (slab > progvar(ivar)%maxvalue)) &
+           slab = progvar(ivar)%maxvalue
+endif
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_BELOW ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then 
+   where ((slab /= MISSING_R8) .and. &
+          (slab < progvar(ivar)%minvalue)) &
+           slab = progvar(ivar)%minvalue
+endif
+
+end function apply_clamping
 
 
 !------------------------------------------------------------------
@@ -1140,7 +1273,6 @@ subroutine pfread_dim(filename)
 
 character(len=*), intent(in)   :: filename
 
-real(r8)                       :: x1, y1 ,z1
 integer(kind=4)                :: nudat, izerr 
 character(len=256)             :: errmsg
 
@@ -1150,17 +1282,17 @@ character(len=256)             :: errmsg
                     convert='BIG_ENDIAN',status='old')         ! gfortran
 
   !read in header infor
-  read(nudat, iostat=izerr) x1 !X
+  read(nudat, iostat=izerr) xdpfb !X
   if (izerr /= 0) then
     errmsg   = "unable to read X"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) y1 !Y
+  read(nudat, iostat=izerr) ydpfb !Y
   if (izerr /= 0) then
     errmsg   = "unable to read Y"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) z1 !Z
+  read(nudat, iostat=izerr) zdpfb !Z
   if (izerr /= 0) then
     errmsg   = "unable to read Z"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
@@ -1213,18 +1345,12 @@ character(len=*), intent(in)   :: filename
 real(r8),         intent(out)  ::  &
                    pfvar(nx,ny,nz)       ! ParFlow pressure files 
 
-real(r8)                       :: x1, y1, z1 
-
-real(r8)                       ::  &
-                   dummyRes              ! Grid Resolution in m
-
+real(r8)                       :: dummyRes              ! Grid Resolution in m 
 integer(kind=4)                :: nudat, dummy, izerr
-integer(kind=4)                ::  &
-                   i, j, k,        &
-                   ix, iy, iz,     &
-                   is, ns,         &
-                   rx, ry, rz,     &
-                   nnx, nny, nnz
+integer(kind=4)                :: i, j, k,            &
+                                  ix, iy, iz, is,     &
+                                  ns, nnx, nny, nnz,  &
+                                  rx, ry, rz
 character(len=256)             :: errmsg
 
 ! code starts here
@@ -1233,17 +1359,17 @@ character(len=256)             :: errmsg
                     convert='BIG_ENDIAN',status='old')         ! gfortran
 
   !read in header infor
-  read(nudat, iostat=izerr) x1 !X
+  read(nudat, iostat=izerr) dummyRes  !X
   if (izerr /= 0) then
     errmsg   = "unable to read X"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) y1 !Y
+  read(nudat, iostat=izerr) dummyRes  !Y
   if (izerr /= 0) then
     errmsg   = "unable to read Y"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) z1 !Z
+  read(nudat, iostat=izerr) dummyRes  !Z
   if (izerr /= 0) then
     errmsg   = "unable to read Z"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
@@ -1298,12 +1424,12 @@ character(len=256)             :: errmsg
    endif
    read(nudat, iostat=izerr) iy
    if (izerr /= 0) then
-     errmsg   = "unable to read ix"
+     errmsg   = "unable to read iy"
      call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
    endif
    read(nudat, iostat=izerr) iz
    if (izerr /= 0) then
-     errmsg   = "unable to read ix"
+     errmsg   = "unable to read iz"
      call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
    endif
 

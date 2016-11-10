@@ -36,6 +36,7 @@ rm pfl_press.pfb
 rm pfl_satur.pfb
 rm pflgrid.nc
 rm clm_restart.nc
+rm parflow_restart
 
 # Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
@@ -58,7 +59,7 @@ do
   rm pfl_satur.pfb
   rm pflgrid.nc
   rm clm_restart.nc
-
+  rm parflow_restart
 
   ln -s ../input.nml .
   prspfb=`ls -1 rurlaf.out.press*.pfb | tail -n -1` 
