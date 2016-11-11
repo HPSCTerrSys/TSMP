@@ -1052,6 +1052,9 @@ endif
 
 if (desired) rbuf = apply_clamping(ivar, sv)    ! For future CPS
 
+!vector to array conversion
+pfvar = RESHAPE(sv,(/nx,ny,nz/))
+
 iunit  = get_unit() 
 open(iunit,file=trim(newfile),status='new',access='stream',convert='BIG_ENDIAN',form='unformatted')
 
