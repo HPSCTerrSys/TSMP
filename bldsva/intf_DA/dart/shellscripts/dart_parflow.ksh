@@ -60,6 +60,8 @@ do
   rm pflgrid.nc
   rm clm_restart.nc
   rm parflow_restart.pfb
+  rm parflow_prior_time.txt 
+  rm dart_posterior_times.txt
 
   ln -s ../input.nml .
   prspfb=`ls -1 rurlaf.out.press*.pfb | tail -n -1` 

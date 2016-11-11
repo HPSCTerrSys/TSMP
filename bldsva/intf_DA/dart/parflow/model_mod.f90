@@ -14,7 +14,10 @@ module model_mod
 use        types_mod, only : r8, obstypelength, MISSING_R8
 
 use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, &
-                             print_time, print_date, set_calendar_type
+                             print_time, print_date, set_calendar_type,        &
+                             operator(*),  operator(+), operator(-),           &    
+                             operator(>),  operator(<), operator(/),           &    
+                             operator(/=), operator(<=)
 
 use     location_mod, only : location_type,      get_close_maxdist_init,        &
                              get_close_obs_init, get_close_obs, set_location,   &
@@ -88,6 +91,7 @@ real(r8)                       :: xdpfb, ydpfb, zdpfb            ! ParFlow PFB f
 ! EXAMPLE: define model parameters here
 integer                          :: model_size
 type(time_type)                  :: time_step
+type(time_type)                  :: start_date      !Needed for Parflow nos
 
 type(location_type), allocatable :: state_loc(:)
 
@@ -306,9 +310,29 @@ integer           :: ndays, nhours, nmins, nsecs,nfreq
 type(time_type)   :: interval
 
 call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
-write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour
+nsecs = (ihour*60 + imin)*60 + isec 
+write(iunit, '(''clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
 
-return 
+interval = statetime - start_date
+
+call get_time(interval, nsecs, ndays)
+
+nhours = nsecs / (60*60)
+nsecs  = nsecs - (nhours * 60*60)
+nmins  = nsecs / 60 
+nsecs  = nsecs - (nmins * 60)
+nfreq  = 3   !PFL SPECIFIC
+
+write(iunit, '(''cosrbin '',''lrff'',4(I2.2),''o'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''pflhist '',I5.5)') (ndays*24 + nhours)/nfreq
+
+call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
+write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth, iday, ihour 
+
+return
+
 end subroutine write_state_times
 
 function get_model_size()
@@ -1002,6 +1026,7 @@ call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
 
 model_time = get_state_time_ncid(ncid)
 
+start_date = get_start_time_ncid(ncid)
 !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
 
 if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
@@ -1936,6 +1961,8 @@ istatus = 0
 end subroutine get_level_indices
 
 !------------------------------------------------------------------
+!>FROM CLM
+
 function get_state_time_ncid( ncid )
 !------------------------------------------------------------------
 ! The restart netcdf files have the time of the state.
@@ -1974,6 +2001,43 @@ get_state_time_ncid = set_date(year, month, day, hour, minute, second)
 end function get_state_time_ncid
 
 !------------------------------------------------------------------
+!>GET START DATE FROM CLM
+function get_start_time_ncid( ncid )
+!------------------------------------------------------------------
+! The restart netcdf files have the time of the start.
+
+type(time_type) :: get_start_time_ncid
+integer, intent(in) :: ncid
+
+integer :: VarID
+integer :: rst_start_ymd, rst_start_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd', VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_ymd'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_start_ymd),'get_start_time_ncid', &
+&            'get_var rst_ref_ymd'//trim(clm_file))
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_tod', VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_tod'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_start_tod),'get_start_time_ncid',&
+&            'get_var rst_ref_tod'//trim(clm_file))
+
+year     = rst_start_ymd/10000
+leftover = rst_start_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_start_tod/3600
+leftover = rst_start_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_start_time_ncid = set_date(year, month, day, hour, minute, second)
+
+end function get_start_time_ncid
 
 
 !===================================================================
