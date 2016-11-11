@@ -4,7 +4,8 @@
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
-#  nrst   = 1 for restart with assimilation
+#  nrst   = 1,2,3 for restart with cosmo,clm,parflow assimilation
+# machine = JURECA, CLUMA2
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
 # --- defaultInitDate  = "2008-05-09 00"
@@ -34,6 +35,13 @@ echo " "
 set icycle  = $1
 set inrst   = $2
 set machine = $3
+if ($inrst == 1) then
+  set assimC = 'cosmo'
+else if ($inrst == 2) then
+  set assimC = 'clm'
+else if ($inrst == 3) then
+  set assimC = 'parflow'
+endif
 #-------------------------------------------------------------------------
 # Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
@@ -74,18 +82,26 @@ set machine = $3
     #set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
     #set oldrundir = $tsmpdir"/run/"$temp_dir
     #
-    # Date manager
+    # Date manager, but this file is obtained only with dart job submission, so you have to submit
+    # dart_....ksh anyway for open loop runs also
     set timefile_path = $oldrundir"/tsmp_instance_0"
-    set defaultStartDate = `grep defaultStartDate $timefile_path/cosmo_prior_time.txt`
-    set defaultInitDate = `grep defaultInitDate $timefile_path/cosmo_prior_time.txt`
-    set clmext = `grep clmext $timefile_path/cosmo_prior_time.txt`
-    set cosrbin = `grep cosrbin $timefile_path/cosmo_prior_time.txt`
-    set pflhist = `grep pflhist $timefile_path/cosmo_prior_time.txt`
+    set defaultStartDate = `grep defaultStartDate $timefile_path/${assimC}_prior_time.txt`
+    set defaultInitDate = `grep defaultInitDate $timefile_path/${assimC}_prior_time.txt`
+    set clmext = `grep clmext $timefile_path/${assimC}_prior_time.txt`
+    set cosrbin = `grep cosrbin $timefile_path/${assimC}_prior_time.txt`
+    set pflhist = `grep pflhist $timefile_path/${assimC}_prior_time.txt`
     #
     #
     set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc"
     set cosrstfil = "$oldrundir/tsmp_instance_X/cosrst/$cosrbin[2]"
-    set pflrstfil = "$oldrundir/tsmp_instance_X/rurlaf.out.press.$pflhist[2].pfb"
+
+    if ($inrst == 3) then
+      # for restart run with parflow assimilation
+      set pflrstfil = "$oldrundir/tsmp_instance_X/parflow_restart.pfb"
+    else
+      #TODO for normal restart run without assimilation
+      set pflrstfil = "$oldrundir/tsmp_instance_X/rurlaf.out.press.$pflhist[2].pfb"
+    endif
 
     cd $tsmpdir/bldsva
 
@@ -109,22 +125,24 @@ set machine = $3
       cd  "tsmp_instance_"$instance
       #COSMO
       rm cosmo_in/raso_IdealSnd_0000LT_*
-      if ($inrst == 0) then 
-        #TODO for normal restart run without assimilation
-        ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
-      else if ($inrst == 1) then 
-        # for restart run with assimilation
+      if ($inrst == 1) then 
+        # for restart run with cosmo assimilation
         rm cosmo_in/$cosrbin[2]
         ln -sf $oldrundir/"tsmp_instance_"$instance/cosmo_restart ./cosmo_in/$cosrbin[2]
       else
-        echo "Code not written for inrst = ", $inrst
-        exit
+        #TODO for normal restart run without assimilation
+        ln -sf $oldrundir/"tsmp_instance_"$instance/cosrst/$cosrbin[2] ./cosmo_in/$cosrbin[2]
       endif
       #CLM
       sed "s,tsmp_instance_X,tsmp_instance_$instance," -i lnd.stdin
       #ParFlow
       sed "s,tsmp_instance_X,tsmp_instance_$instance," -i coup_oas.tcl
       tclsh coup_oas.tcl
+      if ($inrst == 3) then
+        #Distribute assimilated parflow restart files
+        sed "s,rur_ic_press.pfb,$oldrundir/tsmp_instance_$instance/parflow_restart.pfb," -i ascii2pfb.tcl
+        tclsh ascii2pfb.tcl
+      endif
       cd ..
     end
     #Move the prior and posterior dart debug files
