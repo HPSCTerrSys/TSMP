@@ -137,7 +137,8 @@ character(len=256) :: parflow_press_file           = 'parflow_press_file'
 character(len=256) :: parflow_satur_file           = 'parflow_satur_file'
 character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
-character(len=256) :: clm_file                     = 'clmoash0_file'
+character(len=256) :: clm_file                     = 'clmoasr_file'
+character(len=256) :: clm_file_s                   = 'clmoasr_file'
 logical            :: output_1D_state_vector       = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -149,6 +150,7 @@ namelist /model_nml/                &
       pfidb_file,                   &
       grid_file,                    &
       clm_file,                     &
+      clm_file_s,                   &
       output_1D_state_vector,       &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -1005,7 +1007,7 @@ subroutine get_state_vector(sv, model_time)
 real(r8),         intent(inout)           :: sv(1:model_size)
 type(time_type),  intent(out), optional   :: model_time
 real(r8),allocatable                      :: pfbdata(:,:,:)
-integer                                   :: ncid 
+integer                                   :: ncid, ncid_s 
 !
 
 if ( .not. module_initialized ) call static_init_model
@@ -1026,7 +1028,16 @@ call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
 
 model_time = get_state_time_ncid(ncid)
 
-start_date = get_start_time_ncid(ncid)
+! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
+if ( .not. file_exist(clm_file_s) ) then 
+   write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
+   call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+endif
+
+call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
+              'restart_file_to_sv','open '//trim(clm_file_s))
+
+start_date = get_start_time_ncid(ncid_s)
 !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
 
 if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'

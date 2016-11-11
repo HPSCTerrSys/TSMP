@@ -146,9 +146,9 @@ endif
       cd ..
     end
     #Move the prior and posterior dart debug files
-    if ($inrst == 1) then
-      mv $oldrundir/Posterior_Diag.nc $rundir/
-      mv $oldrundir/Prior_Diag.nc $rundir/
+    if ($inrst > 0) then
+      cp $oldrundir/Posterior_Diag.nc $rundir/
+      cp $oldrundir/Prior_Diag.nc $rundir/
     endif
   else
     echo "ERROR : icycle < 1"

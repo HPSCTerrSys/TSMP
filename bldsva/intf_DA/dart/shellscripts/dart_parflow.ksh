@@ -15,7 +15,8 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart01"
+export LOGNAME="$WORK/rundart02"
+export LOGNAME_S="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
@@ -36,6 +37,7 @@ rm pfl_press.pfb
 rm pfl_satur.pfb
 rm pflgrid.nc
 rm clm_restart.nc
+rm clm_restart_s.nc
 rm parflow_restart.pfb
 
 # Copy namelist and executable to rundirectory--------#TODO-
@@ -59,6 +61,7 @@ do
   rm pfl_satur.pfb
   rm pflgrid.nc
   rm clm_restart.nc
+  rm clm_restart_s.nc
   rm parflow_restart.pfb
   rm parflow_prior_time.txt 
   rm dart_posterior_times.txt
@@ -67,12 +70,14 @@ do
   prspfb=`ls -1 rurlaf.out.press*.pfb | tail -n -1` 
   satpfb=`ls -1 rurlaf.out.satur*.pfb | tail -n -1`
   clmrst=`ls -1 clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+  clmrst_s=`ls -1 $LOGNAME_S/tsmp_instance_${instance}/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
   pflgrd=`ls grids.nc`
   ln -s ../pfidb_dz .
   ln -s $prspfb pfl_press.pfb 
   ln -s $satpfb pfl_satur.pfb
   ln -s $pflgrd pflgrid.nc
   ln -s $clmrst clm_restart.nc
+  ln -s $clmrst_s clm_restart_s.nc
   ../parflow_to_dart || exit 1
 
   dartinstance=$(( $instance + 1 ))
