@@ -15,7 +15,7 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart02"
+export LOGNAME="$WORK/rundart01"
 export LOGNAME_S="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
@@ -24,7 +24,7 @@ source $LOGNNAME/loadenvs
 
 # Cleanup---------------
 rm input.nml
-rm pfidb_dz
+#rm pfidb_dz
 rm filter_ics.*
 rm P*Diag.nc
 rm filter_res*
@@ -42,7 +42,7 @@ rm parflow_restart.pfb
 
 # Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
-cp $DART_DIR/pfidb_dz .
+#cp $DART_DIR/pfidb_dz .
 cp $DART_DIR/filter .
 cp $DART_DIR/dart_to_parflow .
 cp $DART_DIR/parflow_to_dart .
@@ -54,7 +54,7 @@ do
   cd tsmp_instance_$instance
 
   rm input.nml
-  rm pfidb_dz
+  #rm pfidb_dz
   rm dart_log.*
   rm dart_posterior
   rm pfl_press.pfb
@@ -72,7 +72,7 @@ do
   clmrst=`ls -1 clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
   clmrst_s=`ls -1 $LOGNAME_S/tsmp_instance_${instance}/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
   pflgrd=`ls grids.nc`
-  ln -s ../pfidb_dz .
+  #ln -s ../pfidb_dz .
   ln -s $prspfb pfl_press.pfb 
   ln -s $satpfb pfl_satur.pfb
   ln -s $pflgrd pflgrid.nc

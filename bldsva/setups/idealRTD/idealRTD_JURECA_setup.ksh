@@ -94,7 +94,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-
+        comment "   copy initial pressure and script into rundir"
+        cp $forcingdir_pfl/pfb*.nc $rundir/ >> $log_file 2>> $err_file
+        check
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check

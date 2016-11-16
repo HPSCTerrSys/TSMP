@@ -250,7 +250,7 @@ parflow_input_file = get_parflow_filename()
 write(*,*)
 write(*,*)'Reading restart files from  '//trim(parflow_input_file)
 
-call get_state_vector(statevector, model_time)
+call get_state_vector(statevector, 1, model_time)
 
 write(*,*)
 write(*,*)'Writing data into '//trim(output_file)

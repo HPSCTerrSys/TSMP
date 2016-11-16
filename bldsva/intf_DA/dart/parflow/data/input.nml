@@ -118,13 +118,14 @@
 &model_nml
    parflow_press_file            = '../data/rurlaf.out.press.00003.pfb'
    parflow_satur_file            = '../data/rurlaf.out.satur.00003.pfb' 
-   pfidb_file                    = '../data/pfidb_dz'
    grid_file                     = '../data/grids.nc'
    clm_file                      = '../data/clm_restart.nc'
+   clm_file_s                    = '../data/clm_restart.nc' 
+   soilInd_file                  = '../data/pfb_soil.nc'
    output_1D_state_vector        = .false.
    assimilation_period_days      = 1
    assimilation_period_seconds   = 0
-   debug                         = 1
+   debug                         = 11
    /
 
 &pfb_to_dart_nml

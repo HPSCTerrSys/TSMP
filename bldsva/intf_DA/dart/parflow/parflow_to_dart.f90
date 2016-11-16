@@ -91,7 +91,7 @@ call static_init_model()
 x_size = get_model_size()
 allocate( x(x_size) )
 
-call get_state_vector(x, model_time) 
+call get_state_vector(x, 1, model_time)   ! 1 for press file 
 
 iunit = open_restart_write(pfb_to_dart_output_file)
 

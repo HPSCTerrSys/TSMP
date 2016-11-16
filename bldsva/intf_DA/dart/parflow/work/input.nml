@@ -130,10 +130,10 @@
 &model_nml
    parflow_press_file            = 'pfl_press.pfb'
    parflow_satur_file            = 'pfl_satur.pfb' 
-   pfidb_file                    = 'pfidb_dz'
    grid_file                     = 'pflgrid.nc'
    clm_file                      = 'clm_restart.nc'
    clm_file_s                    = 'clm_restart_s.nc'
+   soilInd_file                  = 'pfb_soil.nc'
    output_1D_state_vector        = .false.
    assimilation_period_days      = 0 
    assimilation_period_seconds   = 21400 
