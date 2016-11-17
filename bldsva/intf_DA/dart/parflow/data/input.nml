@@ -143,7 +143,7 @@
   /
 
 &dart_to_pfb_nml
-   dart_to_pfb_input_file = 'dart_posterior'
+   dart_to_pfb_input_file = '../data/dart_posterior'
    advance_time_present     = .false.
    /
 

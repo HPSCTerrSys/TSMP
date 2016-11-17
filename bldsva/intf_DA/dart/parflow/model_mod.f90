@@ -1041,7 +1041,7 @@ if ( .not. module_initialized ) call static_init_model
 
 allocate(pfbdata(nx,ny,nz))
 
-if (sv_id ==1) then
+if (sv_id == 1) then
   call pfread_var(parflow_press_file,pfbdata) 
 elseif (sv_id == 2) then
   call pfread_var(parflow_satur_file,pfbdata)
@@ -1051,29 +1051,36 @@ endif
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
-if ( .not. file_exist(clm_file) ) then 
-  write(string1,*) 'cannot open file ', trim(clm_file),' for reading.'
-  call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
-endif
+if (sv_id == 1) then
 
-call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
+  if ( .not. file_exist(clm_file) ) then 
+    write(string1,*) 'cannot open file ', trim(clm_file),' for reading.'
+    call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+  endif
+
+  call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
             'restart_file_to_sv','open '//trim(clm_file))
 
-model_time = get_state_time_ncid(ncid)
+  model_time = get_state_time_ncid(ncid)
 
-! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
-if ( .not. file_exist(clm_file_s) ) then 
-  write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
-  call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
-endif
+  call nc_check(nf90_close(ncid),'restart_file_to_sv','close '//trim(clm_file))
 
-call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
+  ! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
+  if ( .not. file_exist(clm_file_s) ) then 
+    write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
+    call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+  endif
+
+  call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
             'restart_file_to_sv','open '//trim(clm_file_s))
 
-start_date = get_start_time_ncid(ncid_s)
-!CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
+  start_date = get_start_time_ncid(ncid_s)
+  call nc_check(nf90_close(ncid),'restart_file_to_sv','close '//trim(clm_file_s))
+  !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
 
-if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
+  if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
+
+endif
 
 deallocate(pfbdata)
 
@@ -1083,14 +1090,14 @@ end subroutine get_state_vector
 !> Writes the current time and state variables from a dart state
 !> vector (1d array) into a ncommas netcdf restart file.
 
-subroutine write_parflow_file(sv, dart_file, newfile)
+subroutine write_parflow_file(sv,sv_sat, dart_file, newfile)
 
 real(r8),         intent(in) :: sv(:)           ! the DART posterior
+real(r8),         intent(in) :: sv_sat(:)       ! diagnostic vector
 character(len=*), intent(in) :: dart_file       ! the filename
 character(len=*), intent(in) :: newfile         ! the name of the new parflow restart
 
 real(r8)                     :: rbuf(nx*ny*nz) ! data to be read
-real(r8)                     :: sv_sat(nx*ny*nz) ! data to be read
 logical                      :: desiredG  = .false.
 logical                      :: desiredL  = .true.
 integer                      :: ivar
@@ -1125,8 +1132,7 @@ endif
 
 if (desiredG) rbuf = apply_clamping(ivar, sv)    ! For global clamping CPS
 
-!READ parflow satur file for clamping purpose
-call get_state_vector(sv_sat, 2)
+!vector to array conversion
 pfsat = RESHAPE(sv_sat,(/nx,ny,nz/))
 
 !vector to array conversion
@@ -1183,10 +1189,12 @@ do ixs = 0, nxs-1
   do  k=iz +1 , iz + nnz
   do  j=iy +1 , iy + nny
   do  i=ix +1 , ix + nnx
-    if (desiredL .and. pfsat(i,j,k).le.1._r8 .and. k.eq.nz) then      !Surface
-      pfvar(i,j,k) = min(pfvar(i,j,k),max_press_head)
-    elseif (desiredL .and. pfsat(i,j,k).le.1._r8 .and. k.lt.nz) then  !UnsatZ
-      pfvar(i,j,k) = min(pfvar(i,j,k),0._r8) 
+    if (desiredL) then
+      if (pfsat(i,j,k).le.1._r8 .and. k.eq.nz) then      !Surface
+         pfvar(i,j,k) = min(pfvar(i,j,k),max_press_head)
+       elseif (pfsat(i,j,k).le.1._r8 .and. k.lt.nz) then  !UnsatZ
+         pfvar(i,j,k) = min(pfvar(i,j,k),0._r8) 
+       endif
     endif
     write(iunit) pfvar(i,j,k)
   end do

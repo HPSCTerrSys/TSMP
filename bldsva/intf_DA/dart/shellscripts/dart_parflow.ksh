@@ -24,6 +24,7 @@ source $LOGNNAME/loadenvs
 
 # Cleanup---------------
 rm input.nml
+rm pfb_soil.nc
 #rm pfidb_dz
 rm filter_ics.*
 rm P*Diag.nc
@@ -54,6 +55,7 @@ do
   cd tsmp_instance_$instance
 
   rm input.nml
+  rm pfb_soil.nc
   #rm pfidb_dz
   rm dart_log.*
   rm dart_posterior
@@ -78,6 +80,7 @@ do
   ln -s $pflgrd pflgrid.nc
   ln -s $clmrst clm_restart.nc
   ln -s $clmrst_s clm_restart_s.nc
+  ln -s pfb*.nc pfb_soil.nc
   ../parflow_to_dart || exit 1
 
   dartinstance=$(( $instance + 1 ))
@@ -99,6 +102,7 @@ ln -s tsmp_instance_0/$prspfb pfl_press.pfb
 ln -s tsmp_instance_0/$satpfb pfl_satur.pfb
 ln -s tsmp_instance_0/$pflgrd pflgrid.nc
 ln -s tsmp_instance_0/$clmrst clm_restart.nc
+ln -s tsmp_instance_0/pfb_sID*.nc pfb_soil.nc
 echo "CPS 2"
 #for filter?
 
