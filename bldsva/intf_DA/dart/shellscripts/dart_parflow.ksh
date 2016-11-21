@@ -15,7 +15,7 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart01"
+export LOGNAME="$WORK/rundart08"
 export LOGNAME_S="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH

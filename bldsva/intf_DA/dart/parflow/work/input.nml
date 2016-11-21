@@ -134,6 +134,7 @@
    clm_file                      = 'clm_restart.nc'
    clm_file_s                    = 'clm_restart_s.nc'
    soilInd_file                  = 'pfb_soil.nc'
+   ipfb                          = 2
    output_1D_state_vector        = .false.
    assimilation_period_days      = 0 
    assimilation_period_seconds   = 21400 
@@ -146,8 +147,8 @@
 
 &location_nml
    horiz_dist_only             = .true.
-   vert_normalization_height   = 10000.0
-   vert_normalization_level    = 20.0
+   vert_normalization_height   = 1.0
+   vert_normalization_level    = 1.0
    approximate_distance        = .false.
    nlon                        = 71
    nlat                        = 36

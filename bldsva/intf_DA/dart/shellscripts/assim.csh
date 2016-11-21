@@ -47,9 +47,14 @@ foreach irun (`seq 1 $num_days`)
 
 if ($2 == "parflow") then
 set model_dir = `printf $MODEL_PATH%02d $irun`
+if ($irun == 1) then
+  set model_dir0 = $model_dir
+endif
 set prspfb = `ls -1 $model_dir/rurlaf.out.press*.pfb | tail -n -1`
 set satpfb = `ls -1 $model_dir/rurlaf.out.satur*.pfb | tail -n -1`
 set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+set clmrst0 = `ls -1 $model_dir0/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+set pfbsoil = `ls -1 $HOME/database/idealRTD/parflow/pfb_sID*.nc`
 echo $clmrst
 set pflgrd = `ls $model_dir/grids.nc`
  
@@ -59,12 +64,14 @@ echo `pwd`
 echo " "
 echo "------------------------------------------------------------------------    -------"
 rm dart_prior pflgrid.nc clm_restart.nc 
-rm True_State.nc perfect_restart
+rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $prspfb pfl_press.pfb 
 ln -sf $satpfb pfl_satur.pfb 
 ln -sf $pflgrd pflgrid.nc
 ln -sf $clmrst clm_restart.nc
+ln -sf $clmrst0 clm_restart_s.nc
+ln -sf $pfbsoil pfb_soil.nc
 #&model_nml has the above names for restart and netcdf file
 endif  #$2 == "parflow"
 
@@ -79,7 +86,7 @@ echo `pwd`
 echo " "
 echo "-------------------------------------------------------------------------------"
 rm clm_restart.nc clm_history.nc 
-rm True_State.nc perfect_restart
+rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $clmout clm_history.nc
 ln -sf $clmrst clm_restart.nc 
@@ -98,7 +105,7 @@ echo `pwd`
 echo " "
 echo "-------------------------------------------------------------------------------"
 rm cosmo.nc cosmo_prior
-rm True_State.nc perfect_restart
+rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $cosout cosmo.nc
 ln -sf $cosrst cosmo_prior
@@ -140,7 +147,7 @@ echo "Harvest model data: perfect_model_obs"
 echo "-------------------------------------------------------------------------------"
 ./perfect_model_obs
 mv obs_seq.perfect obs_seq.$defaultInitDate[2]
-
+mv True_State.nc True_State.$defaultInitDate[2].nc
 echo "-------------------------------------------------------------------------------"
 echo "Exiting ..."
 echo "-------------------------------------------------------------------------------"

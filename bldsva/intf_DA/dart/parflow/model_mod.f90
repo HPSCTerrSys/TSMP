@@ -65,6 +65,7 @@ public :: get_model_size,         &
 ! the model_mod code.
 public :: get_state_vector, &
           get_parflow_filename, &
+          get_parflow_id,           &
           write_parflow_file
 
 ! version controlled file description for error handling, do not edit
@@ -86,7 +87,6 @@ real(r8)                       ::  &
                    dy,             &     ! Grid Resoultion in m
                    dz                    ! Grid Resolution scale, check parflow namelist
 real(r8)                       :: xdpfb, ydpfb, zdpfb            ! ParFlow PFB file
-
 
 ! EXAMPLE: define model parameters here
 integer                          :: model_size
@@ -131,6 +131,8 @@ real(r8), allocatable ::   lon(:,:)      ! longitude degrees_east
 real(r8), allocatable ::   lat(:,:)      ! latitude  degrees_north
 real(r8), allocatable ::   vcoord(:)     ! vertical co-ordinate in m
 real(r8), allocatable ::   sID(:,:,:)    ! pfl soil indicator 
+real(r8), allocatable ::   sval(:)       ! sID attributes (Ss,Sr,a,N)
+integer               ::   nsInd         ! nsInd/4 = unique sID 
 type(time_type)       ::   parflow_time  ! parflow ouptut time
 
 ! EXAMPLE: perhaps a namelist here 
@@ -141,6 +143,7 @@ character(len=256) :: grid_file                    = 'grid_file'
 character(len=256) :: clm_file                     = 'clmoasr_file'
 character(len=256) :: clm_file_s                   = 'clmoasr_file'
 character(len=256) :: soilInd_file                 = 'pfl_soil_file'
+integer            :: ipfb                         = 1       
 logical            :: output_1D_state_vector       = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -154,6 +157,7 @@ namelist /model_nml/                &
       clm_file,                     &
       clm_file_s,                   &
       soilInd_file,                 &
+      ipfb,                         &
       output_1D_state_vector,       &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -241,7 +245,7 @@ progvar(ivar)%dimnames(3)     = 'level'
 progvar(ivar)%dimlens(1)      = nx
 progvar(ivar)%dimlens(2)      = ny
 progvar(ivar)%dimlens(3)      = nz
-progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !Need pedotransfer function 
+progvar(ivar)%pfb_kind        = KIND_3D_PARAMETER   !Need pedotransfer function 
 progvar(ivar)%index1          = 1
 progvar(ivar)%rangeRestricted = BOUNDED_NONE        
 progvar(ivar)%minvalue        = MISSING_R8 
@@ -258,7 +262,7 @@ progvar(ivar)%dimnames(3)     = 'level'
 progvar(ivar)%dimlens(1)      = nx 
 progvar(ivar)%dimlens(2)      = ny 
 progvar(ivar)%dimlens(3)      = nz 
-progvar(ivar)%pfb_kind        = KIND_3D_PARAMETER   !To Remove from assim 
+progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !To Remove from assim 
 progvar(ivar)%index1          = 1  
 progvar(ivar)%rangeRestricted = BOUNDED_BOTH      
 progvar(ivar)%minvalue        = 0._r8                != f(soil index) 
@@ -565,6 +569,7 @@ deallocate(lon,lat)
 deallocate(vcoord)
 deallocate(state_loc)
 deallocate(sID)
+deallocate(sval)
 !if ( allocated(ens_mean) ) deallocate(ens_mean)
 
 end subroutine end_model
@@ -782,7 +787,7 @@ else
    ! Create the (empty) Prognostic Variables and the Attributes
    !----------------------------------------------------------------------------
 
-   do ivar=1, 1 
+   do ivar=ipfb, ipfb !CPS 1, 1 
 
       varname = trim(progvar(ivar)%varname)
       string1 = trim(filename)//' '//trim(varname)
@@ -904,7 +909,7 @@ else
    !----------------------------------------------------------------------------
    ! We need to process the prognostic variables.
    !----------------------------------------------------------------------------
-   do ivar = 1,1
+   do ivar = ipfb, ipfb !CPS 1,1
 
       varname = trim(progvar(ivar)%varname)
       string2 = trim(filename)//' '//trim(varname)
@@ -1051,7 +1056,7 @@ endif
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
-if (sv_id == 1) then
+if (sv_id == ipfb) then
 
   if ( .not. file_exist(clm_file) ) then 
     write(string1,*) 'cannot open file ', trim(clm_file),' for reading.'
@@ -1090,10 +1095,10 @@ end subroutine get_state_vector
 !> Writes the current time and state variables from a dart state
 !> vector (1d array) into a ncommas netcdf restart file.
 
-subroutine write_parflow_file(sv,sv_sat, dart_file, newfile)
+subroutine write_parflow_file(sv,pfb_state, dart_file, newfile)
 
 real(r8),         intent(in) :: sv(:)           ! the DART posterior
-real(r8),         intent(in) :: sv_sat(:)       ! diagnostic vector
+real(r8),         intent(in) :: pfb_state(:)       ! diagnostic vector
 character(len=*), intent(in) :: dart_file       ! the filename
 character(len=*), intent(in) :: newfile         ! the name of the new parflow restart
 
@@ -1104,8 +1109,9 @@ integer                      :: ivar
 
 !pfb
 real(r8), parameter          :: max_press_head = 0.005_r8
-real(r8)                     :: pfvar(nx,ny,nz)       ! ParFlow pressure files 
-real(r8)                     :: pfsat(nx,ny,nz)       ! ParFlow satur files 
+real(r8)                     :: pfvar(nx,ny,nz)       ! array->DART state 
+real(r8)                     :: pfarr(nx,ny,nz)       ! array->ParFlow state 
+real(r8)                     :: a_vG, N_vG, Ssat, Sres, Sw  ! vG param
 integer(kind=4)              :: iunit
 
 integer(kind=4)              ::  i, j, k,               &
@@ -1133,7 +1139,7 @@ endif
 if (desiredG) rbuf = apply_clamping(ivar, sv)    ! For global clamping CPS
 
 !vector to array conversion
-pfsat = RESHAPE(sv_sat,(/nx,ny,nz/))
+pfarr = RESHAPE(pfb_state,(/nx,ny,nz/))
 
 !vector to array conversion
 pfvar = RESHAPE(sv,(/nx,ny,nz/))
@@ -1186,17 +1192,25 @@ do ixs = 0, nxs-1
 ! End: Writing of sub-grid spatial information
 
 ! Start: Write in data from each individual subgrid
+! Follow the kji looping always
   do  k=iz +1 , iz + nnz
   do  j=iy +1 , iy + nny
   do  i=ix +1 , ix + nnx
-    if (desiredL) then
-      if (pfsat(i,j,k).le.1._r8 .and. k.eq.nz) then      !Surface
-         pfvar(i,j,k) = min(pfvar(i,j,k),max_press_head)
-       elseif (pfsat(i,j,k).le.1._r8 .and. k.lt.nz) then  !UnsatZ
-         pfvar(i,j,k) = min(pfvar(i,j,k),0._r8) 
-       endif
+    if (sID(i,j,k).eq.1) then
+      a_vG = sval(1)
+      N_vG = sval(2)
+      Sres = sval(3)
+      Ssat = sval(4)
+      Sw   = max(pfvar(i,j,k),Sres+0.05_r8)            !Clipping based on soil type
+    else
+      call error_handler(E_ERR,'write_parflow_file','sID/=1', source,revision,revdate)   
     endif
-    write(iunit) pfvar(i,j,k)
+    if (k.eq.nz .and. pfvar(i,j,k).eq.1) then       !Limit overland flow heign in Surface
+      pfarr(i,j,k) = max(pfarr(i,j,k),0.) 
+    elseif (Sw.lt.1._r8 ) then  !UnsatZ
+      pfarr(i,j,k) = -(1/a_vG)*((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1.))) - 1.)**(1./N_vG) 
+    endif
+    write(iunit) pfarr(i,j,k)
   end do
   end do
   end do
@@ -1242,19 +1256,38 @@ endif
 
 end function apply_clamping
 
-
 !------------------------------------------------------------------
-!> Reads the current time and state variables from a model data
-!> file and packs them into a dart state vector.
+!> Reads the parflow file ID, to assimilate
 
+function get_parflow_id()
 
-function get_parflow_filename()
-
-character(len=256) :: get_parflow_filename
+integer :: get_parflow_id
 
 if ( .not. module_initialized ) call static_init_model
 
-get_parflow_filename = trim(parflow_press_file)
+if (ipfb.eq.1 .or. ipfb.eq.2) then
+  get_parflow_id = ipfb
+else
+  call error_handler(E_ERR,'get_parflow_id','ipfb/=1,2', source,revision, revdate)
+endif
+
+end function get_parflow_id
+!------------------------------------------------------------------
+!> Reads the parflow file name
+
+
+function get_parflow_filename(pfbid)
+
+integer, intent(in) :: pfbid 
+character(len=256)  :: get_parflow_filename
+
+if ( .not. module_initialized ) call static_init_model
+
+if (pfbid.eq.1) then
+  get_parflow_filename = trim(parflow_press_file)
+elseif (pfbid.eq.2) then
+  get_parflow_filename = trim(parflow_satur_file)
+endif
 
 end function get_parflow_filename
 
@@ -1314,10 +1347,9 @@ subroutine soil_ind_read(filename)
 !sID ( lat, lon, lev )
 
 character(len=*), intent(in)   :: filename
-integer :: ncid, io, nlon, nlat, nlev, np,  dimid(3), varid(4) 
+integer :: ncid, io, nlon, nlat, nlev, dimid(3), varid(4) 
 integer :: iz
 real(r8):: pfb_dz(nz) 
-real(r8):: sval(4) !(Ssat, Sres, alpha, N)
 character(len=*), parameter  :: pname = "parm"
 
 io = nf90_open(filename, NF90_NOWRITE, ncid)
@@ -1326,7 +1358,7 @@ if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR opening',sou
 io = nf90_inq_varid(ncid, "sID", varid(1))
 if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq sID',source,revision,revdate)
 
-io = nf90_inquire_attribute(ncid, varid(1), pname, np)
+io = nf90_inquire_attribute(ncid, varid(1), pname, nsInd)
 if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq attribute ',source,revision,revdate)
 
 io = nf90_inq_varid(ncid, "dz", varid(2))
@@ -1358,6 +1390,8 @@ end if
 
 io = nf90_get_var(ncid, varid(1), sID)
 if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get sID',source, revision, revdate)
+
+allocate(sval(nsInd))
 
 io = nf90_get_att(ncid, varid(1), pname , sval)
 if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get sval',source,revision, revdate)
@@ -1893,19 +1927,18 @@ integer,  intent(out) :: istatus
 integer  :: k, ll, lr, ur, ul
 real(r8) :: ij_rwgts(2)
 
-! Location of dart_indices
-ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
-lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
-ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
-ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
-
 ! Interpolate
 ij_rwgts(1) = 1.0_r8 - ij_wgts(1)  !ifrac
 ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
 
-do k = 1, 2 
+do k = 1, 2
+  ! Location of dart_indices
+  ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
+  lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
+  ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
+  ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
 
- interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
+  interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
                  ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
 
 end do
@@ -1997,15 +2030,21 @@ if (lon == gridlons(nx)) then
    ij_inds(2)  = nx
    ij_wgts(1)  = 0.0_r8  ! fractional distance to min
 else
-   indarr = maxloc(gridlons , gridlons <= lon)
-   ij_inds(1)  = indarr(1)
+!CPS   indarr = maxloc(gridlons , gridlons <= lon)
+   indarr      = minloc(abs(gridlons-lon))   
+   if (gridlons(indarr(1)) .gt. lon) then
+     ij_inds(1)  = indarr(1) - 1
+   else
+     ij_inds(1)  = indarr(1)
+   endif
    ij_inds(2)  = ij_inds(1) + 1
    dlon        =     lon          - gridlons(ij_inds(1))
    dlonT       = gridlons(ij_inds(2)) - gridlons(ij_inds(1))
    ij_wgts(1)  = dlon / dlonT
 endif
 
-! latitudes are arranged 'south' to 'north', i.e. -90 to 90  (albeit rotated)
+
+! latitudes are arranged 'south' to 'north', i.e. -90 to 90 (geographical) 
 !
 !    | ............ dlatT ............. |
 !    | .. dlat .. |
@@ -2018,13 +2057,19 @@ if (lat == gridlats(ny)) then
    ij_inds(4) = ny
    ij_wgts(2) = 0.0_r8
 else
-   indarr = maxloc( gridlats,  gridlats <= lat)
-   ij_inds(3)   = indarr(1)
+!CPS   indarr = maxloc( gridlats,  gridlats <= lat)
+   indarr      = minloc(abs(gridlats-lat))
+    if (gridlats(indarr(1)) .gt. lat) then 
+     ij_inds(3)  = indarr(1) - 1
+   else 
+     ij_inds(3)  = indarr(1)
+   endif
    ij_inds(4)   = ij_inds(3) + 1
    dlat         =     lat        - gridlats(ij_inds(3))
    dlatT        = gridlats(ij_inds(4)) - gridlats(ij_inds(3))
    ij_wgts(2)   = dlat / dlatT
 endif
+
 
 istatus = 0
 
@@ -2032,8 +2077,8 @@ if (debug > 5 .and. do_output()) then
    write(*,*)
    write(*,*)'longitude index to the  west and  east are ',ij_inds(1:2)
    write(*,*)'latitude  index to the south and north are ',ij_inds(3:4) 
-   write(*,*)'lon  west, lon, lon  east',gridlons(ij_inds(1)),lon,gridlons(ij_inds(2))
-   write(*,*)'lat south, lat, lat north',gridlats(ij_inds(3)), lat,gridlats(ij_inds(4))
+   write(*,*)'lonW, lon, lonE',gridlons(ij_inds(1)),lon,gridlons(ij_inds(2))
+   write(*,*)'latS, lat, latN',gridlats(ij_inds(3)), lat,gridlats(ij_inds(4))
 endif
 
 end subroutine get_corners
@@ -2077,12 +2122,17 @@ endif
 
 if (height == vcoord(1)) then
   kk_inds(1) = 1
-  kk_inds(2) = 2
+  kk_inds(2) = 1 !CPS 2
+  kk_wgt     = 0._r8
+elseif (height == vcoord(nz)) then     !Surface pressure head assimilation
+  kk_inds(1) = nz
+  kk_inds(2) = nz   
   kk_wgt     = 0._r8
 else
-  indarr  = minloc( vcoord,  vcoord >= height )
+  !indarr  = minloc( vcoord,  vcoord >= height )
   !write(*,*) "CPS",vcoord
   !write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
+  indarr  = minloc( vcoord,  vcoord > height )
   kk_inds(1) = indarr(1)
   kk_inds(2) = kk_inds(1) + 1
   dz     = vcoord(kk_inds(1)) - height

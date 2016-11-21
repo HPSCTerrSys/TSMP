@@ -30,6 +30,7 @@ use  assim_model_mod, only : open_restart_read, aread_state_restart, close_resta
 use time_manager_mod, only : time_type, print_time, print_date, operator(-), &
                              get_time, get_date
 use        model_mod, only : static_init_model, write_parflow_file, &
+                             get_parflow_id,   &
                              get_model_size, get_state_vector, write_state_times
 
 implicit none
@@ -57,9 +58,9 @@ namelist /dart_to_pfb_nml/  dart_to_pfb_input_file, &
 integer               :: iunit, io, x_size, diff1, diff2
 type(time_type)       :: model_time, adv_to_time, base_time
 real(r8), allocatable :: statevector(:)
-real(r8), allocatable :: sv_sat(:)         !diagnostic state vector
+real(r8), allocatable :: pfb_state(:)         !parflow state vector
 logical               :: verbose              = .FALSE.
-
+integer               :: pfid, jpfb       ! Index to read parflow file
 !----------------------------------------------------------------------
 
 call initialize_utilities(progname='dart_to_parflow', output_flag=verbose)
@@ -103,12 +104,22 @@ call close_restart(iunit)
 ! time_manager_nml: stop_option, stop_count increments
 !----------------------------------------------------------------------
 
-write(*,*) 'Obtaining diagnostic state vector for clamping'
-allocate( sv_sat(1:x_size) )
-call get_state_vector(sv_sat, 2 )         ! For clamping
+allocate( pfb_state(1:x_size) )
+
+pfid = get_parflow_id()
+
+if (pfid.eq.1) then 
+  jpfb = 2
+elseif (pfid.eq.2) then
+  jpfb = 1
+endif
+
+write(*,*) 'Obtaining scond parflow state vector', jpfb
+ 
+call get_state_vector(pfb_state, jpfb )         ! 
 
 write(*,*) 'Calling write_parflow_file to restart file'
-call write_parflow_file(statevector,sv_sat, dart_to_pfb_input_file, pfb_restart_filename)
+call write_parflow_file(statevector,pfb_state, dart_to_pfb_input_file, pfb_restart_filename)
 
 iunit = open_file('dart_posterior_times.txt', action='write')
 call write_state_times(iunit, model_time)
