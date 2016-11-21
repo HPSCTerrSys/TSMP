@@ -18,7 +18,8 @@ use    utilities_mod, only : initialize_utilities, nc_check, &
 use     location_mod, only : location_type, set_location, write_location, get_dist, &
                              query_location, LocationDims, get_location, VERTISHEIGHT
 use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index, &
-                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE
+                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE, &
+                             KIND_BRIGHTNESS_TEMPERATURE
 use  assim_model_mod, only : open_restart_read, open_restart_write, close_restart, &
                              aread_state_restart, awrite_state_restart, &
                              netcdf_file_type, aoutput_diagnostics, &
@@ -29,8 +30,8 @@ use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              print_time, write_time, &
                              operator(-)
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
-                             compute_gridcell_value, find_gridcell_Npft, model_interpolate, &
-                             DART_get_var, get_grid_vertval
+                             compute_gridcell_value, gridcell_components, &
+                             model_interpolate, DART_get_var, get_grid_vertval
 
 implicit none
 
@@ -72,8 +73,10 @@ type(location_type) :: loc
 
 real(r8) :: interp_val
 
+real(r8), dimension(6) :: metadata
+
 !----------------------------------------------------------------------
-! This portion checks the geometry information. 
+! This portion checks the geometry information.
 !----------------------------------------------------------------------
 
 call initialize_utilities(progname='model_mod_check',output_flag=.TRUE.)
@@ -109,7 +112,7 @@ endif
 
 !----------------------------------------------------------------------
 ! Write a supremely simple restart file. Most of the time, I just use
-! this as a starting point for a Matlab function that replaces the 
+! this as a starting point for a Matlab function that replaces the
 ! values with something more complicated.
 !----------------------------------------------------------------------
 
@@ -191,7 +194,7 @@ endif
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
-! Checking for valid input is tricky ... we don't know much. 
+! Checking for valid input is tricky ... we don't know much.
 !----------------------------------------------------------------------
 
 if (test1thru > 6) then
@@ -200,11 +203,11 @@ endif
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
-! Checking for valid input is tricky ... we don't know much. 
+! Checking for valid input is tricky ... we don't know much.
 !----------------------------------------------------------------------
 
 if (test1thru > 7) then
-   call find_gridcell_Npft( kind_of_interest )
+   call gridcell_components( kind_of_interest )
 endif
 
 !----------------------------------------------------------------------
@@ -213,13 +216,13 @@ endif
 
 if (test1thru > 8) then
    write(*,*)
-   write(*,*)'Testing compute_gridcell_value() with "frac_sno" ...'
+   write(*,*)'Testing compute_gridcell_value() with KIND_SNOWCOVER_FRAC ...'
 
    loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
 
-   call compute_gridcell_value(statevector, loc, "frac_sno", interp_val, ios_out)
+   call compute_gridcell_value(statevector, loc, KIND_SNOWCOVER_FRAC, interp_val, ios_out)
 
-   if ( ios_out == 0 ) then 
+   if ( ios_out == 0 ) then
       write(*,*)'compute_gridcell_value : value is ',interp_val
    else
       write(*,*)'compute_gridcell_value : value is ',interp_val,'with error code',ios_out
@@ -227,13 +230,13 @@ if (test1thru > 8) then
 
 
    write(*,*)
-   write(*,*)'Testing get_grid_vertval() with "T_SOISNO" ...'
+   write(*,*)'Testing get_grid_vertval() with KIND_SOIL_TEMPERATURE ...'
 
    loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
 
-   call get_grid_vertval(statevector, loc, "T_SOISNO", interp_val, ios_out)
+   call get_grid_vertval(statevector, loc, KIND_SOIL_TEMPERATURE, interp_val, ios_out)
 
-   if ( ios_out == 0 ) then 
+   if ( ios_out == 0 ) then
       write(*,*)'get_grid_vertval : value is ',interp_val
    else
       write(*,*)'get_grid_vertval : value is ',interp_val,'with error code',ios_out
@@ -251,7 +254,7 @@ if (test1thru > 9) then
 
    call model_interpolate(statevector, loc, KIND_SNOWCOVER_FRAC, interp_val, ios_out)
 
-   if ( ios_out == 0 ) then 
+   if ( ios_out == 0 ) then
       write(*,*)'model_interpolate : value is ',interp_val
    else
       write(*,*)'model_interpolate : value is ',interp_val,'with error code',ios_out
@@ -296,8 +299,8 @@ end subroutine check_meta_data
 
 
 subroutine find_closest_gridpoint( loc_of_interest )
-! Simple exhaustive search to find the indices into the 
-! state vector of a particular lon/lat/level. They will 
+! Simple exhaustive search to find the indices into the
+! state vector of a particular lon/lat/level. They will
 ! occur multiple times - once for each state variable.
 real(r8), dimension(:), intent(in) :: loc_of_interest
 
@@ -310,11 +313,11 @@ real(r8), dimension(LocationDims) :: rloc
 character(len=32) :: kind_name
 logical :: matched
 
-! Check user input ... if there is no 'vertical' ...  
+! Check user input ... if there is no 'vertical' ...
 if ( (count(loc_of_interest >= 0.0_r8) < 3) .or. &
      (LocationDims < 3 ) ) then
    write(*,*)
-   write(*,*)'Interface not fully implemented.' 
+   write(*,*)'Interface not fully implemented.'
    return
 endif
 
@@ -323,7 +326,7 @@ write(*,'(''Checking for the indices into the state vector that are at'')')
 write(*,'(''lon/lat/lev'',3(1x,f10.5))')loc_of_interest(1:LocationDims)
 
 allocate( thisdist(get_model_size()) )
-thisdist  = 9999999999.9_r8         ! really far away 
+thisdist  = 9999999999.9_r8         ! really far away
 matched   = .false.
 
 ! Trying to support the ability to specify matching a particular KIND.
@@ -337,7 +340,7 @@ rlat = loc_of_interest(2)
 rlev = loc_of_interest(3)
 
 ! Since there can be/will be multiple variables with
-! identical distances, we will just cruise once through 
+! identical distances, we will just cruise once through
 ! the array and come back to find all the 'identical' values.
 do i = 1,get_model_size()
 
@@ -363,7 +366,7 @@ if (.not. matched) then
    return
 endif
 
-! Now that we know the distances ... report 
+! Now that we know the distances ... report
 
 matched = .false.
 do i = 1,get_model_size()

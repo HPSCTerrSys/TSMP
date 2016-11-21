@@ -25,14 +25,14 @@ character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (W
 
 integer  :: level, num_cols, num_levs,num_dates, i,k, iunit
 real(r8) :: lat, lon, t_err_var, uv_err_var, ps_err_var
-real(r8) :: lat_data(10), lon_data(10), level_data(5)
+real(r8) :: lat_data(10), lon_data(10), level_data(3)
 integer  :: yyyy, mm, dd_data(13), hh, mn, ss
-character(len=1024) :: filename
+character(len=512) :: filename
 
 !This is based in CLM grids
 data  lat_data/49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92/
 data  lon_data/ 5.45,  5.45,  5.48,  5.48,  5.51,  5.51,  5.55,  5.55, 5.59,  5.59/
-data  level_data/0.06, 0.130, 0.54 /
+data  level_data/ 0.06, 0.130, 0.54 /
 data  dd_data/9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21/
 
 !Pre Specified Date
@@ -62,9 +62,8 @@ write(iunit, *) num_cols*(num_levs*num_dates)+10     !CPS_write
 write(*, *) 'Input error VARIANCE for T soil obs'
 read(*, *) t_err_var
 
-! No values or qc
-write(iunit, *) 0                          !CPS_write
-write(iunit, *) 0                          !CPS_write
+write(iunit, *) 0  ! number of copies of data (0 for just a definition)  
+write(iunit, *) 0  ! number of quality control values per field (0 or greater)
 
 ! Loop through each column
 do k = 1, num_dates
@@ -78,39 +77,34 @@ do i = 1, num_cols
    ! Loop through each observation in the column
    do level = 1, num_levs
 
-      write(iunit, *) 0                   !CPS_write
-      ! Write out the t observation
-      write(iunit, *) 5                   !CPS_write 'RADIOSONDE_TEMPERATURE'
-      write(iunit, *) 3                   !CPS_write height
-      write(iunit, *) level_data(level)   !CPS_write
-      write(iunit, *) lon                 !CPS_write
-      write(iunit, *) lat                 !CPS_write
-      write(iunit, *) yyyy,mm,dd_data(k),hh,mn,ss        !CPS_write
-      write(iunit, *) t_err_var           !CPS_write
+      write(iunit, *) 0                   ! input a -1 if there are no more obs
+      write(iunit, *) 5                   ! 'RADIOSONDE_TEMPERATURE' - maybe
+      write(iunit, *) 3                   ! 3  --> height
+      write(iunit, *) level_data(level)
+      write(iunit, *) lon
+      write(iunit, *) lat
+      write(iunit, *) yyyy,mm,dd_data(k),hh,mn,ss ! TJH: this time will be overwritten in next phase
+      write(iunit, *) t_err_var           ! observation error variance
 
    end do
 end do
 end do
 
-write(iunit, *) -1                        !CPS_write
-write(iunit, *) 'set_def.out'             !CPS_write
+write(iunit, *) -1                        ! there are no more obs
+write(iunit, *) 'set_def.out'             ! name of template for next phase
 close(iunit)
 
 !CPS added for export
 do k = 1, num_dates
   iunit = get_unit()
-  if (k .le. 9) then
-    write (filename, "(A19,I1)") "column_export_out_0",k 
-  else
-    write (filename, "(A18,I2)") "column_export_out_",k
-  endif
+  write (filename, "(A18,I2.2)") "column_export_out_",k
   open(unit = iunit, file = trim(filename))
-  write(iunit, *) 'set_def.out'             !CPS_write
-  write(iunit, *) 1                         !CPS_write
-  write(iunit, *) 1                         !CPS_write
-  write(iunit, *) yyyy,mm,dd_data(k),hh,mn,ss        !CPS_write
-  write(iunit, *) 0,0                         !CPS_write
-  write(iunit, *) 'obs_seq.in'             !CPS_write
+  write(iunit, *) 'set_def.out'
+  write(iunit, *) 1
+  write(iunit, *) 1
+  write(iunit, *) yyyy,mm,dd_data(k),hh,mn,ss
+  write(iunit, *) 0,0
+  write(iunit, *) 'obs_seq.in'
   close(iunit)
 end do
 

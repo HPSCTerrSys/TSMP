@@ -2,7 +2,7 @@
 ! provided by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: clm_to_dart.f90 6256 2013-06-12 16:19:10Z thoar $
+! $Id: clm_to_dart.f90 7195 2014-10-03 17:01:29Z thoar $
 
 program clm_to_dart
 
@@ -24,8 +24,7 @@ program clm_to_dart
 use        types_mod, only : r8
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              find_namelist_in_file, check_namelist_read
-use        model_mod, only : get_model_size, restart_file_to_sv, &
-                             get_clm_restart_filename
+use        model_mod, only : get_model_size, clm_to_dart_state_vector
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 use time_manager_mod, only : time_type, print_time, print_date
 
@@ -33,15 +32,15 @@ implicit none
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/clm_to_dart.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6256 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
+   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/clm_to_dart.f90 $"
+character(len=32 ), parameter :: revision = "$Revision: 7195 $"
+character(len=128), parameter :: revdate  = "$Date: 2014-10-03 11:01:29 -0600 (Fri, 03 Oct 2014) $"
 
 !-----------------------------------------------------------------------
 ! namelist parameters with default values.
 !-----------------------------------------------------------------------
 
-character(len=128) :: clm_to_dart_output_file  = 'dart_ics'
+character(len=512) :: clm_to_dart_output_file  = 'dart_ics'
 
 namelist /clm_to_dart_nml/ clm_to_dart_output_file
 
@@ -52,7 +51,6 @@ namelist /clm_to_dart_nml/ clm_to_dart_output_file
 integer               :: io, iunit, x_size
 type(time_type)       :: model_time
 real(r8), allocatable :: statevector(:)
-character(len=256)    :: clm_restart_filename
 
 !======================================================================
 
@@ -66,13 +64,6 @@ call find_namelist_in_file("input.nml", "clm_to_dart_nml", iunit)
 read(iunit, nml = clm_to_dart_nml, iostat = io)
 call check_namelist_read(iunit, io, "clm_to_dart_nml") ! closes, too.
 
-call get_clm_restart_filename( clm_restart_filename )
-
-write(*,*)
-write(*,'(''clm_to_dart:converting clm restart file '',A, &
-      &'' to DART file '',A)') &
-       trim(clm_restart_filename), trim(clm_to_dart_output_file)
-
 !----------------------------------------------------------------------
 ! get to work
 !----------------------------------------------------------------------
@@ -80,7 +71,8 @@ write(*,'(''clm_to_dart:converting clm restart file '',A, &
 x_size = get_model_size()
 allocate(statevector(x_size))
 
-call restart_file_to_sv(clm_restart_filename, statevector, model_time) 
+! Each variable specifies its own file of origin.
+call clm_to_dart_state_vector(statevector, model_time) 
 
 iunit = open_restart_write(clm_to_dart_output_file)
 
@@ -95,7 +87,7 @@ call finalize_utilities('clm_to_dart')
 end program clm_to_dart
 
 ! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/clm_to_dart.f90 $
-! $Id: clm_to_dart.f90 6256 2013-06-12 16:19:10Z thoar $
-! $Revision: 6256 $
-! $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
+! $URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/clm_to_dart.f90 $
+! $Id: clm_to_dart.f90 7195 2014-10-03 17:01:29Z thoar $
+! $Revision: 7195 $
+! $Date: 2014-10-03 11:01:29 -0600 (Fri, 03 Oct 2014) $
