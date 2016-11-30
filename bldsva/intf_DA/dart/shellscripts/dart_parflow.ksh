@@ -1,7 +1,7 @@
 #!/bin/ksh
 #ParFlow DART JOB SUBMISSION
 
-USAGE="sbatch <scriptname>"
+USAGE="sbatch <scriptname> $RUNNAME"
 # JUROPATEST module load intel-para/2014.11
 # all in same directory, copy beforehand manually to /work/hbn33/hbn331
  
@@ -15,7 +15,7 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart08"
+export LOGNAME="$WORK/$1"
 export LOGNAME_S="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
@@ -124,4 +124,5 @@ wait
 
 echo "ready" > ready.txt
 exit 0
+
 

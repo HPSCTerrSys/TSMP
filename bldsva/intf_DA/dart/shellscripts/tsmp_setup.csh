@@ -35,7 +35,7 @@ echo " "
 set icycle  = $1
 set inrst   = $2
 set machine = $3
-if ($inrst == 1) then
+if ($inrst <= 1) then
   set assimC = 'cosmo'
 else if ($inrst == 2) then
   set assimC = 'clm'

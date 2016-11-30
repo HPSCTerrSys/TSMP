@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-USAGE="sbatch <scriptname>"
+USAGE="sbatch <scriptname> $RUNNAME"
 # JUROPATEST module load intel-para/2014.11
 # all in same directory, copy beforehand manually to /work/hbn33/hbn331
  
@@ -14,7 +14,7 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
  
-export LOGNAME="$WORK/rundart13"
+export LOGNAME="$WORK/$1"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/cosmo/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME

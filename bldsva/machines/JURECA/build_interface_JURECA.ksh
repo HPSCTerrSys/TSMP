@@ -66,6 +66,8 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=$queue
 #SBATCH --mail-type=ALL
 
+
+cd $rundir
 source $rundir/loadenvs
 date
 echo "started" > started.txt
