@@ -92,8 +92,14 @@ endif
     set pflhist = `grep pflhist $timefile_path/${assimC}_prior_time.txt`
     #
     #
-    set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc"
     set cosrstfil = "$oldrundir/tsmp_instance_X/cosrst/$cosrbin[2]"
+
+    if ($inrst == 2) then
+      #Assimilation overwrites the same restart file ..
+      set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc" 
+    else
+      set clmrstfil = "$oldrundir/tsmp_instance_X/clmoas.clm2.r.$clmext[2].nc"
+    endif
 
     if ($inrst == 3) then
       # for restart run with parflow assimilation

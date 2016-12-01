@@ -1,6 +1,6 @@
 &perfect_model_obs_nml
    start_from_restart    = .true.
-   output_restart        = .false.
+   output_restart        = .true.
    async                 = 0
    init_time_days        = -1
    init_time_seconds     = -1
@@ -10,13 +10,13 @@
    last_obs_seconds      = -1
    output_interval       = 1
    trace_execution       = .false.
-   restart_in_file_name  = 'perfect_ics'
+   restart_in_file_name  = 'dart_prior'
    restart_out_file_name = 'perfect_restart'
    obs_seq_in_file_name  = 'obs_seq.in'
    obs_seq_out_file_name = 'obs_seq.perfect'
    adv_ens_command       = 'no_advance_script'
    output_timestamps     = .false.
-   trace_execution       = .false.
+   trace_execution       = .true.
    output_forward_op_errors = .false.
    print_every_nth_obs   = -1
    silence               = .false.
@@ -150,7 +150,7 @@
 
 
 &assim_model_nml
-   write_binary_restart_files = .true.
+   write_binary_restart_files = .false.
    netCDF_large_file_support  = .true.
   /
 
@@ -172,17 +172,18 @@
 &model_nml
    clm_restart_filename         = 'clm_restart.nc'
    clm_history_filename         = 'clm_history.nc'
+   clm_file_s                   = 'clm_restart_s.nc'
    clm_vector_history_filename  = 'clm_vector_history.nc'
-   assimilation_period_days     = 2
-   assimilation_period_seconds  = 3600
+   assimilation_period_days     = 0 
+   assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.2
    output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
    clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
-                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'UPDATE',
-                    'H2OSOI_LIQ',  'KIND_SOIL_MOISTURE',          '0.0', 'NA' , 'restart' , 'UPDATE',
-                    'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'UPDATE',
+                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'H2OSOI_LIQ',  'KIND_SOIL_MOISTURE',          '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
                     'tsai',        'KIND_STEM_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'tlai',        'KIND_LEAF_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
@@ -204,12 +205,12 @@
 
 
 &clm_to_dart_nml
-   clm_to_dart_output_file  = 'dart_ics'
+   clm_to_dart_output_file  = 'dart_prior'
   /
 
 
 &dart_to_clm_nml
-   dart_to_clm_input_file   = 'dart_restart'
+   dart_to_clm_input_file   = 'dart_posterior'
    advance_time_present     = .false.
   /
 
@@ -281,9 +282,9 @@
    max_num_bins     = 1000
    trusted_obs      = 'null'
    Nregions   = 1
-   lonlim1    = 5.59,  5.46, 5.72, 5.46
-   lonlim2    = 5.63,  5.50, 5.79, 5.50
-   latlim1    = 49.88, 49.88, 49.88, 49.84
+   lonlim1    = 5.45,  5.46, 5.72, 5.46
+   lonlim2    = 5.59,  5.50, 5.79, 5.50
+   latlim1    = 49.87, 49.88, 49.88, 49.84
    latlim2    = 49.92, 49.92, 49.92, 49.87
    reg_names  = 'Center', 'Left', 'Right', 'Bottom'
 
@@ -338,13 +339,13 @@
    loc_of_interest      =  90.0,  41.00, 0.35
 
 &model_mod_check_nml
-   input_file           = 'dart_ics'
-   output_file          = 'check_me_out'
+   input_file           = 'dart_prior'
+   output_file          = 'check_met'
    advance_time_present = .FALSE.
    verbose              = .TRUE.
    test1thru            = 16
    x_ind                = 720
    kind_of_interest     = 'T_SOISNO'
-   loc_of_interest      = 287.5, 82.48, 0.35
+   loc_of_interest      = 5.5, 49.88, 0.02
   /
 

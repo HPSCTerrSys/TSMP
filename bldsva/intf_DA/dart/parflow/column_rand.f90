@@ -32,7 +32,9 @@ character(len=1024) :: filename
 !This is based in CLM grids
 data  lat_data/49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92, 49.87, 49.92/
 data  lon_data/ 5.45,  5.45,  5.48,  5.48,  5.51,  5.51,  5.55,  5.55,  5.59,  5.59/
-data  level_data/0.06, 0.13, 0.54 /    !depth from surface [meters]
+!data  level_data/0.06, 0.13, 0.54 /    !depth from surface [meters]
+!Important to capture the gradient
+data  level_data/0.02, 0.05, 0.08 / 
 data  dd_data/9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21/
 
 !Pre Specified Date

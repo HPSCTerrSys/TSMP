@@ -1,7 +1,8 @@
 #!/bin/csh
 # "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
 #
-set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
+#set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
+set MODEL_PATH="$WORK/PM_JURECA_run/perfectModel"
 set num_days = 13
 
 # SELECT COMPONENT MODEL FOR ASSIMILATION
@@ -77,8 +78,12 @@ endif  #$2 == "parflow"
 
 if ($2 == "clm") then
 set model_dir = `printf $MODEL_PATH%02d $irun`
-set clmrst = `ls -1 $model_dir/clmoas.clm2.r* | tail -n -1`
-set clmout = `ls -1 $model_dir/clmoas.clm2.h0* | tail -n -1`
+if ($irun == 1) then
+  set model_dir0 = $model_dir
+endif
+set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+set clmrst0 = `ls -1 $model_dir0/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
+set clmout = `ls -1 $model_dir/clmoas.clm2.h0*.nc | tail -n -1`
 
 set colum_exp = `printf column_export_out_%02d $irun`
 echo "-------------------------------------------------------------------------------"
@@ -95,8 +100,8 @@ endif  #$2 == "clm"
 
 if ($2 == "cosmo") then
 set model_dir = `printf $MODEL_PATH%02d $irun`
-set clmrst = `ls -1 $model_dir/cosrst/lrff* | tail -n -1`
-set clmout = `ls -1 $model_dir/cosout/lfff* | tail -n -1`
+set cosrst = `ls -1 $model_dir/cosrst/lrff* | tail -n -1`
+set cosout = `ls -1 $model_dir/cosout/lfff* | tail -n -1`
  
 set colum_exp = `printf column_export_out_%02d $irun`
  
