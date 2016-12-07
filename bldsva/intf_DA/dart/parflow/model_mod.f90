@@ -14,19 +14,22 @@ module model_mod
 use        types_mod, only : r8, obstypelength, MISSING_R8
 
 use time_manager_mod, only : time_type, set_time, set_date, get_date, get_time, &
-                             print_time, print_date, set_calendar_type
+                             print_time, print_date, set_calendar_type,        &
+                             operator(*),  operator(+), operator(-),           &    
+                             operator(>),  operator(<), operator(/),           &    
+                             operator(/=), operator(<=)
 
 use     location_mod, only : location_type,      get_close_maxdist_init,        &
                              get_close_obs_init, get_close_obs, set_location,   &
-                             set_location,  get_location,                       &
+                             get_location,                       &
                              vert_is_height,       VERTISHEIGHT
 
 use    utilities_mod, only : register_module, error_handler, nc_check, &
                              get_unit, open_file, close_file, E_ERR, E_MSG, &
                              nmlfileunit, do_output, do_nml_file, do_nml_term,  &
-                             find_namelist_in_file, check_namelist_read
+                             find_namelist_in_file, file_exist, check_namelist_read
 
-use     obs_kind_mod, only : KIND_SOIL_MOISTURE,          &
+use     obs_kind_mod, only : KIND_SOIL_MOISTURE, KIND_3D_PARAMETER,         &
                              paramname_length,            &
                              get_raw_obs_kind_index,      &
                              get_raw_obs_kind_name
@@ -54,6 +57,7 @@ public :: get_model_size,         &
           get_close_maxdist_init, &
           get_close_obs_init,     &
           get_close_obs,          &
+          write_state_times,      &
           ens_mean_for_model
 
 ! not required by DART but for larger models can be useful for
@@ -61,7 +65,8 @@ public :: get_model_size,         &
 ! the model_mod code.
 public :: get_state_vector, &
           get_parflow_filename, &
-          dart_vector_to_model_file
+          get_parflow_id,           &
+          write_parflow_file
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
@@ -81,14 +86,23 @@ real(r8)                       ::  &
                    dx,             &     ! Grid Resolution in m
                    dy,             &     ! Grid Resoultion in m
                    dz                    ! Grid Resolution scale, check parflow namelist
+real(r8)                       :: xdpfb, ydpfb, zdpfb            ! ParFlow PFB file
 
 ! EXAMPLE: define model parameters here
 integer                          :: model_size
 type(time_type)                  :: time_step
+type(time_type)                  :: start_date      !Needed for Parflow nos
+
 type(location_type), allocatable :: state_loc(:)
 
+! Codes for restricting the range of a variable
+integer, parameter :: BOUNDED_NONE  = 0 ! ... unlimited range
+integer, parameter :: BOUNDED_BELOW = 1 ! ... minimum, but no maximum
+integer, parameter :: BOUNDED_ABOVE = 2 ! ... maximum, but no minimum
+integer, parameter :: BOUNDED_BOTH  = 3 ! ... minimum and maximum
+
 ! Everything needed to describe a variable
-integer, parameter :: max_state_variables = 2   !ParFlow has two ouputs 
+integer, parameter :: max_state_variables = 2   !ParFlow has press and satur 
 
 type progvartype
    private
@@ -116,13 +130,20 @@ type(progvartype), dimension(max_state_variables)     :: progvar
 real(r8), allocatable ::   lon(:,:)      ! longitude degrees_east
 real(r8), allocatable ::   lat(:,:)      ! latitude  degrees_north
 real(r8), allocatable ::   vcoord(:)     ! vertical co-ordinate in m
+real(r8), allocatable ::   sID(:,:,:)    ! pfl soil indicator 
+real(r8), allocatable ::   sval(:)       ! sID attributes (Ss,Sr,a,N)
+integer               ::   nsInd         ! nsInd/4 = unique sID 
 type(time_type)       ::   parflow_time  ! parflow ouptut time
 
 ! EXAMPLE: perhaps a namelist here 
 character(len=256) :: parflow_press_file           = 'parflow_press_file'
 character(len=256) :: parflow_satur_file           = 'parflow_satur_file'
-character(len=256) :: pfidb_file                   = 'pfidb_file'
+!character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
+character(len=256) :: clm_file                     = 'clmoasr_file'
+character(len=256) :: clm_file_s                   = 'clmoasr_file'
+character(len=256) :: soilInd_file                 = 'pfl_soil_file'
+integer            :: ipfb                         = 1       
 logical            :: output_1D_state_vector       = .false.
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 21400
@@ -131,8 +152,12 @@ integer            :: debug = 0
 namelist /model_nml/                &
       parflow_press_file,           &
       parflow_satur_file,           &
-      pfidb_file,                   &
+      !pfidb_file,                   &
       grid_file,                    &
+      clm_file,                     &
+      clm_file_s,                   &
+      soilInd_file,                 &
+      ipfb,                         &
       output_1D_state_vector,       &
       assimilation_period_days,     &
       assimilation_period_seconds,  &
@@ -186,24 +211,30 @@ if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid res
 
 model_size = nx*ny*nz
 
-! Get the vertical co-ordinate
-allocate(vcoord(nz))
-call pfidb_read(pfidb_file)
+!! Get the vertical co-ordinate
+!allocate(vcoord(nz))
+!call pfidb_read(pfidb_file)
 
 ! Get the geo-locaion
 allocate(lon(nx,ny))
 allocate(lat(nx,ny))
 
 call grid_read(grid_file)
-if (debug > 0 .and. do_output()) then
+if (debug > 1 .and. do_output()) then
    write(*, '(A,2(1X,F9.2))') '    ...parflow lon', minval(lon), maxval(lon)
    write(*, '(A,2(1X,F9.2))') '    ...parflow lat', minval(lat), maxval(lat)
    write(*, *) '-------------------------------'
 end if
 
+! Get the vertical co-ordinate and soil indicators
+allocate(vcoord(nz))
+allocate(sID(nx,ny,nz))
+call soil_ind_read(soilInd_file)
+
 !CPS call error_handler(E_ERR,'static_init_model','routine not tested',source, revision,revdate)
 ! TODO, var_type could switch between 1 and 2 for pressure and sat
-ivar = 1
+
+ivar                          = 1             !press pfb CPS
 progvar(ivar)%varname         = "psi"
 progvar(ivar)%long_name       = "Pressure Head"
 progvar(ivar)%units           = "m"
@@ -214,8 +245,28 @@ progvar(ivar)%dimnames(3)     = 'level'
 progvar(ivar)%dimlens(1)      = nx
 progvar(ivar)%dimlens(2)      = ny
 progvar(ivar)%dimlens(3)      = nz
-progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !Need pedotransfer function 
+progvar(ivar)%pfb_kind        = KIND_3D_PARAMETER   !Need pedotransfer function 
 progvar(ivar)%index1          = 1
+progvar(ivar)%rangeRestricted = BOUNDED_NONE        
+progvar(ivar)%minvalue        = MISSING_R8 
+progvar(ivar)%maxvalue        = MISSING_R8
+
+ivar                          = 2             !satur pfb CPS
+progvar(ivar)%varname         = "sat"
+progvar(ivar)%long_name       = "Relative Saturation"
+progvar(ivar)%units           = "-"
+progvar(ivar)%numdims         = 3  
+progvar(ivar)%dimnames(1)     = 'pfl_lon'
+progvar(ivar)%dimnames(2)     = 'pfl_lat'
+progvar(ivar)%dimnames(3)     = 'level'
+progvar(ivar)%dimlens(1)      = nx 
+progvar(ivar)%dimlens(2)      = ny 
+progvar(ivar)%dimlens(3)      = nz 
+progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !To Remove from assim 
+progvar(ivar)%index1          = 1  
+progvar(ivar)%rangeRestricted = BOUNDED_BOTH      
+progvar(ivar)%minvalue        = 0._r8                != f(soil index) 
+progvar(ivar)%maxvalue        = 1._r8 
 
 ! Create storage for locations
 allocate(state_loc(model_size))
@@ -243,10 +294,11 @@ subroutine init_conditions(x)
 real(r8), intent(out) :: x(:)
 
 if ( .not. module_initialized ) call static_init_model
-
-call error_handler(E_ERR,'init_conditions','routine not tested',source, revision,revdate)
+write(string1,*) 'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR,'init_conditions',string1,source, revision,revdate)
 x = MISSING_R8
 
+return
 end subroutine init_conditions
 
 
@@ -279,6 +331,40 @@ call error_handler(E_ERR,'adv_1step',string1,source,revision,revdate)
 end subroutine adv_1step
 
 
+subroutine write_state_times(iunit, statetime)
+
+integer,                   intent(in) :: iunit
+type(time_type),           intent(in) :: statetime
+
+integer           :: iyear, imonth, iday, ihour, imin, isec 
+integer           :: ndays, nhours, nmins, nsecs,nfreq
+type(time_type)   :: interval
+
+call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
+nsecs = (ihour*60 + imin)*60 + isec 
+write(iunit, '(''clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
+write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
+
+interval = statetime - start_date
+
+call get_time(interval, nsecs, ndays)
+
+nhours = nsecs / (60*60)
+nsecs  = nsecs - (nhours * 60*60)
+nmins  = nsecs / 60 
+nsecs  = nsecs - (nmins * 60)
+nfreq  = 3   !PFL SPECIFIC
+
+write(iunit, '(''cosrbin '',''lrff'',4(I2.2),''o'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, nsecs
+write(iunit, '(''pflhist '',I5.5)') (ndays*24 + nhours)/nfreq
+
+call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
+write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth, iday, ihour 
+
+return
+
+end subroutine write_state_times
 
 function get_model_size()
 !------------------------------------------------------------------
@@ -311,7 +397,8 @@ type(time_type), intent(out) :: time
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'init_time','routine not tested',source, revision,revdate)
+write(string1,*)'input.nml:start_from_restart cannot be FALSE'
+call error_handler(E_ERR,'init_time',string1,source, revision,revdate)
 ! for now, just set to 0
 time = set_time(0,0)
 
@@ -418,8 +505,11 @@ type(time_type) :: get_model_time_step
 
 if ( .not. module_initialized ) call static_init_model
 
-call error_handler(E_ERR,'get_model_time_step','routine not tested',source, revision,revdate)
 get_model_time_step = time_step
+
+return
+!call error_handler(E_ERR,'get_model_time_step','routine not tested',source, revision,revdate)
+!get_model_time_step = time_step
 
 end function get_model_time_step
 
@@ -450,8 +540,9 @@ kloc =  local_ind / (nx*ny) + 1
 jloc = (local_ind - (kloc-1)*nx*ny)/nx + 1
 iloc =  local_ind - (kloc-1)*nx*ny - (jloc-1)*nx + 1
 
-write(*,*)'.. index_in ',index_in, ' and dereferences to ',iloc,jloc,kloc
-
+if ((debug > 5) .and. do_output()) then
+  write(*,*)'.. index_in ',index_in, ' and dereferences to i,j,k ',iloc,jloc,kloc
+end if
 ! Now that we know the i,j,k we have to index the right set of
 ! coordinate arrays
 mylon = lon(iloc,jloc)
@@ -474,11 +565,12 @@ subroutine end_model()
 ! Does any shutdown and clean-up needed for model. Can be a NULL
 ! INTERFACE if the model has no need to clean up storage, etc.
 
-if ( .not. module_initialized ) call static_init_model
-
-call error_handler(E_ERR,'end_model','routine not tested',source, revision,revdate)
-! good style ... perhaps you could deallocate stuff (from static_init_model?).
-! deallocate(state_loc)
+deallocate(lon,lat)
+deallocate(vcoord)
+deallocate(state_loc)
+deallocate(sID)
+deallocate(sval)
+!if ( allocated(ens_mean) ) deallocate(ens_mean)
 
 end subroutine end_model
 
@@ -695,7 +787,7 @@ else
    ! Create the (empty) Prognostic Variables and the Attributes
    !----------------------------------------------------------------------------
 
-   do ivar=1, 1 
+   do ivar=ipfb, ipfb !CPS 1, 1 
 
       varname = trim(progvar(ivar)%varname)
       string1 = trim(filename)//' '//trim(varname)
@@ -817,7 +909,7 @@ else
    !----------------------------------------------------------------------------
    ! We need to process the prognostic variables.
    !----------------------------------------------------------------------------
-   do ivar = 1,1
+   do ivar = ipfb, ipfb !CPS 1,1
 
       varname = trim(progvar(ivar)%varname)
       string2 = trim(filename)//' '//trim(varname)
@@ -855,7 +947,7 @@ else
       where(dimIDs == TimeDimID) ncstart = timeindex
       where(dimIDs == TimeDimID) nccount = 1
 
-      if ((debug > 0) .and. do_output()) then
+      if ((debug > 10) .and. do_output()) then
          write(*,*)'nc_write_model_vars '//trim(varname)//' start is ',ncstart(1:ndims)
          write(*,*)'nc_write_model_vars '//trim(varname)//' count is ',nccount(1:ndims)
       endif
@@ -921,7 +1013,11 @@ subroutine ens_mean_for_model(ens_mean)
 real(r8), intent(in) :: ens_mean(:)
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'ens_mean_for_model','routine not tested',source, revision,revdate)
+
+!not needed
+! allocate(ens_mean(1:model_size))
+! ens_mean(:) = filter_ens_mean(:)
+!call error_handler(E_ERR,'ens_mean_for_model','routine not tested',source, revision,revdate)
 
 end subroutine ens_mean_for_model
 
@@ -937,26 +1033,60 @@ end subroutine ens_mean_for_model
 !> Reads the current time and state variables from a model data
 !> file and packs them into a dart state vector.
 
-subroutine get_state_vector(sv, model_time)
+subroutine get_state_vector(sv, sv_id, model_time)
 
 real(r8),         intent(inout)           :: sv(1:model_size)
+integer,          intent(in)              :: sv_id     !to choose what to get
 type(time_type),  intent(out), optional   :: model_time
 real(r8),allocatable                      :: pfbdata(:,:,:)
- 
+integer                                   :: ncid, ncid_s 
 !
 
 if ( .not. module_initialized ) call static_init_model
 
 allocate(pfbdata(nx,ny,nz))
 
-call pfread_var(parflow_press_file,pfbdata) 
+if (sv_id == 1) then
+  call pfread_var(parflow_press_file,pfbdata) 
+elseif (sv_id == 2) then
+  call pfread_var(parflow_satur_file,pfbdata)
+else
+  call error_handler(E_ERR,'get_state_vector','sv_id should be 1 or 2',source, revision,revdate)  
+endif
 
 sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
-model_time = parflow_time
+if (sv_id == ipfb) then
 
-if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
-   
+  if ( .not. file_exist(clm_file) ) then 
+    write(string1,*) 'cannot open file ', trim(clm_file),' for reading.'
+    call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+  endif
+
+  call nc_check(nf90_open(trim(clm_file), NF90_NOWRITE, ncid), &
+            'restart_file_to_sv','open '//trim(clm_file))
+
+  model_time = get_state_time_ncid(ncid)
+
+  call nc_check(nf90_close(ncid),'restart_file_to_sv','close '//trim(clm_file))
+
+  ! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
+  if ( .not. file_exist(clm_file_s) ) then 
+    write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
+    call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+  endif
+
+  call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
+            'restart_file_to_sv','open '//trim(clm_file_s))
+
+  start_date = get_start_time_ncid(ncid_s)
+  call nc_check(nf90_close(ncid_s),'restart_file_to_sv','close '//trim(clm_file_s))
+  !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
+
+  if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
+
+endif
+
 deallocate(pfbdata)
 
 end subroutine get_state_vector
@@ -965,32 +1095,199 @@ end subroutine get_state_vector
 !> Writes the current time and state variables from a dart state
 !> vector (1d array) into a ncommas netcdf restart file.
 
-subroutine dart_vector_to_model_file(state_vector, filename, statedate)
+subroutine write_parflow_file(sv,pfb_state, dart_file, newfile)
 
-real(r8),         intent(in) :: state_vector(:)
-character(len=*), intent(in) :: filename
-type(time_type),  intent(in) :: statedate
+real(r8),         intent(in) :: sv(:)           ! the DART posterior
+real(r8),         intent(in) :: pfb_state(:)       ! diagnostic vector
+character(len=*), intent(in) :: dart_file       ! the filename
+character(len=*), intent(in) :: newfile         ! the name of the new parflow restart
+
+real(r8)                     :: rbuf(nx*ny*nz) ! data to be read
+logical                      :: desiredG  = .false.
+logical                      :: desiredL  = .true.
+integer                      :: ivar
+
+!pfb
+real(r8), parameter          :: max_press_head = 0.005_r8
+real(r8)                     :: pfvar(nx,ny,nz)       ! array->DART state 
+real(r8)                     :: pfarr(nx,ny,nz)       ! array->ParFlow state 
+real(r8)                     :: a_vG, N_vG, Ssat, Sres, Sw  ! vG param
+integer(kind=4)              :: iunit
+
+integer(kind=4)              ::  i, j, k,               &
+                                 ix, iy, iz, ixs, iys,  &
+                                 is, ns, nnx, nny, nnz
+integer(kind=4), parameter   :: nxs = 1
+integer(kind=4), parameter   :: nys = 1
+integer(kind=4), parameter   :: rx  = 0
+integer(kind=4), parameter   :: ry  = 0
+integer(kind=4), parameter   :: rz  = 0
+!pfb
+!----------------------------------------------------
 
 if ( .not. module_initialized ) call static_init_model
-call error_handler(E_ERR,'dart_vector_to_model_file','routine not tested',source, revision,revdate)
 
-! code goes here
+write(string1,*)    'The DART posterior file is "'//trim(dart_file)//'"'
+write(string2,*)    'The new (posterior) parflow restart file is "'//trim(newfile)//'"'
+call error_handler(E_MSG,'write_parflow_file ',string1,source,revision,revdate,text2=string2)
 
-end subroutine dart_vector_to_model_file
+if ( .not. file_exist(dart_file) ) then 
+   write(string1,*) 'cannot open file ', trim(dart_file),' for reading.'
+   call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+endif
+
+if (desiredG) rbuf = apply_clamping(ivar, sv)    ! For global clamping CPS
+
+!vector to array conversion
+pfarr = RESHAPE(pfb_state,(/nx,ny,nz/))
+
+!vector to array conversion
+pfvar = RESHAPE(sv,(/nx,ny,nz/))
+
+iunit  = get_unit() 
+open(iunit,file=trim(newfile),status='new',access='stream',convert='BIG_ENDIAN',form='unformatted')
+
+write(iunit) xdpfb !X
+write(iunit) ydpfb !Y
+write(iunit) zdpfb !Z
+
+write(iunit) nx !NX
+write(iunit) ny !NY
+write(iunit) nz !NZ
+
+write(iunit) dx !DX
+write(iunit) dy !DY
+write(iunit) dz !DZ
+
+ns = INT(nxs*nys)
+write(iunit) ns !num_subgrids
+! End: Writing of domain spatial information
+
+! Start: loop over number of sub grids
+nnx = INT(nx/nxs)
+nny = INT(ny/nys)
+nnz = nz
+iz = 0
+!
+do iys = 0, nys-1
+do ixs = 0, nxs-1
+
+! Start: Writing of sub-grid spatial information
+
+  ix = INT(nnx*ixs)
+  iy = INT(nny*iys)
+
+  write(iunit) ix
+  write(iunit) iy
+  write(iunit) iz
+
+  write(iunit) nnx
+  write(iunit) nny
+  write(iunit) nnz
+
+  write(iunit) rx
+  write(iunit) ry
+  write(iunit) rz
+
+! End: Writing of sub-grid spatial information
+
+! Start: Write in data from each individual subgrid
+! Follow the kji looping always
+  do  k=iz +1 , iz + nnz
+  do  j=iy +1 , iy + nny
+  do  i=ix +1 , ix + nnx
+    if (sID(i,j,k).eq.1) then
+      a_vG = sval(1)
+      N_vG = sval(2)
+      Sres = sval(3)
+      Ssat = sval(4)
+      Sw   = max(pfvar(i,j,k),Sres+0.05_r8)            !Clipping based on soil type
+    else
+      call error_handler(E_ERR,'write_parflow_file','sID/=1', source,revision,revdate)   
+    endif
+    if (k.eq.nz .and. pfvar(i,j,k).eq.1) then       !Limit overland flow heign in Surface
+      pfarr(i,j,k) = max(pfarr(i,j,k),0.) 
+    elseif (Sw.lt.1._r8 ) then  !UnsatZ
+      pfarr(i,j,k) = -(1/a_vG)*((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1.))) - 1.)**(1./N_vG) 
+    endif
+    write(iunit) pfarr(i,j,k)
+  end do
+  end do
+  end do
+! End: Write in data from each individual subgrid
+
+end do
+end do
+! End: loop over number of sub grids
+
+close(iunit)
+
+return
+
+end subroutine write_parflow_file
 
 
 !------------------------------------------------------------------
-!> Reads the current time and state variables from a model data
-!> file and packs them into a dart state vector.
+!>replace the posterior values that are outside physical limits with
+!> the limit 
 
 
-function get_parflow_filename()
+function apply_clamping(ivar, posterior) result (slab)
 
-character(len=256) :: get_parflow_filename
+integer,  intent(in) :: ivar 
+real(r8), intent(in) :: posterior(:)
+real(r8)             :: slab(size(posterior))
+
+slab = posterior
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_ABOVE ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then 
+   where ((slab /= MISSING_R8) .and. &
+          (slab > progvar(ivar)%maxvalue)) &
+           slab = progvar(ivar)%maxvalue
+endif
+
+if ((progvar(ivar)%rangeRestricted == BOUNDED_BELOW ) .or. &
+    (progvar(ivar)%rangeRestricted == BOUNDED_BOTH )) then 
+   where ((slab /= MISSING_R8) .and. &
+          (slab < progvar(ivar)%minvalue)) &
+           slab = progvar(ivar)%minvalue
+endif
+
+end function apply_clamping
+
+!------------------------------------------------------------------
+!> Reads the parflow file ID, to assimilate
+
+function get_parflow_id()
+
+integer :: get_parflow_id
 
 if ( .not. module_initialized ) call static_init_model
 
-get_parflow_filename = trim(parflow_press_file)
+if (ipfb.eq.1 .or. ipfb.eq.2) then
+  get_parflow_id = ipfb
+else
+  call error_handler(E_ERR,'get_parflow_id','ipfb/=1,2', source,revision, revdate)
+endif
+
+end function get_parflow_id
+!------------------------------------------------------------------
+!> Reads the parflow file name
+
+
+function get_parflow_filename(pfbid)
+
+integer, intent(in) :: pfbid 
+character(len=256)  :: get_parflow_filename
+
+if ( .not. module_initialized ) call static_init_model
+
+if (pfbid.eq.1) then
+  get_parflow_filename = trim(parflow_press_file)
+elseif (pfbid.eq.2) then
+  get_parflow_filename = trim(parflow_satur_file)
+endif
 
 end function get_parflow_filename
 
@@ -1008,12 +1305,12 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
 
 ! code starts here
   nudat   = get_unit()
-  write(*,*) filename
+  if (debug > 1 .and. do_output()) write(*,*) filename
   open(nudat, file=trim(filename),status='old')
  
   read(nudat,*,iostat=izerr) yyyy, mm, dd, ts 
   if (izerr < 0) call error_handler(E_ERR,'pfidb_read','error time', source, revision, revdate)
-  if (debug > 0 .and. do_output()) write(*,*) '  ...parflow time ',yyyy, mm, dd, ts 
+  if (debug > 10 .and. do_output()) write(*,*) ' DUMMY ...parflow time ',yyyy, mm, dd, ts 
 
   hh = int(ts/3600._r8)
   mn = int(ts - hh*3600)
@@ -1035,7 +1332,7 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
     else
       vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
     end if
-    if (debug > 0 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
+    if (debug > 10 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
                                          iz, pfb_dz(iz), vcoord(iz)
   end do
 
@@ -1043,6 +1340,79 @@ integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
 
 end subroutine pfidb_read
 
+!-----------------------------------------------------------------
+!>Reads the soilInd file to extract the parflow soil parameters
+
+subroutine soil_ind_read(filename)
+!sID ( lat, lon, lev )
+
+character(len=*), intent(in)   :: filename
+integer :: ncid, io, nlon, nlat, nlev, dimid(3), varid(4) 
+integer :: iz
+real(r8):: pfb_dz(nz) 
+character(len=*), parameter  :: pname = "parm"
+
+io = nf90_open(filename, NF90_NOWRITE, ncid)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR opening',source,revision,revdate)
+
+io = nf90_inq_varid(ncid, "sID", varid(1))
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq sID',source,revision,revdate)
+
+io = nf90_inquire_attribute(ncid, varid(1), pname, nsInd)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq attribute ',source,revision,revdate)
+
+io = nf90_inq_varid(ncid, "dz", varid(2))
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq dz',source,revision,revdate)
+
+! Check dimensions for one of the variable
+io = nf90_inq_dimid(ncid, "lon", dimid(1))
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq lat',source,revision,revdate)
+
+io = nf90_inq_dimid(ncid, "lat", dimid(2))
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq lon',source,revision,revdate)
+
+io = nf90_inq_dimid(ncid, "lev", dimid(3))
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR inq lev',source,revision,revdate)
+
+io = nf90_inquire_dimension(ncid, dimid(1), string1, nlon)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get nlon',source, revision,revdate)
+
+io = nf90_inquire_dimension(ncid, dimid(2), string1, nlat)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get nlat',source, revision,revdate)
+
+io = nf90_inquire_dimension(ncid, dimid(3), string1, nlev)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get nlev',source, revision,revdate)
+
+if (nlon /= nx .or. nlat /=ny .or. nlev /=nz) then
+  write(*, *) 'Dimensions ...', nlon, nx, nlat, ny
+  call error_handler(E_ERR,'soil_ind_read','ERR dimension mismatch',source,revision,revdate)
+end if
+
+io = nf90_get_var(ncid, varid(1), sID)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get sID',source, revision, revdate)
+
+allocate(sval(nsInd))
+
+io = nf90_get_att(ncid, varid(1), pname , sval)
+if (io /= nf90_noerr) call error_handler(E_ERR,'soil_ind_read','ERR get sval',source,revision, revdate)
+
+if (debug > 10 .and. do_output()) write(*,'(A,1X,F5.3,1X,F5.3,1X,F5.3,1X,F5.3)')'...sval ' ,&
+                    sval(1),sval(2),sval(3),sval(4) 
+
+io = nf90_get_var(ncid, varid(2), pfb_dz)
+io = nf90_close(ncid)
+
+do iz = nz, 1, -1
+  if (iz == nz) then 
+    vcoord(iz) = 0.5_r8 * pfb_dz(iz) 
+  else 
+    vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
+  end if
+  if (debug > 10 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)') '...dz_sID ' ,&
+                   iz, pfb_dz(iz), vcoord(iz)
+end do
+
+end subroutine soil_ind_read
 !------------------------------------------------------------------
 !> Reads the oasis grids.nc file to extract parflow geo-location 
 
@@ -1091,6 +1461,11 @@ where(lon <   0.0_r8) lon = lon + 360.0_r8
 where(lat < -90.0_r8) lat = -90.0_r8
 where(lat >  90.0_r8) lat =  90.0_r8
 
+if (debug > 99 .and. do_output()) then
+  write(*, *) 'Lon ...', lon(:,1)
+  write(*, *) 'Lat ...', lat(1,:)
+endif
+
 io = nf90_close(ncid)
 
 end subroutine grid_read
@@ -1102,7 +1477,6 @@ subroutine pfread_dim(filename)
 
 character(len=*), intent(in)   :: filename
 
-real(r8)                       :: x1, y1 ,z1
 integer(kind=4)                :: nudat, izerr 
 character(len=256)             :: errmsg
 
@@ -1112,17 +1486,17 @@ character(len=256)             :: errmsg
                     convert='BIG_ENDIAN',status='old')         ! gfortran
 
   !read in header infor
-  read(nudat, iostat=izerr) x1 !X
+  read(nudat, iostat=izerr) xdpfb !X
   if (izerr /= 0) then
     errmsg   = "unable to read X"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) y1 !Y
+  read(nudat, iostat=izerr) ydpfb !Y
   if (izerr /= 0) then
     errmsg   = "unable to read Y"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) z1 !Z
+  read(nudat, iostat=izerr) zdpfb !Z
   if (izerr /= 0) then
     errmsg   = "unable to read Z"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
@@ -1132,6 +1506,10 @@ character(len=256)             :: errmsg
   if (izerr /= 0) then
     errmsg   = "unable to read NX"
     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
+  endif
+  if (nx > 9999 ) then
+     errmsg   = "problem readng NX (NX>9999), check pfb file"
+     call error_handler(E_ERR,'pfread_dim',errmsg,source,revision,revdate)
   endif
   read(nudat, iostat=izerr) ny !NY
   if (izerr /= 0) then
@@ -1171,18 +1549,12 @@ character(len=*), intent(in)   :: filename
 real(r8),         intent(out)  ::  &
                    pfvar(nx,ny,nz)       ! ParFlow pressure files 
 
-real(r8)                       :: x1, y1, z1 
-
-real(r8)                       ::  &
-                   dummyRes              ! Grid Resolution in m
-
+real(r8)                       :: dummyRes              ! Grid Resolution in m 
 integer(kind=4)                :: nudat, dummy, izerr
-integer(kind=4)                ::  &
-                   i, j, k,        &
-                   ix, iy, iz,     &
-                   is, ns,         &
-                   rx, ry, rz,     &
-                   nnx, nny, nnz
+integer(kind=4)                :: i, j, k,            &
+                                  ix, iy, iz, is,     &
+                                  ns, nnx, nny, nnz,  &
+                                  rx, ry, rz
 character(len=256)             :: errmsg
 
 ! code starts here
@@ -1191,17 +1563,17 @@ character(len=256)             :: errmsg
                     convert='BIG_ENDIAN',status='old')         ! gfortran
 
   !read in header infor
-  read(nudat, iostat=izerr) x1 !X
+  read(nudat, iostat=izerr) dummyRes  !X
   if (izerr /= 0) then
     errmsg   = "unable to read X"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) y1 !Y
+  read(nudat, iostat=izerr) dummyRes  !Y
   if (izerr /= 0) then
     errmsg   = "unable to read Y"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
   endif
-  read(nudat, iostat=izerr) z1 !Z
+  read(nudat, iostat=izerr) dummyRes  !Z
   if (izerr /= 0) then
     errmsg   = "unable to read Z"
     call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
@@ -1256,12 +1628,12 @@ character(len=256)             :: errmsg
    endif
    read(nudat, iostat=izerr) iy
    if (izerr /= 0) then
-     errmsg   = "unable to read ix"
+     errmsg   = "unable to read iy"
      call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
    endif
    read(nudat, iostat=izerr) iz
    if (izerr /= 0) then
-     errmsg   = "unable to read ix"
+     errmsg   = "unable to read iz"
      call error_handler(E_ERR,'pfread_var',errmsg,source,revision,revdate)
    endif
 
@@ -1555,19 +1927,18 @@ integer,  intent(out) :: istatus
 integer  :: k, ll, lr, ur, ul
 real(r8) :: ij_rwgts(2)
 
-! Location of dart_indices
-ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
-lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
-ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
-ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
-
 ! Interpolate
 ij_rwgts(1) = 1.0_r8 - ij_wgts(1)  !ifrac
 ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
 
-do k = 1, 2 
+do k = 1, 2
+  ! Location of dart_indices
+  ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
+  lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
+  ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
+  ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
 
- interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
+  interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
                  ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
 
 end do
@@ -1659,15 +2030,21 @@ if (lon == gridlons(nx)) then
    ij_inds(2)  = nx
    ij_wgts(1)  = 0.0_r8  ! fractional distance to min
 else
-   indarr = maxloc(gridlons , gridlons <= lon)
-   ij_inds(1)  = indarr(1)
+!CPS   indarr = maxloc(gridlons , gridlons <= lon)
+   indarr      = minloc(abs(gridlons-lon))   
+   if (gridlons(indarr(1)) .gt. lon) then
+     ij_inds(1)  = indarr(1) - 1
+   else
+     ij_inds(1)  = indarr(1)
+   endif
    ij_inds(2)  = ij_inds(1) + 1
    dlon        =     lon          - gridlons(ij_inds(1))
    dlonT       = gridlons(ij_inds(2)) - gridlons(ij_inds(1))
    ij_wgts(1)  = dlon / dlonT
 endif
 
-! latitudes are arranged 'south' to 'north', i.e. -90 to 90  (albeit rotated)
+
+! latitudes are arranged 'south' to 'north', i.e. -90 to 90 (geographical) 
 !
 !    | ............ dlatT ............. |
 !    | .. dlat .. |
@@ -1680,13 +2057,19 @@ if (lat == gridlats(ny)) then
    ij_inds(4) = ny
    ij_wgts(2) = 0.0_r8
 else
-   indarr = maxloc( gridlats,  gridlats <= lat)
-   ij_inds(3)   = indarr(1)
+!CPS   indarr = maxloc( gridlats,  gridlats <= lat)
+   indarr      = minloc(abs(gridlats-lat))
+    if (gridlats(indarr(1)) .gt. lat) then 
+     ij_inds(3)  = indarr(1) - 1
+   else 
+     ij_inds(3)  = indarr(1)
+   endif
    ij_inds(4)   = ij_inds(3) + 1
    dlat         =     lat        - gridlats(ij_inds(3))
    dlatT        = gridlats(ij_inds(4)) - gridlats(ij_inds(3))
    ij_wgts(2)   = dlat / dlatT
 endif
+
 
 istatus = 0
 
@@ -1694,8 +2077,8 @@ if (debug > 5 .and. do_output()) then
    write(*,*)
    write(*,*)'longitude index to the  west and  east are ',ij_inds(1:2)
    write(*,*)'latitude  index to the south and north are ',ij_inds(3:4) 
-   write(*,*)'lon  west, lon, lon  east',gridlons(ij_inds(1)),lon,gridlons(ij_inds(2))
-   write(*,*)'lat south, lat, lat north',gridlats(ij_inds(3)), lat,gridlats(ij_inds(4))
+   write(*,*)'lonW, lon, lonE',gridlons(ij_inds(1)),lon,gridlons(ij_inds(2))
+   write(*,*)'latS, lat, latN',gridlats(ij_inds(3)), lat,gridlats(ij_inds(4))
 endif
 
 end subroutine get_corners
@@ -1739,12 +2122,17 @@ endif
 
 if (height == vcoord(1)) then
   kk_inds(1) = 1
-  kk_inds(2) = 2
+  kk_inds(2) = 1 !CPS 2
+  kk_wgt     = 0._r8
+elseif (height == vcoord(nz)) then     !Surface pressure head assimilation
+  kk_inds(1) = nz
+  kk_inds(2) = nz   
   kk_wgt     = 0._r8
 else
-  indarr  = minloc( vcoord,  vcoord >= height )
-  write(*,*) "CPS",vcoord
-  write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
+  !indarr  = minloc( vcoord,  vcoord >= height )
+  !write(*,*) "CPS",vcoord
+  !write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
+  indarr  = minloc( vcoord,  vcoord > height )
   kk_inds(1) = indarr(1)
   kk_inds(2) = kk_inds(1) + 1
   dz     = vcoord(kk_inds(1)) - height
@@ -1763,6 +2151,86 @@ endif
 istatus = 0
 
 end subroutine get_level_indices
+
+!------------------------------------------------------------------
+!>FROM CLM
+
+function get_state_time_ncid( ncid )
+!------------------------------------------------------------------
+! The restart netcdf files have the time of the state.
+
+type(time_type) :: get_state_time_ncid
+integer, intent(in) :: ncid 
+
+integer :: VarID
+integer :: rst_curr_ymd, rst_curr_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_curr_ymd', VarID),'get_state_time_ncid', &
+&  'inq_varid timemgr_rst_curr_ymd'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_curr_ymd),'get_state_time_ncid', &
+&            'get_var rst_curr_ymd'//trim(clm_file))
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_curr_tod', VarID),'get_state_time_ncid', &
+&  'inq_varid timemgr_rst_curr_tod'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_curr_tod),'get_state_time_ncid', &
+&            'get_var rst_curr_tod'//trim(clm_file))
+
+year     = rst_curr_ymd/10000
+leftover = rst_curr_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_curr_tod/3600
+leftover = rst_curr_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_state_time_ncid = set_date(year, month, day, hour, minute, second)
+
+end function get_state_time_ncid
+
+!------------------------------------------------------------------
+!>GET START DATE FROM CLM
+function get_start_time_ncid( ncid )
+!------------------------------------------------------------------
+! The restart netcdf files have the time of the start.
+
+type(time_type) :: get_start_time_ncid
+integer, intent(in) :: ncid
+
+integer :: VarID
+integer :: rst_start_ymd, rst_start_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd', VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_ymd'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_start_ymd),'get_start_time_ncid', &
+&            'get_var rst_ref_ymd'//trim(clm_file))
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_tod', VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_tod'//trim(clm_file))
+call nc_check(nf90_get_var(  ncid, VarID,   rst_start_tod),'get_start_time_ncid',&
+&            'get_var rst_ref_tod'//trim(clm_file))
+
+year     = rst_start_ymd/10000
+leftover = rst_start_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_start_tod/3600
+leftover = rst_start_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_start_time_ncid = set_date(year, month, day, hour, minute, second)
+
+end function get_start_time_ncid
+
 
 !===================================================================
 ! End of model_mod

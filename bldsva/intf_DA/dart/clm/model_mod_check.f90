@@ -2,24 +2,24 @@
 ! provided by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: full_model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
+! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
 
 program model_mod_check
-
-! This is not called full_model_mod_check ... because it is used as
-! a generic model_mod for 3D models.
 
 !----------------------------------------------------------------------
 ! purpose: test routines
 !----------------------------------------------------------------------
 
 use        types_mod, only : r8, digits12, metadatalength
-use    utilities_mod, only : initialize_utilities, finalize_utilities, nc_check, &
+use    utilities_mod, only : initialize_utilities, nc_check, &
                              open_file, close_file, find_namelist_in_file, &
-                             check_namelist_read, error_handler, E_MSG
+                             check_namelist_read, finalize_utilities, &
+                             error_handler, E_MSG
 use     location_mod, only : location_type, set_location, write_location, get_dist, &
                              query_location, LocationDims, get_location, VERTISHEIGHT
-use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index
+use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index, &
+                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE, &
+                             KIND_BRIGHTNESS_TEMPERATURE
 use  assim_model_mod, only : open_restart_read, open_restart_write, close_restart, &
                              aread_state_restart, awrite_state_restart, &
                              netcdf_file_type, aoutput_diagnostics, &
@@ -30,14 +30,14 @@ use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              print_time, write_time, &
                              operator(-)
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
-                             model_interpolate, get_state_time
-               !             test_interpolate
+                             compute_gridcell_value, gridcell_components, &
+                             model_interpolate, DART_get_var, get_grid_vertval
 
 implicit none
 
 ! version controlled file description for error handling, do not edit
 character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/full_model_mod_check.f90 $"
+   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/model_mod_check.f90 $"
 character(len=32 ), parameter :: revision = "$Revision: 6311 $"
 character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $"
 
@@ -49,21 +49,20 @@ character (len = 129) :: input_file  = 'dart_ics'
 character (len = 129) :: output_file = 'check_me'
 logical               :: advance_time_present = .FALSE.
 logical               :: verbose              = .FALSE.
+integer               :: test1thru = -1
 integer               :: x_ind = -1
 real(r8), dimension(3) :: loc_of_interest = -1.0_r8
 character(len=metadatalength) :: kind_of_interest = 'ANY'
 
 namelist /model_mod_check_nml/ input_file, output_file, &
-                        advance_time_present, x_ind,    &
+                        advance_time_present, test1thru, x_ind,    &
                         loc_of_interest, kind_of_interest, verbose
 
 !----------------------------------------------------------------------
 ! integer :: numlons, numlats, numlevs
 
-integer :: in_unit, out_unit, ios_out, iunit, io, offset
+integer :: ios_out, iunit, io
 integer :: x_size
-integer :: year, month, day, hour, minute, second
-integer :: secs, days
 
 type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
@@ -74,11 +73,13 @@ type(location_type) :: loc
 
 real(r8) :: interp_val
 
+real(r8), dimension(6) :: metadata
+
 !----------------------------------------------------------------------
-! This portion checks the geometry information. 
+! This portion checks the geometry information.
 !----------------------------------------------------------------------
 
-call initialize_utilities(progname='model_mod_check')
+call initialize_utilities(progname='model_mod_check',output_flag=.TRUE.)
 call set_calendar_type(GREGORIAN)
 
 write(*,*)
@@ -88,55 +89,71 @@ call find_namelist_in_file("input.nml", "model_mod_check_nml", iunit)
 read(iunit, nml = model_mod_check_nml, iostat = io)
 call check_namelist_read(iunit, io, "model_mod_check_nml")
 
-! This harvests all kinds of initialization information
-call static_init_model()
+if (test1thru > 0) then
 
-x_size = get_model_size()
-write(*,'(''state vector has length'',i10)') x_size
-allocate(statevector(x_size))
+   ! This harvests all kinds of initialization information
+
+   write(*,*)
+   write(*,*)'Testing static_init_model ...'
+   call static_init_model()
+   write(*,*)'testing complete ...'
+
+endif
+
+if (test1thru > 1) then
+
+   write(*,*)
+   write(*,*)'Testing get_model_size ...'
+   x_size = get_model_size()
+   write(*,'(''state vector has length'',i10)') x_size
+   write(*,*)'testing complete ...'
+
+endif
 
 !----------------------------------------------------------------------
 ! Write a supremely simple restart file. Most of the time, I just use
-! this as a starting point for a Matlab function that replaces the 
+! this as a starting point for a Matlab function that replaces the
 ! values with something more complicated.
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Writing a trivial restart file.'
+if (test1thru > 2) then
 
-statevector = 1.0_r8;
-model_time  = set_time(21600, 149446)   ! 06Z 4 March 2010
+   write(*,*)
+   write(*,*)'Writing a trivial restart file - "allones.ics".'
 
-iunit = open_restart_write('allones.ics')
-call awrite_state_restart(model_time, statevector, iunit)
-call close_restart(iunit)
+   allocate(statevector(x_size))
 
-!----------------------------------------------------------------------
-! Reads the valid time from the header.rst file
-!----------------------------------------------------------------------
+   statevector = 1.0_r8;
+   model_time  = set_time(21600, 149446)   ! 06Z 4 March 2010
 
-model_time = get_state_time('../testdata1')
-call print_date( model_time,'model_mod_check:model date')
-call print_time( model_time,'model_mod_check:model time')
+   iunit = open_restart_write('allones.ics')
+   call awrite_state_restart(model_time, statevector, iunit)
+   call close_restart(iunit)
+
+endif
 
 !----------------------------------------------------------------------
 ! Open a test DART initial conditions file.
 ! Reads the valid time, the state, and (possibly) a target time.
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Reading '//trim(input_file)
+if (test1thru > 3) then
 
-iunit = open_restart_read(input_file)
-if ( advance_time_present ) then
-   call aread_state_restart(model_time, statevector, iunit, adv_to_time)
-else
-   call aread_state_restart(model_time, statevector, iunit)
+   write(*,*)
+   write(*,*)'Reading '//trim(input_file)
+
+   iunit = open_restart_read(input_file)
+   if ( advance_time_present ) then
+      call aread_state_restart(model_time, statevector, iunit, adv_to_time)
+   else
+      call aread_state_restart(model_time, statevector, iunit)
+   endif
+
+   call close_restart(iunit)
+   call print_date( model_time,'model_mod_check:model date')
+   call print_time( model_time,'model_mod_check:model time')
+
 endif
-
-call close_restart(iunit)
-call print_date( model_time,'model_mod_check:model date')
-call print_time( model_time,'model_mod_check:model time')
 
 !----------------------------------------------------------------------
 ! Output the state vector to a netCDF file ...
@@ -146,16 +163,20 @@ call print_time( model_time,'model_mod_check:model time')
 ! finalize_diag_output()
 !----------------------------------------------------------------------
 
-write(*,*)
-write(*,*)'Exercising the netCDF routines.'
-write(*,*)'Creating '//trim(output_file)//'.nc'
+if (test1thru > 4) then
 
-state_meta(1) = 'restart test'
-ncFileID = init_diag_output(trim(output_file),'just testing a restart', 1, state_meta)
+   write(*,*)
+   write(*,*)'Exercising the netCDF routines.'
+   write(*,*)'Creating '//trim(output_file)//'.nc'
 
-call aoutput_diagnostics(ncFileID, model_time, statevector, 1)
+   state_meta(1) = 'restart test'
+   ncFileID = init_diag_output(trim(output_file),'just testing a restart', 1, state_meta)
 
-call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize')
+   call aoutput_diagnostics(ncFileID, model_time, statevector, 1)
+
+   call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize')
+
+endif
 
 !----------------------------------------------------------------------
 ! Checking get_state_meta_data (and get_state_indices, get_state_kind)
@@ -167,39 +188,93 @@ call nc_check( finalize_diag_output(ncFileID), 'model_mod_check:main', 'finalize
 ! PS( 1741825 : 1752193)    (only 144x72)
 !----------------------------------------------------------------------
 
-if ( x_ind > 0 .and. x_ind <= x_size ) call check_meta_data( x_ind )
-
-write(*,*)'Manually Stopping'
-stop
+if (test1thru > 5) then
+   if ( x_ind > 0 .and. x_ind <= x_size ) call check_meta_data( x_ind )
+endif
 
 !----------------------------------------------------------------------
 ! Trying to find the state vector index closest to a particular ...
-! Checking for valid input is tricky ... we don't know much. 
+! Checking for valid input is tricky ... we don't know much.
 !----------------------------------------------------------------------
 
-if ( loc_of_interest(1) > 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
+if (test1thru > 6) then
+   if ( loc_of_interest(1) > 0.0_r8 ) call find_closest_gridpoint( loc_of_interest )
+endif
+
+!----------------------------------------------------------------------
+! Trying to find the state vector index closest to a particular ...
+! Checking for valid input is tricky ... we don't know much.
+!----------------------------------------------------------------------
+
+if (test1thru > 7) then
+   call gridcell_components( kind_of_interest )
+endif
+
+!----------------------------------------------------------------------
+! Checking if the compute_gridcell_value works
+!----------------------------------------------------------------------
+
+if (test1thru > 8) then
+   write(*,*)
+   write(*,*)'Testing compute_gridcell_value() with KIND_SNOWCOVER_FRAC ...'
+
+   loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
+
+   call compute_gridcell_value(statevector, loc, KIND_SNOWCOVER_FRAC, interp_val, ios_out)
+
+   if ( ios_out == 0 ) then
+      write(*,*)'compute_gridcell_value : value is ',interp_val
+   else
+      write(*,*)'compute_gridcell_value : value is ',interp_val,'with error code',ios_out
+   endif
+
+
+   write(*,*)
+   write(*,*)'Testing get_grid_vertval() with KIND_SOIL_TEMPERATURE ...'
+
+   loc = set_location(loc_of_interest(1), loc_of_interest(2), loc_of_interest(3), VERTISHEIGHT)
+
+   call get_grid_vertval(statevector, loc, KIND_SOIL_TEMPERATURE, interp_val, ios_out)
+
+   if ( ios_out == 0 ) then
+      write(*,*)'get_grid_vertval : value is ',interp_val
+   else
+      write(*,*)'get_grid_vertval : value is ',interp_val,'with error code',ios_out
+   endif
+
+endif
 
 !----------------------------------------------------------------------
 ! Check the interpolation - print initially to STDOUT
 !----------------------------------------------------------------------
 
+if (test1thru > 9) then
+   write(*,*)
+   write(*,*)'Testing model_interpolate() with KIND_SNOWCOVER_FRAC'
 
-write(*,*)
-write(*,*)'Testing model_interpolate ...'
+   call model_interpolate(statevector, loc, KIND_SNOWCOVER_FRAC, interp_val, ios_out)
 
-!     KIND_SNOWCOVER_FRAC              = 90, &   comes from the obs_kind_mod.f90
+   if ( ios_out == 0 ) then
+      write(*,*)'model_interpolate : value is ',interp_val
+   else
+      write(*,*)'model_interpolate : value is ',interp_val,'with error code',ios_out
+   endif
 
-call model_interpolate(statevector, loc, 90 , interp_val, ios_out)
 
-if ( ios_out == 0 ) then 
-   write(*,*)'model_interpolate SUCCESS: The interpolated value is ',interp_val
-else
-   write(*,*)'model_interpolate ERROR: model_interpolate failed with error code ',ios_out
+   write(*,*)
+   write(*,*)'Testing model_interpolate() with KIND_SOIL_TEMPERATURE'
+
+   call model_interpolate(statevector, loc, KIND_SOIL_TEMPERATURE, interp_val, ios_out)
+
+   if ( ios_out == 0 ) then 
+      write(*,*)'model_interpolate : value is ',interp_val
+   else
+      write(*,*)'model_interpolate : value is ',interp_val,'with error code',ios_out
+   endif
+
 endif
 
-call error_handler(E_MSG,'full_model_mod_check','Finished successfully.',source,revision,revdate)
-call finalize_utilities()
-
+call finalize_utilities('model_mod_check')
 
 contains
 
@@ -224,8 +299,8 @@ end subroutine check_meta_data
 
 
 subroutine find_closest_gridpoint( loc_of_interest )
-! Simple exhaustive search to find the indices into the 
-! state vector of a particular lon/lat/level. They will 
+! Simple exhaustive search to find the indices into the
+! state vector of a particular lon/lat/level. They will
 ! occur multiple times - once for each state variable.
 real(r8), dimension(:), intent(in) :: loc_of_interest
 
@@ -238,11 +313,11 @@ real(r8), dimension(LocationDims) :: rloc
 character(len=32) :: kind_name
 logical :: matched
 
-! Check user input ... if there is no 'vertical' ...  
+! Check user input ... if there is no 'vertical' ...
 if ( (count(loc_of_interest >= 0.0_r8) < 3) .or. &
      (LocationDims < 3 ) ) then
    write(*,*)
-   write(*,*)'Interface not fully implemented.' 
+   write(*,*)'Interface not fully implemented.'
    return
 endif
 
@@ -251,7 +326,7 @@ write(*,'(''Checking for the indices into the state vector that are at'')')
 write(*,'(''lon/lat/lev'',3(1x,f10.5))')loc_of_interest(1:LocationDims)
 
 allocate( thisdist(get_model_size()) )
-thisdist  = 9999999999.9_r8         ! really far away 
+thisdist  = 9999999999.9_r8         ! really far away
 matched   = .false.
 
 ! Trying to support the ability to specify matching a particular KIND.
@@ -265,7 +340,7 @@ rlat = loc_of_interest(2)
 rlev = loc_of_interest(3)
 
 ! Since there can be/will be multiple variables with
-! identical distances, we will just cruise once through 
+! identical distances, we will just cruise once through
 ! the array and come back to find all the 'identical' values.
 do i = 1,get_model_size()
 
@@ -291,7 +366,7 @@ if (.not. matched) then
    return
 endif
 
-! Now that we know the distances ... report 
+! Now that we know the distances ... report
 
 matched = .false.
 do i = 1,get_model_size()
@@ -321,7 +396,7 @@ end subroutine find_closest_gridpoint
 end program model_mod_check
 
 ! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/full_model_mod_check.f90 $
-! $Id: full_model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
+! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/model_mod_check.f90 $
+! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
 ! $Revision: 6311 $
 ! $Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $

@@ -1,23 +1,27 @@
 #!/bin/ksh
 
-#Job Submission to Cluma
-#PBS -N TerrSysMP-DART
-#PBS -l walltime=00:90:00
-#PBS -l nodes=1:ppn=64
-#PBS -V 
-#PBS -u pshrestha
-#PBS -q batch
-#PBS -o tsmp.log
-#PBS -e tsmp.err
-
-
-export LOGNAME="/home/pshrestha/terrsysmp/run/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_dart14"
-export DART_DIR="/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
-export LD_LIBRARY_PATH=/daten01/z4/netcdf4.1.3_gfortran_4.2.1/lib/
-
+USAGE="sbatch <scriptname>"
+# JUROPATEST module load intel-para/2014.11
+# all in same directory, copy beforehand manually to /work/hbn33/hbn331
+ 
+#SBATCH --job-name="TerrSysMP"
+#SBATCH --nodes=1
+#SBATCH --ntasks=48
+#SBATCH --ntasks-per-node=48
+#SBATCH --output=mpiMPMD-out.%j
+#SBATCH --error=mpiMPMD-err.%j
+#SBATCH --time=01:00:00
+#SBATCH --partition=batch
+#SBATCH --mail-type=ALL
+ 
+export LOGNAME="$WORK/rundart13"
+export DART_DIR="$HOME/DART/lanai/models/terrsysmp/cosmo/work"
+export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
+source $LOGNNAME/loadenvs
 
 # Cleanup---------------
+rm input.nml
 rm filter_ics.*
 rm P*Diag.nc
 rm filter_res*
@@ -72,12 +76,14 @@ echo $clmext $cosrbin $coshist
 
 ln -s $DART_DIR/obs_seq.$dIndat obs_seq.out || exit 2
 
+#for filter?
 ln -s tsmp_instance_0/cosrst/$cosrbin cosmo_prior
 ln -s tsmp_instance_0/cosout/$coshist cosmo.nc
-
 echo "CPS 2"
+#for filter?
+
 date
-mpirun  -np 64  ./filter || exit 3  >> log_file 2>> err_file
+srun  -n 48  ./filter || exit 3  >> log_file 2>> err_file
 date
 
 for instance in {0..$(($numInst-1))}

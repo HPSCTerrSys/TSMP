@@ -43,7 +43,7 @@
    output_interval          = 1
    num_groups               = 1
    input_qc_threshold       =  3.0
-   outlier_threshold        =  -1.0
+   outlier_threshold        =  1.0
    output_forward_op_errors = .false.
    output_timestamps        = .false.
    output_inflation         = .true.
@@ -79,7 +79,7 @@
 # cutoff of 0.03 (radians) is about 200km
 &assim_tools_nml
    filter_kind                     = 1
-   cutoff                          = 0.00010
+   cutoff                          = 0.002
    sort_obs_inc                    = .false.
    spread_restoration              = .false.
    sampling_error_correction       = .false.

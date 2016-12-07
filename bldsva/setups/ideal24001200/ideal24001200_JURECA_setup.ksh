@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TerrSysMPdb/idealized/2400"
+  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal24001200/clm"
   defaultFDCOS=""
-  defaultFDOAS="/work/slts/slts00/tsmp/TerrSysMPdb/idealized/2400/oasis3"
+  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal24001200/oasis3"
   defaultFDPFL=""
 
 
@@ -72,7 +72,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/ideal/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"

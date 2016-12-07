@@ -31,7 +31,8 @@ use time_manager_mod, only : time_type, set_calendar_type, GREGORIAN, &
                              print_time, print_date, write_time, operator(-)
 
 use        model_mod, only : static_init_model, get_model_size, get_state_meta_data, &
-                             get_state_vector, get_parflow_filename, model_interpolate
+                             get_state_vector, get_parflow_filename, model_interpolate, &
+                             get_parflow_id
 use netcdf
 use typesizes
 
@@ -47,7 +48,7 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 129) :: dart_input_file               = 'dart_ics'
+character (len = 256) :: dart_input_file               = 'dart_ics'
 character (len = 129) :: output_file                   = 'check_me'
 logical               :: advance_time_present          = .FALSE.
 logical               :: verbose                       = .FALSE.
@@ -75,6 +76,7 @@ type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
 
 integer :: i, skip
+integer :: pfbid
 
 character(len=metadatalength) :: state_meta(1)
 character(len=256)            :: parflow_input_file
@@ -245,12 +247,13 @@ write(*,*)'Exhaustive test of model interpolate not written yet ...'
 
 if (test1thru < 10) goto 999
 
-parflow_input_file = get_parflow_filename()
+pfbid = get_parflow_id()
+parflow_input_file = get_parflow_filename(pfbid)
 
 write(*,*)
 write(*,*)'Reading restart files from  '//trim(parflow_input_file)
 
-call get_state_vector(statevector, model_time)
+call get_state_vector(statevector, 1, model_time)
 
 write(*,*)
 write(*,*)'Writing data into '//trim(output_file)

@@ -4,7 +4,7 @@
 cat << EOF >> __rundir__/datm_atm_in
 &shr_strdata_nml
  datamode = 'CLMNCEP'
- domainfile = '__forcingdir__/cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
+ domainfile = '__forcingdir__/../cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
  dtlimit = 1.5,1.5
  fillalgo = 'nn','nn'
  fillmask = 'nomask','nomask'
@@ -191,7 +191,7 @@ cat << EOF >> __rundir__/drv_flds_in
 &drydep_inparm
 /
 &megan_emis_nl
- megan_factors_file = '__forcingdir__/cesm/inputdata/atm/cam/chem/trop_mozart/emis/megan21_emis_factors_c20120313.nc'
+ megan_factors_file = '__forcingdir__/../cesm/inputdata/atm/cam/chem/trop_mozart/emis/megan21_emis_factors_c20120313.nc'
  megan_specifier = 'ISOP = isoprene', 'C10H16 = pinene_a + carene_3 + thujene_a', 'CH3OH = methanol', 'C2H5OH = ethanol',
          'CH2O = formaldehyde', 'CH3CHO = acetaldehyde', 'CH3COOH = acetic_acid', 'CH3COCH3 = acetone'
 /
@@ -204,12 +204,12 @@ cat << EOF >> __rundir__/lnd_in
  co2_type = 'constant'
  create_crop_landunit = .false.
  dtime = __dt_clm_bldsva__
- fatmlndfrc = '__forcingdir__/cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
+ fatmlndfrc = '__forcingdir__/../cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
  finidat = '__finidat__'
- fpftcon = '__forcingdir__/cesm/inputdata/lnd/clm2/pftdata/pft-physiology.clm40.c130424.nc'
- fsnowaging = '__forcingdir__/cesm/inputdata/lnd/clm2/snicardata/snicar_drdt_bst_fit_60_c070416.nc'
- fsnowoptics = '__forcingdir__/cesm/inputdata/lnd/clm2/snicardata/snicar_optics_5bnd_c090915.nc'
- fsurdat = '__forcingdir__/cesm/inputdata/lnd/clm2/surfdata_map/surfdata_300x300pt_NRW_simyr2000.nc'
+ fpftcon = '__forcingdir__/../cesm/inputdata/lnd/clm2/pftdata/pft-physiology.clm40.c130424.nc'
+ fsnowaging = '__forcingdir__/../cesm/inputdata/lnd/clm2/snicardata/snicar_drdt_bst_fit_60_c070416.nc'
+ fsnowoptics = '__forcingdir__/../cesm/inputdata/lnd/clm2/snicardata/snicar_optics_5bnd_c090915.nc'
+ fsurdat = '__forcingdir__/../cesm/inputdata/lnd/clm2/surfdata_map/surfdata_300x300pt_NRW_simyr2000.nc'
  maxpatch_glcmec = 0
  nsegspc = 20
  urban_hac = 'ON_WASTEHEAT'
@@ -248,11 +248,11 @@ cat << EOF >> __rundir__/seq_maps.rc
 #
 # NOTE:  For bfb on different processor counts, set all maptypes to "X".
 ##################################################################
- atm2ice_fmapname: '__forcingdir__/cesm/inputdata/idmap'
+ atm2ice_fmapname: '__forcingdir__/../cesm/inputdata/idmap'
  atm2ice_fmaptype: 'X'
- atm2ice_smapname: '__forcingdir__/cesm/inputdata/idmap'
+ atm2ice_smapname: '__forcingdir__/../cesm/inputdata/idmap'
  atm2ice_smaptype: 'X'
- atm2ice_vmapname: '__forcingdir__/cesm/inputdata/idmap'
+ atm2ice_vmapname: '__forcingdir__/../cesm/inputdata/idmap'
  atm2ice_vmaptype: 'X'
  atm2lnd_fmapname: 'idmap'
  atm2lnd_fmaptype: 'X'
@@ -266,9 +266,9 @@ cat << EOF >> __rundir__/seq_maps.rc
  atm2ocn_vmaptype: 'X'
  atm2wav_smapname: 'idmap'
  atm2wav_smaptype: 'Y'
- ice2atm_fmapname: '__forcingdir__/cesm/inputdata/idmap'
+ ice2atm_fmapname: '__forcingdir__/../cesm/inputdata/idmap'
  ice2atm_fmaptype: 'Y'
- ice2atm_smapname: '__forcingdir__/cesm/inputdata/idmap'
+ ice2atm_smapname: '__forcingdir__/../cesm/inputdata/idmap'
  ice2atm_smaptype: 'Y'
  ice2wav_smapname: 'idmap'
  ice2wav_smaptype: 'Y'
@@ -309,7 +309,7 @@ cat << EOF >> __rundir__/datm.streams.txt.CLM1PT.CLM_USRDAT
             mask    mask
          </variableNames>
          <filePath>
-            __forcingdir__/cesm/inputdata/atm/datm7
+            __forcingdir__/../cesm/inputdata/atm/datm7
          </filePath>
          <fileNames>
             domain.80x80.cosmoDE.nc
@@ -327,7 +327,7 @@ cat << EOF >> __rundir__/datm.streams.txt.CLM1PT.CLM_USRDAT
             FLDS     lwdn
          </variableNames>
          <filePath>
-            __forcingdir__/cesm/inputdata/atm/datm7/CLM1PT_data/300x300pt_NRW
+            __forcingdir__/../cesm/inputdata/atm/datm7/CLM1PT_data/300x300pt_NRW
          </filePath>
          <fileNames>
             2012-01.nc
@@ -362,7 +362,7 @@ cat << EOF >> __rundir__/datm.streams.txt.presaero.clim_2000
             mask    mask
          </variableNames>
          <filePath>
-            __forcingdir__/cesm/inputdata/atm/cam/chem/trop_mozart_aero/aero
+            __forcingdir__/../cesm/inputdata/atm/cam/chem/trop_mozart_aero/aero
          </filePath>
          <fileNames>
             aerosoldep_monthly_2000_mean_1.9x2.5_c090421.nc
@@ -386,7 +386,7 @@ cat << EOF >> __rundir__/datm.streams.txt.presaero.clim_2000
             DSTX04DD   dstdry4
          </variableNames>
          <filePath>
-            __forcingdir__/cesm/inputdata/atm/cam/chem/trop_mozart_aero/aero
+            __forcingdir__/../cesm/inputdata/atm/cam/chem/trop_mozart_aero/aero
          </filePath>
          <fileNames>
             aerosoldep_monthly_2000_mean_1.9x2.5_c090421.nc
