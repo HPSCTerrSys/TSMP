@@ -123,6 +123,7 @@ public :: clm_to_dart_state_vector,     &
           compute_gridcell_value,       &
           gridcell_components,          &
           DART_get_var,                 &
+          write_state_times,            &
           get_model_time
 
 ! version controlled file description for error handling, do not edit
@@ -133,6 +134,9 @@ character(len=128), parameter :: revdate  = "$Date: 2015-11-06 15:20:29 -0700 (F
 
 character(len=256) :: string1, string2, string3
 logical, save :: module_initialized = .false.
+
+!
+type(time_type)                  :: start_date   !CPS needed 
 
 ! Storage for a random sequence for perturbing a single initial state
 
@@ -186,6 +190,7 @@ integer            :: debug = 0   ! turn up for more and more debug messages
 character(len=32)  :: calendar = 'Gregorian'
 character(len=256) :: clm_restart_filename = 'clm_restart.nc'
 character(len=256) :: clm_history_filename = 'clm_history.nc'
+character(len=256) :: clm_file_s = 'clm_restart_s.nc'
 character(len=256) :: clm_vector_history_filename = 'clm_vector_history.nc'
 
 character(len=obstypelength) :: clm_variables(max_state_variables*num_state_table_columns) = ' '
@@ -193,6 +198,7 @@ character(len=obstypelength) :: clm_variables(max_state_variables*num_state_tabl
 namelist /model_nml/            &
    clm_restart_filename,        &
    clm_history_filename,        &
+   clm_file_s,                  &
    clm_vector_history_filename, &
    output_state_vector,         &
    assimilation_period_days,    &  ! for now, this is the timestep
@@ -376,6 +382,44 @@ contains
 ! All the REQUIRED interfaces come first - just by convention.
 !==================================================================
 
+!------------------------------------------------------------------
+
+subroutine write_state_times(iunit, statetime)
+
+integer,                   intent(in) :: iunit
+type(time_type),           intent(in) :: statetime
+
+integer           :: iyear, imonth, iday, ihour, imin, isec 
+integer           :: ndays, nhours, nmins, nsecs,nfreq
+type(time_type)   :: interval
+
+call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
+nsecs = (ihour*60 + imin)*60 + isec 
+write(iunit, '(''clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday,nsecs
+write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth,iday, ihour 
+
+interval = statetime - start_date
+
+call get_time(interval, nsecs, ndays)
+
+nhours = nsecs / (60*60)
+nsecs  = nsecs - (nhours * 60*60)
+nmins  = nsecs / 60 
+nsecs  = nsecs - (nmins * 60)
+nfreq  = 3   !PFL SPECIFIC
+
+write(iunit, '(''cosrbin '',''lrff'',4(I2.2),''o'')') ndays, nhours, nmins,nsecs
+write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins,nsecs
+write(iunit, '(''pflhist '',I5.5)') (ndays*24 + nhours)/nfreq
+
+call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
+write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth,iday, ihour 
+
+return
+
+end subroutine write_state_times
+!------------------------------------------------------------------
+
 
 function get_model_size()
 !------------------------------------------------------------------
@@ -502,6 +546,7 @@ integer :: ncid, TimeDimID, VarID, dimlen, varsize
 integer :: iunit, io, ivar
 integer :: i, j, xi, xj, index1, indexN, indx
 integer :: ss, dd
+integer :: ncid_s   !CPS
 
 integer  :: spvalINT
 real(r4) :: spvalR4
@@ -538,6 +583,12 @@ call get_time(model_timestep,ss,dd) ! set_time() assures the seconds [0,86400)
 
 write(string1,*)'assimilation period is ',dd,' days ',ss,' seconds'
 call error_handler(E_MSG,'static_init_model',string1)
+
+!---------------------------------------------------------------
+! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
+start_date = get_state_time(clm_file_s)
+!---------------------------------------------------------------
+
 
 !---------------------------------------------------------------
 ! The CLM history file (h0?) has the 'superset' of information.

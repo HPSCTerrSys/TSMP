@@ -27,7 +27,7 @@ cd $HOME
     cp -r $rundir/cosout .
     cd cosout
     mkdir ivr
-    cp lfff00000000c* ivr/
+    mv lfff00000000c* ivr/
     cd ..
     cd clmout
     cp $rundir/clmoas.clm2.h0* .

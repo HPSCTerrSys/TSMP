@@ -23,8 +23,9 @@ program clm_to_dart
 
 use        types_mod, only : r8
 use    utilities_mod, only : initialize_utilities, finalize_utilities, &
-                             find_namelist_in_file, check_namelist_read
-use        model_mod, only : get_model_size, clm_to_dart_state_vector
+                             open_file, close_file, find_namelist_in_file, check_namelist_read
+use        model_mod, only : get_model_size, clm_to_dart_state_vector, &
+                             write_state_times
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 use time_manager_mod, only : time_type, print_time, print_date
 
@@ -81,6 +82,11 @@ call close_restart(iunit)
 
 call print_date(model_time, str='clm_to_dart:clm  model date')
 call print_time(model_time, str='clm_to_dart:DART model time')
+
+!CPS need this with terrsysmp
+iunit = open_file('clm_prior_time.txt',form='formatted')
+call write_state_times(iunit, model_time)
+call close_file(iunit)
 
 call finalize_utilities('clm_to_dart')
 

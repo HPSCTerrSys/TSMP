@@ -1080,7 +1080,7 @@ if (sv_id == ipfb) then
             'restart_file_to_sv','open '//trim(clm_file_s))
 
   start_date = get_start_time_ncid(ncid_s)
-  call nc_check(nf90_close(ncid),'restart_file_to_sv','close '//trim(clm_file_s))
+  call nc_check(nf90_close(ncid_s),'restart_file_to_sv','close '//trim(clm_file_s))
   !CPS model_time = parflow_time, THIS IS DUMMY FROM PFIDB_DZ FILE
 
   if (debug > 0 .and. do_output()) write(*,*) '   ... data written to state_vector'
