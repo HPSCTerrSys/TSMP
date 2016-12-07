@@ -7,10 +7,12 @@ route "${cblue}<< always_clm${cnormal}"
 
 configure_clm(){
 route "${cblue}>> configure_clm${cnormal}"
-  cplLib="-lnetcdff "
+  cplLib=" -lnetcdf -lnetcdff "
   flags=""
   flags+="-cc $mpiPath/bin/mpicc "
-  flags+="-fc mpif90 "
+  flags+="-fc $mpiPath/bin/mpif90 "
+  flags+="-mpi_lib $mpiPath/lib64 "
+
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

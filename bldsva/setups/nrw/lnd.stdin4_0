@@ -4,7 +4,7 @@
 cat << EOF >> __rundir__/datm_atm_in
 &shr_strdata_nml
  datamode = 'CLMNCEP'
- domainfile = '__forcingdir__/cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
+ domainfile = '__forcingdir__/../cesm/inputdata/share/domains/domain.clm/domain.lnd.300x300pt_NRW_navy.nc'
  dtlimit = 1.5,1.5
  fillalgo = 'nn','nn'
  fillmask = 'nomask','nomask'

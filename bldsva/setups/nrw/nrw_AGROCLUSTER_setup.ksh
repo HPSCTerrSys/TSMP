@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/home/f.gasper/forcings/testdata_NRW_std"
-  defaultFDCOS="/home/f.gasper/forcings/testdata_NRW_std/cosmo/int2lm_output.20080508"
-  defaultFDOAS="/home/f.gasper/forcings/testdata_NRW_std/oasis3/"
-  defaultFDPFL="/home/f.gasper/forcings/testdata_NRW_std/ParFlow/Rur_NRW/"
+  defaultFDCLM="/home/f.gasper/forcings/TestCases/nrw/clm"
+  defaultFDCOS="/home/f.gasper/forcings/TestCases/nrw/cosmo"
+  defaultFDOAS="/home/f.gasper/forcings/TestCases/nrw/oasis3"
+  defaultFDPFL="/home/f.gasper/forcings/TestCases/nrw/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
@@ -72,7 +72,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"
@@ -93,39 +93,39 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
 
         comment "   copy slopes and slope script into rundir"
-          cp $forcingdir_pfl/slopes/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/ascii2pfb_slopes.tcl $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/slopes/*slope.pfb* $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/*slope.pfb* $rundir >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/*slope*  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/*slope*  $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
 	comment "   create sloap pfb with tclsh"
-          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+          tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check		
 	
 	comment "   copy soilind and soilind script into rundir"
-          cp $forcingdir_pfl/soilInd/ascii2pfb.tcl.template_new $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/soilInd/*Soil* $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/*Soil* $rundir >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/*Soil* $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/*Soil* $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
 	comment "   create soilInd pfb with tclsh"
-        tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+        tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
   fi 
 route "${cblue}<< finalizeSetup${cnormal}"
