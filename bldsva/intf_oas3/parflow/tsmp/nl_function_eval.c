@@ -39,7 +39,8 @@
 typedef struct
 {
    int       time_index;
-
+    double    SpinupDampP1; // NBE
+    double    SpinupDampP2; // NBE
 } PublicXtra;
 
 typedef struct
@@ -210,12 +211,14 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
    int          ipatch, ival;
    int          dir = 0;
 
-
    int         freedrain = 0;  
+
 #ifdef FREEDRAINAGE
    freedrain = 1;
    printf("free drainage BC used \n");
 #endif
+
+
    
    VectorUpdateCommHandle  *handle;
 
@@ -744,19 +747,21 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 
          // sep = dz*z_mult_dat[ip];
 
-//          lower_cond = pp[ip]/ sep   - 0.5 *(Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]))* dp[ip] * gravity  * 
-//             z_dir_g; 
+        //  lower_cond = pp[ip]/ sep   - 0.5 *(Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]))* dp[ip] * gravity  * 
+        //     z_dir_g; 
           
         //  sep = dz*z_mult_dat[ip+sz_p];
 
-//          upper_cond = pp[ip+sz_p] / sep  + 0.5*(Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]))* dp[ip+sz_p] * gravity * 
-//            z_dir_g; 
+       //   upper_cond = pp[ip+sz_p] / sep  + 0.5*(Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]))* dp[ip+sz_p] * gravity * 
+       //     z_dir_g; 
           
           //CPS
-          lower_cond = pp[ip]/ sep   - 0.5 * dp[ip] * gravity  * z_dir_g;
-          
-          upper_cond = pp[ip+sz_p] / sep  + 0.5*dp[ip+sz_p] * gravity *z_dir_g;
-          
+         
+          lower_cond = pp[ip]/ sep   - (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p]))  * dp[ip] * gravity  * z_dir_g;
+
+          upper_cond = pp[ip+sz_p] / sep  + (z_mult_dat[ip+sz_p]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) * dp[ip+sz_p] * gravity *z_dir_g;
+
+ 
           diff = (lower_cond - upper_cond);
 	 u_upper = ffz*del_x_slope*del_y_slope 
           * PMeanDZ(permzp[ip], permzp[ip+sz_p], z_mult_dat[ip],z_mult_dat[ip+sz_p])
@@ -866,7 +871,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
        z_mult_sub = VectorSubvector(z_mult, is);
        /* @RMM added to provide variable dz */
        z_mult_dat = SubvectorData(z_mult_sub);
-      
+       
        
 
       for (ipatch = 0; ipatch < BCStructNumPatches(bc_struct); ipatch++)
@@ -1020,14 +1025,14 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			{
 			   dir = -1;
                 sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM
-                sep = dz*z_mult_dat[ip];  //RMM
+                //sep = dz*z_mult_dat[ip];  //RMM
                //printf("case-1 %d %d %d %f %f  \n", i,j,k, z_mult_dat[ip],z_mult_dat[ip-sz_p]);
                 
 			   lower_cond = pp[ip-sz_p] / sep
-			      - 0.5*dp[ip-sz_p] * gravity *
+			      -  (z_mult_dat[ip-sz_p]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p])) *dp[ip-sz_p] * gravity *
                  z_dir_g;
                 
-			   upper_cond = pp[ip]/ sep + 0.5* dp[ip] * gravity*
+			   upper_cond = pp[ip]/ sep + (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))* dp[ip] * gravity*
                  z_dir_g;
                 
 			   diff = (lower_cond - upper_cond);
@@ -1040,7 +1045,8 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			      rpp[ip-sz_p]*dp[ip-sz_p], rpp[ip]*dp[ip]) 
 			      / viscosity;
                 
-                sep = dz*z_mult_dat[ip];
+                //sep = dz*z_mult_dat[ip];
+                sep = dz*z_mult_dat[ip]/2.0;
                 //printf("case-1 %f %f %d \n", sep,z_mult_dat[ip], ip);
 
 			   lower_cond = value/sep  -  0.25*dp[ip] * gravity;
@@ -1065,10 +1071,10 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
                // printf("%d %d %d %f %f \n",i,j,k,pp[ip], pp[ip+sz_p]);
 
 
-                lower_cond = pp[ip]/sep  -  0.5* dp[ip] * gravity *
+                lower_cond = pp[ip]/sep  - (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) * dp[ip] * gravity *
                 z_dir_g; 
                 
-			   upper_cond = pp[ip+sz_p] /sep + 0.5*dp[ip+sz_p] * gravity  *
+			   upper_cond = pp[ip+sz_p] /sep + (z_mult_dat[ip+sz_p]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) *dp[ip+sz_p] * gravity  *
                 z_dir_g; 
                  
                 diff = (lower_cond - upper_cond);
@@ -1083,7 +1089,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			      / viscosity;
                // printf("uold: %10.6e \n", u_old);
                 
-                sep = dz/2.0;
+                sep = dz*z_mult_dat[ip]/2.0;
                // printf("case+1 %f %f %d \n", sep,z_mult_dat[ip], ip);
 
                 lower_cond = (pp[ip] / sep) - 0.25 *  dp[ip] * gravity *
@@ -1238,14 +1244,14 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 		     {
 			case -1:
 			   dir = -1;
-//                sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM     
-                    sep = dz*z_mult_dat[ip];  //RMM
+                sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM     
+                   // sep = dz*z_mult_dat[ip];  //RMM
 
                      lower_cond = (pp[ip-sz_p] / sep) 
-			      - 0.5 * dp[ip-sz_p] * gravity*
+			      -  (z_mult_dat[ip-sz_p]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip-sz_p] * gravity*
                     z_dir_g;
                      
-			   upper_cond = (pp[ip] / sep) + 0.5 * dp[ip] * gravity*
+			   upper_cond = (pp[ip] / sep) + (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip] * gravity*
                     z_dir_g;
                      
 			   diff = lower_cond - upper_cond;
@@ -1262,11 +1268,11 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
               sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]);  //RMM
  //                   sep = dz*z_mult_dat[ip];  //RMM
 
-			   lower_cond = (pp[ip] / sep) - 0.5 * dp[ip] * gravity*
+			   lower_cond = (pp[ip] / sep) - (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) * dp[ip] * gravity*
                     z_dir_g;
                      
 			   upper_cond = (pp[ip+sz_p] / sep)
-			      + 0.5 * dp[ip+sz_p] * gravity*
+			      + (z_mult_dat[ip+sz_p]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) * dp[ip+sz_p] * gravity*
                     z_dir_g;
 			 
                      diff = lower_cond - upper_cond;
@@ -1289,20 +1295,18 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
               //u_new += q_overlnd;
 		  }
 
-                  /* Remove the boundary term computed above */
-                  fp[ip] -= dt * dir * u_old;
-                  /* Add the correct boundary term */
-                  /* JKe: 1D-Free-Drainage:    (new, 1D free drainage by hydraulic conductivity)  */
+		  /* Remove the boundary term computed above */
+		  fp[ip] -= dt * dir * u_old;
+		  /* Add the correct boundary term */
 
+                  /* JKe: 1D-Free-Drainage:    (new, 1D free drainage by hydraulic conductivity)  */
 
 		  if (freedrain)
                     u_new = u_new * rpp[ip]*permzp[ip]*bc_patch_values[ival];
 		  else
 		    u_new = u_new * bc_patch_values[ival];
-                  
-                  fp[ip] += dt * dir * u_new;
 
-
+		  fp[ip] += dt * dir * u_new;
 	       });
 
 	       break;
@@ -1433,13 +1437,13 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 		     {
 			case -1:
 			   dir = -1;
-                //    sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM
-                    sep = dz*z_mult_dat[ip];  //RMM
+                    sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM
+                  //  sep = dz*z_mult_dat[ip];  //RMM
 
 			   lower_cond = (pp[ip-sz_p] / sep) 
-			      - 0.5 * dp[ip-sz_p] * gravity*
+			      - (z_mult_dat[ip-sz_p]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip-sz_p] * gravity*
                z_dir_g;
-			   upper_cond = (pp[ip] / sep) + 0.5 * dp[ip] * gravity*
+			   upper_cond = (pp[ip] / sep) + (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p])) * dp[ip] * gravity*
                 z_dir_g;
                      
 			   diff = lower_cond - upper_cond;
@@ -1453,13 +1457,13 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			   break;
 			case  1:
 			   dir = 1;
-                     sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]);  //RMM
+                    sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip+sz_p]);  //RMM
                   //   sep = dz*z_mult_dat[ip];  //RMM
 
-			   lower_cond = (pp[ip] / sep) - 0.5 * dp[ip] * gravity *
+			   lower_cond = (pp[ip] / sep) - (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p])) * dp[ip] * gravity *
                z_dir_g;
 			   upper_cond = (pp[ip+sz_p] / sep)
-			      + 0.5 * dp[ip+sz_p] * gravity *
+			      +  (z_mult_dat[ip+sz_p]/(z_mult_dat[ip]+z_mult_dat[ip+sz_p]))  * dp[ip+sz_p] * gravity *
               z_dir_g;
 			   diff = lower_cond - upper_cond;
 			   u_old = ffz * del_x_slope* del_y_slope 
@@ -1496,7 +1500,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
                 double *dummy1, *dummy2, *dummy3, *dummy4; 
             PFModuleInvokeType(OverlandFlowEvalDiffInvoke, overlandflow_module_diff, (grid, is, bc_struct, ipatch, problem_data, pressure,
                                                                              ke_, kw_, kn_, ks_, 
-             //CMS                           dummy1, dummy2, dummy3, dummy4,
+//                                        dummy1, dummy2, dummy3, dummy4,
                                                                                       qx_, qy_, CALCFCN));
             }
 #else
@@ -1567,27 +1571,45 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			   q_overlnd = 0.0;
                      
                     /* old version, not sure we 
-                    should be differecing variable dz with bddy values
-                     sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM */
+                    should be differecing variable dz with bddy values */
+                    // sep = dz*Mean(z_mult_dat[ip],z_mult_dat[ip-sz_p]);  //RMM 
                    /* shorthand for new dz * multiplier */
-                     sep = dz*z_mult_dat[ip];  //RMM
+                   // sep = dz*z_mult_dat[ip];  //RMM
                      
                      
                      
 			   q_overlnd =  vol*z_mult_dat[ip]
                      * (pfmax(pp[ip],0.0) - pfmax(opp[ip],0.0)) / sep+
 			      dt * vol * z_mult_dat[ip]* ((ke_[io]-kw_[io])/dx + (kn_[io] - ks_[io])/dy) 
-                     / sep; // +exp(pfmin(pp[ip],0.0)*10.0)*0.001;
+                     / sep ;// + (exp(pfmin(pp[ip],0.0)* public_xtra -> SpinupDampP1 )* public_xtra -> SpinupDampP2 ); //NBE  
                      
+                      q_overlnd =  vol
+                     * (pfmax(pp[ip],0.0) - pfmax(opp[ip],0.0)) / dz +
+                     dt * vol* ((ke_[io]-kw_[io])/dx + (kn_[io] - ks_[io])/dy) 
+                     / dz + vol*dt/dz*(exp(pfmin(pp[ip],0.0)* public_xtra -> SpinupDampP1 )* public_xtra -> SpinupDampP2 ); //NBE  
+                     
+                    /* q_overlnd = vol * (pfmax(pp[ip],0.0) - pfmax(opp[ip],0.0)) /dz +
+                     dt * vol * ((ke_[io]-kw_[io])/dx + (kn_[io] - ks_[io])/dy) / dz;  */
 
                       if (overlandspinup == 1) {
                      /* add flux loss equal to excess head  that overwrites the prior overland flux */
-                     sep = dz*z_mult_dat[ip];  //RMM
+                     sep = dz*z_mult_dat[ip];  //RMM NOTE this should be the "long form" of sep that uses pmean but need to be consistent w/ jacobian
                          // q_overlnd = 0.0;
-    
+   
+
+
+                       q_overlnd =  vol*z_mult_dat[ip]*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)*10.0)*0.001);
+
+ 
                               //q_overlnd =  vol*z_mult_dat[ip]*dt*((pp[ip] - 0.0) +exp(pfmin(pp[ip],0.0)*10.0)*0.001);
-                          q_overlnd =  vol*z_mult_dat[ip]*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)*10.0)*0.001);
-    
+                          
+                          // Next line was RMM original
+                          //q_overlnd =  (vol/dz)*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)*1.0)*0.001);
+//                          q_overlnd =  vol*z_mult_dat[ip]*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)* public_xtra -> SpinupDampP1 )* public_xtra -> SpinupDampP2 ); //NBE
+                          //q_overlnd =  (vol/dz)*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)* public_xtra -> SpinupDampP1 )* public_xtra -> SpinupDampP2 ); //@RMM
+                          //Laura's version
+                          q_overlnd =  (vol/dz)*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)* public_xtra -> SpinupDampP1 )* public_xtra -> SpinupDampP2 ); //@RMM
+                           // printf("spinup keys: %f %f \n",public_xtra -> SpinupDampP1, public_xtra -> SpinupDampP2);
 
                          //q_overlnd =  vol*z_mult_dat[ip]*dt*((pfmax(pp[ip],0.0) - 0.0)+exp(pfmin(pp[ip],0.0)*1.0)*0.000001);
     
@@ -1664,7 +1686,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 		  ip   = SubvectorEltIndex(p_sub, i, j, k);
 		  value =  bc_patch_values[ival];
 // SGS FIXME why is this needed?
-//#undef max	/*CMS*/	  
+//#undef max		  
 		  pp[ip + fdir[0]*1 + fdir[1]*sy_p + fdir[2]*sz_p] = -FLT_MAX;
 		  fp[ip + fdir[0]*1 + fdir[1]*sy_p + fdir[2]*sz_p] = 0.0;
 		  
@@ -1803,9 +1825,17 @@ PFModule   *NlFunctionEvalNewPublicXtra()
 {
    PFModule      *this_module   = ThisPFModule;
    PublicXtra    *public_xtra;
+//   char           key[IDB_MAX_KEY_LEN];
 
 
    public_xtra = ctalloc(PublicXtra, 1);
+    
+/* These parameters dampen the transition/switching into overland flow to speedup
+   the spinup process. */
+//   sprintf(key, "OverlandSpinupDampP1");
+//   public_xtra -> SpinupDampP1 = GetDoubleDefault(key, 0.0);
+//   sprintf(key, "OverlandSpinupDampP2");
+//   public_xtra -> SpinupDampP2 = GetDoubleDefault(key, 0.0); //NBE
 
    (public_xtra -> time_index) = RegisterTiming("NL_F_Eval");
 
