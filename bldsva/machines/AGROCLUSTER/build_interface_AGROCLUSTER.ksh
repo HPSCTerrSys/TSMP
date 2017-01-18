@@ -94,14 +94,12 @@ cat << EOF >> $rundir/tsmp_pbs_run.ksh
 #PBS -V 
 #PBS -u $USER
 #PBS -q $queue
-
+#PBS -l pvmem=2800mb
 
 cd $rundir
 
 rm -rf  YU*
-
 export LD_LIBRARY_PATH=$defaultTclPath/lib64/:$defaultNcdfPath/lib
-
 echo "started" > started.txt
 
 date

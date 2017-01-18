@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/home/f.gasper/forcings/TestCases/clm"
-  defaultFDCOS="/home/f.gasper/forcings/TestCases/cosmo"
-  defaultFDOAS="/home/f.gasper/forcings/TestCases/oasis3"
-  defaultFDPFL="/home/f.gasper/forcings/TestCases/parflow"
+  defaultFDCLM="/home/f.gasper/forcings/TestCases/nrw/clm"
+  defaultFDCOS="/home/f.gasper/forcings/TestCases/nrw/cosmo"
+  defaultFDOAS="/home/f.gasper/forcings/TestCases/nrw/oasis3"
+  defaultFDPFL="/home/f.gasper/forcings/TestCases/nrw/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 

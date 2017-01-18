@@ -210,14 +210,14 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
    int         *fdir;
    int          ipatch, ival;
    int          dir = 0;
-  
 
-   int         freedrain = 0;
+   int         freedrain = 0;  
+
 #ifdef FREEDRAINAGE
    freedrain = 1;
    printf("free drainage BC used \n");
 #endif
- 
+
    VectorUpdateCommHandle  *handle;
 
    BeginTiming(public_xtra -> time_index);
@@ -1044,6 +1044,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			      / viscosity;
                 
                 //sep = dz*z_mult_dat[ip];
+                sep = dz*z_mult_dat[ip]/2.0;
                 //printf("case-1 %f %f %d \n", sep,z_mult_dat[ip], ip);
 
 			   lower_cond = value/sep  -  0.25*dp[ip] * gravity;
@@ -1086,7 +1087,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 			      / viscosity;
                // printf("uold: %10.6e \n", u_old);
                 
-                //sep = dz/2.0;
+                sep = dz*z_mult_dat[ip]/2.0;
                // printf("case+1 %f %f %d \n", sep,z_mult_dat[ip], ip);
 
                 lower_cond = (pp[ip] / sep) - 0.25 *  dp[ip] * gravity *
@@ -1245,7 +1246,7 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
                    // sep = dz*z_mult_dat[ip];  //RMM
 
                      lower_cond = (pp[ip-sz_p] / sep) 
-			      -  (z_mult_dat[ip]-sz_p/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip-sz_p] * gravity*
+			      -  (z_mult_dat[ip-sz_p]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip-sz_p] * gravity*
                     z_dir_g;
                      
 			   upper_cond = (pp[ip] / sep) + (z_mult_dat[ip]/(z_mult_dat[ip]+z_mult_dat[ip-sz_p]))  * dp[ip] * gravity*
@@ -1298,12 +1299,10 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
 
                   /* JKe: 1D-Free-Drainage:    (new, 1D free drainage by hydraulic conductivity)  */
 
-
-                  if (freedrain)
+		  if (freedrain)
                     u_new = u_new * rpp[ip]*permzp[ip]*bc_patch_values[ival];
-                  else
-                    u_new = u_new * bc_patch_values[ival];
-
+		  else
+		    u_new = u_new * bc_patch_values[ival];
 
 		  fp[ip] += dt * dir * u_new;
 	       });

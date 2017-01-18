@@ -380,7 +380,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   check
 
     spmd="on"       # settings are [on   | off       ] (default is off)
-    maxpft="4"        # settings are 4->17               (default is 4)
+    maxpft="1"        # settings are 4->17               (default is 4)
     rtm="off"      # settings are [on   | off       ] (default is off) 
     cps_catch="off"       # settings are [on   | off       ] (default is off)
     usr_src="$clmdir/bld/usr.src "
