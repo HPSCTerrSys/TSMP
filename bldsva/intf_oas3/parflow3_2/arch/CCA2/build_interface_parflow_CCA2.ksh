@@ -7,6 +7,7 @@ route "${cblue}<< always_pfl${cnormal}"
 
 configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
+
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
@@ -15,24 +16,30 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
     fi  
-
     if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
 
-    flagsSim+="CC=$mpiPath/bin/mpicc  CXX=$mpiPath/bin/mpic++ FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
-    flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
+    flagsSim+="CC=cc  CXX=cc FC=ftn F77=ftn "
+    flagsTools+="CC=cc FC=ftn F77=ftn "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
-
     c_configure_pfl
 
-  comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-  check
-  comment "   sed correct linker command in pftools"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-check
 
+  comment "   sed correct linker command in pfsimulator"
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/ m /  -lm  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+  print -n "   sed correct linker command in pftools"
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/ m /  -lm  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
 
 
 route "${cblue}<< configure_pfl${cnormal}"
@@ -53,12 +60,7 @@ route "${cblue}>> substitutions_pfl${cnormal}"
   check
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
-  check 
-  comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
-  check
+ 
     if [[ $withOASMCT == "true" ]] ; then 
       comment "   sed replace old mod_prism includes from pfl oas files"
         sed -i "s/mod_prism_proto/mod_prism/" $pfldir/pfsimulator/amps/oas3/oas_pfl_vardef.F90 >> $log_file 2>> $err_file
@@ -77,6 +79,7 @@ route "${cblue}<< substitutions_pfl${cnormal}"
 
 setup_pfl(){
 route "${cblue}>> setup_pfl${cnormal}"
+
   c_setup_pfl
 
 route "${cblue}<< setup_pfl${cnormal}"

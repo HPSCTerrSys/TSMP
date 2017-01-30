@@ -8,7 +8,7 @@ route "${cblue}<< always_pfl${cnormal}"
 configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
 
     if [[ $withOAS == "true" ]]; then
@@ -26,14 +26,13 @@ route "${cblue}>> configure_pfl${cnormal}"
 
     c_configure_pfl
 
+
   comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@-lmpi"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
   comment "   sed correct linker command in pftools"
-    sed -i 's@\" \-lmpi \-lifport \-lifcoremt \-limf \-lsvml \-lm \-lipgo \-lirc \-lpthread \-lgcc \-lgcc_s \-lirc_s \-ldl \-lm  \-lmpifort \-lmpi\"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@-lmpi"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
 check
-
-
 
 route "${cblue}<< configure_pfl${cnormal}"
 }
@@ -49,15 +48,13 @@ substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
     comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
-  check 
+ 
   comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
   check
     if [[ $withOASMCT == "true" ]] ; then 
       comment "   sed replace old mod_prism includes from pfl oas files"

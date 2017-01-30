@@ -537,10 +537,6 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
   check
 
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
-  check
-
   comment "    copy fix for hardwired MPI_COMM_WORLD in amps "
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps* $pfldir/pfsimulator/amps/mpi1 >> $log_file 2>> $err_file
   check
