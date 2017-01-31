@@ -9,7 +9,7 @@ configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
 
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
 
     if [[ $withOAS == "true" ]]; then
@@ -41,9 +41,9 @@ substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
   comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
  
     if [[ $withOASMCT == "true" ]] ; then 
