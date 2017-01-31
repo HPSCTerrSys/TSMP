@@ -21,11 +21,11 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
-        ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
-        ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
-        ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
-        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT "
+        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
+        ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
+        ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
+        ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
+        ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
 )
 
 # list of versions with descriptions
@@ -38,6 +38,10 @@ versions+=(
         ["2.1.0MCT"]="2.1.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
         ["2.0.5"]="2.0.5 (Cosmo4.21 & CESM) without modifications"
         ["2.0.5MCT"]="2.0.5 (Cosmo4.21 & CESM) with Oasis3-MCT"
+        ["3.0.0MCT"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT"
+        ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
+        ["3.0.0"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2"
+ 	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
 )
 
 
@@ -53,6 +57,10 @@ modelVersion+=(
         ["2.1.0MCT"]="oasis3-mct clm4_0 cosmo5_1 parflow"
         ["2.0.5"]="oasis3 clm4_0 cosmo4_21 parflow"
         ["2.0.5MCT"]="oasis3-mct clm4_0 cosmo4_21 parflow"
+        ["3.0.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow3_2"
+        ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
+        ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
+        ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -68,6 +76,10 @@ combinations+=(
         ["2.1.0MCT"]=" clm cos pfl clm-cos "
         ["2.0.5"]=" clm cos pfl clm-cos "
         ["2.0.5MCT"]=" clm cos pfl clm-cos "
+        ["3.0.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["3.0.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["3.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
 
 )
 
