@@ -1,11 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/int2lm_output"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_NRW"
-  defaultFDPFL="/daten01/z4/database/ParFlow/Rur_NRW"
-
+  defaultFDCLM="/home/fgasper/database/nrw/clm"
+  defaultFDCOS="/home/fgasper/database/nrw/cosmo"
+  defaultFDOAS="/home/fgasper/database/nrw/oasis3"
+  defaultFDPFL="/home/fgasper/database/nrw/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
@@ -72,7 +71,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"
@@ -95,9 +94,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
 
         comment "   copy slopes and slope script into rundir"
-          cp $forcingdir_pfl/Rur_300X300_Slopes/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/ascii2pfb_slopes.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/Rur_300X300_Slopes/*slope.pfb $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/*slope.pfb $rundir >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/*slope*  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
@@ -113,9 +112,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check		
 	
 	comment "   copy soilind and soilind script into rundir"
-          cp $forcingdir_pfl/Rur_300X300_SoilInd/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/Rur_300X300_SoilInd/rurSoil.sa $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/rurSoil.sa $rundir >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/rurSoil.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check

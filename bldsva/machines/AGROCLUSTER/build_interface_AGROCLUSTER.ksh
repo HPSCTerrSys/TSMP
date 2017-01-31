@@ -5,16 +5,16 @@ getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
   # Default library paths
-  defaultMpiPath="/opt/ibg3/openmpi-1.8.4"
-  defaultNcdfPath="/home/w.kurtz/libs/netcdf_openmpi-1.8.4"
+  defaultMpiPath="/usr"
+  defaultNcdfPath="/home/f.gasper/local/libs/netcdf"
   defaultGrib1Path="/home/w.kurtz/libs/DWD-libgrib1_061107"
   defaultTclPath="/usr"
-  defaultHyprePath="/home/w.kurtz/libs/hypre_openmpi-1.8.4"
-  defaultSiloPath="/home/w.kurtz/libs/silo-4.8_openmpi-1.8.4"
+  defaultHyprePath="/home/w.kurtz/libs/terrsysmp"
+  defaultSiloPath="/home/w.kurtz/libs/terrsysmp"
   defaultPncdfPath="/usr"
   defaultLapackPath="/usr"
 	
-  export LD_LIBRARY_PATH=$defaultTclPath/lib64/:/home/w.kurtz/libs/netcdf_openmpi-1.8.4/lib
+  export LD_LIBRARY_PATH=$defaultTclPath/lib64/:/home/f.gasper/local/libs/netcdf/lib
 
 
   # Default Compiler/Linker optimization
@@ -33,14 +33,6 @@ route "${cblue}<< getMachineDefaults${cnormal}"
 
 finalizeMachine(){
 route "${cblue}>> finalizeMachine${cnormal}"
-
-  comment "   init lmod functionality"
-    . /usr/share/Modules/init/ksh  >> $log_file 2>> $err_file
-  check
-  comment "   source and load Modules on $platform"
-    module load gcc-ibg3  >> $log_file 2>> $err_file
-  check
-
 route "${cblue}<< finalizeMachine${cnormal}"
 }
 
@@ -92,19 +84,19 @@ exel=${exel%?} #remove trailing ":"
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
 
 #Job Submission to Agrocluster
-#PBS -S /bin/csh
+#PBS -S /bin/ksh
 #PBS -N TerrSysMP_run
 #PBS -l walltime=$wtime
 #PBS -l nodes=$nnodes:ppn=$nppn
 #PBS -V 
 #PBS -u $USER
 #PBS -q $queue
-
+#PBS -l pvmem=2800mb
 
 cd $rundir
 
 rm -rf  YU*
-
+export LD_LIBRARY_PATH=$defaultTclPath/lib64/:$defaultNcdfPath/lib
 echo "started" > started.txt
 
 date

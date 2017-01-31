@@ -1,15 +1,14 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database"
-  defaultFDCOS="/daten01/z4/database/cosmo/RTDsounding"
-  defaultFDOAS="/daten01/z4/database/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/daten01/z4/database/ParFlow/idealRTD"
+  defaultFDCLM="/daten01/z4/database/TestCases/idealLES/clm"
+  defaultFDCOS="/daten01/z4/database/TestCases/idealLES/cosmo"
+  defaultFDOAS="/daten01/z4/database/TestCases/idealLES/oasis3"
+  defaultFDPFL="/daten01/z4/database/TestCases/idealLES/parflow"
 
-
-  defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
-  defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
+  defaultNLCLM=$rootdir/bldsva/setups/idealLES/lnd.stdin 
+  defaultNLCOS=$rootdir/bldsva/setups/idealLES/lmrun_uc 
+  defaultNLPFL=$rootdir/bldsva/setups/idealLES/coup_oas.tcl
 
 
   defaultNppn=64
@@ -37,7 +36,7 @@ initSetup(){
   gy_cos=120
   dt_cos=6
   nbndlines=3
-  dump_cos=0.5
+  dump_cos=0.0833333333333333333333333333
 
   gx_pfl=116
   gy_pfl=116
@@ -74,7 +73,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/idealRTD/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/clm3.5/idealLES/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"

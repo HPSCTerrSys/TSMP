@@ -10,6 +10,7 @@ route "${cblue}>> configure_clm${cnormal}"
   flags=""
   ccc="$profComp $mpiPath/bin/mpixlc_r "
   cfc="$profComp $mpiPath/bin/mpixlf90_r "
+  flags+="-mpi_lib $mpiPath/lib "
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

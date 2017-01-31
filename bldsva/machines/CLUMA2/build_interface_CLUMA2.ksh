@@ -22,7 +22,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   profilingImpl=" no "
 
   # Default Processor settings
-  defaultwtime="00:300:00"
+  defaultwtime="48:30:00"
   defaultQ="batch"
 
 route "${cblue}<< getMachineDefaults${cnormal}"

@@ -19,32 +19,32 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set machine       = "CLUMA2"
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
-set DART_DIR      = "/home/pshrestha/DART/lanai/models/terrsysmp/cosmo/work"
+set DART_DIR      = "$HOME/DART/lanai/models/terrsysmp/cosmo/work"
 #
 #User Settings End Here
 
+set icycle = $1
+set inrst  = $2
+set machine = $3
+
 echo " "
 echo "`date` -- BEGIN setup of terrsysmp perfect model"
+echo " icycle: " $icycle
 echo " "
 
-set icycle = $1
 #-------------------------------------------------------------------------
 # Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
 
-#foreach icycle (`seq 1 $runcycle`)
+set sdate = `printf perfectModel%02d $icycle`
 
-
-  set sdate = `printf perfectModel%02d $icycle`
-
-  if ($icycle == 1) then
+if ($icycle == 1) then
     #
     echo "-------------------------------------------------------------------"
     echo "Block 1:  Setting up the inital terrsysmp"
@@ -52,23 +52,22 @@ set icycle = $1
     echo " "
     #
     cd $tsmpdir/bldsva
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -r $WORK/
     set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
-    set rundir        = $tsmpdir"/run/"$temp_dir
+    set rundir        = $WORK/$sdate
     #
     rm $rundir/cosmo_in/raso_IdealSnd_0000LT_*
-  else if ($icycle > 1) then
+else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
-    echo "Block 2: Make the restart runs ....TODO dates !!!!"
+    echo "Block 2: Make the restart runs ...."
     echo "-------------------------------------------------------------------"
     echo " "
     #
     #Use the last rundir
     set oldicycle = `echo "($icycle - 1)" | bc` 
     set oldsdate  = `printf perfectModel%02d $oldicycle`
-    set temp_dir  = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$oldsdate
-    set oldrundir = $tsmpdir"/run/"$temp_dir
+    set oldrundir = $WORK/$oldsdate
     #
     # Date manager
     cd $oldrundir
@@ -99,20 +98,16 @@ set icycle = $1
 
     cd $tsmpdir/bldsva
 
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -r $WORK/ -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
 
     # Update the new rundir
-    set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #
-    set rundir = $tsmpdir"/run/"$temp_dir
+    set rundir = $WORK/$sdate
     rm $rundir/cosmo_in/raso_IdealSnd_0000LT_*   
 
-  else
+else
     echo "ERROR : icycle < 1"
     exit 1
-  endif
-#end
+endif
 
 exit 0
-
-

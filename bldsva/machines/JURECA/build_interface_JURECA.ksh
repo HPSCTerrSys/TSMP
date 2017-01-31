@@ -26,7 +26,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultOptC="-O2"
 
   profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="scorep --thread=none " ; profRun="" ; profVar=""  ;fi
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="scorep --thread=none " ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
@@ -69,6 +69,8 @@ USAGE="sbatch <scriptname>"
 #SBATCH --partition=$queue
 #SBATCH --mail-type=ALL
 
+
+cd $rundir
 source $rundir/loadenvs
 date
 echo "started" > started.txt

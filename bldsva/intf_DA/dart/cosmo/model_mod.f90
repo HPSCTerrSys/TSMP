@@ -1429,7 +1429,7 @@ write(iunit, '(''coshist '',''lfff'',4(I2.2),''.nc'')') ndays, nhours, nmins, ns
 write(iunit, '(''pflhist '',I5.5)') (ndays*24 + nhours)/nfreq
 
 call get_date(start_date, iyear, imonth, iday, ihour, imin, isec)
-write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
+write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth, iday, ihour 
 
 return
 

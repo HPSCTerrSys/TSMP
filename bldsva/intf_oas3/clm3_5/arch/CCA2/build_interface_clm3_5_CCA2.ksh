@@ -12,6 +12,7 @@ route "${cblue}>> configure_clm${cnormal}"
   ccc="cc "
   cfc="ftn "
   flags+="-target_os ecmwf "
+  flags+="-mpi_lib $mpiPath/lib "
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

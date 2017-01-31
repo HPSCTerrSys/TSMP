@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/homea/slts/slts06/forcings/idealRTD"
-  defaultFDCOS="/homea/slts/slts06/forcings/idealRTD/cosmo/RTDsounding"
-  defaultFDOAS="/homea/slts/slts06/forcings/idealRTD/oasis3/mapping_matrix_idealRTD"
-  defaultFDPFL="/homea/slts/slts06/forcings/idealRTD/ParFlow/idealRTD"
+  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/nrw/clm"
+  defaultFDCOS="/work/slts/slts00/tsmp/TestCases/nrw/cosmo"
+  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/nrw/oasis3"
+  defaultFDPFL="/work/slts/slts00/tsmp/TestCases/nrw/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
@@ -15,23 +15,23 @@ initSetup(){
   defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=2
-  defaultCOSProcX=2
+  defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2
   defaultPFLProcY=2
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRunhours=3
+  defaultRunhours=24
 
-  defaultDumpCLM=1
-  defaultDumpCOS=1
-  defaultDumpPFL=1
+  defaultDumpCLM=3
+  defaultDumpCOS=3
+  defaultDumpPFL=3
 
 
   gx_clm=24
   gy_clm=14
-  dt_clm=36
+  dt_clm=18
   res="0014x0024"
 
   gx_cos=30
@@ -41,12 +41,12 @@ initSetup(){
 
   gx_pfl=24
   gy_pfl=14
-  dt_pfl=0.01
+  dt_pfl=0.005
   pflrunname="rurlaf"
   base_pfl=0.0025
 
-  cplfreq1=36
-  cplfreq2=36
+  cplfreq1=18
+  cplfreq2=18
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
@@ -73,7 +73,7 @@ finalizeSetup(){
 route "${cblue}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
-      cp $forcingdir_clm/clm3.5/idealRTD/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
 
     comment "   copy oasis remappingfiles into rundir"
@@ -94,7 +94,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-
+        comment "   copy initial pressure and script into rundir"
+        cp $forcingdir_pfl/pfb*.nc $rundir/ >> $log_file 2>> $err_file
+        check
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
