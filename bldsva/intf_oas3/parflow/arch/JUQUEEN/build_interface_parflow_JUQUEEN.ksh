@@ -16,7 +16,7 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplInc="$incpsmile"
     fi  
 
-    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
+    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -WF,-DREADCLM " ; fi
 
     flagsSim=" "
     pcc="${profComp} $mpiPath/bin/mpixlc_r"

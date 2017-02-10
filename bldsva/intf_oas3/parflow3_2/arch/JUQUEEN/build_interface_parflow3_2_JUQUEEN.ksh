@@ -20,7 +20,7 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplInc="$incpsmile"
     fi  
 
-    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
+    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -WF,-DREADCLM " ; fi
 
     flagsSim+="CC=$mpiPath/bin/mpixlc_r  CXX=$mpiPath/bin/mpixlcxx_r FC=$mpiPath/bin/mpixlf90_r F77=$mpiPath/bin/mpixlf77_r "
     flagsTools+="CC=gcc FC=gfortran F77=gfortran "
