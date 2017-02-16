@@ -20,6 +20,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
+  profilingImpl=" no "
 
   # Default Processor settings
   defaultwtime="00:30:00"

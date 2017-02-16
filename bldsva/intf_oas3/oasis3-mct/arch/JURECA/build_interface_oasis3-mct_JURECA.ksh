@@ -11,14 +11,17 @@ route "${cblue}<< always_oas${cnormal}"
 
 substitutions_oas(){
 route "${cblue}>> substitutions_oas${cnormal}"
+  comment "    cp TopMakefileOasis3 to make_dir"
+    cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
+  check
+    c_substitutions_oas
   comment "   cp new  mod_oasis_method.F90 mod_oasis_grid.F90 to psmile/src"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/mod_oasis_* ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
-    c_substitutions_oas
   comment "   sed prism_get_freq functionality to mod_prism.F90"
     sed -i "/oasis_get_debug/a   use mod_oasis_method ,only: prism_get_freq            => oasis_get_freq" ${oasdir}/lib/psmile/src/mod_prism.F90  >> $log_file 2>> $err_file   # critical anchor
   check
-    # set prefix vor all mct files to run with other mct
+    # set prefix for all mct files to run with other mct
     prefix="oas_"
   comment "   cd to ${oasdir}/lib/mct/mct"
     cd ${oasdir}/lib/mct/mct >> $log_file 2>> $err_file
@@ -101,13 +104,13 @@ route "${cblue}>> configure_oas${cnormal}"
     sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comF90 to oas Makefile"
-    sed -i "s@__comF90__@$mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
+    sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comCC to oas Makefile"
-    sed -i "s@__comCC__@$mpiPath/bin/mpicc $optComp@" $file >> $log_file 2>> $err_file
+    sed -i "s@__comCC__@${profComp} $mpiPath/bin/mpicc $optComp@" $file >> $log_file 2>> $err_file
   check
   comment "   sed ld to oas Makefile"
-    sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+    sed -i "s@__ld__@${profComp} $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
   check
   comment "   sed libs to oas Makefile"
     sed -i "s@__lib__@-L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file

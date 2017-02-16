@@ -15,7 +15,7 @@ check
     cplFlag="-WF,-DCOUP_OAS_COS" 
   fi 
   if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -WF,-DCPL_SCHEME_F " ; fi
-  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
+  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -WF,-DREADCLM " ; fi 
 comment "   sed comflg to cos Makefile"
   sed -i "s@__comflg__@$optComp -I$ncdfPath/include $cplInc -qextname=flush -qsuffix=cpp=f90 -WF,-DGRIBDWD -WF,-DNETCDF $cplFlag -WF,-DHYMACS@" $file >> $log_file 2>> $err_file
 check
@@ -23,10 +23,10 @@ comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
 check
 comment "   sed comF90 to cos Makefile"
-  sed -i "s@__comF90__@$mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ld to cos Makefile"
-  sed -i "s@__ld__@$mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
+  sed -i "s@__ld__@${profComp} $mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
   sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib $ncdfPath/lib/libnetcdf.a@" $file >> $log_file 2>> $err_file

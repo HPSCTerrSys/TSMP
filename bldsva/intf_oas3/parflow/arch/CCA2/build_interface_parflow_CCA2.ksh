@@ -18,7 +18,12 @@ route "${cblue}>> configure_pfl${cnormal}"
     fi  
     if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
 
-    flagsSim+="CC=cc  CXX=cc FC=ftn F77=ftn "
+    flagsSim=" "
+    pcc="cc"
+    pfc="ftn"
+    pf77="ftn"
+    pcxx="cc"
+
     flagsTools+="CC=cc FC=ftn F77=ftn "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
@@ -60,7 +65,9 @@ route "${cblue}>> substitutions_pfl${cnormal}"
   check
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
- 
+  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
+  check 
     if [[ $withOASMCT == "true" ]] ; then 
       comment "   sed replace old mod_prism includes from pfl oas files"
         sed -i "s/mod_prism_proto/mod_prism/" $pfldir/pfsimulator/amps/oas3/oas_pfl_vardef.F90 >> $log_file 2>> $err_file

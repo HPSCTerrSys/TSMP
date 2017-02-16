@@ -35,7 +35,7 @@ getDefaults(){
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
 
-  #profiling ("yes" , "no") - will use machine standard
+  #profiling
   def_profiling="no"
 
   # fresh build clean in new folder
@@ -97,6 +97,11 @@ setDefaults(){
   options+=(["pfl"]=${def_options["pfl"]})
 #Da
   options+=(["da"]=${def_options["da"]})
+
+  #profiling
+  profComp=""
+  profRun=""
+  profVar=""
 
 }
 
@@ -435,7 +440,14 @@ interactive(){
 		  if [[ $numb == 23 ]] ; then ; read lapackPath ; fi
 
 		  if [[ $numb == 24 ]] ; then ; read optComp ; fi
-		  if [[ $numb == 25 ]] ; then ; read profiling ; fi
+		  if [[ $numb == 25 ]] ; then  
+			print "The following profiling tools are available for $platform:"
+                        for a in ${profilingImpl} ; do
+                               printf "%-20s\n" "$a"
+                        done
+                        print "Please type in your desired value..."
+                        read profiling			
+		  fi
 		  if [[ $numb == 26 ]] ; then ; read cplscheme ; fi
 
                   if [[ $numb == 27 ]] ; then ; read readCLM ; fi
@@ -561,6 +573,10 @@ softSanityCheck(){
   if [[ $withCLM == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
+
+  valid="false"
+  case "${profilingImpl}" in *" ${profiling} "*) valid="true" ;; esac
+  if [[ $valid != "true" ]] then; wmessage="This profiling tool is not supported on this machine" ; warning  ;fi
 
 }
 
@@ -700,7 +716,7 @@ getRoot(){
     i)  mode=2 ;;  
     b)  mode=1 ;;
     m)  platform="$OPTARG" ; args=1 ;;
-    p)  profling="${OPTARG}" ; args=1 ;;
+    p)  profiling="${OPTARG}" ; args=1 ;;
     o)  optComp="${OPTARG}" ; args=1 ;; 
     v)  version="$OPTARG"  ;  args=1 ;;
     a)  listA="true" ;;
@@ -777,7 +793,6 @@ check
 
 
   softSanityCheck
-
   comment "  source common interface"
     . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
   check

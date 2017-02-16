@@ -22,12 +22,12 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultLapackPath=""
 
 	
-  export LD_LIBRARY_PATH=$defaultNcdfPath/lib
-
+  export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$defaultNcdfPath/lib:$defaultTclPath/lib/
 
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
+  profilingImpl=" no "
 
   # Default Processor settings
   defaultwtime="00:30:00"

@@ -11,6 +11,10 @@ route "${cblue}<< always_oas${cnormal}"
 
 substitutions_oas(){
 route "${cblue}>> substitutions_oas${cnormal}"
+  comment "    cp TopMakefileOasis3 to make_dir"
+    cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
+  check
+
   comment "   cp new  mod_oasis_method.F90 mod_oasis_grid.F90 to psmile/src"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/mod_oasis_* ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
@@ -102,13 +106,13 @@ route "${cblue}>> configure_oas${cnormal}"
     sed -i "s@__ldflg__@-q64 -qnosave@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comF90 to oas Makefile"
-    sed -i "s@__comF90__@$mpiPath/bin/mpixlf90_r $optComp@" $file >> $log_file 2>> $err_file
+    sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpixlf90_r $optComp@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comCC to oas Makefile"
-    sed -i "s@__comCC__@$mpiPath/bin/mpixlcxx_r $optComp@" $file >> $log_file 2>> $err_file
+    sed -i "s@__comCC__@${profComp} $mpiPath/bin/mpixlcxx_r $optComp@" $file >> $log_file 2>> $err_file
   check
   comment "   sed ld to oas Makefile"
-    sed -i "s@__ld__@$mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
+    sed -i "s@__ld__@${profComp} $mpiPath/bin/mpixlf90_r@" $file >> $log_file 2>> $err_file
   check
   comment "   sed libs to oas Makefile"
     sed -i "s@__lib__@$ncdfPath/lib/libnetcdf.a@" $file >> $log_file 2>> $err_file
