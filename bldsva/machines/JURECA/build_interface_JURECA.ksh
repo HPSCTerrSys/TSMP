@@ -59,12 +59,6 @@ fi
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
-
-USAGE="sbatch <scriptname>"
-
-# JUROPATEST module load intel-para/2014.11
-# all in same directory, copy beforehand manually to $WORK
-
 #SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
@@ -74,7 +68,6 @@ USAGE="sbatch <scriptname>"
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=ALL
-
 
 cd $rundir
 source $rundir/loadenvs
