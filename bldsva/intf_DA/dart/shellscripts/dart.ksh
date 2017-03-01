@@ -1,6 +1,6 @@
 #!/bin/ksh
 
-USAGE="sbatch <scriptname>"
+#USAGE="sbatch <scriptname>"
 # JUROPATEST module load intel-para/2014.11
 # all in same directory, copy beforehand manually to /work/hbn33/hbn331
  
