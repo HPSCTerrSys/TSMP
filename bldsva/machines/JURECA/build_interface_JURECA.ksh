@@ -51,10 +51,10 @@ nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ce
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-USAGE="sbatch <scriptname>"
 
-# JUROPATEST module load intel-para/2014.11
-# all in same directory, copy beforehand manually to $WORK
+
+
+
 
 #SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=$nnodes

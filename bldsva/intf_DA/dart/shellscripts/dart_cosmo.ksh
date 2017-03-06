@@ -1,10 +1,5 @@
 #!/bin/ksh
-#COSMO DART JOB SUBMISSION
 
-USAGE="sbatch <scriptname> $RUNNAME"
-# JUROPATEST module load intel-para/2014.11
-# all in same directory, copy beforehand manually to /work/hbn33/hbn331
- 
 #SBATCH --job-name="dartCOSMO"
 #SBATCH --nodes=1
 #SBATCH --ntasks=48

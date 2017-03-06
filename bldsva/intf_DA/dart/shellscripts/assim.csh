@@ -2,7 +2,7 @@
 # "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
 #
 #set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
-set MODEL_PATH="$WORK/PM_JURECA_run/perfectModel"
+set MODEL_PATH="$WORK/PM_run/perfectModel"
 set num_days = 13
 
 # SELECT COMPONENT MODEL FOR ASSIMILATION
@@ -95,6 +95,7 @@ rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $clmout clm_history.nc
 ln -sf $clmrst clm_restart.nc 
+ln -sf $clmrst0 clm_restart_s.nc
 #&model_nml has the above names for restart and netcdf file
 endif  #$2 == "clm"
 

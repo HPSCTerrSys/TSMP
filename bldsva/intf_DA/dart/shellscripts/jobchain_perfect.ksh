@@ -1,6 +1,4 @@
 #! /bin/ksh
-# Usage: ./jobchain_perfect.ksh #no run/filter 
-# Flexibility to start with model integration or data assimilation
 
 #SBATCH --job-name="TSMPLoopCntr"
 #SBATCH --nodes=1
@@ -20,7 +18,7 @@ NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle -
 NRST=1                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
 RUNSFX="perfectModel"
 ASSIMC=""
-JOBSCRIPT0="jobchain.ksh "
+JOBSCRIPT0="jobchain_perfect.ksh "
 JOBSCRIPT1="tsmp_slm_run.bsh"
 #JOBCHAIN NAMELIST
 #------------
