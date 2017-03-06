@@ -26,10 +26,10 @@ comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
 check
 comment "   sed comF90 to cos Makefile"
-  sed -i "s@__comF90__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ld to cos Makefile"
-  sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
   sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib -L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file

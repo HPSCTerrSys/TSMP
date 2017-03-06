@@ -52,7 +52,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
     cd $cosdir >> $log_file 2>> $err_file
   check
   comment "    make cosmo"
-    make -f $cosdir/Makefile >> $log_file 2>> $err_file
+    make -j 8 -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
   comment "    cp cosmo binary to $bindir"
     cp $cosdir/lmparbin_pur $bindir >> $log_file 2>> $err_file
@@ -191,11 +191,9 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
-    export SKIN_MODE=none
   comment "    make oasis" 
     make -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
-    export SKIN_MODE=mpi
 route "${cblue}<<< c_make_oas${cnormal}"
 }
 
@@ -337,7 +335,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   check
 
     spmd="on"       # settings are [on   | off       ] (default is off)
-    maxpft="4"        # settings are 4->17               (default is 4)
+    maxpft="1"        # settings are 4->17               (default is 4)
     rtm="off"      # settings are [on   | off       ] (default is off) 
     cps_catch="off"       # settings are [on   | off       ] (default is off)
     usr_src="$clmdir/bld/usr.src "
@@ -351,7 +349,6 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-nc_lib $ncdfPath/lib "
     flags+="-nc_mod $ncdfPath/include "
     flags+="-mpi_inc $mpiPath/include "
-    flags+="-mpi_lib $mpiPath/lib "
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
@@ -365,7 +362,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   cppdef=""
   if [[ $cplscheme == "true" ]] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
-    $clmdir/bld/configure $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
+    $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
 }
@@ -376,7 +373,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
-    gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -j 8 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
   comment "    cp clm binary to $bindir"
     cp $clmdir/build/clm $bindir >> $log_file 2>> $err_file
@@ -479,7 +476,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
-    $pfldir/pfsimulator/configure $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+    $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
   check
   comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file
@@ -492,7 +489,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi
 
   comment "    configure pftools"
-    $pfldir/pftools/configure $flagsTools >> $log_file 2>> $err_file
+    $pfldir/pftools/configure $flagsTools CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
 
@@ -536,10 +533,6 @@ c_substitutions_pfl(){
 route "${cblue}>>> c_substitutions_pfl${cnormal}"
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
-  check
-
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
   check
 
   comment "    copy fix for hardwired MPI_COMM_WORLD in amps "

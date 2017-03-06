@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/daten01/z4/database/TestCases/nrw/clm"
-  defaultFDCOS="/daten01/z4/database/TestCases/nrw/cosmo"
-  defaultFDOAS="/daten01/z4/database/TestCases/nrw/oasis3"
-  defaultFDPFL="/daten01/z4/database/TestCases/nrw/parflow"
+  defaultFDCLM="/home/fgasper/database/nrw/clm"
+  defaultFDCOS="/home/fgasper/database/nrw/cosmo"
+  defaultFDOAS="/home/fgasper/database/nrw/oasis3"
+  defaultFDPFL="/home/fgasper/database/nrw/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 

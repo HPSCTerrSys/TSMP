@@ -109,6 +109,11 @@ setDefaults(){
   runhours=$def_runhours
   initDate=$def_initDate
 
+  #profiling
+  profComp=""
+  profRun=""
+  profVar=""
+
   withCESM="false"
 }
 
@@ -328,6 +333,10 @@ softSanityCheck(){
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
 
+  valid="false"
+  case "${profilingImpl}" in *" ${profiling} "*) valid="true" ;; esac
+  if [[ $valid != "true" ]] then; wmessage="This profiling tool is not supported on this machine" ; warning  ;fi
+
 }
 
 interactive(){
@@ -473,7 +482,15 @@ interactive(){
                   if [[ $numb == 25 ]] ; then ; read namelist_oas ; fi
                   if [[ $numb == 26 ]] ; then ; read forcingdir_oas ; fi
 		  if [[ $numb == 27 ]] ; then ; read pfldir ; fi
-                  if [[ $numb == 28 ]] ; then ; read profiling ; fi
+                  if [[ $numb == 28 ]] ; then 
+                         print "The following profiling tools are available for $platform:"
+                         for a in ${profilingImpl} ; do
+                                printf "%-20s\n" "$a"
+                         done
+                         print "Please type in your desired value..."
+                         read profiling
+                  fi
+
                   if [[ $numb == 29 ]] ; then ; read numInst ; fi
   		  if [[ $numb == 30 ]] ; then ; read startInst ; fi
                   if [[ $numb == 31 ]] ; then ; read initDate ; fi
@@ -691,7 +708,7 @@ getRoot(){
     i)  mode=2 ;;
     b)  mode=1 ;;
     m)  platform="$OPTARG" ; args=1 ;; 
-    p)  profling="${OPTARG}" ; args=1 ;;
+    p)  profiling="${OPTARG}" ; args=1 ;;
     v)  version="$OPTARG"  ;  args=1 ;;
     V)  refSetup="$OPTARG"  ;  args=1 ;; 
     a)  listA="true" ;;

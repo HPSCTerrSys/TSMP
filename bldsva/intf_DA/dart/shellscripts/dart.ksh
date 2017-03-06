@@ -1,6 +1,5 @@
 #!/bin/ksh
 
- 
 #SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=1
 #SBATCH --ntasks=48

@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/$HOME/database/rur/clm"
-  defaultFDOAS="/$HOME/database/rur/oasis3"
-  defaultFDPFL="/$HOME/database/rur/parflow"
+  defaultFDCLM="$HOME/database/rur/clm"
+  defaultFDOAS="$HOME/database/rur/oasis3"
+  defaultFDPFL="$HOME/database/rur/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/rur/lnd.stdin 

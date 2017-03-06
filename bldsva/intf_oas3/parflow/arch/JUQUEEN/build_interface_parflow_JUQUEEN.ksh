@@ -16,9 +16,13 @@ route "${cblue}>> configure_pfl${cnormal}"
       cplInc="$incpsmile"
     fi  
 
-    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
+    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -WF,-DREADCLM " ; fi
 
-    flagsSim+="CC=$mpiPath/bin/mpixlc_r  CXX=$mpiPath/bin/mpixlcxx_r FC=$mpiPath/bin/mpixlf90_r F77=$mpiPath/bin/mpixlf77_r "
+    flagsSim=" "
+    pcc="${profComp} $mpiPath/bin/mpixlc_r"
+    pfc="${profComp} $mpiPath/bin/mpixlf90_r"
+    pf77="${profComp} $mpiPath/bin/mpixlf77_r"
+    pcxx="${profComp} $mpiPath/bin/mpixlcxx_r"
     flagsTools+="CC=gcc FC=gfortran F77=gfortran "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdf"
     fcflagsSim="-qfree=f90 -qsuffix=cpp=F90 -qnoextname $cplInc -WF,-Duse_libMPI -WF,-Duse_netCDF -WF,-Duse_comm_MPI1 -WF,-DVERBOSE -WF,-DDEBUG -WF,-DTREAT_OVERLAY -I$ncdfPath/include "
@@ -53,7 +57,10 @@ route "${cblue}<< make_pfl${cnormal}"
 substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
- 
+
+  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
+  check 
 
   print -n "   cp new files with Fortran underscore fix"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
