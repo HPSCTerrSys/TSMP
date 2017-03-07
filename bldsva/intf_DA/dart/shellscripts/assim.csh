@@ -90,7 +90,7 @@ echo "--------------------------------------------------------------------------
 echo `pwd`
 echo " "
 echo "-------------------------------------------------------------------------------"
-rm clm_restart.nc clm_history.nc 
+rm clm_restart.nc clm_restart_s.nc clm_history.nc 
 rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $clmout clm_history.nc

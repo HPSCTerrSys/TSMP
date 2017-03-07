@@ -586,7 +586,19 @@ call error_handler(E_MSG,'static_init_model',string1)
 
 !---------------------------------------------------------------
 ! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
-start_date = get_state_time(clm_file_s)
+!CPS start_date = get_state_time(clm_file_s)
+
+if ( .not. file_exist(clm_file_s) ) then
+  write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
+  call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
+endif
+
+call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
+            'restart_file_to_sv','open '//trim(clm_file_s))
+
+start_date = get_start_time_ncid(ncid_s)
+call nc_check(nf90_close(ncid_s),'restart_file_to_sv','close'//trim(clm_file_s))
+
 !---------------------------------------------------------------
 
 
@@ -3754,7 +3766,45 @@ end function get_state_time_ncid
 
 
 !------------------------------------------------------------------
+!------------------------------------------------------------------
+!>GET START DATE FROM CLM
+function get_start_time_ncid( ncid )
+!------------------------------------------------------------------
+! The restart netcdf files have the time of the start.
 
+type(time_type) :: get_start_time_ncid
+integer, intent(in) :: ncid
+
+integer :: VarID
+integer :: rst_start_ymd, rst_start_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd',VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_ymd'//trim(clm_file_s))
+call nc_check(nf90_get_var(  ncid, VarID,rst_start_ymd),'get_start_time_ncid', &
+&            'get_var rst_ref_ymd'//trim(clm_file_s))
+
+call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_tod',VarID),'get_start_time_ncid', &
+&  'inq_varid timemgr_rst_ref_tod'//trim(clm_file_s))
+call nc_check(nf90_get_var(  ncid, VarID,rst_start_tod),'get_start_time_ncid',&
+&            'get_var rst_ref_tod'//trim(clm_file_s))
+
+year     = rst_start_ymd/10000
+leftover = rst_start_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_start_tod/3600
+leftover = rst_start_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_start_time_ncid = set_date(year, month, day, hour, minute, second)
+
+end function get_start_time_ncid
+!------------------------------------------------------------------
 
 function get_state_time_fname(filename)
 !------------------------------------------------------------------
