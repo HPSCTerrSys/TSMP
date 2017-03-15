@@ -1201,14 +1201,15 @@ do ixs = 0, nxs-1
       N_vG = sval(2)
       Sres = sval(3)
       Ssat = sval(4)
-      Sw   = max(pfvar(i,j,k),Sres+0.05_r8)            !Clipping based on soil type
+      !CPS psi has to approach infinity to Sw to reach Sres
+      Sw   = min(1._r8,max(pfvar(i,j,k),Sres + 0.001_r8))
     else
       call error_handler(E_ERR,'write_parflow_file','sID/=1', source,revision,revdate)   
     endif
-    if (k.eq.nz .and. pfvar(i,j,k).eq.1) then       !Limit overland flow heign in Surface
-      pfarr(i,j,k) = max(pfarr(i,j,k),0.) 
+    if (k.eq.nz .and. Sw.eq.1._r8) then
+      pfarr(i,j,k) = max(pfarr(i,j,k),0._r8) 
     elseif (Sw.lt.1._r8 ) then  !UnsatZ
-      pfarr(i,j,k) = -(1/a_vG)*((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1.))) - 1.)**(1./N_vG) 
+      pfarr(i,j,k) = -(1._r8/a_vG)*((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1._r8))) - 1._r8)**(1._r8/N_vG) 
     endif
     write(iunit) pfarr(i,j,k)
   end do
