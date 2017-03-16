@@ -52,7 +52,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
     cd $cosdir >> $log_file 2>> $err_file
   check
   comment "    make cosmo"
-    make -j 8 -f $cosdir/Makefile >> $log_file 2>> $err_file
+    make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
@@ -417,7 +417,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
-    gmake -j 8 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
