@@ -1,6 +1,4 @@
-#! /bin/ksh
-# Usage: ./terrsysmp-dart_jobchain.ksh #no run/filter 
-# Flexibility to start with model integration or data assimilation
+#!/bin/ksh
 
 #SBATCH --job-name="TSMPLoopCntr"
 #SBATCH --nodes=1
@@ -25,6 +23,8 @@ JOBSCRIPT1="tsmp_slm_run.bsh"
 #JOBCHAIN NAMELIST
 #------------
 
+# Need to run dart to get time output files
+if [[ $NRST == 0 ]] ; then ; ASSIMC="cosmo" ; fi
 if [[ $NRST == 1 ]] ; then ; ASSIMC="cosmo" ; fi
 if [[ $NRST == 2 ]] ; then ; ASSIMC="clm" ; fi
 if [[ $NRST == 3 ]] ; then ; ASSIMC="parflow" ; fi
@@ -52,7 +52,7 @@ if [[ $STEP == "run" ]] then
     JOBID=$(sbatch $WORK/$RUNNAME/$JOBSCRIPT1 2>&1 | awk '{print $(NF)}')
     echo $JOBID
     if [[  $(($NUMCYCLE - $ICYCLE)) == 0 ]] ; then ; exit 0 ; fi
-    #
+
     echo "sbatch --dependency=afterok:${JOBID} $JOBSCRIPT0 $ICYCLE filter"
     JOBID=$(sbatch --dependency=afterok:${JOBID} $JOBSCRIPT0 $ICYCLE "filter" 2>&1 | awk '{print $(NF)}')
 fi

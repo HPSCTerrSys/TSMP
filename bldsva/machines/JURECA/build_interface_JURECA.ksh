@@ -59,6 +59,7 @@ fi
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
+
 #SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks

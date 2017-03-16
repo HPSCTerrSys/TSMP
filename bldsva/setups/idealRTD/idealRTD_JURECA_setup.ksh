@@ -6,7 +6,6 @@ initSetup(){
   defaultFDOAS="/work/slts/slts00/tsmp/TestCases/idealRTD/oasis3"
   defaultFDPFL="/work/slts/slts00/tsmp/TestCases/idealRTD/parflow"
 
-
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
