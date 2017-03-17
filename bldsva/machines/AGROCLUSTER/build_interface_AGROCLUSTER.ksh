@@ -5,7 +5,7 @@ getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
   # Default library paths
-  defaultMpiPath="/usr"
+  defaultMpiPath="/opt/openmpi/1.10.5"
   defaultNcdfPath="/home/f.gasper/local/libs/netcdf"
   defaultGrib1Path="/home/w.kurtz/libs/DWD-libgrib1_061107"
   defaultTclPath="/usr"
