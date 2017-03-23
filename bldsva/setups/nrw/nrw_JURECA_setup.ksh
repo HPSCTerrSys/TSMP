@@ -6,10 +6,10 @@ initSetup(){
   defaultFDOAS="/work/slts/slts00/tsmp/TestCases/nrw/oasis3"
   defaultFDPFL="/work/slts/slts00/tsmp/TestCases/nrw/parflow"
 
-
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
+  defaultNLDA=$rootdir/bldsva/setups/nrw/DA-nl
 
   defaultNppn=48
   defaultCLMProcX=2
@@ -46,6 +46,8 @@ initSetup(){
   cplfreq1=900
   cplfreq2=900
 
+  delta_obs=90000
+ 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_a1
@@ -99,7 +101,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/*slope*  $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
@@ -117,7 +119,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/*Soil* $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check

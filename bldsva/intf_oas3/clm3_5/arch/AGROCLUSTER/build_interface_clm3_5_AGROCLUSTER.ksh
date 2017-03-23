@@ -12,7 +12,6 @@ route "${cblue}>> configure_clm${cnormal}"
   ccc="$mpiPath/bin/mpicc "
   cfc="mpif90 "
   flags+="-mpi_lib $mpiPath/lib64 "
-
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"
 }

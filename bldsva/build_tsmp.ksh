@@ -15,7 +15,8 @@ getDefaults(){
   def_cosdir=""
   def_clmdir=""
   def_pfldir=""
-
+#DA
+  def_dadir=""
   # pathes will be set to tested platform defaults if empty
   def_mpiPath=""
   def_ncdfPath=""
@@ -46,6 +47,8 @@ getDefaults(){
   def_options+=(["clm"]="fresh")
   def_options+=(["pfl"]="fresh")
   def_options+=(["cos"]="fresh")
+#DA
+  def_options+=(["da"]="fresh")
 }
 
 #####################################################
@@ -66,6 +69,8 @@ setDefaults(){
   clmdir=$def_clmdir
   cosdir=$def_cosdir
   pfldir=$def_pfldir
+#DA
+  dadir=$def_dadir
   mpiPath=$def_mpiPath
   ncdfPath=$def_ncdfPath
   lapackPath=$def_lapackPath
@@ -90,6 +95,8 @@ setDefaults(){
   options+=(["cos"]=${def_options["cos"]})
   options+=(["clm"]=${def_options["clm"]})
   options+=(["pfl"]=${def_options["pfl"]})
+#Da
+  options+=(["da"]=${def_options["da"]})
 
   #profiling
   profComp=""
@@ -117,6 +124,8 @@ clearPathSelection(){
   oasdir=""
   cosdir=""
   clmdir=""
+#DA
+  dadir=""
 }
 
 
@@ -134,13 +143,11 @@ setSelection(){
   #compiler optimization
   if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
 
-
 }
 
 finalizeSelection(){
 comment "  create bindir: $bindir"
-  
-  mkdir -p $bindir >> $log_file 2>> $err_file
+  mkdir -p $bindir/libs >> $log_file 2>> $err_file
 check
 
 }
@@ -151,8 +158,9 @@ setCombination(){
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
   if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
-  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi
-
+#DA
+  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${version}_${combination} ; fi  
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi 
 
   withOAS="false"
   withCOS="false"
@@ -160,6 +168,10 @@ setCombination(){
   withCLM="false"
   withOASMCT="false"
   withPCLM="false"
+#DA
+  withDA="false"
+  withPDAF="false"
+
 
   case "$combination" in *clm*) withCLM="true" ;; esac
   case "$combination" in *cos*) withCOS="true" ;; esac
@@ -168,6 +180,8 @@ setCombination(){
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi
+#DA
+  case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
 
 }
 
@@ -281,6 +295,35 @@ route "${cblue}< c_compileParflow${cnormal}"
 }
 
 
+#DA
+compileDA(){
+route "${cblue}> c_compileParflow${cnormal}"
+  comment "  source da interface script"
+    . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh >> $log_file 2>> $err_file
+  check
+    always_da
+    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cblue}< c_compileDA${cnormal}" ;return  ;fi 
+    if [[ ${options["da"]} == "fresh" ]] ; then 
+  comment "  backup da dir to: $dadir"
+      rm -rf $dadir >> $log_file 2>> $err_file
+  check
+      cp -rf ${rootdir}/${mList[4]} $dadir >> $log_file 2>> $err_file
+  check
+    fi  
+    if [[ ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      substitutions_da
+    fi  
+    if [[ ${options["da"]} == "configure" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      configure_da 
+    fi  
+
+    if [[ ${options["da"]} == "make" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
+      make_da
+    fi  
+route "${cblue}< c_compileDA${cnormal}"
+}
+
+
 runCompilation(){
 # run model compilation
   if [[ $withOAS == "true" ]] ; then ; compileOasis ; fi # must be called first bc of dependecies
@@ -288,6 +331,10 @@ runCompilation(){
   if [[ $withCLM == "true" ]] ; then ; compileClm ; fi
   if [[ $withCOS == "true" ]] ; then ; compileCosmo ; fi
   if [[ $withPFL == "true" ]] ; then ; compileParflow ; fi
+
+#DA
+  if [[ $withDA == "true" ]] ; then ; compileDA ; fi
+
 }
 
 interactive(){
@@ -373,33 +420,38 @@ interactive(){
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
-		  if [[ $numb == 8 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
-		  if [[ $numb == 9 ]] ; then ; read bindir ; fi
-		  if [[ $numb == 10 ]] ; then ; read oasdir ; fi
-		  if [[ $numb == 11 ]] ; then ; read clmdir ; fi
-		  if [[ $numb == 12 ]] ; then ; read cosdir ; fi
-		  if [[ $numb == 13 ]] ; then ; read pfldir ; fi
-		  if [[ $numb == 14 ]] ; then ; read mpiPath ; fi
-		  if [[ $numb == 15 ]] ; then ; read siloPath ; fi
-		  if [[ $numb == 16 ]] ; then ; read hyprePath ; fi
-	 	  if [[ $numb == 17 ]] ; then ; read tclPath ; fi
-		  if [[ $numb == 18 ]] ; then ; read grib1Path ; fi
-		  if [[ $numb == 19 ]] ; then ; read ncdfPath ; fi
- 		  if [[ $numb == 20 ]] ; then ; read pncdfPath ; fi
-		  if [[ $numb == 21 ]] ; then ; read lapackPath ; fi
+#DA
+                  if [[ $numb == 8 ]] ; then ; read val ;options+=(["da"]="$val") ; fi
+		  if [[ $numb == 9 ]] ; then ; read rootdir ;clearPathSelection; setCombination; fi
+		  if [[ $numb == 10 ]] ; then ; read bindir ; fi
+		  if [[ $numb == 11 ]] ; then ; read oasdir ; fi
+		  if [[ $numb == 12 ]] ; then ; read clmdir ; fi
+		  if [[ $numb == 13 ]] ; then ; read cosdir ; fi
+		  if [[ $numb == 14 ]] ; then ; read pfldir ; fi
+#DA
+                  if [[ $numb == 15 ]] ; then ; read dadir ; fi
+		  if [[ $numb == 16 ]] ; then ; read mpiPath ; fi
+		  if [[ $numb == 17 ]] ; then ; read siloPath ; fi
+		  if [[ $numb == 18 ]] ; then ; read hyprePath ; fi
+	 	  if [[ $numb == 19 ]] ; then ; read tclPath ; fi
+		  if [[ $numb == 20 ]] ; then ; read grib1Path ; fi
+		  if [[ $numb == 21 ]] ; then ; read ncdfPath ; fi
+ 		  if [[ $numb == 22 ]] ; then ; read pncdfPath ; fi
+		  if [[ $numb == 23 ]] ; then ; read lapackPath ; fi
 
-		  if [[ $numb == 22 ]] ; then ; read optComp ; fi
-		  if [[ $numb == 23 ]] ; then 
-			 print "The following profiling tools are available for $platform:"
-                         for a in ${profilingImpl} ; do
-				printf "%-20s\n" "$a"
-			 done
-		         print "Please type in your desired value..."
-			 read profiling 
+		  if [[ $numb == 24 ]] ; then ; read optComp ; fi
+		  if [[ $numb == 25 ]] ; then  
+			print "The following profiling tools are available for $platform:"
+                        for a in ${profilingImpl} ; do
+                               printf "%-20s\n" "$a"
+                        done
+                        print "Please type in your desired value..."
+                        read profiling			
 		  fi
-		  if [[ $numb == 24 ]] ; then ; read cplscheme ; fi
-                  if [[ $numb == 25 ]] ; then ; read readCLM ; fi
-		  if [[ $numb == 26 ]] ; then ; read freeDrain ; fi
+		  if [[ $numb == 26 ]] ; then ; read cplscheme ; fi
+
+                  if [[ $numb == 27 ]] ; then ; read readCLM ; fi
+		  if [[ $numb == 28 ]] ; then ; read freeDrain ; fi
 		done	
 		interactive
 	  ;;
@@ -420,28 +472,32 @@ printState(){
   print "${cred}(5)${cnormal} clm build option (default=${def_options["clm"]}): ${cgreen}${options["clm"]} ${cnormal}"
   print "${cred}(6)${cnormal} cosmo build option (default=${def_options["cos"]}): ${cgreen}${options["cos"]} ${cnormal}"
   print "${cred}(7)${cnormal} parflow build option (default=${def_options["pfl"]}): ${cgreen}${options["pfl"]} ${cnormal}"
+#DA
+  print "${cred}(8)${cnormal} data assimilation build option (default=${def_options["da"]}): ${cgreen}${options["da"]} ${cnormal}"
   print ""
-  print "${cred}(8)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
-  print "${cred}(9)${cnormal} bin dir (default=$def_rootdir/bin/${platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
-  print "${cred}(10)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
-  print "${cred}(11)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
-  print "${cred}(12)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
-  print "${cred}(13)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
+  print "${cred}(9)${cnormal} root dir (default=$def_rootdir): ${cgreen}$rootdir${cnormal}"
+  print "${cred}(10)${cnormal} bin dir (default=$def_rootdir/bin/${platform}_${version}_${combination}): ${cgreen}$bindir ${cnormal}"
+  print "${cred}(11)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
+  print "${cred}(12)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
+  print "${cred}(13)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(14)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
+#DA
+  print "${cred}(15)${cnormal} data assimilation dir (default=$def_rootdir/${mList[4]}_${platform}_${version}_$combination): ${cgreen}$dadir ${cnormal}"
   print ""
-  print "${cred}(14)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
-  print "${cred}(15)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
-  print "${cred}(16)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath ${cnormal}"
-  print "${cred}(17)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
-  print "${cred}(18)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
-  print "${cred}(19)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
-  print "${cred}(20)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
-  print "${cred}(21)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
+  print "${cred}(16)${cnormal} mpi path (default=$defaultMpiPath): ${cgreen}$mpiPath ${cnormal}"
+  print "${cred}(17)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
+  print "${cred}(18)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath ${cnormal}"
+  print "${cred}(19)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
+  print "${cred}(20)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
+  print "${cred}(21)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
+  print "${cred}(22)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
+  print "${cred}(23)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
   print ""
-  print "${cred}(22)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
-  print "${cred}(23)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
-  print "${cred}(24)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
-  print "${cred}(25)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
-  print "${cred}(26${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
+  print "${cred}(24)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
+  print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
+  print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
+  print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
+  print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
 }
 
 check(){
@@ -632,7 +688,10 @@ getRoot(){
   USAGE+="[Y:optcos?Build option for Cosmo.]:[optcos:='${def_options["cos"]}']"
   USAGE+="[X:optclm?Build option for CLM.]:[optclm:='${def_options["clm"]}']"
   USAGE+="[Z:optpfl?Build option for Parflow.]:[optpfl:='${def_options["pfl"]}']"
-   
+#DA
+  USAGE+="[U:optda?Build option for Data Assimilation.]:[optda:='${def_options["da"]}']"  
+  USAGE+="[u:dadir?Source directory for Data Assimilation. daV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[dadir:='${def_dadir}']"   
+
   USAGE+="[w:oasdir?Source directory for Oasis3. oasisV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[oasdir:='${def_oasdir}']"
   USAGE+="[y:cosdir?Source directory for Cosmo. cosmoV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[cosdir:='${def_cosdir}']"
   USAGE+="[x:clmdir?Source directory for CLM. clmV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[clmdir:='${def_clmdir}']"
@@ -668,12 +727,14 @@ getRoot(){
     C)  cplscheme="$OPTARG" ; args=1 ;;
     r)  readCLM="$OPTARG" ; args=1 ;;
     d)  freeDrain="$OPTARG" ; args=1 ;;
-
+#DA
+    U)  options+=(["da"]="$OPTARG") ; args=1 ;;
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
     Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
     X)  options+=(["clm"]="$OPTARG") ; args=1 ;;
     Z)  options+=(["pfl"]="$OPTARG") ; args=1 ;;
-
+#DA
+    u)  dadir="$OPTARG" ; args=1 ;;
     w)  oasdir="$OPTARG" ; args=1 ;;
     y)  cosdir="$OPTARG"; args=1 ;;
     x)  clmdir="$OPTARG"; args=1 ;;

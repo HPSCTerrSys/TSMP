@@ -1,0 +1,26 @@
+[DA]
+nreal = __ninst__
+outdir = "./pdafout"
+da_interval       = 1
+stat_dumpoffset   = 0
+
+[PF]
+problemname = "__pflname__"
+nprocs      = __pflproc__
+starttime   = 0
+dt          = __dt__
+endtime     = __endtime__
+updateflag  = 3
+paramupdate = 0
+aniso_perm_y  = 1.0
+aniso_perm_z  = 1.0
+printensemble = 0
+printstat     = 0
+
+[CLM]
+problemname = "lnd.stdin"
+nprocs      = __clmproc__
+
+[COSMO]
+nprocs	= __cosproc__
+dtmult = __dtmult__

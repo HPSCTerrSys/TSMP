@@ -92,7 +92,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/yslope*.pfb  $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into slopescript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
           sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
@@ -110,7 +110,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/ptb*.pfb  $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
         check
           sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
         check

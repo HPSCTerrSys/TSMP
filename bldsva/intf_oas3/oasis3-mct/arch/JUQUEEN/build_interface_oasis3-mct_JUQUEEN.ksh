@@ -15,10 +15,11 @@ route "${cblue}>> substitutions_oas${cnormal}"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
   check
 
-    c_substitutions_oas
   comment "   cp new  mod_oasis_method.F90 mod_oasis_grid.F90 to psmile/src"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/mod_oasis_* ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check
+
+    c_substitutions_oas
   comment "   sed prism_get_freq functionality to mod_prism.F90"
     sed -i "/oasis_get_debug/a   use mod_oasis_method ,only: prism_get_freq            => oasis_get_freq" ${oasdir}/lib/psmile/src/mod_prism.F90  >> $log_file 2>> $err_file   # critical anchor
   check

@@ -50,6 +50,12 @@ check
 mpitasks=$((numInst * ($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 
+#DA
+if [[ $withPDAF == "true" ]] ; then
+  srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -delt_obs $delta_obs -rms_obs 0 -obs_filename noname"
+else
+  srun="srun --multi-prog slm_multiprog_mapping.conf"
+fi
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
@@ -69,9 +75,8 @@ source $rundir/loadenvs
 date
 echo "started" > started.txt
 rm -rf YU*
-
 export $profVar
-srun --multi-prog slm_multiprog_mapping.conf
+$srun
 date
 echo "ready" > ready.txt
 exit 0

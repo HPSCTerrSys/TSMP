@@ -101,7 +101,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/slope*.sa  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
@@ -119,7 +119,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/pfl_ind.sa $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,lappend auto_path.*,lappend auto_path $pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check

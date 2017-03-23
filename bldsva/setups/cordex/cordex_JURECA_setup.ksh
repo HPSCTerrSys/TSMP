@@ -29,6 +29,10 @@ initSetup(){
   
   defaultRunhours=3
 
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1 
+
   gx_clm=436
   gy_clm=424
   dt_clm=3600

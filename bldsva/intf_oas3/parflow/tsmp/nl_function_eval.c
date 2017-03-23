@@ -218,8 +218,6 @@ void NlFunctionEval (Vector *pressure,  /* Current pressure values */
    printf("free drainage BC used \n");
 #endif
 
-
-   
    VectorUpdateCommHandle  *handle;
 
    BeginTiming(public_xtra -> time_index);

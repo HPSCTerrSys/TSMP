@@ -10,7 +10,7 @@ initSetup(){
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl 
-
+  defaultNLDA=$rootdir/bldsva/setups/nrw/DA-nl
 
   defaultNppn=16
   defaultCLMProcX=8
@@ -44,6 +44,8 @@ initSetup(){
   dt_pfl=0.25
   pflrunname="rurlaf"
   base_pfl=0.0025
+
+  delta_obs=90000
 
   cplfreq1=900
   cplfreq2=900
@@ -100,7 +102,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/*slope*  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into slopescript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__svaroot__.*,$bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
@@ -118,7 +120,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           chmod u+w $rundir/*Soil* $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
-          sed "s,__svaroot__.*,$pfldir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,__svaroot__.*,$bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	check

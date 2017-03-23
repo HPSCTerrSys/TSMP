@@ -5,7 +5,7 @@ getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
 
   # Default library paths
-  defaultMpiPath="/usr"
+  defaultMpiPath="/opt/openmpi/1.10.5"
   defaultNcdfPath="/home/f.gasper/local/libs/netcdf"
   defaultGrib1Path="/home/w.kurtz/libs/DWD-libgrib1_061107"
   defaultTclPath="/usr"
@@ -70,16 +70,20 @@ if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
 fi
 
 
-exel="mpirun "
+#DA
+if [[ $withPDAF == "true" ]] ; then
+  exel="mpirun -np $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -delt_obs $delta_obs -rms_obs 0 -obs_filename noname"
+else
 
+  exel="mpirun "
 
-if [[ $withOAS == "true" && $withOASMCT == "false" ]] ; then ; exel=$exel" -np $nproc_oas  ./oasis3.MPI1.x :" ; fi
-if [[ $withCOS == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_cos))  ./lmparbin_pur :" ; fi  
-if [[ $withPFL == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_pfl))  ./parflow $pflrunname  :" ; fi
-if [[ $withCLM == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_clm))  ./clm  :" ; fi
+  if [[ $withOAS == "true" && $withOASMCT == "false" ]] ; then ; exel=$exel" -np $nproc_oas  ./oasis3.MPI1.x :" ; fi
+  if [[ $withCOS == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_cos))  ./lmparbin_pur :" ; fi  
+  if [[ $withPFL == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_pfl))  ./parflow $pflrunname  :" ; fi
+  if [[ $withCLM == "true" ]] ; then ; exel=$exel" -np $(($numInst*$nproc_clm))  ./clm  :" ; fi
 
-exel=${exel%?} #remove trailing ":"
-
+  exel=${exel%?} #remove trailing ":"
+fi
 
 cat << EOF >> $rundir/tsmp_pbs_run.ksh
 

@@ -235,13 +235,19 @@ comment "   sed executables and processors into mapping file for instance $insta
   sed "s/__oas3__/#mpmdend/" -i $rundir/ll_multiprog_mapping.conf >> $log_file 2>> $err_file
   check
 
+#DA
+if [[ $withPDAF == "true" ]] ; then
+  runjob="runjob -p $nppn -n $mpitasks $runflags : ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -delt_obs $delta_obs -rms_obs 0 -obs_filename noname"
+else
+  runjob="runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./$exe"
+fi
 
 
 
 cat << EOF >> $rundir/tsmp_ll_run.ksh
 echo "started" > started.txt
 date
-$profRun runjob -p $nppn -n $mpitasks --mapping ll_multiprog_mapping.conf $runflags : ./$exe
+$runjob
 date
 
 echo "ready" > ready.txt
