@@ -68,7 +68,8 @@ contains
     use clm_atmlnd         , only : clm_a2l
     use clm_varcon         , only : denh2o, denice, roverg, hvap, hsub, &
                                     istice, istwet, zlnd, zsno, spval
-    use clm_varpar         , only : nlevsoi, nlevsno, max_pft_per_col      !CPS added max_pft_per_col
+    use clm_varpar         , only : nlevsoi, nlevsno, max_pft_per_col, &
+                                    maxpatch_pft      !CPS added max_pft_per_col
     use QSatMod            , only : QSat
 !
 ! !ARGUMENTS:
@@ -398,7 +399,8 @@ contains
     end do
 
 !CPS change forc_hgt = forc_hgt + z0m + displa at PFT level, works for 1 pft max
-    if (max_pft_per_col .eq. 1) then
+!    if (max_pft_per_col .eq. 1) then
+    if (maxpatch_pft .eq. 1) then
     do pi = 1,max_pft_per_col
       do fc = 1,num_nolakec
         c = filter_nolakec(fc)
