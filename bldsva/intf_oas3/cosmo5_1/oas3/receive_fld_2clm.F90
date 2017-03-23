@@ -578,7 +578,9 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
       !
  END IF                           ! coupling on valid PE only
 
-!CPS WHERE ( fr_land < 0.5 )   t_g(:,:,nnew) = t_s(:,:,nx)
+ !CPS For non-land points
+ WHERE ( fr_land < 0.5 )   t_g(:,:,nnew) = t_s(:,:,nx)
+ WHERE ( fr_land < 0.5 )   tcw(:,:) = tch(:,:)
 
  CALL MPI_Barrier(kl_comm, ierror)
 
