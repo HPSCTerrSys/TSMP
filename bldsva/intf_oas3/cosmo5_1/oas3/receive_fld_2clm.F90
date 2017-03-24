@@ -579,8 +579,10 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
  END IF                           ! coupling on valid PE only
 
  !CPS For non-land points
- WHERE ( fr_land < 0.5 )   t_g(:,:,nnew) = t_s(:,:,nx)
- WHERE ( fr_land < 0.5 )   tcw(:,:) = tch(:,:)
+ WHERE ( fr_land < 0.5 )   t_g(:,:,nnew) = t_s(:,:,nx)   !Surface weighted T
+ WHERE ( fr_land < 0.5 )   tcw(:,:) = tch(:,:)           !Transfer Coef for qv
+ WHERE ( fr_land < 0.5 )   trad_clm(:,:) = t_s(:,:,nx)   !radiation coupling
+ WHERE ( fr_land < 0.5 )   qv_s(:,:,nnew) = qv_s(:,:,nx) !Humidity
 
  CALL MPI_Barrier(kl_comm, ierror)
 
