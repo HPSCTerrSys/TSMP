@@ -89,7 +89,8 @@ setDefaults(){
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
   stdout_file=$cpwd/stdout_all_${date}.txt
-  rm -f $log_file $err_file $stdout_file
+  patchlog_file=$cpwd/patch_all_${date}.txt
+  rm -f $log_file $err_file $stdout_file $patchlog_file
 
   options+=(["oas"]=${def_options["oas"]})
   options+=(["cos"]=${def_options["cos"]})
@@ -519,6 +520,11 @@ terminate(){
   exit 0
 }
 
+patch(){
+  print -n "${ccyan}\npatching $1 into $2 ${cnormal}" | tee -a $stdout_file
+  cp -r -v $1 $2 >> $patchlog_file 2>> $err_file
+}
+
 comment(){
   print -n "$1" | tee -a $stdout_file
 }
@@ -647,6 +653,11 @@ getRoot(){
   cnormal=$(tput sgr0)   #9
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
+  cmagenta=$(tput setaf 5)
+  ccyan=$(tput setaf 6)
+
+  patchlog=""
+
   typeset -A options
   typeset -A def_options
 
@@ -791,7 +802,6 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-
   softSanityCheck
   comment "  source common interface"
     . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
@@ -802,11 +812,16 @@ check
   finalizeMachine
   runCompilation
 
+  echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
+  cat $patchlog_file >> $log_file
+
+  echo "" >> $log_file
   echo "Git:" >> $log_file
   cd $rootdir
   git rev-parse --abbrev-ref HEAD >> $log_file
   git rev-parse HEAD >> $log_file
   
+  echo "" >> $log_file 
   echo "Selection:" >> $log_file
   printState >> $log_file
 
@@ -814,18 +829,22 @@ check
   sed -i "s,.\[32m,,g" $log_file
   sed -i "s,.\[31m,,g" $log_file
   sed -i "s,.\[34m,,g" $log_file
+  sed -i "s,.\[36m,,g" $log_file
   sed -i "s,.[(]B.\[m,,g" $log_file
 
   sed -i "s,.\[32m,,g" $stdout_file
   sed -i "s,.\[31m,,g" $stdout_file
   sed -i "s,.\[34m,,g" $stdout_file
+  sed -i "s,.\[36m,,g" $stdout_file
   sed -i "s,.[(]B.\[m,,g" $stdout_file
 
+  echo "" >> $log_file
   echo "Call:" >> $log_file
   print "$call $*">> $log_file
   mv -f $err_file $bindir
   mv -f $log_file $bindir
   mv -f $stdout_file $bindir
+  rm -f $patchlog_file
 
   print ${cgreen}"build script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"

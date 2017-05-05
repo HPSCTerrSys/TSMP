@@ -12,10 +12,10 @@ route "${cblue}<< always_oas${cnormal}"
 substitutions_oas(){
 route "${cblue}>> substitutions_oas${cnormal}"
   comment "    cp TopMakefileOasis3 to make_dir"
-    cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
+    patch $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
   check
   comment "   cp new  mod_oasis_method.F90 mod_oasis_grid.F90 to psmile/src"
-    cp $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/mod_oasis_* ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/mod_oasis_*" ${oasdir}/lib/psmile/src 
   check
     c_substitutions_oas
   comment "   sed prism_get_freq functionality to mod_prism.F90"
