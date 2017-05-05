@@ -656,8 +656,6 @@ getRoot(){
   cmagenta=$(tput setaf 5)
   ccyan=$(tput setaf 6)
 
-  patchlog=""
-
   typeset -A options
   typeset -A def_options
 
