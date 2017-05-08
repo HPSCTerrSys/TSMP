@@ -913,6 +913,10 @@ check
  #DA
     #PDAF creation
     if [[ $withPDAF == "true" ]] ; then
+      comment "  mkdir sub-directory for instance"
+        mkdir -p $origrundir/tsmp_instance_$(printf "%05d" $instance) >> $log_file 2>> $err_file
+      check
+	
 	namelist_cos="${orignamelist_cos}_${instance}"
         namelist_clm="${orignamelist_clm}_${instance}"
         namelist_pfl="${orignamelist_pfl}_${instance}"
@@ -923,7 +927,9 @@ check
     if [[ $withPFL == "true" ]] ; then ; setup_pfl ;  fi
     if [[ $withOAS == "true" ]] ; then ; setup_oas ;  fi
 
-    if [[ $withPDAF == "false" ]] ; then
+    if [[ $withPDAF == "true" ]] ; then
+      mv ${pflrunname}_$(printf "%05d" $instance).pfidb $origrundir/tsmp_instance_$(printf "%05d" $instance)   		
+    else	
       finalizeSetup
     fi
   route ${cblue}"< creating instance: $instance"${cnormal}

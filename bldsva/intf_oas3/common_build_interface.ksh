@@ -502,6 +502,9 @@ comment "  sed restart file path to namelist"
 check
 
 
+comment "  add axe rights to clm namelist"
+    chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
 comment "  run clm namelist"
     $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
