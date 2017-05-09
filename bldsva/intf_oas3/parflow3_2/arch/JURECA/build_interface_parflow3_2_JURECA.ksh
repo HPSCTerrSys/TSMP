@@ -34,6 +34,9 @@ route "${cblue}>> configure_pfl${cnormal}"
   comment "   sed correct linker command in pfsimulator"
     sed -i 's@-lmpi"@@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
+  comment "   sed CXX to CC in Makefile.config in  pfsimulator"
+    sed -i 's@CXX@CC@' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
   comment "   sed correct linker command in pftools"
     sed -i 's@-lmpi"@@' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
 check
