@@ -46,7 +46,7 @@ route "${cblue}>> substitutions_cos${cnormal}"
  c_substitutions_cos
 
  comment "   a fixed mpe_io.f90 for MPICH MPIs is necessary"
-   cp $rootdir/bldsva/intf_oas3/cosmo4_21/arch/$platform/src/mpe_io.f90 $cosdir/src >> $log_file 2>> $err_file
+   patch $rootdir/bldsva/intf_oas3/cosmo4_21/arch/$platform/src/mpe_io.f90 $cosdir/src 
  check
 
    if [[ $withOASMCT == "true" ]] ; then

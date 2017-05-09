@@ -68,7 +68,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --error=mpiMPMD-err.%j
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=NONE
 
 cd $rundir
 source $rundir/loadenvs
