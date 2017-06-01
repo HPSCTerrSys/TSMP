@@ -79,22 +79,22 @@ route "${cblue}<<< c_make_cos${cnormal}"
 c_substitutions_cos(){
 route "${cblue}>>> c_substitutions_cos${cnormal}"
   comment "    copy oas3 interface to cosmo/src "
-    cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src 
   check
   comment "    replace files with coupling. Add files to cosmo/src "
-    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/* $cosdir/src >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
   check
 
 #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
-	cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/data_parallel.f90 $cosdir/src/ >> $log_file 2>> $err_file
+	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/data_parallel.f90 $cosdir/src/ 
     check
-        cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/organize_data.f90 $cosdir/src/ >> $log_file 2>> $err_file
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/organize_data.f90 $cosdir/src/ 
     check
-        cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_meanvalues.f90 $cosdir/src/ >> $log_file 2>> $err_file
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_meanvalues.f90 $cosdir/src/ 
     check
-        cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_setup.f90 $cosdir/src/ >> $log_file 2>> $err_file
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_setup.f90 $cosdir/src/ 
     check
   fi
 route "${cblue}<<< c_substitutions_cos${cnormal}"
@@ -173,7 +173,7 @@ cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__dump_cos_interval__/$(($dump_cos*(3600/$dt_cos)))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600./$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -250,7 +250,7 @@ route "${cblue}>>> c_substitutions_oas${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
      comment "    cp PDAF fix to ${oasdir}/lib/psmile/src"
-       cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*  ${oasdir}/lib/psmile/src
+       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*"  ${oasdir}/lib/psmile/src
      check
   fi
 route "${cblue}<<< c_substitutions_oas${cnormal}"
@@ -443,19 +443,19 @@ route "${cblue}<<< c_make_clm${cnormal}"
 c_substitutions_clm(){
 route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    copy oas3 interface to clm/src "
-    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src
   check
   comment "    replace hydrology. Add files to clm/bld/usr.src "
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/* $clmdir/bld/usr.src >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/*" $clmdir/bld/usr.src 
   check
 #DA
   if [[ $withPDAF == "true" ]] ; then
   comment "    copy PDAF fix to $clmdir/bld/usr.src "
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
   check
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/iniTimeConst.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
   fi	
 route "${cblue}<<< c_substitutions_clm${cnormal}"
@@ -502,6 +502,9 @@ comment "  sed restart file path to namelist"
 check
 
 
+comment "  add axe rights to clm namelist"
+    chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
 comment "  run clm namelist"
     $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
@@ -616,13 +619,13 @@ route "${cblue}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cblue}>>> c_substitutions_pfl${cnormal}"
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
-    cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
 
   comment "    copy fix for hardwired MPI_COMM_WORLD in amps "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps* $pfldir/pfsimulator/amps/mpi1 >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps*" $pfldir/pfsimulator/amps/mpi1
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/pf_pfmg* $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/pf_pfmg*" $pfldir/pfsimulator/parflow_lib 
   check
 #DA
   if [[ $withPDAF == "true" ]]; then
@@ -634,11 +637,11 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
       " -i $pfldir/pfsimulator/configure $pfldir/pftools/configure >> $log_file 2>> $err_file
     check
     comment "    copy fix for PDAF into $pfldir"
-      cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
     check
-      cp $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/solver_richards.c $pfldir/pfsimulator/parflow_lib >> $log_file 2>> $err_file
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/solver_richards.c $pfldir/pfsimulator/parflow_lib 
     check
-      cp -r $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/da $pfldir/pfsimulator/amps >> $log_file 2>> $err_file
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/da $pfldir/pfsimulator/amps
     check
       sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg.c
     check
@@ -703,6 +706,9 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
       sed '/__pfl_ICPpressureFileName__/d' -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file
   check
     else
+  comment "   sed delete IC_Pressure value  from pfl namelist." 
+      sed '/__pfl_ICPpressureValue__/d' -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
   comment "   sed initial condition to pfl namelist."
       sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
   check

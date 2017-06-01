@@ -52,7 +52,7 @@ nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ce
 
 #DA
 if [[ $withPDAF == "true" ]] ; then
-  srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -delt_obs $delta_obs -rms_obs 0 -obs_filename noname"
+  srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -subtype 1 -delt_obs $delta_obs -rms_obs 0.03 -obs_filename swc_crp"
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
@@ -68,7 +68,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --error=mpiMPMD-err.%j
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
-#SBATCH --mail-type=ALL
+#SBATCH --mail-type=NONE
 
 cd $rundir
 source $rundir/loadenvs

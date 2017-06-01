@@ -101,12 +101,13 @@ setups+=(
         ["bonnRadar"]="two moment microphysics"
         ["seabreeze"]="sea breeze simulation"
         ["smresponse"]="soil moisture response"
+        ["bonn"]="flood area of interest"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar seabreeze smresponse "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "

@@ -59,32 +59,32 @@ route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
 
   comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c 
   check 
 
-  print -n "   cp new files with Fortran underscore fix"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  comment "   cp new files with Fortran underscore fix"
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ 
   check
-  print -n "   cp new files with little endian fix"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ >> $log_file 2>> $err_file
+  comment "   cp new files with little endian fix"
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_io.c           $pfldir/pfsimulator/amps/common/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_io.c           $pfldir/pfsimulator/amps/common/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_config.h.in $pfldir/pfsimulator/config/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/parflow_config.h.in $pfldir/pfsimulator/config/ 
   check
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/tools_io.h          $pfldir/pftools/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/tools_io.h          $pfldir/pftools/ 
   check
 
     if [[ $withOASMCT == "true" ]] ; then 

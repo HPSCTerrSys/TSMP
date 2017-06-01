@@ -49,7 +49,7 @@ substitutions_cos(){
 route "${cblue}>> substitutions_cos${cnormal}"
  c_substitutions_cos
  comment "   cp ObjFiles & ObjDependencies in $cosdir"
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj* $cosdir >> $log_file 2>> $err_file
+   patch "$rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj*" $cosdir
  check
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"

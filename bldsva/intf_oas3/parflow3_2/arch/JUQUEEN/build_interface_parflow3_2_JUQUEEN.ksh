@@ -21,8 +21,11 @@ route "${cblue}>> configure_pfl${cnormal}"
     fi  
 
     if [[ $readCLM == "true" ]] ; then ; cplInc+=" -WF,-DREADCLM " ; fi
-
-    flagsSim+="CC=$mpiPath/bin/mpixlc_r  CXX=$mpiPath/bin/mpixlcxx_r FC=$mpiPath/bin/mpixlf90_r F77=$mpiPath/bin/mpixlf77_r "
+    flagsSim=" "
+    pcc="${profComp} $mpiPath/bin/mpixlc_r"
+    pfc="${profComp} $mpiPath/bin/mpixlf90_r"
+    pf77="${profComp} $mpiPath/bin/mpixlf77_r"
+    pcxx="${profComp} $mpiPath/bin/mpixlcxx_r"
     flagsTools+="CC=gcc FC=gfortran F77=gfortran "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdf"
     fcflagsSim="-qfree=f90 -qsuffix=cpp=F90 -qnoextname $cplInc -WF,-Duse_libMPI -WF,-Duse_netCDF -WF,-Duse_comm_MPI1 -WF,-DVERBOSE -WF,-DDEBUG -WF,-DTREAT_OVERLAY -I$ncdfPath/include "
@@ -59,29 +62,29 @@ route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
  
 
-  print -n "   cp new files with Fortran underscore fix"
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+  comment "   cp new files with Fortran underscore fix"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c         $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_coupler.h      $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h     $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas_pfl_vardef.F90  $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_proto_f90.h $pfldir/pfsimulator/parflow_lib/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_proto_f.h   $pfldir/pfsimulator/parflow_lib/ 
   check
-  print -n "   cp new files with little endian fix"
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ >> $log_file 2>> $err_file
+  comment "   cp new files with little endian fix"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/mpi1/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_proto.h        $pfldir/pfsimulator/amps/oas3/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_io.c           $pfldir/pfsimulator/amps/common/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_io.c           $pfldir/pfsimulator/amps/common/
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_config.h.in $pfldir/pfsimulator/config/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/parflow_config.h.in $pfldir/pfsimulator/config/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/tools_io.h          $pfldir/pftools/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/tools_io.h          $pfldir/pftools/ 
   check
 
     if [[ $withOASMCT == "true" ]] ; then 

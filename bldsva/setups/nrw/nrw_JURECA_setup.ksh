@@ -46,7 +46,7 @@ initSetup(){
   cplfreq1=900
   cplfreq2=900
 
-  delta_obs=90000
+  delta_obs=1
  
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
