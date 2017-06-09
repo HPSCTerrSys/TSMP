@@ -14,6 +14,163 @@
 # only platform and version independent stuff should be done here
 
 
+############################ 
+# ICON interface methods
+############################
+
+
+c_configure_icon(){
+route "${cblue}>>> c_configure_icon${cnormal}"
+  comment "    cd to icon dir"
+    cd $icondir >> $log_file 2>> $err_file
+  check
+  ./configure --with-fortran=intel >> $log_file 2>> $err_file
+  file=$icondir/Makefile
+  #comment "    sed icon rootdir to Makefile"
+  #  sed -i "s@__iconroot__@$icondir@" $file >> $log_file 2>> $err_file
+  #check
+  comment "    sed OAS flag to Makefile"
+    sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
+  check
+  comment "    make clean icon"
+    make clean >> $log_file 2>> $err_file
+  check
+
+    cplFlag=""
+    cplLib=""
+    cplInc=""
+    if [[ $withOAS == "true" ]] ; then
+      cplLib="$liboas $libpsmile"
+      cplInc="$incpsmile"
+    fi
+route "${cblue}<<< c_configure_icon${cnormal}"
+}
+
+c_make_icon(){
+route "${cblue}>>> c_make_icon${cnormal}"
+  comment "    cd to icon dir"
+    cd $icondir >> $log_file 2>> $err_file
+  check
+  comment "    make icon"
+    make -j8 -f $icondir/Makefile >> $log_file 2>> $err_file
+  check
+
+  comment "    cp icon binary to $bindir"
+  cp $icondir/build/x86_64-unknown-linux-gnu/bin/icon $bindir >> $log_file 2>> $err_file
+  check
+
+route "${cblue}<<< c_make_icon${cnormal}"
+}
+
+
+c_substitutions_icon(){
+route "${cblue}>>> c_substitutions_icon${cnormal}"
+  comment "    copy oas3 interface to icon/src "
+  #  cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $icondir/src >> $log_file 2>> $err_file
+  check
+  comment "    replace files with coupling. Add files to icon/src "
+  #  cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/* $icondir/src >> $log_file 2>> $err_file
+  check
+
+route "${cblue}<<< c_substitutions_icon${cnormal}"
+}
+
+c_setup_icon(){
+route "${cblue}>>> c_setup_icon${cnormal}"
+
+comment "  cp namelist to rundir"
+  cp ${namelist_cos} $rundir/icon_nml >> $log_file 2>> $err_file
+check
+
+nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
+#if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
+
+comment "  sed dt to namelist"
+  sed "s,dt_icon_bldsva,$dt_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+
+comment "  sed number of procs to namelist"
+  sed "s,nproc_icon_bldsva,$p_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+
+#comment "  sed gridpoints to namelist"
+#  sed "s,ie_tot_bldsva,$gx_cos," -i $rundir/icon_nml >> $log_file 2>> $err_file
+#check
+#  sed "s,je_tot_bldsva,$gy_cos," -i $rundir/icon_nml >> $log_file 2>> $err_file
+#check
+
+#comment "  sed gridpoints to namelist"
+#  sed "s,nbdl_cos_bldsva,$nbndlines," -i $rundir/icon_nml >> $log_file 2>> $err_file
+#check
+
+
+comment "  create input dir for icon"
+  mkdir -p $rundir/icon_in >> $log_file 2>> $err_file
+check
+comment "  fill icon input dir with softlinks from icon forcing dir"
+  ln -sf $forcingdir_icon/* $rundir/icon_in >> $log_file 2>> $err_file
+check
+
+comment "  sed forcingdir to namelist"
+  sed "s,__forcingdir__,$rundir/icon_in," -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+comment "  sed rundir to namelist"
+  sed "s,__rundir__,$rundir," -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+comment "  sed stop time to namelist"
+  sed "s/nstop_icon_bldsva/$nstop_icon/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+comment "  sed date to namelist"
+  sed "s/init_y_bldsva/$(date '+%Y' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+  sed "s/init_m_bldsva/$(date '+%m' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+  sed "s/init_d_bldsva/$(date '+%d' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+  sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+
+cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))/3600))
+comment "  sed start hour to namelist"
+sed "s/__hstart__/$cnt/" -i $rundir/icon_nml >> $log_file 2>> $err_file
+check
+comment "  sed restart interval to namelist"
+sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
+check
+sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
+check
+sed "s/__nhour_restart_incr__/1/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
+check
+
+cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos} ))
+comment "  sed output interval to namelist"
+sed "s/__ncomb_start__/$cnts/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
+check
+sed "s/__dump_cos_interval__/$(($dump_cos*(3600/$dt_cos)))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
+check
+
+if [[ $restfile_cos != "" ]] then
+comment "  softlink restart file to input dir"
+ln -s $restfile_cos $rundir/cosmo_in  >> $log_file 2>> $err_file
+check
+fi
+
+
+
+comment "  cd to rundir"
+  cd $rundir >> $log_file 2>> $err_file
+check
+comment "  run icon_nml clean"
+  $rundir/icon_nml cleancluma >> $log_file 2>> $err_file
+check
+comment "  run icon_nml exe"
+  $rundir/icon_nml execluma >> $log_file 2>> $err_file
+check
+
+route "${cblue}<<< c_setup_icon${cnormal}"
+}
+
+
 
 ############################ 
 #Cosmo interface methods

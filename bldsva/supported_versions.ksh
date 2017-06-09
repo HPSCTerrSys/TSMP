@@ -21,7 +21,7 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
+        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT "
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
@@ -43,11 +43,12 @@ versions+=(
         ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
         ["3.0.0"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
+        ["4.0.0MCT"]="4.0.0 clm3_5 icon-hdcp2-20150930 and Parflow3_2 and with Oasis3-MCT"
 )
 
 
 # The model versions that correspond to a release version
-# order: Oasis, CLM , COSMO, Parflow !!!
+# order: Oasis, CLM , COSMO, Parflow, ICON !!!
 # Important: this order must be fulfilled. If one of it is not supported, leave a "" at its place.
 modelVersion+=(
         ["1.2.0"]="oasis3 clm3_5 cosmo5_1 parflow"
@@ -63,6 +64,7 @@ modelVersion+=(
         ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
+        ["4.0.0MCT"]="oasis3-mct clm3_5 parflow3_2 icon-hdcp2-20150930"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -83,7 +85,7 @@ combinations+=(
         ["3.0.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-
+        ["4.0.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 )
 
 #list of supported testcases for a certain machine.

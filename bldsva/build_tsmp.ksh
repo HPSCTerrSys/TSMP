@@ -13,6 +13,7 @@ getDefaults(){
   def_bindir=""				#Will be set to $rootdir/bin/$platform_$version_$combination if empty
   def_oasdir=""				#Will be set to $rootdir/XXX_$platform_$combination if empty
   def_cosdir=""
+  def_icondir=""
   def_clmdir=""
   def_pfldir=""
 #DA
@@ -47,6 +48,7 @@ getDefaults(){
   def_options+=(["clm"]="fresh")
   def_options+=(["pfl"]="fresh")
   def_options+=(["cos"]="fresh")
+  def_options+=(["icon"]="fresh")
 #DA
   def_options+=(["da"]="fresh")
 }
@@ -68,6 +70,7 @@ setDefaults(){
   oasdir=$def_oasdir
   clmdir=$def_clmdir
   cosdir=$def_cosdir
+  icondir=$def_icondir
   pfldir=$def_pfldir
 #DA
   dadir=$def_dadir
@@ -89,10 +92,12 @@ setDefaults(){
   log_file=$cpwd/log_all_${date}.txt
   err_file=$cpwd/err_all_${date}.txt
   stdout_file=$cpwd/stdout_all_${date}.txt
-  rm -f $log_file $err_file $stdout_file
+  patchlog_file=$cpwd/patch_all_${date}.txt
+  rm -f $log_file $err_file $stdout_file $patchlog_file
 
   options+=(["oas"]=${def_options["oas"]})
   options+=(["cos"]=${def_options["cos"]})
+  options+=(["icon"]=${def_options["icon"]})
   options+=(["clm"]=${def_options["clm"]})
   options+=(["pfl"]=${def_options["pfl"]})
 #Da
@@ -123,6 +128,7 @@ clearPathSelection(){
   pfldir=""
   oasdir=""
   cosdir=""
+  icondir=""
   clmdir=""
 #DA
   dadir=""
@@ -156,6 +162,7 @@ setCombination(){
   set -A mList ${modelVersion[$version]}
   if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
+  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
   if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
 #DA
@@ -164,6 +171,7 @@ setCombination(){
 
   withOAS="false"
   withCOS="false"
+  withICON="false"
   withPFL="false"
   withCLM="false"
   withOASMCT="false"
@@ -175,8 +183,9 @@ setCombination(){
 
   case "$combination" in *clm*) withCLM="true" ;; esac
   case "$combination" in *cos*) withCOS="true" ;; esac
+  case "$combination" in *icon*) withICON="true" ;; esac
   case "$combination" in *pfl*) withPFL="true" ;; esac
-  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
+  if [[ $withCLM == "true" && ( $withCOS == "true" || $withICON == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi
@@ -211,6 +220,33 @@ route "${cblue}> c_compileClm${cnormal}"
       make_clm
     fi
 route "${cblue}< c_compileClm${cnormal}"
+}
+
+compileIcon(){
+route "${cblue}> c_compileIcon${cnormal}"
+  comment "  source icon interface script"
+    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
+  check
+    always_icon
+    if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cblue}< c_compileIcon${cnormal}" ;  return  ;fi 
+    if [[ ${options["icon"]} == "fresh" ]] ; then 
+  comment "  backup icon dir to: $icondir"
+      rm -rf $icondir >> $log_file 2>> $err_file
+  check
+      cp -rf ${rootdir}/${mList[3]} $icondir >> $log_file 2>> $err_file
+  check
+    fi
+    if [[ ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
+      substitutions_icon
+    fi
+    if [[ ${options["icon"]} == "configure" || ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
+      configure_icon
+    fi
+
+    if [[ ${options["icon"]} == "make" || ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
+      make_icon
+    fi
+route "${cblue}< c_compileIcon${cnormal}"
 }
 
 compileCosmo(){
@@ -330,6 +366,7 @@ runCompilation(){
 
   if [[ $withCLM == "true" ]] ; then ; compileClm ; fi
   if [[ $withCOS == "true" ]] ; then ; compileCosmo ; fi
+  if [[ $withICON == "true" ]] ; then ; compileIcon ; fi
   if [[ $withPFL == "true" ]] ; then ; compileParflow ; fi
 
 #DA
@@ -418,6 +455,7 @@ interactive(){
 		  fi
 		  if [[ $numb == 4 ]] ; then ; read val ;options+=(["oas"]="$val") ; fi
 		  if [[ $numb == 5 ]] ; then ; read val ;options+=(["clm"]="$val") ; fi
+		  if [[ $numb == 29 ]] ; then ; read val ;options+=(["icon"]="$val") ; fi
 		  if [[ $numb == 6 ]] ; then ; read val ;options+=(["cos"]="$val") ; fi
 		  if [[ $numb == 7 ]] ; then ; read val ;options+=(["pfl"]="$val") ; fi
 #DA
@@ -427,6 +465,7 @@ interactive(){
 		  if [[ $numb == 11 ]] ; then ; read oasdir ; fi
 		  if [[ $numb == 12 ]] ; then ; read clmdir ; fi
 		  if [[ $numb == 13 ]] ; then ; read cosdir ; fi
+		  if [[ $numb == 30 ]] ; then ; read icondir ; fi
 		  if [[ $numb == 14 ]] ; then ; read pfldir ; fi
 #DA
                   if [[ $numb == 15 ]] ; then ; read dadir ; fi
@@ -471,6 +510,7 @@ printState(){
   print "${cred}(4)${cnormal} oasis build option (default=${def_options["oas"]}): ${cgreen}${options["oas"]} ${cnormal}" 
   print "${cred}(5)${cnormal} clm build option (default=${def_options["clm"]}): ${cgreen}${options["clm"]} ${cnormal}"
   print "${cred}(6)${cnormal} cosmo build option (default=${def_options["cos"]}): ${cgreen}${options["cos"]} ${cnormal}"
+  print "${cred}(29)${cnormal} icon build option (default=${def_options["icon"]}): ${cgreen}${options["icon"]} ${cnormal}"
   print "${cred}(7)${cnormal} parflow build option (default=${def_options["pfl"]}): ${cgreen}${options["pfl"]} ${cnormal}"
 #DA
   print "${cred}(8)${cnormal} data assimilation build option (default=${def_options["da"]}): ${cgreen}${options["da"]} ${cnormal}"
@@ -480,6 +520,7 @@ printState(){
   print "${cred}(11)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
   print "${cred}(12)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
   print "${cred}(13)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
+  print "${cred}(30)${cnormal} icon dir (default=$def_rootdir/${mList[5]}_${platform}_${version}_$combination): ${cgreen}$icondir ${cnormal}"
   print "${cred}(14)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
 #DA
   print "${cred}(15)${cnormal} data assimilation dir (default=$def_rootdir/${mList[4]}_${platform}_${version}_$combination): ${cgreen}$dadir ${cnormal}"
@@ -517,6 +558,11 @@ terminate(){
   rm -f $log_file
   rm -f $stdout_file
   exit 0
+}
+
+patch(){
+  print -n "${ccyan}\npatching $1 into $2 ${cnormal}" | tee -a $stdout_file
+  cp -r -v $1 $2 >> $patchlog_file 2>> $err_file
 }
 
 comment(){
@@ -565,12 +611,15 @@ softSanityCheck(){
 
   valid="false"
   cstr="invalid"
-  if [[ $withCLM == "true" &&  $withCOS == "true" && $withPFL == "true"  ]]; then ;cstr=" clm-cos-pfl " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" clm-cos " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-pfl " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm " ; fi
-  if [[ $withCLM == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" cos " ; fi
-  if [[ $withCLM == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "true"  ]]; then ;cstr=" clm-cos-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-icon-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" clm-cos " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm-icon " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" cos " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" icon " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
 
@@ -647,6 +696,9 @@ getRoot(){
   cnormal=$(tput sgr0)   #9
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
+  cmagenta=$(tput setaf 5)
+  ccyan=$(tput setaf 6)
+
   typeset -A options
   typeset -A def_options
 
@@ -685,6 +737,7 @@ getRoot(){
   USAGE+=$(printf "[?%-12s #%s]" "configure" "only make clean and configure - no make")
   USAGE+=$(printf "[?%-12s #%s]" "skip" "no build")
   USAGE+="}"
+  USAGE+="[E:opticon?Build option for ICON.]:[opticon:='${def_options["icon"]}']"
   USAGE+="[Y:optcos?Build option for Cosmo.]:[optcos:='${def_options["cos"]}']"
   USAGE+="[X:optclm?Build option for CLM.]:[optclm:='${def_options["clm"]}']"
   USAGE+="[Z:optpfl?Build option for Parflow.]:[optpfl:='${def_options["pfl"]}']"
@@ -692,6 +745,7 @@ getRoot(){
   USAGE+="[U:optda?Build option for Data Assimilation.]:[optda:='${def_options["da"]}']"  
   USAGE+="[u:dadir?Source directory for Data Assimilation. daV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[dadir:='${def_dadir}']"   
 
+  USAGE+="[e:icondir?Source directory for ICON. iconV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[icondir:='${def_icondir}']"
   USAGE+="[w:oasdir?Source directory for Oasis3. oasisV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[oasdir:='${def_oasdir}']"
   USAGE+="[y:cosdir?Source directory for Cosmo. cosmoV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[cosdir:='${def_cosdir}']"
   USAGE+="[x:clmdir?Source directory for CLM. clmV_MACHINE_VERSION_COMBINATION will be taken if ''.]:[clmdir:='${def_clmdir}']"
@@ -728,6 +782,7 @@ getRoot(){
     r)  readCLM="$OPTARG" ; args=1 ;;
     d)  freeDrain="$OPTARG" ; args=1 ;;
 #DA
+    T)  options+=(["icon"]="$OPTARG") ; args=1 ;;
     U)  options+=(["da"]="$OPTARG") ; args=1 ;;
     W)  options+=(["oas"]="$OPTARG") ; args=1 ;;
     Y)  options+=(["cos"]="$OPTARG") ; args=1 ;;
@@ -791,7 +846,6 @@ check
   if [[ $mode == 2 ]] then ; interactive ; fi
 
 
-
   softSanityCheck
   comment "  source common interface"
     . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
@@ -802,11 +856,16 @@ check
   finalizeMachine
   runCompilation
 
+  echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
+  cat $patchlog_file >> $log_file
+
+  echo "" >> $log_file
   echo "Git:" >> $log_file
   cd $rootdir
   git rev-parse --abbrev-ref HEAD >> $log_file
   git rev-parse HEAD >> $log_file
   
+  echo "" >> $log_file 
   echo "Selection:" >> $log_file
   printState >> $log_file
 
@@ -814,18 +873,22 @@ check
   sed -i "s,.\[32m,,g" $log_file
   sed -i "s,.\[31m,,g" $log_file
   sed -i "s,.\[34m,,g" $log_file
+  sed -i "s,.\[36m,,g" $log_file
   sed -i "s,.[(]B.\[m,,g" $log_file
 
   sed -i "s,.\[32m,,g" $stdout_file
   sed -i "s,.\[31m,,g" $stdout_file
   sed -i "s,.\[34m,,g" $stdout_file
+  sed -i "s,.\[36m,,g" $stdout_file
   sed -i "s,.[(]B.\[m,,g" $stdout_file
 
+  echo "" >> $log_file
   echo "Call:" >> $log_file
   print "$call $*">> $log_file
   mv -f $err_file $bindir
   mv -f $log_file $bindir
   mv -f $stdout_file $bindir
+  rm -f $patchlog_file
 
   print ${cgreen}"build script finished sucessfully"${cnormal}
   print "Rootdir: ${rootdir}"
