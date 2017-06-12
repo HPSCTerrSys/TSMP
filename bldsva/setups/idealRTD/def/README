@@ -1,0 +1,13 @@
+The scripts in this folder is managed by the DART shellscripts
+
+#Scripts for quasi-spinup to generate ensemble spread
+coup_oas_TB.tcl       
+idealRTD_JURECA_setup_TB.ksh       
+lnd.stdin_TB
+
+#The above scripts are copied to outer directory for model setup. Once this is complete,
+#the default script below are again copied to the outder directory:
+coup_oas_default.tcl  
+idealRTD_JURECA_setup_default.ksh  
+lnd.stdin_default  
+

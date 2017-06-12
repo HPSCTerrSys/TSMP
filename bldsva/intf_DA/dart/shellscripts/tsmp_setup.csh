@@ -20,7 +20,7 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set ensemble_size = 48 
+set ensemble_size = 49 
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
@@ -48,6 +48,12 @@ endif
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
 
+#
+set defDir = $tsmpdir/bldsva/setups/$refsetup
+cp $defDir/def/idealRTD_JURECA_setup_DA.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_DA.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_DA $defDir/lnd.stdin
+
 #foreach icycle (`seq 1 $runcycle`)
 
 
@@ -61,7 +67,10 @@ endif
     echo " "
     #
     cd $tsmpdir/bldsva
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+    # Added clmrstfil to run with CLM spinup states
+    # Parflow spinup states is used directly as initial PFB file, no need to specify here
+    set clmrstfil = "./clm_restart.nc"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run
     set rundir         = $WORK/run$sdate
     #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #set rundir        = $tsmpdir"/run/"$temp_dir
@@ -161,6 +170,22 @@ endif
     exit 1
   endif
 #end
+
+echo "-------------------------------------------------------------------"
+echo "Block 2:  Perturb seed number and leafcn"
+echo "-------------------------------------------------------------------"
+echo " "
+
+$shellpath/perturb_model_param.csh $rundir $ensemble_size
+
+echo "-------------------------------------------------------------------"
+echo "Block 3:  Updating the setup directory with default script"
+echo "-------------------------------------------------------------------"
+echo " "
+
+cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
 
 exit 0
 

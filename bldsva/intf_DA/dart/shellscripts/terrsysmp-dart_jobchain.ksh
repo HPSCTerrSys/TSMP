@@ -15,7 +15,7 @@
 SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
 MACHINE="JURECA"        #(which machine are your running on)
 NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle - 1)
-NRST=3                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+NRST=0                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
 RUNSFX="rundart"
 ASSIMC=""
 JOBSCRIPT0="terrsysmp-dart_jobchain.ksh "

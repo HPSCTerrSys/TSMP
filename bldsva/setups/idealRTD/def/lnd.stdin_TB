@@ -1,0 +1,42 @@
+#! /bin/ksh
+
+
+cat << EOF > __rundir__/lnd.stdin
+ &clm_inparm
+ caseid         = 'clmoas'
+ ctitle         = 'clmoas'
+ nsrest         =  0
+ nelapse        =  __runstep_clm_bldsva__ 
+ dtime          =  __dt_clm_bldsva__ 
+ start_ymd      =  __yyyymmdd_bldsva__ 
+ start_tod      =  __seconds_clm_bldsva__ 
+
+ finidat        = '__finidat__'
+ flndtopo       = '__forcingdir__/topodata___gridsize__.nc'
+ fsurdat        = './surfdata___gridsize__.nc'
+ fatmgrid       = '__forcingdir__/griddata___gridsize__.nc'
+ fatmlndfrc     = '__forcingdir__/fracdata___gridsize__.nc'
+ fatmtopo       = ''
+ fpftcon        = './pft-physiology.c070207'
+ offline_atmdir = '__forcingdir__/atm_forcing/'
+ frivinp_rtm    = '__forcingdir__/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
+
+ hist_dov2xy    = .true.
+ hist_avgflag_pertape = 'A'
+ hist_nhtfrq    =  -__dump_clm_interval__ 
+ hist_mfilt     =  1
+ hist_crtinic   = 'NONE'
+ mss_irt        =  0 
+
+ hist_empty_htapes = .true.
+ hist_fincl1       = 'H2OSOI','FIRA','FSA','FSH_G','FSH_V','FSDS','FLDS','FGR','FGEV','FCTR','FCEV','FSR','TSOI','TSA','Q2M','TV','TAUX','TAUY'
+
+ irad           =  1
+ wrtdia         = .true.
+ archive_dir    = ''
+ rest_flag      = .true. 
+ rpntpath       = '__rundir_rpointerdir__'
+/
+ &prof_inparm
+ /
+EOF

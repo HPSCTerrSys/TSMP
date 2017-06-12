@@ -24,6 +24,7 @@ sbatch jobchain_perfect.ksh 1 run
 # Use the runmnanger to submit a sequential job for ensemble run with DA
 # For open loop run, set NRST = 0
 # It uses "tsmp_slm_run.bsh" to setup the model runs
+# so the user needs to modify experiment setups, ensemble numbers in the above script
 # And it also uses "dart_XXX" for DA with DART
 sbatch terrsysmp-dart_jobchain.ksh 1 run
 #
@@ -34,6 +35,13 @@ Usage: ./archive_hist.csh rundir ensemble_size
 # Archiving single runs
 copy.csh
 Usage: ./copy.csh rundir
+#
+# Archive hydrological spinup
+Usage: ./archive_hydroSpin.csh $rundir $ensemble_size
+#
+# Archive restart files from hydrological spinup
+Usage: ./archive_restart_hydroSpinup.csh $ensemble_size
+#
 #----------------------------------------------------------------------------------------------------
 # Utility
 #----------------------------------------------------------------------------------------------------
@@ -45,7 +53,7 @@ Usage: ./git_to_dart_XXXX.csh
 filestrip.csh
 Usage: ./filestrip.csh
 #
-# Perturb model parameter
+# Perturb model parameters
 perturb_model_param.csh
 Usage:./perturb_model_param.csh rundir ensemble_size
 #

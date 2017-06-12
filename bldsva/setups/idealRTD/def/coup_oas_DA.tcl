@@ -7,8 +7,7 @@ namespace import Parflow::*
 #For normal soils, need to fix near saturation CPS
 set VG_points 2000000
 set VG_pmin -23000.0
-#set VG_interpolation_method "Spline"
-#
+##set VG_interpolation_method "Spline"
 #--------------------------------------------------------
 pfset FileVersion 4
 #-------------------------------------------------------
@@ -131,8 +130,23 @@ pfset Cycle.constant.Repeat             -1
 # Perm
 #-----------------------------------------------------------------------------
 pfset Geom.Perm.Names			 "domain"
-pfset Geom.domain.Perm.Type		 Constant
-pfset Geom.domain.Perm.Value		 0.0141
+#pfset Geom.domain.Perm.Type		 Constant
+#pfset Geom.domain.Perm.Value		 0.0141
+
+pfset Geom.domain.Perm.Type "TurnBands"
+pfset Geom.domain.Perm.LambdaX  8000.
+pfset Geom.domain.Perm.LambdaY  5000.
+pfset Geom.domain.Perm.LambdaZ  10.0
+pfset Geom.domain.Perm.GeomMean  0.01
+
+pfset Geom.domain.Perm.Sigma   2.25
+pfset Geom.domain.Perm.NumLines 100
+pfset Geom.domain.Perm.RZeta  5.0
+pfset Geom.domain.Perm.KMax  100.0
+pfset Geom.domain.Perm.DelK  0.2
+pfset Geom.domain.Perm.Seed  __seedno__
+pfset Geom.domain.Perm.LogNormal Log
+pfset Geom.domain.Perm.StratType Bottom
 
 pfset Perm.TensorType			 TensorByGeom
 pfset Geom.Perm.TensorByGeom.Names	 "domain"
@@ -181,10 +195,10 @@ pfset Geom.domain.Porosity.Value	 0.389
 #-----------------------------------------------------------------------------
 # Relative Permeability
 #-----------------------------------------------------------------------------
-pfset Phase.RelPerm.Type		 VanGenuchten
-pfset Phase.RelPerm.GeomNames		 "domain"
-pfset Geom.domain.RelPerm.Alpha		 2.69
-pfset Geom.domain.RelPerm.N		 1.41
+pfset Phase.RelPerm.Type                 VanGenuchten
+pfset Phase.RelPerm.GeomNames            "domain"
+pfset Geom.domain.RelPerm.Alpha          2.69
+pfset Geom.domain.RelPerm.N              1.41
 pfset Geom.domain.RelPerm.NumSamplePoints   $VG_points
 pfset Geom.domain.RelPerm.MinPressureHead   $VG_pmin
 #---------------------------------------------------------
@@ -209,9 +223,11 @@ pfset Wells.Names				 ""
 pfset Geom.domain.Patches             "x-lower x-upper y-lower y-upper z-lower z-upper"
 pfset BCPressure.PatchNames [pfget Geom.domain.Patches]
 
-pfset Patch.x-lower.BCPressure.Type                   FluxConst
-pfset Patch.x-lower.BCPressure.Cycle                  "constant"
-pfset Patch.x-lower.BCPressure.alltime.Value          0.0
+pfset Patch.x-lower.BCPressure.Type                       DirEquilRefPatch
+pfset Patch.x-lower.BCPressure.Cycle                      "constant"
+pfset Patch.x-lower.BCPressure.RefGeom                    domain
+pfset Patch.x-lower.BCPressure.RefPatch                   z-upper
+pfset Patch.x-lower.BCPressure.alltime.Value              -3.0
 
 pfset Patch.y-lower.BCPressure.Type                   FluxConst
 pfset Patch.y-lower.BCPressure.Cycle                  "constant"
@@ -240,14 +256,14 @@ pfset Patch.z-upper.BCPressure.alltime.Value             0.0
 #---------------------------------------------------------
 pfset TopoSlopesX.Type			 "Constant"
 pfset TopoSlopesX.GeomNames		 "domain"
-pfset TopoSlopesX.Geom.domain.Value	 0.0
+pfset TopoSlopesX.Geom.domain.Value	 0.00
 
 #---------------------------------------------------------
 # Topo slopes in y-direction
 #---------------------------------------------------------
 pfset TopoSlopesY.Type			 "Constant"
 pfset TopoSlopesY.GeomNames		 "domain"
-pfset TopoSlopesY.Geom.domain.Value	 0.00
+pfset TopoSlopesY.Geom.domain.Value	 0.0
 
 #---------------------------------------------------------
 # Mannings coefficient
@@ -267,7 +283,7 @@ pfset Geom.domain.ICPressure.FileName   "__pfl_ICPpressureFileName__"
 
 #pfset ICPressure.Type			 HydroStaticPatch
 #pfset ICPressure.GeomNames		 domain
-#pfset Geom.domain.ICPressure.Value	 -5.0
+#pfset Geom.domain.ICPressure.Value	 -10.0
 #pfset Geom.domain.ICPressure.RefGeom	 domain
 #pfset Geom.domain.ICPressure.RefPatch	 z-upper
 
@@ -290,25 +306,19 @@ pfset Solver.MaxIter                             10000
 
 pfset Solver.TerrainFollowingGrid                True
 
-pfset Solver.Nonlinear.MaxIter                   100
-pfset Solver.Nonlinear.ResidualTol               1e-5
+pfset Solver.Nonlinear.MaxIter                   400
+pfset Solver.Nonlinear.ResidualTol               1e-3
 pfset Solver.Nonlinear.EtaChoice                 Walker1
-pfset Solver.Nonlinear.EtaChoice                 EtaConstant
-pfset Solver.Nonlinear.EtaValue                  0.001
-pfset Solver.Nonlinear.UseJacobian               False
+pfset Solver.Nonlinear.UseJacobian               True
 pfset Solver.Nonlinear.DerivativeEpsilon         1e-16
 pfset Solver.Nonlinear.StepTol                   1e-12
 pfset Solver.Nonlinear.Globalization             LineSearch
-pfset Solver.Linear.KrylovDimension              30
-pfset Solver.Linear.MaxRestart                   2
+pfset Solver.Linear.KrylovDimension              100
+pfset Solver.Linear.MaxRestart                   8
+pfset Solver.MaxConvergenceFailures              8
 
 #
-pfset Solver.Linear.Preconditioner			 MGSemi
-pfset Solver.Linear.Preconditioner.MGSemi.MaxIter	 1
-pfset Solver.Linear.Preconditioner.MGSemi.MaxLevels	 10
-pfset Solver.PrintSubsurf				 False
-pfset Solver.Drop					 1E-20
-pfset Solver.AbsTol					 1E-12
+pfset Solver.Linear.Preconditioner			PFMGOctree
 
 pfset Solver.PrintSaturation                            True 
 pfset Solver.PrintSubsurf                               False

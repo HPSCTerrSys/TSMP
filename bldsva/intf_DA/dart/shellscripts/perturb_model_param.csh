@@ -12,6 +12,7 @@ echo " "
 #
 set rundir = $1
 set ensemble_size = $2
+set clm_forcing_dir = "/homea/hbn33/hbn331/database/idealRTD/clm/"
 
 cd $rundir
 
@@ -22,27 +23,30 @@ foreach instance (`seq 0 $numInst`)
  echo "tsmp_instance_"$instance
  echo " "
  #parflow
+ set seedno = `echo "($instance*100)" | bc`
  cd tsmp_instance_$instance
- cp /daten01/z4/database/ParFlow/idealRTD/rur_ic_press_Sv06.pfb ./rur_ic_press.pfb
- tclsh ascii2pfb.tcl
+ sed "s,__seedno__,${seedno}," -i coup_oas.tcl
+ tclsh coup_oas.tcl
  cd ..
 
  #clm
- cd tsmp_instance_$instance
- cp /daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 ./pft-physiology_$instance
- set leafcn = `echo "(40.-$instance*2.)" | bc`
+ cd tsmp_instance_${instance}
+ cp ${clm_forcing_dir}/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
+ cp ${clm_forcing_dir}/perturb_surf/surfdata_${instance}_0014x0024.nc ./surfdata_0014x0024.nc
+
+ set leafcn_def = `echo "(24.1+$ensemble_size*0.125)" | bc`
+ set leafcn = `echo "($leafcn_def-$instance*0.25)" | bc`
 
  echo "TODO, I ADD DECIMAL HERE >>>"
  echo " "
- sed "s,0.00000 25.0 0.100,0.00000 $leafcn.0 0.100," -i  pft-physiology_$instance
- sed "s,fpftcon        = '/daten01/z4/database/clm3.5/inputdata/lnd/clm2/pftdata/pft-physiology.c070207',fpftcon        = './pft-physiology_$instance'," -i lnd.stdin
+ sed "s,0.00000 25.0 0.100,0.00000 $leafcn 0.100," -i  pft-physiology.c070207
  cd ..
 
  #cosmo
- set turlength = `echo "(400.-$instance*20.)" | bc`
- cd tsmp_instance_$instance
- sed "s,tur_len=150,tur_len=$turlength," -i lmrun_uc
- ./lmrun_uc execluma
- cd ..
+ #set turlength = `echo "(400.-$instance*20.)" | bc`
+ #cd tsmp_instance_$instance
+ #sed "s,tur_len=150,tur_len=$turlength," -i lmrun_uc
+ #./lmrun_uc execluma
+ #cd ..
 end
 
