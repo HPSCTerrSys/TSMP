@@ -134,9 +134,10 @@ pfset Geom.Perm.Names			 "domain"
 #pfset Geom.domain.Perm.Value		 0.0141
 
 pfset Geom.domain.Perm.Type "TurnBands"
-pfset Geom.domain.Perm.LambdaX  8000.
-pfset Geom.domain.Perm.LambdaY  5000.
-pfset Geom.domain.Perm.LambdaZ  10.0
+#Recommendation from Harrie-Jan 13-06-2017
+pfset Geom.domain.Perm.LambdaX  3000.0
+pfset Geom.domain.Perm.LambdaY  3000.0
+pfset Geom.domain.Perm.LambdaZ  2.0
 pfset Geom.domain.Perm.GeomMean  0.01
 
 pfset Geom.domain.Perm.Sigma   2.25
@@ -279,7 +280,7 @@ pfset ICPressure.Type                   "PFBFile"
 pfset ICPressure.GeomNames              "domain"
 pfset Geom.domain.ICPressure.FileName   "__forcingdir__/rur_ic_press.pfb"
 #for restart purpose
-#pfset Geom.domain.ICPressure.FileName   "__pfl_ICPpressureFileName__" 
+pfset Geom.domain.ICPressure.FileName   "__pfl_ICPpressureFileName__" 
 
 #pfset ICPressure.Type			 HydroStaticPatch
 #pfset ICPressure.GeomNames		 domain

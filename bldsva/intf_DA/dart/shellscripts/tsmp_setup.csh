@@ -1,10 +1,11 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle nrst machine
+# usage: ./tsmp_setup.csh cycle nrst ens machine
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
 #  nrst   = 1,2,3 for restart with cosmo,clm,parflow assimilation
+#  ens    = ensemble size
 # machine = JURECA, CLUMA2
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
@@ -20,7 +21,6 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set ensemble_size = 49 
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
@@ -34,7 +34,8 @@ echo " "
 
 set icycle  = $1
 set inrst   = $2
-set machine = $3
+set ensemble_size = $3
+set machine = $4
 if ($inrst <= 1) then
   set assimC = 'cosmo'
 else if ($inrst == 2) then
@@ -53,6 +54,7 @@ set defDir = $tsmpdir/bldsva/setups/$refsetup
 cp $defDir/def/idealRTD_JURECA_setup_DA.ksh $defDir/idealRTD_JURECA_setup.ksh
 cp $defDir/def/coup_oas_DA.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_DA $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
 
 #foreach icycle (`seq 1 $runcycle`)
 
@@ -186,6 +188,7 @@ echo " "
 cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
 cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_default $defDir/lmrun_uc5_1
 
 exit 0
 

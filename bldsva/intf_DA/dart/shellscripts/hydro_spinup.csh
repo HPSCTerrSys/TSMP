@@ -1,6 +1,6 @@
 #!/bin/csh
-# Script to create perturbed spinup for the 48 ensemles
-# usage: ./tsmp_setup.csh machine
+# Script to create perturbed spinup for the ensemles
+# usage: ./hydro_spinup.csh machine
 # machine = JURECA, CLUMA2
 #
 #-------------------------------------------------------------------------
