@@ -7,6 +7,10 @@ route "${cblue}<< always_icon${cnormal}"
 
 configure_icon(){
 route "${cblue}>> configure_icon${cnormal}"
+comment "    cd to icon dir"
+  cd $icondir >> $log_file 2>> $err_file
+check
+./configure --with-fortran=intel >> $log_file 2>> $err_file
 comment "   cp Makefile to icon dir"
    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
 route "cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir"
@@ -17,6 +21,9 @@ check
   fi
   if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi
   if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
+  file=$icondir/Makefile
+comment "   sed cplFlag to icon Makefile"
+  sed -i "s@__cplflg__@$cplFlag@" $file >> $log_file 2>> $err_file
 route "${cblue}<< configure_icon${cnormal}"
 }
 

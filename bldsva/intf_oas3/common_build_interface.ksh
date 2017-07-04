@@ -21,17 +21,13 @@
 
 c_configure_icon(){
 route "${cblue}>>> c_configure_icon${cnormal}"
-  comment "    cd to icon dir"
-    cd $icondir >> $log_file 2>> $err_file
-  check
-  ./configure --with-fortran=intel >> $log_file 2>> $err_file
-  file=$icondir/Makefile
+  #file=$icondir/Makefile
   #comment "    sed icon rootdir to Makefile"
   #  sed -i "s@__iconroot__@$icondir@" $file >> $log_file 2>> $err_file
   #check
-  comment "    sed OAS flag to Makefile"
-    sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
-  check
+  #comment "    sed OAS flag to Makefile"
+  #  sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
+  #check
   comment "    make clean icon"
     make clean >> $log_file 2>> $err_file
   check
@@ -66,10 +62,11 @@ route "${cblue}<<< c_make_icon${cnormal}"
 c_substitutions_icon(){
 route "${cblue}>>> c_substitutions_icon${cnormal}"
   comment "    copy oas3 interface to icon/src "
-  #  cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $icondir/src >> $log_file 2>> $err_file
+    cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $icondir/src >> $log_file 2>> $err_file
   check
   comment "    replace files with coupling. Add files to icon/src "
-  #  cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/* $icondir/src >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/icon.f90 $icondir/src/drivers >> $log_file 2>> $err_file
   check
 
 route "${cblue}<<< c_substitutions_icon${cnormal}"
