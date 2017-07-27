@@ -1,6 +1,6 @@
 #!/bin/csh
 # Script to setup perfect terrsymp run with cycle
-# usage: ./perfect_tsmp_setup.csh cycle nrst
+# usage: ./perfect_tsmp_setup.csh cycle nrst map_fn machine
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
@@ -24,12 +24,14 @@ set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
 set DART_DIR      = "$HOME/DART/lanai/models/terrsysmp/cosmo/work"
+set clm_forcing_dir = "$HOME/database/idealRTD/clm/"
 #
 #User Settings End Here
 
 set icycle = $1
 set inrst  = $2
-set machine = $3
+set map_fn = $3
+set machine = $4
 
 echo " "
 echo "`date` -- BEGIN setup of terrsysmp perfect model"
@@ -42,6 +44,13 @@ echo " "
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
 
+#
+set defDir = $tsmpdir/bldsva/setups/$refsetup
+cp $defDir/def/idealRTD_JURECA_setup_DA.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_DA.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_DA $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
+#
 set sdate = `printf perfectModel%02d $icycle`
 
 if ($icycle == 1) then
@@ -56,7 +65,25 @@ if ($icycle == 1) then
     set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     set rundir        = $WORK/$sdate
     #
-    rm $rundir/cosmo_in/raso_IdealSnd_0000LT_*
+    cd $rundir
+
+     # Update Model States
+     #ParFlow
+     echo " Using the spinup parflow states ...." $map_fn
+     cp $HOME/database/idealRTD/restart/tsmp_instance_${map_fn}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
+     tclsh ascii2pfb.tcl
+
+     #cosmo
+     set rasonum = `printf raso_IdealSnd_0000LT_%02d $map_fn`
+     sed "s,raso_IdealSnd_0000LT.dat,$rasonum.dat," -i lmrun_uc
+     rm cosmo_in/raso_IdealSnd_0000LT_*
+     cp $HOME/database/idealRTD/cosmo/$rasonum.dat cosmo_in/
+     ./lmrun_uc execluma
+
+     #clm
+     echo " Using the spinup clm states ...."
+     cp $HOME/database/idealRTD/restart/tsmp_instance_${map_fn}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
+
 else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
@@ -110,4 +137,52 @@ else
     exit 1
 endif
 
+#Perturb model Parameters
+
+ cd $rundir
+ #parflow, manual recommends large odd number, not sure why?
+ #without root distribution perturbation, simulation fails with inst 41
+
+
+ set seedno = `echo "($map_fn*1000+13111)" | bc`
+ if ($map_fn == 41) then
+   echo "Changing seed no. for 41"
+   set seedno = `echo "($map_fn*1000+11311)" | bc`
+ endif  
+
+ sed "s,__seedno__,${seedno}," -i coup_oas.tcl
+ tclsh coup_oas.tcl
+
+ #clm
+ #Perturb leaf c:n and root distribution
+ cp ${clm_forcing_dir}/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
+ cp ${clm_forcing_dir}/perturb_surf/surfdata_${map_fn}_0014x0024.nc ./surfdata_0014x0024.nc
+
+ set leafcn_def = `echo "(24.1+49.*0.125)" | bc`
+ set leafcn = `echo "($leafcn_def-$map_fn*0.25)" | bc`
+ set roota  = `echo "(1.+$map_fn*0.22)" | bc`
+ set rootb  = `echo "(1.+$map_fn*0.05)" | bc`
+
+ echo " " 
+ sed "s,0.00000 25.0 0.100,0.00000 $leafcn 0.100," -i  pft-physiology.c070207
+ #sed "s,80 -0.30  6.0 3.0 0.05000,80 -0.30 $roota $rootb 0.05000," -i  pft-physiology.c070207 
+
+ #cosmo
+ set turlength = `echo "(200.-$map_fn*2.5)" | bc`
+ if ( -f lmrun_uc ) then
+   sed "s,__turlen__,${turlength}," -i lmrun_uc
+   ./lmrun_uc execluma
+ endif
+ cd ..
+
+echo "-------------------------------------------------------------------"
+echo "Block 4:  Updating the setup directory with default script"
+echo "-------------------------------------------------------------------"
+echo " "
+
+cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_default $defDir/lmrun_uc5_1
+ 
 exit 0

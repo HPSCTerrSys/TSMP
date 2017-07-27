@@ -18,6 +18,7 @@ set wc            = "02:00:00"
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
+set mapfn         = ${shellpath}/map_fn.txt
 set sdate         = "TBspinup"
 #
 #User Settings End Here
@@ -48,11 +49,11 @@ cd $tsmpdir/bldsva
 set rundir         = $WORK/run$sdate
 
 echo "-------------------------------------------------------------------"
-echo "Block 2:  Perturb seed number and leafcn"
+echo "Block 2:  Perturb parameters .."
 echo "-------------------------------------------------------------------"
 echo " "
 
-$shellpath/perturb_model_param.csh $rundir $ensemble_size
+$shellpath/perturb_model_param.csh $rundir $ensemble_size $mapfn
 
 echo "-------------------------------------------------------------------"
 echo "Block 3:  Updating the setup directory with default script"

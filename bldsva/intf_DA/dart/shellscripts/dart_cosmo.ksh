@@ -1,8 +1,8 @@
 #!/bin/ksh
 
 #SBATCH --job-name="dartCOSMO"
-#SBATCH --nodes=2
-#SBATCH --ntasks=49
+#SBATCH --nodes=1
+#SBATCH --ntasks=48
 #SBATCH --ntasks-per-node=48
 #SBATCH --output=mpiMPMD-out.%j
 #SBATCH --error=mpiMPMD-err.%j

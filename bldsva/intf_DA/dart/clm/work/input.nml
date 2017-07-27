@@ -287,7 +287,7 @@
    latlim2    = 49.95, 49.92, 49.92, 49.87
    reg_names  = 'Center', 'Left', 'Right', 'Bottom'
 
-   hlevel     =  0.02, 0.06, 0.10, 0.20, 0.30
+   hlevel     = 0.02, 0.06, 0.10, 0.20, 0.30, 0.50, 0.80
    print_mismatched_locs = .false.
    create_rank_histogram = .true.
    outliers_in_histogram = .true.

@@ -1,11 +1,12 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle nrst ens machine
+# usage: ./tsmp_setup.csh cycle nrst ens map_fn machine
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
 #  nrst   = 1,2,3 for restart with cosmo,clm,parflow assimilation
 #  ens    = ensemble size
+#  map_fn = mapping of ensemble members
 # machine = JURECA, CLUMA2
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
@@ -35,7 +36,8 @@ echo " "
 set icycle  = $1
 set inrst   = $2
 set ensemble_size = $3
-set machine = $4
+set map_fn = $4
+set machine = $5
 if ($inrst <= 1) then
   set assimC = 'cosmo'
 else if ($inrst == 2) then
@@ -78,7 +80,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
     #set rundir        = $tsmpdir"/run/"$temp_dir
     #
     # Perturb the model state
-    $shellpath/perturb_model_state.csh $rundir $ensemble_size
+    $shellpath/perturb_model_state.csh $rundir $ensemble_size $map_fn
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
@@ -178,7 +180,7 @@ echo "Block 2:  Perturb seed number and leafcn"
 echo "-------------------------------------------------------------------"
 echo " "
 
-$shellpath/perturb_model_param.csh $rundir $ensemble_size
+$shellpath/perturb_model_param.csh $rundir $ensemble_size $map_fn
 
 echo "-------------------------------------------------------------------"
 echo "Block 3:  Updating the setup directory with default script"

@@ -17,9 +17,25 @@ cd $DART/models/terrsysmp/cosmo/work/
 #----------------------------------------------------------------------------------------------------
 # DART source codes sits separate to TerrSysMP source codes
 #
+# Create spinup for subsurface, make sure to change the map_fn text to include all ensembles
+./hydro_spinup.csh machine
+#
+# Use the spuunp initial conditions with perturbed model parameter to make an open loop experiment
+# with members > ensemble number for the final experiment
+#
+# Modify the ntasks and nodes according to member numbers, this also applies to dart_cosmo.ksh
+# Check map_fn
+sbatch terrsysmp-dart_jobchain.ksh 1 run
+#
+#
+# Analyze the ensemble evolution and select the memmber number for Perfect Model, specify it as map_fn
+# for perfect model run, also create a map_fn.txt, not containing this member for creating the ensemble
+# run for DA
+
 # Use the runmanager to submit a sequential job to generate the model trajectory
 # assuiming a perfect model
 # It uses "perfect_tsmp_setup.csh" to setup the model runs
+# It also uses the restart files and perturbation based on map_fn specificed in the script
 sbatch jobchain_perfect.ksh 1 run
 #
 # Use the DART perfect model to harvest synthetic observations:
@@ -60,11 +76,11 @@ Usage: ./filestrip.csh
 #
 # Perturb model parameters
 perturb_model_param.csh
-Usage:./perturb_model_param.csh rundir ensemble_size
+Usage:./perturb_model_param.csh rundir ensemble_size map_fn
 #
 # Perturb model state
 perturb_model_state.csh
-Usage: ./perturb_model_state.csh rundir ensemble_size
+Usage: ./perturb_model_state.csh rundir ensemble_size map_fn
 #
 # Extract time stamp
 timeFile.ksh

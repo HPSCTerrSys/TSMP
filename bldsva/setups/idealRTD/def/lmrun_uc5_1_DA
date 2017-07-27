@@ -370,7 +370,7 @@ cat > INPUT_IO  << end_input_io
          'QC        ','QR        ','QS        ','QI        ','QG        ','RELHUM    ',
          'T_S       ','T_G       ','T_SO      ','W_SO      ','SOBS_RAD  ','THBS_RAD  ',
          'SHFL_S    ','LHFL_S    ','UMFL_S    ','VMFL_S    ','PS        ',
-         'SWDIR_S   ','SWDIFD_S  ','LWD_S     ','HPBL      ',
+         'SWDIR_S   ','SWDIFD_S  ','LWD_S     ','HPBL      ','TOT_PREC  ',
          'QV_S      ','TCH       ','TCM       ','T_2M      ','QV_2M     ',
   ! Type of vertical averaging for yvarpl and yvarzl (p- and z-levels interpolated values):
   ! itype_vertint = 1 : cubic spline (default)
