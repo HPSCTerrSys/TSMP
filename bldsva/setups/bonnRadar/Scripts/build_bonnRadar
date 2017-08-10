@@ -1,0 +1,50 @@
+#!/bin/csh
+set tsmpver       = "1.2.0MCT"
+set refsetup      = "bonnRadar"
+set tsmpdir       = $HOME/terrsysmp
+set surfdata      = $HOME//database/bonnRadar/clm
+set machine       = "JURECA"
+set sdate         = "HET"
+set ensemble_size = 1 
+set wtime         = "7:00:00" 
+#set clmrstfil     = $surfdata/clm.${sdate}.r.2015-07-04-00000.nc
+
+# User Input
+
+set flag = $1
+
+cd $tsmpdir/bldsva
+
+if ($flag == 0) then
+  echo "Setting CLM spinup"
+  #CLM spinup
+  ./setup_tsmp.ksh -v $tsmpver -c "clm" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
+  if (-f $surfdata/surfdata_0320x0320.nc) then
+    rm $surfdata/surfdata_0320x0320.nc
+  endif
+  ln -s $surfdata/surfdata_${sdate}_0320x0320.nc $surfdata/surfdata_0320x0320.nc
+endif
+
+if ($flag == 1) then
+  echo "Setting CLM-ParFlow spinup"
+  #CLM spinup
+  ./setup_tsmp.ksh -v $tsmpver -c "clm-pfl" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
+  if (-f $surfdata/surfdata_0320x0320.nc) then
+    rm $surfdata/surfdata_0320x0320.nc
+  endif
+  ln -s $surfdata/surfdata_${sdate}_0320x0320.nc $surfdata/surfdata_0320x0320.nc
+endif
+
+#COSMO standalone
+#./setup_tsmp.ksh -v $tsmpver -c "cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+#
+#rm $surfdata/surfdata_0320x0320.nc
+#ln -s $surfdata/surfdata_${sdate}_0320x0320.nc $surfdata/surfdata_0320x0320.nc
+#./setup_tsmp.ksh -v $tsmpver -c "clm" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
+# -j "$clmrstfil"
+#
+#COSMO-CLM 
+#./setup_tsmp.ksh -v $tsmpver -c "clm-cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+#changed lnd.stdin
+#sed -i "s/surfdata_0320x0320.nc/surfdata_${sdate}_0320x0320.nc/"   $WORK/run${sdate}/lnd.stdin
+exit 0

@@ -16,7 +16,7 @@ SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
 DPATH="$HOME/DART/lanai/models/terrsysmp/"
 MACHINE="JURECA"        #(which machine are your running on)
 NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle - 1)
-NRST=0                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+NRST=3                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
 NENS=48                 #Ensemble Size
 MAP_FN="$SPATH/map_fn.txt"  #Mapping matrix for ensemble runs
 RUNSFX="rundart"
