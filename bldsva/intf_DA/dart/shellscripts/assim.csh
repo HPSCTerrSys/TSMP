@@ -2,7 +2,7 @@
 # "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
 #
 #set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
-set MODEL_PATH="$WORK/dart_Synthetic_d100/PM_run/perfectModel"
+set MODEL_PATH="$WORK/dart_Synthetic_d10/PM_run/perfectModel"
 set num_days = 13
 
 # SELECT COMPONENT MODEL FOR ASSIMILATION
