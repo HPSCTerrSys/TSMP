@@ -151,12 +151,7 @@ contains
     do fc = 1, num_soilc
        c = filter_soilc(fc)
        fff(c)  = 1._r8 / hkdepth(c)
-!CPS Adding saturated fraction estimation based on topographic index (wtfact)
-#if (defined CATCHMENT)
-       fcov(c) = (1._r8 - fracice(c,1)) * (min(0.3_r8,wtfact(c)/20._r8)) * exp(-0.5_r8*fff(c)*zwt(c)) + fracice(c,1)
-#else
        fcov(c) = (1._r8 - fracice(c,1)) * wtfact(c) * exp(-0.5_r8*fff(c)*zwt(c)) + fracice(c,1)
-#endif
     end do
 
 !dir$ concurrent
@@ -828,7 +823,8 @@ contains
 !CPS Anisotropy set to 1, no macropore assumption Ksat(0)=Ksat*exp(f*dc),independent of surface soil type
 !CPS we increase the default value of fff(c) 
 #if (defined CATCHMENT)
-       rsub_top(c)    = (1._r8 - fracice_rsub(c)) * hksat(c,1)* exp(-wtfact(c) -fff(c)*zwt(c))
+       ! CPS Lawrence et al. 2011
+       rsub_top(c)    = (1._r8 - fracice_rsub(c)) * 5.5e-3_r8 * exp(-fff(c)*zwt(c)
 #else
        rsub_top(c)    = (1._r8 - fracice_rsub(c)) * 4.5e-4_r8 * exp(-fff(c)*zwt(c))
 #endif
