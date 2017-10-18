@@ -637,11 +637,11 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
       " -i $pfldir/pfsimulator/configure $pfldir/pftools/configure >> $log_file 2>> $err_file
     check
     comment "    copy fix for PDAF into $pfldir"
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
     check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
     check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/da $pfldir/pfsimulator/amps
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
     check
       sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg.c
     check
