@@ -29,6 +29,8 @@ module load parallel-netcdf
 
 module load Scalasca/2.2.1
 
+module load cURL
+
 # standard analysis and vis. libs and tools 
 #module load NCO/4.4.8
 #module load CDO/1.6.8
