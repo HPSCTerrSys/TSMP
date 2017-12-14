@@ -88,13 +88,13 @@ route "${cblue}>>> c_substitutions_cos${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
-	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/data_parallel.f90 $cosdir/src/ 
+	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/data_parallel.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/organize_data.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/organize_data.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_meanvalues.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_meanvalues.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_setup.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_setup.f90 $cosdir/src/ 
     check
   fi
 route "${cblue}<<< c_substitutions_cos${cnormal}"
@@ -451,11 +451,11 @@ route "${cblue}>>> c_substitutions_clm${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
   comment "    copy PDAF fix to $clmdir/bld/usr.src "
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtype.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/iniTimeConst.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
   fi	
 route "${cblue}<<< c_substitutions_clm${cnormal}"
