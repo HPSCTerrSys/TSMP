@@ -126,7 +126,7 @@ MODULE mo_mpi
   USE omp_lib, ONLY: omp_get_max_threads, omp_set_num_threads
 #endif
 #ifdef COUP_OAS_ICON
-  USE oas_icon_vardef,  only: kl_comm, MODNAME
+  USE oas_icon_define
 #endif
 
   USE mo_kind
@@ -1714,7 +1714,13 @@ CONTAINS
     CALL MPI_INIT_THREAD(MPI_THREAD_FUNNELED,provided,p_error)
 #endif
 #elif (defined COUP_OAS_ICON)
-    CALL oas_icon_init
+    ! init OASIS coupler
+   CALL oasis_init_comp(oas_comp_id, oas_comp_name, oas_error)
+   IF (oas_error /= 0) &
+     CALL oasis_abort(oas_comp_id, 'oas_icon_init', 'Failure in oasis_init')
+   CALL oasis_get_localcomm(kl_comm, oas_error)
+   IF (oas_error /= 0) &
+     CALL oasis_abort(oas_comp_id, 'oas_icon_init', 'Failure in oasis_get_localcomm')
 #else
     CALL MPI_INIT (p_error)
 #endif
@@ -1760,7 +1766,7 @@ CONTAINS
       yname = '(unnamed)'
     END IF
 #ifdef COUP_OAS_ICON
-    yname = TRIM(MODNAME)
+    yname = TRIM("icon_COUPLED")
 #endif
     global_mpi_name = TRIM(yname)
 
@@ -1787,7 +1793,7 @@ CONTAINS
 
 #else
 
-#ifndef COUP_OAS_ICON
+#ifdef COUP_OAS_ICON
     CALL MPI_COMM_DUP (kl_comm, global_mpi_communicator, p_error)
 #else
     CALL MPI_COMM_DUP (MPI_COMM_WORLD, global_mpi_communicator, p_error)
@@ -1999,7 +2005,9 @@ CONTAINS
     CALL p_barrier(process_mpi_all_comm)
 
 #ifdef COUP_OAS_ICON
-    CALL oas_icon_finalize
+    CALL oasis_terminate(oas_error)
+    IF (oas_error /= 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
+      'Failure in oasis_terminate')
 #else
     CALL MPI_FINALIZE (p_error)
 #endif
@@ -2028,7 +2036,7 @@ CONTAINS
 
 #ifndef NOMPI
 #ifdef COUP_OAS_ICON
-    CALL MPI_ABORT (kl_comm, 0, p_error)
+    CALL oasis_abort(oas_comp_id, oas_comp_name, 'Abort mpi through oasis')
 #else
     CALL MPI_ABORT (MPI_COMM_WORLD, 0, p_error)
 #endif

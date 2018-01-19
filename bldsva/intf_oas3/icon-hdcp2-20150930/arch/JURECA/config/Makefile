@@ -10,6 +10,9 @@ SITE = jrl07.jureca
 
 srcdir = .
 
+oasisdir = __oasisdir__
+include __oasisdir__/util/make_dir/make.oas3
+LIBPSMILE=$(ARCHDIR)/lib/libpsmile.${CHAN}.a $(ARCHDIR)/lib/libmct.a $(ARCHDIR)/lib/libmpeu.a $(ARCHDIR)/lib/libscrip.a
 
 prefix = .
 exec_prefix = build/x86_64-unknown-linux-gnu
@@ -17,26 +20,29 @@ exec_prefix = build/x86_64-unknown-linux-gnu
 bindir = ${exec_prefix}/bin
 libdir = ${exec_prefix}/lib
 
-NETCDFFROOT    = /usr/local/software/jureca/Stages/2016a/software/netCDF-Fortran/4.4.3-ipsmpi-2016a
-NETCDFROOT     = /usr/local/software/jureca/Stages/2016a/software/netCDF/4.4.0-ipsmpi-2016a
-NETCDFLIBPATH  = /usr/local/software/jureca/Stages/2016a/software/netCDF/4.4.0-ipsmpi-2016a/lib64
+NETCDFFROOT    = /usr/local/software/jureca/Stages/2017a/software/netCDF-Fortran/4.4.4-ipsmpi-2017a
+NETCDFROOT     = /usr/local/software/jureca/Stages/2017a/software/netCDF/4.4.1.1-ipsmpi-2017a
+NETCDFLIBPATH  = $(NETCDFROOT)/lib64
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
-NETCDF_INCLUDE = -I/usr/local/software/jureca/Stages/2016a/software/netCDF/4.4.0-ipsmpi-2016a/include -I/usr/local/software/jureca/Stages/2016a/software/netCDF-Fortran/4.4.3-ipsmpi-2016a/include
+NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
 
 CDIROOT     = 
 CDILIBPATH  = 
 CDI_LIB     = 
 CDI_INCLUDE = 
 
-HDF5ROOT       = /usr/local/software/jureca/Stages/2016a/software/HDF5/1.8.16-ipsmpi-2016a
+OASISLIB       = __cpllib__
+OASIS_INCLUDE  = __cplinc__
+
+HDF5ROOT       = /usr/local/software/jureca/Stages/2017a/software/HDF5/1.8.18-ipsmpi-2017a
 HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
 HDF5_INCLUDE   = -I$(HDF5ROOT)/include
 
-SZIPROOT       = /usr/local/software/jureca/Stages/2016a/software/Szip/2.1-iccifort-2016.2.181-GCC-4.9.3-2.25
+SZIPROOT       = /usr/local/software/jureca/Stages/2017a/software/Szip/2.1.1-iccifort-2017.2.174-GCC-5.4.0
 SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
 SZIP_INCLUDE   = -I$(SZIPROOT)/include
 
-ZLIBROOT       = /usr/local/software/jureca/Stages/2016a/software/zlib/1.2.8-iccifort-2016.2.181-GCC-4.9.3-2.25
+ZLIBROOT       = /usr/local/software/jureca/Stages/2017a/software/zlib/1.2.11-iccifort-2017.2.174-GCC-5.4.0
 ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
 ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
 
@@ -48,9 +54,9 @@ XML2ROOT       =
 XML2_LIB       = 
 XML2_INCLUDE   = 
 
-MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.1.5-1-iccifort-2016.2.181-GCC-4.9.3-2.25
-MPI_LIB        = -L$(MPIROOT)/lib -L/usr/local/software/jureca/Stages/2016a/software/psmpi/5.1.5-1-iccifort-2016.2.181-GCC-4.9.3-2.25/lib -lmpi -lmpifort
-MPI_INCLUDE    = -I$(MPIROOT)/include -I$(MPIROOT)/include/
+MPIROOT        = /usr/local/software/jureca/Stages/2017a/software/psmpi/5.1.9-1-iccifort-2017.2.174-GCC-5.4.0
+MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
+MPI_INCLUDE    = -I$(MPIROOT)/include
 
 LAPACKROOT     = 
 LAPACK_LIB_PATH= 
@@ -61,8 +67,8 @@ PROFILE_INCLUDE =
 
 OTHER_LIBS     = 
 
-LIBS           = -L../lib -lsupport  -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS)
-INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE)
+LIBS           = -L../lib -lsupport  -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
+INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE) $(OASIS_INCLUDE)
 INCLUDES       = $(INCLUDE)
 
 AS             = as

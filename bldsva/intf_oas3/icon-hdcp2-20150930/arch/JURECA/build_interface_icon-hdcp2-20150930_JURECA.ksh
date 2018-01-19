@@ -13,17 +13,27 @@ check
 ./configure --with-fortran=intel >> $log_file 2>> $err_file
 comment "   cp Makefile to icon dir"
    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
+check
 route "cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir"
+check
+comment "   sed oasisdir to icon Makefile"
+  sed -i "s@__oasisdir__@$oasdir@" $icondir/Makefile >> $log_file 2>> $err_file
 check
   c_configure_icon
   if [[ $withOAS == "true" ]]; then
     cplFlag="-DCOUP_OAS_ICON " 
   fi
-  if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi
   if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
   file=$icondir/Makefile
 comment "   sed cplFlag to icon Makefile"
   sed -i "s@__cplflg__@$cplFlag@" $file >> $log_file 2>> $err_file
+check
+comment "   sed cplLib to icon Makefile"
+  sed -i "s@__cpllib__@$cplLib@" $file >> $log_file 2>> $err_file
+check
+comment "   sed cplInc to icon Makefile"
+  sed -i "s@__cplinc__@$cplInc@" $file >> $log_file 2>> $err_file
+check
 route "${cblue}<< configure_icon${cnormal}"
 }
 
