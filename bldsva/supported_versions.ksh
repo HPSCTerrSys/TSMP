@@ -43,7 +43,7 @@ versions+=(
         ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
         ["3.0.0"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
-        ["4.0.0MCT"]="4.0.0 clm3_5 icon-hdcp2-20150930 and Parflow3_2 and with Oasis3-MCT"
+        ["4.0.0MCT"]="4.0.0 clm3_5 icon-lem and Parflow3_2 and with Oasis3-MCT"
 )
 
 
@@ -64,7 +64,7 @@ modelVersion+=(
         ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
-        ["4.0.0MCT"]="oasis3-mct clm3_5 parflow3_2 icon-hdcp2-20150930"
+        ["4.0.0MCT"]="oasis3-mct clm3_5 parflow3_2 icon-lem"
 )
 
 # list of model combinations that are available for a version. (first is default) 

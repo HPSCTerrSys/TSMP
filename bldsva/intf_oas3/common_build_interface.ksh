@@ -22,9 +22,6 @@
 c_configure_icon(){
 route "${cblue}>>> c_configure_icon${cnormal}"
   file=$icondir/Makefile
-  comment "    sed OAS flag to Makefile"
-    sed -i "s@__withoas__@$withOAS@" $file >> $log_file 2>> $err_file
-  check
   comment "    make clean icon"
     make clean >> $log_file 2>> $err_file
   check
@@ -32,10 +29,13 @@ route "${cblue}>>> c_configure_icon${cnormal}"
     cplFlag=""
     cplLib=""
     cplInc=""
-    if [[ $withOAS == "true" ]] ; then
+    #if [[ $withOAS == "true" ]] ; then
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
-    fi
+       comment "    sed OAS flag to Makefile"
+       sed -i "s@__withoas__@COUP_OAS_ICON@" $file >> $log_file 2>> $err_file
+       check
+    #fi
 route "${cblue}<<< c_configure_icon${cnormal}"
 }
 
@@ -66,7 +66,8 @@ route "${cblue}>>> c_substitutions_icon${cnormal}"
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/icon.f90 $icondir/src/drivers >> $log_file 2>> $err_file
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers >> $log_file 2>> $err_file
   check
-
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_nh_stepping.f90 $icondir/src/atm_dyn_iconam >> $log_file 2>> $err_file
+  check
 route "${cblue}<<< c_substitutions_icon${cnormal}"
 }
 
@@ -359,9 +360,11 @@ route "${cblue}<<< c_setup_cos${cnormal}"
 
 c_configure_oas(){
 route "${cblue}>>> c_configure_oas${cnormal}"
+echo "SLAVKO -- oasisroot: $oasdir"
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
+echo "SLAVKO -- platform: $platform"
   comment "    sed platform to Makefile"
     sed -i "s@__platform__@$platform@" $file >> $log_file 2>> $err_file
   check

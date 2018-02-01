@@ -20,8 +20,8 @@ exec_prefix = build/x86_64-unknown-linux-gnu
 bindir = ${exec_prefix}/bin
 libdir = ${exec_prefix}/lib
 
-NETCDFFROOT    = /usr/local/software/jureca/Stages/2017a/software/netCDF-Fortran/4.4.4-ipsmpi-2017a
-NETCDFROOT     = /usr/local/software/jureca/Stages/2017a/software/netCDF/4.4.1.1-ipsmpi-2017a
+NETCDFFROOT    = /usr/local/software/jureca/Stages/2016a/software/netCDF-Fortran/4.4.3-ipsmpi-2016a
+NETCDFROOT     = /usr/local/software/jureca/Stages/2016a/software/netCDF/4.4.0-ipsmpi-2016a
 NETCDFLIBPATH  = $(NETCDFROOT)/lib64
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
 NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
@@ -31,18 +31,18 @@ CDILIBPATH  =
 CDI_LIB     = 
 CDI_INCLUDE = 
 
-OASISLIB       = __cpllib__
+OASIS_LIB      = __cpllib__
 OASIS_INCLUDE  = __cplinc__
 
-HDF5ROOT       = /usr/local/software/jureca/Stages/2017a/software/HDF5/1.8.18-ipsmpi-2017a
+HDF5ROOT       = /usr/local/software/jureca/Stages/2016a/software/HDF5/1.8.16-ipsmpi-2016a
 HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
 HDF5_INCLUDE   = -I$(HDF5ROOT)/include
 
-SZIPROOT       = /usr/local/software/jureca/Stages/2017a/software/Szip/2.1.1-iccifort-2017.2.174-GCC-5.4.0
+SZIPROOT       = /usr/local/software/jureca/Stages/2016a/software/Szip/2.1-iccifort-2016.2.181-GCC-4.9.3-2.25
 SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
 SZIP_INCLUDE   = -I$(SZIPROOT)/include
 
-ZLIBROOT       = /usr/local/software/jureca/Stages/2017a/software/zlib/1.2.11-iccifort-2017.2.174-GCC-5.4.0
+ZLIBROOT       = /usr/local/software/jureca/Stages/2016a/software/zlib/1.2.8-iccifort-2016.2.181-GCC-4.9.3-2.25
 ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
 ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
 
@@ -54,7 +54,7 @@ XML2ROOT       =
 XML2_LIB       = 
 XML2_INCLUDE   = 
 
-MPIROOT        = /usr/local/software/jureca/Stages/2017a/software/psmpi/5.1.9-1-iccifort-2017.2.174-GCC-5.4.0
+MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.1.5-1-iccifort-2016.2.181-GCC-4.9.3-2.25
 MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
 MPI_INCLUDE    = -I$(MPIROOT)/include
 
@@ -67,7 +67,7 @@ PROFILE_INCLUDE =
 
 OTHER_LIBS     = 
 
-LIBS           = -L../lib -lsupport  -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
+LIBS           = -L../lib -lsupport -lself -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
 INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE) $(OASIS_INCLUDE)
 INCLUDES       = $(INCLUDE)
 
@@ -76,7 +76,7 @@ AS             = as
 CC             = icc
 CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__
 FC             = ifort
-FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__
+FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
 FlibFLAGS      = $(INCLUDES) -module  ../module 
 F77            = ifort
 F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE
@@ -86,8 +86,8 @@ ARFLAGS        = crv
 
 LDFLAGS        = -I../src -I../support -I../module -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__
 
-SRCDIRS        = externals/mtime/src blas lapack support src
-OBJDIRS        =  build/x86_64-unknown-linux-gnu/externals/mtime/src build/x86_64-unknown-linux-gnu/blas build/x86_64-unknown-linux-gnu/lapack build/x86_64-unknown-linux-gnu/support build/x86_64-unknown-linux-gnu/src
+SRCDIRS        = externals/self/src externals/mtime/src blas lapack support src
+OBJDIRS        = build/x86_64-unknown-linux-gnu/externals/self/src build/x86_64-unknown-linux-gnu/externals/mtime/src build/x86_64-unknown-linux-gnu/blas build/x86_64-unknown-linux-gnu/lapack build/x86_64-unknown-linux-gnu/support build/x86_64-unknown-linux-gnu/src
 
 ECHO_N = -n
 
