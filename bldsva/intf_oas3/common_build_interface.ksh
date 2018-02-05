@@ -22,20 +22,26 @@
 c_configure_icon(){
 route "${cblue}>>> c_configure_icon${cnormal}"
   file=$icondir/Makefile
+  cplFlag=""
+  cplLib=""
+  cplInc=""
+  if [[ $withOAS == "true" ]] ; then
+    cplLib="$liboas $libpsmile"
+    cplInc="$incpsmile"
+    comment "    sed OAS flag to Makefile"
+    sed -i "s@__withoas__@COUP_OAS_ICON@" $file >> $log_file 2>> $err_file
+    check
+    comment "    sed make.oas3 to Makefile"
+    sed -i "s@__oasismakefile__@\$(oasisdir)/util/make_dir/make.oas3@" $file >> $log_file 2>> $err_file
+    check
+  else
+    comment "    remove make.oas3 from Makefile"
+    sed -i "/__oasismakefile__/d" $file >> $log_file 2>> $err_file
+    check
+  fi
   comment "    make clean icon"
     make clean >> $log_file 2>> $err_file
   check
-
-    cplFlag=""
-    cplLib=""
-    cplInc=""
-    #if [[ $withOAS == "true" ]] ; then
-      cplLib="$liboas $libpsmile"
-      cplInc="$incpsmile"
-       comment "    sed OAS flag to Makefile"
-       sed -i "s@__withoas__@COUP_OAS_ICON@" $file >> $log_file 2>> $err_file
-       check
-    #fi
 route "${cblue}<<< c_configure_icon${cnormal}"
 }
 
@@ -58,6 +64,7 @@ route "${cblue}<<< c_make_icon${cnormal}"
 
 c_substitutions_icon(){
 route "${cblue}>>> c_substitutions_icon${cnormal}"
+if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $icondir/src >> $log_file 2>> $err_file
   check
@@ -68,6 +75,7 @@ route "${cblue}>>> c_substitutions_icon${cnormal}"
   check
     cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_nh_stepping.f90 $icondir/src/atm_dyn_iconam >> $log_file 2>> $err_file
   check
+fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
 }
 

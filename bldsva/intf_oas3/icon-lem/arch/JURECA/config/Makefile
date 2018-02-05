@@ -11,7 +11,7 @@ SITE = jrl07.jureca
 srcdir = .
 
 oasisdir = __oasisdir__
-include __oasisdir__/util/make_dir/make.oas3
+include __oasismakefile__
 LIBPSMILE=$(ARCHDIR)/lib/libpsmile.${CHAN}.a $(ARCHDIR)/lib/libmct.a $(ARCHDIR)/lib/libmpeu.a $(ARCHDIR)/lib/libscrip.a
 
 prefix = .
