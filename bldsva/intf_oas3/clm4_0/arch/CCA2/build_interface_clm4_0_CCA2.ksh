@@ -117,34 +117,34 @@ substitutions_clm(){
 route "${cblue}>> substitutions_clm${cnormal}"
 
   comment "   cp new clm configure, Makefile XMLs and scripts to $clmdir"
-    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Machines/* $clmdir/scripts/ccsm_utils/Machines/ >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Machines/*" $clmdir/scripts/ccsm_utils/Machines/
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Case.template/config_definition.xml $clmdir/scripts/ccsm_utils/Case.template >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Case.template/config_definition.xml $clmdir/scripts/ccsm_utils/Case.template
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Tools/* $clmdir/scripts/ccsm_utils/Tools/ >> $log_file 2>> $err_file
+    patch "$rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Tools/*" $clmdir/scripts/ccsm_utils/Tools/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/create_newcase $clmdir/scripts/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/create_newcase $clmdir/scripts/
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/clm.buildnml.csh $clmdir/models/lnd/clm/bld/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/clm.buildnml.csh $clmdir/models/lnd/clm/bld/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/configure $clmdir/models/lnd/clm/bld/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/configure $clmdir/models/lnd/clm/bld/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/config_files/config_definition.xml $clmdir/models/lnd/clm/bld/config_files/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/lnd/clm/bld/config_files/config_definition.xml $clmdir/models/lnd/clm/bld/config_files/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/atm/datm/bld/datm.buildexe.csh $clmdir/models/atm/datm/bld/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/atm/datm/bld/datm.buildexe.csh $clmdir/models/atm/datm/bld/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/atm/datm/bld/namelist_defaults_datm.xml $clmdir/models/atm/datm/bld/namelist_files/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/atm/datm/bld/namelist_defaults_datm.xml $clmdir/models/atm/datm/bld/namelist_files/ 
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/drv/bld/cesm.buildexe.csh $clmdir/models/drv/bld/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/models/drv/bld/cesm.buildexe.csh $clmdir/models/drv/bld/ 
   check
 
 
   comment "   cp oasis interface to $clmdir"
-    cp  -R $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/utils/oas3 $clmdir/models/utils/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/utils/oas3 $clmdir/models/utils/
   check
-    cp -R  $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/clm/cpl_oas3 $clmdir/models/lnd/clm/src/ >> $log_file 2>> $err_file
+    patch  $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/clm/cpl_oas3 $clmdir/models/lnd/clm/src/ 
   check
-    cp -R  $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/atm/cpl_oas3 $clmdir/models/atm/datm/ >> $log_file 2>> $err_file
+    patch  $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/atm/cpl_oas3 $clmdir/models/atm/datm/ 
   check
 
 
@@ -168,14 +168,14 @@ route "${cblue}>> substitutions_clm${cnormal}"
     mkdir -p $clmdir/SourceMods/ >> $log_file 2>> $err_file
   check
   comment "   cp source modifications to $clmdir"
-    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.drv $clmdir/SourceMods/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.drv $clmdir/SourceMods/ 
   check
-    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.datm $clmdir/SourceMods/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.datm $clmdir/SourceMods/ 
   check
-    cp -R $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.clm $clmdir/SourceMods/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/src.clm $clmdir/SourceMods/ 
   check
     #FG: I'm not sure which consequences this can have. I replaced ISO_C_BINDING:C_SIZE_OF by something intrinsic.
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/src/iompi_mod.F90 $clmdir/models/utils/pio/ >> $log_file 2>> $err_file
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/src/iompi_mod.F90 $clmdir/models/utils/pio/ 
   check
 
 route "${cblue}<< substitutions_clm${cnormal}"

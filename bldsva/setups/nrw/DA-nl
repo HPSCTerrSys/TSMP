@@ -1,10 +1,12 @@
 [DA]
 nreal = __ninst__
 outdir = "./pdafout"
-da_interval       = 1
+da_interval       = 24
 stat_dumpoffset   = 0
 
 [PF]
+prefix_input="tsmp_instance"
+prefix_output="../tsmp_instance"
 problemname = "__pflname__"
 nprocs      = __pflproc__
 starttime   = 0
@@ -14,8 +16,8 @@ updateflag  = 3
 paramupdate = 0
 aniso_perm_y  = 1.0
 aniso_perm_z  = 1.0
-printensemble = 0
-printstat     = 0
+printensemble = 1
+printstat     = 1
 
 [CLM]
 problemname = "lnd.stdin"

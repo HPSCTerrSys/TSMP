@@ -523,7 +523,7 @@ subroutine iniTimeConst
 
       ! Decay factor (m)
 #if (defined CATCHMENT)
-      hkdepth(c) = 1._r8/6.0_r8
+      hkdepth(c) = 1._r8/0.5_r8  ! CPS Lawrence et al. 2011
 #else
       hkdepth(c) = 1._r8/2.5_r8
 #endif

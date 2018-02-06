@@ -1,0 +1,47 @@
+#!/bin/csh
+set ityp_gscp = 2727
+set landsurf  = HET
+set outdir = ${landsurf}${ityp_gscp}
+set indir  = $WORK/run${landsurf}
+#
+if ( -d ./$outdir ) then
+  echo Directory already exists! $dir
+  exit 1
+else
+  mkdir $outdir
+endif
+#
+cd $outdir
+#
+cp $indir/lmrun_uc .
+#
+mkdir cosout
+cd cosout
+mkdir day1
+mkdir day2
+mkdir ivr
+mv $indir/cosmo_out/lfff00000000c.nc ivr/
+echo "Transferring hourly cosmo output for day 1..."
+set sfx = "lfff00*0000.nc"
+mv $indir/cosmo_out/$sfx day1/
+echo "Transferring hourly cosmo output for day 2..."
+mv $indir/cosmo_out/lfff01* day2/
+mv $indir/cosmo_out/lfff02* day2/
+cd ..
+#
+if ($landsurf != "REF") then
+  cp $indir/lnd.stdin .  
+  mkdir clmout
+  cd clmout   
+  mkdir day1
+  mkdir day2
+  echo "Transferring hourly clm output for day 1..."
+  mv $indir/clmoas.clm2.h0.2015-07-04* day1
+  echo "Transferring hourly clm output for day 2..."
+  mv $indir/clmoas.clm2.h0.2015-07-05* day2
+endif
+#
+cd ../../
+
+scp -r $outdir pshrestha@cluma2.meteo.uni-bonn.de:/daten04/pshrestha/
+exit 0

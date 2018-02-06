@@ -1,0 +1,731 @@
+#!/bin/ksh
+INIT_D=init_d_bldsva
+INIT_M=init_m_bldsva
+INIT_Y=init_y_bldsva
+INIT_H=init_h_bldsva
+CONV_SCHEME=3
+#
+username_cluma=pshrestha
+username_sx9=xxxx
+nsteps=nstop_cos_bldsva
+#
+lmworkdir_cluma=__rundir__
+lmoutdir_cluma=__rundir__/cosout
+lmrestdir_cluma=__rundir__/cosrst
+lmindir_cluma=__forcingdir__/
+#
+rasoinput=__forcingdir__/raso_IdealSnd_0000LT.dat
+#
+lmworkdir_sx9=/e/uhome/xxxx/cosmo/
+lmoutdir_sx9=/e/gtmp/xxxx/cosmo/
+lmindir_sx9=/e/uscratch/xxxx/cosmo/
+#
+#################################################
+# host detection
+#################################################
+cmd=$1
+if [[ $1 = clean ]]; then
+  if [[ ($HOST = lxe00) || ($HOST = lxe01) ]]; then
+    cmd=cleansx9
+    echo "... assuming sx9 as host"
+  fi
+  if [[ $HOST = m01 ]]; then
+    cmd=cleancluma
+    echo "... assuming cluma as host"
+  fi
+fi
+#
+if [[ $1 = exe ]]; then
+  if [[ ($HOST = lxe00) || ($HOST = lxe01) ]]; then
+    cmd=exesx9
+    echo "... assuming sx9 as host"
+  fi
+  if [[ $HOST = m01 ]]; then
+    cmd=execluma
+    echo "... assuming cluma as host"
+  fi
+fi
+#################################################
+# host-depending settings
+#################################################
+#
+nprocspernode=999
+if [[ $cmd = execluma ]]; then
+  nprocspernode=4; queue=batch; username=$username_cluma
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
+  echo "###### JOB RUN ON CLUMA ######"
+elif [[ $cmd = exesx9 ]]; then
+  nprocspernode=16; queue=normal@sx9esiox1; username=$username_sx9
+  lmworkdir=$lmworkdir_sx9; lmoutdir=$lmoutdir_sx9; lmindir=$lmindir_sx9
+  echo "###### JOB RUN ON SX9 ######"
+elif [[ $cmd = cleancluma ]]; then
+  nprocspernode=999; queue=none
+  lmworkdir=$lmworkdir_cluma; lmoutdir=$lmoutdir_cluma; lmindir=$lmindir_cluma ; lmrestdir=$lmrestdir_cluma
+  echo "LMRUN_UC: clean up"
+elif [[ $cmd = cleansx9 ]]; then
+  nprocspernode=999; queue=none
+  lmworkdir=$lmworkdir_sx9; lmoutdir=$lmoutdir_sx9; lmindir=$lmindir_sx9
+  echo "LMRUN_UC: clean up"
+fi
+#
+#################################################
+# number of processors
+#################################################
+#
+NPX=1
+NPY=1
+if [[ $cmd = exesx9 ]]; then
+  # ON SX9 keep NPX=1 for performance reasons
+  NPX=1
+  NPY=$nprocspernode
+fi
+if [[ $cmd = execluma ]]; then
+  # ON CLUMA arbitrary settings possible
+  NPX=nprocx_cos_bldsva
+  NPY=nprocy_cos_bldsva
+fi
+NPIO=0
+NP1=`expr $NPX \* $NPY`; NP=`expr $NP1 + $NPIO`; N1=`expr $NP + $nprocspernode - 1`; NODES=`expr $N1 \/ $nprocspernode`
+init_date=${INIT_Y}${INIT_M}${INIT_D}${INIT_H}
+#
+#################################################
+# define directories
+#################################################
+#
+jobname=cosmo${INIT_D}${INIT_M}${INIT_Y}
+runname=cosmo4.21agb_${INIT_D}.${INIT_M}.${INIT_Y}.${INIT_H}00_v03/
+workdir=$lmworkdir/
+INIDIR=$lmindir
+OUTPUT=$lmoutdir
+DATUM=${INIT_Y}${INIT_M}${INIT_D}${INIT_H}
+RESTAR=$lmrestdir
+BD_DIR=$INIDIR
+#
+#################################################
+# selection of actions
+#################################################
+#
+#################################################
+# display help
+#################################################
+#
+if [[ ($cmd != execluma) && ($cmd != exesx9) && ($cmd != cleancluma) && ($cmd != cleansx9) ]]; then
+  umacho
+  echo "COSMORUN : Runs COSMO, cleans working and output directories (on automatically detected host)."
+  echo
+  echo "SYNTAX :"
+  echo
+  echo "lmrun_uc clean                  cleans working and output directories"
+  echo
+  echo "lmrun_uc exe                    starts COSMO"
+  echo
+  echo "lmrun_uc cleancluma, execluma   explicitly sets cluma as host"
+  echo
+  echo "lmrun_uc cleansx9, exesx9       explicitly sets sx9 as host"
+  echo
+  echo "lmrun_uc                        displays help text"
+  echo
+  exit
+fi
+#
+#################################################
+# generate output directory
+#################################################
+#
+if [ ! -d $OUTPUT ] ; then
+  mkdir -p $OUTPUT
+fi
+if [ ! -d $RESTAR ] ; then
+  mkdir -p $RESTAR
+fi
+#
+echo "VK CONFIG with DATE        ${INIT_D}.${INIT_M}.${INIT_Y} ${INIT_H}:00"
+echo "VK CONFIG with CONV.SCHEME $CONV_SCHEME"
+echo "VK CONFIG with INPUTDIR    $INIDIR"
+echo "VK CONFIG with WORKDIR     $workdir"
+echo "VK CONFIG with OUTPUTDIR   $OUTPUT"
+echo "VK CONFIG with JOBNAME     $jobname"
+#
+#################################################
+# clean up only
+#################################################
+#
+if [[ ($cmd = cleancluma) || ($cmd = cleansx9) ]]; then
+  echo "tidy up ..."
+  cd $workdir
+  rm -f cosmo_de_job
+  rm ftrace.out.*
+  rm mon.out.*
+  rm -f *~
+  rm -f YU*
+  rm -f INPUT_*
+  rm -f ${jobname}*
+  rm -f output/*
+  rm -f $OUTPUT/*
+  rm -f cosmo_de_job
+  rm -f M_*
+  rm -f diag*
+  exit 0
+fi
+#
+#################################################
+# start COSMO
+#################################################
+#
+if [[ ($cmd = execluma) || ($cmd = exesx9) ]]; then
+rm -f cosmo_de_job
+echo "generate cosmo_de_job ..."
+
+cat >> cosmo_de_job << namelists
+
+#################################################
+# namelist settings
+#################################################
+#################################################
+# cat together the INPUT*-files
+#################################################
+
+cat > INPUT_ORG << end_input_org
+ &LMGRID
+  ! Definition of the grid structure:
+  ! dlon = dx / earthradius * (180 / PI); in degrees
+    dlon=0.00899289282,
+  ! dlat = dy / earthradius * (180 / PI); in degrees
+    dlat=0.00899289282,
+    ie_tot=ie_tot_bldsva,
+    je_tot=je_tot_bldsva,
+    ke_tot=50,
+    startlat_tot = -0.100, startlon_tot = -2.949,
+    pollat       = 40.0,          pollon = -170.0,
+    !startlon_tot=7.117,
+    !startlat_tot=50.709,
+    !pollon=-180.00,
+    !pollat=90.00,
+ /
+ &RUNCTL
+    ! Idealized run with artificial initial and lateral boundary conditions and
+    ! possibly other artificial elements like convection triggers?
+    lartif_data=.true.,
+    ! 2D oder 3D ? wenn l2dim=.true., dann je_tot = 7 !!!:
+    l2dim=.false.,
+    ! timestep in sec:
+    dt=dt_cos_bldsva,
+    ! Starting hour of the forecast relative to to the starting date ydate_ini below:
+    ! (normally 0.0, except for restart runs)
+    hstart=__hstart__,
+    ! End hour of the forecast:
+    nstop= $nsteps,
+    ! Produces additional control output:
+    idbg_level = 5,
+    ldebug_dyn = .true.,
+    ldebug_gsp = .FALSE.,
+    ldebug_rad = .FALSE.,
+    ldebug_tur = .FALSE.,
+    ldebug_con = .FALSE.,
+    ldebug_soi = .FALSE.,
+    ldebug_io  = .FALSE.,
+    ldebug_dia = .FALSE.,
+    ldebug_ass = .FALSE.,
+    ldebug_lhn = .FALSE.,
+    ! Use digital filtering scheme in model initialisation:
+    ldfi=.false.,
+    ! compute syntetic satellite images:
+    luse_rttov=.false.,
+    ! main switch to include diagnostic calculations:
+    ldiagnos=.true.,
+    ! main switch to include physical parameterizations:
+    lphys=.true.,
+    ! Periodic lateral boundary conditions:
+    lperi_x=.true.,
+    lperi_y=.true.,
+! Radiative lateral BCs can be switched on by lradlbc=.true. in namelist DYNCTL!
+!    lradlbc=.false.,
+    ! Type of timing (?)
+    itype_timing = 4,
+    ! type of calendar:
+    itype_calendar = 0,
+    ! set to .true.:
+    lreproduce=.true.,
+    lreorder=.false.,
+    ! main switch to use observations for assimilation purposes:
+    luseobs=.false.,
+    ldatatypes=.false.,
+    ! number of additional boundary lines to store values from neighbouring processors:
+    nboundlines=3,
+    ! Type of MPI-CommuniCation:
+    ncomm_type=1,
+    ! Number of PEs:
+    nprocio=$NPIO,
+    nprocx=$NPX,
+    nprocy=$NPY,
+    ydate_ini='$DATUM',
+    ydate_bd='$DATUM',
+! New in Version 4.14:
+    linit_fields = .FALSE.,
+    ydate_end = '',
+    l_cosmo_art = .FALSE.,
+    l_pollen = .FALSE.,
+/
+ &TUNING
+  ! Parameter mu of the assumed rain DSD:
+  mu_rain = 0.5,
+  ! Tuning factor for the N0 parameter of the assumed rain DSD:
+  rain_n0_factor = 0.1,
+  ! pat_len: Length scale (m) of subscale surface patterns over land.
+  pat_len=500.0, 
+  tur_len=150.0,
+  z0m_dia=0.2,
+  ! rlam_heat: scaling factor for the thickness of the laminar boundary layer for heat (default=-1.0)
+  rlam_heat=1.0,
+  ! rlam_mom: scaling factor for the thickness of the laminar boundary layer for momentum (default=-1.0)
+  rlam_mom=0.0,
+  ! rat_sea: ratio of laminar scaling factors for heat over sea and land (default=1.0)
+  rat_sea=20.0,
+  ! rat_lam: ratio of thickness of laminar boundary layer for water vapour and sensible heat (default=1.0)
+  rat_lam=1.0,
+  ! rat_can: Scaling factor for the calculation of canopy height (default=1.0)
+  rat_can=1.0,
+  ! c_lnd: Surface Area Index for gridpoints over land (excluding LAI), default=2.0
+  c_lnd=2.0,
+  ! c_soil: Surface Area Index of the evaporating fraction for gridpoints over land, default=2.0
+  c_soil=1.0,
+  ! c_sea: Surface Area Index for gridpoints over sea, default=1.0
+  c_sea=1.2,
+ /
+end_input_org
+
+cat > INPUT_IO  << end_input_io
+ &IOCTL
+  lasync_io=.false.,
+  ! Nummer des WMO-Centers, an dem die Berechnung stattfindet :-) 
+  ! sollte 78 (=DWD) sein, damit die vom LM erzeutgen grib-files auch gelesen werden koennen.
+  ncenter=78,
+  ! Number of gribout namelists:
+  ngribout=1,
+  ydir_restart_out='$RESTAR',
+  ydir_restart_in='$INIDIR',
+  nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
+  ytunit_restart='f',
+ /
+
+ &DATABASE
+ /
+
+ &GRIBIN
+  hincbound=1.0,
+  newbc = 0,
+  hnewbcdt = 0.0
+  lan_t_s=.false.,
+  lan_t_so0=.true.,
+  lan_t_cl=.true., 
+  lan_w_cl=.true., 
+  lan_vio3=.true.,
+  lan_hmo3=.true., 
+  lan_plcov=.true., 
+  lan_lai=.true., 
+  lan_rootdp=.true.,
+  lan_t_snow=.true., 
+  lan_w_i=.true., 
+  lan_w_snow=.true., 
+  lan_rho_snow=.false.,
+  lbdana=.false.,
+  ydirini='$INIDIR',
+  lchkini=.TRUE.,
+  ydirbd='$BD_DIR',
+  lchkbd=.TRUE.,
+  lana_qi=.TRUE., 
+  llb_qi=.TRUE., 
+  lana_qr_qs=.TRUE., 
+  llb_qr_qs=.true., 
+  lana_qg=.true., 
+  llb_qg=.true., 
+  lana_rho_snow=.true.,
+  nlgw_ini = 2,
+  lbd_frame = .FALSE.,
+  npstrframe = 8,
+ /
+ &GRIBOUT
+  ! 4. Zeichen in den Grib-Ausgabedateien, spezifiziert die Art der Zeitverschluesselung im Dateinamen:
+  ytunit='f',
+  ! Format der Ausgabe: grib1 (grb1) oder NetCDF (ncdf):
+  yform_write='ncdf',
+  ! Tripel of values for defining the output time steps in h:
+  ! hcomb = 0.0, 6.0, 0.1 means: from hour 0 to hour 6 in steps of 6 minutes
+  ! (Several triples may be given one after another!)
+  !hcomb=0.0, 20.0, 0.25,
+  ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
+  nrbit=16,
+  ! Indikator for the time unit in grib-output (0=min, 1=stunde) - 0 no more possible since COSMO 5.0:
+!  nunit_of_time=1,
+  l_p_filter=.false.,
+  l_z_filter=.false.,
+  ! Additional suffix for the grib files defined in this namelist:
+  ysuffix='',
+  ! Unit for output of cloud variables QX, QNXXXX 
+  !  loutput_q_densities =.true.  :  kg/m**3 resp. 1/m**3
+  !  loutput_q_densities =.false. :  kg/kg   resp. 1/kg
+  loutput_q_densities = .false.,
+  ! Output variables for the eta-system (max. 130)
+  yvarml='U         ','V         ','W         ','T         ','P         ','QV        ',
+         'QC        ','QR        ','QS        ','QI        ','QG        ','RELHUM    ',
+         'T_S       ','T_G       ','T_SO      ','W_SO      ','SOBS_RAD  ','THBS_RAD  ',
+         'SHFL_S    ','LHFL_S    ','UMFL_S    ','VMFL_S    ','PS        ',
+         'SWDIR_S   ','SWDIFD_S  ','LWD_S     ','HPBL      ',
+         'QV_S      ','TCH       ','TCM       ','T_2M      ','QV_2M     ',
+  ! Type of vertical averaging for yvarpl and yvarzl (p- and z-levels interpolated values):
+  ! itype_vertint = 1 : cubic spline (default)
+  ! itype_vertint = 2 : linear interpolation
+  !itype_vertint=1,
+  ! Output variables at const. p-surfaces (max. 50)
+  !yvarpl='U         ','V         ','FI        ','OMEGA     ',
+  ! P-surfaces for output of yvarpl (in increasing order)
+  !plev=  500.0,  700.0,  850.0, 900.0,
+  ! Output variables for const. z-surfaces (max. 20)
+  !yvarzl='U         ','V         ','W         ','T         ','P         ',
+  !	 'RELHUM    ','QV        ',
+  ! Z-surfaces for output of yvarzl (in increasing order):
+  !zlev=    0.,  250.,  500.,  750., 1000., 1250., 1500., 1750., 2000.,
+  !      2250., 2500., 2750., 3000., 3500., 
+  !      4000., 4500., 5000., 5500., 6000., 6500., 7000.,
+  !      7500., 8000., 8500., 9000., 9500.,10000.,10500.,11000.,
+  !     11500.,12000.,12500.,13000.,13500.,14000.,
+  ! Max, Min and Mean of each output record are written to the file 'YUCHKDAT'
+  !lcheck=.true.,
+  ! Flag for writing of the constant fields at model start:
+  lwrite_const=.true.,
+  ! Interpolation of u and v from the staggered grid to the mass points on output:
+  ! (only effective for the eta-levels-output; is done for z- oder p-levels in any case):
+  luvmasspoint=.true.,
+  ! Directory for the output files:
+  ydir='$OUTPUT',
+ /
+end_input_io
+
+cat > INPUT_DYN << end_input_dyn
+ &DYNCTL
+    ! Rayleigh-damping layer at the model top:
+    lspubc=.true.,
+      ! type of Rayleigh damping in the upper levels
+          ! itype_spubc = 1 : damping to constant boundary fields
+          ! itype_spubc = 2 : damping to smoothed model fields
+      itype_spubc = 1, 
+      ! rdheight: bottom height of Rayleigh damping layer 
+      ! (should be something like 2/3 * hmax, hmax beeing defined in src_artifdata.f90)
+      rdheight=15000.,
+      ! Number of time steps in Rayleigh damping time scale (default = 10):
+      nrdtau=10,
+    ! beta-variable for treatment of soundwaves: zwischen 0 und 1; 0.4 bewirkt leichte Daempfung von vertikal laufenden Schallwellen
+    betasw=0.4, 
+    ! Coeffizient of the divergence damping:
+    xkd=0.10,
+    ! Type of microphysics BC relaxation: 
+       ! itype_outflow_qrsg = 1 : same weights as dyn. variables, 
+       ! itype_outflow_qrsg = 2 : relaxation only on inflow boundaries
+    itype_outflow_qrsg = 1,
+    ! Fall back solution if no boundary fields are found, but are required (e.g., at the end of a real-case simulation)
+       ! itype_lbc_qrsg = 1 : set boundary values to first interior row
+       ! itype_lbc_qrsg = 2 : set boundary values to 0.0
+    itype_lbc_qrsg = 1,
+    ! explicit or implicit formulation of the lateral relaxation boundary condition:
+      ! width of relaxation layer in m: (should be set to about 5-20 * dx)
+      rlwidth=10000.0,
+    ! Include/ exclude cloud water condensation and evaporation (effective only for itype_gscp < 100):
+    lcond=.true.,
+    ! Parameters for the artificial fourth-order diffusion terms:
+    lhordiff=.true.,
+      itype_hdiff=2,
+      hd_corr_u_bd = 1.00,
+      hd_corr_t_bd = 0.75,
+      hd_corr_trcr_bd = 0.50,
+      hd_corr_p_bd = 0.75,
+      hd_corr_u_in = 1.00,
+      hd_corr_t_in = 0.75,
+      hd_corr_trcr_in = 0.50,
+      hd_corr_p_in = 0.75,
+      hd_dhmax=250.0,
+    ! Choose the time integration scheme:
+      ! Runge-Kutta: l2tls = .true.
+      ! Leapfrog:    l2tls = .false.
+      ! Semi-implicit scheme: lsemi_imp = .true.
+    lsemi_imp=.false., 
+      ! dimension of the Krylow space used in the elliptic
+      ! solver for the semi-implicit scheme
+      ikrylow_si = 20,
+      eps_si = 1.0E-8,
+      maxit_si = 200,
+      iprint_si = 0,
+    l2tls=.true.,
+      irunge_kutta=1,
+        irk_order=3,
+        iadv_order=5,
+      ! Type of fast waves solver: 1 = previous fast_waves_rk.f90, 2 = new fast_waves_sc.f90:
+      itype_fast_waves = 2,
+        ! if .true., compute p-gradients in the fast waves solver according to Mahrer (1984) (only for itype_fast_waves = 2).
+        !  This increases stability in steep terrain:
+        lhor_pgrad_Mahrer = .false.,
+        ! if .true., the fully 3D (=isotropic) divergence damping is used (only for itype_fast_waves=2):
+        l_3D_div_damping = .false.,
+      ! type of bottom boundary condition for w (see DOCS/misc.global):
+      itype_bbc_w = 114,
+      ! Dynamic bottom boundary condition:
+      ldyn_bbc = .FALSE.,
+      ! Type of T-advection: 0 = Adv. T, 1 = Adv. Theta:
+      itheta_adv = 0,
+      ltadv_limiter = .FALSE.,
+      ! Type of the scheme for horizontal advection of moisture quantities:
+      !   Semi Lagrangian with multiplicative filling  'SL3_MF'
+      !   Semi Lagrangian with selective filling       'SL3_SFD'
+      !   Eulerian:                          'vanLeer', 'PPM', 'Bott_2' oder 'Bott_4'
+      !   Eulerian with Strang splitting:    'vanLeer_Strang', 'PPM_Strang', 'Bott_2_Strang' oder 'Bott_4_Strang'
+      y_scalar_advect='Bott2',
+      ! choice of the vertical advection scheme for the dynamic variables: "impl2", "impl3" or "expl"
+      y_vert_adv_dyn='expl',
+      ! order of explicit vertical advection scheme in case of y_vert_adv_dyn='expl':
+      ieva_order=3,
+      ! Take the microphysics tendency from the last timestep into account in the Runge-Kutta fast waves solver:
+      ldiabf_lh=.true.,
+    ! lw_freeslip: if .TRUE.: with free slip lateral boundary condition for w and
+    ! if .FALSE. specified lateral boundary values for w (recommended for real-data simulations is .true.):
+    lw_freeslip=.true.,
+    ! max. allowed integer courant number in cr-indep. adv. (recommended is intcr_max = 1)
+    intcr_max = 1,
+    ! if =.TRUE.: take cos(phi) coriolis terms into account (Ronny Petrik)
+    lcori_deep = .FALSE.,
+    ! IF ladv_deep=.True. then add deep atmosphere terms: u*w/r and v*w/r and (u**2+v**2)/r
+    ladv_deep = .FALSE.,
+    ! Take Coriolis force into account:
+    lcori = .false.,
+    ! Take the metrical terms due to the earth curvature into account:
+    ! Only effective if lartif_data=.true.!!!
+    ! (precisely: if lmetr=.false.: tan(phi)=0, cos(phi)=1; that is: f-plane at the equator
+    ! of the rotated geographical system. 
+    ! If additionally lcori=.true., then the Coriolis parameter f takes the value for 
+    ! 45 Grad geograph. latitude.)
+    ! For smallscale idealized runs, we recommend lmetr=.false.
+    lmetr = .false.,
+    ! Radiative lateral boundary conditions:
+    lradlbc = .FALSE.,
+      relax_fac = 0.00,
+    alphaass = 1.0,
+ /END
+end_input_dyn
+
+cat > INPUT_EPS << end_input_eps
+ &EPSCTL
+  iepsmem = -(1),
+  iepstot = -(1),
+  iepstyp = -(1),
+  fac_lai = 1.,
+  rmin_lai = 0.,
+  rmax_lai = 8.,
+  fac_plcov = 1.,
+  rmin_plcov = 0.,
+  rmax_plcov = 1.,
+  fac_rootdp = 1.,
+  rmin_rootdp = 0.,
+  rmax_rootdp = 2.,
+ /
+end_input_eps
+
+cat > INPUT_PHY << end_input_phy
+ &PHYCTL
+    ! grid scale precipitation:
+    lgsp=.true.,
+    ! Type of cloud microphysics:
+    itype_gscp=4,
+      ldiniprec=.false.,
+    ! Radiation scheme:
+    lrad=.true.,
+    hincrad=0.25,
+      lradf_avg=.false.,
+      nradcoarse=1,
+      ico2_rad=0,
+      lradtopo=.false.,
+    ! Master switch for turbulent diffusion:
+    ltur=.true.,
+      ! type of turbulent diffusion parametrization 3=progrnostic TKE-based standard scheme; 7=LES-Scheme, 100=const. diff. coeff.:
+      itype_turb=3,
+      ! prognostic treatment of TKE (for itype_turb=5/7)
+      lprog_tke=.true.,
+      limpltkediff = .FALSE.,
+      ! Mode of turbulent diffusion parametrization in case of itype_turb=3:
+      imode_turb=1,
+      ! time step increment for running the turbulent diffusion scheme:
+      ninctura=1,
+      ! 3D-turbulence --- erst ab Version 3.13!!!
+      l3dturb=.true.,
+        l3dturb_metr=.true.,
+      ! type of TKE shear production (itype_turb=3 only):
+      ! 1 = only vertical shear production
+      ! 2 = full 3D isotropic shear production
+      ! 3 = vertical shear and separted horizontal shear mode
+      itype_sher = 2,
+      ! explicit corrections of the implicit calculated
+      ! turbulent diffusion (only if itype_turb=3)
+      lexpcor=.true.,
+      ! consideration of thermal TKE-sources in the 
+      ! enthalpy budget:
+      ltmpcor=.false.,
+      ! using the profile values of the lowest main level instead
+      ! of the mean value of the lowest layer for surface flux
+      ! calulations, should be .false. (.true. not tested!!!):
+      lprfcor=.false.,
+      ! nonlocal calculation of vertical gradients used:
+      ! for turbulent diffusion (only if itype_turb=3)
+      lnonloc=.false.,
+      ! consideration of fluctuations of the heat capacity of air:
+      lcpfluc=.false.,
+      !  main parameter to select surface-layer parameterization (2=TKE based scheme including a laminar sublayer)
+      ! itype_wcld: type of water cloud diagnosis (1=relative humidity based scheme, 2=statistical scheme):
+      itype_wcld=2,
+      icldm_rad=4,
+      icldm_turb=2,
+      icldm_tran=0,
+      itype_tran=2,
+      ! different parameters in case of itype_tran=2:
+        ! imode_tran: type of surface-atmosphere transfer (1=based on diagnostic TKE, 2=prognostic TKE)
+        imode_tran=1,
+      ! itype_synd: type of diagnosis of synoptic station values:
+      itype_synd=2,
+    ! Master switch for the soil model
+    lsoil=.true.,
+      lmulti_layer=.true.,
+      lmelt=.true.,
+      lmelt_var=.true.,
+      itype_evsl=2,
+      itype_trvg=2,
+      ! Number of soil levels (lmulti_layer=.true.):
+      ke_soil=7,
+      czml_soil=0.005,0.02,0.06,0.18,0.54,1.62,4.86,14.58,
+      !nlgw=2,
+      !lmulti_snow = .FALSE.,
+      !ke_snow = 2,
+    ! to run with forest data (evergreen and deciduous):
+    lforest=.false.,
+    ! To run with lake model FLAKE:
+    llake=.FALSE.
+    ! Convection scheme:
+    lconv=.false.,
+      ! time step increment for running the convection scheme:
+      nincconv=10,
+      itype_conv = $CONV_SCHEME,
+      lcape=.false.,
+      lctke=.false.,
+      lconf_avg=.true.,
+      ! output of instantaneous values of top_con/bas_con instead of min/max (Tiedke)
+      lconv_inst=.false.,
+    ! sea ice model:
+    lseaice = .FALSE.,
+    ! run with subscale orography scheme (SSO):
+    lsso = .FALSE.,
+    nincsso = 5,
+    ltkesso = .FALSE.,
+    lemiss = .FALSE.,
+    lstomata = .FALSE.,
+    itype_aerosol = 1,
+    itype_root = 1,
+    itype_heatcond = 1,
+    itype_hydbound = 1,
+ /
+end_input_phy
+
+cat > INPUT_DIA << end_input_dia
+ &DIACTL
+  n0meanval=0, 
+  nincmeanval=1,
+  lgplong=.true., 
+  lgpshort=.false., 
+  lgpspec=.false., 
+  n0gp=0,
+  h0gp = 0.0,
+  hincgp=1,
+  ! Indices (:) for desired grid point output:
+  !  i_gp,  j_gp, have priority over lat_gp,  lon_gp!
+  !                  i_gp,  j_gp,   lat_gp,  lon_gp,  stationname
+  stationlist_tot=      5,     5,      0.0,     0.0,   "station_1",
+  l_integrals = .FALSE.,
+  itype_diag_t2m = 1,
+  itype_diag_gusts = 1,
+ /
+end_input_dia
+
+cat > INPUT_INI << end_input_ini
+ &INICTL
+  ! Nur wichtig, wenn ldfi=.true. in RUNCTL
+  ! indicator for kind of filtering:
+  ndfi=2,
+  tspan=3600.0, 
+  taus=3600.0,
+  ! time step for the backward/forward filtering stage; should be = dt
+  dtbak=6.0, 
+  dtfwd=6.0,
+ /
+end_input_ini
+
+cat > INPUT_ASS << end_input_ass
+ &NUDGING
+  lnudge=.false.,
+ /
+end_input_ass
+
+cat > INPUT_IDEAL << end_input_artifctl
+ &ARTIFCTL
+ ldebug_artif = .true.,
+  idbg_artif_level = 5,
+ irefatm = 2,
+  p0sl = 1e5,       ! reference surface (z = 0.0 m) pressure [Pa]
+  t0sl = 300.0,     ! reference surface temperature [K]
+  dt0lp = 42.0,     ! logarithmic temperature gradient [K]
+  delta_t = 75.0,   ! temperature diff. surface - stratosphere [K]
+  h_scal = 10000.0, ! e-folding height of exponential adjustment to the stratosphere temp. [m]
+  bvref = 0.01,     ! constant Brund-Vaisala-frequency for irefatm=3 [1/s]
+ ivctype = 2,
+  zspacing_type = 'predefined',! sub-type of coordinate spec.
+  vcflat = 11000.0,         ! height, above which coordinate levels become flat [m]
+ linit_realoro = .false.,
+  href_oro=140.0,
+  itype_topo = 0, 
+  lhill = .false., .false., .false.,
+ itype_soil_c = 1, 
+  z0_c      = 0.108,        ! z_0 in m
+  fr_land_c = 1.0,         ! land fraction, dimensionless
+  soiltyp_c = 6.0,         ! clay loam soiltype, dimensionless
+  plcov_c   = 0.9,         ! plant cover, dimensionless
+  lai_c     = 3.5,         ! LAI, dimensionless
+  rootdp_c  = 0.6,         ! root depth in m
+  for_e_c   = 0.0,         ! area fraction of evergreen forests
+  for_d_c   = 0.0,         ! area fraction of decidious forests
+  h_ice_c   = 0.1,         ! ice thickness in m
+ itype_soil_tw = 1, 
+  t_surf_c  = -1.0,     ! baseline t_s (if < 0, the atmosphere temperature at the surface is used)
+  t_soil_c  = 287.0,   ! t_soil in K (if < 0, t_s is taken instead) for all soiltypes except glaciers)
+  wf_soil_c = 0.4,      ! soil water saturation, dimensionless (0 ... 1)
+  t_snow_c  = -1.0,     ! t_snow in K (if < 0, t_s is taken instead)
+  w_snow_c  = 0.0,      ! snow water equivalent in m H2O
+  w_i_c     = 0.0,      ! interception storage on plants in m H2O
+  t_ice_c   = -1.0,     ! T at the snow-ice or air-ice interf. in K (if < 0, t_s is taken instead) 
+  t_water_c = -1.0,     ! T at the water-ice or water-air interface in K (if < 0, t_s is taken instead)
+ itype_artifprofiles = 1, 
+ rasofile = '$rasoinput',
+ linitw_followeta = .true.,
+ lnosurffluxes_m = .false.,
+ lnosurffluxes_h = .false.,
+ ltempdist = .false., .false., .false.,.false.,
+/
+end_input_artifctl
+
+namelists
+
+#################################################
+#cleanup
+#################################################
+
+rm -f INPUT_ORG INPUT_IO INPUT_DYN INPUT_DIA INPUT_PHY INPUT_INI
+rm -f INPUT_ASS INPUT_SAT INPUT_EPS
+
+chmod u+x cosmo_de_job
+fi
+./cosmo_de_job
+exit 0
+             
+

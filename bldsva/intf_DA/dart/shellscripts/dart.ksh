@@ -1,3 +1,4 @@
+###Deprecated
 #!/bin/ksh
 
 #SBATCH --job-name="TerrSysMP"

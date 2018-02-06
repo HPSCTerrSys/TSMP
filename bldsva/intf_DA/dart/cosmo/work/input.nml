@@ -25,7 +25,7 @@
 &filter_nml
    async                    = 0
    adv_ens_command          = "./no_way_to_advance"
-   ens_size                 = 48 
+   ens_size                 = __nens__
    start_from_restart       = .true.
    output_restart           = .true.
    obs_sequence_in_name     = "obs_seq.out"
@@ -38,8 +38,8 @@
    first_obs_seconds        = -1
    last_obs_days            = -1
    last_obs_seconds         = -1
-   num_output_state_members = 48
-   num_output_obs_members   = 48
+   num_output_state_members = __nens__ 
+   num_output_obs_members   = __nens__
    output_interval          = 1
    num_groups               = 1
    input_qc_threshold       =  3.0
@@ -79,7 +79,7 @@
 # cutoff of 0.03 (radians) is about 200km
 &assim_tools_nml
    filter_kind                     = 1
-   cutoff                          = 0.002
+   cutoff                          = __cutrad__
    sort_obs_inc                    = .false.
    spread_restoration              = .false.
    sampling_error_correction       = .false.
@@ -279,7 +279,7 @@
    reg_names  = 'Center', 'Left', 'Right', 'Bottom'
    print_mismatched_locs = .true.
    verbose               = .true.
-   hlevel =  10.0,  100.0, 200.0,500.0, 1000.0
+   hlevel = 10.0, 100.0, 200.0, 500., 1000.,3000.,5000.
   /
 
 

@@ -17,6 +17,8 @@ export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
 source $LOGNNAME/loadenvs
 
+export numInst=$2
+
 # Cleanup---------------
 rm input.nml
 rm pfb_soil.nc
@@ -42,8 +44,6 @@ cp $DART_DIR/input.nml .
 cp $DART_DIR/filter .
 cp $DART_DIR/dart_to_parflow .
 cp $DART_DIR/parflow_to_dart .
-
-numInst=48
 
 for instance in {0..$(($numInst-1))}
 do
@@ -102,7 +102,7 @@ echo "CPS 2"
 #for filter?
 
 date
-srun  -n 48  ./filter || exit 3  >> log_file 2>> err_file
+srun  -n $numInst  ./filter || exit 3  >> log_file 2>> err_file
 date
 
 for instance in {0..$(($numInst-1))}

@@ -25,13 +25,13 @@ character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (W
 
 integer  :: level, num_cols, num_levs,num_dates, i,k, iunit
 real(r8) :: lat, lon, t_err_var, uv_err_var, ps_err_var
-real(r8) :: lat_data(10), lon_data(10), level_data(5)
+real(r8) :: lat_data(10), lon_data(10), level_data(7)
 integer  :: yyyy, mm, dd_data(13), hh, mn, ss
 character(len=1024) :: filename
 
 data  lat_data/49.87, 49.95, 49.87, 49.95, 49.87, 49.95, 49.87, 49.95, 49.87, 49.95/
 data  lon_data/ 5.48,  5.48,  5.55,  5.55,  5.62,  5.62,  5.69,  5.69,  5.75,  5.75/
-data  level_data/10.0, 100.0, 200.0, 500., 1000./
+data  level_data/10.0, 100.0, 200.0, 500., 1000.,3000.,5000./
 data  dd_data/9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21/
 
 !Pre Specified Date
@@ -47,7 +47,7 @@ open(unit = iunit, file = 'column_rand.out')
 write(*, *) 'input the number of columns:10'
 read(*, *) num_cols
 
-write(*, *) 'input the number of model levels:5'
+write(*, *) 'input the number of model levels:7'
 read(*, *) num_levs
 
 write(*, *) 'input the number of dates:13'

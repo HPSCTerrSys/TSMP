@@ -16,6 +16,7 @@ SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
 MACHINE="JURECA"        #(which machine are your running on)
 NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle - 1)
 NRST=1                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+MAP_FN=9                #Mapping matrix (selected ensemble member for perfect model run)
 RUNSFX="perfectModel"
 ASSIMC=""
 JOBSCRIPT0="jobchain_perfect.ksh "
@@ -42,7 +43,7 @@ if [[ $STEP == "run" ]] then
     echo " "
     # 1: (Script to create the rundirectory with multiple instances e.g. rundar01)
     if [[ $ICYCLE = "1" ]] then ; NRST=0 ; fi
-    ./perfect_tsmp_setup.csh $ICYCLE $NRST $MACHINE
+    ./perfect_tsmp_setup.csh $ICYCLE $NRST $MAP_FN $MACHINE
 
     # 2: Submit jobscript for terrsysmp run
     RUNNAME=`printf $RUNSFX%02d ${ICYCLE}`

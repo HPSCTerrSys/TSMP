@@ -1,10 +1,12 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle nrst machine
+# usage: ./tsmp_setup.csh cycle nrst ens map_fn machine
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
 #  nrst   = 1,2,3 for restart with cosmo,clm,parflow assimilation
+#  ens    = ensemble size
+#  map_fn = mapping of ensemble members
 # machine = JURECA, CLUMA2
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
@@ -20,7 +22,6 @@
 # experiment setup flags
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "idealRTD"
-set ensemble_size = 48 
 # paths 
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
@@ -34,7 +35,9 @@ echo " "
 
 set icycle  = $1
 set inrst   = $2
-set machine = $3
+set ensemble_size = $3
+set map_fn = $4
+set machine = $5
 if ($inrst <= 1) then
   set assimC = 'cosmo'
 else if ($inrst == 2) then
@@ -47,6 +50,13 @@ endif
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
+
+#
+set defDir = $tsmpdir/bldsva/setups/$refsetup
+cp $defDir/def/idealRTD_JURECA_setup_DA.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_DA.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_DA $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
 
 #foreach icycle (`seq 1 $runcycle`)
 
@@ -61,13 +71,16 @@ endif
     echo " "
     #
     cd $tsmpdir/bldsva
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+    # Added clmrstfil to run with CLM spinup states
+    # Parflow spinup states is used directly as initial PFB file, no need to specify here
+    set clmrstfil = "./clm_restart.nc"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run
     set rundir         = $WORK/run$sdate
     #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #set rundir        = $tsmpdir"/run/"$temp_dir
     #
     # Perturb the model state
-    $shellpath/perturb_model_state.csh $rundir $ensemble_size
+    $shellpath/perturb_model_state.csh $rundir $ensemble_size $map_fn
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
@@ -161,6 +174,23 @@ endif
     exit 1
   endif
 #end
+
+echo "-------------------------------------------------------------------"
+echo "Block 2:  Perturb seed number and leafcn"
+echo "-------------------------------------------------------------------"
+echo " "
+
+$shellpath/perturb_model_param.csh $rundir $ensemble_size $map_fn
+
+echo "-------------------------------------------------------------------"
+echo "Block 3:  Updating the setup directory with default script"
+echo "-------------------------------------------------------------------"
+echo " "
+
+cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
+cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
+cp $defDir/def/lmrun_uc5_1_default $defDir/lmrun_uc5_1
 
 exit 0
 

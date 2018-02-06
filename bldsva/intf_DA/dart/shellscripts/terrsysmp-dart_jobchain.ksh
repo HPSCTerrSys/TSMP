@@ -13,9 +13,12 @@
 
 #JOBCHAIN NAMELIST
 SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
+DPATH="$HOME/DART/lanai/models/terrsysmp/"
 MACHINE="JURECA"        #(which machine are your running on)
 NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle - 1)
 NRST=3                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+NENS=48                 #Ensemble Size
+MAP_FN="$SPATH/map_fn.txt"  #Mapping matrix for ensemble runs
 RUNSFX="rundart"
 ASSIMC=""
 JOBSCRIPT0="terrsysmp-dart_jobchain.ksh "
@@ -36,15 +39,20 @@ ICYCLE=$1
 STEP=$2
 
 #------------
-cd $SPATH
+if [[ $ICYCLE == 1 ]] then
+    echo " Updating DART namelist ...."
+    echo " "
+    ./dart_setup.csh $NENS $DPATH
+fi
 
+cd $SPATH
 
 if [[ $STEP == "run" ]] then
     echo " TerrSysMP run ...."
     echo " "
     # 1: (Script to create the rundirectory with multiple instances e.g. rundar01)
     if [[ $ICYCLE = "1" ]] then ; NRST=0 ; fi
-    ./tsmp_setup.csh $ICYCLE $NRST $MACHINE
+    ./tsmp_setup.csh $ICYCLE $NRST $NENS $MAP_FN $MACHINE
 
     # 2: Submit jobscript for terrsysmp run
     RUNNAME=`printf $RUNSFX%02d ${ICYCLE}`
@@ -66,8 +74,8 @@ if [[ $STEP == "filter" ]] then
     RUNNAME=`printf $RUNSFX%02d ${ICYCLE}`
 
     # 4: Submit jobscript for dart run
-    echo "sbatch $JOBSCRIPT2 $RUNNAME"
-    JOBID=$(sbatch $JOBSCRIPT2 $RUNNAME 2>&1 | awk '{print $(NF)}')
+    echo "sbatch $JOBSCRIPT2 $RUNNAME $NENS"
+    JOBID=$(sbatch $JOBSCRIPT2 $RUNNAME $NENS 2>&1 | awk '{print $(NF)}')
     #
     echo "sbatch --dependency=afterok:${JOBID} $JOBSCRIPT0 $(($ICYCLE+1)) run"
     JOBID=$(sbatch --dependency=afterok:${JOBID} $JOBSCRIPT0 $(($ICYCLE+1)) "run" 2>&1 | awk '{print $(NF)}')
