@@ -83,15 +83,15 @@ c_setup_icon(){
 route "${cblue}>>> c_setup_icon${cnormal}"
 
 comment "  cp namelist to rundir"
-  cp ${namelist_cos} $rundir/icon_nml >> $log_file 2>> $err_file
+  cp ${namelist_icon} $rundir/icon_nml >> $log_file 2>> $err_file
 check
 
-nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
+#nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
 #if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 
-comment "  sed dt to namelist"
-  sed "s,dt_icon_bldsva,$dt_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
+#comment "  sed dt to namelist"
+#  sed "s,dt_icon_bldsva,$dt_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
+#check
 
 comment "  sed number of procs to namelist"
   sed "s,nproc_icon_bldsva,$p_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
@@ -132,43 +132,6 @@ check
   sed "s/init_d_bldsva/$(date '+%d' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
 check
   sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-
-cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))/3600))
-comment "  sed start hour to namelist"
-sed "s/__hstart__/$cnt/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-comment "  sed restart interval to namelist"
-sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
-check
-sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
-check
-sed "s/__nhour_restart_incr__/1/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
-check
-
-cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos} ))
-comment "  sed output interval to namelist"
-sed "s/__ncomb_start__/$cnts/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
-check
-sed "s/__dump_cos_interval__/$(($dump_cos*(3600/$dt_cos)))/" -i $rundir/icon_nml  >> $log_file 2>> $err_file
-check
-
-if [[ $restfile_cos != "" ]] then
-comment "  softlink restart file to input dir"
-ln -s $restfile_cos $rundir/cosmo_in  >> $log_file 2>> $err_file
-check
-fi
-
-
-
-comment "  cd to rundir"
-  cd $rundir >> $log_file 2>> $err_file
-check
-comment "  run icon_nml clean"
-  $rundir/icon_nml cleancluma >> $log_file 2>> $err_file
-check
-comment "  run icon_nml exe"
-  $rundir/icon_nml execluma >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"

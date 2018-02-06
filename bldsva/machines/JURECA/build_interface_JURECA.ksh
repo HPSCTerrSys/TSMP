@@ -47,7 +47,7 @@ comment "   copy JURECA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
 check
 
-mpitasks=$((numInst * ($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
+mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 
 #DA
@@ -95,14 +95,13 @@ end_oas=$(($start_oas+$nproc_oas-1))
 start_cos=$(($nproc_oas+$counter))
 end_cos=$(($start_cos+($numInst*$nproc_cos)-1))
 
-#maybe use icon instead of cosmo
-start_icon=$start_cos
-end_icon=$end_cos
+start_icon=$(($nproc_oas+$counter))
+end_icon=$(($start_icon+($numInst*$nproc_icon)-1))
 
-start_pfl=$(($numInst*$nproc_cos+$nproc_oas+$counter))
+start_pfl=$(($numInst*($nproc_cos+$nproc_icon)+$nproc_oas+$counter))
 end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
-start_clm=$((($numInst*$nproc_cos)+$nproc_oas+($numInst*$nproc_pfl)+$counter))
+start_clm=$((($numInst*($nproc_cos+$nproc_icon))+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
 
 
@@ -111,7 +110,14 @@ if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  do
   for iter in {1..$nproc_cos}
   do
-    if [[ $withCOS == "true" || $withICON == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+  done
+ done
+ for instance in {$startInst..$(($startInst+$numInst-1))}
+ do
+  for iter in {1..$nproc_icon}
+  do
+    if [[ $withICON == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
   done
  done
  for instance in {$startInst..$(($startInst+$numInst-1))}

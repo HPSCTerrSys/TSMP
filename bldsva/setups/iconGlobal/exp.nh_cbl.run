@@ -1,0 +1,553 @@
+#!/bin/ksh
+
+set -x
+. ./add_run_routines
+#-----------------------------------------------------------------------------
+# target parameters
+# ----------------------------
+site="jrl06.jureca"
+target="jureca"
+compiler="intel"
+loadmodule="Intel ParaStationMPI netCDF-Fortran "
+with_mpi="yes"
+with_openmp="yes"
+job_name="exp.nh_cbl.run"
+submit="sbatch"
+#-----------------------------------------------------------------------------
+# openmp environment variables
+# ----------------------------
+export OMP_NUM_THREADS=4
+export ICON_THREADS=4
+export OMP_SCHEDULE=static
+export OMP_DYNAMIC="false"
+export OMP_STACKSIZE=200M
+
+export PSP_RENDEZVOUS_OPENIB=-1
+#-----------------------------------------------------------------------------
+# MPI variables
+# ----------------------------
+mpi_procs_pernode=6
+START="srun"
+#-----------------------------------------------------------------------------
+# load ../setting if exists  
+if [ -a ../setting ]
+then
+  echo "Load Setting"
+  . ../setting
+fi
+#-----------------------------------------------------------------------------
+bindir="${basedir}/build/x86_64-unknown-linux-gnu/bin"   # binaries
+BUILDDIR=build/x86_64-unknown-linux-gnu
+#-----------------------------------------------------------------------------
+#=============================================================================
+export LD_LIBRARY_PATH=/usr/local/software/jureca/Stages/2017a/software/netCDF/4.4.1.1-ipsmpi-2017a/lib64:$LD_LIBRARY_PATH
+#=============================================================================
+nproma=16
+cdo="cdo"
+cdo_diff="cdo diffn"
+icon_data_rootFolder=""
+icon_data_poolFolder=""
+icon_data_buildbotFolder="/buildbot_data"
+icon_data_buildbotFolder_aes="/buildbot_data/aes"
+icon_data_buildbotFolder_oes="/buildbot_data/oes"
+export EXPNAME="nh_cbl"
+
+atmo_namelist=NAMELIST_${EXPNAME}
+#
+#-----------------------------------------------------------------------------
+# global timing
+start_date="2008-09-01T00:00:00Z"
+end_date="2008-09-01T03:00:00Z"
+ndays_restart=60
+dt_restart=`expr ${ndays_restart} \* 86400`
+#
+#-----------------------------------------------------------------------------
+# model timing
+dtime=0.5
+dt_checkpoint=`expr 1 \* 3600 `  # write restart file every 1 hours
+#
+#-----------------------------------------------------------------------------
+# model parameters
+atmo_model_equations=3 # equation system
+#                     1=hydrost. atm. (T dynamics)
+#                     2=hydrost. atm. (theta dynamics)
+#                     3=non-hydrost. atm.,
+#                    -1=shallow water model
+#                    -2=hydrost. ocean
+nlev=64           # nlev = number of full levels
+iforcing=3        # 3 for inwp forcing; 0 for no forcing
+#
+#-----------------------------------------------------------------------------
+# the grid files
+atmo_dyn_grids='torus_grid_x192_y192_e70m.nc'
+#
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+#
+# write ICON namelist parameters
+# ------------------------
+# For a complete list see Namelist_overview and Namelist_overview.pdf
+#
+cat > ${atmo_namelist} << EOF
+!
+&parallel_nml
+ nproma         = ${nproma}
+ p_test_run     = .false.
+ l_test_openmp  = .false.
+ l_log_checks   = .false.
+/
+&grid_nml
+ ! cell_type is not used = 3            ! triangular cells
+ dynamics_grid_filename = "${atmo_dyn_grids}",
+ corio_lat = 0.0
+/ 
+&run_nml
+ num_lev     = ${nlev},      ! number of full levels of vertical grid
+ dtime       = ${dtime}     ! [s] timestep in seconds
+ ltestcase   = .TRUE.       ! run testcase                 --> testcase_ctl
+ ldynamics   = .TRUE.       ! dynamics
+ ltransport  = .TRUE.       ! transport
+ iforcing    = ${iforcing}  !
+ ntracer     =  1           ! number of tracers - default 0
+ ltimer      = .true.       ! 
+ timers_level = 100         !
+ msg_level   = 12          ! detailed report during integration
+ output      = 'nml','totint'      
+ profiling_output = 3
+/
+&dynamics_nml
+ iequations  = ${atmo_model_equations}       ! 1: hydrost. atmosphere
+ lcoriolis   = .FALSE.
+ idiv_method     = 1
+ divavg_cntrwgt  = 0.50
+/
+&nh_testcase_nml
+ nh_test_name      = 'CBL'  !test case identifier
+ u_cbl             = 0.0, 0.0  !u_cbl(1)=constant, u_cbl(2)=gradient, default=0
+ v_cbl             = 0.0, 0.0  !v_cbl(1)=constant, v_cbl(2)=gradient, default=0
+ th_cbl            = 290.0, 0.006  !th_cbl(1)=constant, th_cbl(2)=gradient
+/
+&les_nml
+ is_dry_cbl        = .TRUE. 
+ shflx             =  0.1  ! kinematic surface heat flux
+ lhflx             =  0.0  ! knematic latent heat flux 
+ isrfc_type        = 2     !2=Fixed flux, 5=fixed SST, 3=fixed bflux
+ ufric             = 0.45
+ expname           = '${EXPNAME}'
+ avg_interval_sec = 900.
+ sampl_freq_sec   = 30.
+ ldiag_les_out    = .TRUE.
+/
+&diffusion_nml
+ lhdiff_temp  = .TRUE.
+ lhdiff_vn    = .TRUE.
+ lhdiff_w     = .FALSE.
+ hdiff_order  = 4
+/
+&nwp_phy_nml
+inwp_gscp       = 0
+inwp_convection = 0
+inwp_radiation  = 0
+inwp_cldcover   = 0
+inwp_turb       = 5
+inwp_satad      = 0
+inwp_surface    = 0
+/
+&turbdiff_nml
+lconst_z0 = .TRUE.
+const_z0  = 0.0003
+/
+&transport_nml
+ ihadv_tracer = 0,0,0,0,0,0,0
+ ivadv_tracer = 0,0,0,0,0,0,0
+/
+&nonhydrostatic_nml
+ iadv_rhotheta = 2
+ igradp_method = 2  !new default
+ ivctype       = 2  !1=Gal-Chen; 2=SLEVE
+ rayleigh_coeff  = 0.10     ! Rayleigh coefficient for damping in upper levels
+ vwind_offctr    = 0.4      ! off-centering for time differencing (like alpha in turb)
+ l_open_ubc      = .false.  ! top open upper boundary condition. might help to go higher
+ damp_height     = 2700      ! damping height, keep top 5-10 levels for damping
+/
+&sleve_nml                   ! vertical grid standard output for message level >= 15
+ min_lay_thckn   = 0.        ! lowest level thickness (between half-levels), set 0 to do equal spacing
+ top_height      = 3200
+ stretch_fac     = 0.9       ! stretching towards model top (1.0 default; smaller - bigger top level thickness)
+/
+&io_nml
+ dt_checkpoint    = ${dt_checkpoint} ! [s] trigger new restart file
+ lkeep_in_sync    = .true.
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "${start_date}"
+ output_end       = "${end_date}"
+ output_interval  = "PT30M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = '${EXPNAME}_insta'
+ output_grid      = .TRUE.
+ ml_varlist       = 'u','v','w','temp','theta_v','pres_sfc','pres','tkvh','z_ifc','z_mc','rho','shfl_s','lhfl_s','tke'
+/
+EOF
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+# add standard atmo_non-hydrostatic_files
+. ${thisdir}/add_required_atmo_non-hydrostatic_files
+#-----------------------------------------------------------------------------
+#!/bin/ksh
+#=============================================================================
+#
+# This section of the run script prepares and starts the model integration. 
+#
+# bindir and START must be defined as environment variables or
+# they must be substituted with appropriate values.
+#
+# Marco Giorgetta, MPI-M, 2010-04-21
+#
+#-----------------------------------------------------------------------------
+#
+# directories definition
+#
+ICONDIR=${ICON_BASE_PATH}
+RUNSCRIPTDIR=${ICONDIR}/run
+if [ x$grids_folder = x ] ; then
+   HGRIDDIR=${ICONDIR}/grids
+else
+   HGRIDDIR=$grids_folder
+fi
+
+# experiment directory, with plenty of space, create if new
+#EXPDIR=${ICONDIR}/experiments/${EXPNAME}
+EXPDIR=$WORK/icon/experiments/${EXPNAME}
+if [ ! -d ${EXPDIR} ] ;  then
+  mkdir -p ${EXPDIR}
+fi
+#
+ls -ld ${EXPDIR}
+if [ ! -d ${EXPDIR} ] ;  then
+    mkdir ${EXPDIR}
+#else
+#   rm -rf ${EXPDIR}
+#   mkdir  ${EXPDIR}
+fi
+ls -ld ${EXPDIR}
+check_error $? "${EXPDIR} does not exist?"
+
+cd ${EXPDIR}
+
+#-----------------------------------------------------------------------------
+# set up the model lists if they do not exist
+# this works for subngle model runs
+# for coupled runs the lists should be declared explicilty
+if [ x$namelist_list = x ]; then
+#  minrank_list=(        0           )
+#  maxrank_list=(     65535          )
+#  incrank_list=(        1           )
+  minrank_list[0]=0
+  maxrank_list[0]=65535
+  incrank_list[0]=1
+  if [ x$atmo_namelist != x ]; then
+    # this is the atmo model
+    namelist_list[0]="$atmo_namelist"
+    modelname_list[0]="atmo"
+    modeltype_list[0]=1
+    run_atmo="true"
+  elif [ x$ocean_namelist != x ]; then
+    # this is the ocean model
+    namelist_list[0]="$ocean_namelist"
+    modelname_list[0]="ocean"
+    modeltype_list[0]=2
+  elif [ x$testbed_namelist != x ]; then
+    # this is the testbed model
+    namelist_list[0]="$testbed_namelist"
+    modelname_list[0]="testbed"
+    modeltype_list[0]=99
+  else
+    check_error 1 "No namelist is defined"
+  fi 
+fi
+
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+# set some default values and derive some run parameteres
+restart=${restart:=".false."}
+restartSemaphoreFilename='isRestartRun.sem'
+#AUTOMATIC_RESTART_SETUP:
+if [ -f ${restartSemaphoreFilename} ]; then
+  restart=.true.
+  #  do not delete switch-file, to enable restart after unintended abort
+  #[[ -f ${restartSemaphoreFilename} ]] && rm ${restartSemaphoreFilename}
+fi
+#END AUTOMATIC_RESTART_SETUP
+#
+# wait 5min to let GPFS finish the write operations
+if [ "x$restart" != 'x.false.' -a "x$submit" != 'x' ]; then
+  sleep 10;
+fi
+# fill some checks
+
+run_atmo=${run_atmo="false"}
+if [ x$atmo_namelist != x ]; then
+  run_atmo="true"
+fi
+run_ocean=${run_ocean="false"}
+if [ x$ocean_namelist != x ]; then
+  run_ocean="true"
+fi
+
+#-----------------------------------------------------------------------------
+# add grids to required files
+all_grids="${atmo_dyn_grids} ${atmo_rad_grids} ${ocean_grids}"
+for gridfile in ${all_grids}; do
+  ls -l ${HGRIDDIR}/$gridfile
+  check_error $? "${HGRIDDIR}/$gridfile does not exist."
+  add_required_file ${HGRIDDIR}/$gridfile ./
+done
+#-----------------------------------------------------------------------------
+# print_required_files
+copy_required_files
+link_required_files
+
+
+#-----------------------------------------------------------------------------
+# get restart files
+
+if  [ x$restart_atmo_from != "x" ] ; then
+  rm -f restart_atm_DOM01.nc
+#  ln -s ${ICONDIR}/experiments/${restart_from_folder}/${restart_atmo_from} ${EXPDIR}/restart_atm_DOM01.nc
+  cp ${ICONDIR}/experiments/${restart_from_folder}/${restart_atmo_from} cp_restart_atm.nc
+  ln -s cp_restart_atm.nc restart_atm_DOM01.nc
+  restart=".true."
+fi
+if  [ x$restart_ocean_from != "x" ] ; then
+  rm -f restart_oce.nc
+#  ln -s ${ICONDIR}/experiments/${restart_from_folder}/${restart_ocean_from} ${EXPDIR}/restart_oce.nc
+  cp ${ICONDIR}/experiments/${restart_from_folder}/${restart_ocean_from} cp_restart_oce_DOM01.nc
+  ln -s cp_restart_oce_DOM01.nc restart_oce_DOM01.nc
+  restart=".true."
+fi
+#-----------------------------------------------------------------------------
+
+
+
+#-----------------------------------------------------------------------------
+#
+# create ICON master namelist
+# ------------------------
+# For a complete list see Namelist_overview and Namelist_overview.pdf
+
+#-----------------------------------------------------------------------------
+# create master_namelist
+master_namelist=icon_master.namelist
+if [ x$end_date = x ]; then
+cat > $master_namelist << EOF
+&master_nml
+ lrestart            = $restart
+/
+&time_nml
+ ini_datetime_string = "$start_date"
+ dt_restart          = $dt_restart
+/
+EOF
+else
+cat > $master_namelist << EOF
+&master_nml
+ lrestart            = $restart
+/
+&master_time_control_nml
+ calendar             = "proleptic gregorian" 
+ checkpointTimeIntval = "$checkpoint_interval" 
+ restartTimeIntval    = "$restart_interval" 
+ experimentStartDate  = "$start_date" 
+ experimentStopDate   = "$end_date" 
+/
+&time_nml
+ ini_datetime_string = "$start_date"
+ end_datetime_string = "$end_date"
+ dt_restart          = $dt_restart
+/
+EOF
+fi
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+# add model component to master_namelist
+add_component_to_master_namelist()
+{
+    
+  model_namelist_filename="$1"
+  model_name=$2
+  model_type=$3
+  model_min_rank=$4
+  model_max_rank=$5
+  model_inc_rank=$6
+  
+cat >> $master_namelist << EOF
+&master_model_nml
+  modelName="$model_name"
+  modelNamelistFilename="$model_namelist_filename"
+  modelType=$model_type
+  modelMinRank=$model_min_rank
+  modelMaxRank=$model_max_rank
+  modelIncRank=$model_inc_rank
+/
+EOF
+
+#-----------
+#get namelist
+  if [ -f ${RUNSCRIPTDIR}/$model_namelist_filename ] ; then
+    mv -f ${RUNSCRIPTDIR}/$model_namelist_filename ${EXPDIR}
+    check_error $? "mv -f ${RUNSCRIPTDIR}/$model_namelist_filename"
+  else
+    check_error 1 "${RUNSCRIPTDIR}/$model_namelist_filename does not exist"
+  fi  
+
+}
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+# Add JSBACH part to master_namelist
+
+if [ x$lnd_namelist != x ]; then
+  cat >> $master_namelist <<EOF
+&jsb_control_nml
+ is_standalone      = .false.
+ restart_jsbach     = .false.
+/
+&jsb_model_nml
+ model_name = 'JSBACHlite'
+ model_shortname = 'lite'
+ model_description = 'JSBACH-lite model'
+ model_namelist_filename = "${lnd_namelist}"
+/
+EOF
+fi
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+#
+#  get model
+#
+export MODEL=${bindir}/icon
+#
+ls -l ${MODEL}
+check_error $? "${MODEL} does not exist?"
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+#
+# start experiment
+#
+
+rm -f finish.status
+#
+#if [ x$target = "xblizzard" ] ; then
+#  run_model
+#else
+  date
+  ${START} ${MODEL}
+  date
+#fi
+#
+if [ -r finish.status ] ; then
+  check_error 0 "${START} ${MODEL}"
+else
+  check_error -1 "${START} ${MODEL}"
+fi
+#
+#-----------------------------------------------------------------------------
+#
+finish_status=`cat finish.status`
+echo $finish_status
+echo "============================"
+echo "Script run successfully: $finish_status"
+echo "============================"
+#-----------------------------------------------------------------------------
+
+
+#-----------------------------------------------------------------------------
+namelist_list=""
+#-----------------------------------------------------------------------------
+# check if we have to restart, ie resubmit
+#   Note: this is a different mechanism from checking the restart
+if [ $finish_status = "RESTART" ] ; then
+  echo "restart next experiment..."
+  this_script="${RUNSCRIPTDIR}/${job_name}"
+  echo 'this_script: ' "$this_script"
+  touch ${restartSemaphoreFilename}
+  cd ${RUNSCRIPTDIR}
+  ${submit} $this_script
+else
+  [[ -f ${restartSemaphoreFilename} ]] && rm ${restartSemaphoreFilename}
+fi
+
+#-----------------------------------------------------------------------------
+# automatic call/submission of post processing if available
+if [ "x${autoPostProcessing}" = "xtrue" ]; then
+  # check if there is a postprocessing is available
+  cd ${RUNSCRIPTDIR}
+  targetPostProcessingScript="./post.${EXPNAME}.run"
+  [[ -x $targetPostProcessingScript ]] && ${submit} ${targetPostProcessingScript}
+  cd -
+fi
+
+#-----------------------------------------------------------------------------
+# check if we test the restart mechanism
+get_last_1_restart()
+{
+  model_restart_param=$1
+  restart_list=$(ls *restart_*${model_restart_param}*_*T*Z.nc)
+  
+  last_restart=""
+  last_1_restart=""  
+  for restart_file in $restart_list
+  do
+    last_1_restart=$last_restart
+    last_restart=$restart_file
+
+    echo $restart_file $last_restart $last_1_restart
+  done  
+}
+
+
+restart_atmo_from=""
+restart_ocean_from=""
+if [ x$test_restart = "xtrue" ] ; then
+  # follows a restart run in the same script
+  # set up the restart parameters
+  restart_from_folder=${EXPNAME}
+  # get the previous from last rstart file for atmo
+  get_last_1_restart "atm"
+  if [ x$last_1_restart != x ] ; then
+    restart_atmo_from=$last_1_restart
+  fi
+  get_last_1_restart "oce"
+  if [ x$last_1_restart != x ] ; then
+    restart_ocean_from=$last_1_restart
+  fi
+  
+  EXPNAME=${EXPNAME}_restart
+  test_restart="false"
+fi
+
+#-----------------------------------------------------------------------------
+
+cd $RUNSCRIPTDIR
+
+#-----------------------------------------------------------------------------
+
+	
+# exit 0
+#
+# vim:ft=sh
+#-----------------------------------------------------------------------------
