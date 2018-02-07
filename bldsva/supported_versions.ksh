@@ -104,13 +104,13 @@ setups+=(
         ["seabreeze"]="sea breeze simulation"
         ["smresponse"]="soil moisture response"
         ["bonn"]="flood area of interest"
-        ["iconGlobal"]="icon global run"
+        ["icon-nh-cbl"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse iconGlobal "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse icon-nh-cbl "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "
