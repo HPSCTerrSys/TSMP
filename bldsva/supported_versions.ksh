@@ -64,7 +64,7 @@ modelVersion+=(
         ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
-        ["4.0.0MCT"]="oasis3-mct clm3_5 parflow3_2 icon-lem"
+        ["4.0.0MCT"]="oasis3-mct clm3_5 icon-lem parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 

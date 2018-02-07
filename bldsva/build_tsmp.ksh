@@ -162,7 +162,7 @@ setCombination(){
   set -A mList ${modelVersion[$version]}
   if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
   if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
   if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
 #DA
@@ -225,7 +225,7 @@ route "${cblue}< c_compileClm${cnormal}"
 compileIcon(){
 route "${cblue}> c_compileIcon${cnormal}"
   comment "  source icon interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_icon
     if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cblue}< c_compileIcon${cnormal}" ;  return  ;fi 
@@ -233,7 +233,7 @@ route "${cblue}> c_compileIcon${cnormal}"
   comment "  backup icon dir to: $icondir"
       rm -rf $icondir >> $log_file 2>> $err_file
   check
-      cp -rf ${rootdir}/${mList[3]} $icondir >> $log_file 2>> $err_file
+      cp -rf ${rootdir}/${mList[2]} $icondir >> $log_file 2>> $err_file
   check
     fi
     if [[ ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
@@ -520,7 +520,7 @@ printState(){
   print "${cred}(11)${cnormal} oasis dir (default=$def_rootdir/${mList[0]}_${platform}_${version}_$combination): ${cgreen}$oasdir ${cnormal}"
   print "${cred}(12)${cnormal} clm dir (default=$def_rootdir/${mList[1]}_${platform}_${version}_$combination): ${cgreen}$clmdir ${cnormal}"
   print "${cred}(13)${cnormal} cosmo dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$cosdir ${cnormal}"
-  print "${cred}(30)${cnormal} icon dir (default=$def_rootdir/${mList[5]}_${platform}_${version}_$combination): ${cgreen}$icondir ${cnormal}"
+  print "${cred}(30)${cnormal} icon dir (default=$def_rootdir/${mList[2]}_${platform}_${version}_$combination): ${cgreen}$icondir ${cnormal}"
   print "${cred}(14)${cnormal} parflow dir (default=$def_rootdir/${mList[3]}_${platform}_${version}_$combination): ${cgreen}$pfldir ${cnormal}"
 #DA
   print "${cred}(15)${cnormal} data assimilation dir (default=$def_rootdir/${mList[4]}_${platform}_${version}_$combination): ${cgreen}$dadir ${cnormal}"
