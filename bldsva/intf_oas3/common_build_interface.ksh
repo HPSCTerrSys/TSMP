@@ -66,14 +66,14 @@ c_substitutions_icon(){
 route "${cblue}>>> c_substitutions_icon${cnormal}"
 if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
-    cp -R $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $icondir/src >> $log_file 2>> $err_file
+    cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
   check
   comment "    replace files with coupling. Add files to icon/src "
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure >> $log_file 2>> $err_file
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/icon.f90 $icondir/src/drivers >> $log_file 2>> $err_file
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon.f90 $icondir/src/drivers >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/mo_nh_stepping.f90 $icondir/src/atm_dyn_iconam >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nh_stepping.f90 $icondir/src/atm_dyn_iconam >> $log_file 2>> $err_file
   check
 fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
@@ -82,31 +82,17 @@ route "${cblue}<<< c_substitutions_icon${cnormal}"
 c_setup_icon(){
 route "${cblue}>>> c_setup_icon${cnormal}"
 
+comment "  cp add_run_routines to rundir"
+  cp $rootdir/bldsva/setups/add_run_routines $rundir >> $log_file 2>> $err_file
+check
+
 comment "  cp namelist to rundir"
   cp ${namelist_icon} $rundir/icon_nml >> $log_file 2>> $err_file
 check
 
-#nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
-#if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
-
-#comment "  sed dt to namelist"
-#  sed "s,dt_icon_bldsva,$dt_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
-#check
-
 comment "  sed number of procs to namelist"
   sed "s,nproc_icon_bldsva,$p_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
 check
-
-#comment "  sed gridpoints to namelist"
-#  sed "s,ie_tot_bldsva,$gx_cos," -i $rundir/icon_nml >> $log_file 2>> $err_file
-#check
-#  sed "s,je_tot_bldsva,$gy_cos," -i $rundir/icon_nml >> $log_file 2>> $err_file
-#check
-
-#comment "  sed gridpoints to namelist"
-#  sed "s,nbdl_cos_bldsva,$nbndlines," -i $rundir/icon_nml >> $log_file 2>> $err_file
-#check
-
 
 comment "  create input dir for icon"
   mkdir -p $rundir/icon_in >> $log_file 2>> $err_file
@@ -120,18 +106,6 @@ comment "  sed forcingdir to namelist"
 check
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-comment "  sed stop time to namelist"
-  sed "s/nstop_icon_bldsva/$nstop_icon/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-comment "  sed date to namelist"
-  sed "s/init_y_bldsva/$(date '+%Y' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-  sed "s/init_m_bldsva/$(date '+%m' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-  sed "s/init_d_bldsva/$(date '+%d' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-  sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/icon_nml >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"

@@ -897,7 +897,7 @@ check
   fi
   if [[ $withICON == "true" ]] ; then
     comment "  source icon build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
+      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
     check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp icon exe to $rundir"
@@ -907,7 +907,7 @@ check
   fi
   if [[ $withPFL == "true" ]] ; then
     comment "  source pfl build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh  >> $log_file 2>> $err_file
+      . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
     check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp pfl exe to $rundir"
@@ -929,7 +929,7 @@ check
 #DA
   if [[ $withPDAF == "true" ]] ; then
     comment "  source PDAF build interface for $platform"
-      . ${rootdir}/bldsva/intf_DA/${mList[5]}/arch/${platform}/build_interface_${mList[5]}_${platform}.ksh  >> $log_file 2>> $err_file
+      . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh  >> $log_file 2>> $err_file
     check
     comment "  cp da exe to $rundir"
       cp $bindir/tsmp-pdaf $rundir  >> $log_file 2>> $err_file

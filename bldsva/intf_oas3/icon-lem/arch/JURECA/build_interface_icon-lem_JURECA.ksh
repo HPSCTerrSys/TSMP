@@ -16,9 +16,9 @@ sed -i.bak s@NETCDFROOT/lib@NETCDFROOT/lib64@g configure
 check
 NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-fortran=intel --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/homea/slts/slts23/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
 comment "   cp Makefile to icon dir"
-   cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
 check
-route "cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile $icondir"
+route "cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir"
 check
 comment "   sed oasisdir to icon Makefile"
   sed -i "s@__oasisdir__@$oasdir@" $icondir/Makefile >> $log_file 2>> $err_file

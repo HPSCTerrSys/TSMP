@@ -26,7 +26,6 @@ export PSP_RENDEZVOUS_OPENIB=-1
 #-----------------------------------------------------------------------------
 # MPI variables
 # ----------------------------
-mpi_procs_pernode=6
 START="srun"
 #-----------------------------------------------------------------------------
 # load ../setting if exists  
@@ -36,28 +35,19 @@ then
   . ../setting
 fi
 #-----------------------------------------------------------------------------
-bindir="${basedir}/build/x86_64-unknown-linux-gnu/bin"   # binaries
-BUILDDIR=build/x86_64-unknown-linux-gnu
+#bindir="${basedir}/build/x86_64-unknown-linux-gnu/bin"   # binaries
 #-----------------------------------------------------------------------------
 #=============================================================================
-export LD_LIBRARY_PATH=/usr/local/software/jureca/Stages/2017a/software/netCDF/4.4.1.1-ipsmpi-2017a/lib64:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=/usr/local/software/jureca/Stages/2017a/software/netCDF/4.4.1.1-ipsmpi-2017a/lib64:$LD_LIBRARY_PATH
 #=============================================================================
 nproma=16
-cdo="cdo"
-cdo_diff="cdo diffn"
-icon_data_rootFolder=""
-icon_data_poolFolder=""
-icon_data_buildbotFolder="/buildbot_data"
-icon_data_buildbotFolder_aes="/buildbot_data/aes"
-icon_data_buildbotFolder_oes="/buildbot_data/oes"
 export EXPNAME="nh_cbl"
-
 atmo_namelist=NAMELIST_${EXPNAME}
 #
 #-----------------------------------------------------------------------------
 # global timing
 start_date="2008-09-01T00:00:00Z"
-end_date="2008-09-01T03:00:00Z"
+end_date="2008-09-01T00:15:00Z"
 ndays_restart=60
 dt_restart=`expr ${ndays_restart} \* 86400`
 #
@@ -223,8 +213,7 @@ else
 fi
 
 # experiment directory, with plenty of space, create if new
-#EXPDIR=${ICONDIR}/experiments/${EXPNAME}
-EXPDIR=$WORK/icon/experiments/${EXPNAME}
+EXPDIR=__rundir__
 if [ ! -d ${EXPDIR} ] ;  then
   mkdir -p ${EXPDIR}
 fi
@@ -439,10 +428,10 @@ fi
 #
 #  get model
 #
-export MODEL=${bindir}/icon
+#export MODEL=${bindir}/icon
 #
-ls -l ${MODEL}
-check_error $? "${MODEL} does not exist?"
+#ls -l ${MODEL}
+#check_error $? "${MODEL} does not exist?"
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 #
@@ -450,6 +439,11 @@ check_error $? "${MODEL} does not exist?"
 #
 
 rm -f finish.status
+
+# stop here and run the model from tsmp_slm_run.bsh
+exit 0
+
+
 #
 #if [ x$target = "xblizzard" ] ; then
 #  run_model

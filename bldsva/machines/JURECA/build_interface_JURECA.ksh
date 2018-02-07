@@ -50,6 +50,11 @@ check
 mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
 
+icon_nml=""
+if [[ $withICON == "true" ]] ; then
+  icon_nml=". icon_nml"
+fi
+
 #DA
 if [[ $withPDAF == "true" ]] ; then
   srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -subtype 1 -delt_obs $delta_obs -rms_obs 0.03 -obs_filename swc_crp"
@@ -76,6 +81,7 @@ date
 echo "started" > started.txt
 rm -rf YU*
 export $profVar
+$icon_nml
 $srun
 date
 echo "ready" > ready.txt
