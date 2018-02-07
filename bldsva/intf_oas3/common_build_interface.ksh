@@ -87,25 +87,11 @@ comment "  cp add_run_routines to rundir"
 check
 
 comment "  cp namelist to rundir"
-  cp ${namelist_icon} $rundir/icon_nml >> $log_file 2>> $err_file
-check
-
-comment "  sed number of procs to namelist"
-  sed "s,nproc_icon_bldsva,$p_icon," -i $rundir/icon_nml >> $log_file 2>> $err_file
+  cp ${namelist_icon} $rundir >> $log_file 2>> $err_file
 check
 
 comment "  create input dir for icon"
   mkdir -p $rundir/icon_in >> $log_file 2>> $err_file
-check
-comment "  fill icon input dir with softlinks from icon forcing dir"
-  ln -sf $forcingdir_icon/* $rundir/icon_in >> $log_file 2>> $err_file
-check
-
-comment "  sed forcingdir to namelist"
-  sed "s,__forcingdir__,$rundir/icon_in," -i $rundir/icon_nml >> $log_file 2>> $err_file
-check
-comment "  sed rundir to namelist"
-  sed "s,__rundir__,$rundir," -i $rundir/icon_nml >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"

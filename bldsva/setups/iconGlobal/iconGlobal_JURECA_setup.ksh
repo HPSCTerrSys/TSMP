@@ -8,16 +8,16 @@ initSetup(){
 
 
   #defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
-  defaultNLICON=$rootdir/bldsva/setups/iconGlobal/exp.nh_cbl.run 
+  defaultNLICON="$rootdir/bldsva/setups/iconGlobal/icon_master.namelist $rootdir/bldsva/setups/iconGlobal/NAMELIST_nh_cbl"
   #defaultNLPFL=$rootdir/bldsva/setups/ideal300150/coup_oas.tcl 
 
 
-  defaultNppn=5
+  defaultNppn=24
   #defaultCLMProcX=4
   #defaultCLMProcY=2
   #defaultCOSProcX=8
   #defaultCOSProcY=8
-  defaultICONProc=120
+  defaultICONProc=24
   #defaultPFLProcX=4
   #defaultPFLProcY=4
 
