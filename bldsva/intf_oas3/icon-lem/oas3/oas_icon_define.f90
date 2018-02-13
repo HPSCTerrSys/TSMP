@@ -20,21 +20,27 @@ TYPE :: t_oas_field
   CHARACTER(len = 8)  :: clpname
   INTEGER             :: vid
 END TYPE t_oas_field
-TYPE(t_oas_field), DIMENSION(7)  :: oas_snd_fields
-TYPE(t_oas_field), DIMENSION(5)  :: oas_rcv_fields
+TYPE(t_oas_field), DIMENSION(11)  :: oas_snd_fields
+TYPE(t_oas_field), DIMENSION(7)  :: oas_rcv_fields
 REAL, POINTER     :: &
-  oas_sw_snd(:), &
-  oas_lw_snd(:), &
-  oas_rain_snd(:), &
-  oas_t_snd(:), &
-  oas_p_snd(:), &
-  oas_qv_snd(:), &
-  oas_u_snd(:), &
-  oas_sh_rcv(:), &
-  oas_lh_rcv(:), &
-  oas_tau_rcv(:), &
-  oas_lw_rcv(:), &
-  oas_alb_rcv(:)
+  oas_tempe_snd(:), &
+  oas_uwind_snd(:), &
+  oas_vwind_snd(:), &
+  oas_spwat_snd(:), &
+  oas_thick_snd(:), &
+  oas_press_snd(:), &
+  oas_dirsw_snd(:), &
+  oas_difsw_snd(:), &
+  oas_longw_snd(:), &
+  oas_cvpre_snd(:), &
+  oas_gspre_snd(:), &
+  oas_infra_rcv(:), &
+  oas_albed_rcv(:), &
+  oas_albei_rcv(:), &
+  oas_taux_rcv(:),  &
+  oas_tauy_rcv(:),  &
+  oas_shflx_rcv(:), &
+  oas_lhflx_rcv(:)
 
 PUBLIC :: &
  oas_comp_id, oas_comp_name, kl_comm, oas_error, oas_nlat, &

@@ -822,27 +822,39 @@ MODULE mo_nh_stepping
 #ifdef COUP_OAS_ICON
     time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
     sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current)
-    CALL oasis_put(oas_snd_fields(1)%vid, sim_time_oas, oas_sw_snd, oas_error)
+    CALL oasis_put(oas_snd_fields(1)%vid, sim_time_oas, oas_tempe_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of SW')
-    CALL oasis_put(oas_snd_fields(2)%vid, sim_time_oas, oas_lw_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of tempe')
+    CALL oasis_put(oas_snd_fields(2)%vid, sim_time_oas, oas_uwind_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of LW')
-    CALL oasis_put(oas_snd_fields(3)%vid, sim_time_oas, oas_rain_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of uwind')
+    CALL oasis_put(oas_snd_fields(3)%vid, sim_time_oas, oas_vwind_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of RAIN')
-    CALL oasis_put(oas_snd_fields(4)%vid, sim_time_oas, oas_t_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of vwind')
+    CALL oasis_put(oas_snd_fields(4)%vid, sim_time_oas, oas_spwat_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of T')
-    CALL oasis_put(oas_snd_fields(5)%vid, sim_time_oas, oas_p_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of spwat')
+    CALL oasis_put(oas_snd_fields(5)%vid, sim_time_oas, oas_thick_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of P')
-    CALL oasis_put(oas_snd_fields(6)%vid, sim_time_oas, oas_qv_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of thick')
+    CALL oasis_put(oas_snd_fields(6)%vid, sim_time_oas, oas_press_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of QV')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_u_snd, oas_error)
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of press')
+    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_dirsw_snd, oas_error)
     IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of U')
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of dirsw')
+    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_difsw_snd, oas_error)
+    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of difsw')
+    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_longw_snd, oas_error)
+    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of longw')
+    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_cvpre_snd, oas_error)
+    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of cvpre')
+    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_gspre_snd, oas_error)
+    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
+      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of gspre')
 #endif
 
     ! store state of output files for restarting purposes
