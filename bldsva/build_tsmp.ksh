@@ -206,7 +206,13 @@ route "${cblue}> c_compileClm${cnormal}"
   comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
+    if [[ $withICON == "true" ]]; then
+      clmicon="${mList[1]}"
+      clmicon=${clmicon%'-icon'}
+      cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
+    else
       cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
+    fi
   check
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then

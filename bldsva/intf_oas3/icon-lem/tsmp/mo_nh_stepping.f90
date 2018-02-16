@@ -634,6 +634,7 @@ MODULE mo_nh_stepping
   
   REAL(wp)                             :: sim_time         !< elapsed simulation time
   INTEGER                              :: sim_time_oas     !< elapsed simulation time
+  CHARACTER(len=128)                   :: oas_message
 
   LOGICAL :: l_isStartdate, l_isExpStopdate, l_isRestart, l_isCheckpoint, l_doWriteRestart
   
@@ -822,39 +823,13 @@ MODULE mo_nh_stepping
 #ifdef COUP_OAS_ICON
     time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
     sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current)
-    CALL oasis_put(oas_snd_fields(1)%vid, sim_time_oas, oas_tempe_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of tempe')
-    CALL oasis_put(oas_snd_fields(2)%vid, sim_time_oas, oas_uwind_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of uwind')
-    CALL oasis_put(oas_snd_fields(3)%vid, sim_time_oas, oas_vwind_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of vwind')
-    CALL oasis_put(oas_snd_fields(4)%vid, sim_time_oas, oas_spwat_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of spwat')
-    CALL oasis_put(oas_snd_fields(5)%vid, sim_time_oas, oas_thick_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of thick')
-    CALL oasis_put(oas_snd_fields(6)%vid, sim_time_oas, oas_press_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of press')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_dirsw_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of dirsw')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_difsw_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of difsw')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_longw_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of longw')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_cvpre_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of cvpre')
-    CALL oasis_put(oas_snd_fields(7)%vid, sim_time_oas, oas_gspre_snd, oas_error)
-    IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) &
-      CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_put of gspre')
+    DO jg = 1, SIZE(oas_snd_meta)
+      CALL oasis_put(oas_snd_meta(jg)%vid, sim_time_oas, oas_snd_field(:,jg), oas_error)
+      IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) THEN
+        WRITE(oas_message,*) 'Failure in oasis_put of ', oas_snd_meta(jg)%clpname
+        CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
+      END IF
+    END DO
 #endif
 
     ! store state of output files for restarting purposes
@@ -1394,6 +1369,8 @@ MODULE mo_nh_stepping
 
     TYPE(timeDelta), POINTER             :: time_diff
     REAL(wp)                             :: sim_time !< elapsed simulation time on this grid level
+    INTEGER                              :: sim_time_oas, oas_i
+    CHARACTER(len=128)                   :: oas_message
 
     ! calculate elapsed simulation time in seconds (local time for
     ! this domain!)
@@ -1855,6 +1832,17 @@ MODULE mo_nh_stepping
             SELECT CASE (iforcing)
 
             CASE (inwp) ! iforcing
+
+#ifdef COUP_OAS_ICON
+              time_diff    =  getTimeDeltaFromDateTime(datetime_local(jg)%ptr, time_config%tc_exp_startdate)
+              sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr)
+              DO oas_i = 1, SIZE(oas_rcv_meta)
+                WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
+                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_snd_field(oas_i,:), oas_error)
+                IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) &
+                  CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
+              END DO
+#endif
 
               ! nwp physics
               CALL nwp_nh_interface(lcall_phy(jg,:), .FALSE.,          & !in

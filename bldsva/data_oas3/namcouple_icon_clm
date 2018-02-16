@@ -1,0 +1,233 @@
+# Oasis reads in this file at run-time.
+# Prepared for the SVA System (ICON and CLM) 
+# Slavko Brdar (s.brdar@fz-juelich.de)
+# suggestions (oasishelp@cerfacs.fr). 
+#
+# Any line beginning with # is ignored. Blank lines are not allowed.
+#
+ $SEQMODE
+# This keyword concerns the coupling algorithm. Put here the maximum number
+# of fields that have to be, at one particular coupling timestep,
+# exchanged sequentially in a given order.
+             2
+ $END
+#########################################################################
+ $CHANNEL
+# The communication technique you want to use.
+# Choices are MPI1 or MPI2, NONE.
+# - if you want to use MPI1 or MPI2 message passing, you must write 
+# MPI1 or MPI2 (+ NOBSEND if you do not want to use the default MPI_BSend)
+# on one line 
+# + one line per model giving for the model the total number of procs,
+# the number of procs implied in the coupling and, for MPI2 only, an
+# optional launching argument
+#
+  MPI1 NOBSEND
+   nproc_exe1 ncpl_exe1
+   nproc_exe2 ncpl_exe2
+ $END
+#########################################################################
+ $NFIELDS
+# Put the number of fields exchanged by OASIS.
+# If it is bigger than twice the number of fields exchanged, put also on 
+# the same line the maximum number of prism_def_var_proto
+# called by one component model in the coupled system (optional).
+# For the definition of the fields, see under $STRINGS keyword
+#
+           21 
+ $END
+#########################################################################
+ $JOBNAME
+# This is an acronym for this run (3 characters).
+  ICO
+ $END
+##########################################################################
+ $NBMODEL
+# This gives you the number of models running in this experiment +
+# their names (6 characters) + , in option, the maximum Fortran unit
+# number used by each model; 1024 will be used if none are given.
+#
+   2  oasicon  oasclm 99 99
+ $END
+###########################################################################
+ $RUNTIME
+# This gives you the total simulated time for this run in seconds 
+#
+  totalruntime 
+ $END
+###########################################################################
+ $INIDATE
+# This is the initial date of the run. This is important only if
+# FILLING analysis is used for a coupling field in the run.
+# The format is YYYYMMDD.
+  yyyymmdd
+ $END
+###########################################################################
+ $MODINFO
+# Indicates if a header is encapsulated within the field brick 
+# in binary restart files for all communication techniques,  
+# (and for coupling field exchanges for PIPE, SIPC and GMEM.
+# (YES or NOT)
+  NOT
+ $END
+###########################################################################
+ $NLOGPRT
+# Index of printing level in output file cplout: 0 = no printing
+#  1 = main routines and field names when treated, 2 = complete output
+  0
+ $END
+###########################################################################
+ $CALTYPE
+# Calendar type :  0      = 365 day calendar (no leap years)
+#                  1      = 365 day, or 366 days for leap years, calendar
+#                  n (>1) = n day month calendar
+# This is important only if FILLING analysis is used for a coupling
+# field in the run.
+#
+  30
+ $END
+###########################################################################
+ $STRINGS
+#
+# The above variables are the general parameters for the experiment.
+# Everything below has to do with the fields being exchanged.
+#
+############################################################################
+#                      ICON  <<--->>> CLM 
+#                      --------------------
+# Field 1 : 
+#
+#   First line:
+# 1) and 2) Symbolic names for the field before and after interpolation
+#           (8 characters maximum)
+# 3) Index of field in cf_name_table.txt
+# 4) Exchange frequency for the field in seconds (here 0.5 hours)
+# 5) Number of analysis to be performed
+# 6) Restart input NetCDF file names
+# 7) Field status (EXPORTED, AUXILARY, IGNORED, EXPOUT, IGNOUT, INPUT, OUTPUT)
+#
+#for ignout, the grid and partioning of source and target should be identical
+#S_MD1_01  R_MD2_01  10 7200  0  fdmd1.nc IGNOUT 
+#gmd1 gmd2  LAG=0 SEQ=1
+#:%
+ICOTEMPE  CLMTEMPE  10 cplfreq1  2  icon01.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0 
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOUWIND  CLMUWIND  10 cplfreq1  2  icon02.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOVWIND  CLMVWIND  10 cplfreq1  2  icon03.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOSPWAT  CLMSPWAT  10 cplfreq1  2  icon04.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOTHICK  CLMTHICK  10 cplfreq1  2  icon05.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOPRESS  CLMPRESS  10 cplfreq1  2  icon06.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICODIRSW  CLMDIRSW  10 cplfreq1  2  icon07.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICODIFSW  CLMDIFSW  10 cplfreq1  2  icon08.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOLONGW  CLMLONGW  10 cplfreq1  2  icon09.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOCVPRE  CLMCVPRE  10 cplfreq1  2  icon15.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+ICOGSPRE  CLMGSPRE  10 cplfreq1  2  icon16.nc EXPORTED
+ngiconx ngicony ngclmx ngclmy gicon gclm SEQ=1
+R 0 R 0
+LOCTRANS SCRIPR
+ AVERAGE
+ BILINEAR LR SCALAR LATLON 1
+#
+# FROM CLM TO ICON
+CLMINFRA ICOINFRA  10 cplfreq1  1  clm05.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0 
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMALBED ICOALBED  10 cplfreq1  1  clm06.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLMALBEI ICOALBEI  10 cplfreq1 1  clm07.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_TAUX ICO_TAUX  10 cplfreq1 1  clm08.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLM_TAUY ICO_TAUY  10 cplfreq1 1  clm09.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLMSHFLX ICOSHFLX  10 cplfreq1 1  clm10.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+CLMLHFLX ICOLHFLX  10 cplfreq1 1  clm11.nc EXPORTED
+ngclmx ngclmy ngiconx ngicony gclm gicon SEQ=2
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4
+#
+ $END

@@ -534,38 +534,39 @@ CONTAINS
 
     ! define variables for OASIS3-MCT
     !
-    oas_snd_fields(1)%clpname = "ICOTEMPE"
-    oas_snd_fields(2)%clpname = "ICOUWIND"
-    oas_snd_fields(3)%clpname = "ICOVWIND"
-    oas_snd_fields(4)%clpname = "ICOSPWAT"
-    oas_snd_fields(5)%clpname = "ICOTHICK"
-    oas_snd_fields(6)%clpname = "ICOPRESS"
-    oas_snd_fields(7)%clpname = "ICODIRSW"
-    oas_snd_fields(8)%clpname = "ICODIFSW"
-    oas_snd_fields(9)%clpname = "ICOLONSW"
-    oas_snd_fields(10)%clpname = "ICOCVPRE"
-    oas_snd_fields(11)%clpname = "ICOGSPRE"
-    oas_rcv_fields(1)%clpname = "ICOINFRA"
-    oas_rcv_fields(2)%clpname = "ICOALBED"
-    oas_rcv_fields(3)%clpname = "ICOALBEI"
-    oas_rcv_fields(4)%clpname = "ICO_TAUX"
-    oas_rcv_fields(5)%clpname = "ICO_TAUY"
-    oas_rcv_fields(6)%clpname = "ICOSHFLX"
-    oas_rcv_fields(7)%clpname = "ICOLHFLX"
+    oas_snd_meta(1)%clpname = "ICOTEMPE"
+    oas_snd_meta(2)%clpname = "ICOUWIND"
+    oas_snd_meta(3)%clpname = "ICOVWIND"
+    oas_snd_meta(4)%clpname = "ICOSPWAT"
+    oas_snd_meta(5)%clpname = "ICOTHICK"
+    oas_snd_meta(6)%clpname = "ICOPRESS"
+    oas_snd_meta(7)%clpname = "ICODIRSW"
+    oas_snd_meta(8)%clpname = "ICODIFSW"
+    oas_snd_meta(9)%clpname = "ICOLONSW"
+    oas_snd_meta(10)%clpname = "ICOCVPRE"
+    oas_snd_meta(11)%clpname = "ICOGSPRE"
 
-    DO jg = 1, SIZE(oas_snd_fields)
-      CALL oasis_def_var(oas_snd_fields(jg)%vid, oas_snd_fields(jg)%clpname, oas_part_id, &
+    oas_rcv_meta(1)%clpname = "ICOINFRA"
+    oas_rcv_meta(2)%clpname = "ICOALBED"
+    oas_rcv_meta(3)%clpname = "ICOALBEI"
+    oas_rcv_meta(4)%clpname = "ICO_TAUX"
+    oas_rcv_meta(5)%clpname = "ICO_TAUY"
+    oas_rcv_meta(6)%clpname = "ICOSHFLX"
+    oas_rcv_meta(7)%clpname = "ICOLHFLX"
+
+    DO jg = 1, SIZE(oas_snd_meta)
+      CALL oasis_def_var(oas_snd_meta(jg)%vid, oas_snd_meta(jg)%clpname, oas_part_id, &
         oas_var_nodims, OASIS_Out, oas_vshape, OASIS_Real, oas_error)
       IF (oas_error /= 0) THEN
-        CALL message('Failure in oasis_def_var for ', oas_snd_fields(jg)%clpname)
+        CALL message('Failure in oasis_def_var for ', oas_snd_meta(jg)%clpname)
         CALL oasis_abort(oas_comp_id, oas_comp_name, '')
       END IF
     END DO
-    DO jg = 1, SIZE(oas_rcv_fields)
-      CALL oasis_def_var(oas_rcv_fields(jg)%vid, oas_rcv_fields(jg)%clpname, oas_part_id, &
+    DO jg = 1, SIZE(oas_rcv_meta)
+      CALL oasis_def_var(oas_rcv_meta(jg)%vid, oas_rcv_meta(jg)%clpname, oas_part_id, &
         oas_var_nodims, OASIS_In, oas_vshape, OASIS_Real, oas_error)
       IF (oas_error /= 0) THEN
-        CALL message('Failure in oasis_def_var for ', oas_rcv_fields(jg)%clpname)
+        CALL message('Failure in oasis_def_var for ', oas_rcv_meta(jg)%clpname)
         CALL oasis_abort(oas_comp_id, oas_comp_name, '')
       END IF
     END DO
@@ -573,47 +574,16 @@ CONTAINS
     CALL oasis_enddef(oas_error)
 
     ! allocate memory for data exchange
-    ALLOCATE ( &
-      oas_tempe_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_uwind_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_vwind_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_spwat_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_thick_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_press_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_dirsw_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_difsw_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_longw_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_cvpre_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_gspre_snd(oas_vshape(1):oas_vshape(2)), &
-      oas_infra_rcv(oas_vshape(1):oas_vshape(2)), &
-      oas_albed_rcv(oas_vshape(1):oas_vshape(2)), &
-      oas_albei_rcv(oas_vshape(1):oas_vshape(2)), &
-      oas_taux_rcv(oas_vshape(1):oas_vshape(2)),  &
-      oas_tauy_rcv(oas_vshape(1):oas_vshape(2)),  &
-      oas_shflx_rcv(oas_vshape(1):oas_vshape(2)),  &
-      oas_lhflx_rcv(oas_vshape(1):oas_vshape(2)),  &
-      stat=oas_error )
+    ALLOCATE( oas_snd_field(1:SIZE(oas_snd_meta), oas_vshape(1):oas_vshape(2)), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon send buffers' )
+    ALLOCATE( oas_rcv_field(1:SIZE(oas_rcv_meta), oas_vshape(1):oas_vshape(2)), stat=oas_error )
+    IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
+      'Failure in allocating icon receive buffers' )
+
     ! initialize buffers
-    oas_tempe_snd = -1000.
-    oas_uwind_snd = -1000.
-    oas_vwind_snd = -1000.
-    oas_spwat_snd = -1000.
-    oas_thick_snd = -1000.
-    oas_press_snd = -1000.
-    oas_dirsw_snd = -1000.
-    oas_difsw_snd = -1000.
-    oas_longw_snd = -1000.
-    oas_cvpre_snd = -1000.
-    oas_gspre_snd = -1000.
-    oas_infra_rcv = -1000.
-    oas_albed_rcv = -1000.
-    oas_albei_rcv = -1000.
-    oas_taux_rcv = -1000.
-    oas_tauy_rcv = -1000.
-    oas_shflx_rcv = -1000.
-    oas_lhflx_rcv = -1000.
+    oas_snd_field = -1000.
+    oas_rcv_field = -1000.
 #endif
 
     !------------------------------------------------------------------
