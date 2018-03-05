@@ -229,7 +229,7 @@ isec = dtime * ( get_nstep() - 1 )
  CALL p2g(begp, endp, begc, endc, begl, endl, begg, endg, numrad, albi_pft, albi_gcell, &
          p2c_scale_type='unity', c2l_scale_type= 'unity', l2g_scale_type='unity')
 
-#ifdef COUP_OAS_ICON
+#ifndef COUP_OAS_ICON
  CALL p2g(begp, endp, begc, endc, begl, endl, begg, endg, co2fl_pft, co2fl_gcell, &
          p2c_scale_type='unity', c2l_scale_type= 'unity', l2g_scale_type='unity')
 

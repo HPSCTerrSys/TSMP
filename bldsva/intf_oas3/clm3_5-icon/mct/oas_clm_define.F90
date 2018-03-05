@@ -111,7 +111,7 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   ALLOCATE(igparal(200))
   igparal(1) = 0
   igparal(2) = 0
-  igparal(3) = 36864
+  igparal(3) = 90000
   CALL oasis_def_partition(part_id, igparal, ierror, igparal(3))
   IF (ierror /= 0) &
     CALL oasis_abort(comp_id, comp_name, 'Failure in oasis_def_partition')
