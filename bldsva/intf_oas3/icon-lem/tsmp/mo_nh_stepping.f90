@@ -216,6 +216,7 @@ MODULE mo_nh_stepping
 
 #ifdef COUP_OAS_ICON
   USE oas_icon_define
+  USE mo_parallel_config,          ONLY: idx_no, blk_no
 #endif
 
   IMPLICIT NONE
@@ -1357,7 +1358,7 @@ MODULE mo_nh_stepping
     INTEGER :: n_now_grf, n_now, n_save
     INTEGER :: n_now_rcf, n_new_rcf         ! accounts for reduced calling frequencies (rcf)
 
-    INTEGER :: jstep, jgp, jgc, jn
+    INTEGER :: jstep, jgp, jgc, jn, ii, jc, jb
 
     REAL(wp):: dt_sub                ! (advective) timestep for next finer grid level
     TYPE(timedelta), POINTER :: mtime_dt_sub
@@ -1838,10 +1839,25 @@ MODULE mo_nh_stepping
               sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr)
               DO oas_i = 1, SIZE(oas_rcv_meta)
                 WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
-                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_snd_field(oas_i,:), oas_error)
+                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(oas_i,:), oas_error)
                 IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) &
                   CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
+
+                ! transform thru oasis recieved variable into something icon can use
+                !
+                !DO jb = 1, p_patch(jg)%nblks_c
+                !  DO jc = 
+                !    glb_idx_1d = p_patch(jg)%cells%decomp_info%glb_index(idx_1d(jc,jb))
+                !    oas_rcv_field(jc,jb) = oas_rcv_field(oas_i,glb_idx_1d)
+                !  END DO
+                !END DO
+                DO ii = 1, SIZE(oas_rcv_field(oas_i,:))
+                  jc = idx_no(ii)
+                  jb = blk_no(ii)
+                  oas_rcv_field_icon(oas_i,jc,jb) = oas_rcv_field(oas_i,ii)
+                END DO
               END DO
+              
 #endif
 
               ! nwp physics

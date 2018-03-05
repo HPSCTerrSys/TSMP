@@ -48,7 +48,7 @@ USE oas_clm_vardef
 USE domainMod   , ONLY : latlon_type, latlon_check, alatlon,amask , adomain
 USE spmdMod     , ONLY : masterproc , mpicom, iam
 USE surfrdMod   , ONLY : surfrd_get_latlon
-USE decompMod    , only : get_proc_global, get_proc_bounds, adecomp
+USE decompMod   , only : get_proc_global, get_proc_bounds, adecomp
 !==============================================================================
 
 IMPLICIT NONE
@@ -103,296 +103,24 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
 
 ! Define coupling scheme between ICON and CLM
 #ifdef CPL_SCHEME_F
- cpl_scheme = .True. !TRN Scheme
+  cpl_scheme = .True. !TRN Scheme
 #else
- cpl_scheme = .False. !INV Scheme
+  cpl_scheme = .False. !INV Scheme
 #endif
 
-
- ndlon = alatlon%ni
- ndlat = alatlon%nj
-
- 
-
- ! For the moment OASIS4 not able to process 2D subdomain with non contiguous unmasked points (land points) 
- ! (12/2010)
- ! To compare OASIS3/OASIS4 behaviours, we do the same with OASIS3
- !
- CALL MPI_Barrier(kl_comm, nerror)
-#define WITHAUXFILES
-#ifdef WITHAUXFILES
- IF ( masterproc ) THEN
-   !
-   CALL prism_start_grids_writing (write_aux_files)
-   !
-   ALLOCATE( zclo(ndlon, 4), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zclo' )
-     RETURN
-   ENDIF
-   ALLOCATE( zcla(ndlat, 4), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zcla' )
-     RETURN
-   ENDIF
-   ALLOCATE( zlon(ndlon), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlon' )
-     RETURN
-   ENDIF
-   ALLOCATE( zlat(ndlat), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat' )
-     RETURN
-   ENDIF
-   ALLOCATE( tmp_2D(ndlon*ndlat,8), stat = nerror )
-   IF ( nerror > 0 ) THEN
-     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating tmp_2D' )
-     RETURN
-   ENDIF
-
-   ALLOCATE(oas_mask(ndlon*ndlat))
-   IF ( nerror > 0 ) THEN
-      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating oas_mask' )
-      RETURN
-   ENDIF
-
-      
-   ! -----------------------------------------------------------------
-   ! ... Define the elements, i.e. specify the corner points for each
-   !     volume element. 
-   !     We only need to give the 4 horizontal corners
-   !     for a volume element plus the vertical position of the upper
-   !     and lower face. Nevertheless the volume element has 8 corners.
-   ! -----------------------------------------------------------------
-
-   ! -----------------------------------------------------------------
-   ! ... Define centers and corners 
-   ! -----------------------------------------------------------------
-   !  1: lower left corner. 2,: lower right corner.
-   !  3: upper right corner. 4,: upper left corner.
-   !  using latlon%edges :  global edges (N,E,S,W)
-   !
-   ! Latitudes
-   ! Assumes lats are constant on an i line
-   !
-    zlat(:) = alatlon%latc(1:ndlat)
-   !
-   IF (alatlon%latc(ndlat) > alatlon%latc(1)) THEN  ! South to North grid
-      zcla(1,1) = alatlon%edges(3)
-      zcla(ndlat,2) = alatlon%edges(1)
-    !
-      DO jj = 2, ndlat
-         jgm1 = jj - 1
-         zcla(jj,1) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
-         zcla(jgm1,2) = zcla(jj,1)
-      ENDDO 
-
-   ELSE                                      ! North to South grid
-      zcla(ndlat,1) = alatlon%edges(3)
-      zcla(1,2) = alatlon%edges(1)
-      !
-      DO jj = 2, ndlat
-        jgm1 = jj - 1
-        zcla(jj,2) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
-        zcla(jgm1,1) = zcla(jj,2)
-      ENDDO
-
-   ENDIF
-
-   ! Longitudes
-   !
-   zlon(:) = alatlon%lonc(1:ndlon)
-   !
-   zclo(:,1) = alatlon%edges(4)
-   zclo(:,2) = alatlon%edges(2)
-
-   dx = zlon(2)-zlon(1)
-
-   DO ji = 2, ndlon
-      zclo(ji,1) = zclo(ji,1) + ( ji -1 ) * dx
-      zclo(ji-1,2) = zclo(ji,1)
-   ENDDO 
-
-   DO ji = 1, ndlon  ! make sure that all centers are nearby corners regarding the longitude...
-     IF( zlon(ji) - zclo(ji,1) < -300._r8 )   zlon(ji) = zlon(ji) + 360._r8
-     IF( zlon(ji) - zclo(ji,1) >  300._r8 )   zlon(ji) = zlon(ji) - 360._r8
-   END DO
-
-
-   ! -----------------------------------------------------------------
-   ! ... Define the mask
-   ! -----------------------------------------------------------------
-   DO jj = 1, ndlat
-   DO ji = 1, ndlon
-     jg    = (jj-1)*ndlon + ji
-     IF ( amask(jg) == 1 ) THEN
-        oas_mask(jg) = 0
-     ELSE
-        oas_mask(jg) = 1
-     ENDIF
-   ENDDO
-   ENDDO
-
-   CALL flush(nulout)
-
-   ! -----------------------------------------------------------------
-   ! ... Write info on OASIS auxillary files (if needed)
-   ! ----------------------------------------------------------------
-
-   IF ( write_aux_files == 1 ) THEN
- 
-    DO jj = 1, ndlat
-    DO ji = 1, ndlon
-       tmp_2D(ji+(jj-1)*ndlon,1) = zlon(ji)
-       tmp_2D(ji+(jj-1)*ndlon,2) = zlat(jj)
-    ENDDO
-    ENDDO
-
-   CALL prism_write_grid (clgrd, ndlon*ndlat, 1, tmp_2D(:,1), tmp_2D(:,2))
-
-    DO jj = 1, ndlat
-    DO ji = 1, ndlon
-     tmp_2D(ji+(jj-1)*ndlon,1) = zclo(ji,1)
-     tmp_2D(ji+(jj-1)*ndlon,2) = zclo(ji,2)
-     tmp_2D(ji+(jj-1)*ndlon,5) = zcla(jj,1)
-     tmp_2D(ji+(jj-1)*ndlon,7) = zcla(jj,2)
-    ENDDO
-    ENDDO
-
-    ! Fill missing corners for longitude
-    tmp_2D(:,3) = tmp_2D(:,2)
-    tmp_2D(:,4) = tmp_2D(:,1)
-
-    ! Fill missing corners for latitude
-    tmp_2D(:,6) = tmp_2D(:,5)
-    tmp_2D(:,8) = tmp_2D(:,7)
-
-    CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2D(:,1:4), tmp_2D(:,5:8))
-
-    ! tbd CALL prism_write_angle (clgrd, ndlon*ndlat, 1, angle)
-
-    CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
-
-    ! EM tbd Fill areas with true values
-    tmp_2D(:,1) = 1 
-!CPS        CALL prism_write_area (clgrd, ndlon*ndlat, 1, tmp_2D(:,1))
-
-    CALL prism_terminate_grids_writing()
-        
-  ENDIF                      ! write_aux_files = 1
-
-  WRITE(nulout,*) ' oasclm: oas_clm_define: prism_terminate_grids'
-  CALL flush(nulout)
-  DEALLOCATE(tmp_2D, oas_mask, zclo, zcla, zlon, zlat)
- ENDIF                       ! masterproc
-#endif
-
-!FG  The following piece of code querries the number, length and offset of 
-!    contiguous parts in the lat/lon representation. This is done in a 
-!    brutforce way by travercing through begg-endg and determining if
-!    predecessor in begg-endg is also predecessor in lat/lon.
-!    I couldn't find a CLM intrinsic way to get this information, if there is
-!    one, please let me know. 
-!    At the moment the orange partition of oasis supports only 200 parts,
-!    luckily CLM seem to use always 20 parts regardless of the domainsize.
-
-ALLOCATE(igparal(200))
-
-
-igparal(1) = 3  !orange partition
-
-#if (1 == 0)
-CALL get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
-
-c=1
-off=(adecomp%gdc2j(begg)-1)*ndlon +adecomp%gdc2i(begg) -1
-leng=1
-
-do it1=begg+1,endg
-
-  i=adecomp%gdc2i(it1)
-  im1=adecomp%gdc2i(it1-1)
-  j=adecomp%gdc2j(it1)
-  if(j.eq.1) then
-        jm1=-1
-  else
-    jm1=adecomp%gdc2j(it1-1)
-  endif
-
-  if( (i-1.eq.im1) .or. (i.eq.1 .and. jm1.eq.j-1 .and. im1.eq.ndlon)  ) then
-    leng=leng+1
-  else
-    igparal(c*2+1) = off
-    igparal(c*2+2) = leng
-    igparal(2) = c
-    off=(adecomp%gdc2j(it1)-1)*ndlon +adecomp%gdc2i(it1) -1
-    c=c+1
-    leng=1
-  endif
-
-enddo
-igparal(c*2+1) = off
-igparal(c*2+2) = leng
-igparal(2) = c
-
-#endif
-
-ani = adomain%ni
-anj = adomain%nj
-
-total_part_len=0
-c=0
-leng=0
-last_owner=-1
-do aj = 1,anj
-  do ai = 1,ani
-    an = (aj-1)*ani + ai
-    owner = adecomp%glo2owner(an)
-    if(owner==iam ) then
-       if(last_owner/=iam) then       !start of new partiontion
-          if(last_owner/=-1) leng=0   !no leading masked cells have to be added to the first partition
-          c=c+1
-          if(last_owner==-1) then
-             igparal(c*2+1) = 0
-          else
-             igparal(c*2+1) = an-1
-          endif
-       endif
-       leng=leng+1
-    else  
-       if(owner==-1) then
-          if(last_owner== iam .or. last_owner== -1) leng=leng+1 !adding also masked cells to the partition
-       else                                                     !other procs partiton start
-          if(last_owner==iam) then                               ! if this cell ends ongoing partition, length is written out
-             igparal(c*2+2) = leng            
-             total_part_len=total_part_len+leng
-          endif
-       endif 
-    endif    
-    if(owner/=-1) last_owner=owner
-  enddo
-enddo
-if(last_owner==iam)then   !write length if this proc had last partition
-  igparal(c*2+2) = leng  
-  total_part_len=total_part_len+leng
-endif
-igparal(2)=c
-
-CALL MPI_Barrier(kl_comm, nerror)
+  ALLOCATE(igparal(200))
+  igparal(1) = 0
+  igparal(2) = 0
+  igparal(3) = 36864
+  CALL oasis_def_partition(part_id, igparal, ierror, igparal(3))
+  IF (ierror /= 0) &
+    CALL oasis_abort(comp_id, comp_name, 'Failure in oasis_def_partition')
 
   ! -----------------------------------------------------------------
   ! ... Define the partition 
   ! -----------------------------------------------------------------
      
         
-  CALL prism_def_partition_proto( igrid, igparal, nerror )
-  IF( nerror /= PRISM_Success )   CALL prism_abort_proto (ncomp_id, 'oas_clm_define',   &
-            &                                                        'Failure in prism_def_partition' )
-
-
-
-
   ! -----------------------------------------------------------------
   ! ... Variable definition
   ! ----------------------------------------------------------------
@@ -400,25 +128,14 @@ CALL MPI_Barrier(kl_comm, nerror)
   ! Default values
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
-  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
-  ssnd(2)%clname='CLM_TAUY'      !  meridional wind stress
-  ssnd(3)%clname='CLMLATEN'      !  total latent heat flux (W/m**2)
-  ssnd(4)%clname='CLMSENSI'      !  total sensible heat flux (W/m**2)
-  ssnd(5)%clname='CLMINFRA'      ! emitted infrared (longwave) radiation (W/m**2)
-  ssnd(6)%clname='CLMALBED'      ! direct albedo
-  ssnd(7)%clname='CLMALBEI'      ! diffuse albedo
-!MU (17.01.13)
-  ssnd(8)%clname='CLMCO2FL'      ! net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
-!MU (17.01.13)
-  ssnd(9)%clname='CLM_RAM1'      ! Aerodynamic resistance (s/m)   !CPS
-  ssnd(10)%clname='CLM_RAH1'      ! Aerodynamic resistance (s/m)   !CPS
-  ssnd(11)%clname='CLM_RAW1'      ! Aerodynamic resistance (s/m)   !CPS
-  ssnd(12)%clname='CLM_TSF1'      ! Surface Temperature (K)   !CPS
-  ssnd(13)%clname='CLM_QSF1'      ! Surface Humidity (kg/kg)   !CPS
-!MU (12.04.13)
-  ssnd(14)%clname='CLMPHOTO'      ! photosynthesis rate (umol CO2 m-2s-1)
-  ssnd(15)%clname='CLMPLRES'      ! plant respiration (umol CO2 m-2s-1)
-!MU (12.04.13)
+  !CMS: from 1 to 100 are the sending fields from CLM to ICON
+  ssnd(1)%clname='ICOINFRA'
+  ssnd(2)%clname='ICOALBED'
+  ssnd(3)%clname='ICOALBEI'
+  ssnd(4)%clname='ICO_TAUX'
+  ssnd(5)%clname='ICO_TAUY'
+  ssnd(6)%clname='ICOSHFLX'
+  ssnd(7)%clname='ICOLHFLX'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
@@ -431,24 +148,6 @@ CALL MPI_Barrier(kl_comm, nerror)
   ssnd(108)%clname='CLMFLX08'
   ssnd(109)%clname='CLMFLX09'
   ssnd(110)%clname='CLMFLX10'
-
-  srcv(1)%clname='CLMTEMPE'
-  srcv(2)%clname='CLMUWIND'
-  srcv(3)%clname='CLMVWIND'
-  srcv(4)%clname='CLMSPWAT'   ! specific water vapor content
-  srcv(5)%clname='CLMTHICK'   ! thickness of lowest level (m)
-  srcv(6)%clname='CLMPRESS'   ! surface pressure (Pa)
-  srcv(7)%clname='CLMDIRSW'   ! direct shortwave downward radiation (W/m2)
-  srcv(8)%clname='CLMDIFSW'   ! diffuse shortwave downward radiation (W/m2)
-  srcv(9)%clname='CLMLONGW'   ! longwave downward radiation (W/m2)
-  srcv(10)%clname='CLMCVRAI'  ! convective rain precipitation      (kg/m2*s)
-  srcv(11)%clname='CLMCVSNW'  ! convective snow precipitation      (kg/m2*s)
-  srcv(12)%clname='CLMGSRAI'  ! gridscale rain precipitation
-  srcv(13)%clname='CLMGSSNW'  ! gridscale snow precipitation
-  srcv(14)%clname='CLMGRAUP'  ! gridscale graupel precipitation
-  srcv(15)%clname='CLMCVPRE'  ! total convective precipitation
-  srcv(16)%clname='CLMGSPRE'  ! total gridscale precipitation
-  srcv(17)%clname='CLMCO2PP'  ! CO2 partial pressure (Pa)  !CMU
 
   !CMS: from 101 to 200 are the receiving fields from PFL to CLM
   srcv(101)%clname='CLMSAT01' ! water saturation received from PFL for each soil layer
@@ -498,32 +197,9 @@ CALL MPI_Barrier(kl_comm, nerror)
   srcv(120)%level= 10  
 
   srcv(111:120)%ref='PSI'
- 
-! Send/Receive Variable Selection
+
 #ifdef COUP_OAS_ICON
-
-IF (cpl_scheme) THEN         !CPS
-  ssnd(5:7)%laction=.TRUE.     !CPS
-  ssnd(8)%laction=.TRUE.
-  ssnd(14)%laction=.FALSE.
-  ssnd(15)%laction=.FALSE.
-  ssnd(9:13)%laction=.TRUE.    !CPS
-ELSE
-  ssnd(1:7)%laction=.TRUE.
-  ssnd(8)%laction=.TRUE.
-  ssnd(14)%laction=.FALSE.
-  ssnd(15)%laction=.FALSE.
-ENDIF 
-
-  srcv(1:9)%laction=.TRUE.
-  srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
-!MU (17.01.13)
-  srcv(17)%laction=.TRUE.    ! always true
-!  IF (srcv(17)%laction==.FALSE.) THEN
-!    PRINT*, 'ERROR (oas_clm_define): srcv(17)%laction has to be .TRUE.'
-!    PRINT*, '----- If CO2 is not initialized in ICON a dummy is sent to CLM and CO2 content from CLM is used.'
-!  ENDIF
-!MU (17.01.13)
+  ssnd(1:7)%laction = .TRUE.
 #endif
 
 #ifdef COUP_OAS_PFL
@@ -538,15 +214,26 @@ ENDIF
   var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
 
   ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
-  ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
+  ipshape(2) = igparal(3)    ! maximum index for each dimension of the coupling field array
+
+  DO jg = 1, SIZE(oas_snd_meta)
+      CALL oasis_def_var(oas_snd_meta(jg)%vid, oas_snd_meta(jg)%clpname, oas_part_id, &
+        oas_var_nodims, OASIS_Out, oas_vshape, OASIS_Real, oas_error)
+      IF (oas_error /= 0) THEN
+        CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_var') 
+      END IF
+    END DO
+    DO jg = 1, SIZE(oas_rcv_meta)
+      CALL oasis_def_var(oas_rcv_meta(jg)%vid, oas_rcv_meta(jg)%clpname, oas_part_id, &
+        oas_var_nodims, OASIS_In, oas_vshape, OASIS_Real, oas_error)
+      IF (oas_error /= 0) THEN
+        CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_var')
+      END IF
+    END DO
 
 
-
-
-  ! ... Announce send variables. 
-  !
-!      ksnd=0                           !CPS
-  DO ji = 1, nmaxfld
+  ! ... Announce send variables (ParFlow)
+  DO ji = 100, nmaxfld
     IF ( ssnd(ji)%laction ) THEN 
             
       CALL prism_def_var_proto(ssnd(ji)%nid, ssnd(ji)%clname, igrid, &
@@ -556,10 +243,8 @@ ENDIF
  !           ksnd = ksnd + 1             !CPS now defined in oas_clm_vardef
     ENDIF
   END DO
-  !
-  ! ... Announce received variables. 
-  !
-  DO ji = 1, nmaxfld
+  ! ... Announce received variables (ParFlow)
+  DO ji = 100, nmaxfld
     IF ( srcv(ji)%laction ) THEN 
 
     CALL prism_def_var_proto(srcv(ji)%nid, srcv(ji)%clname, igrid, &

@@ -1,6 +1,6 @@
 MODULE oas_icon_define
 
-!USE mo_kind,  ONLY : wp
+USE mo_kind,  ONLY : wp
 USE netcdf
 USE mod_oasis
 
@@ -23,6 +23,7 @@ END TYPE t_oas_field
 TYPE(t_oas_field), DIMENSION(11)  :: oas_snd_meta
 TYPE(t_oas_field), DIMENSION(7)  :: oas_rcv_meta
 REAL, ALLOCATABLE     :: oas_snd_field(:,:), oas_rcv_field(:,:)
+REAL(wp), ALLOCATABLE :: oas_rcv_field_icon(:,:,:)
 
 PUBLIC :: &
  oas_comp_id, oas_comp_name, kl_comm, oas_error, oas_nlat, &

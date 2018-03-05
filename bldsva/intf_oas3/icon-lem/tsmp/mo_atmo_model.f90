@@ -28,7 +28,7 @@ MODULE mo_atmo_model
     &                                   timer_ext_data, print_timer
   USE mo_parallel_config,         ONLY: p_test_run, l_test_openmp, num_io_procs,              &
     &                                   num_restart_procs, use_async_restart_output,          &
-    &                                   num_prefetch_proc
+    &                                   num_prefetch_proc, nproma
   USE mo_master_config,           ONLY: isRestart
 #ifndef NOMPI
 #if defined(__GET_MAXRSS__)
@@ -580,10 +580,14 @@ CONTAINS
     ALLOCATE( oas_rcv_field(1:SIZE(oas_rcv_meta), oas_vshape(1):oas_vshape(2)), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
+    ALLOCATE( oas_rcv_field_icon(1:SIZE(oas_rcv_meta), nproma, p_patch(1)%nblks_c), stat=oas_error )
+    IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
+      'Failure in allocating icon receive buffers' )
 
     ! initialize buffers
     oas_snd_field = -1000.
     oas_rcv_field = -1000.
+    oas_rcv_field_icon = -1000.
 #endif
 
     !------------------------------------------------------------------

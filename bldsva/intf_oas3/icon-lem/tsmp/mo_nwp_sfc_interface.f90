@@ -51,6 +51,10 @@ MODULE mo_nwp_sfc_interface
   USE mo_phyparam_soil              ! soil and vegetation parameters for TILES
   USE mo_physical_constants,  ONLY: tmelt
 
+#ifdef COUP_OAS_ICON
+  USE oas_icon_define
+#endif
+
   
   IMPLICIT NONE 
 
@@ -503,7 +507,7 @@ CONTAINS
         ENDDO
 !
 !---------- END Copy index list fields
-
+#ifndef COUP_OAS_ICON
         CALL terra_multlay(                                    &
         &  icant=icant                                       , & !IN canopy-type
         &  ie=nproma                                         , & !IN array dimensions
@@ -614,6 +618,13 @@ CONTAINS
         &  zshfl_sfc     = shfl_s_t              , & !OUT sensible heat flux surface interface     (W/m2) 
         &  zlhfl_sfc     = lhfl_s_t              , & !OUT latent   heat flux surface interface     (W/m2) 
         &  zqhfl_sfc     = qhfl_s_t                ) !OUT moisture flux surface interface          (kg/m2/s) 
+#else
+        prm_diag%umfl_s_t = oas_rcv_field_icon(4,:,:)
+        prm_diag%vmfl_s_t = oas_rcv_field_icon(5,:,:)
+        shfl_s_t          = oas_rcv_field_icon(6,:,:)
+        lhfl_s_t          = oas_rcv_field_icon(7,:,:)
+        !qhfl_s_t = 
+#endif
 
 
         ! Multiply w_snow with old snow fraction in order to obtain the area-average SWE needed for
