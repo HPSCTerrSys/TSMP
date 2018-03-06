@@ -95,7 +95,7 @@ comment "  create input dir for icon"
 check
 
 comment "  create input dir for icon"
-  cp -p /homea/slts/slts23/data/icon-ccs/* $rundir >> $log_file 2>> $err_file
+  cp -p /homea/slts/slts23/data/setups/icon-ccs/* $rundir >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"
