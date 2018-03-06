@@ -51,13 +51,13 @@ initSetup(){
 
 
   if [[ $withPFL == "false" && $withICON == "true" ]]; then
-      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm
   fi
   if [[ $withPFL == "true" && $withICON == "false" ]]; then
     defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
   fi
   if [[ $withPFL == "true" && $withICON == "true" ]]; then
-      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm_pfl
   fi
 
 }
