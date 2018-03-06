@@ -826,6 +826,8 @@ MODULE mo_nh_stepping
     sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current)
     DO jg = 1, SIZE(oas_snd_meta)
       CALL oasis_put(oas_snd_meta(jg)%vid, sim_time_oas, oas_snd_field(:,jg), oas_error)
+      WRITE(oas_message,*) 'Sending  ', oas_snd_meta(jg)%clpname
+      CALL message(routine, oas_message)
       IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) THEN
         WRITE(oas_message,*) 'Failure in oasis_put of ', oas_snd_meta(jg)%clpname
         CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
@@ -1838,10 +1840,15 @@ MODULE mo_nh_stepping
               time_diff    =  getTimeDeltaFromDateTime(datetime_local(jg)%ptr, time_config%tc_exp_startdate)
               sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr)
               DO oas_i = 1, SIZE(oas_rcv_meta)
-                WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
+                WRITE(oas_message,*) 'Receiving  ', oas_snd_meta(jg)%clpname
+                CALL message(routine, oas_message)
                 CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(oas_i,:), oas_error)
-                IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) &
+                WRITE(oas_message,*) 'Received  ', oas_snd_meta(jg)%clpname
+                CALL message(routine, oas_message)
+                IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN
+                  WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
                   CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
+                END IF
 
                 ! transform thru oasis recieved variable into something icon can use
                 !
