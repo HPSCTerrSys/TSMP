@@ -542,7 +542,7 @@ CONTAINS
     oas_snd_meta(6)%clpname = "ICOPRESS"
     oas_snd_meta(7)%clpname = "ICODIRSW"
     oas_snd_meta(8)%clpname = "ICODIFSW"
-    oas_snd_meta(9)%clpname = "ICOLONSW"
+    oas_snd_meta(9)%clpname = "ICOLONGW"
     oas_snd_meta(10)%clpname = "ICOCVPRE"
     oas_snd_meta(11)%clpname = "ICOGSPRE"
 
