@@ -574,13 +574,13 @@ CONTAINS
     CALL oasis_enddef(oas_error)
 
     ! allocate memory for data exchange
-    ALLOCATE( oas_snd_field(1:SIZE(oas_snd_meta), oas_vshape(1):oas_vshape(2)), stat=oas_error )
+    ALLOCATE( oas_snd_field(oas_vshape(1):oas_vshape(2),11), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon send buffers' )
-    ALLOCATE( oas_rcv_field(1:SIZE(oas_rcv_meta), oas_vshape(1):oas_vshape(2)), stat=oas_error )
+    ALLOCATE( oas_rcv_field(oas_vshape(1):oas_vshape(2),7), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
-    ALLOCATE( oas_rcv_field_icon(1:SIZE(oas_rcv_meta), nproma, p_patch(1)%nblks_c), stat=oas_error )
+    ALLOCATE( oas_rcv_field_icon(nproma, p_patch(1)%nblks_c,11), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
 
