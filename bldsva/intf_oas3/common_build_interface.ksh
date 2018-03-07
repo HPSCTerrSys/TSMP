@@ -494,7 +494,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   cppdef=""
-  if [[ $cplscheme == "true" ]] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
+  if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
