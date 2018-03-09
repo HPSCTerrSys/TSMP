@@ -66,7 +66,7 @@ OPTIONS
      -clm_exedir <dir>  Directory where CLM executable will be created.
      -cc <name>         User specified C compiler (linux only).  Overrides Makefile default.
      -ccsm              Building CLM from within CCSM scripts
-     -oas3_icon         Building with OASIS3 libraries and icon rcv and snd subroutines
+     -oas3_icon         Building with OASIS3-MCT libraries and icon rcv and snd subroutines
      -oas3_pfl          Building with OASIS3 libraries and parflow rcv and snd subroutines
      -cps_catch         Building with explicit topographic index input in FMAX
      -cflags <string>   A string of user specified C compiler options.  Appended to

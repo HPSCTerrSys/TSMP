@@ -311,8 +311,8 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
-  comment "    make oasis" 
-    make -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
+  comment "    make oasis j16" 
+    make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
 #DA
@@ -477,8 +477,9 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     if [[ $spmd == "off" ]] ; then ; flags+="-nospmd " ; fi
     flags+="-maxpft $maxpft -rtm $rtm -usr_src $usr_src "
     if [[ $withCOS == "true" ]] ; then ; flags+="-oas3_cos " ; fi
+    if [[ $withICON == "true" ]] ; then ; flags+="-oas3_icon " ; fi
     if [[ $withPFL == "true" ]] ; then ; flags+="-oas3_pfl " ; fi
-    if [[ $withPFL == "false" && $withCOS == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
+    if [[ $withPFL == "false" && $withCOS == "false" && $withICON == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
     flags+="-nc_inc $ncdfPath/include "
     flags+="-nc_lib $ncdfPath/lib "
     flags+="-nc_mod $ncdfPath/include "
@@ -486,16 +487,22 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
+      comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
+      comment "adding OAS libs"
       cplLib+="$liboas $libpsmile"
       cplInc=$incpsmile
     fi
+      comment " OAS libs cplLib: $cplLib"
+      comment " OAS libs cplInc: $cplInc"
+      comment " OAS libs cplInc: $incpsmile"
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   cppdef=""
   if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
+  comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
@@ -507,7 +514,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
-    gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -j16 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
@@ -533,14 +540,14 @@ route "${cblue}<<< c_make_clm${cnormal}"
 c_substitutions_clm(){
 route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    copy oas3 interface to clm/src "
-    patch $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/mct $clmdir/src
   check
   comment "    replace hydrology. Add files to clm/bld/usr.src "
     patch "$rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/*" $clmdir/bld/usr.src 
   check
 #DA
   if [[ $withPDAF == "true" ]] ; then
-  comment "    copy PDAF fix to $clmdir/bld/usr.src "
+  comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
   check
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src

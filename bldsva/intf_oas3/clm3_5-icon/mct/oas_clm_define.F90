@@ -108,13 +108,17 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   cpl_scheme = .False. !INV Scheme
 #endif
 
+  WRITE(*,*) 'CLM defining partition'
+
   ALLOCATE(igparal(200))
   igparal(1) = 0
   igparal(2) = 0
   igparal(3) = 90000
-  CALL oasis_def_partition(part_id, igparal, ierror, igparal(3))
-  IF (ierror /= 0) &
-    CALL oasis_abort(comp_id, comp_name, 'Failure in oasis_def_partition')
+  CALL prism_def_partition_proto(igrid, igparal, nerror, igparal(3))
+  IF (nerror /= 0) &
+    CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_partition')
+
+  WRITE(*,*) 'CLM defined partition'
 
   ! -----------------------------------------------------------------
   ! ... Define the partition 
@@ -124,6 +128,8 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   ! -----------------------------------------------------------------
   ! ... Variable definition
   ! ----------------------------------------------------------------
+
+  WRITE(*,*) 'CLM define variables'
 
   ! Default values
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
@@ -148,6 +154,24 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   ssnd(108)%clname='CLMFLX08'
   ssnd(109)%clname='CLMFLX09'
   ssnd(110)%clname='CLMFLX10'
+
+  srcv(1)%clname='CLMTEMPE'
+  srcv(2)%clname='CLMUWIND'
+  srcv(3)%clname='CLMVWIND'
+  srcv(4)%clname='CLMSPWAT'   ! specific water vapor content
+  srcv(5)%clname='CLMTHICK'   ! thickness of lowest level (m)
+  srcv(6)%clname='CLMPRESS'   ! surface pressure (Pa)
+  srcv(7)%clname='CLMDIRSW'   ! direct shortwave downward radiation (W/m2)
+  srcv(8)%clname='CLMDIFSW'   ! diffuse shortwave downward radiation (W/m2)
+  srcv(9)%clname='CLMLONGW'   ! longwave downward radiation (W/m2)
+  srcv(10)%clname='CLMCVRAI'  ! convective rain precipitation      (kg/m2*s)
+  srcv(11)%clname='CLMCVSNW'  ! convective snow precipitation      (kg/m2*s)
+  srcv(12)%clname='CLMGSRAI'  ! gridscale rain precipitation
+  srcv(13)%clname='CLMGSSNW'  ! gridscale snow precipitation
+  srcv(14)%clname='CLMGRAUP'  ! gridscale graupel precipitation
+  srcv(15)%clname='CLMCVPRE'  ! total convective precipitation
+  srcv(16)%clname='CLMGSPRE'  ! total gridscale precipitation
+  srcv(17)%clname='CLMCO2PP'  ! CO2 partial pressure (Pa)  !CMU
 
   !CMS: from 101 to 200 are the receiving fields from PFL to CLM
   srcv(101)%clname='CLMSAT01' ! water saturation received from PFL for each soil layer
@@ -210,24 +234,31 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   srcv(111:120)%laction=.TRUE.
 #endif
 
+  srcv(1:9)%laction = .TRUE.
+  srcv(15:16)%laction = .TRUE.
+
   var_nodims(1) = 1           ! Dimension number of exchanged arrays
   var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
 
   ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
   ipshape(2) = igparal(3)    ! maximum index for each dimension of the coupling field array
 
-  DO jg = 1, SIZE(oas_snd_meta)
-      CALL oasis_def_var(oas_snd_meta(jg)%vid, oas_snd_meta(jg)%clpname, oas_part_id, &
-        oas_var_nodims, OASIS_Out, oas_vshape, OASIS_Real, oas_error)
-      IF (oas_error /= 0) THEN
-        CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_var') 
+  DO ji = 1, nmaxfld
+      IF ( ssnd(ji)%laction ) THEN
+        CALL prism_def_var_proto(ssnd(ji)%nid, ssnd(ji)%clname, igrid, &
+          var_nodims, OASIS_Out, ipshape, OASIS_Real, nerror)
+        IF (nerror /= 0) THEN
+          CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_var') 
+        END IF
       END IF
     END DO
-    DO jg = 1, SIZE(oas_rcv_meta)
-      CALL oasis_def_var(oas_rcv_meta(jg)%vid, oas_rcv_meta(jg)%clpname, oas_part_id, &
-        oas_var_nodims, OASIS_In, oas_vshape, OASIS_Real, oas_error)
-      IF (oas_error /= 0) THEN
-        CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_var')
+    DO ji = 1, nmaxfld
+      IF ( srcv(ji)%laction ) THEN
+        CALL prism_def_var_proto(srcv(ji)%nid, srcv(ji)%clname, igrid, &
+          var_nodims, OASIS_In, ipshape, OASIS_Real, nerror)
+        IF (nerror /= 0) THEN
+          CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_var')
+        END IF
       END IF
     END DO
 
@@ -258,6 +289,9 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   !------------------------------------------------------------------
   ! End of definition phase
   !------------------------------------------------------------------
+
+  WRITE(*,*) 'CLM defined variables'
+
 
 DEALLOCATE( igparal)
 
