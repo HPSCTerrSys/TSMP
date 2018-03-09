@@ -6,16 +6,16 @@
  checkpointTimeIntval = "" 
  restartTimeIntval    = "" 
  experimentStartDate  = "2008-09-01T00:00:00Z" 
- experimentStopDate   = "2008-09-01T00:15:00Z" 
+ experimentStopDate   = "2008-09-01T00:00:02Z" 
 /
 &time_nml
  ini_datetime_string = "2008-09-01T00:00:00Z"
- end_datetime_string = "2008-09-01T00:15:00Z"
+ end_datetime_string = "2008-09-01T00:00:02Z"
  dt_restart          = 5184000
 /
 &master_model_nml
   model_name="atmo"
-  model_namelist_filename="NAMELIST_nh_cbl"
+  model_namelist_filename="NAMELIST_ccs"
   model_type=1
   model_min_rank=0
   model_max_rank=65535
