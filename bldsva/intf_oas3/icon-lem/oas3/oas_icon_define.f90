@@ -7,7 +7,7 @@ USE mod_oasis
 IMPLICIT NONE
 
 INTEGER               :: oas_comp_id
-CHARACTER(len=2)      :: oas_comp_name="icon"
+CHARACTER(len=4)      :: oas_comp_name="icon"
 INTEGER               :: kl_comm              ! local communicator 
 INTEGER               :: oas_error            ! return error code
 INTEGER               :: oas_nlat = 2949120
