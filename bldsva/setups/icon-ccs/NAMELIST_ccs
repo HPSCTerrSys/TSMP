@@ -42,7 +42,7 @@
  lhflx             =  0.0  ! knematic latent heat flux 
  isrfc_type        = 2     !2=Fixed flux, 5=fixed SST, 3=fixed bflux
  ufric             = 0.45
- expname           = 'nh_cbl'
+ expname           = 'ccs'
  avg_interval_sec = 900.
  sampl_freq_sec   = 30.
  ldiag_les_out    = .TRUE.
@@ -97,7 +97,7 @@ const_z0  = 0.0003
  file_interval    = "P01D"
  include_last     = .TRUE.
  remap            = 0   ! triangular grid
- output_filename  = 'nh_cbl_insta'
+ output_filename  = 'ccs_insta'
  output_grid      = .TRUE.
  ml_varlist       = 'u','v','w','temp','theta_v','pres_sfc','pres','tkvh','z_ifc','z_mc','rho','shfl_s','lhfl_s','tke'
 /

@@ -222,7 +222,7 @@ CONTAINS
     TYPE(t_sim_step_info)   :: sim_step_info  
     TYPE(t_RestartAttributeList), POINTER :: restartAttributes
 
-    CHARACTER(len=10) :: gridelem
+    CHARACTER(len=100) :: gridelem
 
     ! initialize global registry of lon-lat grids
     CALL init_lonlat_grid_list()
@@ -536,8 +536,8 @@ CONTAINS
     ALLOCATE( oas_part(3) )
     oas_part(1) = 0
     oas_part(2) = 0
-    oas_part(3) = p_patch(1)%n_patch_cells
-    WRITE(gridelem,*) p_patch(1)%n_patch_cells
+    oas_part(3) = oas_nlon*oas_nlat
+    WRITE(gridelem,*) p_patch(1)%n_patch_cells, ' ', oas_part(3)
     WRITE(*,*) 'Slavko: grid el: ', gridelem
     CALL oasis_def_partition(oas_part_id, oas_part, oas_error, oas_part(3))
     IF (oas_error /= 0) &
