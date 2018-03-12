@@ -222,7 +222,7 @@ CONTAINS
     TYPE(t_sim_step_info)   :: sim_step_info  
     TYPE(t_RestartAttributeList), POINTER :: restartAttributes
 
-    CHARACTER(len=100) :: gridelem
+    CHARACTER(len=200) :: gridelem
 
     ! initialize global registry of lon-lat grids
     CALL init_lonlat_grid_list()

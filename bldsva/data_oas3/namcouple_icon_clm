@@ -1,139 +1,132 @@
  $NFIELDS
   18
  $END
-#########################################################################
- $JOBNAME
-  TR3
- $END
-##########################################################################
+#
  $RUNTIME
   2
  $END
-###########################################################################
+#
  $INIDATE
   20080508
  $END
-###########################################################################
- $MODINFO
-  NOT
- $END
-###########################################################################
+#
  $NLOGPRT
-  10 -1
+  10 0
  $END
-###########################################################################
+#
  $NBMODEL
    2  icon  oasclm 99 99
  $END
-###########################################################################
+#
  $CALTYPE
   30
  $END
-###########################################################################
+#
+#
  $STRINGS
-ICOTEMPE  CLMTEMPE  10 1  1  cos01.nc EXPOUT
-36864 1 90000 1 gicon gclm
+ICOTEMPE CLMTEMPE 1 1 1 icon01.nc EXPOUT
+36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0 
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOUWIND  CLMUWIND  10 1 1 cos02.nc EXPOUT
+ICOUWIND CLMUWIND 1 1 1 icon02.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOVWIND  CLMVWIND  10 1 1 cos03.nc EXPOUT
+ICOVWIND CLMVWIND 1 1 1 icon03.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOSPWAT  CLMSPWAT  10 1 1 cos04.nc EXPOUT
+ICOSPWAT CLMSPWAT 1 1 1 icon04.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOTHICK  CLMTHICK  10 1 1 cos05.nc EXPOUT
+ICOTHICK CLMTHICK 1 1 1 icon05.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOPRESS  CLMPRESS  10 1 1 cos06.nc EXPOUT
+ICOPRESS CLMPRESS 1 1 1 icon06.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICODIRSW  CLMDIRSW  10 1 1 cos07.nc EXPOUT
+ICODIRSW CLMDIRSW 1 1 1 icon07.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICODIFSW  CLMDIFSW  10 1 1 cos08.nc EXPOUT
+ICODIFSW CLMDIFSW 1 1 1 icon08.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOLONGW  CLMLONGW  10 1 1 cos09.nc EXPOUT
+ICOLONGW CLMLONGW 1 1 1 icon09.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOCVPRE  CLMCVPRE  10 1 1 cos15.nc EXPOUT
+ICOCVPRE CLMCVPRE 1 1 1 icon10.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOGSPRE  CLMGSPRE  10 1 1 cos16.nc EXPOUT
+ICOGSPRE CLMGSPRE 1 1 1 icon11.nc EXPOUT
 36864 1 90000 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 # FROM CLM TO ICOMO
-CLMINFRA ICOINFRA  10 1  1  clm05.nc EXPOUT
+CLMINFRA ICOINFRA 1 1 1 clm05.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0 
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-CLMALBED ICOALBED  10 1  1  clm06.nc EXPOUT
+CLMALBED ICOALBED 1 1 1 clm06.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMALBEI ICOALBEI  10 1 1  clm07.nc EXPOUT
+CLMALBEI ICOALBEI 1 1 1 clm07.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLM_TAUX ICO_TAUX  10 1 1  clm08.nc EXPOUT
+CLM_TAUX ICO_TAUX 1 1 1 clm08.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLM_TAUY ICO_TAUY  10 1 1  clm09.nc EXPOUT
+CLM_TAUY ICO_TAUY 1 1 1 clm09.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMSENSI ICOSHFLX  10 1 1  clm10.nc EXPOUT
+CLMSENSI ICOSHFLX 1 1 1 clm10.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMLATEN ICOLHFLX  10 1 1  clm11.nc EXPOUT
+CLMLATEN ICOLHFLX 1 1 1 clm11.nc EXPOUT
 90000 1 36864 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
