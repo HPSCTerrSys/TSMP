@@ -842,25 +842,25 @@ MODULE mo_nh_stepping
       jc = idx_no(jg)
       jb = blk_no(jg)
       oas_snd_field(jg,1) = p_diag%temp(jc,nlev,jb)
-      oas_snd_field(jg,2) = p_diag%u(jc,nlev,jb)  ! Slavko: check on which level !!
-      oas_snd_field(jg,3) = p_diag%v(jc,nlev,jb)
-      oas_snd_field(jg,4) = p_prog%tracer(jc,nlev,jb,iqv)
-      oas_snd_field(jg,5) = p_metrics%z_mc(jc,nlev,jb) - p_metrics%z_ifc(jc,nlev+1,jb)
-      oas_snd_field(jg,6) = p_diag%pres_sfc(jc,jb)
-      oas_snd_field(jg,7) = prm_diag(1)%swflxsfc(jc,jb) - prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
-      oas_snd_field(jg,8) = prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
-      oas_snd_field(jg,9) = prm_diag(1)%lwflxsfc(jc,jb) + prm_diag(1)%lwflx_up_sfc(jc,jb)
-      oas_snd_field(jg,10) = prm_diag(1)%rain_con_rate(jc,jb) + prm_diag(1)%snow_con_rate(jc,jb)
+      !oas_snd_field(jg,2) = p_diag%u(jc,nlev,jb)  ! Slavko: check on which level !!
+      !oas_snd_field(jg,3) = p_diag%v(jc,nlev,jb)
+      !oas_snd_field(jg,4) = p_prog%tracer(jc,nlev,jb,iqv)
+      !oas_snd_field(jg,5) = p_metrics%z_mc(jc,nlev,jb) - p_metrics%z_ifc(jc,nlev+1,jb)
+      !oas_snd_field(jg,6) = p_diag%pres_sfc(jc,jb)
+      !oas_snd_field(jg,7) = prm_diag(1)%swflxsfc(jc,jb) - prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
+      !oas_snd_field(jg,8) = prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
+      !oas_snd_field(jg,9) = prm_diag(1)%lwflxsfc(jc,jb) + prm_diag(1)%lwflx_up_sfc(jc,jb)
+      !oas_snd_field(jg,10) = prm_diag(1)%rain_con_rate(jc,jb) + prm_diag(1)%snow_con_rate(jc,jb)
       ! Slavko: is this consistent with convective precipitation ??
-      oas_snd_field(jg,11) = prm_diag(1)%rain_gsp_rate(jc,jb) + prm_diag(1)%snow_gsp_rate(jc,jb) + &
-        prm_diag(1)%ice_gsp_rate(jc,jb) + prm_diag(1)%graupel_gsp_rate(jc,jb) + &
-       prm_diag(1)%hail_gsp_rate(jc,jb)
+      !oas_snd_field(jg,11) = prm_diag(1)%rain_gsp_rate(jc,jb) + prm_diag(1)%snow_gsp_rate(jc,jb) + &
+      !  prm_diag(1)%ice_gsp_rate(jc,jb) + prm_diag(1)%graupel_gsp_rate(jc,jb) + &
+      ! prm_diag(1)%hail_gsp_rate(jc,jb)
     END DO
 
     time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
     sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current) / 1000
     DO jg = 1, SIZE(oas_snd_meta)
-      CALL oasis_put(oas_snd_meta(jg)%vid, sim_time_oas, oas_snd_field(:,jg), oas_error)
+      CALL oasis_put(oas_snd_meta(jg)%vid, sim_time_oas-1, oas_snd_field(:,jg), oas_error)
       WRITE(oas_message,*) 'Sending  ', oas_snd_meta(jg)%clpname
       CALL message(routine, oas_message)
       IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) THEN
@@ -1877,7 +1877,7 @@ MODULE mo_nh_stepping
               DO oas_i = 1, SIZE(oas_rcv_meta)
                 WRITE(oas_message,*) 'Receiving  ', oas_snd_meta(jg)%clpname
                 CALL message(routine, oas_message)
-                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(oas_i,:), oas_error)
+                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas-1, oas_rcv_field(oas_i,:), oas_error)
                 WRITE(oas_message,*) 'Received  ', oas_snd_meta(jg)%clpname
                 CALL message(routine, oas_message)
                 IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN

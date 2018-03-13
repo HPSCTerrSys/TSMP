@@ -111,10 +111,52 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   WRITE(*,*) 'CLM defining partition'
 
   ALLOCATE(igparal(200))
-  igparal(1) = 0
-  igparal(2) = 0
-  igparal(3) = 90000
-  CALL prism_def_partition_proto(igrid, igparal, nerror, igparal(3))
+  ani = adomain%ni
+  anj = adomain%nj
+
+  igparal(1) = 3
+  total_part_len=0
+  c=0
+  leng=0
+  last_owner=-1
+  do aj = 1,anj
+    do ai = 1,ani
+      an = (aj-1)*ani + ai
+      owner = adecomp%glo2owner(an)
+      if(owner==iam ) then
+        if(last_owner/=iam) then       !start of new partiontion
+           if(last_owner/=-1) leng=0   !no leading masked cells have to be added to the first partition
+           c=c+1
+           if(last_owner==-1) then
+             igparal(c*2+1) = 0 
+           else
+             igparal(c*2+1) = an-1
+           endif
+        endif
+        leng=leng+1
+      else  
+        if(owner==-1) then
+          if(last_owner== iam .or. last_owner== -1) leng=leng+1 !adding also masked cells to the partition
+        else                                                     !other procs partiton start
+          if(last_owner==iam) then                               ! if this cell ends ongoing partition, length is written out
+            igparal(c*2+2) = leng    
+            total_part_len=total_part_len+leng
+          endif
+        endif 
+     endif    
+     if(owner/=-1) last_owner=owner
+   enddo
+ enddo
+ if(last_owner==iam)then   !write length if this proc had last partition
+   igparal(c*2+2) = leng  
+   total_part_len=total_part_len+leng
+ endif
+
+  igparal(2)=c
+
+  CALL MPI_Barrier(kl_comm, nerror)
+
+  CALL prism_def_partition_proto(igrid, igparal, nerror)
   IF (nerror /= 0) &
     CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_partition')
 
