@@ -858,7 +858,7 @@ MODULE mo_nh_stepping
     END DO
 
     time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
-    sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current)
+    sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current) / 1000
     DO jg = 1, SIZE(oas_snd_meta)
       CALL oasis_put(oas_snd_meta(jg)%vid, sim_time_oas, oas_snd_field(:,jg), oas_error)
       WRITE(oas_message,*) 'Sending  ', oas_snd_meta(jg)%clpname
@@ -1873,7 +1873,7 @@ MODULE mo_nh_stepping
 
 #ifdef COUP_OAS_ICON
               time_diff    =  getTimeDeltaFromDateTime(datetime_local(jg)%ptr, time_config%tc_exp_startdate)
-              sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr)
+              sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr) / 1000
               DO oas_i = 1, SIZE(oas_rcv_meta)
                 WRITE(oas_message,*) 'Receiving  ', oas_snd_meta(jg)%clpname
                 CALL message(routine, oas_message)
