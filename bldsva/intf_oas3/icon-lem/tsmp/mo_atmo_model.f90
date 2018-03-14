@@ -121,6 +121,9 @@ MODULE mo_atmo_model
 
 #ifdef COUP_OAS_ICON
   USE oas_icon_define
+  USE mo_impl_constants,          ONLY: min_rlcell_int, grf_bdywidth_c
+  USE mo_parallel_config,         ONLY: idx_1d
+  USE mo_loopindices,             ONLY: get_indices_c
 #endif
 
   !-------------------------------------------------------------------------
@@ -221,8 +224,10 @@ CONTAINS
     INTEGER                 :: jg, jgp, jstep0, error_status
     TYPE(t_sim_step_info)   :: sim_step_info  
     TYPE(t_RestartAttributeList), POINTER :: restartAttributes
-
-    CHARACTER(len=200) :: gridelem
+#ifdef COUP_OAS_ICON
+    INTEGER :: i_startblk, i_endblk, jb, jc, i_startidx, i_endidx, &
+               rl_start, rl_end, c
+#endif
 
     ! initialize global registry of lon-lat grids
     CALL init_lonlat_grid_list()
@@ -533,13 +538,25 @@ CONTAINS
       'oas_icon_partition', 'Number of ICON domain > 1 when coupled to CLM.')
 
     WRITE(*,*) 'Slavko: ICO defining partition'
-    ALLOCATE( oas_part(3) )
-    oas_part(1) = 0
-    oas_part(2) = 0
-    oas_part(3) = oas_nlon*oas_nlat
-    WRITE(gridelem,*) p_patch(1)%n_patch_cells, ' ', oas_part(3)
-    WRITE(*,*) 'Slavko: grid el: ', gridelem
-    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, oas_part(3))
+
+    ALLOCATE( oas_part(2+p_patch(1)%n_patch_cells) )
+    oas_part(1) = 4
+    rl_start = grf_bdywidth_c+1
+    rl_end   = min_rlcell_int
+    i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
+    i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
+    c = 0
+    DO jb = i_startblk, i_endblk
+      CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx, i_endidx, rl_start, rl_end)
+      DO jc = i_startidx, i_endidx
+        c = c + 1
+        jg = idx_1d(jc,jb)
+        oas_part(jg+2) = p_patch(1)%cells%decomp_info%glb_index(jg)
+      END DO
+    END DO
+    oas_part(2) = c
+
+    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, 73728)
     IF (oas_error /= 0) &
       CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_partition')
     WRITE(*,*) 'ICO defined partition'
@@ -549,7 +566,7 @@ CONTAINS
     oas_var_nodims(1) = 1   ! rang of field array
     oas_var_nodims(2) = 1   ! 'bundle' always 1 in OASIS3-MCT
     oas_vshape(1)     = 1
-    oas_vshape(2)     = oas_part(3)
+    oas_vshape(2)     = oas_part(2)
 
     WRITE(*,*) 'ICO defining variables'
 
