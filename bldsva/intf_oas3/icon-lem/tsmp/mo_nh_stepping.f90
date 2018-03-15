@@ -572,8 +572,7 @@ MODULE mo_nh_stepping
 !   ELSE
     !---------------------------------------
 
-    CALL perform_nh_timeloop (mtime_current, latbc, p_nh_state(jg)%metrics, &
-      p_nh_state(1)%prog(nnow(1)), p_nh_state(1)%diag)
+    CALL perform_nh_timeloop (mtime_current, latbc)
 !   ENDIF
 
   CALL deallocate_nh_stepping (latbc)
@@ -590,14 +589,11 @@ MODULE mo_nh_stepping
   !! @par Revision History
   !! Initial release by Almut Gassmann, (2009-04-15)
   !!
-  SUBROUTINE perform_nh_timeloop (mtime_current, latbc, p_metrics, p_prog, p_diag)
+  SUBROUTINE perform_nh_timeloop (mtime_current, latbc)
     !
     CHARACTER(len=*), PARAMETER :: routine = modname//':perform_nh_timeloop'
     TYPE(t_latbc_data),     INTENT(INOUT)  :: latbc !< data structure for async latbc prefetching
     TYPE(datetime),         POINTER        :: mtime_current     ! current datetime (mtime)
-    TYPE(t_nh_metrics), INTENT(IN) :: p_metrics
-    TYPE(t_nh_prog), INTENT(IN) :: p_prog
-    TYPE(t_nh_diag), INTENT(IN) :: p_diag
 
   INTEGER                              :: jg, jn, jgc
   INTEGER                              :: ierr
@@ -872,30 +868,17 @@ MODULE mo_nh_stepping
         i_endidx, rl_start, rl_end)
       DO jc = i_startidx, i_endidx
         ii = idx_1d(jc,jb)
-        !WRITE(*,*) prm_diag(1)%hail_gsp_rate(jc,jb)
-        !WRITE(*,*) prm_diag(1)%graupel_gsp_rate(jc,jb)
-        !WRITE(*,*) prm_diag(1)%ice_gsp_rate(jc,jb)
-        !WRITE(*,*) p_metrics%z_mc(jc,nlev,jb)
-        !WRITE(*,*) p_metrics%z_ifc(jc,nlev+1,jb)
-        !WRITE(*,*) p_prog%tracer(jc,nlev,jb,iqv)
-
-        oas_snd_field(ii,1) = &
-          p_diag%temp(jc,nlev,jb)
-        oas_snd_field(ii,2) = &
-          p_diag%u(jc,nlev,jb)  ! Slavko: check on which level !!
-        oas_snd_field(ii,3) = &
-         p_diag%v(jc,nlev,jb)
-        oas_snd_field(ii,4) = 0.
-        ! p_prog%tracer(jc,nlev,jb,iqv)
-        oas_snd_field(ii,5) = 20.
-        !  p_metrics%z_mc(jc,nlev,jb) - p_metrics%z_ifc(jc,nlev+1,jb)
-        oas_snd_field(ii,6) = &
-          p_diag%pres_sfc(jc,jb)
-        oas_snd_field(ii,7) = prm_diag(1)%swflxsfc(jc,jb) - prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
-        oas_snd_field(ii,8) = prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
-        oas_snd_field(ii,9) = prm_diag(1)%lwflxsfc(jc,jb) + prm_diag(1)%lwflx_up_sfc(jc,jb)
+        oas_snd_field(ii,1)  = p_nh_state(1)%diag%temp(jc,nlev,jb)
+        oas_snd_field(ii,2)  = p_nh_state(1)%diag%u(jc,nlev,jb)  ! Slavko: check on which level !!
+        oas_snd_field(ii,3)  = p_nh_state(1)%diag%v(jc,nlev,jb)
+        oas_snd_field(ii,4)  = p_nh_state(1)%prog(nnow(1))%tracer(jc,nlev,jb,iqv)
+        oas_snd_field(ii,5)  = &
+          p_nh_state(1)%metrics%z_mc(jc,nlev,jb) - p_nh_state(1)%metrics%z_ifc(jc,nlev+1,jb)
+        oas_snd_field(ii,6)  = p_nh_state(1)%diag%pres_sfc(jc,jb)
+        oas_snd_field(ii,7)  = prm_diag(1)%swflxsfc(jc,jb) - prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
+        oas_snd_field(ii,8)  = prm_diag(1)%swflx_dn_sfc_diff(jc,jb)
+        oas_snd_field(ii,9)  = prm_diag(1)%lwflxsfc(jc,jb) + prm_diag(1)%lwflx_up_sfc(jc,jb)
         oas_snd_field(ii,10) = prm_diag(1)%rain_con_rate(jc,jb) + prm_diag(1)%snow_con_rate(jc,jb)
-        ! Slavko: is this consistent with convective precipitation ??
         oas_snd_field(ii,11) = prm_diag(1)%rain_gsp_rate(jc,jb) + prm_diag(1)%snow_gsp_rate(jc,jb)! + &
         !  prm_diag(1)%ice_gsp_rate(jc,jb) + prm_diag(1)%graupel_gsp_rate(jc,jb) + &
         ! prm_diag(1)%hail_gsp_rate(jc,jb)
