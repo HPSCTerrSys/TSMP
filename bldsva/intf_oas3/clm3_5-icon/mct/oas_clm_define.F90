@@ -177,13 +177,13 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
   !CMS: from 1 to 100 are the sending fields from CLM to ICON
-  ssnd(1)%clname='ICOINFRA'
-  ssnd(2)%clname='ICOALBED'
-  ssnd(3)%clname='ICOALBEI'
-  ssnd(4)%clname='ICO_TAUX'
-  ssnd(5)%clname='ICO_TAUY'
-  ssnd(6)%clname='ICOSHFLX'
-  ssnd(7)%clname='ICOLHFLX'
+  ssnd(1)%clname='CLMINFRA'
+  ssnd(2)%clname='CLMALBED'
+  ssnd(3)%clname='CLMALBEI'
+  ssnd(4)%clname='CLM_TAUX'
+  ssnd(5)%clname='CLM_TAUY'
+  ssnd(6)%clname='CLMSHFLX'
+  ssnd(7)%clname='CLMLHFLX'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
