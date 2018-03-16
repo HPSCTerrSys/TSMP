@@ -15,7 +15,7 @@
 /
 &master_model_nml
   model_name="atmo"
-  model_namelist_filename="NAMELIST_ccs"
+  model_namelist_filename="NAMELIST_nrw"
   model_type=1
   model_min_rank=0
   model_max_rank=65535
