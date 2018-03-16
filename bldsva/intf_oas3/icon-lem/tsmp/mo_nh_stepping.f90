@@ -826,6 +826,11 @@ MODULE mo_nh_stepping
     CALL messy_time(1)
 #endif
 
+#ifdef COUP_OAS_ICON
+    time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
+    sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current) / 100
+#endif
+
     ! update model date and time mtime based
     mtime_current = mtime_current + model_time_step
 
@@ -837,8 +842,6 @@ MODULE mo_nh_stepping
     !CALL diagnose_pres_temp (p_metrics, pt_prog, pt_prog_rcf,   &
     !     &                      pt_diag, pt_patch,                 &
     !     &                      lnd_prog          = lnd_prog_new)
-    time_diff    =  getTimeDeltaFromDateTime(mtime_current, time_config%tc_exp_startdate)
-    sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, mtime_current) / 1000
     
     CALL diag_for_output_dyn()
 
@@ -886,8 +889,8 @@ MODULE mo_nh_stepping
     END DO
 
     DO ii = 1, SIZE(oas_snd_meta)
-      CALL oasis_put(oas_snd_meta(ii)%vid, sim_time_oas-1, oas_snd_field(:,ii), oas_error)
-      WRITE(oas_message,*) 'Sending  ', oas_snd_meta(ii)%clpname, 'at ', sim_time_oas-1
+      CALL oasis_put(oas_snd_meta(ii)%vid, sim_time_oas, oas_snd_field(:,ii), oas_error)
+      WRITE(oas_message,*) 'Sending  ', oas_snd_meta(ii)%clpname, 'at ', sim_time_oas
       CALL message(routine, oas_message)
       IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Sent) THEN
         WRITE(oas_message,*) 'Failure in oasis_put of ', oas_snd_meta(ii)%clpname
@@ -1871,14 +1874,11 @@ MODULE mo_nh_stepping
           IF (atm_phy_nwp_config(jg)%is_les_phy) THEN
 
 #ifdef COUP_OAS_ICON
-              time_diff  => newTimedelta("PT0S")
-              time_diff    =  getTimeDeltaFromDateTime(datetime_local(jg)%ptr, time_config%tc_exp_startdate)
-              sim_time_oas =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr) / 1000
-              CALL deallocateTimedelta(time_diff)
+              sim_time_oas = FLOOR(sim_time * 10.)
               DO oas_i = 1, SIZE(oas_rcv_meta)
                 WRITE(oas_message,*) 'Receiving  ', oas_rcv_meta(oas_i)%clpname
                 CALL message(routine, oas_message)
-                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas-1, oas_rcv_field(:,oas_i), oas_error)
+                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(:,oas_i), oas_error)
                 WRITE(oas_message,*) 'Received  ', oas_rcv_meta(oas_i)%clpname, 'at ', sim_time_oas-1
                 CALL message(routine, oas_message)
                 IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN

@@ -117,7 +117,7 @@ CALL MPI_Barrier(kl_comm, ier)
  !
  WRITE(*,*) "Slavko CLM: putting var ", ssnd(kid)%clname, " with min,max=", &
    MINVAL(buffer_array), " ", MAXVAL(buffer_array)
- CALL prism_put_proto( ssnd(kid)%nid, kstep, buffer_array, kinfo )
+ CALL prism_put_proto( ssnd(kid)%nid, kstep*10, buffer_array, kinfo )
  WRITE(*,*) "Slavko CLM: put var ", ssnd(kid)%clname
 
 deallocate(buffer_array)
