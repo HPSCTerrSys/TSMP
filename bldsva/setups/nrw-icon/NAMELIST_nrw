@@ -1,33 +1,32 @@
 &parallel_nml
  nproma         = 16
- p_test_run     = .false.
- l_test_openmp  = .false.
- l_log_checks   = .false.
+ p_test_run     = .FALSE.
+ l_test_openmp  = .FALSE.
+ l_log_checks   = .FALSE.
  write_div_to_file = .TRUE.
 /
 &grid_nml
- ! cell_type is not used = 3            ! triangular cells
  dynamics_grid_filename = icon_nrw_150km_R1247m.nc
  dynamics_parent_grid_id = 0
- lfeedback         = .false.
- l_limited_area    = .true.
+ lfeedback         = .FALSE.
+ l_limited_area    = .TRUE.
 / 
 &initicon_nml
  init_mode              =  4 !4=cosmo, 2=ifs, 3=combined
  ana_varnames_map_file  = 'ana_varnames_map_file.txt'
  latbc_varnames_map_file = 'dict.latbc'
  nlevsoil_in            =  8
- lread_ana              = .false.
+ lread_ana              = .FALSE.
 /
 &run_nml
  num_lev     = 150
- lvert_nest = .false.
+ lvert_nest  = .FALSE.
  dtime       = 6.0
  ldynamics   = .TRUE.       ! dynamics
  ltestcase   = .FALSE.      ! testcase
  ltransport  = .TRUE.       ! transport
  iforcing    = 3.
- ltimer      = .true.       ! 
+ ltimer      = .TRUE.       ! 
  timers_level = 10          !
  profiling_output = 3       !
  msg_level   = 12           ! detailed report during integration
@@ -57,35 +56,35 @@
  lhdiff_w         = .TRUE.
 /
 &nwp_phy_nml
-inwp_gscp       = 4 !4 for two moment
-inwp_convection = 0
-inwp_radiation  = 1
-inwp_cldcover   = 5
-inwp_turb       = 5
-inwp_satad      = 1
-inwp_surface    = 1
-latm_above_top  = .true.
-efdt_min_raylfric = 7200.
-itype_z0         = 1  !1=land cover and topo, 2=land cover
-dt_rad           = 900.
+inwp_gscp          = 4      ! 4 for two moment
+inwp_convection    = 0
+inwp_radiation     = 1
+inwp_cldcover      = 5
+inwp_turb          = 5
+inwp_satad         = 1
+inwp_surface       = 1
+latm_above_top     = .TRUE.
+efdt_min_raylfric  = 7200.
+itype_z0           = 1      ! 1=land cover and topo, 2=land cover
+dt_rad             = 900.
 /
 &les_nml
- isrfc_type        = 1  !1=TERRA,2=Fixed flux, 5=fixed SST, 3=fixed bflux
+ isrfc_type        = 1      ! 1=TERRA, 2=fixed flux, 5=fixed SST, 3=fixed bflux
  ldiag_les_out     = .FALSE.
  les_metric        = .TRUE.
 /
 &lnd_nml
-ntiles   = 1
-nlev_snow = 2
-lmulti_snow = .true.
-idiag_snowfrac = 1
-lsnowtile = .false.
-frlnd_thrhld = 0.5
-frlake_thrhld = 0.5
-frsea_thrhld = 0.5
-lseaice   = .false.
-llake     = .false.
-itype_lndtbl   =  2
+ntiles             = 1
+nlev_snow          = 2
+lmulti_snow        = .TRUE.
+idiag_snowfrac     = 1
+lsnowtile          = .FALSE.
+frlnd_thrhld       = 0.5
+frlake_thrhld      = 0.5
+frsea_thrhld       = 0.5
+lseaice            = .FALSE.
+llake              = .FALSE.
+itype_lndtbl       =  2
 /
 &radiation_nml
  irad_o3 = 7
@@ -104,8 +103,8 @@ rbf_scale_mode_ll = 1 !2=default for automatic calculations
  grf_scalfbk      = 1
  grf_tracfbk      = 1
  denom_diffu_v    = 150.
- l_mass_consvcorr = .true. 
- l_density_nudging = .true.
+ l_mass_consvcorr = .TRUE. 
+ l_density_nudging = .TRUE.
  !rbf_scale_grf_e = 0.4, 0.35, 0.25
 /
 &nonhydrostatic_nml
@@ -116,12 +115,12 @@ rbf_scale_mode_ll = 1 !2=default for automatic calculations
  vwind_offctr     =  0.25
  damp_height      =  15000.
  rayleigh_coeff   =  0.25
- lhdiff_rcf       = .true.
+ lhdiff_rcf       = .TRUE.
  divdamp_fac      =  0.004
  divdamp_order    =  4
- l_open_ubc       = .true.
+ l_open_ubc       = .TRUE.
  igradp_method    =  3
- l_zdiffu_t       = .true.
+ l_zdiffu_t       = .TRUE.
  thslp_zdiffu     =  0.02
  thhgtd_zdiffu    =  125.
  htop_moist_proc  =  22500.
@@ -138,19 +137,11 @@ rbf_scale_mode_ll = 1 !2=default for automatic calculations
 /
 &io_nml
  dt_checkpoint    = 3600.
- lkeep_in_sync    = .true.
+ lkeep_in_sync    = .TRUE.
  restart_file_type = 5
  output_nml_dict  = "dict.icon.hdcp2"
  netcdf_dict      = "dict.icon.hdcp2"
 /
-!&meteogram_output_nml
-! lmeteogram_enabled= .TRUE.,.TRUE.
-! n0_mtgrm          = 0,0             ! meteogram initial time step (0 is first step!)
-! ninc_mtgrm        = 1,1         ! meteogram output interval (steps)
-! max_time_stamps   = 2,2       !every 1/4 hours
-! ldistributed      = .FALSE.,.FALSE.
-! stationlist_tot   =  50.909,   6.814, 'bla',
-!/
 &output_nml
  dom              = 1
  output_start     = "2013-04-24T00:00:00Z"

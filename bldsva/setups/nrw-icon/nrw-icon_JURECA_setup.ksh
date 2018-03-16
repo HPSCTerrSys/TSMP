@@ -9,19 +9,21 @@ initSetup(){
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   #defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
 
-  defaultNppn=48
-  defaultICONProc=44
+  defaultNppn=24
+  defaultICONProc=20
   defaultCLMProcX=2
   defaultCLMProcY=2
   #defaultPFLProcX=3
   #defaultPFLProcY=4
   
-  defaultStartDate="2008-05-08 00"
-  defaultInitDate="2008-05-08 00"
+  defaultStartDate="2013-04-24 00"
+  defaultInitDate="2013-04-24 00"
   defaultRunhours=3
 
   defaultDumpCLM=1
   #defaultDumpPFL=1	
+
+  gx_icon=15472
 
   gx_clm=300
   gy_clm=300
@@ -34,7 +36,7 @@ initSetup(){
   #pflrunname="rurlaf"
   #base_pfl=0.0025
 
-  cplfreq1=900
+  cplfreq1=9000
   #cplfreq2=900
 
   delta_obs=1
@@ -71,8 +73,16 @@ route "${cblue}>> finalizeSetup${cnormal}"
     fi  
   fi  
 
-  comment "  copy initial, bnd data for icon"
-    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/* $rundir/ >> $log_file 2>> $err_file
+  comment "  copy grid file for icon"
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/icon_nrw_150km_R1247m.nc $rundir/ >> $log_file 2>> $err_file
+  check
+
+  comment "  copy initial data for icon"
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/init_icon_nrw_150km_R1247m_2013042400.nc $rundir/ >> $log_file 2>> $err_file
+  check
+
+  comment "  copy remap data for icon"
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/rmp_* $rundir/ >> $log_file 2>> $err_file
   check
 
   if [[ $withPFL == "true" ]] then
