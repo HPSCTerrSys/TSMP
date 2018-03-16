@@ -93,9 +93,9 @@ itype_lndtbl       =  2
 &interpol_nml
 nudge_zone_width  = 12  !-1 create nudge zone in grid
 lsq_high_ord      = 2
-rbf_vec_scale_c   = 0.06
-rbf_vec_scale_v   = 0.14
-rbf_vec_scale_e   = 0.30
+rbf_vec_scale_c   = 0.12
+rbf_vec_scale_v   = 0.28
+rbf_vec_scale_e   = 0.60
 rbf_scale_mode_ll = 1 !2=default for automatic calculations
 /
 &gridref_nml
