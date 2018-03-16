@@ -1,0 +1,21 @@
+# Dictionary for mapping between internal names and GRIB2 shortNames
+# needed by GRIB2 read procedures.
+#
+# internal name     GRIB2 shortName
+u                   U
+v                   V
+w                   W
+temp                T
+pres                P
+qv                  QV
+qc                  QC
+qi                  QI
+qr                  QR
+qs                  QS
+pres_sfc            LNPS
+z_ifc               HHL
+vn                  VN
+GEOSP               GEOSP
+GEOP_ML             GEOP_ML
+theta_v             THETA_V
+rho                 DEN

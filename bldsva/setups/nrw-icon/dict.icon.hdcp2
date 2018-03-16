@@ -1,0 +1,43 @@
+# The following table defines the dictionary for the mapping  between
+# user defined short names and short names defined in the "add_var"
+# calls in ICON. The "add_var" names are used by default, if either no
+# translation is used or the name does not occur in the dictionary.
+#
+# This file contains a dictionary for the mapping between "add_var"
+# names and names used for HDCP2 postprocessing.
+#
+# ===========================================================
+#
+#
+# dict names         "add_var" name
+# ---------------------------------
+#
+# prognostic variables
+  ta                 temp
+  hus                qv
+  clw                qc
+  cli                qi
+  ua                 u
+  va                 v
+  wa                 w
+# 
+# diagnostics
+#
+  prw                tqv_dia
+  clivi              tqi_dia
+  clwvi		     tqc_dia
+  clt                clct
+  ps                 pres_sfc
+  huss               qv_2m
+  tas                t_2m
+  hurs               rh_2m
+  rsdscs             asodird_s
+  rsdsdiff           asodifd_s
+  rlds               athd_s
+  mrlsl              w_so
+  tsl                t_so
+  rsd                asod_t
+  uas                u_10
+  vas                v_10
+  cct                p_ctop
+  ccb                p_cbase    
