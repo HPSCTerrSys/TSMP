@@ -3,7 +3,7 @@
  $END
 #
  $RUNTIME
-  2
+  totalruntime
  $END
 #
  $INIDATE
