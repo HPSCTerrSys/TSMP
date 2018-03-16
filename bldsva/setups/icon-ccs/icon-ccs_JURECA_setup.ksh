@@ -2,9 +2,8 @@
 
 initSetup(){
   defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal300150/oasis3"
-  defaultFDICON=""
   defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal300150/clm"
-  defaultFDPFL=""
+  #defaultFDPFL=""
 
   defaultNLICON="$rootdir/bldsva/setups/icon-ccs/icon_master.namelist $rootdir/bldsva/setups/icon-ccs/NAMELIST_ccs"
   defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
@@ -12,7 +11,7 @@ initSetup(){
 
 
   defaultNppn=24
-  defaultICONProc=1
+  defaultICONProc=44
   defaultCLMProcX=2
   defaultCLMProcY=2
   #defaultPFLProcX=4
@@ -71,6 +70,10 @@ route "${cblue}>> finalizeSetup${cnormal}"
       done
     fi  
   fi  
+
+  comment "  copy initial, bnd data for icon"
+    ln -s /homea/slts/slts23/data/setups/icon-ccs/* $rundir/ >> $log_file 2>> $err_file
+  check
 
 route "${cblue}<< finalizeSetup${cnormal}"
 }
