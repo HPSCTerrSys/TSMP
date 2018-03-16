@@ -363,6 +363,19 @@ route "${cblue}>>> c_setup_oas${cnormal}"
   if [[ $withCESM == "true" || $withOASMCT == "true" ]] ; then ; ncpl_exe3=$nproc_clm ; fi
 
 
+  if [[ $withICON == "true" ]]; then
+    sed "s/ngiconx/$gx_icon/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+    sed "s/ngclmx/$(($gx_clm*$gy_clm))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  fi
+
+
   if [[ $withPFL == "true" && $withCOS == "true" ]] then
 
     sed "s/nproc_exe1/$nproc_cos/" -i $rundir/namcouple >> $log_file 2>> $err_file

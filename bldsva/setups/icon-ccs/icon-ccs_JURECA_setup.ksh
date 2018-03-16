@@ -1,23 +1,20 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal300150/clm"
-  defaultFDCOS=""
   defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal300150/oasis3"
+  defaultFDICON=""
+  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal300150/clm"
   defaultFDPFL=""
 
-
-  defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
   defaultNLICON="$rootdir/bldsva/setups/icon-ccs/icon_master.namelist $rootdir/bldsva/setups/icon-ccs/NAMELIST_ccs"
+  defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
   #defaultNLPFL=$rootdir/bldsva/setups/ideal300150/coup_oas.tcl 
 
 
-  defaultNppn=2
-  defaultCLMProcX=1
-  defaultCLMProcY=1
-  #defaultCOSProcX=8
-  #defaultCOSProcY=8
+  defaultNppn=24
   defaultICONProc=1
+  defaultCLMProcX=2
+  defaultCLMProcY=2
   #defaultPFLProcX=4
   #defaultPFLProcY=4
 
@@ -26,19 +23,14 @@ initSetup(){
   defaultRunhours=1
 
   defaultDumpCLM=1
-  #defaultDumpCOS=1
   defaultDumpICON=1
   #defaultDumpPFL=1
 
+  gx_icon=73728
   gx_clm=300
   gy_clm=300
   dt_clm=1
   res="0300x0300"
-
-  #gx_cos=150
-  #gy_cos=150
-  #dt_cos=10
-  #nbndlines=4
 
   #gx_pfl=300
   #gy_pfl=300
@@ -47,8 +39,7 @@ initSetup(){
   #base_pfl=0.0025
 
   cplfreq1=1
-  #cplfreq2=900
-
+  cplfreq2=1
 
   if [[ $withPFL == "false" && $withICON == "true" ]]; then
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm
