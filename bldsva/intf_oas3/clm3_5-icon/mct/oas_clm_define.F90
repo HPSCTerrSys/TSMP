@@ -184,6 +184,8 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   ssnd(5)%clname='CLM_TAUY'
   ssnd(6)%clname='CLMSHFLX'
   ssnd(7)%clname='CLMLHFLX'
+  ssnd(8)%clname='CLMEMISS'
+  ssnd(9)%clname='CLMTGRND'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
@@ -265,7 +267,7 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   srcv(111:120)%ref='PSI'
 
 #ifdef COUP_OAS_ICON
-  ssnd(1:7)%laction = .TRUE.
+  ssnd(1:9)%laction = .TRUE.
 #endif
 
 #ifdef COUP_OAS_PFL

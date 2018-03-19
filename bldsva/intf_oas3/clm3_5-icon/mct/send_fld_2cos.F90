@@ -91,9 +91,15 @@ INTEGER, PARAMETER ::   jps_qsf1   =  13    !  Surface Humidity (kg/kg) !CPS
 INTEGER, PARAMETER ::   jps_fpsn   =  14   !  photosynthesis rate (umol CO2 m-2s-1)
 INTEGER, PARAMETER ::   jps_fplres =  15   !  plant respiration (umol CO2 m-2s-1)
 !MU (12.04.13)
+INTEGER, PARAMETER ::   jps_emg   =  16    !  zonal wind stress
+INTEGER, PARAMETER ::   jps_t_grnd   =  17    !  zonal wind stress
 
 INTEGER            ::   isec, info, jn, ier, jj, ji, g1      ! temporary integer
 
+REAL(KIND=r8), POINTER  :: t_grnd(:)
+REAL(KIND=r8), POINTER  :: t_grnd_gcell(:)
+REAL(KIND=r8), POINTER  :: emg(:)
+REAL(KIND=r8), POINTER  :: emg_gcell(:)
 REAL(KIND=r8), POINTER  :: taux_pft(:)
 REAL(KIND=r8), POINTER  :: taux_gcell(:)
 REAL(KIND=r8), POINTER  :: tauy_pft(:)
@@ -144,6 +150,8 @@ INTEGER                         :: status, ncid, ncvarid, dimids(3) !CPS Debug O
 
  ! Set pointers into derived type (pft level)
 
+ t_grnd               => clm3%g%l%c%ces%t_grnd
+ emg                  => clm3%g%l%c%cps%emg
  taux_pft             => clm3%g%l%c%p%pmf%taux
  tauy_pft             => clm3%g%l%c%p%pmf%tauy
  eflx_lh_tot_pft      => clm3%g%l%c%p%pef%eflx_lh_tot
@@ -165,6 +173,8 @@ INTEGER                         :: status, ncid, ncvarid, dimids(3) !CPS Debug O
 #endif 
  ! Set pointers into derived type (gridcell level)
 
+ t_grnd_gcell         => clm_l2a%t_grnd
+ emg_gcell            => clm_l2a%emg
  taux_gcell           => clm_l2a%taux
  tauy_gcell           => clm_l2a%tauy
  eflx_lh_tot_gcell    => clm_l2a%eflx_lh_tot
@@ -200,6 +210,14 @@ INTEGER                         :: status, ncid, ncvarid, dimids(3) !CPS Debug O
 isec = dtime * ( get_nstep() - 1 )
 
  ! Do flux averaging from pft to gridcell
+
+ ! ground temperature
+ CALL c2g(begc, endc, begl, endl, begg, endg, t_grnd, t_grnd_gcell, &
+         c2l_scale_type= 'unity', l2g_scale_type='unity')
+
+ ! ground emissivity
+ CALL c2g(begc, endc, begl, endl, begg, endg, emg, emg_gcell, &
+         c2l_scale_type= 'unity', l2g_scale_type='unity')
 
  ! wind stress in x direction
  CALL p2g(begp, endp, begc, endc, begl, endl, begg, endg, taux_pft, taux_gcell, &
@@ -264,6 +282,11 @@ isec = dtime * ( get_nstep() - 1 )
 
 
 
+snd_field(:)=atm_l2a%t_grnd
+IF( ssnd(jps_t_grnd)%laction )  CALL oas_clm_snd( jps_t_grnd, isec,snd_field(:),begg,endg, info )
+
+snd_field(:)=atm_l2a%emg
+IF( ssnd(jps_emg)%laction )  CALL oas_clm_snd( jps_emg, isec,snd_field(:),begg,endg, info )
 
 snd_field(:)=atm_l2a%taux
 IF( ssnd(jps_taux)%laction )  CALL oas_clm_snd( jps_taux, isec,snd_field(:),begg,endg, info )

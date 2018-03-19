@@ -37,6 +37,12 @@ MODULE mo_nwp_rad_interface
     &                                nwp_rg_radiation_reduced
   USE mo_albedo,               ONLY: sfc_albedo, sfc_albedo_modis
   USE mtime,                   ONLY: datetime
+
+#ifdef COUP_OAS_ICON
+  USE oas_icon_define
+  USE mo_impl_constants,       ONLY: min_rlcell_int, grf_bdywidth_c
+  USE mo_loopindices,          ONLY: get_indices_c
+#endif
   
   IMPLICIT NONE
 
@@ -91,6 +97,10 @@ MODULE mo_nwp_rad_interface
     REAL(wp):: zsct        ! solar constant (at time of year)
     REAL(wp):: cosmu0_dark ! minimum cosmu0, for smaller values no shortwave calculations
 
+#ifdef COUP_OAS_ICON
+    INTEGER :: rl_start, rl_end, i_startblk, i_endblk, jb, i_startidx, &
+               i_endidx, jc
+#endif
 
 
     ! patch ID
@@ -145,10 +155,10 @@ MODULE mo_nwp_rad_interface
 #else
     rl_start = grf_bdywidth_c+1
     rl_end   = min_rlcell_int
-    i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
-    i_endblk   = p_patch(1)%cells%end_blk(rl_end,MAX(1,p_patch(1)%n_childdom))
+    i_startblk = pt_patch%cells%start_blk(rl_start, 1)
+    i_endblk   = pt_patch%cells%end_blk(rl_end,MAX(1,pt_patch%n_childdom))
     DO jb = i_startblk, i_endblk
-      CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx, &
+      CALL get_indices_c(pt_patch, jb, i_startblk, i_endblk, i_startidx, &
         i_endidx, rl_start, rl_end)
       DO jc = i_startidx, i_endidx
         prm_diag%albdif(jc,jb) = oas_rcv_field_icon(2,jc,jb)

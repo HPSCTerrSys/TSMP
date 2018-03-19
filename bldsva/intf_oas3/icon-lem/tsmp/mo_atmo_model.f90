@@ -591,6 +591,8 @@ CONTAINS
     oas_rcv_meta(5)%clpname = "ICO_TAUY"
     oas_rcv_meta(6)%clpname = "ICOSHFLX"
     oas_rcv_meta(7)%clpname = "ICOLHFLX"
+    oas_rcv_meta(8)%clpname = "ICOEMISS"
+    oas_rcv_meta(9)%clpname = "ICOTGRND"
 
     
     DO jg = 1, SIZE(oas_snd_meta)
@@ -622,7 +624,7 @@ CONTAINS
     ALLOCATE( oas_snd_field(oas_vshape(1):oas_vshape(2),11), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon send buffers' )
-    ALLOCATE( oas_rcv_field(oas_vshape(1):oas_vshape(2),7), stat=oas_error )
+    ALLOCATE( oas_rcv_field(oas_vshape(1):oas_vshape(2),9), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
     ALLOCATE( oas_rcv_field_icon(nproma, p_patch(1)%nblks_c,11), stat=oas_error )

@@ -97,6 +97,8 @@ type lnd2atm_type
 #if (defined DUST  )
   real(r8), pointer :: flxdst(:,:)       !dust flux (size bins)
 #endif
+  real(r8), pointer :: t_grnd(:)
+  real(r8), pointer :: emg(:)
 end type lnd2atm_type
 
   type(atm2lnd_type),public,target :: atm_a2l      ! a2l fields on atm grid
@@ -273,6 +275,8 @@ end subroutine init_atm2lnd_type
 #if (defined DUST )
   allocate(l2a%flxdst(beg:end,1:ndst))
 #endif
+  allocate(l2a%t_grnd(beg:end))
+  allocate(l2a%emg(beg:end))
 
 ! ival = nan      ! causes core dump in map_maparray, tcx fix
   ival = 0.0_r8
@@ -311,6 +315,8 @@ end subroutine init_atm2lnd_type
 #if (defined DUST )
   l2a%flxdst(beg:end,1:ndst) = ival
 #endif
+  l2a%t_grnd(beg:end) = ival
+  l2a%emg(beg:end) = ival
 end subroutine init_lnd2atm_type
 
 !------------------------------------------------------------------------------
@@ -700,6 +706,8 @@ end subroutine clm_mapa2l
      ix=ix+1; asrc(:,ix) = l2a_src%flxdst(:,m)  
   end do !m
 #endif
+  ix=ix+1; asrc(:,ix) = l2a_src%t_grnd(:)
+  ix=ix+1; asrc(:,ix) = l2a_src%emg(:)
 
   call map_maparrayl(begg_s, endg_s, begg_d, endg_d, nflds, asrc, adst, map1dl_l2a)
 
@@ -743,6 +751,8 @@ end subroutine clm_mapa2l
      ix=ix+1; l2a_dst%flxdst(:,m)    = adst(:,ix)
   end do !m
 #endif
+  ix=ix+1; l2a_dst%t_grnd(:)    = adst(:,ix)
+  ix=ix+1; l2a_dst%emg(:)    = adst(:,ix)
 
   deallocate(asrc)
   deallocate(adst)
@@ -973,6 +983,14 @@ end subroutine clm_mapl2a
      do g = begg,endg
         clm_l2a%t_rad(g) = sqrt(sqrt(clm_l2a%eflx_lwrad_out(g)/sb))
      end do
+
+     call c2g(begc, endc, begl, endl, begg, endg, &
+          cptr%ces%t_grnd, clm_l2a%t_grnd, &
+          c2l_scale_type= 'unity', l2g_scale_type='unity')
+
+     call c2g(begc, endc, begl, endl, begg, endg, &
+          cptr%cps%emg, clm_l2a%emg, &
+          c2l_scale_type= 'unity', l2g_scale_type='unity')
 
   end if
 
