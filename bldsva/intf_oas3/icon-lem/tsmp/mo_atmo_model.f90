@@ -556,7 +556,7 @@ CONTAINS
     END DO
     oas_part(2) = c
 
-    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, 73728)
+    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, 15472)
     IF (oas_error /= 0) &
       CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_partition')
     WRITE(*,*) 'ICO defined partition'
