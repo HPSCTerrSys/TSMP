@@ -621,8 +621,8 @@ CONTAINS
 #else
         prm_diag%umfl_s_t(:,:,1) = oas_rcv_field_icon(4,:,:)
         prm_diag%vmfl_s_t(:,:,1) = oas_rcv_field_icon(5,:,:)
-        shfl_s_t          = oas_rcv_field_icon(6,:,:)
-        lhfl_s_t          = oas_rcv_field_icon(7,:,:)
+        prm_diag%shfl_s_t(:,:,1) = oas_rcv_field_icon(6,:,:) 
+        prm_diag%lhfl_s_t(:,:,1) = oas_rcv_field_icon(7,:,:)
         !qhfl_s_t = 
 #endif
 
@@ -688,8 +688,10 @@ CONTAINS
           prm_diag%lhfl_bs_t     (jc,jb,isubs) = lhfl_bs_t     (ic)
           lnd_diag%rstom_t       (jc,jb,isubs) = rstom_t       (ic)
 
+#ifndef COUP_OAS_ICON
           prm_diag%shfl_s_t      (jc,jb,isubs) = shfl_s_t      (ic)
           prm_diag%lhfl_s_t      (jc,jb,isubs) = lhfl_s_t      (ic)
+#endif
           prm_diag%qhfl_s_t      (jc,jb,isubs) = qhfl_s_t      (ic)
 
 
