@@ -14,7 +14,6 @@
 &initicon_nml
  init_mode              =  4 !4=cosmo, 2=ifs, 3=combined
  ana_varnames_map_file  = 'ana_varnames_map_file.txt'
- latbc_varnames_map_file = 'dict.latbc'
  nlevsoil_in            =  8
  lread_ana              = .FALSE.
 /
@@ -44,10 +43,10 @@
 &limarea_nml
  itype_latbc     = 1
  dtime_latbc     = 3600.
- dt_latbc        = 'PT01H'
  nlev_latbc      = 50
  latbc_path      = "/work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247"
  latbc_filename  = "latbc_icon_nrw_150km_R1247m_<y><m><d><h>.nc"
+ latbc_varnames_map_file = 'dict.latbc'
 /
 &diffusion_nml
  hdiff_order      = 5
@@ -91,11 +90,11 @@ itype_lndtbl       =  2
  irad_aero = 6
 /
 &interpol_nml
-nudge_zone_width  = 12  !-1 create nudge zone in grid
+nudge_zone_width  = 8  !-1 create nudge zone in grid
 lsq_high_ord      = 2
-rbf_vec_scale_c   = 0.12
-rbf_vec_scale_v   = 0.28
-rbf_vec_scale_e   = 0.60
+rbf_vec_scale_c   = 0.06
+rbf_vec_scale_v   = 0.14
+rbf_vec_scale_e   = 0.30
 rbf_scale_mode_ll = 1 !2=default for automatic calculations
 /
 &gridref_nml
