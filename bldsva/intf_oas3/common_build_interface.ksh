@@ -79,6 +79,8 @@ if [[ $withOAS == "true" ]]; then
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rad_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
   check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rrtm_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
 fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
 }

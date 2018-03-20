@@ -57,6 +57,10 @@ MODULE mo_nwp_rrtm_interface
   USE mo_bcs_time_interpolation, ONLY: t_time_interpolation_weights,         &
     &                                  calculate_time_interpolation_weights
 
+#ifdef COUP_OAS_ICON
+  USE oas_icon_define
+#endif
+
   IMPLICIT NONE
 
   PRIVATE
@@ -466,6 +470,10 @@ CONTAINS
     INTEGER:: i_startblk, i_endblk    !> blocks
     INTEGER:: i_startidx, i_endidx    !< slices
     INTEGER:: i_nchdom                !< domain index
+#ifdef COUP_OAS_ICON
+    REAL(wp) :: emissivity(nproma,pt_patch%nblks_c), &
+                tgrnd(nproma,pt_patch%nblks_c)
+#endif
 
     i_nchdom  = MAX(1,pt_patch%n_childdom)
     jg        = pt_patch%id
@@ -504,8 +512,8 @@ CONTAINS
     END IF
 
 #ifdef COUP_OAS_ICON
-      emissivity = oas_rcv_field_icon(8,:,:)
-      tgrnd = oas_rcv_field_icon(9,:,:)
+      emissivity(:,:) = oas_rcv_field_icon(8,:,:)
+      tgrnd(:,:) = oas_rcv_field_icon(9,:,:)
 #else
       emissivity = ext_data%atm%emis_rad(:,:)
       tgrnd = lnd_prog%t_g(:,:)
