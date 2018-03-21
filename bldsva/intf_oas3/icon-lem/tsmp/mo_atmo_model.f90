@@ -537,6 +537,9 @@ CONTAINS
     IF (n_dom > 1) CALL oasis_abort(oas_comp_id, &
       'oas_icon_partition', 'Number of ICON domain > 1 when coupled to CLM.')
 
+    oas_nlat = p_patch(1)%n_patch_cells_g
+    oas_nlon = 1
+
     WRITE(*,*) 'Slavko: ICO defining partition'
 
     ALLOCATE( oas_part(2+p_patch(1)%n_patch_cells) )
@@ -556,7 +559,7 @@ CONTAINS
     END DO
     oas_part(2) = c
 
-    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, 15472)
+    CALL oasis_def_partition(oas_part_id, oas_part, oas_error, oas_nlat*oas_nlon)
     IF (oas_error /= 0) &
       CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_partition')
     WRITE(*,*) 'ICO defined partition'

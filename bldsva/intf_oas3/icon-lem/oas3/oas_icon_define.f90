@@ -10,8 +10,8 @@ INTEGER               :: oas_comp_id
 CHARACTER(len=4)      :: oas_comp_name="icon"
 INTEGER               :: kl_comm              ! local communicator 
 INTEGER               :: oas_error            ! return error code
-INTEGER               :: oas_nlat = 15472
-INTEGER               :: oas_nlon = 1
+INTEGER               :: oas_nlat
+INTEGER               :: oas_nlon
 INTEGER               :: oas_var_nodims(2)
 INTEGER               :: oas_vshape(2)
 INTEGER               :: oas_part_id
