@@ -1570,6 +1570,56 @@ MODULE mo_nh_stepping
       CALL messy_vdiff(jg)
       IF (timers_level > 3) CALL timer_stop(timer_extra3)
 #endif
+
+      time_diff  => newTimedelta("PT0S")
+      time_diff  =  getTimeDeltaFromDateTime(datetime_local(jg)%ptr, time_config%tc_exp_startdate)
+      sim_time =  getTotalMillisecondsTimedelta(time_diff, datetime_local(jg)%ptr)*1.e-3_wp
+      CALL deallocateTimedelta(time_diff)
+#ifdef COUP_OAS_ICON
+WRITE(*,*) "Slavko: sim_time=", sim_time
+              sim_time_oas = FLOOR(sim_time * 10.)
+              DO oas_i = 1, SIZE(oas_rcv_meta)
+                WRITE(oas_message,*) 'Receiving  ', oas_rcv_meta(oas_i)%clpname,&
+                  " at t=", sim_time_oas
+                CALL message(routine, oas_message)
+                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(:,oas_i), oas_error)
+                WRITE(oas_message,*) 'Received  ', oas_rcv_meta(oas_i)%clpname, 'at t=', sim_time_oas
+                CALL message(routine, oas_message)
+                IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN
+                  WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
+                  CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
+                END IF
+
+                ! transform thru oasis recieved variable into something icon can use
+                !
+                !DO jb = 1, p_patch(jg)%nblks_c
+                !  DO jc = 
+                !    glb_idx_1d = p_patch(jg)%cells%decomp_info%glb_index(idx_1d(jc,jb))
+                !    oas_rcv_field(jc,jb) = oas_rcv_field(oas_i,glb_idx_1d)
+                !  END DO
+                !END DO
+                
+                WRITE(*,*) "Slavko: icon transforming received vars"
+                rl_start = grf_bdywidth_c+1
+                rl_end   = min_rlcell_int
+                i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
+                i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
+                DO jb = i_startblk, i_endblk
+                  CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx,&
+                    i_endidx, rl_start, rl_end)
+                  DO jc = i_startidx, i_endidx
+                    ii = idx_1d(jc,jb)
+                    oas_rcv_field_icon(jc,jb,oas_i) = oas_rcv_field(ii,oas_i)
+                  END DO
+                END DO
+                WRITE(*,*) "Slavko: icon transformed received vars"
+
+                ! check:
+                WRITE(*,*) "Slavko: for ", oas_i, " got min, max=", &
+                  MINVAL(oas_rcv_field(:,oas_i)), MAXVAL(oas_rcv_field(:,oas_i))
+              END DO
+              
+#endif
       !
       ! Update model date (for local patch!) - Note that for the
       ! top-level patch, this is omitted, since the update has already
@@ -1872,50 +1922,6 @@ MODULE mo_nh_stepping
           END IF
 
           IF (atm_phy_nwp_config(jg)%is_les_phy) THEN
-
-#ifdef COUP_OAS_ICON
-              sim_time_oas = FLOOR(sim_time * 10.)
-              DO oas_i = 1, SIZE(oas_rcv_meta)
-                WRITE(oas_message,*) 'Receiving  ', oas_rcv_meta(oas_i)%clpname
-                CALL message(routine, oas_message)
-                CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(:,oas_i), oas_error)
-                WRITE(oas_message,*) 'Received  ', oas_rcv_meta(oas_i)%clpname, 'at ', sim_time_oas-1
-                CALL message(routine, oas_message)
-                IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN
-                  WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
-                  CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
-                END IF
-
-                ! transform thru oasis recieved variable into something icon can use
-                !
-                !DO jb = 1, p_patch(jg)%nblks_c
-                !  DO jc = 
-                !    glb_idx_1d = p_patch(jg)%cells%decomp_info%glb_index(idx_1d(jc,jb))
-                !    oas_rcv_field(jc,jb) = oas_rcv_field(oas_i,glb_idx_1d)
-                !  END DO
-                !END DO
-                
-                WRITE(*,*) "Slavko: icon transforming received vars"
-                rl_start = grf_bdywidth_c+1
-                rl_end   = min_rlcell_int
-                i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
-                i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
-                DO jb = i_startblk, i_endblk
-                  CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx,&
-                    i_endidx, rl_start, rl_end)
-                  DO jc = i_startidx, i_endidx
-                    ii = idx_1d(jc,jb)
-                    oas_rcv_field_icon(jc,jb,oas_i) = oas_rcv_field(ii,oas_i)
-                  END DO
-                END DO
-                WRITE(*,*) "Slavko: icon transformed received vars"
-
-                ! check:
-                WRITE(*,*) "Slavko: for ", oas_i, " got min, max=", &
-                  MINVAL(oas_rcv_field(:,oas_i)), MAXVAL(oas_rcv_field(:,oas_i))
-              END DO
-              
-#endif
 
             ! les physics
             CALL les_phy_interface(lcall_phy(jg,:), .FALSE.,         & !in

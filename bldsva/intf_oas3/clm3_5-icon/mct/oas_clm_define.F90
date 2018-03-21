@@ -48,7 +48,7 @@ USE oas_clm_vardef
 USE domainMod   , ONLY : latlon_type, latlon_check, alatlon,amask , adomain
 USE spmdMod     , ONLY : masterproc , mpicom, iam
 USE surfrdMod   , ONLY : surfrd_get_latlon
-USE decompMod   , only : get_proc_global, get_proc_bounds, adecomp
+USE decompMod    , only : get_proc_global, get_proc_bounds, adecomp
 !==============================================================================
 
 IMPLICIT NONE
@@ -101,91 +101,112 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
 !- Begin Subroutine oas_clm_define 
 !------------------------------------------------------------------------------
 
-! Define coupling scheme between ICON and CLM
+! Define coupling scheme between COSMO and CLM
 #ifdef CPL_SCHEME_F
-  cpl_scheme = .True. !TRN Scheme
+ cpl_scheme = .True. !TRN Scheme
 #else
-  cpl_scheme = .False. !INV Scheme
+ cpl_scheme = .False. !INV Scheme
 #endif
 
-  WRITE(*,*) 'CLM defining partition'
 
-  ALLOCATE(igparal(200))
-  ani = adomain%ni
-  anj = adomain%nj
+!FG  The following piece of code querries the number, length and offset of 
+!    contiguous parts in the lat/lon representation. This is done in a 
+!    brutforce way by travercing through begg-endg and determining if
+!    predecessor in begg-endg is also predecessor in lat/lon.
+!    I couldn't find a CLM intrinsic way to get this information, if there is
+!    one, please let me know. 
+!    At the moment the orange partition of oasis supports only 200 parts,
+!    luckily CLM seem to use always 20 parts regardless of the domainsize.
 
-  igparal(1) = 3
-  total_part_len=0
-  c=0
-  leng=0
-  last_owner=-1
-  do aj = 1,anj
-    do ai = 1,ani
-      an = (aj-1)*ani + ai
-      owner = adecomp%glo2owner(an)
-      if(owner==iam ) then
-        if(last_owner/=iam) then       !start of new partiontion
-           if(last_owner/=-1) leng=0   !no leading masked cells have to be added to the first partition
-           c=c+1
-           if(last_owner==-1) then
-             igparal(c*2+1) = 0 
-           else
+WRITE(*,*) 'CLM defining partition'
+
+ALLOCATE(igparal(200))
+
+igparal(1) = 3  !orange partition
+
+ani = adomain%ni
+anj = adomain%nj
+
+total_part_len=0
+c=0
+leng=0
+last_owner=-1
+do aj = 1,anj
+  do ai = 1,ani
+    an = (aj-1)*ani + ai
+    owner = adecomp%glo2owner(an)
+    if(owner==iam ) then
+       if(last_owner/=iam) then       !start of new partiontion
+          if(last_owner/=-1) leng=0   !no leading masked cells have to be added to the first partition
+          c=c+1
+          if(last_owner==-1) then
+             igparal(c*2+1) = 0
+          else
              igparal(c*2+1) = an-1
-           endif
-        endif
-        leng=leng+1
-      else  
-        if(owner==-1) then
-          if(last_owner== iam .or. last_owner== -1) leng=leng+1 !adding also masked cells to the partition
-        else                                                     !other procs partiton start
-          if(last_owner==iam) then                               ! if this cell ends ongoing partition, length is written out
-            igparal(c*2+2) = leng    
-            total_part_len=total_part_len+leng
           endif
-        endif 
-     endif    
-     if(owner/=-1) last_owner=owner
-   enddo
- enddo
- if(last_owner==iam)then   !write length if this proc had last partition
-   igparal(c*2+2) = leng  
-   total_part_len=total_part_len+leng
- endif
+       endif
+       leng=leng+1
+    else  
+       if(owner==-1) then
+          if(last_owner== iam .or. last_owner== -1) leng=leng+1 !adding also masked cells to the partition
+       else                                                     !other procs partiton start
+          if(last_owner==iam) then                               ! if this cell ends ongoing partition, length is written out
+             igparal(c*2+2) = leng            
+             total_part_len=total_part_len+leng
+          endif
+       endif 
+    endif    
+    if(owner/=-1) last_owner=owner
+  enddo
+enddo
+if(last_owner==iam)then   !write length if this proc had last partition
+  igparal(c*2+2) = leng  
+  total_part_len=total_part_len+leng
+endif
+igparal(2)=c
 
-  igparal(2)=c
-
-  CALL MPI_Barrier(kl_comm, nerror)
-
-  CALL prism_def_partition_proto(igrid, igparal, nerror)
-  IF (nerror /= 0) &
-    CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_partition')
-
-  WRITE(*,*) 'CLM defined partition'
+CALL MPI_Barrier(kl_comm, nerror)
 
   ! -----------------------------------------------------------------
   ! ... Define the partition 
   ! -----------------------------------------------------------------
      
         
+  CALL prism_def_partition_proto( igrid, igparal, nerror )
+  IF( nerror /= PRISM_Success )   CALL prism_abort_proto (ncomp_id, 'oas_clm_define',   &
+            &                                                        'Failure in prism_def_partition' )
+
+
+
+
   ! -----------------------------------------------------------------
   ! ... Variable definition
   ! ----------------------------------------------------------------
 
-  WRITE(*,*) 'CLM define variables'
-
   ! Default values
   ssnd(1:nmaxfld)%laction=.FALSE.  ; srcv(1:nmaxfld)%laction=.FALSE.
 
-  !CMS: from 1 to 100 are the sending fields from CLM to ICON
-  ssnd(1)%clname='CLMINFRA'
-  ssnd(2)%clname='CLMALBED'
-  ssnd(3)%clname='CLMALBEI'
-  ssnd(4)%clname='CLM_TAUX'
-  ssnd(5)%clname='CLM_TAUY'
-  ssnd(6)%clname='CLMSHFLX'
-  ssnd(7)%clname='CLMLHFLX'
-  ssnd(8)%clname='CLMEMISS'
-  ssnd(9)%clname='CLMTGRND'
+  ssnd(1)%clname='CLM_TAUX'      !  zonal wind stress
+  ssnd(2)%clname='CLM_TAUY'      !  meridional wind stress
+  ssnd(3)%clname='CLMLATEN'      !  total latent heat flux (W/m**2)
+  ssnd(4)%clname='CLMSENSI'      !  total sensible heat flux (W/m**2)
+  ssnd(5)%clname='CLMINFRA'      ! emitted infrared (longwave) radiation (W/m**2)
+  ssnd(6)%clname='CLMALBED'      ! direct albedo
+  ssnd(7)%clname='CLMALBEI'      ! diffuse albedo
+!MU (17.01.13)
+  ssnd(8)%clname='CLMCO2FL'      ! net CO2 flux (now only photosynthesis rate) (umol CO2 m-2s-1)
+!MU (17.01.13)
+  ssnd(9)%clname='CLM_RAM1'      ! Aerodynamic resistance (s/m)   !CPS
+  ssnd(10)%clname='CLM_RAH1'      ! Aerodynamic resistance (s/m)   !CPS
+  ssnd(11)%clname='CLM_RAW1'      ! Aerodynamic resistance (s/m)   !CPS
+  ssnd(12)%clname='CLM_TSF1'      ! Surface Temperature (K)   !CPS
+  ssnd(13)%clname='CLM_QSF1'      ! Surface Humidity (kg/kg)   !CPS
+!MU (12.04.13)
+  ssnd(14)%clname='CLMPHOTO'      ! photosynthesis rate (umol CO2 m-2s-1)
+  ssnd(15)%clname='CLMPLRES'      ! plant respiration (umol CO2 m-2s-1)
+!MU (12.04.13)
+  ssnd(16)%clname='CLMEMISS'
+  ssnd(17)%clname='CLMTGRND'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
@@ -265,9 +286,39 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   srcv(120)%level= 10  
 
   srcv(111:120)%ref='PSI'
+ 
+! Send/Receive Variable Selection
+#ifdef COUP_OAS_COS
+
+IF (cpl_scheme) THEN         !CPS
+  ssnd(5:7)%laction=.TRUE.     !CPS
+  ssnd(8)%laction=.TRUE.
+  ssnd(14)%laction=.FALSE.
+  ssnd(15)%laction=.FALSE.
+  ssnd(9:13)%laction=.TRUE.    !CPS
+ELSE
+  ssnd(1:7)%laction=.TRUE.
+  ssnd(8)%laction=.TRUE.
+  ssnd(14)%laction=.FALSE.
+  ssnd(15)%laction=.FALSE.
+ENDIF 
+
+  srcv(1:9)%laction=.TRUE.
+  srcv(15:16)%laction=.TRUE. ! Coupling only total convective and gridscale precipitations 
+!MU (17.01.13)
+  srcv(17)%laction=.TRUE.    ! always true
+!  IF (srcv(17)%laction==.FALSE.) THEN
+!    PRINT*, 'ERROR (oas_clm_define): srcv(17)%laction has to be .TRUE.'
+!    PRINT*, '----- If CO2 is not initialized in COSMO a dummy is sent to CLM and CO2 content from CLM is used.'
+!  ENDIF
+!MU (17.01.13)
+#endif
 
 #ifdef COUP_OAS_ICON
-  ssnd(1:9)%laction = .TRUE.
+  ssnd(1:7)%laction=.TRUE.
+  ssnd(16:17)%laction=.TRUE.
+  srcv(1:9)%laction=.TRUE.
+  srcv(15:16)%laction=.TRUE.
 #endif
 
 #ifdef COUP_OAS_PFL
@@ -278,37 +329,19 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   srcv(111:120)%laction=.TRUE.
 #endif
 
-  srcv(1:9)%laction = .TRUE.
-  srcv(15:16)%laction = .TRUE.
-
   var_nodims(1) = 1           ! Dimension number of exchanged arrays
   var_nodims(2) = 1           ! number of bundles (always 1 for OASIS3)
 
   ipshape(1) = 1             ! minimum index for each dimension of the coupling field array
-  ipshape(2) = igparal(3)    ! maximum index for each dimension of the coupling field array
+  ipshape(2) = ndlon*ndlat   ! maximum index for each dimension of the coupling field array
 
+
+
+
+  ! ... Announce send variables. 
+  !
+!      ksnd=0                           !CPS
   DO ji = 1, nmaxfld
-      IF ( ssnd(ji)%laction ) THEN
-        CALL prism_def_var_proto(ssnd(ji)%nid, ssnd(ji)%clname, igrid, &
-          var_nodims, OASIS_Out, ipshape, OASIS_Real, nerror)
-        IF (nerror /= 0) THEN
-          CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_var') 
-        END IF
-      END IF
-    END DO
-    DO ji = 1, nmaxfld
-      IF ( srcv(ji)%laction ) THEN
-        CALL prism_def_var_proto(srcv(ji)%nid, srcv(ji)%clname, igrid, &
-          var_nodims, OASIS_In, ipshape, OASIS_Real, nerror)
-        IF (nerror /= 0) THEN
-          CALL prism_abort_proto(ncomp_id, 'oas_clm_define', 'Failure in prism_def_var')
-        END IF
-      END IF
-    END DO
-
-
-  ! ... Announce send variables (ParFlow)
-  DO ji = 100, nmaxfld
     IF ( ssnd(ji)%laction ) THEN 
             
       CALL prism_def_var_proto(ssnd(ji)%nid, ssnd(ji)%clname, igrid, &
@@ -318,8 +351,10 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
  !           ksnd = ksnd + 1             !CPS now defined in oas_clm_vardef
     ENDIF
   END DO
-  ! ... Announce received variables (ParFlow)
-  DO ji = 100, nmaxfld
+  !
+  ! ... Announce received variables. 
+  !
+  DO ji = 1, nmaxfld
     IF ( srcv(ji)%laction ) THEN 
 
     CALL prism_def_var_proto(srcv(ji)%nid, srcv(ji)%clname, igrid, &
@@ -333,9 +368,6 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
   !------------------------------------------------------------------
   ! End of definition phase
   !------------------------------------------------------------------
-
-  WRITE(*,*) 'CLM defined variables'
-
 
 DEALLOCATE( igparal)
 
