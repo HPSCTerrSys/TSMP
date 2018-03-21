@@ -79,10 +79,20 @@ route "${cblue}>> finalizeSetup${cnormal}"
 
   comment "  copy initial data for icon"
     ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/init_icon_nrw_150km_R1247m_2013042400.nc $rundir/ >> $log_file 2>> $err_file
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/init_icon_nrw_150km_R1247m_2013042400.nc $rundir/ifs2icon_R2B11_DOM01.nc >> $log_file 2>> $err_file
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/init_icon_nrw_150km_R1247m_2013042400.nc $rundir/dwdFG_R2B11_DOM01.nc >> $log_file 2>> $err_file
+  check
+
+  comment "  copy extpart for icon"
+    ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/extpar_icon_nrw_150km_R1247m.nc $rundir/ >> $log_file 2>> $err_file
   check
 
   comment "  copy remap data for icon"
     ln -s /work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247/rmp_* $rundir/ >> $log_file 2>> $err_file
+  check
+
+  comment "  copy 2mom lookup table"
+    ln -s $icondir/data/dmin_wetgrowth_lookup.dat $rundir >> $log_file 2>> $err_file
   check
 
   if [[ $withPFL == "true" ]] then
