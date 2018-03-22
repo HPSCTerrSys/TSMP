@@ -7,7 +7,7 @@
 /
 &grid_nml
  ! cell_type is not used = 3            ! triangular cells
- dynamics_grid_filename = "torus_triangles_192x192_50m.nc",
+ dynamics_grid_filename = "torus_grid_x192_y192_e70m.nc"
  corio_lat = 0.0
 / 
 &run_nml
