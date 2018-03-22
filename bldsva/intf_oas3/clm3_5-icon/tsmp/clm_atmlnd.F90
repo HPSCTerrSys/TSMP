@@ -663,6 +663,8 @@ end subroutine clm_mapa2l
   nflds = nflds + ndst
 #endif
 
+  nflds = nflds + 2
+
 
   allocate(asrc(begg_s:endg_s,nflds))
   allocate(adst(begg_d:endg_d,nflds))
