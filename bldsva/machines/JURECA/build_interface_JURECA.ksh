@@ -70,6 +70,8 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
 
+export PSP_RENDEZVOUS_OPENIB=-1
+
 cd $rundir
 source $rundir/loadenvs
 date
