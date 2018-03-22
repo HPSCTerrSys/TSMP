@@ -59,7 +59,11 @@ LOGICAL                                           :: llaction
 !set buffer to 0 before calling oasis
  bufz = 0. 
 
+#ifdef COUP_OAS_ICON
+ CALL prism_get_proto(trcv(kid)%vid, kstep*10, bufz, kinfo )
+#else
  CALL prism_get_proto(trcv(kid)%vid, kstep, bufz, kinfo )
+#endif
  IF ( ierror .NE. PRISM_Ok .AND. ierror .LT. PRISM_Recvd ) &
  CALL prism_abort_proto(comp_id, 'oas_pfl_rcv', 'Failure in prism_get_proto')
 

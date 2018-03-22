@@ -57,11 +57,19 @@ REAL(KIND=8), DIMENSION(nx,ny), INTENT(IN)        :: kdata
 ! prepare array (only valid shape, without halos) for OASIS
  bufz = kdata
  IF (kindex .eq. 0) THEN
+#ifdef COUP_OAS_ICON
+   CALL prism_put_proto(wsnd(kid)%vid, kstep*10, bufz, kinfo )        !saturation
+#else
    CALL prism_put_proto(wsnd(kid)%vid, kstep, bufz, kinfo )        !saturation
+#endif
    IF ( ierror .NE. PRISM_Ok .AND. ierror .LT. PRISM_Sent ) &
    CALL prism_abort_proto(comp_id, 'oas_pfl_snd', 'Failure in prism_put_proto')
  ELSEIF (kindex .eq. 1) THEN
+#ifdef COUP_OAS_ICON
+   CALL prism_put_proto(psnd(kid)%vid, kstep*10, bufz, kinfo )        !pressure 
+#else
    CALL prism_put_proto(psnd(kid)%vid, kstep, bufz, kinfo )        !pressure 
+#endif
    IF ( ierror .NE. PRISM_Ok .AND. ierror .LT. PRISM_Sent ) &
    CALL prism_abort_proto(comp_id, 'oas_pfl_snd', 'Failure in prism_put_proto')
  ENDIF
