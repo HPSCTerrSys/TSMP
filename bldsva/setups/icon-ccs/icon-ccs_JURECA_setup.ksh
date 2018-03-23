@@ -7,15 +7,15 @@ initSetup(){
 
   defaultNLICON="$rootdir/bldsva/setups/icon-ccs/icon_master.namelist $rootdir/bldsva/setups/icon-ccs/NAMELIST_ccs"
   defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
-  #defaultNLPFL=$rootdir/bldsva/setups/ideal300150/coup_oas.tcl 
+  defaultNLPFL=$rootdir/bldsva/setups/ideal300150/coup_oas.tcl 
 
 
   defaultNppn=24
   defaultICONProc=44
   defaultCLMProcX=2
   defaultCLMProcY=2
-  #defaultPFLProcX=4
-  #defaultPFLProcY=4
+  defaultPFLProcX=4
+  defaultPFLProcY=4
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
@@ -23,7 +23,7 @@ initSetup(){
 
   defaultDumpCLM=1
   defaultDumpICON=1
-  #defaultDumpPFL=1
+  defaultDumpPFL=1
 
   gx_icon=73728
   gx_clm=300
@@ -31,11 +31,11 @@ initSetup(){
   dt_clm=1
   res="0300x0300"
 
-  #gx_pfl=300
-  #gy_pfl=300
-  #dt_pfl=0.25
-  #pflrunname="rurlaf"
-  #base_pfl=0.0025
+  gx_pfl=300
+  gy_pfl=300
+  dt_pfl=0.25
+  pflrunname="rurlaf"
+  base_pfl=0.0025
 
   cplfreq1=1
   cplfreq2=1
