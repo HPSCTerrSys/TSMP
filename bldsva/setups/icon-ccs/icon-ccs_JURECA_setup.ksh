@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal300150/oasis3"
-  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal300150/clm"
-  defaultFDPFL=""
+  defaultFDOAS="/homea/slts/slts23/tsmp/setups/icon-ccs/oasis"
+  defaultFDCLM="/homea/slts/slts23/tsmp/setups/icon-ccs/clm"
+  defaultFDPFL="/homea/slts/slts23/tsmp/setups/icon-ccs/pfl"
 
   defaultNLICON="$rootdir/bldsva/setups/icon-ccs/icon_master.namelist $rootdir/bldsva/setups/icon-ccs/NAMELIST_ccs"
   defaultNLCLM=$rootdir/bldsva/setups/icon-ccs/lnd.stdin 
@@ -11,7 +11,7 @@ initSetup(){
 
 
   defaultNppn=24
-  defaultICONProc=44
+  defaultICONProc=52
   defaultCLMProcX=2
   defaultCLMProcY=2
   defaultPFLProcX=4
@@ -21,19 +21,19 @@ initSetup(){
   defaultInitDate="2008-05-08 00"
   defaultRunhours=0
 
-  defaultDumpCLM=1
   defaultDumpICON=1
+  defaultDumpCLM=1
   defaultDumpPFL=1
 
   gx_icon=73728
 
-  gx_clm=300
-  gy_clm=300
+  gx_clm=192
+  gy_clm=192
   dt_clm=1
-  res="0300x0300"
+  res="0192x0192"
 
-  gx_pfl=300
-  gy_pfl=300
+  gx_pfl=192
+  gy_pfl=192
   dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=0.0025
