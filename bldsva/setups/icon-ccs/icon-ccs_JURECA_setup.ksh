@@ -33,7 +33,7 @@ initSetup(){
 
   gx_pfl=300
   gy_pfl=300
-  dt_pfl=0.25
+  dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=0.0025
 
