@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDOAS="/homea/slts/slts23/tsmp/setups/icon-ccs/oasis"
-  defaultFDCLM="/homea/slts/slts23/tsmp/setups/icon-ccs/clm"
-  defaultFDPFL="/homea/slts/slts23/tsmp/setups/icon-ccs/pfl"
+  defaultFDOAS="/homea/slts/slts23/data/tsmp/setups/icon-ccs/oasis"
+  defaultFDCLM="/homea/slts/slts23/data/tsmp/setups/icon-ccs/clm"
+  defaultFDPFL="/homea/slts/slts23/data/tsmp/setups/icon-ccs/pfl"
 
   defaultNLICON="$rootdir/bldsva/setups/icon-ccs/icon_master.namelist $rootdir/bldsva/setups/icon-ccs/NAMELIST_ccs"
   defaultNLCLM=$rootdir/bldsva/setups/icon-ccs/lnd.stdin 
@@ -64,16 +64,17 @@ route "${cblue}>> finalizeSetup${cnormal}"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check
     if [[ $withOASMCT == "true" ]] then
-      for x in $rundir/*BILINEA* ;do 
-        comment "   rename oasis3 remapping files" 
-          mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
-        check 
-      done
+      comment "   rename oasis3 remapping files (SBr: skip for now!)"
+      #for x in $rundir/*BILINEA* ;do 
+      #  comment "   rename oasis3 remapping files" 
+      #    mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
+      #  check 
+      #done
     fi  
   fi  
 
-  comment "  copy initial, bnd data for icon"
-    ln -s /homea/slts/slts23/data/setups/icon-ccs/* $rundir/ >> $log_file 2>> $err_file
+  comment "  copy grid for icon"
+    ln -s /homea/slts/slts23/data/tsmp/setups/icon-ccs/icon/torus_grid_x192_y192_e70m.nc $rundir/ >> $log_file 2>> $err_file
   check
 
 route "${cblue}<< finalizeSetup${cnormal}"
