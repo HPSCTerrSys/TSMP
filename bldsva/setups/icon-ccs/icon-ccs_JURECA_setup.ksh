@@ -19,7 +19,7 @@ initSetup(){
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRunhours=0
+  defaultRunhours=2
 
   defaultDumpICON=1
   defaultDumpCLM=1
@@ -38,8 +38,8 @@ initSetup(){
   pflrunname="rurlaf"
   base_pfl=0.0025
 
-  cplfreq1=10
-  cplfreq2=10
+  cplfreq1=450
+  cplfreq2=450
 
   if [[ $withPFL == "false" && $withICON == "true" ]]; then
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm

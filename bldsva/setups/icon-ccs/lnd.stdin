@@ -6,8 +6,8 @@ cat << EOF > __rundir__/lnd.stdin
  caseid         = 'clmoas'
  ctitle         = 'clmoas'
  nsrest         =  0
- nelapse        =  2 ! __runstep_clm_bldsva__ 
- dtime          =  1 ! __dt_clm_bldsva__
+ nelapse        =  160 ! __runstep_clm_bldsva__ 
+ dtime          =  45. ! __dt_clm_bldsva__
  start_ymd      =  __yyyymmdd_bldsva__
  start_tod      =  __seconds_clm_bldsva__ 
 
