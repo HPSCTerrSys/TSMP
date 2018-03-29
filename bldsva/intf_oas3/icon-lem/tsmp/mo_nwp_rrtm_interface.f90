@@ -512,8 +512,8 @@ CONTAINS
     END IF
 
 #ifdef COUP_OAS_ICON
-      emissivity(:,:) = oas_rcv_field_icon(8,:,:)
-      tgrnd(:,:) = oas_rcv_field_icon(9,:,:)
+      emissivity(:,:) = oas_rcv_field_icon(:,:,8)
+      tgrnd(:,:) = oas_rcv_field_icon(:,:,9)
 #else
       emissivity = ext_data%atm%emis_rad(:,:)
       tgrnd = lnd_prog%t_g(:,:)

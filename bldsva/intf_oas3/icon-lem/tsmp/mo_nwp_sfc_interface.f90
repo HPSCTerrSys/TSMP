@@ -619,10 +619,10 @@ CONTAINS
         &  zlhfl_sfc     = lhfl_s_t              , & !OUT latent   heat flux surface interface     (W/m2) 
         &  zqhfl_sfc     = qhfl_s_t                ) !OUT moisture flux surface interface          (kg/m2/s) 
 #else
-        prm_diag%umfl_s_t(:,:,1) = oas_rcv_field_icon(4,:,:)
-        prm_diag%vmfl_s_t(:,:,1) = oas_rcv_field_icon(5,:,:)
-        prm_diag%shfl_s_t(:,:,1) = oas_rcv_field_icon(6,:,:) 
-        prm_diag%lhfl_s_t(:,:,1) = oas_rcv_field_icon(7,:,:)
+        prm_diag%umfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,4)
+        prm_diag%vmfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,5)
+        prm_diag%shfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,6) 
+        prm_diag%lhfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,7)
         !qhfl_s_t = 
 #endif
 

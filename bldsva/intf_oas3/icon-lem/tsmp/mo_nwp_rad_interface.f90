@@ -161,10 +161,10 @@ MODULE mo_nwp_rad_interface
       CALL get_indices_c(pt_patch, jb, i_startblk, i_endblk, i_startidx, &
         i_endidx, rl_start, rl_end)
       DO jc = i_startidx, i_endidx
-        prm_diag%albdif(jc,jb) = oas_rcv_field_icon(2,jc,jb)
+        prm_diag%albdif(jc,jb) = oas_rcv_field_icon(jc,jb,2)
         prm_diag%albvisdif(jc,jb) =  prm_diag%albdif(jc,jb)
         prm_diag%albnirdif(jc,jb) = prm_diag%albdif(jc,jb)
-        prm_diag%albnirdir(jc,jb) = oas_rcv_field_icon(3,jc,jb)
+        prm_diag%albnirdir(jc,jb) = oas_rcv_field_icon(jc,jb,3)
         prm_diag%albvisdir(jc,jb) = prm_diag%albnirdir(jc,jb)
       END DO
     END DO
