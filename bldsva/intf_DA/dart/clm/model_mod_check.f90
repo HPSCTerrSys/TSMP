@@ -18,8 +18,7 @@ use    utilities_mod, only : initialize_utilities, nc_check, &
 use     location_mod, only : location_type, set_location, write_location, get_dist, &
                              query_location, LocationDims, get_location, VERTISHEIGHT
 use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index, &
-                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE, &
-                             KIND_BRIGHTNESS_TEMPERATURE
+                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE
 use  assim_model_mod, only : open_restart_read, open_restart_write, close_restart, &
                              aread_state_restart, awrite_state_restart, &
                              netcdf_file_type, aoutput_diagnostics, &
@@ -72,8 +71,6 @@ type(netcdf_file_type) :: ncFileID
 type(location_type) :: loc
 
 real(r8) :: interp_val
-
-real(r8), dimension(6) :: metadata
 
 !----------------------------------------------------------------------
 ! This portion checks the geometry information.

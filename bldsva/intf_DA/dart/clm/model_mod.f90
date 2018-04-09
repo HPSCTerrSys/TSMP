@@ -57,29 +57,8 @@ use     obs_kind_mod, only : KIND_SOIL_TEMPERATURE,           &
                              KIND_ICE,                        &
                              KIND_SNOWCOVER_FRAC,             &
                              KIND_SNOW_THICKNESS,             &
-                             KIND_LEAF_CARBON,                &
-                             KIND_LIVE_STEM_CARBON,           &
-                             KIND_DEAD_STEM_CARBON,           &
-                             KIND_LEAF_NITROGEN,              &
-                             KIND_LEAF_AREA_INDEX,            &
-                             KIND_STEM_AREA_INDEX,            &
-                             KIND_NET_PRIMARY_PROD_FLUX,      &
-                             KIND_BIOMASS,                    &
                              KIND_WATER_TABLE_DEPTH,          &
                              KIND_GEOPOTENTIAL_HEIGHT,        &
-                             KIND_BRIGHTNESS_TEMPERATURE,     &
-                             KIND_RADIATION_VISIBLE_DOWN,     &
-                             KIND_RADIATION_VISIBLE_UP,       &
-                             KIND_RADIATION_NEAR_IR_DOWN,     &
-                             KIND_RADIATION_NEAR_IR_UP,       &
-                             KIND_VEGETATION_TEMPERATURE,     &
-                             KIND_FRAC_PHOTO_AVAIL_RADIATION, &
-                             KIND_FPAR_SUNLIT_DIRECT,         &
-                             KIND_FPAR_SUNLIT_DIFFUSE,        &
-                             KIND_FPAR_SHADED_DIRECT,         &
-                             KIND_FPAR_SHADED_DIFFUSE,        &
-                             KIND_FPAR_SHADED_DIRECT,         &
-                             KIND_FPAR_SHADED_DIFFUSE,        &
                              paramname_length,                &
                              get_raw_obs_kind_index,          &
                              get_raw_obs_kind_name
@@ -135,8 +114,7 @@ character(len=128), parameter :: revdate  = "$Date: 2015-11-06 15:20:29 -0700 (F
 character(len=256) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
-!
-type(time_type)                  :: start_date   !CPS needed 
+type(time_type) :: start_date   ! experiment start date - needed by parflow
 
 ! Storage for a random sequence for perturbing a single initial state
 
@@ -188,17 +166,17 @@ real(r8)           :: model_perturbation_amplitude = 0.2
 logical            :: output_state_vector = .true.
 integer            :: debug = 0   ! turn up for more and more debug messages
 character(len=32)  :: calendar = 'Gregorian'
+character(len=256) :: clm_file_s = 'clm_restart_s.nc'
 character(len=256) :: clm_restart_filename = 'clm_restart.nc'
 character(len=256) :: clm_history_filename = 'clm_history.nc'
-character(len=256) :: clm_file_s = 'clm_restart_s.nc'
 character(len=256) :: clm_vector_history_filename = 'clm_vector_history.nc'
 
 character(len=obstypelength) :: clm_variables(max_state_variables*num_state_table_columns) = ' '
 
 namelist /model_nml/            &
+   clm_file_s,                  &
    clm_restart_filename,        &
    clm_history_filename,        &
-   clm_file_s,                  &
    clm_vector_history_filename, &
    output_state_vector,         &
    assimilation_period_days,    &  ! for now, this is the timestep
@@ -342,13 +320,6 @@ integer,  allocatable, dimension(:) :: latjxy       ! latitude  index of parent 
 real(r8), allocatable, dimension(:) :: levels       ! depth
 real(r8), allocatable, dimension(:) :: landarea     ! land area ... 'support' ... 'weight'
 
-!------------------------------------------------------------------------------
-! set this to true if you want to print out the current time
-! after each N observations are processed, for benchmarking.
-
-logical :: print_timestamps = .false.
-integer :: print_every_Nth  = 10000
-
 !------------------------------------------------------------------
 ! module storage
 !------------------------------------------------------------------
@@ -378,11 +349,10 @@ END INTERFACE
 
 contains
 
-!==================================================================
-! All the REQUIRED interfaces come first - just by convention.
-!==================================================================
 
 !------------------------------------------------------------------
+! This routine writes the experiment start times to a file that is
+! used by ParFlow.
 
 subroutine write_state_times(iunit, statetime)
 
@@ -418,13 +388,13 @@ write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth,
 return
 
 end subroutine write_state_times
-!------------------------------------------------------------------
 
+
+!------------------------------------------------------------------
+!> Returns the size of the model as an integer.
+!> Required for all applications.
 
 function get_model_size()
-!------------------------------------------------------------------
-! Returns the size of the model as an integer.
-! Required for all applications.
 
 integer :: get_model_size
 
@@ -435,11 +405,11 @@ get_model_size = model_size
 end function get_model_size
 
 
+!------------------------------------------------------------------
+!> CLM is never advanced by DART.
+!> If we get here, something is wrong and we should stop right away.
 
 subroutine adv_1step(x, time)
-!------------------------------------------------------------------
-! CLM is never advanced by DART.
-! If we get here, something is wrong and we should stop right away.
 
 real(r8),        intent(inout) :: x(:)
 type(time_type), intent(in)    :: time
@@ -546,7 +516,6 @@ integer :: ncid, TimeDimID, VarID, dimlen, varsize
 integer :: iunit, io, ivar
 integer :: i, j, xi, xj, index1, indexN, indx
 integer :: ss, dd
-integer :: ncid_s   !CPS
 
 integer  :: spvalINT
 real(r4) :: spvalR4
@@ -586,21 +555,12 @@ call error_handler(E_MSG,'static_init_model',string1)
 
 !---------------------------------------------------------------
 ! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
-!CPS start_date = get_state_time(clm_file_s)
+! parflow needs the very first start time of the whole assimilation experiment.
+! this comes from the timemgr_rst_curr_ymd,timemgr_rst_curr_tod  variables
+! from the first set of output. That filename is specified in the dart
+! namelist by variable 'clm_file_s'
 
-if ( .not. file_exist(clm_file_s) ) then
-  write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
-  call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
-endif
-
-call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
-            'restart_file_to_sv','open '//trim(clm_file_s))
-
-start_date = get_start_time_ncid(ncid_s)
-call nc_check(nf90_close(ncid_s),'restart_file_to_sv','close'//trim(clm_file_s))
-
-!---------------------------------------------------------------
-
+start_date = get_start_time()
 
 !---------------------------------------------------------------
 ! The CLM history file (h0?) has the 'superset' of information.
@@ -2505,8 +2465,8 @@ integer,             intent(out) :: istatus
 
 real(r8), dimension(LocationDims) :: loc_array
 real(r8) :: llon, llat, lheight
-real(r8) :: interp_val_2, interp_val_3
-integer  :: istatus_2, istatus_3
+real(r8) :: interp_val_2
+integer  :: istatus_2
 character(len=paramname_length) :: kind_string
 
 if ( .not. module_initialized ) call static_init_model
@@ -2574,29 +2534,9 @@ select case( obs_kind )
 
       call get_grid_vertval(x, location, obs_kind, interp_val, istatus)
 
-   case ( KIND_SNOWCOVER_FRAC, &
-          KIND_LEAF_AREA_INDEX,       KIND_STEM_AREA_INDEX,        &
-          KIND_LEAF_CARBON,           KIND_LEAF_NITROGEN,          &
-          KIND_WATER_TABLE_DEPTH,     KIND_VEGETATION_TEMPERATURE, &
-          KIND_FPAR_SUNLIT_DIRECT,    KIND_FPAR_SUNLIT_DIFFUSE,    &
-          KIND_FPAR_SHADED_DIRECT,    KIND_FPAR_SHADED_DIFFUSE,    &
-          KIND_RADIATION_VISIBLE_UP,  KIND_RADIATION_VISIBLE_DOWN, &
-          KIND_RADIATION_NEAR_IR_UP,  KIND_RADIATION_NEAR_IR_DOWN, &
-          KIND_NET_PRIMARY_PROD_FLUX, KIND_FRAC_PHOTO_AVAIL_RADIATION )
+   case ( KIND_SNOWCOVER_FRAC, KIND_WATER_TABLE_DEPTH )
 
       call compute_gridcell_value(x, location, obs_kind, interp_val, istatus)
-
-   case ( KIND_BIOMASS )
-
-      call compute_gridcell_value(x, location, KIND_LEAF_CARBON     , interp_val,   istatus)
-      call compute_gridcell_value(x, location, KIND_LIVE_STEM_CARBON, interp_val_2, istatus_2)
-      call compute_gridcell_value(x, location, KIND_DEAD_STEM_CARBON, interp_val_3, istatus_3)
-      if ((istatus == 0) .and. (istatus_2 == 0) .and. (istatus_3 == 0 )) then
-         interp_val = interp_val + interp_val_2 + interp_val_3
-      else
-         interp_val = MISSING_R8
-         istatus = 6
-      endif
 
    case default
 
@@ -3725,11 +3665,90 @@ end subroutine get_sparse_geog
 
 
 !------------------------------------------------------------------
+!> GET START DATE FROM CLM
+!> This file has the time of the start of the experiment,
+!> not the time of the current state. parflow needs this, not CLM.
+!> The filename comes from the DART namelist ... 'clm_file_s'
 
+function get_start_time()
+
+type(time_type) :: get_start_time
+
+character(len=*), parameter :: routine = 'get_start_time'
+integer :: io, ncid, VarID
+integer :: rst_start_ymd, rst_start_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+if ( .not. file_exist(clm_file_s) ) then
+  write(string1,*) 'cannot open file "'//trim(clm_file_s)//'" for reading.'
+  call error_handler(E_ERR,routine,string1,source,revision,revdate)
+endif
+
+io = nf90_open(clm_file_s, NF90_NOWRITE, ncid)
+call nc_check(io,routine, 'open "'//trim(clm_file_s)//'"')
+
+io = nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd', VarID)
+call nc_check(io, routine, 'inq_varid timemgr_rst_ref_ymd "'//trim(clm_file_s)//'"')
+
+io = nf90_get_var(ncid, VarID, rst_start_ymd)
+call nc_check(io, routine, 'get_var rst_ref_ymd "'//trim(clm_file_s)//'"')
+
+io = nf90_inq_varid(ncid, 'timemgr_rst_ref_tod', VarID)
+call nc_check(io, routine, 'inq_varid timemgr_rst_ref_tod "'//trim(clm_file_s)//'"')
+
+io = nf90_get_var(ncid, VarID, rst_start_tod)
+call nc_check(io, routine, 'get_var rst_ref_tod "'//trim(clm_file_s)//'"')
+
+call nc_check(nf90_close(ncid),routine,'close "'//trim(clm_file_s)//'"')
+
+year     = rst_start_ymd/10000
+leftover = rst_start_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_start_tod/3600
+leftover = rst_start_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_start_time = set_date(year, month, day, hour, minute, second)
+
+end function get_start_time
+
+
+!------------------------------------------------------------------
+!> Return the valid time of the model state given a filename.
+
+function get_state_time_fname(filename)
+
+type(time_type) :: get_state_time_fname
+character(len=*), intent(in) :: filename
+
+integer         :: ncid
+
+if ( .not. module_initialized ) call static_init_model
+
+if ( .not. file_exist(filename) ) then
+   write(string1,*) 'cannot open file ', trim(filename),' for reading.'
+   call error_handler(E_ERR,'get_state_time_fname',string1,source,revision,revdate)
+endif
+
+call nc_check( nf90_open(trim(filename), NF90_NOWRITE, ncid), &
+                  'get_state_time_fname', 'open '//trim(filename))
+
+get_state_time_fname = get_state_time_ncid(ncid)
+
+call nc_check(nf90_close(ncid),'get_state_time_fname', 'close '//trim(filename))
+
+end function get_state_time_fname
+
+
+!------------------------------------------------------------------
+!> Return the valid time of the model state given a netCDF ID.
 
 function get_state_time_ncid( ncid )
-!------------------------------------------------------------------
-! The restart netcdf files have the time of the state.
 
 type(time_type) :: get_state_time_ncid
 integer, intent(in) :: ncid
@@ -3766,79 +3785,10 @@ end function get_state_time_ncid
 
 
 !------------------------------------------------------------------
-!------------------------------------------------------------------
-!>GET START DATE FROM CLM
-function get_start_time_ncid( ncid )
-!------------------------------------------------------------------
-! The restart netcdf files have the time of the start.
-
-type(time_type) :: get_start_time_ncid
-integer, intent(in) :: ncid
-
-integer :: VarID
-integer :: rst_start_ymd, rst_start_tod, leftover
-integer :: year, month, day, hour, minute, second
-
-if ( .not. module_initialized ) call static_init_model
-
-call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd',VarID),'get_start_time_ncid', &
-&  'inq_varid timemgr_rst_ref_ymd'//trim(clm_file_s))
-call nc_check(nf90_get_var(  ncid, VarID,rst_start_ymd),'get_start_time_ncid', &
-&            'get_var rst_ref_ymd'//trim(clm_file_s))
-
-call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_tod',VarID),'get_start_time_ncid', &
-&  'inq_varid timemgr_rst_ref_tod'//trim(clm_file_s))
-call nc_check(nf90_get_var(  ncid, VarID,rst_start_tod),'get_start_time_ncid',&
-&            'get_var rst_ref_tod'//trim(clm_file_s))
-
-year     = rst_start_ymd/10000
-leftover = rst_start_ymd - year*10000
-month    = leftover/100
-day      = leftover - month*100
-
-hour     = rst_start_tod/3600
-leftover = rst_start_tod - hour*3600
-minute   = leftover/60
-second   = leftover - minute*60
-
-get_start_time_ncid = set_date(year, month, day, hour, minute, second)
-
-end function get_start_time_ncid
-!------------------------------------------------------------------
-
-function get_state_time_fname(filename)
-!------------------------------------------------------------------
-! the static_init_model ensures that the clm namelists are read.
-!
-type(time_type) :: get_state_time_fname
-character(len=*), intent(in) :: filename
-
-integer         :: ncid
-
-if ( .not. module_initialized ) call static_init_model
-
-if ( .not. file_exist(filename) ) then
-   write(string1,*) 'cannot open file ', trim(filename),' for reading.'
-   call error_handler(E_ERR,'get_state_time_fname',string1,source,revision,revdate)
-endif
-
-call nc_check( nf90_open(trim(filename), NF90_NOWRITE, ncid), &
-                  'get_state_time_fname', 'open '//trim(filename))
-
-get_state_time_fname = get_state_time_ncid(ncid)
-
-call nc_check(nf90_close(ncid),'get_state_time_fname', 'close '//trim(filename))
-
-end function get_state_time_fname
-
-
-!------------------------------------------------------------------
-
+!> This defines the window used for assimilation.
+!> all observations +/- half this timestep are assimilated.
 
 function set_model_time_step()
-!------------------------------------------------------------------
-! This defines the window used for assimilation.
-! all observations +/- half this timestep are assimilated.
 
 type(time_type) :: set_model_time_step
 

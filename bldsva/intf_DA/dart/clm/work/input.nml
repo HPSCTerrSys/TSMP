@@ -172,37 +172,25 @@
 &model_nml
    clm_restart_filename         = 'clm_restart.nc'
    clm_history_filename         = 'clm_history.nc'
-   clm_file_s                   = 'clm_restart_s.nc'
    clm_vector_history_filename  = 'clm_vector_history.nc'
+   clm_file_s                   = 'clm_restart_s.nc'
    assimilation_period_days     = 0 
    assimilation_period_seconds  = 21400
-   model_perturbation_amplitude = 0.2
    output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
    clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
-                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_LIQ',  'KIND_SOIL_MOISTURE',          '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
-                    'tsai',        'KIND_STEM_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
-                    'tlai',        'KIND_LEAF_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'TV',          'KIND_VEGETATION_TEMPERATURE', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
                     'Q2M',         'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'history' , 'NO_COPY_BACK'
   /
-
-                    'FSRVDLN',     'KIND_RADIATION_VISIBLE_UP',   'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
-                    'FSRNDLN',     'KIND_RADIATION_NEAR_IR_UP',   'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
-                    'FSDSVDLN',    'KIND_RADIATION_VISIBLE_DOWN', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
-                    'FSDSNDLN',    'KIND_RADIATION_NEAR_IR_DOWN', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
-                    'PBOT',        'KIND_SURFACE_PRESSURE',       '0.0', 'NA' , 'vector'  , 'NO_COPY_BACK',
-                    'TBOT',        'KIND_TEMPERATURE',            'NA' , 'NA' , 'vector'  , 'NO_COPY_BACK'
 
 # See the clm model_mod.html for a larger listing of CLM variables and their associated DART KINDs.
 # Be aware that some variables exist in both restart and history files, so it makes a difference where
 # the variable comes from. Only those in the CESM restart file are relevant for future model advances.
 # The list is by no means complete.
-
 
 &clm_to_dart_nml
    clm_to_dart_output_file  = 'dart_prior'
@@ -216,7 +204,7 @@
 
 
 &location_nml
-   horiz_dist_only             = .true.
+   horiz_dist_only             = .false.
    vert_normalization_pressure = 100000.0
    vert_normalization_height   = 10000.0
    vert_normalization_level    = 20.0
@@ -228,11 +216,11 @@
 
 
 &utilities_nml
-   TERMLEVEL = 2
+   TERMLEVEL      = 2
    module_details = .false.
-   logfilename = 'dart_log.out'
-   nmlfilename = 'dart_log.nml'
-   write_nml   = 'file'
+   logfilename    = 'dart_log.out'
+   nmlfilename    = 'dart_log.nml'
+   write_nml      = 'file'
   /
 
 

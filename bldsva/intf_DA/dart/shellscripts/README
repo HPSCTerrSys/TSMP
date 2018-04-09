@@ -5,11 +5,14 @@
 # DART source codes sits separate to TerrSysMP source codes
 # Only interface codes for component model resides in both directories
 # Use of git_to_dart syncs these interface codes in TerrSysMP folder to DART folder
-Example
+# Example
 ./git_to_dart_cosmo.csh 
+
 # With any updates the codes need to be rebuilt
+
 cd $DART/models/terrsysmp/cosmo/work/
 ./quickbuild.csh
+
 # The current setup assumes that DART and TerrSySMP folder both sits in the $HOME directory
 # 
 #----------------------------------------------------------------------------------------------------
@@ -18,71 +21,76 @@ cd $DART/models/terrsysmp/cosmo/work/
 # DART source codes sits separate to TerrSysMP source codes
 #
 # Create spinup for subsurface, make sure to change the map_fn text to include all ensembles
+
 ./hydro_spinup.csh machine
-#
-# Use the spuunp initial conditions with perturbed model parameter to make an open loop experiment
+
+# Use the spunup initial conditions with perturbed model parameter to make an open loop experiment
 # with members > ensemble number for the final experiment
 #
 # Modify the ntasks and nodes according to member numbers, this also applies to dart_cosmo.ksh
 # Check map_fn
+
 sbatch terrsysmp-dart_jobchain.ksh 1 run
-#
-#
-# Analyze the ensemble evolution and select the memmber number for Perfect Model, specify it as map_fn
+
+# Analyze the ensemble evolution and select the member number for Perfect Model, specify it as map_fn
 # for perfect model run, also create a map_fn.txt, not containing this member for creating the ensemble
 # run for DA
 
 # Use the runmanager to submit a sequential job to generate the model trajectory
-# assuiming a perfect model
+# assuming a perfect model
 # It uses "perfect_tsmp_setup.csh" to setup the model runs
 # It also uses the restart files and perturbation based on map_fn specificed in the script
+
 sbatch jobchain_perfect.ksh 1 run
-#
+
 # Use the DART perfect model to harvest synthetic observations:
-# This will exctrat the observations in DART format for the specified regions in column_mod.f90
+# This will extract the observations in DART format for the specified regions in column_mod.f90
+
 ./assim.csh 0/1 clm/cosmo/parflow
-#
-# Use the runmnanger to submit a sequential job for ensemble run with DA
+
+# Use the runmanger to submit a sequential job for ensemble run with DA
 # For open loop run, set NRST = 0
 # It uses "tsmp_slm_run.bsh" to setup the model runs
 # so the user needs to modify experiment setups, ensemble numbers in the above script
 # And it also uses "dart_XXX" for DA with DART
+
 sbatch terrsysmp-dart_jobchain.ksh 1 run
-#
+
 # Archiving ensemble runs
 archive_hist.csh
 Usage: ./archive_hist.csh rundir ensemble_size
-#
+
 # Archiving single runs
 copy.csh
 Usage: ./copy.csh rundir
-#
+
 # Archive hydrological spinup
 Usage: ./archive_hydroSpin.csh $rundir $ensemble_size
-#
+
 # Archive restart files from hydrological spinup
 Usage: ./archive_restart_hydroSpinup.csh $ensemble_size
-#
+
 #----------------------------------------------------------------------------------------------------
-# Utility
+# Utilities
 #----------------------------------------------------------------------------------------------------
 # Update DART source code from the TerrSysMP folder
-git_to_dart_XXXX.csh
-Usage: ./git_to_dart_XXXX.csh
-#
+
+git_to_dart.csh
+Usage: ./git_to_dart.csh
+
 # Strip filenames
 filestrip.csh
 Usage: ./filestrip.csh
-#
+
 # Perturb model parameters
 perturb_model_param.csh
 Usage:./perturb_model_param.csh rundir ensemble_size map_fn
-#
+
 # Perturb model state
 perturb_model_state.csh
 Usage: ./perturb_model_state.csh rundir ensemble_size map_fn
-#
+
 # Extract time stamp
 timeFile.ksh
 Usage: ./timeFile.ksh rundir
-#
+

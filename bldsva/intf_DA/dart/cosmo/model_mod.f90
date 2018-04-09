@@ -40,14 +40,10 @@ use    utilities_mod, only : register_module, error_handler,                   &
 use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,       &
                              KIND_V_WIND_COMPONENT,       &
                              KIND_VERTICAL_VELOCITY,      &
-                             KIND_TEMPERATURE,            &
                              KIND_PRESSURE,               &
-                             KIND_PRESSURE_PERTURBATION,  &
                              KIND_SPECIFIC_HUMIDITY,      &
                              KIND_CLOUD_LIQUID_WATER,     &
                              KIND_CLOUD_ICE,              &
-                             KIND_SURFACE_ELEVATION,      &
-                             KIND_SURFACE_GEOPOTENTIAL,   &
                              paramname_length,            &
                              get_raw_obs_kind_index,      &
                              get_raw_obs_kind_name
