@@ -5,8 +5,8 @@ package require parflow
 namespace import Parflow::*
 #
 #For normal soils, need to fix near saturation CPS
-set VG_points 2000000
-set VG_pmin -23000.0
+#set VG_points 2000000
+#set VG_pmin -23000.0
 ##set VG_interpolation_method "Spline"
 #--------------------------------------------------------
 pfset FileVersion 4
@@ -200,8 +200,8 @@ pfset Phase.RelPerm.Type                 VanGenuchten
 pfset Phase.RelPerm.GeomNames            "domain"
 pfset Geom.domain.RelPerm.Alpha          2.69
 pfset Geom.domain.RelPerm.N              1.41
-pfset Geom.domain.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.domain.RelPerm.MinPressureHead   $VG_pmin
+#pfset Geom.domain.RelPerm.NumSamplePoints   $VG_points
+#pfset Geom.domain.RelPerm.MinPressureHead   $VG_pmin
 #---------------------------------------------------------
 # Saturation
 #---------------------------------------------------------

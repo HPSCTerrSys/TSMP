@@ -6,19 +6,18 @@ initSetup(){
   defaultFDOAS="/daten01/z4/database/TestCases/idealRTD/oasis3"
   defaultFDPFL="/daten01/z4/database/TestCases/idealRTD/parflow"
 
-
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
   defaultNppn=64
-  defaultCLMProcX=2
-  defaultCLMProcY=2
+  defaultCLMProcX=1
+  defaultCLMProcY=1
   defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2
-  defaultPFLProcY=2
+  defaultPFLProcY=1
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
@@ -27,6 +26,7 @@ initSetup(){
   defaultDumpCLM=3
   defaultDumpCOS=3
   defaultDumpPFL=3
+
 
   gx_clm=24
   gy_clm=14
@@ -43,7 +43,6 @@ initSetup(){
   dt_pfl=0.005
   pflrunname="rurlaf"
   base_pfl=0.0025
-  dump_pfl=3.0
 
   cplfreq1=18
   cplfreq2=18
@@ -94,13 +93,15 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-          cp $forcingdir_pfl/rur_ic_press.pfb $rundir >> $log_file 2>> $err_file
-        check
-          chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+        # Specific perturbed surface data and spinup pressure data are copied using DART scripts
+
+        #  cp $forcingdir_pfl/rur_ic_press.pfb $rundir >> $log_file 2>> $err_file
+        #check
+        #  chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+        chmod u+w $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
@@ -109,9 +110,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        comment "   create slope pfb with tclsh"
-          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
-        check
+        #comment "   create sloap pfb with tclsh"
+        #  tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+        #check
               
 
   fi 

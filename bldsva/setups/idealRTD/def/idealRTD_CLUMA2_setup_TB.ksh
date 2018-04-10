@@ -6,31 +6,31 @@ initSetup(){
   defaultFDOAS="/daten01/z4/database/TestCases/idealRTD/oasis3"
   defaultFDPFL="/daten01/z4/database/TestCases/idealRTD/parflow"
 
-
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
   defaultNppn=64
-  defaultCLMProcX=2
-  defaultCLMProcY=2
+  defaultCLMProcX=1
+  defaultCLMProcY=1
   defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2
-  defaultPFLProcY=2
+  defaultPFLProcY=1
 
-  defaultStartDate="2008-05-08 00"
-  defaultInitDate="2008-05-08 00"
-  defaultRunhours=24
+  defaultStartDate="2008-02-01 00"
+  defaultInitDate="2008-02-01 00"
+  defaultRunhours=2304
 
-  defaultDumpCLM=3
-  defaultDumpCOS=3
-  defaultDumpPFL=3
+  defaultDumpCLM=24
+  defaultDumpCOS=24
+  defaultDumpPFL=24
+
 
   gx_clm=24
   gy_clm=14
-  dt_clm=18
+  dt_clm=3600
   res="0014x0024"
 
   gx_cos=30
@@ -40,13 +40,12 @@ initSetup(){
 
   gx_pfl=24
   gy_pfl=14
-  dt_pfl=0.005
+  dt_pfl=1.0
   pflrunname="rurlaf"
-  base_pfl=0.0025
-  dump_pfl=3.0
+  base_pfl=0.001
 
   cplfreq1=18
-  cplfreq2=18
+  cplfreq2=3600
 
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
@@ -94,11 +93,10 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-          cp $forcingdir_pfl/rur_ic_press.pfb $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/rur_ic_press_gwt_3m.pfb $rundir/rur_ic_press.pfb >> $log_file 2>> $err_file
         check
           chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
@@ -109,7 +107,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        comment "   create slope pfb with tclsh"
+        comment "   create sloap pfb with tclsh"
           tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
         check
               

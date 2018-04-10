@@ -18,7 +18,7 @@ perfect_model_obs
 preprocess
 EndOfText
 
-set DEST = $HOME/DART/lanai/models/terrsysmp/parflow/
+set DEST = $HOME/DART/models/terrsysmp/parflow/
 set SOURCE = $HOME/terrsysmp/bldsva/intf_DA/dart/parflow/
 
 rsync -Cavzr --exclude-from=exclude-list.txt ${SOURCE} ${DEST}

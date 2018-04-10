@@ -2,7 +2,7 @@
 # Script to create perturbed spinup for the ensemles
 # usage: ./hydro_spinup.csh machine
 # machine = JURECA, CLUMA2
-#
+# Note - This script assumes perturbed surface forcing data available for CLM
 #-------------------------------------------------------------------------
 # User Settings
 # 
@@ -40,7 +40,7 @@ echo "-------------------------------------------------------------------"
 echo " "
 #
 set defDir = $tsmpdir/bldsva/setups/$refsetup
-cp $defDir/def/idealRTD_JURECA_setup_TB.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/idealRTD_${machine}_setup_TB.ksh $defDir/idealRTD_${machine}_setup.ksh
 cp $defDir/def/coup_oas_TB.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_TB $defDir/lnd.stdin
 
@@ -61,7 +61,7 @@ echo "-------------------------------------------------------------------"
 echo " "
 
 # Update the setup directory again
-cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/idealRTD_${machine}_setup_default.ksh $defDir/idealRTD_${machine}_setup.ksh
 cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
 
