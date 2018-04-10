@@ -1,7 +1,8 @@
 #!/bin/csh
 
 # usage: ./archive_hydroSpin.csh $rundir $ensemble_size
-#
+# ensemble_size = ensemble_size + 1
+# Change map_fn to the above size
 echo "-------------------------------------------------------------------"
 echo "History files will be archived in the "$HOME" directory"
 echo "usage: ./archive_hist.csh rundir ensemble_size"

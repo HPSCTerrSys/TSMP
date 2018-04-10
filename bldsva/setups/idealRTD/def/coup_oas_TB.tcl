@@ -198,8 +198,8 @@ pfset Geom.domain.Porosity.Value	 0.389
 #-----------------------------------------------------------------------------
 pfset Phase.RelPerm.Type                 VanGenuchten
 pfset Phase.RelPerm.GeomNames            "domain"
-pfset Geom.domain.RelPerm.Alpha          2.69
-pfset Geom.domain.RelPerm.N              1.41
+pfset Geom.domain.RelPerm.Alpha          2.1
+pfset Geom.domain.RelPerm.N              2.0
 #pfset Geom.domain.RelPerm.NumSamplePoints   $VG_points
 #pfset Geom.domain.RelPerm.MinPressureHead   $VG_pmin
 #---------------------------------------------------------
@@ -207,8 +207,8 @@ pfset Geom.domain.RelPerm.N              1.41
 #---------------------------------------------------------
 pfset Phase.Saturation.Type		 VanGenuchten
 pfset Phase.Saturation.GeomNames	 domain
-pfset Geom.domain.Saturation.Alpha	 2.69
-pfset Geom.domain.Saturation.N		 1.41
+pfset Geom.domain.Saturation.Alpha	 2.1
+pfset Geom.domain.Saturation.N		 2.0
 pfset Geom.domain.Saturation.SRes	 0.08
 pfset Geom.domain.Saturation.SSat	 1.0
 

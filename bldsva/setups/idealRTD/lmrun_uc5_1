@@ -353,8 +353,7 @@ cat > INPUT_IO  << end_input_io
   ! hcomb = 0.0, 6.0, 0.1 means: from hour 0 to hour 6 in steps of 6 minutes
   ! (Several triples may be given one after another!)
   !hcomb=0.0, 20.0, 0.25,
-  !ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
-  ncomb=__ncomb_start__,$nsteps,600,
+  ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
   nrbit=16,
   ! Indikator for the time unit in grib-output (0=min, 1=stunde) - 0 no more possible since COSMO 5.0:
 !  nunit_of_time=1,

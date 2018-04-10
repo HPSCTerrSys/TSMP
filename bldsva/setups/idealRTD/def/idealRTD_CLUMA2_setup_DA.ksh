@@ -12,12 +12,12 @@ initSetup(){
 
 
   defaultNppn=64
-  defaultCLMProcX=1
-  defaultCLMProcY=1
+  defaultCLMProcX=2
+  defaultCLMProcY=2
   defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2
-  defaultPFLProcY=1
+  defaultPFLProcY=2
 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
