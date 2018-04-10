@@ -34,11 +34,11 @@ preprocess
 EndOfText
 
 if ( ! $?TERRSYSMP ) then
-   set DART = $HOME/terrsysmp
+   set   TERRSYSMP = $HOME/terrsysmp
 endif
 
 if ( ! $?DART ) then
-   set DART = $HOME/DART/lanai
+   set  DART = $HOME/DART/lanai
 endif
 
 echo "Installing $TERRSYSMP into $DART"
@@ -58,3 +58,6 @@ end
 
 echo "to finish up ... "
 echo "cd ${DART}/models/terrsysmp  and check/build each of the models."
+
+exit 0
+

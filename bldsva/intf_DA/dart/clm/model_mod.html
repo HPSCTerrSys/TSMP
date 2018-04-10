@@ -3,8 +3,8 @@
 <HTML>
 <HEAD>
 <TITLE>module model_mod (CLM)</TITLE>
-<link rel="stylesheet" type="text/css" href="../../doc/html/doc.css">
-<link href="../../doc/images/dart.ico" rel="shortcut icon" />
+<link rel="stylesheet" type="text/css" href="../../../doc/html/doc.css">
+<link href="../../../doc/images/dart.ico" rel="shortcut icon" />
 </HEAD>
 <BODY>
 <A NAME="TOP"></A>
@@ -14,10 +14,10 @@
 <table border=0 summary="" cellpadding=5>
 <tr>
     <td valign=middle>
-    <img src="../../doc/images/Dartboard7.png" alt="DART project logo" height=70 />
+    <img src="../../../doc/images/Dartboard7.png" alt="DART project logo" height=70 />
     </td>
     <td>
-       <P>Jump to <a href="../../index.html">DART Documentation Main Index</a><br />
+       <P>Jump to <a href="../../../index.html">DART Documentation Main Index</a><br />
           <small><small>version information for this file: <br />
           <!-- version tag follows, do not edit -->
           $Id: model_mod.html 9063 2015-11-13 23:30:45Z thoar $</small></small>
@@ -65,6 +65,9 @@ In the TerrSysMP configuration, CLM executes forecasts for the length of an assi
 stops, and writes out restart files (and perhaps history files and even 'vector' history files).
 This GREATLY simplifies the traditional DART workflow, but it means 
 <em>TerrSysMP has to stop and write out a restart file every time an assimilation is required</em>. 
+Since some output normally happens at every assimilation interval, the extra time required to completely stop
+is minimal for all but the most trivial configurations. Reading from restart files allows DART to be able
+to flexibly adapt to new versions of the models and generally requires no additional coding.
 </P>
 
 <P> DART does not advance CLM. TerrSysMP is responsible for that. DART requires a CLM
@@ -166,7 +169,7 @@ mainly to indicate the location of the DART observation sequence files on your s
 <TBODY valign=top>
 
 <TR><TD>
-<a href="http://www.cesm.ucar.edu/models/clm/surface.heterogeneity.html"><img src="../../doc/images/clm_landcover.jpg" alt="CLM gridcell breakdown" height=250 /></a>
+<a href="http://www.cesm.ucar.edu/models/clm/surface.heterogeneity.html"><img src="../../../doc/images/clm_landcover.jpg" alt="CLM gridcell breakdown" height=250 /></a>
 </TD>
     <TD>"The land surface is represented by 5 primary sub-grid land cover types 
      (landunits: glacier, lake, wetland, urban, vegetated) in each grid cell. 
@@ -586,7 +589,7 @@ A more representative example follows after this description.
    debug                        = 0
    clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
                     'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
-                    'H2OSOI_LIQ',  'KIND_SOIL_MOISTURE',          '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'H2OSOI_LIQ',  'KIND_LIQUID_WATER',           '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
                     'tsai',        'KIND_STEM_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',

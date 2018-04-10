@@ -44,7 +44,7 @@ use     location_mod, only : location_type, get_dist, query_location,          &
                              vert_is_height,   VERTISHEIGHT,                   &
                              get_close_obs_init, get_close_obs, LocationDims
 
-use    utilities_mod, only : register_module, error_handler,                   &
+use    utilities_mod, only : register_module, error_handler, nmlfileunit,      &
                              E_ERR, E_WARN, E_MSG, logfileunit, get_unit,      &
                              nc_check, do_output, to_upper,                    &
                              find_namelist_in_file, check_namelist_read,       &
@@ -57,8 +57,29 @@ use     obs_kind_mod, only : KIND_SOIL_TEMPERATURE,           &
                              KIND_ICE,                        &
                              KIND_SNOWCOVER_FRAC,             &
                              KIND_SNOW_THICKNESS,             &
+                             KIND_LEAF_CARBON,                &
+                             KIND_LIVE_STEM_CARBON,           &
+                             KIND_DEAD_STEM_CARBON,           &
+                             KIND_LEAF_NITROGEN,              &
+                             KIND_LEAF_AREA_INDEX,            &
+                             KIND_STEM_AREA_INDEX,            &
+                             KIND_NET_PRIMARY_PROD_FLUX,      &
+                             KIND_BIOMASS,                    &
                              KIND_WATER_TABLE_DEPTH,          &
                              KIND_GEOPOTENTIAL_HEIGHT,        &
+                             KIND_BRIGHTNESS_TEMPERATURE,     &
+                             KIND_RADIATION_VISIBLE_DOWN,     &
+                             KIND_RADIATION_VISIBLE_UP,       &
+                             KIND_RADIATION_NEAR_IR_DOWN,     &
+                             KIND_RADIATION_NEAR_IR_UP,       &
+                             KIND_VEGETATION_TEMPERATURE,     &
+                             KIND_FRAC_PHOTO_AVAIL_RADIATION, &
+                             KIND_FPAR_SUNLIT_DIRECT,         &
+                             KIND_FPAR_SUNLIT_DIFFUSE,        &
+                             KIND_FPAR_SHADED_DIRECT,         &
+                             KIND_FPAR_SHADED_DIFFUSE,        &
+                             KIND_FPAR_SHADED_DIRECT,         &
+                             KIND_FPAR_SHADED_DIFFUSE,        &
                              paramname_length,                &
                              get_raw_obs_kind_index,          &
                              get_raw_obs_kind_name
@@ -536,7 +557,7 @@ read(iunit, nml = model_nml, iostat = io)
 call check_namelist_read(iunit, io, 'model_nml')
 
 ! Record the namelist values used for the run
-if (do_nml_file()) write(logfileunit, nml=model_nml)
+if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
 !---------------------------------------------------------------
@@ -2465,8 +2486,8 @@ integer,             intent(out) :: istatus
 
 real(r8), dimension(LocationDims) :: loc_array
 real(r8) :: llon, llat, lheight
-real(r8) :: interp_val_2
-integer  :: istatus_2
+real(r8) :: interp_val_2, interp_val_3
+integer  :: istatus_2, istatus_3
 character(len=paramname_length) :: kind_string
 
 if ( .not. module_initialized ) call static_init_model
@@ -2534,9 +2555,29 @@ select case( obs_kind )
 
       call get_grid_vertval(x, location, obs_kind, interp_val, istatus)
 
-   case ( KIND_SNOWCOVER_FRAC, KIND_WATER_TABLE_DEPTH )
+   case ( KIND_SNOWCOVER_FRAC, &
+          KIND_LEAF_AREA_INDEX,       KIND_STEM_AREA_INDEX,        &
+          KIND_LEAF_CARBON,           KIND_LEAF_NITROGEN,          &
+          KIND_WATER_TABLE_DEPTH,     KIND_VEGETATION_TEMPERATURE, &
+          KIND_FPAR_SUNLIT_DIRECT,    KIND_FPAR_SUNLIT_DIFFUSE,    &
+          KIND_FPAR_SHADED_DIRECT,    KIND_FPAR_SHADED_DIFFUSE,    &
+          KIND_RADIATION_VISIBLE_UP,  KIND_RADIATION_VISIBLE_DOWN, &
+          KIND_RADIATION_NEAR_IR_UP,  KIND_RADIATION_NEAR_IR_DOWN, &
+          KIND_NET_PRIMARY_PROD_FLUX, KIND_FRAC_PHOTO_AVAIL_RADIATION )
 
       call compute_gridcell_value(x, location, obs_kind, interp_val, istatus)
+
+   case ( KIND_BIOMASS )
+
+      call compute_gridcell_value(x, location, KIND_LEAF_CARBON     , interp_val,   istatus)
+      call compute_gridcell_value(x, location, KIND_LIVE_STEM_CARBON, interp_val_2, istatus_2)
+      call compute_gridcell_value(x, location, KIND_DEAD_STEM_CARBON, interp_val_3, istatus_3)
+      if ((istatus == 0) .and. (istatus_2 == 0) .and. (istatus_3 == 0 )) then
+         interp_val = interp_val + interp_val_2 + interp_val_3
+      else
+         interp_val = MISSING_R8
+         istatus = 6
+      endif
 
    case default
 
