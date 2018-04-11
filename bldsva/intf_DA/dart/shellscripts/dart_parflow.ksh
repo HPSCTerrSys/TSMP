@@ -15,7 +15,7 @@
 #PBS -l walltime=2:30:00
 #PBS -l nodes=1:ppn=64
 #PBS -V 
-#PBS -u $USER
+#PBS -u pshrestha 
 #PBS -q batch
 #PBS -e err.txt
 #PBS -o out.txt
