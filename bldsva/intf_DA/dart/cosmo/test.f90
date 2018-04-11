@@ -1,6 +1,6 @@
-PROGRAM test
+! DART $Id: test.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
-! DART $Id: test.f90 $
+PROGRAM test
 
 !----------------------------------------------------------------------
 ! purpose: test routines
@@ -31,9 +31,9 @@ use     location_mod, only : location_type, get_dist, query_location,          &
 IMPLICIT NONE
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: test.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: test.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 INTEGER :: var_type,index,istat,n,i
 integer,allocatable :: seed(:)
@@ -102,9 +102,3 @@ STOP
   print*,istat
 
 END PROGRAM test
-
-! <next few lines under version control, do not edit>
-! $URL: $
-! $Id: test.f90 $
-! $Revision: $
-! $Date: $

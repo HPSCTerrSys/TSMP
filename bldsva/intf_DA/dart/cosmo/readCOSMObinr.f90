@@ -243,4 +243,3 @@ ENDDO read_loop
 CLOSE (nudat, IOSTAT=izerr)
 
 end program readCOSMObinr
-

@@ -1,3 +1,5 @@
+! DART $Id: cosmo_data_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
+
 MODULE cosmo_data_mod
 
 ! This module contains the routines to read or write
@@ -44,9 +46,9 @@ implicit none
 private
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: cosmo_data_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: cosmo_data_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 type cosmo_meta
   character(len=16)  :: varname_short
@@ -892,9 +894,3 @@ CONTAINS
   END SUBROUTINE read_time
   
 END MODULE cosmo_data_mod
-
-! <next few lines under version control, do not edit>
-! $URL: 
-! $Id: cosmo_data_mod.f90 $
-! $Revision: $
-! $Date: $

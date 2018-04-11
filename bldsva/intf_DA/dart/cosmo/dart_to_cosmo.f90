@@ -1,10 +1,10 @@
-! DART software - Copyright 2004 - 2011 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
+!
+! DART $Id: dart_to_cosmo.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program dart_to_cosmo
-
-! DART $Id: dart_to_cosmo.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: interface between DART and the cosmo model
@@ -38,9 +38,9 @@ use        model_mod, only : get_model_size, static_init_model, &
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: dart_to_cosmo.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: dart_to_cosmo.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !------------------------------------------------------------------
 ! The namelist variables
@@ -134,9 +134,3 @@ endif
 call finalize_utilities()
 
 end program dart_to_cosmo
-
-! <next few lines under version control, do not edit>
-! $URL: $
-! $Id: dart_to_cosmo.f90 $
-! $Revision: $
-! $Date: $

@@ -1,6 +1,6 @@
-MODULE byte_mod
+! DART $Id: byte_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
-! DART $Id: byte_mod.f90 $
+MODULE byte_mod
 
 use types_mod, only : r4, r8
 
@@ -8,9 +8,9 @@ implicit none
 private
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: byte_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: byte_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 public :: concat_bytes1
 public :: concat_bytes1_sign
@@ -264,10 +264,3 @@ CONTAINS
   END FUNCTION get_word
 
 END MODULE byte_mod
-
-! <next few lines under version control, do not edit>
-! $URL: $
-! $Id: byte_mod.f90 $
-! $Revision: $
-! $Date: $
-
