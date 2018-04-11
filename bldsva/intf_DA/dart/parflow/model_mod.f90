@@ -1,7 +1,6 @@
 ! This code is not necessarily under the DART copyright ...
 !
-
-! DART $Id: $
+! DART $Id: model_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 module model_mod
 
@@ -40,6 +39,11 @@ use netcdf
 implicit none
 private
 
+! version controlled file description for error handling, do not edit
+character(len=*), parameter :: source   = "$URL: model_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
+
 ! required by DART code - will be called from filter and other
 ! DART executables.  interfaces to these routines are fixed and
 ! cannot be changed in any way.
@@ -70,13 +74,8 @@ public :: get_state_vector,     &
           write_parflow_file,   &
           PRESSURE_HEAD, SATURATION
 
-! version controlled file description for error handling, do not edit
-character(len=*), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_mod.f90 $"
-character(len=*), parameter :: revision = "$Revision: 6256 $"
-character(len=*), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
 
-character(len=256) :: string1, string2, string3
+character(len=512) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
 ! Dimension and grid resolution from (parflow binary) PFB file
@@ -2227,9 +2226,3 @@ end function get_start_time
 !===================================================================
 end module model_mod
 !===================================================================
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_mod.f90 $
-! $Id: model_mod.f90 6256 2013-06-12 16:19:10Z thoar $
-! $Revision: 6256 $
-! $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $

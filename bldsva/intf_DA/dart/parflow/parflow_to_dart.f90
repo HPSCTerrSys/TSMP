@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: model_to_dart.f90 6311 2013-07-17 22:04:54Z thoar $
+! DART $Id: parflow_to_dart.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program parflow_to_dart
 
@@ -16,8 +16,8 @@ program parflow_to_dart
 !
 ! 
 ! USAGE:  The parflow pfb filename is read from the input.nml
-!         <edit parflow_to_dart_output_file in input.nml:model_to_dart_nml>
-!         model_to_dart
+!         <edit pfb_to_dart_output_file in input.nml:pfb_to_dart_nml>
+!         ./parflow_to_dart
 !
 ! author: Tim Hoar 6/24/09
 !         P. Shrestha 7/7/16 Update the template for ParFlow
@@ -40,10 +40,9 @@ use time_manager_mod, only : time_type, print_time, print_date
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_to_dart.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6311 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $"
+character(len=*), parameter :: source   = "$URL: parflow_to_dart.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !-----------------------------------------------------------------------
 ! namelist parameters with default values.
@@ -116,9 +115,3 @@ call print_time(model_time, str=' parflow_to_dart model time')
 call finalize_utilities(progname='parflow_to_dart')
 
 end program parflow_to_dart
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_to_dart.f90 $
-! $Id: model_to_dart.f90 6311 2013-07-17 22:04:54Z thoar $
-! $Revision: 6311 $
-! $Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $

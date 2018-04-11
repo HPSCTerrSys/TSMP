@@ -1,10 +1,10 @@
 #!/bin/csh
 #
-# DART software - Copyright 2004 - 2013 UCAR. This open source software is
-# provided by UCAR, "as is", without charge, subject to all terms of use at
+# DART software - Copyright UCAR. This open source software is provided
+# by UCAR, "as is", without charge, subject to all terms of use at
 # http://www.image.ucar.edu/DAReS/DART/DART_download
 #
-# DART $Id: quickbuild.csh 6256 2013-06-12 16:19:10Z thoar $
+# DART $Id: quickbuild.csh Wed Apr 11 20:26:43 CEST 2018 $
 
 #----------------------------------------------------------------------
 # 'preprocess' is a program that culls the appropriate sections of the
@@ -107,9 +107,3 @@ echo ' for lam-mpi run "lamboot" once, then "runme_filter"'
 echo ' for mpich run "mpd" once, then "runme_filter"'
 
 exit 0
-
-# <next few lines under version control, do not edit>
-# $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/work/quickbuild.csh $
-# $Revision: 6256 $
-# $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
-

@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
+! DART $Id: model_mod_check.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program model_mod_check
 
@@ -39,10 +39,9 @@ use typesizes
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_mod_check.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6311 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $"
+character(len=*), parameter :: source   = "$URL: model_mod_check.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !------------------------------------------------------------------
 ! The namelist variables
@@ -389,11 +388,4 @@ deallocate( thisdist )
 
 end subroutine find_closest_gridpoint
 
-
 end program model_mod_check
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/model_mod_check.f90 $
-! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
-! $Revision: 6311 $
-! $Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $

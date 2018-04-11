@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: dart_to_model.f90 6311 2013-07-17 22:04:54Z thoar $
+! DART $Id: dart_to_parflow.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program dart_to_parflow
 
@@ -37,10 +37,9 @@ use        model_mod, only : static_init_model, write_parflow_file, &
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=*), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/dart_to_model.f90 $"
-character(len=*), parameter :: revision = "$Revision: 6311 $"
-character(len=*), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $"
+character(len=*), parameter :: source   = "$URL: dart_to_parflow.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 character(len=512) :: string1, string2, string3
 
@@ -153,9 +152,3 @@ endif
 call finalize_utilities(progname='dart_to_parflow')
 
 end program dart_to_parflow
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/template/dart_to_model.f90 $
-! $Id: dart_to_model.f90 6311 2013-07-17 22:04:54Z thoar $
-! $Revision: 6311 $
-! $Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $
