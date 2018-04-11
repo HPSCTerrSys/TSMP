@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: dart_to_clm.f90 6256 2013-06-12 16:19:10Z thoar $
+! DART $Id: dart_to_clm.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program dart_to_clm
 
@@ -35,17 +35,16 @@ use        model_mod, only : static_init_model, sv_to_restart_file, &
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/dart_to_clm.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6256 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
+character(len=*), parameter :: source   = "$URL: dart_to_clm.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !------------------------------------------------------------------
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 128) :: dart_to_clm_input_file = 'dart_restart'
-logical               :: advance_time_present   = .false.
+character(len=256) :: dart_to_clm_input_file = 'dart_restart'
+logical            :: advance_time_present   = .false.
 
 namelist /dart_to_clm_nml/ dart_to_clm_input_file, &
                            advance_time_present
@@ -124,9 +123,3 @@ endif
 call finalize_utilities('dart_to_clm')
 
 end program dart_to_clm
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/dart_to_clm.f90 $
-! $Id: dart_to_clm.f90 6256 2013-06-12 16:19:10Z thoar $
-! $Revision: 6256 $
-! $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $

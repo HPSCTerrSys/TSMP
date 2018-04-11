@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: column_rand.f90 6256 2013-06-12 16:19:10Z thoar $
+! DART $Id: column_rand.f90 Wed Apr 11 20:26:43 CEST 2018 $
  
 program column_rand
 
@@ -18,10 +18,9 @@ use   location_mod, only : VERTISSURFACE, VERTISLEVEL
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/bgrid_solo/column_rand.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6256 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
+character(len=*), parameter :: source   = & "$URL: column_rand.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 integer  :: level, num_cols, num_levs,num_dates, i,k, iunit
 real(r8) :: lat, lon, t_err_var, uv_err_var, ps_err_var
@@ -109,9 +108,3 @@ do k = 1, num_dates
 end do
 
 end program column_rand
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/bgrid_solo/column_rand.f90 $
-! $Id: column_rand.f90 6256 2013-06-12 16:19:10Z thoar $
-! $Revision: 6256 $
-! $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $

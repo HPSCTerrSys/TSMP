@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: model_mod.f90 9015 2015-11-06 22:20:29Z thoar $
+! DART $Id: model_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 module model_mod
 
@@ -94,6 +94,11 @@ use netcdf
 implicit none
 private
 
+! version controlled file description for error handling, do not edit
+character(len=*), parameter :: source   = "$URL: model_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
+
 ! these routines must be public and you cannot change
 ! the arguments - they will be called *from* the DART code.
 public :: get_model_size,         &
@@ -126,13 +131,8 @@ public :: clm_to_dart_state_vector,     &
           write_state_times,            &
           get_model_time
 
-! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 9015 $"
-character(len=128), parameter :: revdate  = "$Date: 2015-11-06 15:20:29 -0700 (Fri, 06 Nov 2015) $"
 
-character(len=256) :: string1, string2, string3
+character(len=512) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
 type(time_type) :: start_date   ! experiment start date - needed by parflow
@@ -5297,13 +5297,4 @@ endif
 
 end function FindDesiredTimeIndx
 
-!===================================================================
-! End of model_mod
-!===================================================================
 end module model_mod
-
-! <next few lines under version control, do not edit>
-! $URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/model_mod.f90 $
-! $Id: model_mod.f90 9015 2015-11-06 22:20:29Z thoar $
-! $Revision: 9015 $
-! $Date: 2015-11-06 15:20:29 -0700 (Fri, 06 Nov 2015) $

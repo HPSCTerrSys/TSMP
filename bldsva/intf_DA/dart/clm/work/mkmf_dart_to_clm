@@ -1,18 +1,12 @@
 #!/bin/csh
 #
-# DART software - Copyright 2004 - 2013 UCAR. This open source software is
-# provided by UCAR, "as is", without charge, subject to all terms of use at
+# DART software - Copyright UCAR. This open source software is provided
+# by UCAR, "as is", without charge, subject to all terms of use at
 # http://www.image.ucar.edu/DAReS/DART/DART_download
 #
-# DART $Id: mkmf_dart_to_clm 6256 2013-06-12 16:19:10Z thoar $
+# DART $Id: mkmf_dart_to_clm Wed Apr 11 20:26:43 CEST 2018 $
 
 ../../../../mkmf/mkmf -p dart_to_clm -t ../../../../mkmf/mkmf.template   \
  -a "../../../.." path_names_dart_to_clm
 
 exit $status
-
-# <next few lines under version control, do not edit>
-# $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/work/mkmf_dart_to_clm $
-# $Revision: 6256 $
-# $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
-
