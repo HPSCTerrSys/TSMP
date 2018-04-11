@@ -45,6 +45,10 @@ echo "Installing $TERRSYSMP into $DART"
 
 foreach FILE ( clm cosmo parflow )
 
+   echo ""
+   echo "========================================"
+   echo "Synching $FILE directory"
+
    set SOURCE = ${TERRSYSMP}/bldsva/intf_DA/dart/$FILE/
    set   DEST = ${DART}/models/terrsysmp/$FILE/
 
@@ -53,6 +57,7 @@ foreach FILE ( clm cosmo parflow )
    endif
 
    rsync -Cavzr --exclude-from=exclude-list.txt ${SOURCE} ${DEST}
+   echo ""
 
 end
 
