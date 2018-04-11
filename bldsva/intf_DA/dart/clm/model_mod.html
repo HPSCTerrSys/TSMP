@@ -103,7 +103,8 @@ to flexibly adapt to new versions of the models and generally requires no additi
         <br />
         <br />
         As of (V7195) 3 October 2014, this script demonstrates how to create 'vector'-based
-        CLM history files (which requires a bugfix) and has an option to use a bugfixed snow grain-size code. <br />
+        CLM history files (which requires a bugfix) and has an option to use a bugfixed snow 
+        grain-size code.<br />
         <a href='http://bugs.cgd.ucar.edu/show_bug.cgi?id=1730'>http://bugs.cgd.ucar.edu/show_bug.cgi?id=1730</a><br />
         <a href='http://bugs.cgd.ucar.edu/show_bug.cgi?id=1934'>http://bugs.cgd.ucar.edu/show_bug.cgi?id=1934</a>
     </TD>
@@ -126,7 +127,8 @@ to flexibly adapt to new versions of the models and generally requires no additi
         <br />
         <br />
         As of (V7195) 3 October 2014, this script demonstrates how to create 'vector'-based
-        CLM history files (which requires a bugfix) and has an option to use a bugfixed snow grain-size code. <br />
+        CLM history files (which requires a bugfix) and has an option to use a bugfixed snow
+        grain-size code.<br />
         <a href='http://bugs.cgd.ucar.edu/show_bug.cgi?id=1730'>http://bugs.cgd.ucar.edu/show_bug.cgi?id=1730</a><br />
         <a href='http://bugs.cgd.ucar.edu/show_bug.cgi?id=1934'>http://bugs.cgd.ucar.edu/show_bug.cgi?id=1934</a>
     </TD>
@@ -275,7 +277,6 @@ mainly to indicate the location of the DART observation sequence files on your s
 <LI> Check everything before resubmitting
     </LI>
 </OL>
-</P>
 
 <div>
 <TABLE border=0 cellpadding=4 width=100% summary='clm_variables description'>
@@ -312,9 +313,9 @@ mainly to indicate the location of the DART observation sequence files on your s
                          maximum value. If set to 'NA', there is no maximum value.</TD></TR>
 <TR><TD><strong>Column&nbsp;5</strong></TD>
                      <TD>filename</TD><TD>This specifies which file should be used to obtain the variable. <br />
-                     <em class=code>'restart'</em>&nbsp;=&gt;&nbsp;clm_restart_filename</em> <br />
-                     <em class=code>'history'</em>&nbsp;=&gt;&nbsp;clm_history_filename</em> <br />
-                     <em class=code>'vector'&nbsp;</em>&nbsp;=&gt;&nbsp;clm_vector_history_filename</em></TD></TR>
+                     <em class=code>'restart'&nbsp;=&gt;&nbsp;clm_restart_filename</em> <br />
+                     <em class=code>'history'&nbsp;=&gt;&nbsp;clm_history_filename</em> <br />
+                     <em class=code>'vector'&nbsp;&nbsp;=&gt;&nbsp;clm_vector_history_filename</em></TD></TR>
 <TR><TD><strong>Column&nbsp;6</strong></TD>
                      <TD>update</TD><TD>If the variable comes from the restart file, it may be updated after the assimilation.<br />
                      <em class=code>'UPDATE'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</em>&nbsp;=&gt; the variable in the restart file is updated.<br />
@@ -325,7 +326,7 @@ mainly to indicate the location of the DART observation sequence files on your s
 <P>The following are only meant to be examples - they are not scientifically validated.
    Some of these that are UPDATED are probably diagnostic quantities, Some of these that
    should be updated may be marked NO_COPY_BACK. There are multiple choices for some
-   DART kinds. This list is by no means complete.<P>
+   DART kinds. This list is by no means complete.</P>
 <pre>
        'livecrootc',  'KIND_ROOT_CARBON',            'NA', 'NA', 'restart', 'UPDATE',
        'deadcrootc',  'KIND_ROOT_CARBON',            'NA', 'NA', 'restart', 'UPDATE',
@@ -416,7 +417,7 @@ to the CLM restart file because it may clash with the estimates from the
 variables will/may be used for other observation operators, however.
 </P>
 
-<P></P>
+<P><!-- dummy spacer so top aligns correctly --></P>
 
 <!--===================== DESCRIPTION OF A NAMELIST =====================-->
 
@@ -556,15 +557,15 @@ A more representative example follows after this description.
             <li> what file contains the variable - 'restart', 'history'  'vector (history)'</li>
             <li> does the variable get updated in the restart file or not ...
                  only variables from restart files may be updated.<br />
-     'UPDATE'       =>        update the variable in the restart file
-     'NO_COPY_BACK' => do NOT update the variable in the restart file
-     All these variables WILL be updated INTERNALLY IN DART.
-     Only variables marked 'restart', 'UPDATE' will be modified for CLM.</li>
-     </ol>
-  There is no point specifying min/max values for variables not marked 'UPDATE'
-  Be aware that some variables exist in both restart and history files, so it makes a difference where
-  the variable comes from. Only those in the CESM restart file are relevant for future model advances.
-  The list is by no means complete.
+                 'UPDATE'       =&gt; update the variable in the restart file
+                 'NO_COPY_BACK' =&gt; do NOT update the variable in the restart file
+                 All these variables WILL be updated INTERNALLY IN DART.
+                 Only variables marked 'restart', 'UPDATE' will be modified for CLM.</li>
+        </OL>
+        There is no point specifying min/max values for variables not marked 'UPDATE'
+        Be aware that some variables exist in both restart and history files, so it makes
+        a difference where the variable comes from. Only those in the CESM restart file 
+        are relevant for future model advances. The list is by no means complete.
         </TD>
 </TR>
 
@@ -572,7 +573,9 @@ A more representative example follows after this description.
 </TABLE>
 </div>
 
-<P>This is a much more realistic example of a DART-CLM namelist. 
+<P>This is a much more realistic example of a DART-CLM namelist and will accomodate a wide variety of
+forward operators. In the TerrSysMP configuration, only the soil temperature needs to be updated, the
+rest of the variables are used for forward operator calculation only.</P>
 
 <div class=namelist>
 <pre>
@@ -587,15 +590,15 @@ A more representative example follows after this description.
    output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
-   clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
+   clm_variables  = 'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
+                    'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
                     'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_LIQ',  'KIND_LIQUID_WATER',           '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
-                    'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
                     'tsai',        'KIND_STEM_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'tlai',        'KIND_LEAF_AREA_INDEX',        '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'TV',          'KIND_VEGETATION_TEMPERATURE', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
-                    'Q2M',         'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'history' , 'NO_COPY_BACK'
+                    'Q2M',         'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'history' , 'NO_COPY_BACK',
                     'FSRVDLN',     'KIND_RADIATION_VISIBLE_UP',   'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
                     'FSRNDLN',     'KIND_RADIATION_NEAR_IR_UP',   'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
                     'FSDSVDLN',    'KIND_RADIATION_VISIBLE_DOWN', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
@@ -659,7 +662,7 @@ A more representative example follows after this description.
 </TABLE>
 </div>
 
-<P></P>
+<P><!-- dummy spacer so top aligns correctly --></P>
 
 <!--==================================================================-->
 
@@ -1231,7 +1234,7 @@ A NULL INTERFACE in this model.
 </TABLE>
 
 </div>
-<P></P>
+<P><!-- dummy spacer so top aligns correctly --></P>
 
 <!--==================================================================-->
 <!-- list of all optional public interfaces                           -->
@@ -1605,7 +1608,7 @@ Returns the valid time of the model state vector.
     <TD>the record of all the namelists actually USED - 
         contains the default values</TD></TR>
 </TABLE>
-<P></P>
+<P><!-- dummy spacer so top aligns correctly --></P>
 
 <!--==================================================================-->
 <!-- Cite references, if need be.                                     -->
@@ -1654,6 +1657,7 @@ none at this time
 <H2>FUTURE PLANS</H2>
 <P>
 Almost too many to list.
+</P>
 <ol>
 <li>Implement a robust update_snow() routine that takes the modified SWE and
     repartitions it into the respective snow layers in a manner that works
@@ -1676,7 +1680,6 @@ Almost too many to list.
     would measure. What units are they in? Can one operator support both?</li>
 <li>...</li>
 </ol>
-</P>
 
 <!--==================================================================-->
 <!-- PrivateComponents                                                -->

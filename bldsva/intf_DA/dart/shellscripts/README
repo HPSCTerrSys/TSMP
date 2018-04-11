@@ -25,7 +25,8 @@ cd $DART/models/terrsysmp/cosmo/work/
 ./hydro_spinup.csh machine
 
 # Use the spunup initial conditions with perturbed model parameter to make an open loop experiment
-# with members > ensemble number for the final experiment
+# with members > ensemble number for the final experiment. The extra one will be the 'truth' in
+# the perfect_model experiment.
 #
 # Modify the ntasks and nodes according to member numbers, this also applies to dart_cosmo.ksh
 # Check map_fn
@@ -39,7 +40,7 @@ sbatch terrsysmp-dart_jobchain.ksh 1 run
 # Use the runmanager to submit a sequential job to generate the model trajectory
 # assuming a perfect model
 # It uses "perfect_tsmp_setup.csh" to setup the model runs
-# It also uses the restart files and perturbation based on map_fn specificed in the script
+# It also uses the restart files and perturbation based on map_fn specified in the script
 
 sbatch jobchain_perfect.ksh 1 run
 
@@ -48,7 +49,7 @@ sbatch jobchain_perfect.ksh 1 run
 
 ./assim.csh 0/1 clm/cosmo/parflow
 
-# Use the runmanger to submit a sequential job for ensemble run with DA
+# Use the runmanager to submit a sequential job for ensemble run with DA
 # For open loop run, set NRST = 0
 # It uses "tsmp_slm_run.bsh" to setup the model runs
 # so the user needs to modify experiment setups, ensemble numbers in the above script
