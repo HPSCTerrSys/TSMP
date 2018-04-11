@@ -148,8 +148,9 @@
 
 # reduce from 1000. to 10. and 1000. to 100
 &location_nml
-   horiz_dist_only             = .true.
-   vert_normalization_height   = 10.0
+   horiz_dist_only             = __hdonly__
+   vert_normalization_pressure = 10.0
+   vert_normalization_height   = __vnhgt__
    vert_normalization_level    = 100.0
    approximate_distance        = .false.
    nlon                        = 71

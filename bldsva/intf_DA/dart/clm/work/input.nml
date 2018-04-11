@@ -139,12 +139,12 @@
 
 
 &obs_kind_nml
-   assimilate_these_obs_types = 'TOWER_NETC_ECO_EXCHANGE',
+   assimilate_these_obs_types = 'SOIL_TEMPERATURE',
+                                'TOWER_NETC_ECO_EXCHANGE',
                                 'TOWER_LATENT_HEAT_FLUX',
                                 'TOWER_SENSIBLE_HEAT_FLUX',
-                                'COSMOS_NEUTRON_INTENSITY',
-                                'SOIL_TEMPERATURE'
-   evaluate_these_obs_types   = 'SOIL_MOISTURE'
+   evaluate_these_obs_types   = 'SOIL_MOISTURE',
+                                'COSMOS_NEUTRON_INTENSITY'
   /
 
 
@@ -179,6 +179,7 @@
    calendar                     = 'Gregorian'
    debug                        = 0
    clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
+                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_LIQ',  'KIND_LIQUID_WATER',           '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
@@ -203,9 +204,9 @@
 
 
 &location_nml
-   horiz_dist_only             = .false.
+   horiz_dist_only             = __hdonly__
    vert_normalization_pressure = 100000.0
-   vert_normalization_height   = 10000.0
+   vert_normalization_height   = __vnhgt__
    vert_normalization_level    = 20.0
    approximate_distance        = .false.
    nlon                        = 71

@@ -14,7 +14,7 @@ set rundir = $1
 set ensemble_size = $2
 set map_fn_file = $3
 set clm_forcing_dir = "/homea/hbn33/hbn331/database/idealRTD/clm/"
-
+set clm_forcing_dir = "/daten01/z4/database/TestCases/idealRTD/clm/"
 #Read the map_fn_file
 set map_fn =
 foreach line (`cat ${map_fn_file}`)

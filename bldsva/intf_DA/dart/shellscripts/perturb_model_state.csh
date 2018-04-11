@@ -1,6 +1,6 @@
 #!/bin/csh
 #
-# Usage: ./perturb_model_state.csh rundir ensemble_size map_fn
+# Usage: ./perturb_model_state.csh rundir testcasedir ensemble_size map_fn
 #-------------------------------------------------------------------------
 # Block 2, 
 # Create perturbation for the ensemble runs 
@@ -11,8 +11,9 @@ echo "-------------------------------------------------------------------"
 echo " "
 #
 set rundir = $1
-set ensemble_size = $2
-set map_fn_file = $3
+set testcasedir = $2
+set ensemble_size = $3
+set map_fn_file = $4
 
 #Read the map_fn_file
 set map_fn =
@@ -38,19 +39,19 @@ foreach instance (`seq 0 $numInst`)
  #-------------------------------------------------------------------#
  #ParFlow
  echo " Using the spinup parflow states ...." $instance " .." $minstance
- cp $HOME/database/idealRTD/restart/tsmp_instance_${minstance}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
+ cp ${testcasedir}/restart/tsmp_instance_${minstance}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
  tclsh ascii2pfb.tcl
 
  #cosmo
  set rasonum = `printf raso_IdealSnd_0000LT_%02d $minstance`
  sed "s,raso_IdealSnd_0000LT.dat,$rasonum.dat," -i lmrun_uc
  rm cosmo_in/raso_IdealSnd_0000LT_* 
- cp $HOME/database/idealRTD/cosmo/$rasonum.dat cosmo_in/
+ cp ${testcasedir}/cosmo/$rasonum.dat cosmo_in/
  ./lmrun_uc execluma
 
  #clm
  echo " Using the spinup clm states ...."
- cp $HOME/database/idealRTD/restart/tsmp_instance_${minstance}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
+ cp ${testcasedir}/restart/tsmp_instance_${minstance}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
  #-------------------------------------------------------------------#
 
  cd ..

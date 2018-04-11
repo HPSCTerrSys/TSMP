@@ -1,8 +1,10 @@
 #!/bin/csh
 # Copy it to the archive spinup directory
 # Execute it from within the directory
-Usage: ./archive_restart_hydroSpinup.csh N
-set Nens = $2
+# Usage ./archive_restart_hydroSpinup.csh N
+# N = ensemble_size
+# Current -> Manually move the restart directory to CLM test case folder (e.g. $HOME/database/idealRTD/)
+set Nens = $1
 #
 mkdir restart
 cd restart
