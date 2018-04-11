@@ -178,11 +178,11 @@
    output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
-   clm_variables  = 'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
-                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+   clm_variables  = 'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
                     'H2OSOI_LIQ',  'KIND_LIQUID_WATER',           '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
                     'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
-                    'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
+                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
                     'TV',          'KIND_VEGETATION_TEMPERATURE', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
                     'Q2M',         'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'history' , 'NO_COPY_BACK'
   /

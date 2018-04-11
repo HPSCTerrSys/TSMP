@@ -1,5 +1,13 @@
 &model_nml
-   output_state_vector = .true., 
-   time_step_days      = 0,
-   time_step_seconds   = 3600  /
-
+   parflow_press_file           = 'parflow_press_file'
+   parflow_satur_file           = 'parflow_satur_file'
+   pfidb_file                   = 'pfidb_file'
+   grid_file                    = 'grid_file'
+   clm_file                     = 'clm_restart.nc'
+   clm_file_s                   = 'clm_restart_s.nc'
+   soilInd_file                 = 'pfl_soil_file'
+   parflow_assim_variable       = 'saturation'
+   assimilation_period_days     = 0
+   assimilation_period_seconds  = 21400
+   debug = 0
+  /

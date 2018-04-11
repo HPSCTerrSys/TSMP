@@ -1,10 +1,10 @@
 &model_nml
-   cosmo_filename               = "test.grb",
-   model_dt                     = 40,
-   model_perturbation_amplitude = 0.1,
-   output_state_vector          = .false.,
-   model_dims                   = 665, 657, 40,
-   record_length                = 1,
-   verbose                      = .false.
+   cosmo_restart_file           = 'cosmo_restart_file'
+   cosmo_netcdf_file            = 'cosmo_netcdf_file'
+   assimilation_period_days     = 0
+   assimilation_period_seconds  = 60
+   output_1D_state_vector       = .FALSE.
+   model_perturbation_amplitude = 0.1
+   debug                        = 0
+   variables                    = ''
   /
-
