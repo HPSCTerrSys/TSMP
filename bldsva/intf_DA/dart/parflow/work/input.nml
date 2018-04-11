@@ -135,11 +135,10 @@
    clm_file                      = 'clm_restart.nc'
    clm_file_s                    = 'clm_restart_s.nc'
    soilInd_file                  = 'pfb_soil.nc'
-   ipfb                          = 2
-   output_1D_state_vector        = .false.
+   parflow_assim_variable        = 'saturation'
    assimilation_period_days      = 0 
    assimilation_period_seconds   = 21400 
-   debug                         = 11
+   debug                         = 10
    /
 
 &pfb_to_dart_nml
@@ -148,9 +147,9 @@
 
 # reduce from 1000. to 10. and 1000. to 100
 &location_nml
-   horiz_dist_only             = __hdonly__
+   horiz_dist_only             = .false.
    vert_normalization_pressure = 10.0
-   vert_normalization_height   = __vnhgt__
+   vert_normalization_height   = 50000.0
    vert_normalization_level    = 100.0
    approximate_distance        = .false.
    nlon                        = 71
@@ -245,9 +244,9 @@
 
 &model_mod_check_nml
    dart_input_file            = 'dart_prior'
-   output_file                = 'check_me'
+   output_file                = 'mmc_output'
    advance_time_present       = .false.
-   x_ind                      = 100
+   x_ind                      = 8000
    kind_of_interest           = 'KIND_SOIL_MOISTURE'
    verbose                    = .FALSE.
    test1thru                  = 11

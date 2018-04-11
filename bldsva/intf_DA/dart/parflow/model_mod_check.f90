@@ -48,13 +48,13 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 256) :: dart_input_file               = 'dart_ics'
-character (len = 129) :: output_file                   = 'check_me'
-logical               :: advance_time_present          = .FALSE.
-logical               :: verbose                       = .FALSE.
-integer                :: test1thru                    = -1
-integer               :: x_ind                         = -1
-real(r8), dimension(3) :: loc_of_interest              = -1.0_r8
+character(len=256)            :: dart_input_file       = 'dart_ics'
+character(len=256)            :: output_file           = 'check_me'
+logical                       :: advance_time_present  = .FALSE.
+logical                       :: verbose               = .FALSE.
+integer                       :: test1thru             = -1
+integer                       :: x_ind                 = -1
+real(r8), dimension(3)        :: loc_of_interest       = -1.0_r8
 character(len=metadatalength) :: kind_of_interest      = 'ANY'
 character(len=metadatalength) :: interp_test_vertcoord = 'VERTISHEIGHT'
 
@@ -329,24 +329,22 @@ logical :: matched
 
 write(*,*)
 write(*,'(''Checking for the index in the state vector that is closest to '')')
-write(*,'(''lon/lat/lev'',3(1x,f14.5))')loc_of_interest(1:LocationDims)
+write(*,'(''lon/lat/lev '',3(1x,f20.14))')loc_of_interest(1:LocationDims)
 
 allocate( thisdist(get_model_size()) )
 thisdist  = 9999999999.9_r8         ! really far away 
 matched   = .false.
-!
 
 plon = loc_of_interest(1)
 plat = loc_of_interest(2)
 plev = loc_of_interest(3)
-
 
 ! Since there can be multiple variables with
 ! identical distances, we will just cruise once through 
 ! the array and come back to find all the 'identical' values.
 do i = 1,get_model_size()
 
-   ! Really inefficient, but grab the 'which_vert' from the
+   ! REALLY INEFFICIENT, but grab the 'which_vert' from the
    ! grid and set our target location to have the same.
    ! Then, compute the distance and compare.
 
@@ -376,7 +374,7 @@ do i = 1,get_model_size()
    if ( thisdist(i) == closest ) then
       call get_state_meta_data(i, loc1)
       vals = get_location(loc1)
-      write(*,'(3(1x,f14.5),i3)') vals, i
+      write(*,'(A,1x,3(1x,f20.14),i10)') 'matched at ',vals, i
       matched = .true.
    endif
 

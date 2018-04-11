@@ -30,8 +30,8 @@ use    utilities_mod, only : initialize_utilities, finalize_utilities, &
                              open_file, close_file,E_ERR, E_MSG, error_handler
 
 use        model_mod, only : get_model_size, get_state_vector, &
-                             write_state_times,get_parflow_filename, &
-                             get_parflow_id,static_init_model
+                             write_state_times, get_parflow_filename, &
+                             get_parflow_id, static_init_model
 
 use  assim_model_mod, only : awrite_state_restart, open_restart_write, close_restart
 
@@ -49,26 +49,27 @@ character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (T
 ! namelist parameters with default values.
 !-----------------------------------------------------------------------
 
+logical            :: verbose = .TRUE.
 character(len=128) :: pfb_to_dart_output_file  = 'dart_ics'
 
-namelist /pfb_to_dart_nml/    &
-     pfb_to_dart_output_file
+namelist /pfb_to_dart_nml/ pfb_to_dart_output_file, verbose
 
 !----------------------------------------------------------------------
 ! global storage
 !----------------------------------------------------------------------
 
+character(len=512)    :: string1, string2
 character(len=256)    :: parflow_filename
-logical               :: verbose = .TRUE.
 integer               :: io, iunit, x_size
-integer               :: pfid               !ParFlow ID
 type(time_type)       :: model_time
-real(r8), allocatable :: x(:)               !statevector
-character(len=512)   :: string1, string2
+real(r8), allocatable :: x(:)       ! statevector
+integer               :: pfid       ! ParFlow ID (PRESSURE_HEAD -or- SATURATION)
 
 !======================================================================
 
 call initialize_utilities(progname='parflow_to_dart')
+
+call static_init_model() ! to initialize the model_mod
 
 !----------------------------------------------------------------------
 ! Read the namelist to get the output filename.
@@ -80,22 +81,20 @@ call check_namelist_read(iunit, io, "pfb_to_dart_nml") ! closes, too.
 
 pfid = get_parflow_id()
 
-parflow_filename = get_parflow_filename(pfid)        ! 1/2 for press/sat file  
+parflow_filename = get_parflow_filename(pfid)
 
 write(string1,*) 'converting parflow file "'//trim(parflow_filename)//'"'
 write(string2,*) ' to DART file "'//trim(pfb_to_dart_output_file)//'"'
-call error_handler(E_MSG,'parflow_to_dart',string1,text2=string2)
+call error_handler(E_MSG, 'parflow_to_dart', string1, text2=string2)
 
 !----------------------------------------------------------------------
 ! get to work
 !----------------------------------------------------------------------
 
-call static_init_model()
-
 x_size = get_model_size()
 allocate( x(x_size) )
 
-call get_state_vector(x, pfid, model_time)   ! 1/2 for press/sat file 
+call get_state_vector(x, pfid, model_time)
 
 iunit = open_restart_write(pfb_to_dart_output_file)
 
@@ -112,8 +111,8 @@ call close_file(iunit)
 ! finish up
 !----------------------------------------------------------------------
 
-call print_date(model_time, str='parflow_to_dart:model model date')
-call print_time(model_time, str='parflow_to_dart:DART model time')
+call print_date(model_time, str='parflow_to_dart:model date')
+call print_time(model_time, str='parflow_to_dart:model time')
 call finalize_utilities()
 
 end program parflow_to_dart
