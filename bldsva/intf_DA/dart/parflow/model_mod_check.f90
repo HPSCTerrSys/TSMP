@@ -284,7 +284,7 @@ call print_time( model_time,'model_mod_check:model time')
 
  999 continue
 
-call finalize_utilities()
+call finalize_utilities(progname='model_mod_check')
 
 ! end of main program
 

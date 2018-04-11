@@ -111,9 +111,9 @@ call close_file(iunit)
 ! finish up
 !----------------------------------------------------------------------
 
-call print_date(model_time, str='parflow_to_dart:model date')
-call print_time(model_time, str='parflow_to_dart:model time')
-call finalize_utilities()
+call print_date(model_time, str=' parflow_to_dart model date')
+call print_time(model_time, str=' parflow_to_dart model time')
+call finalize_utilities(progname='parflow_to_dart')
 
 end program parflow_to_dart
 

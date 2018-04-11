@@ -367,7 +367,7 @@ type(time_type)   :: missing
 missing = set_time_missing()
 
 if (start_date == missing) then
-   write(string1,*)'start_date was not set'
+   write(string1,*)'TJH start_date was not set'
    call error_handler(E_ERR,'write_state_time',string1,source,revision,revdate)
 endif
 
@@ -375,8 +375,6 @@ call get_date(statetime, iyear, imonth, iday, ihour, imin, isec)
 nsecs = (ihour*60 + imin)*60 + isec 
 write(iunit, '(''clmext '',I4.4,2(''-'',I2.2),''-'',i5.5)') iyear, imonth, iday, nsecs
 write(iunit, '(''defaultInitDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear, imonth, iday, ihour 
-
-call print_date( start_date,'TJH debug write_state_times:start date')
 
 interval = statetime - start_date
 
@@ -955,12 +953,12 @@ allocate(pfbdata(nx,ny,nz))
 if (sv_id == PRESSURE_HEAD) then
 
    call pfread_var(parflow_press_file, pfbdata) 
-   write(string1,*)'reading from "'//trim(parflow_press_file)//'"'
+   write(string1,'(A)')'reading from "'//trim(parflow_press_file)//'"'
 
 elseif (sv_id == SATURATION) then
 
    call pfread_var(parflow_satur_file, pfbdata)
-   write(string1,*)'reading from "'//trim(parflow_satur_file)//'"'
+   write(string1,'(A)')'reading from "'//trim(parflow_satur_file)//'"'
 
 else
 
@@ -990,16 +988,16 @@ sv(:) = reshape(pfbdata,(/ (nx*ny*nz) /))
 
    if (debug > 0 .and. do_output()) then
       if (present(model_time)) then
-      call print_date( model_time,'get_state_vector:model date')
-      call print_time( model_time,'get_state_vector:model time')
-      call print_date( model_time,'get_state_vector:model date',logfileunit)
-      call print_time( model_time,'get_state_vector:model time',logfileunit)
+      call print_date( model_time,' get_state_vector model date')
+      call print_time( model_time,' get_state_vector model time')
+      call print_date( model_time,' get_state_vector model date',logfileunit)
+      call print_time( model_time,' get_state_vector model time',logfileunit)
       endif
 
-      call print_date( start_date,'get_state_vector:start date')
-      call print_time( start_date,'get_state_vector:start time')
-      call print_date( start_date,'get_state_vector:start date',logfileunit)
-      call print_time( start_date,'get_state_vector:start time',logfileunit)
+      call print_date( start_date,' get_state_vector start date')
+      call print_time( start_date,' get_state_vector start time')
+      call print_date( start_date,' get_state_vector start date',logfileunit)
+      call print_time( start_date,' get_state_vector start time',logfileunit)
    endif
 
 ! endif  !>@todo check
@@ -1042,10 +1040,12 @@ integer(kind=4), parameter   :: rz  = 0
 
 if ( .not. module_initialized ) call static_init_model
 
-write(string1,*) 'The DART posterior file is "'//trim(dart_file)//'"'
-write(string2,*) 'The new (posterior) parflow restart file is "'//trim(newfile)//'"'
-call error_handler(E_MSG, 'write_parflow_file', string1, &
-           source, revision, revdate, text2=string2)
+if (debug > 99 .and. do_output()) then
+   write(string1,*) 'The DART posterior file is "'//trim(dart_file)//'"'
+   write(string2,*) 'The new (posterior) parflow restart file is "'//trim(newfile)//'"'
+   call error_handler(E_MSG, 'write_parflow_file', string1, &
+              source, revision, revdate, text2=string2)
+endif
 
 if ( .not. file_exist(dart_file) ) then 
    write(string1,*) 'cannot open file "', trim(dart_file),'" for reading.'
@@ -1090,7 +1090,7 @@ nnx = INT(nx/nxs)
 nny = INT(ny/nys)
 nnz = nz
 iz = 0
-!
+
 do iys = 0, nys-1
 do ixs = 0, nxs-1
 
@@ -1118,6 +1118,7 @@ do ixs = 0, nxs-1
   do  k=iz +1 , iz + nnz
   do  j=iy +1 , iy + nny
   do  i=ix +1 , ix + nnx
+
     if (sID(i,j,k).eq.1) then
       a_vG = sval(1)
       N_vG = sval(2)
@@ -1126,13 +1127,20 @@ do ixs = 0, nxs-1
       !CPS psi has to approach infinity to Sw to reach Sres
       Sw   = min(1._r8,max(pfvar(i,j,k),Sres + 0.001_r8))
     else
-      call error_handler(E_ERR, 'write_parflow_file', 'sID/=1', source,revision,revdate)
+      write(string1,*)'sID(i,j,k) /= 1 at i,j,k',i,j,k
+      call error_handler(E_ERR,'write_parflow_file',string1,source,revision,revdate)
     endif
+
     if (k.eq.nz .and. Sw.eq.1._r8) then
       pfarr(i,j,k) = max(pfarr(i,j,k),0._r8) 
     elseif (Sw.lt.1._r8 ) then  !UnsatZ
-      pfarr(i,j,k) = -(1._r8/a_vG)*((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1._r8))) - 1._r8)**(1._r8/N_vG) 
+      pfarr(i,j,k) = -(1._r8/a_vG) * &
+                ((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1._r8))) - 1._r8)**(1._r8/N_vG) 
+    !>@todo what happens here
+    !> else
+    !>@todo what happens here
     endif
+
     write(iunit) pfarr(i,j,k)
   end do
   end do

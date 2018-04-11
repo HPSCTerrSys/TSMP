@@ -96,10 +96,10 @@ else
 endif
 call close_restart(iunit)
 
-call print_date( model_time,' dart_to_parflow: model date')
-call print_time( model_time,' dart_to_parflow: model time')
-call print_date( model_time,' dart_to_parflow: model date',logfileunit)
-call print_time( model_time,' dart_to_parflow: model time',logfileunit)
+call print_date( model_time,' dart_to_parflow model date')
+call print_time( model_time,' dart_to_parflow model time')
+call print_date( model_time,' dart_to_parflow model date',logfileunit)
+call print_time( model_time,' dart_to_parflow model time',logfileunit)
 
 !----------------------------------------------------------------------
 ! update the current model state vector
@@ -120,15 +120,18 @@ elseif (pfid .eq. SATURATION) then
    write(string3,'(A)')'PRESSURE_HEAD'
 endif
 
-write(string1,*) 'converting DART file "'//trim(dart_to_pfb_input_file)//'"'
-write(string2,*) 'using parflow state "'//trim(string3)//'"'
-write(string3,*) 'updating "'//trim(pfb_restart_filename)//'"'
+write(string1,'(A)')'converting DART file "'//trim(dart_to_pfb_input_file)//'"'
+write(string2,'(A)')'using parflow state "'//trim(string3)//'"'
+write(string3,'(A)')'updating "'//trim(pfb_restart_filename)//'"'
 call error_handler(E_MSG,'dart_to_parflow',string1,text2=string2,text3=string3)
 
 call get_state_vector(pfb_state, jpfb)
 
 call write_parflow_file(statevector, pfb_state, &
              dart_to_pfb_input_file, pfb_restart_filename)
+
+!>@todo ... dart_posterior_times.txt and dart_prior_time.txt will always
+!>          have the same information ...
 
 iunit = open_file('dart_posterior_times.txt', action='write')
 call write_state_times(iunit, model_time)
@@ -138,14 +141,16 @@ call close_file(iunit)
 ! Log what we think we're doing, and exit.
 !----------------------------------------------------------------------
 
+!>@ the adv_to_time is never used ... we can skip this if need be ...
+
 if ( advance_time_present ) then
-call print_time(adv_to_time,'dart_to_parflow:advance_to time')
-call print_date(adv_to_time,'dart_to_parflow:advance_to date')
-call print_time(adv_to_time,'dart_to_parflow:advance_to time',logfileunit)
-call print_date(adv_to_time,'dart_to_parflow:advance_to date',logfileunit)
+call print_time(adv_to_time,' dart_to_parflow advance_to time')
+call print_date(adv_to_time,' dart_to_parflow advance_to date')
+call print_time(adv_to_time,' dart_to_parflow advance_to time',logfileunit)
+call print_date(adv_to_time,' dart_to_parflow advance_to date',logfileunit)
 endif
 
-call finalize_utilities()
+call finalize_utilities(progname='dart_to_parflow')
 
 end program dart_to_parflow
 
