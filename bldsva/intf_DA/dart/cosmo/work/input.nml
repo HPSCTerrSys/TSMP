@@ -166,7 +166,6 @@
    assimilation_period_days     = 0
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.1
-   output_1D_state_vector       = .false.
    debug                        = 1 
    variables = '2',  '33', 'U',  'KIND_U_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
                '2',  '34', 'V',  'KIND_V_WIND_COMPONENT',       'NA' , 'NA' , 'UPDATE',
