@@ -508,7 +508,6 @@ if (istatus /= 0) return
 call get_level_indices(geo_hgt, hgt_inds, hgt_wgt, istatus)
 if (istatus /= 0) return
 
-
 if (obs_type == KIND_SOIL_SATURATION) then
 
    ! Horizontal interpolation at two levels given by hgt_inds
@@ -517,7 +516,7 @@ if (obs_type == KIND_SOIL_SATURATION) then
    if (istatus /= 0) return
 
    ! Vertical interpolation to scalar estimate.
-   interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+   interp_val = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
 
    return
 
@@ -525,14 +524,14 @@ else if (obs_type == KIND_SOIL_MOISTURE) then
 
    call calculate_soil_moisture(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
    if (istatus /= 0) return
-   interp_val   = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+   interp_val   = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
    return
 
 elseif (obs_type == KIND_SOIL_WATER_CONTENT) then
 
    call calculate_soil_water_content(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
    if (istatus /= 0) return
-   interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+   interp_val = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
    return
 
 endif
@@ -1686,7 +1685,8 @@ end subroutine define_var_dims
 
 
 !------------------------------------------------------------------------
-!> Horizontal interpolation at two height indices
+!> Horizontal interpolation for each of two heights.
+!> Result is two values - one at each height.
 
 subroutine horizontal_interpolate(x, ivar, kk_inds, ij_inds, ij_wgts, interp_hv, istatus)
 
@@ -1721,8 +1721,9 @@ if (debug > 99 .and. do_output()) then
    write(*,*)
    write(*,*)' ileft, jbot, level_index decompose to ', ll, x(ll), ij_rwgts(1)  
    write(*,*)'iright, jbot, level_index decompose to ', lr, x(lr), ij_wgts(1)
-   write(*,*)'iright, jtop, level_index decompose to ', ur, x(ur), ij_rwgts(2)  
-   write(*,*)' ileft, jtop, level_index decompose to ', ul, x(ul), ij_rwgts(2) 
+   write(*,*)'iright, jtop, level_index decompose to ', ur, x(ur), ij_wgts(1)  
+   write(*,*)' ileft, jtop, level_index decompose to ', ul, x(ul), ij_rwgts(1) 
+   write(*,*)' bottom, top weights are ', ij_rwgts(2), ij_rwgts(1) 
    write(*,*)' horizontal value is ', kk_inds(1), interp_hv(1)
    write(*,*)' horizontal value is ', kk_inds(2), interp_hv(2)
 endif
@@ -1759,12 +1760,13 @@ endif
 
 end function ijk_to_dart
 
+
 !------------------------------------------------------------------------
 !> Get model corners for the observed location
 !> Adapted from cosmo interp routines
 
-subroutine get_corners(lon, lat, nx, ny, gridlons, gridlats, ij_inds, &
-                        ij_wgts, istatus)
+subroutine get_corners(lon, lat, nx, ny, gridlons, gridlats, &
+                       ij_inds, ij_wgts, istatus)
 
 real(r8), intent(in)  :: lon
 real(r8), intent(in)  :: lat
@@ -1772,9 +1774,8 @@ integer,  intent(in)  :: nx
 integer,  intent(in)  :: ny
 real(r8), intent(in)  :: gridlons(nx)
 real(r8), intent(in)  :: gridlats(ny)
-
 integer,  intent(out) :: ij_inds(4) ! ileft, iright, jbot, jtop
-real(r8), intent(out) :: ij_wgts(2)    ! ifrac, jfrac
+real(r8), intent(out) :: ij_wgts(2) ! ifrac, jfrac
 
 !Local Variables
 integer               :: istatus, indarr(1)
@@ -1799,13 +1800,13 @@ endif
 !    |------------|---------------------|
 ! lonleft       lon                  lonright
 ! ij_inds(1)                         ij_inds(2)
+! 'dlon' is ij_wghts(1)
 
 if (lon == gridlons(nx)) then
    ij_inds(1)  = nx-1
    ij_inds(2)  = nx
-   ij_wgts(1)  = 0.0_r8  ! fractional distance to min
+   ij_wgts(1)  = 0.0_r8  ! weight for the lonleft
 else
-!CPS   indarr = maxloc(gridlons , gridlons <= lon)
    indarr      = minloc(abs(gridlons-lon))   
    if (gridlons(indarr(1)) .gt. lon) then
      ij_inds(1)  = indarr(1) - 1
@@ -1813,11 +1814,10 @@ else
      ij_inds(1)  = indarr(1)
    endif
    ij_inds(2)  = ij_inds(1) + 1
-   dlon        =     lon          - gridlons(ij_inds(1))
+   dlon        =     lon              - gridlons(ij_inds(1)) ! see figure
    dlonT       = gridlons(ij_inds(2)) - gridlons(ij_inds(1))
    ij_wgts(1)  = dlon / dlonT
 endif
-
 
 ! latitudes are arranged 'south' to 'north', i.e. -90 to 90 (geographical) 
 !
@@ -1832,7 +1832,6 @@ if (lat == gridlats(ny)) then
    ij_inds(4) = ny
    ij_wgts(2) = 0.0_r8
 else
-!CPS   indarr = maxloc( gridlats,  gridlats <= lat)
    indarr      = minloc(abs(gridlats-lat))
     if (gridlats(indarr(1)) .gt. lat) then 
      ij_inds(3)  = indarr(1) - 1
@@ -1840,11 +1839,10 @@ else
      ij_inds(3)  = indarr(1)
    endif
    ij_inds(4)   = ij_inds(3) + 1
-   dlat         =     lat        - gridlats(ij_inds(3))
+   dlat         =           lat        - gridlats(ij_inds(3))
    dlatT        = gridlats(ij_inds(4)) - gridlats(ij_inds(3))
    ij_wgts(2)   = dlat / dlatT
 endif
-
 
 istatus = 0
 
@@ -1874,10 +1872,8 @@ subroutine get_level_indices(height, kk_inds, kk_wgt, istatus)
 !                 | ............ dztot ............. |
 !                 | ... dz ... |
 !                 |------------|---------------------|
-!               ztop         height                 zbot
-!              iabove                              ibelow
+!               ideeper      height                 ishallower
 !              kk_inds(1)                          kk_inds(2) 
-
 
 real(r8), intent(in)  :: height
 integer,  intent(out) :: kk_inds(2) 
@@ -1897,19 +1893,16 @@ endif
 
 if (height == vcoord(1)) then
   kk_inds(1) = 1
-  kk_inds(2) = 1 !CPS 2
+  kk_inds(2) = 1
   kk_wgt     = 0._r8
-elseif (height == vcoord(nz)) then     !Surface pressure head assimilation
+elseif (height == vcoord(nz)) then
   kk_inds(1) = nz
   kk_inds(2) = nz   
   kk_wgt     = 0._r8
 else
-  !indarr  = minloc( vcoord,  vcoord >= height )
-  !write(*,*) "CPS",vcoord
-  !write(*,*) "CPS", height, indarr(1), vcoord(indarr(1))
   indarr  = minloc( vcoord,  vcoord > height )
-  kk_inds(1) = indarr(1)
-  kk_inds(2) = kk_inds(1) + 1
+  kk_inds(1) = indarr(1)       ! Deeper layer
+  kk_inds(2) = kk_inds(1) + 1  ! Shallower layer
   dz     = vcoord(kk_inds(1)) - height
   dztot  = vcoord(kk_inds(1)) - vcoord(kk_inds(2))
   kk_wgt = dz / dztot
@@ -1917,9 +1910,11 @@ endif
 
 if (debug > 99 .and. do_output()) then
   write(*,*)
-  write(*,*)'vertical levels for ParFlow '
-  write(*,*)'iabove, levelfrac, ibelow ', kk_inds(1), kk_wgt, kk_inds(2)
-  write(*,*)'iabove, height, ibelow ', vcoord(kk_inds(1)), height, vcoord(kk_inds(2))
+  write(*,'(A30,f20.15,1x,i2)')'height at shallower layer',vcoord(kk_inds(2)), kk_inds(2)
+  write(*,*)'frac',kk_wgt
+  write(*,'(A30,f20.15)')'desired        height ',height
+  write(*,*)'frac',1.0_r8 - kk_wgt
+  write(*,'(A30,f20.15,1x,i2)')'height at deeper    layer',vcoord(kk_inds(1)), kk_inds(1)
   write(*,*)
 endif
 
@@ -2066,7 +2061,7 @@ do k = 1, 2
   ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(k))
   ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(k))
 
-  saturation = (/ x(ll), x(lr), x(ul), x(ur) /)
+  saturation = (/ x(ll), x(lr), x(ur), x(ul) /)
 
   soilID = soil_type(ij_inds(1), ij_inds(3), kk_inds(k)) 
   porosities(1) = soil_parameters(POROSITY,soilID) ! lower left
@@ -2086,12 +2081,21 @@ do k = 1, 2
                  ij_wgts(2)  * (ij_rwgts(1)*saturation(4) + ij_wgts(1)*saturation(3))
 enddo
 
+! ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(k))
+! lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(k))
+! ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(k))
+! ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(k))
+
+! interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
+!                ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
+
 if (debug > 99 .and. do_output()) then
    write(*,*)
    write(*,*)' ileft, jbot, level_index decompose to ', ll, x(ll), ij_rwgts(1)  
    write(*,*)'iright, jbot, level_index decompose to ', lr, x(lr), ij_wgts(1)
    write(*,*)'iright, jtop, level_index decompose to ', ur, x(ur), ij_rwgts(2)  
    write(*,*)' ileft, jtop, level_index decompose to ', ul, x(ul), ij_rwgts(2) 
+   write(*,*)' bottom, top weights are ', ij_rwgts(2), ij_rwgts(1) 
    write(*,*)' horizontal value is ', kk_inds(1), interp_hv(1)
    write(*,*)' horizontal value is ', kk_inds(2), interp_hv(2)
 endif

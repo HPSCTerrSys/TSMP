@@ -138,7 +138,7 @@
    parflow_assim_variable        = 'saturation'
    assimilation_period_days      = 0 
    assimilation_period_seconds   = 21400 
-   debug                         = 10
+   debug                         = 0
    /
 
 &pfb_to_dart_nml
@@ -243,14 +243,26 @@
    /
 
 &model_mod_check_nml
-   dart_input_file            = 'dart_prior'
-   output_file                = 'mmc_output'
-   advance_time_present       = .false.
-   x_ind                      = 8000
-   kind_of_interest           = 'KIND_SOIL_MOISTURE'
-   verbose                    = .FALSE.
-   test1thru                  = 11
-   loc_of_interest            = 5.5, 49.88, 0.5
-   interp_test_vertcoord      = 'VERTISHEIGHT'
+   dart_input_file       = 'dart_prior'
+   output_file           = 'mmc_output'
+   advance_time_present  = .false.
+   x_ind                 = 8000
+   kind_of_interest      = 'KIND_SOIL_MOISTURE'
+   verbose               = .FALSE.
+   test1thru             = 9
+   loc_of_interest       = 5.5730320707600001, 49.937321821019999, 0.01
+   interp_test_vertcoord = 'VERTISHEIGHT'
+   interp_test_lonrange  =  5.412,  5.617
+   interp_test_dlon      = 0.001
+   interp_test_latrange  = 49.840, 49.950
+   interp_test_dlat      = 0.001
+   interp_test_vertrange = 0.02, 0.50
+   interp_test_dvert     = 0.01
+   verbose               = .false.
    /
 
+
+ longitude index to the  west and  east are           19          20
+ latitude  index to the south and north are           12          13
+ lonW, lon, lonE   5.5730320707600001        5.5819999999999999        5.5820249635799994     
+ latS, lat, latN   49.937321821019999        49.940000000000005        49.946314713840003  
