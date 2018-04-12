@@ -29,10 +29,13 @@ use    utilities_mod, only : register_module, error_handler, nc_check, &
                              find_namelist_in_file, file_exist, to_upper, &
                              check_namelist_read, logfileunit
 
-use     obs_kind_mod, only : KIND_SOIL_MOISTURE, KIND_3D_PARAMETER,         &
-                             paramname_length,            &
-                             get_raw_obs_kind_index,      &
-                             get_raw_obs_kind_name
+use     obs_kind_mod, only : paramname_length, &
+                             get_raw_obs_kind_index, &
+                             get_raw_obs_kind_name, &
+                             KIND_3D_PARAMETER, &
+                             KIND_SOIL_SATURATION, &
+                             KIND_SOIL_WATER_CONTENT, &
+                             KIND_SOIL_MOISTURE
 
 use netcdf
 
@@ -102,7 +105,7 @@ integer, parameter :: BOUNDED_ABOVE = 2 ! ... maximum, but no minimum
 integer, parameter :: BOUNDED_BOTH  = 3 ! ... minimum and maximum
 
 integer, parameter :: PRESSURE_HEAD = 1
-integer, parameter :: SATURATION= 2
+integer, parameter :: SATURATION = 2
 
 ! Everything needed to describe a variable
 integer, parameter :: max_state_variables = 2   !ParFlow has press and satur 
@@ -133,16 +136,14 @@ type(progvartype), dimension(max_state_variables)     :: progvar
 real(r8), allocatable ::   lon(:,:)      ! longitude degrees_east
 real(r8), allocatable ::   lat(:,:)      ! latitude  degrees_north
 real(r8), allocatable ::   vcoord(:)     ! vertical co-ordinate in m
-real(r8), allocatable ::   sID(:,:,:)    ! pfl soil indicator 
-real(r8), allocatable ::   sval(:)       ! sID attributes (Ss,Sr,a,N)
-integer               ::   nsInd         ! nsInd/4 = unique sID 
+integer,  allocatable ::   soil_type(:,:,:)     ! pfl soil indicator 
+real(r8), allocatable ::   soil_parameters(:,:) ! soil attributes (Ss,Sr,a,N,Phi)
 type(time_type)       ::   parflow_time  ! parflow ouptut time
 integer               ::   ipfb ! determine from  parflow_assim_variable
 
 ! run-time options - the namelist and the defaults
 character(len=256) :: parflow_press_file           = 'parflow_press_file'
 character(len=256) :: parflow_satur_file           = 'parflow_satur_file'
-character(len=256) :: pfidb_file                   = 'pfidb_file'
 character(len=256) :: grid_file                    = 'grid_file'
 character(len=256) :: clm_file                     = 'clm_restart.nc'
 character(len=256) :: clm_file_s                   = 'clm_restart_s.nc'
@@ -156,7 +157,6 @@ integer            :: debug = 0
 namelist /model_nml/                &
       parflow_press_file,           &
       parflow_satur_file,           &
-      pfidb_file,                   &
       grid_file,                    &
       clm_file,                     &
       clm_file_s,                   &
@@ -230,10 +230,6 @@ if (debug > 0 .and. do_output()) write(*,'(A,3(1X,F9.2))') '    ... pfb grid res
 
 model_size = nx*ny*nz
 
-!! Get the vertical co-ordinate
-!allocate(vcoord(nz))
-!call pfidb_read(pfidb_file)
-
 ! Get the geo-locaion
 allocate(lon(nx,ny))
 allocate(lat(nx,ny))
@@ -247,9 +243,7 @@ if (debug > 1 .and. do_output()) then
 end if
 
 ! Get the vertical co-ordinate and soil indicators
-allocate(vcoord(nz))
-allocate(sID(nx,ny,nz))
-call soil_ind_read(soilInd_file)
+call read_soil_table(soilInd_file)
 
 ! TODO, var_type could switch between 1 and 2 for pressure and sat
 
@@ -281,7 +275,7 @@ progvar(ivar)%dimnames(3)     = 'level'
 progvar(ivar)%dimlens(1)      = nx 
 progvar(ivar)%dimlens(2)      = ny 
 progvar(ivar)%dimlens(3)      = nz 
-progvar(ivar)%pfb_kind        = KIND_SOIL_MOISTURE   !To Remove from assim 
+progvar(ivar)%pfb_kind        = KIND_SOIL_SATURATION
 progvar(ivar)%index1          = 1  
 progvar(ivar)%rangeRestricted = BOUNDED_BOTH      
 progvar(ivar)%minvalue        = 0._r8                != f(soil index) 
@@ -448,6 +442,7 @@ subroutine model_interpolate(x, location, obs_type, interp_val, istatus)
 ! Error codes:
 ! istatus = 99 : unknown error
 ! istatus = 10 : observation type is not in state vector
+! istatus = 11 : observation type cannot be computed
 ! istatus = 15 : observation lies outside the model domain (horizontal)
 ! istatus = 16 : observation lies outside the model domain (vertical)
 ! istatus = 19 : observation vertical coordinate is not supported
@@ -463,7 +458,6 @@ integer, parameter :: VERTICAL_UNSUPPORTED = 19
 
 ! Local Variables
 
-integer  :: pfb_kind
 integer  :: i, ivar
 integer  :: geo_inds(4), hgt_inds(2)
 real(r8) :: geo_wgts(4), hgt_wgt
@@ -478,47 +472,70 @@ if ( .not. module_initialized ) call static_init_model
 interp_val = MISSING_R8     ! the DART bad value flag
 istatus = 99                ! unknown error
 
-pfb_kind = obs_type
+! Identity observation support
 
-if ( pfb_kind < 0 ) then
-   interp_val = x(-1*pfb_kind)
+if ( obs_type < 0 ) then
+   interp_val = x(-1*obs_type)
    istatus = 0
    return
 endif
-
-! Determine if this pfb_kind exists in ParFlow state vector
-! Unnecessary but who knows if ivar will increase in future
-
-ivar = -1
-FoundIt: do i = 1, max_state_variables     ! we do not yet define nfields in input_nml
-   if (progvar(i)%pfb_kind == pfb_kind) then
-      ivar = i
-      exit FoundIt
-   endif
-enddo FoundIt
 
 ! Get the geo-location
 point_coords(1:3) = get_location(location)
 geo_lon = point_coords(1) ! degrees East
 geo_lat = point_coords(2) ! degrees North
-geo_hgt  = point_coords(3) ! depth in meters 
+geo_hgt = point_coords(3) ! depth in meters 
 
-call get_corners(geo_lon, geo_lat, nx, ny, lon(1:nx,1), lat(1,1:ny), geo_inds, geo_wgts, istatus) 
+! Determine if the state has soil saturation
 
+ivar = -1
+FoundIt: do i = 1, max_state_variables
+   if (progvar(i)%pfb_kind == KIND_SOIL_SATURATION) then
+      ivar = i
+      exit FoundIt
+   endif
+enddo FoundIt
+if (ivar < 0) then
+   istatus = NO_KIND_IN_STATE
+   return
+endif
+
+! Get the corners, weights, etc. needed by every method
+call get_corners(geo_lon, geo_lat, nx, ny, lon(1:nx,1), lat(1,1:ny), &
+                 geo_inds, geo_wgts, istatus) 
 if (istatus /= 0) return
 
 call get_level_indices(geo_hgt, hgt_inds, hgt_wgt, istatus)
-
 if (istatus /= 0) return
 
-! Horizontal interpolation at two levels given by hgt_inds
-call horizontal_interpolate(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
 
-interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+if (obs_type == KIND_SOIL_SATURATION) then
 
-istatus = 0
+   ! Horizontal interpolation at two levels given by hgt_inds
+   call horizontal_interpolate(x, ivar, hgt_inds, geo_inds, geo_wgts, &
+                            interp_h_var, istatus)
+   if (istatus /= 0) return
 
-return 
+   ! Vertical interpolation to scalar estimate.
+   interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+
+   return
+
+else if (obs_type == KIND_SOIL_MOISTURE) then
+
+   call calculate_soil_moisture(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
+   if (istatus /= 0) return
+   interp_val   = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+   return
+
+elseif (obs_type == KIND_SOIL_WATER_CONTENT) then
+
+   call calculate_soil_water_content(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
+   if (istatus /= 0) return
+   interp_val = interp_h_var(1)*hgt_wgt + interp_h_var(2)*(1.0_r8 - hgt_wgt)
+   return
+
+endif
 
 end subroutine model_interpolate
 
@@ -594,8 +611,8 @@ subroutine end_model()
 deallocate(lon,lat)
 deallocate(vcoord)
 deallocate(state_loc)
-deallocate(sID)
-deallocate(sval)
+deallocate(soil_type)
+deallocate(soil_parameters)
 !if ( allocated(ens_mean) ) deallocate(ens_mean)
 
 end subroutine end_model
@@ -1017,9 +1034,10 @@ real(r8),         intent(in) :: pfb_state(:)    ! diagnostic vector
 character(len=*), intent(in) :: dart_file       ! the filename
 character(len=*), intent(in) :: newfile         ! the name of the new parflow restart
 
+character(len=*), parameter :: routine = 'write_parflow_file'
 real(r8)                     :: rbuf(nx*ny*nz) ! data to be read
 logical                      :: desiredG  = .false.
-integer                      :: ivar, izerr
+integer                      :: ivar, izerr, soilID
 
 !pfb
 real(r8), parameter          :: max_press_head = 0.005_r8
@@ -1042,13 +1060,13 @@ if ( .not. module_initialized ) call static_init_model
 if (debug > 99 .and. do_output()) then
    write(string1,*) 'The DART posterior file is "'//trim(dart_file)//'"'
    write(string2,*) 'The new (posterior) parflow restart file is "'//trim(newfile)//'"'
-   call error_handler(E_MSG, 'write_parflow_file', string1, &
+   call error_handler(E_MSG, routine, string1, &
               source, revision, revdate, text2=string2)
 endif
 
 if ( .not. file_exist(dart_file) ) then 
    write(string1,*) 'cannot open file "', trim(dart_file),'" for reading.'
-   call error_handler(E_ERR,'write_parflow_file',string1,source,revision,revdate)
+   call error_handler(E_ERR,routine,string1,source,revision,revdate)
 endif
 
 if (desiredG) rbuf = apply_clamping(ivar, sv)    ! For global clamping CPS
@@ -1064,7 +1082,7 @@ open(iunit, file=newfile, status='unknown', access='stream', &
      convert='BIG_ENDIAN', form='unformatted', iostat=izerr)
 if (izerr /= 0) then
    write(string1,*) 'cannot create file "', trim(newfile),'".'
-   call error_handler(E_ERR,'write_parflow_file',string1,source,revision,revdate)
+   call error_handler(E_ERR,routine,string1,source,revision,revdate)
 endif
 rewind(iunit)
 
@@ -1118,26 +1136,24 @@ do ixs = 0, nxs-1
   do  j=iy +1 , iy + nny
   do  i=ix +1 , ix + nnx
 
-    if (sID(i,j,k).eq.1) then
-      a_vG = sval(1)
-      N_vG = sval(2)
-      Sres = sval(3)
-      Ssat = sval(4)
-      !CPS psi has to approach infinity to Sw to reach Sres
-      Sw   = min(1._r8,max(pfvar(i,j,k),Sres + 0.001_r8))
-    else
-      write(string1,*)'sID(i,j,k) /= 1 at i,j,k',i,j,k
-      call error_handler(E_ERR,'write_parflow_file',string1,source,revision,revdate)
-    endif
+    soilID = soil_type(i,j,k)
+    a_vG   = soil_parameters(1,soilID)
+    N_vG   = soil_parameters(2,soilID)
+    Sres   = soil_parameters(3,soilID)
+    Ssat   = soil_parameters(4,soilID)
 
-    if (k.eq.nz .and. Sw.eq.1._r8) then
+    !CPS psi has to approach infinity to Sw to reach Sres
+    Sw   = min(1._r8,max(pfvar(i,j,k),Sres + 0.001_r8))
+
+    if (k .eq. nz .and. Sw .eq. 1._r8) then ! saturated
       pfarr(i,j,k) = max(pfarr(i,j,k),0._r8) 
+
     elseif (Sw.lt.1._r8 ) then  !UnsatZ
       pfarr(i,j,k) = -(1._r8/a_vG) * &
                 ((((Ssat-Sres)/(Sw-Sres))**(N_vG/(N_vG-1._r8))) - 1._r8)**(1._r8/N_vG) 
-    !>@todo what happens here
-    !> else
-    !>@todo what happens here
+    else
+       write(string1,*)'Should not be possible.'
+       call error_handler(E_ERR,routine,string1,source,revision,revdate)
     endif
 
     write(iunit) pfarr(i,j,k)
@@ -1220,127 +1236,104 @@ endif
 end function get_parflow_filename
 
 
-!------------------------------------------------------------------
-!> Reads pfidb ascii file to extract time and vertical co-ordinate
-
-subroutine pfidb_read(filename)
-
-character(len=*), intent(in)   :: filename
-
-integer(kind=4)                :: nudat, izerr, iz
-character(len=256)             :: errmsg
-real(r8)                       :: pfb_dz(nz)
-integer(kind=4)                :: yyyy, mm, dd, hh, mn, ss,  ts
-
-! code starts here
-  if (debug > 1 .and. do_output()) write(*,*) 'pdidb opening "'//trim(filename)//'"'
-
-!>@todo TJH understand what is going on here.
-!>@todo what is up with all the integer(kind=4) ...
- 
-  nudat = open_file(filename,'formatted','read')
-  read(nudat,*,iostat=izerr) yyyy, mm, dd, ts 
-  if (izerr < 0) call error_handler(E_ERR,'pfidb_read','error time', source, revision, revdate)
-  if (debug > 10 .and. do_output()) write(*,*) ' DUMMY ...parflow time ',yyyy, mm, dd, ts
-
-  hh = int(ts/3600._r8)
-  mn = int(ts - hh*3600)
-  ss = mod(ts, 60)  
-
-  parflow_time = set_date(yyyy,mm,dd,hh,mn,ss) 
-
-  do iz = 1, nz
-    read(nudat,'(F5.2)',iostat=izerr) pfb_dz(iz)
-    if (izerr < 0) then
-       write(errmsg,*) 'ERROR READING pfidb_dz file ', iz
-       call error_handler(E_ERR,'pfidb_read', errmsg, source, revision, revdate)
-    endif
-  end do
-
-  do iz = nz, 1, -1
-    if (iz == nz) then
-      vcoord(iz) = 0.5_r8 * pfb_dz(iz) 
-    else
-      vcoord(iz) = vcoord(iz+1) + 0.5_r8 *(pfb_dz(iz+1) + pfb_dz(iz))
-    end if
-    if (debug > 10 .and. do_output()) write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)')   '... pfidb ' ,&
-                                         iz, pfb_dz(iz), vcoord(iz)
-  end do
-
-  close(nudat)
-
-end subroutine pfidb_read
-
-
 !-----------------------------------------------------------------
 !> Reads the soilInd file to extract the parflow soil parameters
-!> sID ( lat, lon, lev )
+!> The soil_type matrix is an integer table of soil classifications.
+!> The value in the matrix is an index into a 2D array of soil
+!> parameters. 
+!> int sID(lev, lat, lon) ;
+!>     sID:units = "-" ;
+!>     sID:longname = "ParFlow soil ID" ;
+!>     sID:_FillValue = -9999 ;
+!> double sparmval(sID, parameters) ;
+!>     sparmval:units = "-" ;
+!>     sparmval:longname = "Soil Parameters" ;
+!>     sparmval:parameters = "a_vG N_vG Sres Sat Phi" ;
+!>     sparmval:_FillValue = -9999.
+!>
+!> routine fills in module variables:
+!>    soil_type(nx,ny,nz) .... integer soil types at each gridcell
+!>    soil_parameters(nparams,:) ... 5 parameters for each integer type
+!>    vcoord(nz) ... depth (m)
 
-subroutine soil_ind_read(filename)
+subroutine read_soil_table(filename)
 
-character(len=*), intent(in)   :: filename
+character(len=*), intent(in) :: filename
 
-integer :: ncid, io, nlon, nlat, nlev, dimid(3), varid(4) 
-integer :: iz
+character(len=*), parameter :: routine = 'read_soil_table'
+
+character(len=obstypelength) :: dimnames(NF90_MAX_VAR_DIMS)
+
+integer :: dimids(NF90_MAX_VAR_DIMS)
+integer :: dimlens(NF90_MAX_VAR_DIMS)
+integer :: ncid, io, ndims, varid 
+integer :: i, iz
 real(r8):: pfb_dz(nz) 
-character(len=*), parameter :: pname = "parm"
-character(len=*), parameter :: routine = 'soil_ind_read'
 
 io = nf90_open(filename, NF90_NOWRITE, ncid)
 call nc_check(io, routine, 'cannot open "'//trim(filename)//'"')
 
-io = nf90_inq_varid(ncid, "sID", varid(1))
+io = nf90_inq_varid(ncid, 'sID', varid)
 call nc_check(io, routine, 'inq_varid sID')
 
-io = nf90_inquire_attribute(ncid, varid(1), pname, nsInd)
-call nc_check(io, routine, 'inquire_attribute '//pname)
+io = nf90_inquire_variable(ncid, varid, dimids=dimids, ndims=ndims)
+do i = 1,ndims
+   write(string1,*)'inquire dimension ',i,' of "sID"'
+   io = nf90_inquire_dimension(ncid, dimids(i), name=dimnames(i), len=dimlens(i))
+   call nc_check(io, routine, string1)
+enddo
 
-io = nf90_inq_varid(ncid, "dz", varid(2))
-call nc_check(io, routine, 'inquire_varid dz')
-
-! Check dimensions for one of the variable
-io = nf90_inq_dimid(ncid, "lon", dimid(1))
-call nc_check(io, routine, 'inq_dimid lon')
-
-io = nf90_inq_dimid(ncid, "lat", dimid(2))
-call nc_check(io, routine, 'inq_dimid lat')
-
-io = nf90_inq_dimid(ncid, "lev", dimid(3))
-call nc_check(io, routine, 'inq_dimid lev')
-
-io = nf90_inquire_dimension(ncid, dimid(1), string1, len=nlon)
-call nc_check(io, routine, 'inquire_dimension length nlon')
-
-io = nf90_inquire_dimension(ncid, dimid(2), string1, len=nlat)
-call nc_check(io, routine, 'inquire_dimension length nlat')
-
-io = nf90_inquire_dimension(ncid, dimid(3), string1, len=nlev)
-call nc_check(io, routine, 'inquire_dimension length nlev')
-
-if (nlon /= nx .or. nlat /=ny .or. nlev /=nz) then
-  write(string1, *) 'dimension mismatch ... nlon ', nlon, ' /= ', nx, ' or '
-  write(string2, *) 'nlat ', nlat, ' /= ', ny, ' or '
-  write(string3, *) 'nlev ', nlev, ' /= ', nz
-  call error_handler(E_ERR,'soil_ind_read',string1, &
-             source,revision,revdate, text2=string2, text3=string3)
+if (dimlens(1) /= nx .or. dimlens(2) /=ny .or. dimlens(3) /=nz) then
+  write(string1, *) 'dimension mismatch ... nlon ', dimlens(1), ' /= ', nx, ' or '
+  write(string2, *) 'nlat ', dimlens(2), ' /= ', ny, ' or '
+  write(string3, *) 'nlev ', dimlens(3), ' /= ', nz
+  call error_handler(E_ERR,routine,string1, &
+             source, revision, revdate, text2=string2, text3=string3)
 endif
 
-io = nf90_get_var(ncid, varid(1), sID)
-call nc_check(io, routine, 'get_var sID')
+! Now we know the variable is shaped the same as the parflow state.
 
-allocate(sval(nsInd))
+allocate(soil_type(nx,ny,nz))
 
-io = nf90_get_att(ncid, varid(1), pname , sval)
-call nc_check(io, routine, 'get_att sval')
+io = nf90_get_var(ncid, varid, soil_type)
+call nc_check(io, routine, 'get_var soil_type "'//trim(filename)//'"')
 
-if (debug > 10 .and. do_output()) &
-   write(*,'(A,4(1X,F5.3))') '...sval ',sval(1),sval(2),sval(3),sval(4) 
+! move on to the lookup table of soil properties
 
-io = nf90_get_var(ncid, varid(2), pfb_dz)
-call nc_check(io, routine, 'get_var dz')
+io = nf90_inq_varid(ncid, 'sparmval', varid)
+call nc_check(io, routine, 'inq_varid sparmval "'//trim(filename)//'"')
+
+io = nf90_inquire_variable(ncid, varid, dimids=dimids, ndims=ndims)
+do i = 1,ndims
+   write(string1,*)'inquire dimension ',i,' of sparmval "'//trim(filename)//'"'
+   io = nf90_inquire_dimension(ncid, dimids(i), name=dimnames(i), len=dimlens(i))
+   call nc_check(io, routine, string1)
+enddo
+
+allocate(soil_parameters(dimlens(1),dimlens(2)))
+
+io = nf90_get_var(ncid, varid, soil_parameters)
+call nc_check(io, routine, 'get_var soil_parameters "'//trim(filename)//'"')
+
+if (debug > 0 .and. do_output()) then
+   do i = 1,size(soil_parameters,1)
+     write(*,'(A,1x,i8,A,5(1X,F5.3))') 'parameters for soil type ',i, &
+                                       ' are', soil_parameters(:,i)
+   enddo
+endif
+
+! move on to the lookup table of soil properties
+
+io = nf90_inq_varid(ncid, 'dz', varid)
+call nc_check(io, routine, 'inquire_varid dz "'//trim(filename)//'"')
+
+io = nf90_get_var(ncid, varid, pfb_dz)
+call nc_check(io, routine, 'get_var dz "'//trim(filename)//'"')
 
 io = nf90_close(ncid)
-call nc_check(io, routine, 'close "'//trim(filename))
+call nc_check(io, routine, 'close "'//trim(filename)//'"')
+
+allocate(vcoord(nz))
 
 do iz = nz, 1, -1
   if (iz == nz) then 
@@ -1352,7 +1345,7 @@ do iz = nz, 1, -1
     write(*,'(A,1X,I2,1X,F5.2,1X,F6.3)') '...dz_sID ', iz, pfb_dz(iz), vcoord(iz)
 end do
 
-end subroutine soil_ind_read
+end subroutine read_soil_table
 
 
 !------------------------------------------------------------------
@@ -1650,193 +1643,6 @@ end subroutine pfread_var
 
 
 !-----------------------------------------------------------------------
-!> Writes pfb binary file, based on tr32-z4-tools work of P. Shrestha
-
-subroutine pfwrite_var(filename,nx,ny,nz,dx,dy,dz,xd,yd,zd,nxs,nys,pfvar)
-
-character(len=*), intent(in)   :: filename
-integer(kind=4),  intent(in)   ::  &
-                   nx,             &     ! Longitude dimension
-                   ny,             &     ! Latitude dimension
-                   nz,             &                    ! Vertical dimension
-                   nxs, nys
-real(r8),         intent(in)   ::  &
-                   dx,             &     ! Grid Resolution in m
-                   dy,             &     ! Grid Resoultion in m
-                   dz,             &    ! Grid Resolution scale, check parflow namelist
-                   xd,yd,zd
-real(r8),         intent(in)   ::  &
-                   pfvar(nx,ny,nz)       ! ParFlow pressure files 
-
-
-character(len=*), parameter :: routine = 'pfwrite_var'
-integer(kind=4)             :: nudat, izerr
-character(len=256)          :: errmsg
-integer(kind=4)             :: i,j,k, ix, iy, iz, ns,       &
-                               rx, ry, rz, nnx, nny, nnz, ixs, iys
-
-! code starts here
-  nudat   = get_unit()
-  open(nudat,file=trim(filename),form='unformatted',access='stream' , &
-                    convert='BIG_ENDIAN',status='new', iostat=izerr) ! gfortran
-
-  if (izerr /= 0) then
-     write(string1,*) 'cannot open "', trim(filename),'" for reading.'
-     call error_handler(E_ERR,routine,string1,source,revision,revdate)
-  endif
-
-  !read in header infor
-  write(nudat, iostat=izerr) xd !X
-  if (izerr /= 0) then
-    errmsg   = "unable to write  X"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) yd !Y
-  if (izerr /= 0) then
-    errmsg   = "unable to write Y"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) zd !Z
-  if (izerr /= 0) then
-    errmsg   = "unable to write  Z"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-
-  write(nudat, iostat=izerr) nx !NX
-  if (izerr /= 0) then
-    errmsg   = "unable to write NX"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) ny !NY
-  if (izerr /= 0) then
-    errmsg   = "unable to write NY"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) nz !NZ
-  if (izerr /= 0) then
-    errmsg   = "unable to write NZ"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-
-  write(nudat, iostat=izerr) dx !dX
-  if (izerr /= 0) then
-    errmsg   = "unable to write  dx"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) dy !dY
-  if (izerr /= 0) then
-    errmsg   = "unable to write dy"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-  write(nudat, iostat=izerr) dz !dZ
-  if (izerr /= 0) then
-    errmsg   = "unable to write  dz"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-
-  ns = int(nxs*nys)
-  write(nudat,iostat=izerr)  ns !num_subgrids
-  if (izerr /= 0) then
-    errmsg   = "unable to write  ns"
-    call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-  endif
-! End: Writing of domain spatial information
-
-! Start: loop over number of sub grids
-  nnx = int(nx/nxs)
-  nny = int(ny/nys)
-  nnz = nz
-  iz = 0
-!
-  do iys = 0, nys-1
-  do ixs = 0, nxs-1
-
-! Start: Writing of sub-grid spatial information
-
-    ix = int(nnx*ixs)
-    iy = int(nny*iys)
-
-    write(nudat,iostat=izerr) ix
-    if (izerr /= 0) then
-      errmsg   = "unable to write  ix"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) iy
-    if (izerr /= 0) then
-      errmsg   = "unable to write  iy"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) iz
-    if (izerr /= 0) then
-      errmsg   = "unable to write  iz"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) nnx
-    if (izerr /= 0) then
-      errmsg   = "unable to write  nnx"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) nny
-    if (izerr /= 0) then
-      errmsg   = "unable to write  nny"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) nnz
-    if (izerr /= 0) then
-      errmsg   = "unable to write  nnz"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    rx = 0; ry = 0; rz=0
-    write(nudat,iostat=izerr) rx
-    if (izerr /= 0) then
-      errmsg   = "unable to write  rx"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) ry
-    if (izerr /= 0) then
-      errmsg   = "unable to write  ry"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-    write(nudat,iostat=izerr) rz
-    if (izerr /= 0) then
-      errmsg   = "unable to write  rz"
-      call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-    endif
-
-! End: Writing of sub-grid spatial information
-
-    ! Start: Write in data from each individual subgrid
-    do  k=iz +1 , iz + nnz
-    do  j=iy +1 , iy + nny
-    do  i=ix +1 , ix + nnx
-      write(nudat,iostat=izerr) pfvar(i,j,k)
-      if (izerr /= 0) then
-        errmsg   = "unable to write  pfvar"
-        call error_handler(E_ERR,routine,errmsg,source,revision,revdate)
-      endif
-    end do
-    end do
-    end do 
-
-! End: Write in data from each individual subgrid
-  end do 
-  end do 
-! End: loop over number of sub grids
-
-  close(nudat)
-  return
-end subroutine pfwrite_var
-
-
-!-----------------------------------------------------------------------
 !>  define_var_dims() takes the N-dimensional variable and appends the DART
 !>  dimensions of 'copy' and 'time'. If the variable initially had a 'time'
 !>  dimension, it is ignored because (by construction) it is a singleton
@@ -1887,8 +1693,8 @@ subroutine horizontal_interpolate(x, ivar, kk_inds, ij_inds, ij_wgts, interp_hv,
 real(r8), intent(in)  :: x(:)
 integer,  intent(in)  :: ivar
 integer,  intent(in)  :: kk_inds(2)
-integer,  intent(in)  :: ij_inds(4)     ! ileft, iright, jbot, jtop
-real(r8), intent(in)  :: ij_wgts(2)     ! ifrac, jfrac
+integer,  intent(in)  :: ij_inds(4)    ! ileft, iright, jbot, jtop
+real(r8), intent(in)  :: ij_wgts(2)    ! ifrac, jfrac
 real(r8), intent(out) :: interp_hv(2)  ! at two height levels 
 integer,  intent(out) :: istatus
 
@@ -1901,10 +1707,10 @@ ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
 
 do k = 1, 2
   ! Location of dart_indices
-  ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(1))
-  lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(1))
-  ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(1))
-  ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(1))
+  ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(k))
+  lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(k))
+  ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(k))
+  ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(k))
 
   interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
                  ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
@@ -1913,10 +1719,10 @@ end do
 
 if (debug > 99 .and. do_output()) then
    write(*,*)
-   write(*,*)' ileft, jbot, level_index decompose to ', ll, x( ll), ij_rwgts(1)  
-   write(*,*)'iright, jbot, level_index decompose to ',lr, x(lr), ij_wgts(1)
-   write(*,*)'iright, jtop, level_index decompose to ',ur, x(ur), ij_rwgts(2)  
-   write(*,*)' ileft, jtop, level_index decompose to ', ul, x( ul),ij_rwgts(2) 
+   write(*,*)' ileft, jbot, level_index decompose to ', ll, x(ll), ij_rwgts(1)  
+   write(*,*)'iright, jbot, level_index decompose to ', lr, x(lr), ij_wgts(1)
+   write(*,*)'iright, jtop, level_index decompose to ', ur, x(ur), ij_rwgts(2)  
+   write(*,*)' ileft, jtop, level_index decompose to ', ul, x(ul), ij_rwgts(2) 
    write(*,*)' horizontal value is ', kk_inds(1), interp_hv(1)
    write(*,*)' horizontal value is ', kk_inds(2), interp_hv(2)
 endif
@@ -2221,6 +2027,102 @@ second   = leftover - minute*60
 get_start_time = set_date(year, month, day, hour, minute, second)
 
 end function get_start_time
+
+
+!-----------------------------------------------------------------------
+!> routine to compute the soil moisture at all the surrounding corners
+!> and interpolate them to two locations - above and below 
+!>
+!> soil_type
+!> soil_parameters
+
+subroutine calculate_soil_moisture(x, ivar, kk_inds, ij_inds, ij_wgts, interp_hv, istatus)
+
+real(r8), intent(in)  :: x(:)            ! soil saturation (the state)
+integer,  intent(in)  :: ivar
+integer,  intent(in)  :: kk_inds(2)      ! layer indices
+integer,  intent(in)  :: ij_inds(4)      ! ileft, iright, jbot, jtop
+real(r8), intent(in)  :: ij_wgts(2)      ! ifrac, jfrac
+real(r8), intent(out) :: interp_hv(2)    ! at two levels
+integer,  intent(out) :: istatus
+
+integer, parameter :: POROSITY = 5
+integer  :: soilID
+integer  :: k, ll, lr, ur, ul
+real(r8) :: ij_rwgts(2)
+real(r8) :: saturation(4)   ! at each corner
+real(r8) :: porosities(4)   ! at each corner
+
+ij_rwgts(1) = 1.0_r8 - ij_wgts(1)  !ifrac
+ij_rwgts(2) = 1.0_r8 - ij_wgts(2)  !jfrac
+
+! calculate the soil moisture at each corner ... for each layer
+
+do k = 1, 2
+
+  ! Location of dart_indices
+  ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(k))
+  lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(k))
+  ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(k))
+  ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(k))
+
+  saturation = (/ x(ll), x(lr), x(ul), x(ur) /)
+
+  soilID = soil_type(ij_inds(1), ij_inds(3), kk_inds(k)) 
+  porosities(1) = soil_parameters(POROSITY,soilID) ! lower left
+
+  soilID = soil_type(ij_inds(2), ij_inds(3), kk_inds(k)) 
+  porosities(2) = soil_parameters(POROSITY,soilID) ! lower right
+  
+  soilID = soil_type(ij_inds(2), ij_inds(4), kk_inds(k)) 
+  porosities(3) = soil_parameters(POROSITY,soilID) ! upper right
+  
+  soilID = soil_type(ij_inds(1), ij_inds(4), kk_inds(k)) 
+  porosities(4) = soil_parameters(POROSITY,soilID) ! upper left
+
+  saturation = saturation * porosities ! now soil moisture, actually
+ 
+  interp_hv(k) = ij_rwgts(2) * (ij_rwgts(1)*saturation(1) + ij_wgts(1)*saturation(2)) + &
+                 ij_wgts(2)  * (ij_rwgts(1)*saturation(4) + ij_wgts(1)*saturation(3))
+enddo
+
+if (debug > 99 .and. do_output()) then
+   write(*,*)
+   write(*,*)' ileft, jbot, level_index decompose to ', ll, x(ll), ij_rwgts(1)  
+   write(*,*)'iright, jbot, level_index decompose to ', lr, x(lr), ij_wgts(1)
+   write(*,*)'iright, jtop, level_index decompose to ', ur, x(ur), ij_rwgts(2)  
+   write(*,*)' ileft, jtop, level_index decompose to ', ul, x(ul), ij_rwgts(2) 
+   write(*,*)' horizontal value is ', kk_inds(1), interp_hv(1)
+   write(*,*)' horizontal value is ', kk_inds(2), interp_hv(2)
+endif
+
+istatus = 0
+
+end subroutine calculate_soil_moisture
+
+
+!-----------------------------------------------------------------------
+!> routine to compute the soil moisture at all the surrounding corners
+!> and interpolate them to two locations - above and below 
+
+subroutine calculate_soil_water_content(x, ivar, kk_inds, ij_inds, ij_wgts, interp_h_var, istatus)
+
+real(r8), intent(in)  :: x(:)
+integer,  intent(in)  :: ivar
+integer,  intent(in)  :: kk_inds(2)
+integer,  intent(in)  :: ij_inds(4)
+real(r8), intent(in)  :: ij_wgts(4)
+real(r8), intent(out) :: interp_h_var(2)
+integer,  intent(out) :: istatus
+
+call error_handler(E_ERR,'calculate_soil_water_content','routine not written', &
+                   source, revision, revdate)
+
+istatus = 11
+
+end subroutine calculate_soil_water_content
+
+
 
 
 !===================================================================

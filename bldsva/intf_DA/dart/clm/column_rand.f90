@@ -18,7 +18,7 @@ use   location_mod, only : VERTISSURFACE, VERTISLEVEL
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=*), parameter :: source   = & "$URL: column_rand.f90 $"
+character(len=*), parameter :: source   = "$URL: column_rand.f90 $"
 character(len=*), parameter :: revision = "$Revision: Bonn $"
 character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 

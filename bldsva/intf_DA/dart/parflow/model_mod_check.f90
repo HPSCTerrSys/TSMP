@@ -65,16 +65,13 @@ namelist /model_mod_check_nml/ dart_input_file, output_file,        &
 !----------------------------------------------------------------------
 ! integer :: numlons, numlats, numlevs
 
-integer :: in_unit, out_unit, ios_out, iunit, io, offset
+integer :: ios_out, iunit, io
 integer :: x_size
-integer :: year, month, day, hour, minute, second
-integer :: secs, days
 integer :: myobsIndex           !Observation Type to use in interpolation
 
 type(time_type)       :: model_time, adv_to_time
 real(r8), allocatable :: statevector(:)
 
-integer :: i, skip
 integer :: pfbid
 
 character(len=metadatalength) :: state_meta(1)
@@ -322,7 +319,6 @@ type(location_type) :: loc0, loc1
 integer  :: i, which_vert, var_type
 real(r8) :: plon, plat, plev, vals(3)
 real(r8) :: closest
-character(len=129)  :: string1
 real(r8), allocatable, dimension(:) :: thisdist
 logical :: matched
 
