@@ -232,7 +232,6 @@ character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
 character(len=256) :: cosmo_netcdf_file            = "cosmo_netcdf_file"
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 60
-logical            :: output_1D_state_vector       = .FALSE.
 real(r8)           :: model_perturbation_amplitude = 0.1
 integer            :: debug                        = 0
 character(len=obstypelength) :: variables(max_state_variables*num_state_table_columns) = ' '
@@ -243,10 +242,10 @@ namelist /model_nml/             &
    assimilation_period_days,     &
    assimilation_period_seconds,  &
    model_perturbation_amplitude, &
-   output_1D_state_vector,       &
    debug,                        &
    variables
 
+logical         :: output_1D_state_vector = .FALSE.
 integer         :: model_size = 0
 type(time_type) :: model_timestep ! smallest time to adv model
 type(time_type) :: start_date     ! start date of the experiment (according to the netCDF file)

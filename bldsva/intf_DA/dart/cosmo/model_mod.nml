@@ -3,7 +3,6 @@
    cosmo_netcdf_file            = 'cosmo_netcdf_file'
    assimilation_period_days     = 0
    assimilation_period_seconds  = 60
-   output_1D_state_vector       = .FALSE.
    model_perturbation_amplitude = 0.1
    debug                        = 0
    variables                    = ''

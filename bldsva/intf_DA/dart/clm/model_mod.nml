@@ -20,7 +20,6 @@
    assimilation_period_days     = 0 
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.2
-   output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
    clm_variables                = ''

@@ -442,7 +442,6 @@ A more representative example follows after this description.
   clm_restart_filename         = 'clm_restart.nc',
   clm_history_filename         = 'clm_history.nc',
   clm_vector_history_filename  = 'clm_vector_history.nc',
-  output_state_vector          = .false.,
   assimilation_period_days     = 2,
   assimilation_period_seconds  = 0,
   model_perturbation_amplitude = 0.2,
@@ -498,13 +497,6 @@ A more representative example follows after this description.
         the restart file, which should make for better forward operators.
         It is only needed if some of the variables specified in
         <em class=code>clm_variables</em> come from this file.</TD>
-</TR>
-
-<TR><TD>output_state_vector</TD>
-    <TD>logical</TD>
-    <TD>If .true. write state vector as a 1D array to the DART diagnostic
-        output files.  If .false. break state vector up into variables 
-        before writing to the output files.</TD>
 </TR>
 
 <TR><TD>assimilation_period_days, <br />
@@ -587,7 +579,6 @@ rest of the variables are used for forward operator calculation only.</P>
    assimilation_period_days     = 0 
    assimilation_period_seconds  = 21400
    model_perturbation_amplitude = 0.2
-   output_state_vector          = .false.
    calendar                     = 'Gregorian'
    debug                        = 0
    clm_variables  = 'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',

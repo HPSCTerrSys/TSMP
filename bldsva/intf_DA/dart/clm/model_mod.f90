@@ -184,7 +184,6 @@ integer, parameter :: VT_STATEINDX    = 6 ! ... update (state) or not
 integer            :: assimilation_period_days = 0
 integer            :: assimilation_period_seconds = 60
 real(r8)           :: model_perturbation_amplitude = 0.2
-logical            :: output_state_vector = .true.
 integer            :: debug = 0   ! turn up for more and more debug messages
 character(len=32)  :: calendar = 'Gregorian'
 character(len=256) :: clm_file_s = 'clm_restart_s.nc'
@@ -199,7 +198,6 @@ namelist /model_nml/            &
    clm_restart_filename,        &
    clm_history_filename,        &
    clm_vector_history_filename, &
-   output_state_vector,         &
    assimilation_period_days,    &  ! for now, this is the timestep
    assimilation_period_seconds, &
    model_perturbation_amplitude,&
@@ -348,7 +346,7 @@ real(r8), allocatable, dimension(:) :: landarea     ! land area ... 'support' ..
 integer         :: model_size      ! the state vector length
 type(time_type) :: model_time      ! valid time of the model state
 type(time_type) :: model_timestep  ! smallest time to adv model
-
+logical         :: output_state_vector = .false.
 
 INTERFACE vector_to_prog_var
       MODULE PROCEDURE vector_to_1d_prog_var

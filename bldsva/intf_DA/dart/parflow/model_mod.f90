@@ -518,21 +518,19 @@ if (obs_type == KIND_SOIL_SATURATION) then
    ! Vertical interpolation to scalar estimate.
    interp_val = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
 
-   return
-
-else if (obs_type == KIND_SOIL_MOISTURE) then
+else if (obs_type == KIND_SOIL_MOISTURE) then  ! cm^3/cm^3
 
    call calculate_soil_moisture(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
    if (istatus /= 0) return
    interp_val   = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
-   return
 
 elseif (obs_type == KIND_SOIL_WATER_CONTENT) then
 
-   call calculate_soil_water_content(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
+   call calculate_soil_moisture(x, ivar, hgt_inds, geo_inds, geo_wgts, interp_h_var, istatus)
    if (istatus /= 0) return
    interp_val = interp_h_var(2)*hgt_wgt + interp_h_var(1)*(1.0_r8 - hgt_wgt)
-   return
+
+   interp_val = interp_val * 100.0_r8
 
 endif
 
@@ -595,8 +593,7 @@ vloc  = vcoord(kloc)
 
 location = set_location(mylon, mylat, vloc, VERTISHEIGHT) ! meters
 
-!>@todo is there only one variable type in parflow ....
-if (present(var_type)) var_type = 0  
+if (present(var_type)) var_type = progvar(ipfb)%pfb_kind 
 
 end subroutine get_state_meta_data
 
@@ -2027,6 +2024,13 @@ end function get_start_time
 !-----------------------------------------------------------------------
 !> routine to compute the soil moisture at all the surrounding corners
 !> and interpolate them to two locations - above and below 
+!> Returns soil moisture in cm^3 / cm^3
+!>
+!> The porosity is required at the grid locations to convert soil saturations
+!> to soil moisture. The soil moisture at the locations is then linearly
+!> interpolated to the desired locations. The porosity at the gridcells can
+!> be obtained from the file referenced in the &model_nml:soilInd_file variable.
+!> Necessary module variables containing this metadata are:
 !>
 !> soil_type
 !> soil_parameters
@@ -2081,14 +2085,6 @@ do k = 1, 2
                  ij_wgts(2)  * (ij_rwgts(1)*saturation(4) + ij_wgts(1)*saturation(3))
 enddo
 
-! ll = ijk_to_dart(ivar, ij_inds(1), ij_inds(3), kk_inds(k))
-! lr = ijk_to_dart(ivar, ij_inds(2), ij_inds(3), kk_inds(k))
-! ur = ijk_to_dart(ivar, ij_inds(2), ij_inds(4), kk_inds(k))
-! ul = ijk_to_dart(ivar, ij_inds(1), ij_inds(4), kk_inds(k))
-
-! interp_hv(k) = ij_rwgts(2) * ( ij_rwgts(1) * x(ll) + ij_wgts(1) * x(lr)) + &
-!                ij_wgts(2)  * ( ij_rwgts(1) * x(ul) + ij_wgts(1) * x(ur))
-
 if (debug > 99 .and. do_output()) then
    write(*,*)
    write(*,*)' ileft, jbot, level_index decompose to ', ll, x(ll), ij_rwgts(1)  
@@ -2103,30 +2099,6 @@ endif
 istatus = 0
 
 end subroutine calculate_soil_moisture
-
-
-!-----------------------------------------------------------------------
-!> routine to compute the soil moisture at all the surrounding corners
-!> and interpolate them to two locations - above and below 
-
-subroutine calculate_soil_water_content(x, ivar, kk_inds, ij_inds, ij_wgts, interp_h_var, istatus)
-
-real(r8), intent(in)  :: x(:)
-integer,  intent(in)  :: ivar
-integer,  intent(in)  :: kk_inds(2)
-integer,  intent(in)  :: ij_inds(4)
-real(r8), intent(in)  :: ij_wgts(4)
-real(r8), intent(out) :: interp_h_var(2)
-integer,  intent(out) :: istatus
-
-call error_handler(E_ERR,'calculate_soil_water_content','routine not written', &
-                   source, revision, revdate)
-
-istatus = 11
-
-end subroutine calculate_soil_water_content
-
-
 
 
 !===================================================================
