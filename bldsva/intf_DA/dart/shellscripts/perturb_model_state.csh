@@ -39,7 +39,7 @@ foreach instance (`seq 0 $numInst`)
  #-------------------------------------------------------------------#
  #ParFlow
  echo " Using the spinup parflow states ...." $instance " .." $minstance
- cp ${testcasedir}/restart/tsmp_instance_${minstance}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
+ cp ${testcasedir}/restart/tsmp_instance_${minstance}/rurlaf.out.press.*.pfb ./rur_ic_press.pfb
  tclsh ascii2pfb.tcl
 
  #cosmo
@@ -51,7 +51,7 @@ foreach instance (`seq 0 $numInst`)
 
  #clm
  echo " Using the spinup clm states ...."
- cp ${testcasedir}/restart/tsmp_instance_${minstance}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
+ cp ${testcasedir}/restart/tsmp_instance_${minstance}/clmoas.clm2.r.*.nc ./clm_restart.nc
  #-------------------------------------------------------------------#
 
  cd ..

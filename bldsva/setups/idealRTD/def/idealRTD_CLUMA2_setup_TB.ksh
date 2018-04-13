@@ -19,9 +19,9 @@ initSetup(){
   defaultPFLProcX=2
   defaultPFLProcY=1
 
-  defaultStartDate="2008-02-01 00"
-  defaultInitDate="2008-02-01 00"
-  defaultRunhours=2304
+  defaultStartDate="2015-02-01 00"
+  defaultInitDate="2015-02-01 00"
+  defaultRunhours=1416
 
   defaultDumpCLM=24
   defaultDumpCOS=24

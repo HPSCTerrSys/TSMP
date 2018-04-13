@@ -1,7 +1,7 @@
 #!/bin/csh
 # This script is intended to update the DART namelist
 # Uses, git_to_dart_XXXX for syncing with the DART source codes...
-# Usage 
+# Usage ./dart_setup.csh 20 /home/pshrestha/DART/lanai/models/terrsysmp 
 #
 # USER SETUP ----DART NAMELIST PARAMETERS--------
 # soil-vegetation

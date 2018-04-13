@@ -288,6 +288,14 @@
    filename_seq_list = 'pieces.txt'
    filename_out      = 'obs_seq.combined'
    print_only        = .false.
+   first_obs_days       = 151302,
+   first_obs_seconds    = 43201,
+   last_obs_days        = 151303,
+   last_obs_seconds     = 43200,
+   min_lat              =  40.0,
+   max_lat              =  60.0,
+   min_lon              =    4.0,
+   max_lon              =  10.0,
    gregorian_cal     = .true.
    synonymous_qc_list = 'COSMOS QC','Ameriflux QC'
   /
