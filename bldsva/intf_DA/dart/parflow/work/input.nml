@@ -41,7 +41,7 @@
    num_output_obs_members   = __nens__ 
    output_interval          = 1
    num_groups               = 1
-   input_qc_threshold       = 3.0
+   input_qc_threshold       = 99.0
    outlier_threshold        = 3.0
    output_forward_op_errors = .false.
    output_timestamps        = .false.
@@ -121,6 +121,7 @@
 
 &obs_kind_nml
    assimilate_these_obs_types = 'SOIL_MOISTURE'
+   evaluate_these_obs_types = 'SOIL_WATER_CONTENT'
     /
 
 &assim_model_nml
@@ -136,8 +137,8 @@
    clm_file_s                    = 'clm_restart_s.nc'
    soilInd_file                  = 'pfb_soil.nc'
    parflow_assim_variable        = 'saturation'
-   assimilation_period_days      = 0 
-   assimilation_period_seconds   = 21400 
+   assimilation_period_days      = 2 
+   assimilation_period_seconds   = 0 
    debug                         = 0
    /
 
@@ -192,10 +193,10 @@
 
 &schedule_nml
    calendar        = 'Gregorian'
-   first_bin_start =  1997,  1,  1,  0,  0,  0
-   first_bin_end   =  1998,  1,  1,  0,  0,  0
-   last_bin_end    =  1998,  1,  1,  0,  0,  0
-   bin_interval_days    = 7 
+   first_bin_start =  2015,  1,  1,  0,  0,  0
+   first_bin_end   =  2016,  1,  1,  0,  0,  0
+   last_bin_end    =  2016,  1,  1,  0,  0,  0
+   bin_interval_days    = 5000
    bin_interval_seconds = 0
    max_num_bins         = 1000
    print_table          = .true.

@@ -59,6 +59,9 @@ foreach FILE ( clm cosmo parflow )
    rsync -Cavzr --exclude-from=exclude-list.txt ${SOURCE} ${DEST}
    echo ""
 
+   cd $DEST/work
+   ./quickbuild.csh -mpi
+   cd -
 end
 
 echo "to finish up ... "
