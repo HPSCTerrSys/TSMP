@@ -471,8 +471,7 @@ CONTAINS
     INTEGER:: i_startidx, i_endidx    !< slices
     INTEGER:: i_nchdom                !< domain index
 #ifdef COUP_OAS_ICON
-    REAL(wp) :: emissivity(nproma,pt_patch%nblks_c), &
-                tgrnd(nproma,pt_patch%nblks_c)
+    REAL(wp) :: t_sf(nproma,pt_patch%nblks_c)
 #endif
 
     i_nchdom  = MAX(1,pt_patch%n_childdom)
@@ -512,12 +511,11 @@ CONTAINS
     END IF
 
 #ifdef COUP_OAS_ICON
-      emissivity(:,:) = oas_rcv_field_icon(:,:,8)
-      tgrnd(:,:) = oas_rcv_field_icon(:,:,9)
+      t_sf(:,:) = oas_rcv_field_icon(:,:,8)
 #else
-      emissivity = ext_data%atm%emis_rad(:,:)
-      tgrnd = lnd_prog%t_g(:,:)
+      t_sf = lnd_prog%t_g(:,:)
 #endif
+      emissivity = ext_data%atm%emis_rad(:,:)
 
 !$OMP PARALLEL PRIVATE(jb,i_startidx,i_endidx,dust_tunefac)
 !$OMP DO ICON_OMP_GUIDED_SCHEDULE
@@ -533,7 +531,7 @@ CONTAINS
       IF (i_startidx > i_endidx) CYCLE
 
 
-      prm_diag%tsfctrad(1:i_endidx,jb) = tgrnd(1:i_endidx,jb)
+      prm_diag%tsfctrad(1:i_endidx,jb) = t_sf(1:i_endidx,jb)
 
       IF (tune_dust_abs > 0._wp) THEN
 !DIR$ NOINLINE

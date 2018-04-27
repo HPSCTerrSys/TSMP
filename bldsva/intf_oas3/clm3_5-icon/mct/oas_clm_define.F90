@@ -205,8 +205,7 @@ CALL MPI_Barrier(kl_comm, nerror)
   ssnd(14)%clname='CLMPHOTO'      ! photosynthesis rate (umol CO2 m-2s-1)
   ssnd(15)%clname='CLMPLRES'      ! plant respiration (umol CO2 m-2s-1)
 !MU (12.04.13)
-  ssnd(16)%clname='CLMEMISS'
-  ssnd(17)%clname='CLMTGRND'
+  !ssnd(16)%clname='CLMEMISS'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  
@@ -316,6 +315,7 @@ ENDIF
 
 #ifdef COUP_OAS_ICON
   ssnd(1:7)%laction=.TRUE.
+  ssnd(12)%laction=.TRUE.
   ssnd(16:17)%laction=.TRUE.
   srcv(1:9)%laction=.TRUE.
   srcv(15:16)%laction=.TRUE.
