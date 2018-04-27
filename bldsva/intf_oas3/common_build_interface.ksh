@@ -14,6 +14,92 @@
 # only platform and version independent stuff should be done here
 
 
+############################ 
+# ICON interface methods
+############################
+
+
+c_configure_icon(){
+route "${cblue}>>> c_configure_icon${cnormal}"
+  file=$icondir/Makefile
+  cplFlag=""
+  cplLib=""
+  cplInc=""
+  if [[ $withOAS == "true" ]] ; then
+    cplLib="$liboas $libpsmile"
+    cplInc="$incpsmile"
+    comment "    sed OAS flag to Makefile"
+    sed -i "s@__withoas__@COUP_OAS_ICON@" $file >> $log_file 2>> $err_file
+    check
+    comment "    sed make.oas3 to Makefile"
+    sed -i "s@__oasismakefile__@\$(oasisdir)/util/make_dir/make.oas3@" $file >> $log_file 2>> $err_file
+    check
+  else
+    comment "    remove make.oas3 from Makefile"
+    sed -i "/__oasismakefile__/d" $file >> $log_file 2>> $err_file
+    check
+  fi
+  comment "    make clean icon"
+    make clean >> $log_file 2>> $err_file
+  check
+route "${cblue}<<< c_configure_icon${cnormal}"
+}
+
+c_make_icon(){
+route "${cblue}>>> c_make_icon${cnormal}"
+  comment "    cd to icon dir"
+    cd $icondir >> $log_file 2>> $err_file
+  check
+  comment "    make icon"
+    make -j8 -f $icondir/Makefile >> $log_file 2>> $err_file
+  check
+
+  comment "    cp icon binary to $bindir"
+  cp $icondir/build/x86_64-unknown-linux-gnu/bin/icon $bindir >> $log_file 2>> $err_file
+  check
+
+route "${cblue}<<< c_make_icon${cnormal}"
+}
+
+
+c_substitutions_icon(){
+route "${cblue}>>> c_substitutions_icon${cnormal}"
+if [[ $withOAS == "true" ]]; then
+  comment "    copy oas3 interface to icon/src "
+    cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
+  check
+  comment "    replace files with coupling. Add files to icon/src "
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nh_stepping.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_sfc_interface.f90 $icondir/src/lnd_phy_nwp/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rad_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rrtm_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+fi
+route "${cblue}<<< c_substitutions_icon${cnormal}"
+}
+
+c_setup_icon(){
+route "${cblue}>>> c_setup_icon${cnormal}"
+
+comment "  cp add_run_routines to rundir"
+  cp $rootdir/bldsva/setups/common/add_run_routines $rundir >> $log_file 2>> $err_file
+check
+
+comment "  cp namelist to rundir"
+  cp ${namelist_icon} $rundir >> $log_file 2>> $err_file
+check
+
+route "${cblue}<<< c_setup_icon${cnormal}"
+}
+
+
 
 ############################ 
 #Cosmo interface methods
@@ -207,9 +293,11 @@ route "${cblue}<<< c_setup_cos${cnormal}"
 
 c_configure_oas(){
 route "${cblue}>>> c_configure_oas${cnormal}"
+echo "SLAVKO -- oasisroot: $oasdir"
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
+echo "SLAVKO -- platform: $platform"
   comment "    sed platform to Makefile"
     sed -i "s@__platform__@$platform@" $file >> $log_file 2>> $err_file
   check
@@ -221,8 +309,8 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
-  comment "    make oasis" 
-    make -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
+  comment "    make oasis j16" 
+    make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
 #DA
@@ -271,6 +359,19 @@ route "${cblue}>>> c_setup_oas${cnormal}"
   ncpl_exe2=$nproc_pfl
   ncpl_exe3=1
   if [[ $withCESM == "true" || $withOASMCT == "true" ]] ; then ; ncpl_exe3=$nproc_clm ; fi
+
+
+  if [[ $withICON == "true" ]]; then
+    sed "s/ngiconx/$gx_icon/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+    sed "s/ngclmx/$(($gx_clm*$gy_clm))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  fi
 
 
   if [[ $withPFL == "true" && $withCOS == "true" ]] then
@@ -387,8 +488,9 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     if [[ $spmd == "off" ]] ; then ; flags+="-nospmd " ; fi
     flags+="-maxpft $maxpft -rtm $rtm -usr_src $usr_src "
     if [[ $withCOS == "true" ]] ; then ; flags+="-oas3_cos " ; fi
+    if [[ $withICON == "true" ]] ; then ; flags+="-oas3_icon " ; fi
     if [[ $withPFL == "true" ]] ; then ; flags+="-oas3_pfl " ; fi
-    if [[ $withPFL == "false" && $withCOS == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
+    if [[ $withPFL == "false" && $withCOS == "false" && $withICON == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
     flags+="-nc_inc $ncdfPath/include "
     flags+="-nc_lib $ncdfPath/lib "
     flags+="-nc_mod $ncdfPath/include "
@@ -396,16 +498,22 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
+      comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
+      comment "adding OAS libs"
       cplLib+="$liboas $libpsmile"
       cplInc=$incpsmile
     fi
+      comment " OAS libs cplLib: $cplLib"
+      comment " OAS libs cplInc: $cplInc"
+      comment " OAS libs cplInc: $incpsmile"
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   cppdef=""
-  if [[ $cplscheme == "true" ]] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
+  if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
+  comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
@@ -417,7 +525,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
-    gmake -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -j16 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
@@ -443,14 +551,14 @@ route "${cblue}<<< c_make_clm${cnormal}"
 c_substitutions_clm(){
 route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    copy oas3 interface to clm/src "
-    patch $rootdir/bldsva/intf_oas3/${mList[1]}/oas3 $clmdir/src
+    patch $rootdir/bldsva/intf_oas3/${mList[1]}/mct $clmdir/src
   check
   comment "    replace hydrology. Add files to clm/bld/usr.src "
     patch "$rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/*" $clmdir/bld/usr.src 
   check
 #DA
   if [[ $withPDAF == "true" ]] ; then
-  comment "    copy PDAF fix to $clmdir/bld/usr.src "
+  comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
   check
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
