@@ -380,11 +380,7 @@ double       *temp_data)
 
       /* Set the HYPRE grid */
 //CPS fix
-#ifdef HAVE_OAS3
       HYPRE_StructGridCreate(amps_CommWorld, 3, &(instance_xtra->hypre_grid) );
-#else
-      HYPRE_StructGridCreate(MPI_COMM_WORLD, 3, &(instance_xtra->hypre_grid) );
-#endif      
 
       grid         = instance_xtra -> grid;
       
@@ -457,15 +453,10 @@ double       *temp_data)
       symmetric = MatrixSymmetric(pf_Bmat);
       if ( !(instance_xtra->hypre_mat) )
       {
-#ifdef HAVE_OAS3
          HYPRE_StructMatrixCreate(amps_CommWorld, instance_xtra->hypre_grid, 
 			       instance_xtra->hypre_stencil,
 			       &(instance_xtra->hypre_mat) );
-#else
-         HYPRE_StructMatrixCreate(MPI_COMM_WORLD, instance_xtra->hypre_grid,
-                               instance_xtra->hypre_stencil,
-                               &(instance_xtra->hypre_mat) );
-#endif
+
 	 HYPRE_StructMatrixSetNumGhost(instance_xtra->hypre_mat, full_ghosts);
          HYPRE_StructMatrixSetSymmetric(instance_xtra->hypre_mat, symmetric);
          HYPRE_StructMatrixInitialize(instance_xtra->hypre_mat);
@@ -474,15 +465,9 @@ double       *temp_data)
       /* Set up new right-hand-side vector */
       if ( !(instance_xtra->hypre_b) )
       {
-#ifdef HAVE_OAS3
          HYPRE_StructVectorCreate(amps_CommWorld, 
 			       instance_xtra->hypre_grid, 
 			       &(instance_xtra->hypre_b) );
-#else
-         HYPRE_StructVectorCreate(MPI_COMM_WORLD,
-                               instance_xtra->hypre_grid,
-                               &(instance_xtra->hypre_b) );
-#endif
 	 HYPRE_StructVectorSetNumGhost(instance_xtra->hypre_b, no_ghosts);
 	 HYPRE_StructVectorInitialize(instance_xtra->hypre_b);
       }
@@ -491,15 +476,10 @@ double       *temp_data)
       if ( !(instance_xtra->hypre_x) )
       {
 
-#ifdef HAVE_OAS3
          HYPRE_StructVectorCreate(amps_CommWorld, 
 			       instance_xtra->hypre_grid, 
 			       &(instance_xtra->hypre_x) );
-#else
-         HYPRE_StructVectorCreate(MPI_COMM_WORLD,
-                               instance_xtra->hypre_grid,
-                               &(instance_xtra->hypre_x) );
-#endif
+
 	 HYPRE_StructVectorSetNumGhost(instance_xtra->hypre_x, full_ghosts);
 	 HYPRE_StructVectorInitialize(instance_xtra->hypre_x);
       }
@@ -975,13 +955,9 @@ double       *temp_data)
       EndTiming(public_xtra->time_index_copy_hypre);
 
       /* Set up the PFMG preconditioner */
-#ifdef HAVE_OAS3
       HYPRE_StructPFMGCreate(amps_CommWorld,
 				&(instance_xtra->hypre_pfmg_data) );
-#else
-      HYPRE_StructPFMGCreate(MPI_COMM_WORLD,
-                                &(instance_xtra->hypre_pfmg_data) );
-#endif
+
       HYPRE_StructPFMGSetTol(instance_xtra->hypre_pfmg_data, 1.0e-30);
       /* Set user parameters for PFMG */
       HYPRE_StructPFMGSetMaxIter(instance_xtra->hypre_pfmg_data, max_iter);

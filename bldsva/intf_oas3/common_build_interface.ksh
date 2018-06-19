@@ -174,13 +174,13 @@ route "${cblue}>>> c_substitutions_cos${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
-	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/data_parallel.f90 $cosdir/src/ 
+	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/data_parallel.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/organize_data.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/organize_data.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_meanvalues.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_meanvalues.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/src_setup.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_setup.f90 $cosdir/src/ 
     check
   fi
 route "${cblue}<<< c_substitutions_cos${cnormal}"
@@ -561,9 +561,9 @@ route "${cblue}>>> c_substitutions_clm${cnormal}"
   comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtypeInitMod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/iniTimeConst.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
   fi	
 route "${cblue}<<< c_substitutions_clm${cnormal}"
@@ -745,11 +745,11 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
       " -i $pfldir/pfsimulator/configure $pfldir/pftools/configure >> $log_file 2>> $err_file
     check
     comment "    copy fix for PDAF into $pfldir"
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
     check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
     check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/da $pfldir/pfsimulator/amps
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
     check
       sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg.c
     check
