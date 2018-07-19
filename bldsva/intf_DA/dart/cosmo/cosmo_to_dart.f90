@@ -1,10 +1,10 @@
-! DART software - Copyright 2004 - 2011 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
+!
+! DART $Id: cosmo_to_dart.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program cosmo_to_dart
-
-! DART $Id: cosmo_to_dart.f90 $
 
 !----------------------------------------------------------------------
 ! purpose: interface between cosmo and DART
@@ -38,9 +38,9 @@ use time_manager_mod, only : time_type, print_time, print_date
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: cosmo_to_dart.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: cosmo_to_dart.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !-----------------------------------------------------------------------
 ! namelist parameters with default values.
@@ -107,9 +107,3 @@ call print_time(model_time, str='cosmo_to_dart:DART  model time')
 call finalize_utilities()
 
 end program cosmo_to_dart
-
-! <next few lines under version control, do not edit>
-! $URL: $
-! $Id: cosmo_to_dart.f90 $
-! $Revision: $
-! $Date: $

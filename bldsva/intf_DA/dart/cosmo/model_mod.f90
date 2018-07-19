@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2016 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! DART $Id: $
+! DART $Id: model_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 module model_mod
 
@@ -40,14 +40,10 @@ use    utilities_mod, only : register_module, error_handler,                   &
 use     obs_kind_mod, only : KIND_U_WIND_COMPONENT,       &
                              KIND_V_WIND_COMPONENT,       &
                              KIND_VERTICAL_VELOCITY,      &
-                             KIND_TEMPERATURE,            &
                              KIND_PRESSURE,               &
-                             KIND_PRESSURE_PERTURBATION,  &
                              KIND_SPECIFIC_HUMIDITY,      &
                              KIND_CLOUD_LIQUID_WATER,     &
                              KIND_CLOUD_ICE,              &
-                             KIND_SURFACE_ELEVATION,      &
-                             KIND_SURFACE_GEOPOTENTIAL,   &
                              paramname_length,            &
                              get_raw_obs_kind_index,      &
                              get_raw_obs_kind_name
@@ -60,11 +56,11 @@ implicit none
 private
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = "$URL: model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: none $"
-character(len=128), parameter :: revdate  = "$Date: none $"
+character(len=*), parameter :: source   = "$URL: model_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
-character(len=256) :: string1, string2, string3
+character(len=512) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
 ! these routines must be public and you cannot change
@@ -236,7 +232,6 @@ character(len=256) :: cosmo_restart_file           = "cosmo_restart_file"
 character(len=256) :: cosmo_netcdf_file            = "cosmo_netcdf_file"
 integer            :: assimilation_period_days     = 0
 integer            :: assimilation_period_seconds  = 60
-logical            :: output_1D_state_vector       = .FALSE.
 real(r8)           :: model_perturbation_amplitude = 0.1
 integer            :: debug                        = 0
 character(len=obstypelength) :: variables(max_state_variables*num_state_table_columns) = ' '
@@ -247,10 +242,10 @@ namelist /model_nml/             &
    assimilation_period_days,     &
    assimilation_period_seconds,  &
    model_perturbation_amplitude, &
-   output_1D_state_vector,       &
    debug,                        &
    variables
 
+logical         :: output_1D_state_vector = .FALSE.
 integer         :: model_size = 0
 type(time_type) :: model_timestep ! smallest time to adv model
 type(time_type) :: start_date     ! start date of the experiment (according to the netCDF file)
@@ -3321,10 +3316,3 @@ end function get_start_time
 !>
 
 end module model_mod
-
-! <next few lines under version control, do not edit>
-! $URL: $
-! $Id: $
-! $Revision: $
-! $Date: $
-

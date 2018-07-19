@@ -41,7 +41,7 @@
    num_output_obs_members   = __nens__ 
    output_interval          = 1
    num_groups               = 1
-   input_qc_threshold       = 3.0
+   input_qc_threshold       = 99.0
    outlier_threshold        = 3.0
    output_forward_op_errors = .false.
    output_timestamps        = .false.
@@ -121,6 +121,7 @@
 
 &obs_kind_nml
    assimilate_these_obs_types = 'SOIL_MOISTURE'
+   evaluate_these_obs_types = 'SOIL_WATER_CONTENT'
     /
 
 &assim_model_nml
@@ -135,11 +136,10 @@
    clm_file                      = 'clm_restart.nc'
    clm_file_s                    = 'clm_restart_s.nc'
    soilInd_file                  = 'pfb_soil.nc'
-   ipfb                          = 2
-   output_1D_state_vector        = .false.
-   assimilation_period_days      = 0 
-   assimilation_period_seconds   = 21400 
-   debug                         = 11
+   parflow_assim_variable        = 'saturation'
+   assimilation_period_days      = 2 
+   assimilation_period_seconds   = 0 
+   debug                         = 0
    /
 
 &pfb_to_dart_nml
@@ -148,8 +148,9 @@
 
 # reduce from 1000. to 10. and 1000. to 100
 &location_nml
-   horiz_dist_only             = .true.
-   vert_normalization_height   = 10.0
+   horiz_dist_only             = .false.
+   vert_normalization_pressure = 10.0
+   vert_normalization_height   = 50000.0
    vert_normalization_level    = 100.0
    approximate_distance        = .false.
    nlon                        = 71
@@ -192,10 +193,10 @@
 
 &schedule_nml
    calendar        = 'Gregorian'
-   first_bin_start =  1997,  1,  1,  0,  0,  0
-   first_bin_end   =  1998,  1,  1,  0,  0,  0
-   last_bin_end    =  1998,  1,  1,  0,  0,  0
-   bin_interval_days    = 7 
+   first_bin_start =  2015,  1,  1,  0,  0,  0
+   first_bin_end   =  2016,  1,  1,  0,  0,  0
+   last_bin_end    =  2016,  1,  1,  0,  0,  0
+   bin_interval_days    = 5000
    bin_interval_seconds = 0
    max_num_bins         = 1000
    print_table          = .true.
@@ -243,14 +244,26 @@
    /
 
 &model_mod_check_nml
-   dart_input_file            = 'dart_prior'
-   output_file                = 'check_me'
-   advance_time_present       = .false.
-   x_ind                      = 100
-   kind_of_interest           = 'KIND_SOIL_MOISTURE'
-   verbose                    = .FALSE.
-   test1thru                  = 11
-   loc_of_interest            = 5.5, 49.88, 0.5
-   interp_test_vertcoord      = 'VERTISHEIGHT'
+   dart_input_file       = 'dart_prior'
+   output_file           = 'mmc_output'
+   advance_time_present  = .false.
+   x_ind                 = 8000
+   kind_of_interest      = 'KIND_SOIL_MOISTURE'
+   verbose               = .FALSE.
+   test1thru             = 9
+   loc_of_interest       = 5.5730320707600001, 49.937321821019999, 0.01
+   interp_test_vertcoord = 'VERTISHEIGHT'
+   interp_test_lonrange  =  5.412,  5.617
+   interp_test_dlon      = 0.001
+   interp_test_latrange  = 49.840, 49.950
+   interp_test_dlat      = 0.001
+   interp_test_vertrange = 0.02, 0.50
+   interp_test_dvert     = 0.01
+   verbose               = .false.
    /
 
+
+ longitude index to the  west and  east are           19          20
+ latitude  index to the south and north are           12          13
+ lonW, lon, lonE   5.5730320707600001        5.5819999999999999        5.5820249635799994     
+ latS, lat, latN   49.937321821019999        49.940000000000005        49.946314713840003  

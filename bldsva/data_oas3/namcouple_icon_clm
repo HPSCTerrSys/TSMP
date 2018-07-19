@@ -1,0 +1,141 @@
+ $NFIELDS
+  20
+ $END
+#
+ $RUNTIME
+  totalruntime
+ $END
+#
+ $INIDATE
+  20080508
+ $END
+#
+ $NLOGPRT
+  10 0
+ $END
+#
+ $NBMODEL
+   2  icon  oasclm 99 99
+ $END
+#
+ $CALTYPE
+  30
+ $END
+#
+#
+ $STRINGS
+ICOTEMPE CLMTEMPE 1 cplfreq1 1 icon01.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0 
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOUWIND CLMUWIND 1 cplfreq1 1 icon02.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOVWIND CLMVWIND 1 cplfreq1 1 icon03.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOSPWAT CLMSPWAT 1 cplfreq1 1 icon04.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOTHICK CLMTHICK 1 cplfreq1 1 icon05.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOPRESS CLMPRESS 1 cplfreq1 1 icon06.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICODIRSW CLMDIRSW 1 cplfreq1 1 icon07.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICODIFSW CLMDIFSW 1 cplfreq1 1 icon08.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOLONGW CLMLONGW 1 cplfreq1 1 icon09.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOCVPRE CLMCVPRE 1 cplfreq1 1 icon10.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOGSPRE CLMGSPRE 1 cplfreq1 1 icon11.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+# FROM CLM TO ICOMO
+CLM_TAUX ICO_TAUX 1 cplfreq1 1 clm04.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLM_TAUY ICO_TAUY 1 cplfreq1 1 clm05.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMLATEN ICOLHFLX 1 cplfreq1 1 clm07.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMSENSI ICOSHFLX 1 cplfreq1 1 clm06.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMINFRA ICOINFRA 1 cplfreq1 1 clm01.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0 
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+CLMALBED ICOALBED 1 cplfreq1 1 clm02.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMALBEI ICOALBEI 1 cplfreq1 1 clm03.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLM_TSF1 ICOTGRND 1 cplfreq1 1 clm09.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=2
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+ $END

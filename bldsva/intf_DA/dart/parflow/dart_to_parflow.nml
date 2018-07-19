@@ -1,0 +1,6 @@
+&dart_to_pfb_nml
+   pfb_restart_filename   = 'model_restartfile'
+   dart_to_pfb_input_file = 'dart_restart'
+   advance_time_present   = .false.
+   verbose                = .false.
+  /

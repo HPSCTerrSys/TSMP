@@ -1,0 +1,160 @@
+&parallel_nml
+ nproma         = 16
+ p_test_run     = .FALSE.
+ l_test_openmp  = .FALSE.
+ l_log_checks   = .FALSE.
+ write_div_to_file = .TRUE.
+/
+&grid_nml
+ dynamics_grid_filename = icon_nrw_150km_R1247m.nc
+ dynamics_parent_grid_id = 0
+ lfeedback         = .FALSE.
+ l_limited_area    = .TRUE.
+/ 
+&initicon_nml
+ init_mode              =  4 !4=cosmo, 2=ifs, 3=combined
+ ana_varnames_map_file  = 'ana_varnames_map_file.txt'
+ nlevsoil_in            =  8
+ lread_ana              = .FALSE.
+/
+&run_nml
+ num_lev     = 150
+ lvert_nest  = .FALSE.
+ dtime       = 6.0
+ ldynamics   = .TRUE.       ! dynamics
+ ltestcase   = .FALSE.      ! testcase
+ ltransport  = .TRUE.       ! transport
+ iforcing    = 3.
+ ltimer      = .TRUE.       ! 
+ timers_level = 10          !
+ profiling_output = 3       !
+ msg_level   = 12           ! detailed report during integration
+ output      = 'nml','totint'      
+/
+&dynamics_nml
+ iequations  = 3
+ lcoriolis   = .TRUE.
+ idiv_method     = 1
+ divavg_cntrwgt  = 0.50
+/
+&transport_nml
+ lclip_tracer = .FALSE.
+/
+&limarea_nml
+ itype_latbc     = 1
+ dtime_latbc     = 3600.
+ nlev_latbc      = 50
+ latbc_path      = "/work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247"
+ latbc_filename  = "latbc_icon_nrw_150km_R1247m_<y><m><d><h>.nc"
+ latbc_varnames_map_file = 'dict.latbc'
+/
+&diffusion_nml
+ hdiff_order      = 5
+ lhdiff_vn        = .TRUE.
+ lhdiff_temp      = .TRUE.
+ lhdiff_w         = .TRUE.
+/
+&nwp_phy_nml
+inwp_gscp          = 4      ! 4 for two moment
+inwp_convection    = 0
+inwp_radiation     = 1
+inwp_cldcover      = 5
+inwp_turb          = 5
+inwp_satad         = 1
+inwp_surface       = 1
+latm_above_top     = .TRUE.
+efdt_min_raylfric  = 7200.
+itype_z0           = 1      ! 1=land cover and topo, 2=land cover
+dt_rad             = 900.
+/
+&les_nml
+ isrfc_type        = 1      ! 1=TERRA, 2=fixed flux, 5=fixed SST, 3=fixed bflux
+ ldiag_les_out     = .FALSE.
+ les_metric        = .TRUE.
+/
+&lnd_nml
+ntiles             = 1
+nlev_snow          = 2
+lmulti_snow        = .TRUE.
+idiag_snowfrac     = 1
+lsnowtile          = .FALSE.
+frlnd_thrhld       = 0.5
+frlake_thrhld      = 0.5
+frsea_thrhld       = 0.5
+lseaice            = .FALSE.
+llake              = .FALSE.
+itype_lndtbl       =  2
+/
+&radiation_nml
+ irad_o3 = 7
+ irad_aero = 6
+/
+&interpol_nml
+nudge_zone_width  = 8  !-1 create nudge zone in grid
+lsq_high_ord      = 2
+rbf_vec_scale_c   = 0.06
+rbf_vec_scale_v   = 0.14
+rbf_vec_scale_e   = 0.30
+rbf_scale_mode_ll = 1 !2=default for automatic calculations
+/
+&gridref_nml
+ grf_intmethod_e  = 5  !6 default
+ grf_scalfbk      = 1
+ grf_tracfbk      = 1
+ denom_diffu_v    = 150.
+ l_mass_consvcorr = .TRUE. 
+ l_density_nudging = .TRUE.
+ !rbf_scale_grf_e = 0.4, 0.35, 0.25
+/
+&nonhydrostatic_nml
+ iadv_rhotheta    =  2
+ ivctype          =  2
+ itime_scheme     =  4
+ exner_expol      =  0.333
+ vwind_offctr     =  0.25
+ damp_height      =  15000.
+ rayleigh_coeff   =  0.25
+ lhdiff_rcf       = .TRUE.
+ divdamp_fac      =  0.004
+ divdamp_order    =  4
+ l_open_ubc       = .TRUE.
+ igradp_method    =  3
+ l_zdiffu_t       = .TRUE.
+ thslp_zdiffu     =  0.02
+ thhgtd_zdiffu    =  125.
+ htop_moist_proc  =  22500.
+ hbot_qvsubstep   =  24000.
+/
+&sleve_nml
+ min_lay_thckn   = 20.
+ top_height      = 21000.
+ stretch_fac     = 0.9
+ decay_scale_1   = 4000.
+ decay_scale_2   = 2500.
+ decay_exp       = 1.2
+ flat_height     = 16000. 
+/
+&io_nml
+ dt_checkpoint    = 3600.
+ lkeep_in_sync    = .TRUE.
+ restart_file_type = 5
+ output_nml_dict  = "dict.icon.hdcp2"
+ netcdf_dict      = "dict.icon.hdcp2"
+/
+&output_nml
+ dom              = 1
+ output_start     = "2013-04-24T00:00:00Z"
+ output_end       = "2013-04-24T01:00:00Z"
+ output_interval  = "PT10M"
+ file_interval    = "PT01H"
+ include_last     = .TRUE.
+ output_filename  = '1247_10m'
+ filename_format  = "<output_filename>_DOM<physdom>_<levtype>_<datetime2>"
+ ml_varlist       = 'group:dwd_fg_atm_vars','group:dwd_fg_sfc_vars'
+ output_grid      = .TRUE.
+/
+&extpar_nml
+ itopo          = 1
+ n_iter_smooth_topo = 1
+ heightdiff_threshold = 1000.
+/

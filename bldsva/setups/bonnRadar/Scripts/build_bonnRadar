@@ -5,13 +5,23 @@ set tsmpdir       = $HOME/terrsysmp
 set surfdata      = $HOME//database/bonnRadar/clm
 set machine       = "JURECA"
 set sdate         = "HET"
+set mp_type       = 2683
 set ensemble_size = 1 
 set wtime         = "7:00:00" 
-#set clmrstfil     = $surfdata/clm.${sdate}.r.2015-07-04-00000.nc
+set clmrstfil     = $surfdata/clm.${sdate}.r.2015-07-04-00000.nc
 
 # User Input
 
 set flag = $1
+
+##NOTE ON BUILDING THIS TEST CASE
+#1. Set cps_catch="on" in
+# $HOME/terrsysmp/bldsva/intf_oas3/common_build_interface.ksh 
+#2. Change config to config2 in  
+#$HOME/terrsysmp/bldsva/intf_oas3/cosmo5_1/arch/JURECA/build_interface_cosmo5_1_JURECA.ksh
+#3. Build command
+# ./build_tsmp.ksh -v 1.2.0MCT -c clm-cos -m JURECA  ??? -C false
+##NOTE ON BUILDING THIS TEST CASE
 
 cd $tsmpdir/bldsva
 
@@ -35,6 +45,11 @@ if ($flag == 1) then
   ln -s $surfdata/surfdata_${sdate}_0320x0320.nc $surfdata/surfdata_0320x0320.nc
 endif
 
+if ($flag == 2) then
+  echo "Setting ParFlow spinup"
+  #CLM spinup
+  ./setup_tsmp.ksh -v $tsmpver -c "pfl" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
+endif
 #COSMO standalone
 #./setup_tsmp.ksh -v $tsmpver -c "cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
 #
@@ -43,8 +58,15 @@ endif
 #./setup_tsmp.ksh -v $tsmpver -c "clm" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
 # -j "$clmrstfil"
 #
-#COSMO-CLM 
-#./setup_tsmp.ksh -v $tsmpver -c "clm-cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+if ($flag == 4) then
+  echo "Setting COSMO-CLM run"
+  #COSMO-CLM 
+ ./setup_tsmp.ksh -v $tsmpver -c "clm-cos" -V $refsetup -Q $wtime -m $machine -I $sdate$mp_type -N $ensemble_size -j "$clmrstfil" -r $WORK/run
+#change itype_gscp
+sed -i "s/itype_gscp=2727/itype_gscp=${mp_type}/" $WORK/run${sdate}${mp_type}/lmrun_uc
+cd $WORK/run${sdate}${mp_type}
+./lmrun_uc execluma
 #changed lnd.stdin
 #sed -i "s/surfdata_0320x0320.nc/surfdata_${sdate}_0320x0320.nc/"   $WORK/run${sdate}/lnd.stdin
+endif
 exit 0

@@ -21,6 +21,7 @@ getDefaults(){
   ## following parameters  will be set to tested setup defaults if empty
   def_namelist_clm=""
   def_namelist_cos=""
+  def_namelist_icon=""
   def_namelist_oas=""
   def_namelist_pfl=""
 #DA
@@ -28,19 +29,23 @@ getDefaults(){
 
   def_forcingdir_clm=""
   def_forcingdir_cos=""
+  def_forcingdir_icon=""
   def_forcingdir_oas=""
   def_forcingdir_pfl=""
   def_restfile_pfl=""
   def_restfile_clm=""
   def_restfile_cos=""
+  def_restfile_icon=""
   def_dump_clm=""
   def_dump_cos=""
+  def_dump_icon=""
   def_dump_pfl=""	  
   def_queue=""
   def_px_clm=""
   def_py_clm=""
   def_px_cos=""
   def_py_cos=""
+  def_p_icon=""
   def_px_pfl=""
   def_py_pfl=""
   def_startDate=""
@@ -90,20 +95,25 @@ setDefaults(){
   py_clm=$def_py_clm
   px_cos=$def_px_cos
   py_cos=$def_py_cos
+  p_icon=$def_p_icon
   px_pfl=$def_px_pfl
   py_pfl=$def_py_pfl
   forcingdir_clm=$def_forcingdir_clm
   forcingdir_cos=$def_forcingdir_cos
+  forcingdir_icon=$def_forcingdir_icon
   forcingdir_oas=$def_forcingdir_oas
   forcingdir_pfl=$def_forcingdir_pfl
   restfile_pfl=$def_restfile_pfl
   restfile_clm=$def_restfile_clm
   restfile_cos=$def_restfile_cos
+  restfile_icon=$def_restfile_icon
   dump_clm=$def_dump_clm
   dump_cos=$def_dump_cos
+  dump_icon=$def_dump_icon
   dump_pfl=$def_dump_pfl
   namelist_clm=$def_namelist_clm
   namelist_cos=$def_namelist_cos
+  namelist_icon=$def_namelist_icon
   namelist_oas=$def_namelist_oas
   namelist_pfl=$def_namelist_pfl
 #DA
@@ -133,6 +143,7 @@ clearSetupSelection(){
   py_clm=""
   px_cos=""
   py_cos=""
+  p_icon=""
   px_pfl=""
   py_pfl=""
   startDate=""
@@ -141,6 +152,7 @@ clearSetupSelection(){
 
   forcingdir_clm=""
   forcingdir_cos=""
+  forcingdir_icon=""
   forcingdir_pfl=""
   forcingdir_oas=""
   clearPathSelection
@@ -151,6 +163,7 @@ clearPathSelection(){
   bindir=""
   namelist_clm=""
   namelist_cos=""
+  namelist_icon=""
   namelist_pfl=""
   namelist_oas=""
 #DA
@@ -166,16 +179,19 @@ setSelection(){
   if [[ $py_clm == "" ]] then ; py_clm=$defaultCLMProcY ; fi
   if [[ $px_cos == "" ]] then ; px_cos=$defaultCOSProcX ; fi
   if [[ $py_cos == "" ]] then ; py_cos=$defaultCOSProcY ; fi
+  if [[ $p_icon == "" ]] then ; p_icon=$defaultICONProc ; fi
   if [[ $px_pfl == "" ]] then ; px_pfl=$defaultPFLProcX ; fi
   if [[ $py_pfl == "" ]] then ; py_pfl=$defaultPFLProcY ; fi
   
   if [[ $forcingdir_clm == "" ]] then ; forcingdir_clm=$defaultFDCLM ; fi
   if [[ $forcingdir_cos == "" ]] then ; forcingdir_cos=$defaultFDCOS ; fi
+  if [[ $forcingdir_icon == "" ]] then ; forcingdir_icon=$defaultFDICON ; fi
   if [[ $forcingdir_oas == "" ]] then ; forcingdir_oas=$defaultFDOAS ; fi
   if [[ $forcingdir_pfl == "" ]] then ; forcingdir_pfl=$defaultFDPFL ; fi
 
   if [[ $namelist_clm == "" ]] then ; namelist_clm=$defaultNLCLM ; fi
   if [[ $namelist_cos == "" ]] then ; namelist_cos=$defaultNLCOS ; fi
+  if [[ $namelist_icon == "" ]] then ; namelist_icon=$defaultNLICON ; fi
   if [[ $namelist_oas == "" ]] then ; namelist_oas=$defaultNLOAS ; fi
   if [[ $namelist_pfl == "" ]] then ; namelist_pfl=$defaultNLPFL ; fi
 #DA
@@ -187,6 +203,7 @@ setSelection(){
 
   if [[ $dump_clm == "" ]] then ; dump_clm=$defaultDumpCLM ; fi
   if [[ $dump_cos == "" ]] then ; dump_cos=$defaultDumpCOS ; fi
+  if [[ $dump_icon == "" ]] then ; dump_icon=$defaultDumpICON ; fi
   if [[ $dump_pfl == "" ]] then ; dump_pfl=$defaultDumpPFL ; fi
 
   if [[ $exp_id == "__DATE__" ]] then
@@ -215,6 +232,7 @@ setSelection(){
 setCombination(){
   withOAS="false"
   withCOS="false"
+  withICON="false"
   withPFL="false"
   withCLM="false"
   withOASMCT="false"
@@ -223,10 +241,11 @@ setCombination(){
   withDA="false"
   withPDAF="false"
 
+  case "$combination" in *icon*) withICON="true" ;; esac
   case "$combination" in *clm*) withCLM="true" ;; esac
   case "$combination" in *cos*) withCOS="true" ;; esac
   case "$combination" in *pfl*) withPFL="true" ;; esac
-  if [[ $withCLM == "true" && ( $withCOS == "true" || $withPFL == "true" )  ]]; then
+  if [[ $withCLM == "true" && ( $withCOS == "true" || $withICON == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi  
@@ -246,8 +265,10 @@ finalizeSelection(){
   nproc_pfl=0
   nproc_clm=0
   nproc_cos=0
+  nproc_icon=0
   if [[ $withPFL == "true" ]] ; then ; nproc_pfl=$((${px_pfl}*${py_pfl})) ;fi 
   if [[ $withCOS == "true" ]] ; then ; nproc_cos=$((${px_cos}*${py_cos})) ;fi 
+  if [[ $withICON == "true" ]] ; then ; nproc_icon=${p_icon} ;fi 
   if [[ $withCLM == "true" ]] ; then ; nproc_clm=$((${px_clm}*${py_clm})) ;fi 
   if [[ $withOAS == "true" ]] ; then ; nproc_oas=1 ;fi 
   if [[ $withOASMCT == "true" ]] ; then ; nproc_oas=0 ;fi 
@@ -334,12 +355,15 @@ softSanityCheck(){
 
   valid="false"
   cstr="invalid"
-  if [[ $withCLM == "true" &&  $withCOS == "true" && $withPFL == "true"  ]]; then ;cstr=" clm-cos-pfl " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" clm-cos " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-pfl " ; fi
-  if [[ $withCLM == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm " ; fi
-  if [[ $withCLM == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" cos " ; fi
-  if [[ $withCLM == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "true"  ]]; then ;cstr=" clm-cos-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-icon-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" clm-cos " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm-icon " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" clm-pfl " ; fi
+  if [[ $withCLM == "true" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" clm " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "false" &&  $withCOS == "true" && $withPFL == "false"  ]]; then ;cstr=" cos " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "true" &&  $withCOS == "false" && $withPFL == "false"  ]]; then ;cstr=" icon " ; fi
+  if [[ $withCLM == "false" &&  $withICON == "false" &&  $withCOS == "false" && $withPFL == "true"  ]]; then ;cstr=" pfl " ; fi
   case "${combinations[${version}]}" in *${cstr}*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This combination is not supported in this version" ; warning  ;fi
 
@@ -478,6 +502,7 @@ interactive(){
                   if [[ $numb == 11 ]] ; then ; read py_clm ; fi
                   if [[ $numb == 12 ]] ; then ; read px_cos ; fi
                   if [[ $numb == 13 ]] ; then ; read py_cos ; fi
+                  if [[ $numb == 40 ]] ; then ; read p_icon ; fi
                   if [[ $numb == 14 ]] ; then ; read px_pfl ; fi
                   if [[ $numb == 15 ]] ; then ; read py_pfl ; fi
                   if [[ $numb == 16 ]] ; then ; read rootdir ;clearPathSelection; setSelection ; fi
@@ -486,7 +511,9 @@ interactive(){
                   if [[ $numb == 19 ]] ; then ; read namelist_clm ; fi
                   if [[ $numb == 20 ]] ; then ; read forcingdir_clm ; fi
                   if [[ $numb == 21 ]] ; then ; read namelist_cos ; fi
+                  if [[ $numb == 41 ]] ; then ; read namelist_icon ; fi
                   if [[ $numb == 22 ]] ; then ; read forcingdir_cos ; fi
+                  if [[ $numb == 42 ]] ; then ; read forcingdir_icon ; fi
                   if [[ $numb == 23 ]] ; then ; read namelist_pfl ; fi
                   if [[ $numb == 24 ]] ; then ; read forcingdir_pfl ; fi
                   if [[ $numb == 25 ]] ; then ; read namelist_oas ; fi
@@ -508,9 +535,11 @@ interactive(){
 		  if [[ $numb == 34 ]] ; then ; read restfile_pfl ; fi
 		  if [[ $numb == 35 ]] ; then ; read restfile_clm ; fi
 		  if [[ $numb == 36 ]] ; then ; read restfile_cos ; fi
+		  if [[ $numb == 43 ]] ; then ; read restfile_icon ; fi
                   if [[ $numb == 37 ]] ; then ; read dump_pfl ; fi
                   if [[ $numb == 38 ]] ; then ; read dump_clm ; fi
                   if [[ $numb == 39 ]] ; then ; read dump_cos ; fi
+                  if [[ $numb == 44 ]] ; then ; read dump_icon ; fi
                 done
                 interactive
           ;;
@@ -540,6 +569,7 @@ printState(){
   print "${cred}(11)${cnormal} processors in Y for clm (default=$def_py_clm): ${cgreen}$py_clm${cnormal}"
   print "${cred}(12)${cnormal} processors in X for cos (default=$def_px_cos): ${cgreen}$px_cos${cnormal}"
   print "${cred}(13)${cnormal} processors in Y for cos (default=$def_py_cos): ${cgreen}$py_cos${cnormal}"
+  print "${cred}(40)${cnormal} processors for icon     (default=$def_p_icon): ${cgreen}$p_icon${cnormal}"
   print "${cred}(14)${cnormal} processors in X for pfl (default=$def_px_pfl): ${cgreen}$px_pfl${cnormal}"
   print "${cred}(15)${cnormal} processors in Y for pfl (default=$def_py_pfl): ${cgreen}$py_pfl${cnormal}"
   print ""
@@ -550,7 +580,9 @@ printState(){
   print "${cred}(19)${cnormal} namelist dir for clm (default='$def_namelist_clm'): ${cgreen}$namelist_clm${cnormal}"
   print "${cred}(20)${cnormal} forcing dir for clm (default='$def_forcingdir_clm'): ${cgreen}$forcingdir_clm${cnormal}"
   print "${cred}(21)${cnormal} namelist dir for cos (default='$def_namelist_cos'): ${cgreen}$namelist_cos${cnormal}"
+  print "${cred}(41)${cnormal} namelist dir for icon (default='$def_namelist_icon'): ${cgreen}$namelist_icon${cnormal}"
   print "${cred}(22)${cnormal} forcing dir for cos (default='$def_forcingdir_cos'): ${cgreen}$forcingdir_cos${cnormal}"
+  print "${cred}(42)${cnormal} forcing dir for icon (default='$def_forcingdir_icon'): ${cgreen}$forcingdir_icon${cnormal}"
   print "${cred}(23)${cnormal} namelist dir for pfl (default='$def_namelist_pfl'): ${cgreen}$namelist_pfl${cnormal}"
   print "${cred}(24)${cnormal} forcing dir for pfl (default='$def_forcingdir_pfl'): ${cgreen}$forcingdir_pfl${cnormal}"
   print "${cred}(25)${cnormal} namelist dir for oas (default='$def_namelist_oas'): ${cgreen}$namelist_oas${cnormal}"
@@ -568,9 +600,11 @@ printState(){
   print "${cred}(34)${cnormal} Path to restart file for pfl. No restart if ''. (default=$def_restfile_pfl): ${cgreen}$restfile_pfl ${cnormal}"
   print "${cred}(35)${cnormal} Path to restart file for clm. No restart if ''. (default=$def_restfile_clm): ${cgreen}$restfile_clm ${cnormal}"
   print "${cred}(36)${cnormal} Path to restart file for cos. No restart if ''. (default=$def_restfile_cos): ${cgreen}$restfile_cos ${cnormal}"  
+  print "${cred}(43)${cnormal} Path to restart file for icon. No restart if ''. (default=$def_restfile_icon): ${cgreen}$restfile_icon ${cnormal}"  
   print "${cred}(37)${cnormal} Dump interval for pfl.  (default=$def_dump_pfl): ${cgreen}$dump_pfl ${cnormal}"
   print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
   print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
+  print "${cred}(43)${cnormal} Dump interval for icon.  (default=$def_dump_icon): ${cgreen}$dump_icon ${cnormal}"
 
 }
 
@@ -667,9 +701,9 @@ getRoot(){
   USAGE+="[i:interactive?Interactive mode - command line arguments and defaults will be overwritten during the interactive session (This is the default without arguments).]"
   USAGE+="[a:avail?Prints a listing of every machine with available versions. The script will exit afterwards.]"
   USAGE+="[t:tutorial?Prints a tutorial/description on how to add new versions and platforms to this script. The script will exit afterwards.]"
-  USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
-  USAGE+="[B:bindir?Absolut path to bin directory for the builded executables.]:[path:='$def_bindir']"
-  USAGE+="[r:rundir?Absolut path to run directory for TSMP.]:[path:='$def_rundir']"
+  USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
+  USAGE+="[B:bindir?Absolute path to bin directory for the builded executables.]:[path:='$def_bindir']"
+  USAGE+="[r:rundir?Absolute path to run directory for TSMP.]:[path:='$def_rundir']"
   USAGE+="[I:expid?Experiment ID suffix for rundir. DATE will be taken if empty.]:[expid:='$def_exp_id']"
   USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
   USAGE+="[V:refsetup?Reference setup. This is a setup that is supported and tested on a certain machine. No further inputs are needed for this setup. If you leave it '' the machine default will be taken.]:[refsetup:='$def_refSetup']"
@@ -689,6 +723,7 @@ getRoot(){
   USAGE+="[W:pyclm? Number of tasks for clm in Y direction. If you leave it '' the machine default will be taken.]:[pyclm:='$def_py_clm']"
   USAGE+="[x:pxcos? Number of tasks for cosmo in X direction. If you leave it '' the machine default will be taken.]:[pxcos:='$def_px_cos']"
   USAGE+="[X:pycos? Number of tasks for cosmo in Y direction. If you leave it '' the machine default will be taken.]:[pycos:='$def_py_cos']"
+  USAGE+="[z:picon? Number of tasks for icon. If you leave it '' the machine default will be taken.]:[picon:='$def_p_icon']"
   USAGE+="[y:pxpfl? Number of tasks for ParFlow in X direction. If you leave it '' the machine default will be taken.]:[pxpfl:='$def_px_pfl']"
   USAGE+="[Y:pypfl? Number of tasks for ParFlow in Y direction. If you leave it '' the machine default will be taken.]:[pypfl:='$def_py_pfl']"
   USAGE+="[d:namoas? Namelist for Oasis. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namoas:='']"
@@ -696,7 +731,8 @@ getRoot(){
   USAGE+="[e:namclm? Namelist for clm. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namclm:='']"
   USAGE+="[E:forcedirclm? Forcing directory for clm. This will replace the default forcing dir from the reference setup.]:[forcedirclm:='']"
   USAGE+="[f:namcos? Namelist for Cosmo. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namcos:='']"
-  USAGE+="[F:forcedircos? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcedircos:='']"
+  USAGE+="[Z:namicon? Namelist for icon. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namicon:='']"
+  USAGE+="[U:forcediricon? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcediricon:='']"
   USAGE+="[g:nampfl? Namelist for ParFlow. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[nampfl:='']"
 #DA
   USAGE+="[h:namda? Namelist for data assimilation. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namda:='']"
@@ -704,9 +740,11 @@ getRoot(){
   USAGE+="[G:forcedirpfl? Forcing directory for ParFlow. This will replace the default forcing dir from the reference setup.]:[forcedirpfl:='']"
   USAGE+="[j:restfileclm? Restart file for CLM. No restart for CLM if ''.]:[restfileclm:='$def_restfile_clm']"
   USAGE+="[k:restfilecos? Restart file for Cosmo. No restart for Cosmo if ''.]:[restfilecos:='$def_restfile_cos']"
+  USAGE+="[e:restfileicon? Restart file for icon. No restart for icon if ''.]:[restfileicon:='$def_restfile_icon']"
   USAGE+="[l:restfilepfl? Restart file for ParFlow. No restart for ParFlow if ''.]:[restfilepfl:='$def_restfile_pfl']"
   USAGE+="[J:dumpclm? Dump interval for CLM (in hours).]:[dumpclm:='$def_dump_clm']"
   USAGE+="[K:dumpcos? Dump interval for Cosmo (in hours).]:[dumpcos:='$def_dump_cos']"
+  USAGE+="[E:dumpicon? Dump interval for Cosmo (in hours).]:[dumpicon:='$def_dump_icon']"
   USAGE+="[L:dumppfl? Dump interval for ParFlow (in hours).]:[dumppfl:='$def_dump_pfl']"
 
 
@@ -739,7 +777,9 @@ getRoot(){
     e)  namelist_clm=$OPTARG ; args=1 ;;
     E)  forcingdir_clm=$OPTARG ; args=1 ;;
     f)  namelist_cos=$OPTARG ; args=1 ;;
+    Z)  namelist_icon=$OPTARG ; args=1 ;;
     F)  forcingdir_cos=$OPTARG ; args=1 ;;
+    U)  forcingdir_icon=$OPTARG ; args=1 ;;
     g)  namelist_pfl=$OPTARG ; args=1 ;;
     G)  forcingdir_pfl=$OPTARG ; args=1 ;;
 #DA
@@ -749,6 +789,7 @@ getRoot(){
     W)  py_clm=$OPTARG ; args=1 ;;
     x)  px_cos=$OPTARG ; args=1 ;;
     X)  py_cos=$OPTARG ; args=1 ;;
+    z)  p_icon=$OPTARG ; args=1 ;;
     y)  px_pfl=$OPTARG ; args=1 ;;
     Y)  py_pfl=$OPTARG ; args=1 ;;
  
@@ -762,10 +803,12 @@ getRoot(){
     l)  restfile_pfl="$OPTARG"; args=1 ;;
     j)  restfile_clm="$OPTARG"; args=1 ;;
     k)  restfile_cos="$OPTARG"; args=1 ;;
+    e)  restfile_icon="$OPTARG"; args=1 ;;
 
     L)  dump_pfl="$OPTARG"; args=1 ;;
     J)  dump_clm="$OPTARG"; args=1 ;;
     K)  dump_cos="$OPTARG"; args=1 ;;
+    E)  dump_icon="$OPTARG"; args=1 ;;
 
 
     esac
@@ -829,6 +872,7 @@ check
 #  start setup
   origrundir=$rundir
   orignamelist_cos=$namelist_cos
+  orignamelist_icon=$namelist_icon
   orignamelist_clm=$namelist_clm
   orignamelist_pfl=$namelist_pfl
   if [[ $withCLM == "true" ]] ; then 
@@ -848,6 +892,16 @@ check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp cos exe to $rundir"
         cp $bindir/lmparbin_pur $rundir  >> $log_file 2>> $err_file
+      check
+    fi
+  fi
+  if [[ $withICON == "true" ]] ; then
+    comment "  source icon build interface for $platform"
+      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
+    check
+    if [[ $withPDAF == "false" ]] ; then
+      comment "  cp icon exe to $rundir"
+        cp $bindir/icon $rundir  >> $log_file 2>> $err_file
       check
     fi
   fi
@@ -893,6 +947,11 @@ check
       comment "  mkdir sub-directory for instance"
         mkdir -p $rundir >> $log_file 2>> $err_file
       check
+      if [[ -e "${orignamelist_icon}_${instance}" ]] ; then 
+	namelist_icon="${orignamelist_icon}_${instance}"
+      else
+        namelist_icon="$orignamelist_icon"
+      fi
       if [[ -e "${orignamelist_cos}_${instance}" ]] ; then 
 	namelist_cos="${orignamelist_cos}_${instance}"
       else
@@ -917,6 +976,7 @@ check
         mkdir -p $origrundir/tsmp_instance_$(printf "%05d" $instance) >> $log_file 2>> $err_file
       check
 	
+	namelist_icon="${orignamelist_icon}_${instance}"
 	namelist_cos="${orignamelist_cos}_${instance}"
         namelist_clm="${orignamelist_clm}_${instance}"
         namelist_pfl="${orignamelist_pfl}_${instance}"
@@ -924,6 +984,7 @@ check
 
     if [[ $withCLM == "true" ]] ; then ; setup_clm ;  fi
     if [[ $withCOS == "true" ]] ; then ; setup_cos ;  fi
+    if [[ $withICON == "true" ]] ; then ; setup_icon ;  fi
     if [[ $withPFL == "true" ]] ; then ; setup_pfl ;  fi
     if [[ $withOAS == "true" ]] ; then ; setup_oas ;  fi
 

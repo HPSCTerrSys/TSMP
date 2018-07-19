@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: model_mod.f90 9015 2015-11-06 22:20:29Z thoar $
+! DART $Id: model_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 module model_mod
 
@@ -44,7 +44,7 @@ use     location_mod, only : location_type, get_dist, query_location,          &
                              vert_is_height,   VERTISHEIGHT,                   &
                              get_close_obs_init, get_close_obs, LocationDims
 
-use    utilities_mod, only : register_module, error_handler,                   &
+use    utilities_mod, only : register_module, error_handler, nmlfileunit,      &
                              E_ERR, E_WARN, E_MSG, logfileunit, get_unit,      &
                              nc_check, do_output, to_upper,                    &
                              find_namelist_in_file, check_namelist_read,       &
@@ -94,6 +94,11 @@ use netcdf
 implicit none
 private
 
+! version controlled file description for error handling, do not edit
+character(len=*), parameter :: source   = "$URL: model_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
+
 ! these routines must be public and you cannot change
 ! the arguments - they will be called *from* the DART code.
 public :: get_model_size,         &
@@ -126,17 +131,11 @@ public :: clm_to_dart_state_vector,     &
           write_state_times,            &
           get_model_time
 
-! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 9015 $"
-character(len=128), parameter :: revdate  = "$Date: 2015-11-06 15:20:29 -0700 (Fri, 06 Nov 2015) $"
 
-character(len=256) :: string1, string2, string3
+character(len=512) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
-!
-type(time_type)                  :: start_date   !CPS needed 
+type(time_type) :: start_date   ! experiment start date - needed by parflow
 
 ! Storage for a random sequence for perturbing a single initial state
 
@@ -185,22 +184,20 @@ integer, parameter :: VT_STATEINDX    = 6 ! ... update (state) or not
 integer            :: assimilation_period_days = 0
 integer            :: assimilation_period_seconds = 60
 real(r8)           :: model_perturbation_amplitude = 0.2
-logical            :: output_state_vector = .true.
 integer            :: debug = 0   ! turn up for more and more debug messages
 character(len=32)  :: calendar = 'Gregorian'
+character(len=256) :: clm_file_s = 'clm_restart_s.nc'
 character(len=256) :: clm_restart_filename = 'clm_restart.nc'
 character(len=256) :: clm_history_filename = 'clm_history.nc'
-character(len=256) :: clm_file_s = 'clm_restart_s.nc'
 character(len=256) :: clm_vector_history_filename = 'clm_vector_history.nc'
 
 character(len=obstypelength) :: clm_variables(max_state_variables*num_state_table_columns) = ' '
 
 namelist /model_nml/            &
+   clm_file_s,                  &
    clm_restart_filename,        &
    clm_history_filename,        &
-   clm_file_s,                  &
    clm_vector_history_filename, &
-   output_state_vector,         &
    assimilation_period_days,    &  ! for now, this is the timestep
    assimilation_period_seconds, &
    model_perturbation_amplitude,&
@@ -342,13 +339,6 @@ integer,  allocatable, dimension(:) :: latjxy       ! latitude  index of parent 
 real(r8), allocatable, dimension(:) :: levels       ! depth
 real(r8), allocatable, dimension(:) :: landarea     ! land area ... 'support' ... 'weight'
 
-!------------------------------------------------------------------------------
-! set this to true if you want to print out the current time
-! after each N observations are processed, for benchmarking.
-
-logical :: print_timestamps = .false.
-integer :: print_every_Nth  = 10000
-
 !------------------------------------------------------------------
 ! module storage
 !------------------------------------------------------------------
@@ -356,7 +346,7 @@ integer :: print_every_Nth  = 10000
 integer         :: model_size      ! the state vector length
 type(time_type) :: model_time      ! valid time of the model state
 type(time_type) :: model_timestep  ! smallest time to adv model
-
+logical         :: output_state_vector = .false.
 
 INTERFACE vector_to_prog_var
       MODULE PROCEDURE vector_to_1d_prog_var
@@ -378,11 +368,10 @@ END INTERFACE
 
 contains
 
-!==================================================================
-! All the REQUIRED interfaces come first - just by convention.
-!==================================================================
 
 !------------------------------------------------------------------
+! This routine writes the experiment start times to a file that is
+! used by ParFlow.
 
 subroutine write_state_times(iunit, statetime)
 
@@ -418,13 +407,13 @@ write(iunit, '(''defaultStartDate '',I4.4,2(''-'',I2.2),1x,i2.2)') iyear,imonth,
 return
 
 end subroutine write_state_times
-!------------------------------------------------------------------
 
+
+!------------------------------------------------------------------
+!> Returns the size of the model as an integer.
+!> Required for all applications.
 
 function get_model_size()
-!------------------------------------------------------------------
-! Returns the size of the model as an integer.
-! Required for all applications.
 
 integer :: get_model_size
 
@@ -435,11 +424,11 @@ get_model_size = model_size
 end function get_model_size
 
 
+!------------------------------------------------------------------
+!> CLM is never advanced by DART.
+!> If we get here, something is wrong and we should stop right away.
 
 subroutine adv_1step(x, time)
-!------------------------------------------------------------------
-! CLM is never advanced by DART.
-! If we get here, something is wrong and we should stop right away.
 
 real(r8),        intent(inout) :: x(:)
 type(time_type), intent(in)    :: time
@@ -546,7 +535,6 @@ integer :: ncid, TimeDimID, VarID, dimlen, varsize
 integer :: iunit, io, ivar
 integer :: i, j, xi, xj, index1, indexN, indx
 integer :: ss, dd
-integer :: ncid_s   !CPS
 
 integer  :: spvalINT
 real(r4) :: spvalR4
@@ -567,7 +555,7 @@ read(iunit, nml = model_nml, iostat = io)
 call check_namelist_read(iunit, io, 'model_nml')
 
 ! Record the namelist values used for the run
-if (do_nml_file()) write(logfileunit, nml=model_nml)
+if (do_nml_file()) write(nmlfileunit, nml=model_nml)
 if (do_nml_term()) write(     *     , nml=model_nml)
 
 !---------------------------------------------------------------
@@ -586,21 +574,12 @@ call error_handler(E_MSG,'static_init_model',string1)
 
 !---------------------------------------------------------------
 ! HAVE TO USE THE START FILE TO GET THE CORRECT START DATE :(((
-!CPS start_date = get_state_time(clm_file_s)
+! parflow needs the very first start time of the whole assimilation experiment.
+! this comes from the timemgr_rst_curr_ymd,timemgr_rst_curr_tod  variables
+! from the first set of output. That filename is specified in the dart
+! namelist by variable 'clm_file_s'
 
-if ( .not. file_exist(clm_file_s) ) then
-  write(string1,*) 'cannot open file ', trim(clm_file_s),' for reading.'
-  call error_handler(E_ERR,'restart_file_to_sv',string1,source,revision,revdate)
-endif
-
-call nc_check(nf90_open(trim(clm_file_s), NF90_NOWRITE, ncid_s), &
-            'restart_file_to_sv','open '//trim(clm_file_s))
-
-start_date = get_start_time_ncid(ncid_s)
-call nc_check(nf90_close(ncid_s),'restart_file_to_sv','close'//trim(clm_file_s))
-
-!---------------------------------------------------------------
-
+start_date = get_start_time()
 
 !---------------------------------------------------------------
 ! The CLM history file (h0?) has the 'superset' of information.
@@ -3725,11 +3704,90 @@ end subroutine get_sparse_geog
 
 
 !------------------------------------------------------------------
+!> GET START DATE FROM CLM
+!> This file has the time of the start of the experiment,
+!> not the time of the current state. parflow needs this, not CLM.
+!> The filename comes from the DART namelist ... 'clm_file_s'
 
+function get_start_time()
+
+type(time_type) :: get_start_time
+
+character(len=*), parameter :: routine = 'get_start_time'
+integer :: io, ncid, VarID
+integer :: rst_start_ymd, rst_start_tod, leftover
+integer :: year, month, day, hour, minute, second
+
+if ( .not. module_initialized ) call static_init_model
+
+if ( .not. file_exist(clm_file_s) ) then
+  write(string1,*) 'cannot open file "'//trim(clm_file_s)//'" for reading.'
+  call error_handler(E_ERR,routine,string1,source,revision,revdate)
+endif
+
+io = nf90_open(clm_file_s, NF90_NOWRITE, ncid)
+call nc_check(io,routine, 'open "'//trim(clm_file_s)//'"')
+
+io = nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd', VarID)
+call nc_check(io, routine, 'inq_varid timemgr_rst_ref_ymd "'//trim(clm_file_s)//'"')
+
+io = nf90_get_var(ncid, VarID, rst_start_ymd)
+call nc_check(io, routine, 'get_var rst_ref_ymd "'//trim(clm_file_s)//'"')
+
+io = nf90_inq_varid(ncid, 'timemgr_rst_ref_tod', VarID)
+call nc_check(io, routine, 'inq_varid timemgr_rst_ref_tod "'//trim(clm_file_s)//'"')
+
+io = nf90_get_var(ncid, VarID, rst_start_tod)
+call nc_check(io, routine, 'get_var rst_ref_tod "'//trim(clm_file_s)//'"')
+
+call nc_check(nf90_close(ncid),routine,'close "'//trim(clm_file_s)//'"')
+
+year     = rst_start_ymd/10000
+leftover = rst_start_ymd - year*10000
+month    = leftover/100
+day      = leftover - month*100
+
+hour     = rst_start_tod/3600
+leftover = rst_start_tod - hour*3600
+minute   = leftover/60
+second   = leftover - minute*60
+
+get_start_time = set_date(year, month, day, hour, minute, second)
+
+end function get_start_time
+
+
+!------------------------------------------------------------------
+!> Return the valid time of the model state given a filename.
+
+function get_state_time_fname(filename)
+
+type(time_type) :: get_state_time_fname
+character(len=*), intent(in) :: filename
+
+integer         :: ncid
+
+if ( .not. module_initialized ) call static_init_model
+
+if ( .not. file_exist(filename) ) then
+   write(string1,*) 'cannot open file ', trim(filename),' for reading.'
+   call error_handler(E_ERR,'get_state_time_fname',string1,source,revision,revdate)
+endif
+
+call nc_check( nf90_open(trim(filename), NF90_NOWRITE, ncid), &
+                  'get_state_time_fname', 'open '//trim(filename))
+
+get_state_time_fname = get_state_time_ncid(ncid)
+
+call nc_check(nf90_close(ncid),'get_state_time_fname', 'close '//trim(filename))
+
+end function get_state_time_fname
+
+
+!------------------------------------------------------------------
+!> Return the valid time of the model state given a netCDF ID.
 
 function get_state_time_ncid( ncid )
-!------------------------------------------------------------------
-! The restart netcdf files have the time of the state.
 
 type(time_type) :: get_state_time_ncid
 integer, intent(in) :: ncid
@@ -3766,79 +3824,10 @@ end function get_state_time_ncid
 
 
 !------------------------------------------------------------------
-!------------------------------------------------------------------
-!>GET START DATE FROM CLM
-function get_start_time_ncid( ncid )
-!------------------------------------------------------------------
-! The restart netcdf files have the time of the start.
-
-type(time_type) :: get_start_time_ncid
-integer, intent(in) :: ncid
-
-integer :: VarID
-integer :: rst_start_ymd, rst_start_tod, leftover
-integer :: year, month, day, hour, minute, second
-
-if ( .not. module_initialized ) call static_init_model
-
-call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_ymd',VarID),'get_start_time_ncid', &
-&  'inq_varid timemgr_rst_ref_ymd'//trim(clm_file_s))
-call nc_check(nf90_get_var(  ncid, VarID,rst_start_ymd),'get_start_time_ncid', &
-&            'get_var rst_ref_ymd'//trim(clm_file_s))
-
-call nc_check(nf90_inq_varid(ncid, 'timemgr_rst_ref_tod',VarID),'get_start_time_ncid', &
-&  'inq_varid timemgr_rst_ref_tod'//trim(clm_file_s))
-call nc_check(nf90_get_var(  ncid, VarID,rst_start_tod),'get_start_time_ncid',&
-&            'get_var rst_ref_tod'//trim(clm_file_s))
-
-year     = rst_start_ymd/10000
-leftover = rst_start_ymd - year*10000
-month    = leftover/100
-day      = leftover - month*100
-
-hour     = rst_start_tod/3600
-leftover = rst_start_tod - hour*3600
-minute   = leftover/60
-second   = leftover - minute*60
-
-get_start_time_ncid = set_date(year, month, day, hour, minute, second)
-
-end function get_start_time_ncid
-!------------------------------------------------------------------
-
-function get_state_time_fname(filename)
-!------------------------------------------------------------------
-! the static_init_model ensures that the clm namelists are read.
-!
-type(time_type) :: get_state_time_fname
-character(len=*), intent(in) :: filename
-
-integer         :: ncid
-
-if ( .not. module_initialized ) call static_init_model
-
-if ( .not. file_exist(filename) ) then
-   write(string1,*) 'cannot open file ', trim(filename),' for reading.'
-   call error_handler(E_ERR,'get_state_time_fname',string1,source,revision,revdate)
-endif
-
-call nc_check( nf90_open(trim(filename), NF90_NOWRITE, ncid), &
-                  'get_state_time_fname', 'open '//trim(filename))
-
-get_state_time_fname = get_state_time_ncid(ncid)
-
-call nc_check(nf90_close(ncid),'get_state_time_fname', 'close '//trim(filename))
-
-end function get_state_time_fname
-
-
-!------------------------------------------------------------------
-
+!> This defines the window used for assimilation.
+!> all observations +/- half this timestep are assimilated.
 
 function set_model_time_step()
-!------------------------------------------------------------------
-! This defines the window used for assimilation.
-! all observations +/- half this timestep are assimilated.
 
 type(time_type) :: set_model_time_step
 
@@ -5306,13 +5295,4 @@ endif
 
 end function FindDesiredTimeIndx
 
-!===================================================================
-! End of model_mod
-!===================================================================
 end module model_mod
-
-! <next few lines under version control, do not edit>
-! $URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/model_mod.f90 $
-! $Id: model_mod.f90 9015 2015-11-06 22:20:29Z thoar $
-! $Revision: 9015 $
-! $Date: 2015-11-06 15:20:29 -0700 (Fri, 06 Nov 2015) $

@@ -26,6 +26,7 @@ set refsetup      = "idealRTD"
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
+set testcasedir   = /daten01/z4/database/TestCases/idealRTD 
 #
 #User Settings End Here
 
@@ -53,7 +54,7 @@ endif
 
 #
 set defDir = $tsmpdir/bldsva/setups/$refsetup
-cp $defDir/def/idealRTD_JURECA_setup_DA.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/idealRTD_${machine}_setup_DA.ksh $defDir/idealRTD_${machine}_setup.ksh
 cp $defDir/def/coup_oas_DA.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_DA $defDir/lnd.stdin
 cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
@@ -80,7 +81,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
     #set rundir        = $tsmpdir"/run/"$temp_dir
     #
     # Perturb the model state
-    $shellpath/perturb_model_state.csh $rundir $ensemble_size $map_fn
+    $shellpath/perturb_model_state.csh $rundir $testcasedir $ensemble_size $map_fn
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
@@ -187,7 +188,7 @@ echo "Block 3:  Updating the setup directory with default script"
 echo "-------------------------------------------------------------------"
 echo " "
 
-cp $defDir/def/idealRTD_JURECA_setup_default.ksh $defDir/idealRTD_JURECA_setup.ksh
+cp $defDir/def/idealRTD_${machine}_setup_default.ksh $defDir/idealRTD_${machine}_setup.ksh
 cp $defDir/def/coup_oas_default.tcl $defDir/coup_oas.tcl
 cp $defDir/def/lnd.stdin_default $defDir/lnd.stdin
 cp $defDir/def/lmrun_uc5_1_default $defDir/lmrun_uc5_1

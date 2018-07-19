@@ -93,7 +93,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-        comment "   copy initial pressure and script into rundir"
+        comment "   copy parflow soil ID and geodata into rundir"
         cp $forcingdir_pfl/pfb*.nc $rundir/ >> $log_file 2>> $err_file
         check
         comment "   copy initial pressure and script into rundir"

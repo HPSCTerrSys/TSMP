@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: clm_to_dart.f90 7195 2014-10-03 17:01:29Z thoar $
+! DART $Id: clm_to_dart.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program clm_to_dart
 
@@ -32,10 +32,9 @@ use time_manager_mod, only : time_type, print_time, print_date
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/clm_to_dart.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 7195 $"
-character(len=128), parameter :: revdate  = "$Date: 2014-10-03 11:01:29 -0600 (Fri, 03 Oct 2014) $"
+character(len=*), parameter :: source   = "$URL: clm_to_dart.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !-----------------------------------------------------------------------
 ! namelist parameters with default values.
@@ -91,9 +90,3 @@ call close_file(iunit)
 call finalize_utilities('clm_to_dart')
 
 end program clm_to_dart
-
-! <next few lines under version control, do not edit>
-! $URL: https://svn-dares-dart.cgd.ucar.edu/DART/trunk/models/clm/clm_to_dart.f90 $
-! $Id: clm_to_dart.f90 7195 2014-10-03 17:01:29Z thoar $
-! $Revision: 7195 $
-! $Date: 2014-10-03 11:01:29 -0600 (Fri, 03 Oct 2014) $

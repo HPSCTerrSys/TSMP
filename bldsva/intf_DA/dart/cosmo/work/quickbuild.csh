@@ -1,12 +1,10 @@
 #!/bin/csh
 #
-# DART software - Copyright 2004 - 2011 UCAR. This open source software is
-# provided by UCAR, "as is", without charge, subject to all terms of use at
+# DART software - Copyright UCAR. This open source software is provided
+# by UCAR, "as is", without charge, subject to all terms of use at
 # http://www.image.ucar.edu/DAReS/DART/DART_download
 #
-# $Id: quickbuild.csh 5353 2011-10-13 21:23:59Z thoar $
-#
-# Script to manage the compilation of all components for this model;
+# DART $Id: quickbuild.csh Wed Apr 11 20:26:43 CEST 2018 $
 
 #----------------------------------------------------------------------
 # 'preprocess' is a program that culls the appropriate sections of the
@@ -56,7 +54,7 @@ foreach TARGET ( mkmf_* )
    endsw
 end
 
-\rm -f *.o *.mod Makefile .cppdefs
+\rm -f *.o *.mod input.nml*_default
 
 if ( $#argv == 1 && "$1" == "-mpi" ) then
   echo "Success: All single task DART programs compiled."  
@@ -67,22 +65,19 @@ else if ( $#argv == 1 && "$1" == "-nompi" ) then
   exit 0
 else
   echo ""
-  echo "Success: All single task DART programs compiled."  
-  echo "Script now compiling MPI parallel versions of the DART programs."
-  echo "Run the quickbuild.csh script with a -nompi argument or"
-  echo "edit the quickbuild.csh script and add an exit line"
-  echo "to bypass compiling with MPI to run in parallel on multiple cpus."
+  echo "Success: All DART programs compiled."
+  echo "Script is exiting before building the MPI version of the DART programs."
+  echo "Run the quickbuild.csh script with a -mpi argument or"
+  echo "edit the quickbuild.csh script and remove the exit line"
+  echo "to compile with MPI to run in parallel on multiple cpus."
   echo ""
+  exit 0
 endif
 
 #----------------------------------------------------------------------
-# to disable an MPI parallel version of filter for this model, 
-# call this script with the -nompi argument, or if you are never going to
-# build with MPI, add an exit before the entire section above.
-#----------------------------------------------------------------------
-
-#----------------------------------------------------------------------
-# Build the MPI-enabled target(s) 
+# to enable an MPI parallel version of filter for this model, 
+# call this script with the -mpi argument, or if you are going to build
+# with MPI all the time, remove or comment out the entire section above.
 #----------------------------------------------------------------------
 
 \rm -f filter
@@ -102,7 +97,7 @@ if ($status != 0) then
    exit $n
 endif
 
-\rm -f *.o *.mod
+\rm -f *.o *.mod input.nml*_default
 
 echo
 echo 'time to run filter here:'
@@ -112,9 +107,3 @@ echo ' for lam-mpi run "lamboot" once, then "runme_filter"'
 echo ' for mpich run "mpd" once, then "runme_filter"'
 
 exit 0
-
-# <next few lines under version control, do not edit>
-# $URL: https://proxy.subversion.ucar.edu/DAReS/DART/branches/cosmo/models/cosmo/work/quickbuild.csh $
-# $Revision: 5353 $
-# $Date: 2011-10-13 15:23:59 -0600 (Thu, 13 Oct 2011) $
-

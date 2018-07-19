@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------------------------
-!Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
+!Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
 !This file is part of TerrSysMP-PDAF
 !
@@ -58,16 +58,37 @@ MODULE mod_assimilation
   INTEGER, ALLOCATABLE :: dim_state_p_count(:)
   INTEGER, ALLOCATABLE :: dim_state_p_stride(:)
   ! gw end
-  REAL, ALLOCATABLE    :: obs(:)          ! Vector holding all observations
-  INTEGER, ALLOCATABLE :: obs_index(:)    ! Vector holding state-vector indices of observations
+  REAL, ALLOCATABLE    :: obs(:)          ! Vector holding all observations for Global domain 
+  REAL, ALLOCATABLE    :: obs_p(:)        ! Vector holding observations for PE-local domain
+  INTEGER, ALLOCATABLE :: obs_index_p(:)  ! Vector holding state-vector indices of observations for PE-local domain
   INTEGER, ALLOCATABLE :: obs_index_l(:)  ! Vector holding local state-vector indices of observations
-  INTEGER, ALLOCATABLE :: coords_obs(:,:) ! Array for observation coordinates
-  INTEGER :: coords_l(2)                  ! Coordinates of local analysis domain
   INTEGER, ALLOCATABLE :: local_dims_obs(:) ! Array for process-local observation dimensions
+  INTEGER, ALLOCATABLE :: obs_nc2pdaf(:)  ! mapping ordering of obs between netcdf input and internal ordering in pdaf
+  REAL, ALLOCATABLE :: pressure_obserr_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
+  REAL, ALLOCATABLE :: clm_obserr_p(:)    ! Vector holding  observation errors for CLM run at each PE-local domain  
+  REAL, ALLOCATABLE :: distance(:)        ! Localization distance
+  REAL, ALLOCATABLE :: xcoord_fortran_g(:), & ! Global coordinates for the domain are stored,
+                       ycoord_fortran_g(:), & ! been gathered from local domains. used when 
+                       zcoord_fortran_g(:)    ! local filter analysis is selected. 
+  INTEGER, ALLOCATABLE :: global_to_local(:)  ! Vector to map global index to local domain index
+  INTEGER, ALLOCATABLE :: longxy(:), latixy(:), longxy_obs(:), latixy_obs(:) ! longitude and latitude of grid cells and observation cells
+  INTEGER, ALLOCATABLE :: var_id_obs(:)   ! for remote sensing data the variable identifier to group  
+                                          ! variables distributed over a grid surface area 
+  !kuw
+  INTEGER, ALLOCATABLE :: obs_id_p(:) ! ID of observation point in PE-local domain
+  INTEGER, ALLOCATABLE :: m_id_f(:)   ! index for mapping mstate to local domain
+  !kuw end
+
+  INTEGER :: dim_obs_p     ! Process-local number of observations
+  INTEGER, ALLOCATABLE :: maxlon(:), minlon(:), maxlat(:), minlat(:), & ! store the maximum and minimum coordinates limits 
+                          maxix(:), minix(:), maxiy(:), miniy(:)        ! for remote sensing data with the same variable identity 
+  INTEGER :: dim_nx, dim_ny ! the dimension along the x and y direction
+                            ! for remote sensing data
+  REAL, ALLOCATABLE :: lon_var_id(:), ix_var_id(:)
+  REAL, ALLOCATABLE :: lat_var_id(:), iy_var_id(:)
 
   ! *** User defined observation filename ***
   character (len = 110) :: obs_filename
-
 
 ! *** Below are the generic variables used for configuring PDAF ***
 ! *** Their values are set in init_PDAF                         ***

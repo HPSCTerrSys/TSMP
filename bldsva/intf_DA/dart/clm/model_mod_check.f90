@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
+! DART $Id: model_mod_check.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 program model_mod_check
 
@@ -18,8 +18,7 @@ use    utilities_mod, only : initialize_utilities, nc_check, &
 use     location_mod, only : location_type, set_location, write_location, get_dist, &
                              query_location, LocationDims, get_location, VERTISHEIGHT
 use     obs_kind_mod, only : get_raw_obs_kind_name, get_raw_obs_kind_index, &
-                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE, &
-                             KIND_BRIGHTNESS_TEMPERATURE
+                             KIND_SNOWCOVER_FRAC, KIND_SOIL_TEMPERATURE
 use  assim_model_mod, only : open_restart_read, open_restart_write, close_restart, &
                              aread_state_restart, awrite_state_restart, &
                              netcdf_file_type, aoutput_diagnostics, &
@@ -36,17 +35,16 @@ use        model_mod, only : static_init_model, get_model_size, get_state_meta_d
 implicit none
 
 ! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/model_mod_check.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6311 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $"
+character(len=*), parameter :: source   = "$URL: model_mod_check.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 
 !------------------------------------------------------------------
 ! The namelist variables
 !------------------------------------------------------------------
 
-character (len = 129) :: input_file  = 'dart_ics'
-character (len = 129) :: output_file = 'check_me'
+character(len=256)    :: input_file  = 'dart_ics'
+character(len=256)    :: output_file = 'check_me'
 logical               :: advance_time_present = .FALSE.
 logical               :: verbose              = .FALSE.
 integer               :: test1thru = -1
@@ -72,8 +70,6 @@ type(netcdf_file_type) :: ncFileID
 type(location_type) :: loc
 
 real(r8) :: interp_val
-
-real(r8), dimension(6) :: metadata
 
 !----------------------------------------------------------------------
 ! This portion checks the geometry information.
@@ -284,7 +280,7 @@ subroutine check_meta_data( iloc )
 integer, intent(in) :: iloc
 type(location_type) :: loc
 integer             :: var_type
-character(len=129)  :: string1
+character(len=512)  :: string1
 
 write(*,*)
 write(*,*)'Checking metadata routines.'
@@ -394,9 +390,3 @@ end subroutine find_closest_gridpoint
 
 
 end program model_mod_check
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/model_mod_check.f90 $
-! $Id: model_mod_check.f90 6311 2013-07-17 22:04:54Z thoar $
-! $Revision: 6311 $
-! $Date: 2013-07-18 00:04:54 +0200 (Thu, 18 Jul 2013) $

@@ -30,6 +30,8 @@
 
 #include "parflow_config.h"
 
+#include "amps_common.h"
+
 #ifdef AMPS_MALLOC_DEBUG
 #include <dmalloc.h>
 #else
@@ -132,11 +134,26 @@ Currently there is only the global communication context.
 
 @memo Global communication context
 */
+#define amps_CommWorld MPI_COMM_WORLD
+#define amps_CommNode  nodeComm
+#define amps_CommWrite writeComm
 
 extern MPI_Comm oas3Comm;
-#define amps_CommWorld oas3Comm
+//#define amps_CommWorld oas3Comm
+extern MPI_Comm nodeComm;
+extern MPI_Comm writeComm;
+
+/*Global ranks and size of MPI_COMM_WORLD*/
 extern int amps_rank;
 extern int amps_size;
+
+/*Node level ranks and size of nodeComm */
+extern int amps_node_rank;
+extern int amps_node_size;
+
+/*Writing proc ranks and size of writeComm */
+extern int amps_write_rank;
+extern int amps_write_size;
 
 /*===========================================================================*/
 /**
@@ -162,6 +179,8 @@ Currently there is only a single communicator, \Ref{amps_CommWorld}.
 @return current node's rank in the communication context
 */
 #define amps_Rank(comm) amps_rank
+#define amps_nodeRank(comm) amps_node_rank
+#define amps_writeRank(comm) amps_write_rank
 
 /*===========================================================================*/
 /**

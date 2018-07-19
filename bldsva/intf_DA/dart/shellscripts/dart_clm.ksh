@@ -1,5 +1,6 @@
 #!/bin/ksh
 
+#SBATCH --ignore-pbs
 #SBATCH --job-name="dartCLM"
 #SBATCH --nodes=1
 #SBATCH --ntasks=48
@@ -9,12 +10,23 @@
 #SBATCH --time=00:10:00
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
+
+#PBS -N dartCLM 
+#PBS -l walltime=2:30:00
+#PBS -l nodes=1:ppn=64
+#PBS -V 
+#PBS -u pshrestha 
+#PBS -q batch
+#PBS -e err.txt
+#PBS -o out.txt
  
 export LOGNAME="$WORK/$1"
 export LOGNAME_S="$WORK/rundart01"
 export DART_DIR="$HOME/DART/lanai/models/terrsysmp/clm/work"
+#Machine Specific
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
+#Machine Specific
 source $LOGNNAME/loadenvs
 
 export numInst=$2
@@ -86,6 +98,7 @@ echo "CPS 2"
 #for filter?
 
 date
+#Machine Specific
 srun  -n $numInst  ./filter || exit 3  >> log_file 2>> err_file
 date
 

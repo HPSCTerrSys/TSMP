@@ -1,0 +1,133 @@
+#!/bin/bash
+#-----------------------------------------------------------------------------
+check_error()
+{
+    # Check if the first parameter (return status) is not OK
+    # Arguments:
+    #   $1 = error status: 0 = OK, not 0 = ERROR
+    #   $2 = error message
+
+    if [ "${STATUS_FILE}" = "" ]
+    then
+      STATUS_FILE=${basedir}/.status.file
+    fi
+    
+    echo "$1" > ${STATUS_FILE}
+    echo "$1" > ${basedir}/run/${job_name}.status
+
+    if [ $1 != 0 ] 
+    then
+        echo "QSUBW_ERROR: JOB_%HOSTNAME%_%PID%: RC = "
+        echo "check_error()"
+        echo "   ERROR : $2"
+        exit $1
+    fi
+
+}
+
+warning()
+{
+    # Warning if the first parameter (return status) is not OK
+    # Arguments:
+    #   $1 = error status: 0 = OK, not 0 = ERROR
+    #   $2 = error message
+    if [ $1 != 0 ]
+    then
+        echo "   WARNING : $2"
+    fi
+}
+
+
+number_of_required_files=0
+number_of_linked_files=0
+
+add_required_file()
+{
+  in_name=$1
+  new_name=$2
+  
+  input_required_file[$number_of_required_files]=$in_name
+  output_required_file[$number_of_required_files]=$new_name  
+  # print added required file $number_of_required_files ${input_required_file[${number_of_required_files}]} ${output_required_file[${number_of_required_files}]}  
+  (( number_of_required_files = number_of_required_files + 1 ))    
+}
+
+print_required_files()
+{
+  i=0
+  while [ $i -lt $number_of_required_files ]
+  do
+    print required file $i : ${input_required_file[${i}]} ${output_required_file[${i}]}
+   (( i=i+1 ))
+  done    
+}
+
+copy_required_files()
+{
+  i=0
+  while [ $i -lt $number_of_required_files ]
+  do
+    cp -f ${input_required_file[${i}]} ${output_required_file[${i}]}
+   (( i=i+1 ))
+  done    
+}
+
+add_link_file()
+{
+  in_name=$1
+  new_name=$2
+  
+  input_linked_file[$number_of_linked_files]=$in_name
+  output_linked_file[$number_of_linked_files]=$new_name  
+  (( number_of_linked_files = number_of_linked_files + 1 ))    
+}
+
+print_linked_files()
+{
+  i=0
+  while [ $i -lt $number_of_linked_files ]
+  do
+    print linked file $i : ${input_linked_file[${i}]} ${output_linked_file[${i}]}
+   (( i=i+1 ))
+  done    
+}
+
+link_required_files()
+{
+  i=0
+  while [ $i -lt $number_of_linked_files ]
+  do
+    rm ${output_linked_file[${i}]}   # remove in order to replace the link if necessary
+    ln -sf ${input_linked_file[${i}]} ${output_linked_file[${i}]}
+   (( i=i+1 ))
+  done    
+}
+
+#-----------------------------------------------------------------------------
+export F_NORCW=65535
+ulimit -s unlimited
+#-----------------------------------------------------------------------------
+# absolute paths of directories
+calldir=$(pwd)
+thisdir=$(pwd)
+basedir=${thisdir%/*}                   # determine base directory
+MODEL_BASE_PATH=$basedir
+ICON_BASE_PATH=$basedir
+export ICON_BASE_PATH
+RUNSCRIPT_NAME=`basename $0`
+# ICON_RUN_PATH=$ICON_BASE_PATH/run
+#-----------------------------------------------------------------------------
+# set default data paths
+# can be overwritten by the experiment, or by the add_required_ocean_files,
+# add_required_atmo_files, etc
+# icon_data_RootFolder=/pool/data/ICON/buildbot
+
+#-----------------------------------------------------------------------------
+second=1                                 # [s] 1 second
+minute=60                                # [s] 1 minute
+hour=3600                                # [s] 1 hour
+day=86400                                # [s] 1 day
+month=2592000                            # [s] 30 days
+year360=31104000                         # [s] 360 days
+year=31556900                            # [s] 1 earth year 
+#-----------------------------------------------------------------------------

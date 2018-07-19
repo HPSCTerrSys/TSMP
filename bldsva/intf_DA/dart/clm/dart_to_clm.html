@@ -104,23 +104,31 @@ prematurely terminating the namelist.
 <div class=namelist>
 <pre>
 &amp;dart_to_clm_nml
-   dart_to_clm_output_file      = 'dart_restart',
-   advance_time_present         = .false.,
-   /
+   dart_to_clm_output_file      = 'dart_restart'
+   advance_time_present         = .false.
+  /
 </pre>
 </div>
 <br />
 <div class=namelist>
 <pre>
 &amp;model_nml
-   clm_restart_filename         = 'clm_restart.nc',
-   clm_history_filename         = 'clm_history.nc',
-   calendar                     = 'Gregorian',
-   clm_state_variables          = 'frac_sno',    'KIND_SNOWCOVER_FRAC',
-                                  'SNOWDP',      'KIND_SNOW_THICKNESS',
-                                  'T_SOISNO',    'KIND_SOIL_TEMPERATURE',
-                                  'leafc',       'KIND_LEAF_CARBON'
-   /
+   clm_restart_filename         = 'clm_restart.nc'
+   clm_history_filename         = 'clm_history.nc'
+   clm_vector_history_filename  = 'clm_vector_history.nc'
+   clm_file_s                   = 'clm_restart_s.nc'
+   assimilation_period_days     = 0
+   assimilation_period_seconds  = 21400
+   calendar                     = 'Gregorian'
+   debug                        = 0
+   clm_variables  = 'T_SOISNO',    'KIND_SOIL_TEMPERATURE',       'NA' , 'NA' , 'restart' , 'UPDATE',
+                    'H2OSOI_LIQ',  'KIND_LIQUID_WATER',           '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'H2OSOI_ICE',  'KIND_ICE',                    '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'H2OSNO',      'KIND_SNOW_WATER',             '0.0', 'NA' , 'restart' , 'NO_COPY_BACK',
+                    'frac_sno',    'KIND_SNOWCOVER_FRAC',         '0.0', '1.0', 'restart' , 'NO_COPY_BACK',
+                    'TV',          'KIND_VEGETATION_TEMPERATURE', 'NA' , 'NA' , 'history' , 'NO_COPY_BACK',
+                    'Q2M',         'KIND_SPECIFIC_HUMIDITY',      '0.0', 'NA' , 'history' , 'NO_COPY_BACK'
+  /
 
 (partial list)
 </pre>
@@ -141,23 +149,16 @@ prematurely terminating the namelist.
 
 <TBODY valign=top>
 
-<TR><TD> dart_to_clm_input_file </TD>
-    <TD> character(len=128) </TD>
-    <TD>The name of the DART file containing the model state
-to insert into the CLM restart file.
+<TR><TD> dart_to_clm_output_file </TD>
+    <TD> character(len=256) </TD>
+    <TD>The name of the CLM file to be updated.
 </TD></TR>
 
 <TR><TD> advance_time_present </TD>
     <TD> logical </TD>
-<TD>switch to control the ability to read a DART file containing TWO
-timestamps in the file header.  If you are converting a DART initial
-conditions or restart file this should be <em class=code>.false.</em>; these
-files have a single timestamp describing the valid time of the model state.
-If <em class=code>.true.</em>, TWO timestamps are expected to
-be the DART file header.  In this case, a namelist for CLM (called 
-<em class=file>clm_in.DART</em>) is created that contains the 
-<em class=code>&amp;time_manager_nml</em> settings appropriate to advance CLM to
-the time requested by DART.
+    <TD> Not used for the TerrSysMP implementation since CLM is never going
+    to be advanced by <em class=program>filter</em> or </em>perfect_model_obs</em>.
+    Should always be <em class=code>.false.</em>. 
 </TD></TR>
 
 </TBODY> 

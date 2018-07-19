@@ -1,0 +1,329 @@
+ $NFIELDS
+  50
+ $END
+#
+ $RUNTIME
+  totalruntime
+ $END
+#
+ $INIDATE
+  20080508
+ $END
+#
+ $NLOGPRT
+  10 0
+ $END
+#
+ $NBMODEL
+   3 icon oasclm oaspfl 99 99
+ $END
+#
+ $CALTYPE
+  30
+ $END
+#
+#
+ $STRINGS
+#
+# ICON to CLM
+#
+ICOTEMPE CLMTEMPE 1 cplfreq1 1 icon01.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0 
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOUWIND CLMUWIND 1 cplfreq1 1 icon02.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOVWIND CLMVWIND 1 cplfreq1 1 icon03.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOSPWAT CLMSPWAT 1 cplfreq1 1 icon04.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOTHICK CLMTHICK 1 cplfreq1 1 icon05.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOPRESS CLMPRESS 1 cplfreq1 1 icon06.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICODIRSW CLMDIRSW 1 cplfreq1 1 icon07.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICODIFSW CLMDIFSW 1 cplfreq1 1 icon08.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOLONGW CLMLONGW 1 cplfreq1 1 icon09.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOCVPRE CLMCVPRE 1 cplfreq1 1 icon10.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+ICOGSPRE CLMGSPRE 1 cplfreq1 1 icon11.nc EXPOUT
+ngiconx 1 ngclmx 1 gicon gclm SEQ=+1
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+# ParFlow to CLM
+#
+PFLSAT01  CLMSAT01  1 cplfreq2 1  pfl01.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT02  CLMSAT02  1 cplfreq2 1  pfl02.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT03  CLMSAT03  1 cplfreq2 1  pfl03.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT04  CLMSAT04  1 cplfreq2 1  pfl04.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT05  CLMSAT05  1 cplfreq2 1  pfl05.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT06  CLMSAT06  1 cplfreq2 1  pfl06.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT07  CLMSAT07  1 cplfreq2 1  pfl07.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT08  CLMSAT08  1 cplfreq2 1  pfl08.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT09  CLMSAT09  1 cplfreq2 1  pfl09.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLSAT10  CLMSAT10  1 cplfreq2 1  pfl10.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI01  CLMPSI01  1 cplfreq2 1  pfl11.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI02  CLMPSI02  1 cplfreq2 1  pfl12.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI03  CLMPSI03  1 cplfreq2 1  pfl13.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI04  CLMPSI04  1 cplfreq2 1  pfl14.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI05  CLMPSI05  1 cplfreq2 1  pfl15.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI06  CLMPSI06  1 cplfreq2 1  pfl16.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI07  CLMPSI07  1 cplfreq2 1  pfl17.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI08  CLMPSI08  1 cplfreq2 1  pfl18.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI09  CLMPSI09  1 cplfreq2 1  pfl19.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+PFLPSI10  CLMPSI10  1 cplfreq2 1  pfl20.nc EXPOUT
+ngpflx ngpfly ngclmx ngclmy gpfl gclm SEQ=+2
+R 0 R 0
+SCRIPR
+ BILINEAR LR SCALAR LATLON 1
+#
+# CLM to ICON
+#
+CLM_TAUX ICO_TAUX 1 cplfreq1 1 clm04.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLM_TAUY ICO_TAUY 1 cplfreq1 1 clm05.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMLATEN ICOLHFLX 1 cplfreq1 1 clm07.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMSENSI ICOSHFLX 1 cplfreq1 1 clm06.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMINFRA ICOINFRA 1 cplfreq1 1 clm01.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0 
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1 
+#
+CLMALBED ICOALBED 1 cplfreq1 1 clm02.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLMALBEI ICOALBEI 1 cplfreq1 1 clm03.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+CLM_TSF1 ICOTGRND 1 cplfreq1 1 clm09.nc EXPOUT
+ngclmx 1 ngiconx 1 gclm gicon SEQ=+3
+P 0 P 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 1
+#
+# CLM to ParFlow
+#
+CLMFLX01  PFLFLX01  1 cplfreq2 1  clm07.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX02  PFLFLX02  1 cplfreq2 1  clm08.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX03  PFLFLX03  1 cplfreq2 1  clm09.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX04  PFLFLX04  1 cplfreq2 1  clm10.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX05  PFLFLX05  1 cplfreq2 1  clm11.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX06  PFLFLX06  1 cplfreq2 1  clm12.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX07  PFLFLX07  1 cplfreq2 1  clm13.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX08  PFLFLX08  1 cplfreq2 1  clm14.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX09  PFLFLX09  1 cplfreq2 1  clm15.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+#
+CLMFLX10  PFLFLX10  1 cplfreq2 1  clm16.nc EXPOUT
+ngclmx ngclmy ngpflx ngpfly gclm gpfl SEQ=+4
+R 0 R 0
+SCRIPR
+ DISTWGT U SCALAR LATLON 1 4 
+ $END

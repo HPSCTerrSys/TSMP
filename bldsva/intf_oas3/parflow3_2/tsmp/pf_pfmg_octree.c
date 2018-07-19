@@ -35,6 +35,17 @@
 #ifdef HAVE_HYPRE
 #include "hypre_dependences.h"
 
+/*
+ * Versions of Hypre > 2.10.x require dimension argument for
+ * BoxCreate.  Previous versions don't require argument.
+ */
+#if PARFLOW_HYPRE_VERSION_MAJOR > 2 || \
+   ( PARFLOW_HYPRE_VERSION_MAJOR >= 2 &&  PARFLOW_HYPRE_VERSION_MINOR >= 10 )
+#define PARFLOW_HYPRE_DIM 3
+#else
+#define PARFLOW_HYPRE_DIM
+#endif
+
 typedef struct
 {
    int  max_iter;
@@ -150,7 +161,8 @@ int          zero)
       ihi[1] = ilo[1] + ny_v - 1;
       ihi[2] = ilo[2] + nz_v - 1;
 
-      value_box = hypre_BoxCreate();
+      value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
+      
       hypre_BoxSetExtents(value_box, ilo, ihi); 
 
       GrGeomInBoxLoop(i, j, k, 
@@ -165,7 +177,7 @@ int          zero)
 			 ihi[1] = ilo[1] + num_j - 1;
 			 ihi[2] = ilo[2] + num_k - 1;
 			 
-			 set_box = hypre_BoxCreate();
+			 set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			 hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			 hypre_StructVectorSetBoxValues ( hypre_b,
@@ -259,7 +271,7 @@ int          zero)
       ihi[1] = ilo[1] + ny_v - 1;
       ihi[2] = ilo[2] + nz_v - 1;
 
-      value_box = hypre_BoxCreate();
+      value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
       hypre_BoxSetExtents(value_box, ilo, ihi); 
 
       GrGeomInBoxLoop(i, j, k, 
@@ -274,7 +286,7 @@ int          zero)
 			 ihi[1] = ilo[1] + num_j - 1;
 			 ihi[2] = ilo[2] + num_k - 1;
 			 
-			 set_box = hypre_BoxCreate();
+			 set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			 hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			 hypre_StructVectorSetBoxValues ( hypre_x,
@@ -378,8 +390,8 @@ double       *temp_data)
       }
 
       /* Set the HYPRE grid */
-//CPS fix
       HYPRE_StructGridCreate(amps_CommWorld, 3, &(instance_xtra->hypre_grid) );
+
 
       grid         = instance_xtra -> grid;
       
@@ -473,7 +485,6 @@ double       *temp_data)
       /* Set up new solution vector */
       if ( !(instance_xtra->hypre_x) )
       {
-
          HYPRE_StructVectorCreate(amps_CommWorld, 
 			       instance_xtra->hypre_grid, 
 			       &(instance_xtra->hypre_x) );
@@ -546,7 +557,7 @@ double       *temp_data)
 			ihi[1] = ilo[1] + ny_m - 1;
 	    		ihi[2] = ilo[2] + nz_m - 1;
 
-	    		value_box = hypre_BoxCreate();
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -562,7 +573,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 			       
-			       set_box = hypre_BoxCreate();
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 			       
                                /* IMF: commented print statement
@@ -617,7 +628,7 @@ double       *temp_data)
 	    		ihi[1] = ilo[1] + ny - 1;
 	    		ihi[2] = ilo[2] + nz - 1;
 
-	    		value_box = hypre_BoxCreate();
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -632,7 +643,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 
-			       set_box = hypre_BoxCreate();
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			       /*
@@ -748,7 +759,7 @@ double       *temp_data)
 			ihi[1] = ilo[1] + ny_m - 1;
 	    		ihi[2] = ilo[2] + nz_m - 1;
 
-	    		value_box = hypre_BoxCreate();
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -764,7 +775,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 			       
-			       set_box = hypre_BoxCreate();
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 			       
                                /* IMF: commented print statement
@@ -855,7 +866,7 @@ double       *temp_data)
 	    		ihi[1] = ilo[1] + ny - 1;
 	    		ihi[2] = ilo[2] + nz - 1;
 
-	    		value_box = hypre_BoxCreate();
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -870,7 +881,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 
-			       set_box = hypre_BoxCreate();
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			       /*
@@ -954,6 +965,7 @@ double       *temp_data)
       /* Set up the PFMG preconditioner */
       HYPRE_StructPFMGCreate(amps_CommWorld,
 				&(instance_xtra->hypre_pfmg_data) );
+
       HYPRE_StructPFMGSetTol(instance_xtra->hypre_pfmg_data, 1.0e-30);
       /* Set user parameters for PFMG */
       HYPRE_StructPFMGSetMaxIter(instance_xtra->hypre_pfmg_data, max_iter);
@@ -1096,28 +1108,23 @@ int  PFMGOctreeSizeOfTempData()
  Hyper is not available.   
 */
 
-void         PFMGOctree(soln, rhs, tol, zero)
-Vector      *soln;
-Vector      *rhs;
-double       tol;
-int          zero;
+void         PFMGOctree(
+   Vector      *soln,
+   Vector      *rhs,
+   double       tol,
+   int          zero)
 {
    amps_Printf("Error: Parflow not compiled with hypre, can't use pfmg\n");   
    exit(1);
 }
 
-//CPS PFModule  *PFMGOctreeInitInstanceXtra(problem, grid, problem_data,  
-//				      pf_Bmat, pf_Cmat, pf_Emat, pf_Fmat, temp_data)
-PFModule  *PFMGOctreeInitInstanceXtra(problem, grid, problem_data,   
-                                      pf_Bmat, pf_Cmat, temp_data)
-Problem      *problem;
-Grid         *grid;
-ProblemData  *problem_data;
-Matrix       *pf_Bmat;
-Matrix	     *pf_Cmat;
-/*CPS Matrix	     *pf_Emat,
-Matrix	     *pf_Fmat,*/
-double       *temp_data;
+PFModule  *PFMGOctreeInitInstanceXtra(
+   Problem      *problem,
+   Grid         *grid,
+   ProblemData  *problem_data,
+   Matrix       *pf_Bmat,
+   Matrix	*pf_Cmat,
+   double       *temp_data)
 {
    amps_Printf("Error: Parflow not compiled with hypre, can't use pfmg\n");   
    exit(1);

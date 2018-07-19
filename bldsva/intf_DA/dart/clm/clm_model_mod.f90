@@ -1,8 +1,8 @@
-! DART software - Copyright 2004 - 2013 UCAR. This open source software is
-! provided by UCAR, "as is", without charge, subject to all terms of use at
+! DART software - Copyright UCAR. This open source software is provided
+! by UCAR, "as is", without charge, subject to all terms of use at
 ! http://www.image.ucar.edu/DAReS/DART/DART_download
 !
-! $Id: clm_model_mod.f90 6256 2013-06-12 16:19:10Z thoar $
+! DART $Id: clm_model_mod.f90 Wed Apr 11 20:26:43 CEST 2018 $
 
 module clm_model_mod
 
@@ -73,6 +73,11 @@ use netcdf
 implicit none
 private
 
+! version controlled file description for error handling, do not edit
+character(len=*), parameter :: source   = "$URL: clm_model_mod.f90 $"
+character(len=*), parameter :: revision = "$Revision: Bonn $"
+character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
+
 ! these routines must be public and you cannot change
 ! the arguments - they will be called *from* the DART code.
 public :: clm_get_model_size,         &
@@ -87,8 +92,8 @@ public :: clm_get_model_size,         &
           clm_nc_write_model_atts,    &
           clm_nc_write_model_vars,    &
           clm_pert_model_state,       &
-          get_close_maxdist_init, &
-          get_close_obs_init,     &
+          get_close_maxdist_init,     &
+          get_close_obs_init,         &
           clm_get_close_obs,          &
           clm_ens_mean_for_model
 
@@ -106,13 +111,7 @@ public :: get_gridsize,                 &
           DART_get_var,                 &
           get_model_time
 
-! version controlled file description for error handling, do not edit
-character(len=256), parameter :: source   = &
-   "$URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/clm_model_mod.f90 $"
-character(len=32 ), parameter :: revision = "$Revision: 6256 $"
-character(len=128), parameter :: revdate  = "$Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $"
-
-character(len=256) :: string1, string2, string3
+character(len=512) :: string1, string2, string3
 logical, save :: module_initialized = .false.
 
 ! Storage for a random sequence for perturbing a single initial state
@@ -3899,13 +3898,4 @@ endif
 
 end function findVarindex
 
-!===================================================================
-! End of model_mod
-!===================================================================
 end module clm_model_mod
-
-! <next few lines under version control, do not edit>
-! $URL: https://proxy.subversion.ucar.edu/DAReS/DART/releases/Lanai/models/clm/clm_model_mod.f90 $
-! $Id: clm_model_mod.f90 6256 2013-06-12 16:19:10Z thoar $
-! $Revision: 6256 $
-! $Date: 2013-06-12 18:19:10 +0200 (Wed, 12 Jun 2013) $
