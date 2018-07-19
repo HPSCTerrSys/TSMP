@@ -568,7 +568,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi
 
   comment "    configure pftools"
-    $pfldir/pftools/configure $flagsTools CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+    $pfldir/pftools/configure $flagsTools >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
 

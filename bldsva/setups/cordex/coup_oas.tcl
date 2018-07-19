@@ -51,7 +51,7 @@ pfset Domain.GeomName                            domain
  pfset GeomInput.Names                 "solidinput indi_input"
  pfset GeomInput.solidinput.InputType  SolidFile
  pfset GeomInput.solidinput.GeomNames  domain
- pfset GeomInput.solidinput.FileName   /homea/slts/slts06/forcings/testdata_EU_std/ParFlow/geom_cordex0.11_436x424.pfsol
+ pfset GeomInput.solidinput.FileName   __pfl_solidinput_filename__
  pfset Geom.domain.Patches             "top bottom perimeter"
 
 #-----------------------------------------------------------------------------

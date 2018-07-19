@@ -1,0 +1,42 @@
+#!/bin/tcsh
+#2015-04-30_KGo
+#USAGE="source $0"
+#for bld and work w/ TerrSysMP on JUROPATEST/JURECA
+#for standard user
+
+module purge
+
+
+# Only necessary if modules are missing after maintenence
+module load Intel
+module load ParaStationMPI/5.2.1-1
+
+
+# basic toolchain, latest Intel compilers and ParaStation MPI
+
+# software development
+#module load git/2.3.2
+
+# libs for TerrSysMP
+module load Tcl/8.6.8
+module load Hypre
+module load Silo
+#grib1 dwd
+module load netCDF
+module load netCDF-Fortran
+module load parallel-netcdf
+
+
+# standard analysis and vis. libs and tools 
+#module load NCO/4.4.8
+#module load CDO/1.6.8
+#module load ncview/2.1.5
+#module load Python/2.7.9 
+#matplotlib/1.3.1-Python-2.7.9
+#netCDF4-python/1.1.7.1-Python-2.7.9 
+####ScientificPython/2.9.4-Python-2.7.9 
+#basemap
+#NCL
+#image magick / feh ... some standard viewer is missing
+
+module li
