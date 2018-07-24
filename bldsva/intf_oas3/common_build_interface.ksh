@@ -293,11 +293,9 @@ route "${cblue}<<< c_setup_cos${cnormal}"
 
 c_configure_oas(){
 route "${cblue}>>> c_configure_oas${cnormal}"
-echo "SLAVKO -- oasisroot: $oasdir"
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
-echo "SLAVKO -- platform: $platform"
   comment "    sed platform to Makefile"
     sed -i "s@__platform__@$platform@" $file >> $log_file 2>> $err_file
   check
