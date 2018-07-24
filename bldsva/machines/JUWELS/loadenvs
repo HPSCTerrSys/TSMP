@@ -6,6 +6,12 @@
 
 module --force purge
 
+# standard modules on Juwels
+module load StdEnv
+module load jscslurm/.17.02.11
+module load jsctools/.0.1
+module load .juwels-env
+
 # Only necessary if modules are missing after maintenence
 module load Intel/2018.2.199-GCC-5.5.0
 module load ParaStationMPI/5.2.1-1
@@ -14,7 +20,7 @@ module load ParaStationMPI/5.2.1-1
 # basic toolchain, latest Intel compilers and ParaStation MPI
 
 # libs for TerrSysMP
-module load Tcl/8.6.8
+module load Tcl/.8.6.8
 module load Hypre/2.14.0
 module load Silo/4.10.2
 #grib1 dwd
