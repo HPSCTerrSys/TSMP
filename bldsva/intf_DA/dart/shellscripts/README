@@ -6,7 +6,9 @@
 # Only interface codes for component model resides in both directories
 # Use of git_to_dart syncs these interface codes in TerrSysMP folder to DART folder
 # Example
-./git_to_dart_cosmo.csh 
+./git_to_dart.csh 
+# Note, make sure NETCDF_FORTRAN points to the library compiled using 
+# the compiler specified in DART/lanai/mkmf/mkmf.template !
 
 # With any updates the codes need to be rebuilt
 

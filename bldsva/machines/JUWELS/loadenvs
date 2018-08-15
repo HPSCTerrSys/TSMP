@@ -6,6 +6,10 @@
 
 module --force purge
 
+# Only necessary if modules are missing after maintenence
+module use /gpfs/software/juwels/otherstages/
+module load Stages/2018a
+#
 # standard modules on Juwels
 module load StdEnv
 module load jscslurm/.17.02.11
