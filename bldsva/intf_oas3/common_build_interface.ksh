@@ -496,6 +496,9 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
+
+    cplInc+="-g -traceback -heap-arrays " # Mukund
+
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
@@ -661,7 +664,12 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
+    echo "$pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file"
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+  check
+  comment "    patch pfsimulator/parflow_lib/problem_phase_rel_perm.c "
+    sed -i "s@inline double VanGLookupSpline@double VanGLookupSpline@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
+    sed -i "s@inline double VanGLookupLinear@double VanGLookupLinear@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
   check
   comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file

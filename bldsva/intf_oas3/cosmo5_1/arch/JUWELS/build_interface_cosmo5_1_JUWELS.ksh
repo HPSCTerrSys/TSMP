@@ -26,7 +26,7 @@ comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
 check
 comment "   sed comF90 to cos Makefile"
-  sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90 -cpp -c -ffree-line-length-512 -ffpe-trap=invalid,zero,overflow,denormal@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ld to cos Makefile"
   sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
