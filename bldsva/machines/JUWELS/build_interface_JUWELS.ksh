@@ -13,13 +13,13 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/p/project/cslts/local_SBr/juwels/DWD-libgrib1_20110128/lib"
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
-  defaultHyprePath="/p/project/cslts/local_SBr/juwels/hypre"
+  defaultHyprePath="/p/project/cslts/local/juwels/hypre"
   defaultSiloPath="$EBROOTSILO"
-  defaultLapackPath="/p/project/cslts/local_SBr/juwels/OpenBLAS"
+  defaultLapackPath="/p/project/cslts/local/juwels/OpenBLAS"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
