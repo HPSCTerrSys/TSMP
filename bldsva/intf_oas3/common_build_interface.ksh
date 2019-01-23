@@ -497,8 +497,6 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
 
-    cplInc+="-g -traceback -heap-arrays " # Mukund
-
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
