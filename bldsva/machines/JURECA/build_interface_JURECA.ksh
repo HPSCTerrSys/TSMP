@@ -13,7 +13,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20061107.jureca_tc2015.07_psintel_opt_KGo2/lib"
+  defaultGrib1Path="/p/project/cslts/local/jureca/grib1_DWD/grib1-DWD20061107.jureca_tc2015.07_psintel_opt_KGo2/lib"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
