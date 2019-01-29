@@ -14,9 +14,9 @@
 #JOBCHAIN NAMELIST
 SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
 DPATH="$HOME/DART/lanai/models/terrsysmp/"
-MACHINE="JURECA"        #(which machine are your running on)
-NUMCYCLE=120             #(number of days to run , number of JOBS = 2*$numCycle - 1)
-NRST=0                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+MACHINE="JUWELS"        #(which machine are your running on)
+NUMCYCLE=90             #(number of days to run , number of JOBS = 2*$numCycle - 1)
+NRST=1                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
 NENS=48                 #Ensemble Size
 MAP_FN="$SPATH/map_fn.txt"  #Mapping matrix for ensemble runs
 RUNSFX="rundart"
@@ -27,7 +27,7 @@ JOBSCRIPT1="tsmp_slm_run.bsh"
 #------------
 
 # Need to run dart to get time output files
-if [[ $NRST == 0 ]] ; then ; ASSIMC="cosmo" ; fi
+if [[ $NRST == 0 ]] ; then ; ASSIMC="date" ; fi
 if [[ $NRST == 1 ]] ; then ; ASSIMC="cosmo" ; fi
 if [[ $NRST == 2 ]] ; then ; ASSIMC="clm" ; fi
 if [[ $NRST == 3 ]] ; then ; ASSIMC="parflow" ; fi

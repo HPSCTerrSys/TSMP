@@ -6,7 +6,7 @@
 # Create perturbation for the ensemble runs 
 #-------------------------------------------------------------------------
 echo "-------------------------------------------------------------------"
-echo "Block 1: Perturbing the model states...."
+echo "perturb_model_state: Perturbing the atmospheric model state...."
 echo "-------------------------------------------------------------------"
 echo " "
 #

@@ -61,9 +61,12 @@ if ($icycle == 1) then
     echo " "
     #
     cd $tsmpdir/bldsva
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -r $WORK/
-    set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     set rundir        = $WORK/$sdate
+    set clmrstfil = "$rundir/clm_restart.nc" 
+    # Atmosphere init :sounding file
+    # Root zone and subsurface init: restart file from spinup, check below
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -j "$clmrstfil" --wtime=00:10:00 -r $WORK/
+    set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #
     cd $rundir
 
@@ -125,7 +128,7 @@ else if ($icycle > 1) then
 
     cd $tsmpdir/bldsva
 
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -r $WORK/ -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -r $WORK/ --wtime=00:10:00 -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil"
 
     # Update the new rundir
     #

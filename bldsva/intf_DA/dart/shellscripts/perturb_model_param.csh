@@ -1,20 +1,19 @@
 #!/bin/csh
 #
-# Usage: ./perturb.csh rundir ensemble_szie map_fn
+# Usage: ./perturb_model_param rundir ensemble_szie map_fn
 #-------------------------------------------------------------------------
-# Block 2, 
 # Create perturbation for the ensemble runs 
 #-------------------------------------------------------------------------
 echo "-------------------------------------------------------------------"
-echo "Block 2: Perturbing the parameters of clm parflow cosmo ...."
+echo "perturb_model_param: Perturbing the parameters of terrsysmp ...."
 echo "-------------------------------------------------------------------"
 echo " "
 #
 set rundir = $1
 set ensemble_size = $2
 set map_fn_file = $3
-set clm_forcing_dir = "/homea/hbn33/hbn331/database/idealRTD/clm/"
-set clm_forcing_dir = "/daten01/z4/database/TestCases/idealRTD/clm/"
+set clm_forcing_dir = "${HOME}/database/idealRTD/clm/"
+# set clm_forcing_dir = "/daten01/z4/database/TestCases/idealRTD/clm/"
 #Read the map_fn_file
 set map_fn =
 foreach line (`cat ${map_fn_file}`)

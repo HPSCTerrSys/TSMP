@@ -26,7 +26,7 @@ export DART_DIR="$HOME/DART/lanai/models/terrsysmp/cosmo/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
 #Machine Specific
-source $LOGNNAME/loadenvs
+#source $LOGNNAME/loadenvs
 
 export numInst=$2
 # Cleanup---------------

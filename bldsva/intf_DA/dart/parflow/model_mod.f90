@@ -1141,7 +1141,8 @@ do ixs = 0, nxs-1
     !CPS psi has to approach infinity to Sw to reach Sres
     Sw   = min(1._r8,max(pfvar(i,j,k),Sres + 0.001_r8))
 
-    if (k .eq. nz .and. Sw .eq. 1._r8) then ! saturated
+  !CPS?  if (k .eq. nz .and. Sw .eq. 1._r8) then ! saturated
+    if (Sw .eq. 1._r8) then ! saturated
       pfarr(i,j,k) = max(pfarr(i,j,k),0._r8) 
 
     elseif (Sw.lt.1._r8 ) then  !UnsatZ
