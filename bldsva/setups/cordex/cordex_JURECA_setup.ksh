@@ -111,6 +111,8 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
+          sed "s,__pfl_solidinput_filename__,/p/project/cslts/slts06/forcings/testdata_EU_std/ParFlow/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+        check
 	comment "   create sloap pfb with tclsh"
           tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check		
