@@ -138,6 +138,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
     cd $cosdir >> $log_file 2>> $err_file
   check
   comment "    make cosmo"
+    export SCOREP_WRAPPER=on
     make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
 
@@ -308,6 +309,7 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
   comment "    make oasis j16" 
+    export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
@@ -513,6 +515,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
   comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
+    export SCOREP_WRAPPER=off
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
@@ -524,6 +527,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
+    export SCOREP_WRAPPER=on
     gmake -j16 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
@@ -650,7 +654,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
-    export SKIN_MODE=none
+  export SCOREP_WRAPPER=off
   comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
   check
@@ -696,13 +700,14 @@ comment "    cd to pfsimulator"
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
 comment "    make pfsimulator"
+  export SCOREP_WRAPPER=on
   make -f $pfldir/pfsimulator/Makefile >> $log_file 2>> $err_file
 check
 comment "    make install pfsimulator"
   make -f $pfldir/pfsimulator/Makefile install >> $log_file 2>> $err_file
 check
 
-
+  export SCOREP_WRAPPER=off
 comment "    cd to pftools"
   cd $pfldir/pftools >> $log_file 2>> $err_file
 check

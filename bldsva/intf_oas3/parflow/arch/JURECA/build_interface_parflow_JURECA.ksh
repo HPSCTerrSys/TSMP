@@ -24,6 +24,13 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="${profComp} $mpiPath/bin/mpif77"
     pcxx="${profComp} $mpiPath/bin/mpic++"
     flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
+    if [[ $profiling == "scalasca" ]]; then
+      pcc="scalasca-mpicc"
+      pfc="scalasca-mpif90"
+      pf77="scalasca-mpif77"
+      pcxx="scalasca-mpic++"
+      flagsTools+="CC=scalasca-mpicc FC=scalasca-mpif90 F77=scalasca-mpif77 "
+    fi
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
     cflagsSim=" -qopenmp "
