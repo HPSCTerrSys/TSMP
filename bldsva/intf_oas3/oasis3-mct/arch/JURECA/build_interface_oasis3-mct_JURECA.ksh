@@ -105,21 +105,21 @@ route "${cblue}>> configure_oas${cnormal}"
   check
   comment "   sed comF90 to oas Makefile"
     if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comF90__@scalasca-mpif90 $optComp@" $file >> $log_file 2>> $err_file
+      sed -i "s@__comF90__@scorep-mpif90 $optComp@" $file >> $log_file 2>> $err_file
     else
       sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
     fi
   check
   comment "   sed comCC to oas Makefile"
     if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comCC__@scalasca-mpicc $optComp@" $file >> $log_file 2>> $err_file
+      sed -i "s@__comCC__@scorep-mpicc $optComp@" $file >> $log_file 2>> $err_file
     else
       sed -i "s@__comCC__@${profComp} $mpiPath/bin/mpicc $optComp@" $file >> $log_file 2>> $err_file
     fi
   check
   comment "   sed ld to oas Makefile"
     if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__ld__@scalasca-mpif90@" $file >> $log_file 2>> $err_file
+      sed -i "s@__ld__@scorep-mpif90@" $file >> $log_file 2>> $err_file
     else
       sed -i "s@__ld__@${profComp} $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
     fi

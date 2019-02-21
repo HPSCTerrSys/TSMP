@@ -309,10 +309,8 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
   comment "    make oasis j16" 
-    export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
-  export SKIN_MODE=mpi
 #DA
   if [[ $withPDAF == "true" ]]; then
   comment "    cp oas libs to $bindir/libs" 

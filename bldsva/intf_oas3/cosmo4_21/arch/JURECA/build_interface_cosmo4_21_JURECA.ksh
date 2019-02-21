@@ -24,14 +24,14 @@ comment "   sed ldflg to cos Makefile"
 check
 comment "   sed comF90 to cos Makefile"
   if [[ $profiling == "scalasca" ]]; then
-    sed -i "s@__comF90__@scalasca-mpif90@" $file >> $log_file 2>> $err_file
+    sed -i "s@__comF90__@scorep-mpif90@" $file >> $log_file 2>> $err_file
   else
     sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
   fi
 check
 comment "   sed ld to cos Makefile"
   if [[ $profiling == "scalasca" ]]; then
-    sed -i "s@__ld__@scalasca-mpif90@" $file >> $log_file 2>> $err_file
+    sed -i "s@__ld__@scorep-mpif90@" $file >> $log_file 2>> $err_file
   else
     sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
   fi
