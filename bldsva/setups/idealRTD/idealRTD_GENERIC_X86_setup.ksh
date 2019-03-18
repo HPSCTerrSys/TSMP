@@ -1,14 +1,14 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$TRAINHOME/RTD/idealRTD/clm"
-  defaultFDCOS="$TRAINHOME/RTD/idealRTD/cosmo"
-  defaultFDOAS="$TRAINHOME/RTD/idealRTD/oasis3"
-  defaultFDPFL="$TRAINHOME/RTD/idealRTD/parflow"
+  defaultFDCLM="${rootdir}/RTD/idealRTD/clm"
+  defaultFDCOS="${rootdir}/RTD/idealRTD/cosmo"
+  defaultFDOAS="${rootdir}/RTD/idealRTD/oasis3"
+  defaultFDPFL="${rootdir}/RTD/idealRTD/parflow"
 
-  defaultNLCLM=$TRAINHOME/terrsysmp/bldsva/setups/idealRTD/lnd.stdin 
-  defaultNLCOS=$TRAINHOME/terrsysmp/bldsva/setups/idealRTD/lmrun_uc 
-  defaultNLPFL=$TRAINHOME/terrsysmp/bldsva/setups/idealRTD/coup_oas.tcl
+  defaultNLCLM=${rootdir}/bldsva/setups/idealRTD/lnd.stdin 
+  defaultNLCOS=${rootdir}/bldsva/setups/idealRTD/lmrun_uc 
+  defaultNLPFL=${rootdir}/bldsva/setups/idealRTD/coup_oas.tcl
 
 
   defaultNppn=48
