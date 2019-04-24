@@ -49,9 +49,14 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p
-
-  IMPLICIT NONE
+        ONLY: obs_index_p, dim_obs
+   use mod_parallel_model, &
+        only: model
+   use mod_tsmp, &
+        only: tag_model_clm 
+   use mod_read_obs, &
+        only: idx_obs_nc
+     IMPLICIT NONE
 
 ! !ARGUMENTS:
   INTEGER, INTENT(in) :: step               ! Currrent time step
@@ -59,7 +64,8 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
   REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
   REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
-  integer :: i
+  integer :: i,dim_obs_l
+  ! type(SATELLITE), intent(out) :: SAT 
 ! !CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
@@ -76,5 +82,27 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   DO i = 1, dim_obs_p
      m_state_p(i) = state_p(obs_index_p(i))
   END DO
+
+  if (model == tag_model_clm) then
+     call CMEM_MAIN(m_state_p,dim_obs_p)
+     ! select the obs in my domain
+     !dim_obs_l = 1
+     !do i = 1, dim_obs
+     !  do j = begg, endg
+     !      deltax = abs(lon(j)-clmobs_lon(i))
+     !      deltay = abs(lat(j)-clmobs_lat(i))
+     !      if((deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))) then
+     !         dim_obs_p = dim_obs_p + 1
+     !      end if
+     !   end do
+     !end do
+     ! saving the size of local observation vector to variable dim_state_p
+     !dim_state_p = dim_obs_p
+
+     !DO i = 1, dim_obs_l    
+     !   call CMEM_MAIN(m_state_p,i,dim_obs_l)
+     !END DO
+  end if
+
 
 END SUBROUTINE obs_op_pdaf

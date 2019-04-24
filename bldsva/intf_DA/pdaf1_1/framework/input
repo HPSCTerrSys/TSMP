@@ -1,0 +1,25 @@
+&NAMOPT CIDIEL=, 
+       CITEFF='Choudhury', 
+       CISMR=, 
+       CIRGHR='Wigneron',
+       CIVEG=,
+       CIATM='Pellarin',       
+       CITVEG=,
+       CIDVEG='HTessel',
+       CITDIEL=, 
+       /
+&NAMRAD FGHZ=1.4, 
+        THETA=40,
+       /
+&NAMLEV NLAY_SOIL_MW=,
+        NLAY_SOIL_LS=10,
+       /
+&NAMDEF LOFFCMEM=.False.,
+        LOFIELDEXP=.False.,
+        LGPRINT=.True.,
+        JPHISTLEV=4,
+        CFINOUT='pdaf',
+        LOMASK_OCEAN=.False.,
+        LOMASK_AUTO=.True.,
+	INPUTSATINFO='/p/scratch/cjicg41/jicg4175/day4/OBSR16_orbit_fallschool.nc',
+/
