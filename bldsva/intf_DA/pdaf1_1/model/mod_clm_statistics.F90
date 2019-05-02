@@ -158,26 +158,34 @@ contains
     sd = sqrt(sd/(realsize-1))
 
 
-    if(masterproc .and. (realrank.eq.0)) then
+    if((realrank.eq.0)) then
       ptr => mm
       call gather_data_to_master(ptr,clmvar_global_g,clmlevel=nameg)
-      do g1 = 1, numg
-        ji = adecomp%gdc2i(g1)
-        jj = adecomp%gdc2j(g1)
-        clmvar_out(ji,jj) = clmvar_global_g(g1)
-      end do
-      ierr = nf90_inq_varid(il_file_id, trim(variable_names(3)) , ncvarid(3))
-      ierr = nf90_put_var( il_file_id, ncvarid(3), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
 
+      if(masterproc) then
+        do g1 = 1, numg
+          ji = adecomp%gdc2i(g1)
+          jj = adecomp%gdc2j(g1)
+          clmvar_out(ji,jj) = clmvar_global_g(g1)
+        end do
+        ierr = nf90_inq_varid(il_file_id, trim(variable_names(3)) , ncvarid(3))
+        ierr = nf90_put_var( il_file_id, ncvarid(3), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+      end if
+    end if
+
+    if((realrank.eq.0)) then
       ptr => sd
       call gather_data_to_master(ptr,clmvar_global_g,clmlevel=nameg)
-      do g1 = 1, numg
-        ji = adecomp%gdc2i(g1)
-        jj = adecomp%gdc2j(g1)
-        clmvar_out(ji,jj) = clmvar_global_g(g1)
-      end do
-      ierr = nf90_inq_varid(il_file_id, trim(variable_names(4)) , ncvarid(4))
-      ierr = nf90_put_var( il_file_id, ncvarid(4), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+
+      if(masterproc) then
+        do g1 = 1, numg
+          ji = adecomp%gdc2i(g1)
+          jj = adecomp%gdc2j(g1)
+          clmvar_out(ji,jj) = clmvar_global_g(g1)
+        end do
+        ierr = nf90_inq_varid(il_file_id, trim(variable_names(4)) , ncvarid(4))
+        ierr = nf90_put_var( il_file_id, ncvarid(4), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+      end if
     end if
    
 
@@ -198,26 +206,34 @@ contains
     call mpi_reduce(var,sd,nloc,MPI_REAL8,MPI_SUM,0,statcomm,ierr)
     sd = sqrt(sd/(realsize-1))
 
-    if(masterproc .and. (realrank.eq.0)) then
+    if((realrank.eq.0)) then
       ptr => mm
       call gather_data_to_master(ptr,clmvar_global_g,clmlevel=nameg)
-      do g1 = 1, numg
-        ji = adecomp%gdc2i(g1)
-        jj = adecomp%gdc2j(g1)
-        clmvar_out(ji,jj) = clmvar_global_g(g1)
-      end do
-      ierr = nf90_inq_varid(il_file_id, trim(variable_names(1)) , ncvarid(1))
-      ierr = nf90_put_var( il_file_id, ncvarid(1), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
 
+      if(masterproc) then
+        do g1 = 1, numg
+          ji = adecomp%gdc2i(g1)
+          jj = adecomp%gdc2j(g1)
+          clmvar_out(ji,jj) = clmvar_global_g(g1)
+        end do
+        ierr = nf90_inq_varid(il_file_id, trim(variable_names(1)) , ncvarid(1))
+        ierr = nf90_put_var( il_file_id, ncvarid(1), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+      end if
+    end if
+
+    if((realrank.eq.0)) then
       ptr => sd
       call gather_data_to_master(ptr,clmvar_global_g,clmlevel=nameg)
-      do g1 = 1, numg
-        ji = adecomp%gdc2i(g1)
-        jj = adecomp%gdc2j(g1)
-        clmvar_out(ji,jj) = clmvar_global_g(g1)
-      end do
-      ierr = nf90_inq_varid(il_file_id, trim(variable_names(2)) , ncvarid(2))
-      ierr = nf90_put_var( il_file_id, ncvarid(2), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+
+      if(masterproc) then
+        do g1 = 1, numg
+          ji = adecomp%gdc2i(g1)
+          jj = adecomp%gdc2j(g1)
+          clmvar_out(ji,jj) = clmvar_global_g(g1)
+        end do
+        ierr = nf90_inq_varid(il_file_id, trim(variable_names(2)) , ncvarid(2))
+        ierr = nf90_put_var( il_file_id, ncvarid(2), clmvar_out(:,:), start = (/ 1, 1,ts /), count = (/ nlon, nlat, 1 /) )
+      end if
     end if
    
 
@@ -263,6 +279,7 @@ contains
     ! deallocate temporary arrays
     deallocate(mm)
     deallocate(sd)
+    deallocate(var)
     deallocate(clmvar_local_g)
     if (masterproc) then
       deallocate(clmvar_global_g)
@@ -279,7 +296,7 @@ contains
     ! Determine history dataset filenames.
     !
     ! !USES:
-    use iso_c_binding, only: c_loc, c_null_char, c_f_pointer
+    use iso_c_binding
     use clm_varctl, only : caseid
     use clm_time_manager, only : get_curr_date, get_prev_date
     use enkf_clm_mod, only : outdir
@@ -307,12 +324,7 @@ contains
     !call get_curr_date (yr, mon, day, sec)
     !write(cdate,'(i4.4,"-",i2.2,"-",i2.2,"-",i5.5)') yr,mon,day,sec
     !get_statistic_filename = trim(caseid)//".stat.et."//trim(cdate)//".nc"
-    character,pointer :: poutdir
-
-    !call c_f_pointer(outdir,pchar)
-    !call c_f_pointer(c_loc(outdir),pchar)
-    poutdir = outdir
-    call c_f_pointer(c_loc(poutdir),pchar)
+    call c_f_pointer(c_loc(outdir),pchar)
     s_len = index(pchar,c_null_char)-1
 
     get_statistic_filename = trim(pchar(1:s_len))//"/"//trim(caseid)//".stat.et.nc"

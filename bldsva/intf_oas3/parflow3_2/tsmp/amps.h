@@ -30,7 +30,7 @@
 
 #include "parflow_config.h"
 
-#include "amps_common.h"
+//#include "amps_common.h"
 
 #ifdef AMPS_MALLOC_DEBUG
 #include <dmalloc.h>

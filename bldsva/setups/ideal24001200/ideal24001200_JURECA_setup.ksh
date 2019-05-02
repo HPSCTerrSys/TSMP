@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal24001200/clm"
+  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/ideal24001200/clm"
   defaultFDCOS=""
-  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal24001200/oasis3"
+  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/ideal24001200/oasis3"
   defaultFDPFL=""
 
 

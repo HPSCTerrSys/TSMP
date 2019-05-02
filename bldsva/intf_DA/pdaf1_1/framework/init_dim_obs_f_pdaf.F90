@@ -81,6 +81,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
 #if defined CLMSA
   !kuw
+  use shr_kind_mod    , only : r8 => shr_kind_r8 
   USE clmtype,    ONLY : clm3
   use decompMod , only : get_proc_bounds, get_proc_global
   USE enkf_clm_mod, only: domain_def_clm
@@ -108,8 +109,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   character (len = 110) :: current_observation_filename
   INTEGER, ALLOCATABLE :: displ(:), recv_counts(:), recv(:)
 #if defined CLMSA
-  real, pointer :: lon(:)
-  real, pointer :: lat(:)
+  real(r8), pointer :: lon(:)
+  real(r8), pointer :: lat(:)
   integer :: begp, endp   ! per-proc beginning and ending pft indices
   integer :: begc, endc   ! per-proc beginning and ending column indices
   integer :: begl, endl   ! per-proc beginning and ending landunit indices

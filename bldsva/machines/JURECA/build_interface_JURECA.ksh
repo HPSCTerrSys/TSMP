@@ -13,7 +13,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/homea/slts/slts00/sandbox/grib1-DWD20061107.jureca_tc2015.07_psintel_opt_KGo2/lib"
+  defaultGrib1Path="/p/project/cslts/local/jureca/grib1_DWD/grib1-DWD20061107.jureca_tc2015.07_psintel_opt_KGo2/lib"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
@@ -69,6 +69,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
+#SBATCH --account=slts
 
 export PSP_RENDEZVOUS_OPENIB=-1
 

@@ -26,10 +26,18 @@ comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
 check
 comment "   sed comF90 to cos Makefile"
-  sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  if [[ $profiling == "scalasca" ]]; then
+    sed -i "s@__comF90__@scorep-mpif90@" $file >> $log_file 2>> $err_file
+  else
+    sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  fi
 check
 comment "   sed ld to cos Makefile"
-  sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  if [[ $profiling == "scalasca" ]]; then
+    sed -i "s@__ld__@scorep-mpif90@" $file >> $log_file 2>> $err_file
+  else
+    sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  fi
 check
 comment "   sed libs to cos Makefile"
   sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib -L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file

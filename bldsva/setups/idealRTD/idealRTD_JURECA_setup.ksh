@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/idealRTD/clm"
-  defaultFDCOS="/work/slts/slts00/tsmp/TestCases/idealRTD/cosmo"
-  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/idealRTD/oasis3"
-  defaultFDPFL="/work/slts/slts00/tsmp/TestCases/idealRTD/parflow"
+  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/clm"
+  defaultFDCOS="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/cosmo"
+  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/oasis3"
+  defaultFDPFL="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 

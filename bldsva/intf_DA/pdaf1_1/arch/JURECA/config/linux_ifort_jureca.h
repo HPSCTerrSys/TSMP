@@ -13,9 +13,9 @@
 # $Id: linux_ifort.h 1395 2013-05-03 13:44:37Z lnerger $
 
 # Compiler, Linker, and Archiver
-FC = mpif90
+FC = __comFC__
 LD = $(FC)
-CC = mpicc
+CC = __comCC__
 AR = ar
 RANLIB = ranlib 
 
@@ -39,7 +39,7 @@ OPT_LNK = $(OPT)
 
 # Linking libraries (BLAS, LAPACK, if required: MPI)
 
-LINK_LIBS = -Wl,--start-group  __LIBS__  -Wl,--end-group -openmp -lpthread -lm
+LINK_LIBS = -Wl,--start-group  __LIBS__  -Wl,--end-group -qopenmp -lpthread -lm
 
 
 # Specifications for the archiver

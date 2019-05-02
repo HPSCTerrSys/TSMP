@@ -15,12 +15,13 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
   defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
+  #defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
-  defaultHyprePath="$EBROOTHYPRE"
+  defaultHyprePath="/p/project/cslts/local/juwels/hypre"
   defaultSiloPath="$EBROOTSILO"
-  defaultLapackPath="$EBROOTIMKL"
+  defaultLapackPath="/p/project/cslts/local/juwels/OpenBLAS"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
@@ -70,6 +71,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
+#SBATCH --mail-type=slts
 
 cd $rundir
 source $rundir/loadenvs

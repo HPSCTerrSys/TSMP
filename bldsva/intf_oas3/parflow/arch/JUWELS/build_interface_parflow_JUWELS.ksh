@@ -5,7 +5,7 @@ route "${cblue}>> always_pfl${cnormal}"
 route "${cblue}<< always_pfl${cnormal}"
 }
 
-configure_pfl(){
+configure_pfl(){ 
 route "${cblue}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
@@ -26,24 +26,30 @@ route "${cblue}>> configure_pfl${cnormal}"
     flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    cflagsSim=" -qopenmp "
+    cflagsSim=" -fopenmp "
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
-
+  
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
-  comment "   sed correct linker command in pftools"
-    sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-check
-
-
+    sed "s/ m /  -lm  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  check
+  print -n "   sed correct linker command in pftools"
+    sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/ m /  -lm  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
+    sed "s/-l /  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+  check
 
 route "${cblue}<< configure_pfl${cnormal}"
 }
 
-make_pfl(){
+make_pfl(){ 
 route "${cblue}>> make_pfl${cnormal}"
   c_make_pfl
 route "${cblue}<< make_pfl${cnormal}"

@@ -104,13 +104,25 @@ route "${cblue}>> configure_oas${cnormal}"
     sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
   check
   comment "   sed comF90 to oas Makefile"
-    sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
+    if [[ $profiling == "scalasca" ]]; then
+      sed -i "s@__comF90__@scorep-mpif90 $optComp@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__comF90__@${profComp} $mpiPath/bin/mpif90 $optComp@" $file >> $log_file 2>> $err_file
+    fi
   check
   comment "   sed comCC to oas Makefile"
-    sed -i "s@__comCC__@${profComp} $mpiPath/bin/mpicc $optComp@" $file >> $log_file 2>> $err_file
+    if [[ $profiling == "scalasca" ]]; then
+      sed -i "s@__comCC__@scorep-mpicc $optComp@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__comCC__@${profComp} $mpiPath/bin/mpicc $optComp@" $file >> $log_file 2>> $err_file
+    fi
   check
   comment "   sed ld to oas Makefile"
-    sed -i "s@__ld__@${profComp} $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+    if [[ $profiling == "scalasca" ]]; then
+      sed -i "s@__ld__@scorep-mpif90@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__ld__@${profComp} $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+    fi
   check
   comment "   sed libs to oas Makefile"
     sed -i "s@__lib__@-L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file

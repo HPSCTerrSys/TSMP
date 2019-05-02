@@ -1,5 +1,5 @@
 !-------------------------------------------------------------------------------------------
-!Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
+!Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
 !This file is part of TerrSysMP-PDAF
 !
@@ -138,7 +138,7 @@ subroutine check_n_observationfile(fn,nn)
   character(len=*),intent(in) :: fn
   integer, intent(out)        :: nn
 
-  integer :: ncid, varid !,dimid
+  integer :: ncid, varid, status !,dimid
   !character (len = *), parameter :: dim_name = "dim_obs"
   character (len = *), parameter :: varname = "no_obs"
   character(len = nf90_max_name) :: recorddimname

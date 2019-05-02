@@ -16,18 +16,20 @@ platforms+=(
         ["CCA2"]="ECMWF (Reading, UK) - general purpose Linux Cluster"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUQUEEN"]="JSC (FZ-Juelich) - high scale machine"
-        ["JUWELS"]="JSC (FZ-Juelich) - general purpose Linux Cluster (big jobs)"
+        ["GENERIC_X86"]="Generic Linux x86 machine"
+        ["JUWELS"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
 )
 
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 3.0.0MCTPDAF 1.1.0MCTPDAF "
-        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
-        ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
-        ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.1.0MCTPDAF 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT"
+        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
+        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
+        ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
+        ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
         ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
+        ["GENERIC_X86"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
 )
 
 # list of versions with descriptions
@@ -41,18 +43,15 @@ versions+=(
         ["2.1.0MCT"]="2.1.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
         ["2.0.5"]="2.0.5 (Cosmo4.21 & CESM) without modifications"
         ["2.0.5MCT"]="2.0.5 (Cosmo4.21 & CESM) with Oasis3-MCT"
-        ["3.0.0MCT"]="3.0.0 old models (clm3_5 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT"
-        ["3.0.0MCTPDAF"]="3.0.0 old models (clm3_5 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT and PDAF Data Assimilation"
+        ["3.0.0MCT"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT"
         ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
         ["3.0.0"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
-        ["4.0.0MCT"]="4.0.0 clm3_5-icon icon-lem Parflow3_2 Oasis3-MCT"
-        ["4.1.0MCT"]="4.1.0 clm4_0 icon-lem Parflow3_2 Oasis3-MCT"
 )
 
 
 # The model versions that correspond to a release version
-# order: Oasis, CLM , COSMO, Parflow, ICON !!!
+# order: Oasis, CLM , COSMO, Parflow !!!
 # Important: this order must be fulfilled. If one of it is not supported, leave a "" at its place.
 modelVersion+=(
         ["1.2.0"]="oasis3 clm3_5 cosmo5_1 parflow"
@@ -65,12 +64,9 @@ modelVersion+=(
         ["2.0.5"]="oasis3 clm4_0 cosmo4_21 parflow"
         ["2.0.5MCT"]="oasis3-mct clm4_0 cosmo4_21 parflow"
         ["3.0.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow3_2"
-        ["3.0.0MCTPDAF"]="oasis3-mct clm3_5 cosmo4_21 parflow3_2 pdaf1_1"
         ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
-        ["4.0.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow"
-        ["4.1.0MCT"]="oasis3-mct clm4_0 icon-lem parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -88,12 +84,10 @@ combinations+=(
         ["2.0.5"]=" clm cos pfl clm-cos "
         ["2.0.5MCT"]=" clm cos pfl clm-cos "
         ["3.0.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["3.0.0MCTPDAF"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
         ["3.0.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["4.0.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
-        ["4.1.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+
 )
 
 #list of supported testcases for a certain machine.
@@ -110,21 +104,18 @@ setups+=(
         ["idealLES"]="idealized LES runs"
         ["rur"]="Reanalysis over Rur"
         ["bonnRadar"]="two moment microphysics"
-        ["seabreeze"]="sea breeze simulation"
-        ["smresponse"]="soil moisture response"
         ["bonn"]="flood area of interest"
-        ["icon-ccs"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
-        ["nrw-icon"]="150x150 (1.2km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex scalingStudy idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse scalingStudy "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "
+	["GENERIC_X86"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn "
 )
 

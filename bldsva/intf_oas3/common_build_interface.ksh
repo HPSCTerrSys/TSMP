@@ -138,6 +138,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
     cd $cosdir >> $log_file 2>> $err_file
   check
   comment "    make cosmo"
+    export SCOREP_WRAPPER=on
     make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
 
@@ -310,7 +311,6 @@ route "${cblue}>>> c_make_oas${cnormal}"
   comment "    make oasis j16" 
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
-  export SKIN_MODE=mpi
 #DA
   if [[ $withPDAF == "true" ]]; then
   comment "    cp oas libs to $bindir/libs" 
@@ -496,6 +496,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
+
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
@@ -512,6 +513,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
   comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
+    export SCOREP_WRAPPER=off
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_clm${cnormal}"
@@ -523,6 +525,7 @@ route "${cblue}>>> c_make_clm${cnormal}"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    make clm"
+    export SCOREP_WRAPPER=on
     gmake -j16 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
@@ -649,7 +652,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
-    export SKIN_MODE=none
+  export SCOREP_WRAPPER=off
   comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
   check
@@ -661,7 +664,12 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
+    echo "$pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file"
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+  check
+  comment "    patch pfsimulator/parflow_lib/problem_phase_rel_perm.c "
+    sed -i "s@inline double VanGLookupSpline@double VanGLookupSpline@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
+    sed -i "s@inline double VanGLookupLinear@double VanGLookupLinear@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
   check
   comment "    cd to pftools"
     cd $pfldir/pftools >> $log_file 2>> $err_file
@@ -690,13 +698,14 @@ comment "    cd to pfsimulator"
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
 comment "    make pfsimulator"
+  export SCOREP_WRAPPER=on
   make -f $pfldir/pfsimulator/Makefile >> $log_file 2>> $err_file
 check
 comment "    make install pfsimulator"
   make -f $pfldir/pfsimulator/Makefile install >> $log_file 2>> $err_file
 check
 
-
+  export SCOREP_WRAPPER=off
 comment "    cd to pftools"
   cd $pfldir/pftools >> $log_file 2>> $err_file
 check
@@ -798,7 +807,7 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
 
   comment "   sed start counter to pfl namelist."
       cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))))
-      cnt=$(python -c "print $cnt/($dump_pfl*3600.)")
+      cnt=$(python -c "print ($cnt/($dump_pfl*3600.))")
       sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 

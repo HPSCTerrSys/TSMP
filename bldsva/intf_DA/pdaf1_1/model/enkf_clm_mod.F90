@@ -64,9 +64,7 @@ module enkf_clm_mod
   real(r8) :: dtime     ! time step increment (sec)
   integer  :: ier       ! error code
 
-  !character(c_char),bind(C,name="outdir") :: outdirec
-  ! type(c_ptr) :: outdir
-  character(c_char), pointer :: outdir 
+  character(c_char),bind(C,name="outdir"),target :: outdir
 
   logical  :: log_print    ! true=> print diagnostics
   real(r8) :: eccf         ! earth orbit eccentricity factor
@@ -113,6 +111,7 @@ module enkf_clm_mod
     endif
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
+    IF (allocated(clm_statevec)) deallocate(clm_statevec)
     allocate(clm_statevec(clm_statevecsize))
   end subroutine
 
@@ -419,10 +418,10 @@ module enkf_clm_mod
     integer, allocatable, intent(inout) :: longxy_obs(:)
     integer, allocatable, intent(inout) :: latixy_obs(:)
     integer :: ni, nj, ii, jj, kk, cid, ier, ncells, nlunits, &
-               ncols, npfts, count
+               ncols, npfts, counter
     real :: minlon, minlat, maxlon, maxlat
-    real, pointer :: lon(:)
-    real, pointer :: lat(:)
+    real(r8), pointer :: lon(:)
+    real(r8), pointer :: lat(:)
     integer :: begg, endg   ! per-proc gridcell ending gridcell indices
 
     lon   => alatlon%lonc
@@ -447,15 +446,15 @@ module enkf_clm_mod
     ! initialize vector with zero values
     longxy(:) = 0
     latixy(:) = 0
-    count = 1
+    counter = 1
     do ii = 1, nj
       do jj = 1, ni
          cid = (ii-1)*ni + jj
          do kk = begg, endg  
             if(cid == adecomp%gdc2glo(kk)) then  
-               latixy(count) = ii
-               longxy(count) = jj
-               count = count + 1
+               latixy(counter) = ii
+               longxy(counter) = jj
+               counter = counter + 1
             endif   
          enddo  
       end do
@@ -491,7 +490,12 @@ module enkf_clm_mod
           latixy_obs(i) = 1
        endif   
     end do   
-    
+    ! deallocate temporary arrays
+    deallocate(longxy)
+    deallocate(latixy)
+    deallocate(longxy_obs)
+    deallocate(latixy_obs)    
+
   end subroutine  
 
   subroutine init_clm_l_size(dim_l)
