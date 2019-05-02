@@ -4,6 +4,10 @@ lappend auto_path $env(PARFLOW_DIR)/bin
 package require parflow
 namespace import Parflow::*
 #
+#For normal soils, need to fix near saturation CPS
+set VG_points 20000
+set VG_pmin -50.0
+#set VG_interpolation_method "Spline"
 
 #--------------------------------------------------------
 pfset FileVersion 4
@@ -22,8 +26,8 @@ pfset ComputationalGrid.Lower.X			 0.0
 pfset ComputationalGrid.Lower.Y			 0.0
 pfset ComputationalGrid.Lower.Z			 -30.
 
-pfset ComputationalGrid.DX			 1132.
-pfset ComputationalGrid.DY		         1132. 
+pfset ComputationalGrid.DX			 500.
+pfset ComputationalGrid.DY		         500. 
 pfset ComputationalGrid.DZ			 1.00
 
 pfset ComputationalGrid.NX			 __ngpflx_bldsva__ 
@@ -61,20 +65,22 @@ pfset Geom.domain.Upper.Z                     0.0
 pfset Geom.domain.Patches	             "x-lower x-upper y-lower y-upper z-lower z-upper"
 
 pfset GeomInput.indinput.InputType  IndicatorField
-pfset GeomInput.indinput.GeomNames  "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
-pfset Geom.indinput.FileName  "__forcingdir__/bonnRadarSoilInd.pfb"
+pfset GeomInput.indinput.GeomNames  "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
+pfset Geom.indinput.FileName  "__forcingdir__/rurSoilInd.pfb"
 
-pfset GeomInput.sand.Value               3
-pfset GeomInput.sloam.Value              4
-pfset GeomInput.loam.Value               5
-pfset GeomInput.cloam.Value              6
-pfset GeomInput.clay.Value               7
-pfset GeomInput.ac1.Value               11
-pfset GeomInput.ac2.Value               12
-pfset GeomInput.ac3.Value               13
-pfset GeomInput.ac4.Value               14
-pfset GeomInput.ac5.Value               15
-pfset GeomInput.ac6.Value               16
+pfset GeomInput.v1.Value              1
+pfset GeomInput.v2.Value              2
+pfset GeomInput.v3.Value              3 
+pfset GeomInput.v4.Value              4 
+pfset GeomInput.v5.Value              5
+pfset GeomInput.v6.Value              6
+pfset GeomInput.v7.Value              7
+pfset GeomInput.a1.Value              11
+pfset GeomInput.a2.Value              12
+pfset GeomInput.a3.Value              13
+pfset GeomInput.a4.Value              14
+pfset GeomInput.a5.Value              15
+pfset GeomInput.a6.Value              16
 #-----------------------------------------------------------------------------
 # VARIABLE dz ASSIGNMENTS
 #-----------------------------------------------------------------------------
@@ -128,58 +134,68 @@ pfset TimingInfo.DumpInterval		 __dump_pfl_interval__
 
 # Time Cycles
 #-----------------------------------------------------------------------------
-pfset Cycle.Names "constant"
+pfset Cycle.Names                       "constant"
 pfset Cycle.constant.Names              "alltime"
 pfset Cycle.constant.alltime.Length      1
 pfset Cycle.constant.Repeat             -1
 
 #  HYDROLOGICAL PARAMETERS
 #Schaap and Leiz (1998), Soil Science
-# Later changed to
-# #http://science.sciencemag.org/content/sci/suppl/2016/07/27/353.6297.377.DC1/Maxwell.SM.pdf
 #  SETUP AND VALUES
 #-----------------------------------------------------------------------------
 # Perm
 #-----------------------------------------------------------------------------
-pfset Geom.Perm.Names			 "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
+pfset Geom.Perm.Names			"v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
 
-pfset Geom.sand.Perm.Type		 Constant
-pfset Geom.sand.Perm.Value		 0.269
+pfset Geom.v1.Perm.Type              Constant
+pfset Geom.v1.Perm.Value             0.0328
 
-pfset Geom.sloam.Perm.Type               Constant
-pfset Geom.sloam.Perm.Value              0.0158
+pfset Geom.v2.Perm.Type              Constant
+pfset Geom.v2.Perm.Value             0.0328
 
-pfset Geom.loam.Perm.Type                Constant
-pfset Geom.loam.Perm.Value               0.0050
+pfset Geom.v3.Perm.Type              Constant
+pfset Geom.v3.Perm.Value             0.0328
 
-pfset Geom.cloam.Perm.Type               Constant
-pfset Geom.cloam.Perm.Value              0.0034
+pfset Geom.v4.Perm.Type              Constant
+pfset Geom.v4.Perm.Value             0.0328
 
-pfset Geom.clay.Perm.Type                Constant
-pfset Geom.clay.Perm.Value               0.0062
+pfset Geom.v5.Perm.Type              Constant
+pfset Geom.v5.Perm.Value             0.0328
 
-pfset Geom.ac1.Perm.Type              Constant
-pfset Geom.ac1.Perm.Value             0.02
+pfset Geom.v6.Perm.Type              Constant
+pfset Geom.v6.Perm.Value             0.0328
 
-pfset Geom.ac2.Perm.Type             Constant
-pfset Geom.ac2.Perm.Value            0.01
+pfset Geom.v7.Perm.Type              Constant
+pfset Geom.v7.Perm.Value             0.0328
 
-pfset Geom.ac3.Perm.Type             Constant
-pfset Geom.ac3.Perm.Value            0.02
+pfset Geom.v8.Perm.Type              Constant
+pfset Geom.v8.Perm.Value             0.0328
 
-pfset Geom.ac4.Perm.Type             Constant
-pfset Geom.ac4.Perm.Value            0.01
+pfset Geom.v9.Perm.Type              Constant
+pfset Geom.v9.Perm.Value             0.0328
 
-pfset Geom.ac5.Perm.Type             Constant
-pfset Geom.ac5.Perm.Value            0.0005
+pfset Geom.a1.Perm.Type              Constant
+pfset Geom.a1.Perm.Value             0.0045
 
-pfset Geom.ac6.Perm.Type             Constant
-pfset Geom.ac6.Perm.Value            0.0001
+pfset Geom.a2.Perm.Type              Constant
+pfset Geom.a2.Perm.Value             0.0045
+
+pfset Geom.a3.Perm.Type              Constant
+pfset Geom.a3.Perm.Value             0.0045
+
+pfset Geom.a4.Perm.Type              Constant
+pfset Geom.a4.Perm.Value             0.0045
+
+pfset Geom.a5.Perm.Type              Constant
+pfset Geom.a5.Perm.Value             0.0045
+
+pfset Geom.a6.Perm.Type              Constant
+pfset Geom.a6.Perm.Value             0.0045
 
 pfset Perm.TensorType			 TensorByGeom
 pfset Geom.Perm.TensorByGeom.Names	 "domain"
-pfset Geom.domain.Perm.TensorValX	 10.0
-pfset Geom.domain.Perm.TensorValY	 10.0
+pfset Geom.domain.Perm.TensorValX	 1.0
+pfset Geom.domain.Perm.TensorValY	 1.0
 pfset Geom.domain.Perm.TensorValZ	 1.0
 
 #-----------------------------------------------------------------------------
@@ -215,143 +231,215 @@ pfset Geom.Retardation.GeomNames	 ""
 
 #-----------------------------------------------------------------------------
 # Porosity
-# Consistent with CLM Porosity
 #-----------------------------------------------------------------------------
-pfset Geom.Porosity.GeomNames           "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
+pfset Geom.Porosity.GeomNames         "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6" 
 
-pfset Geom.sand.Porosity.Type          Constant
-pfset Geom.sand.Porosity.Value         0.3756
+pfset Geom.v1.Porosity.Type          Constant
+pfset Geom.v1.Porosity.Value         0.4386
 
-pfset Geom.sloam.Porosity.Type          Constant
-pfset Geom.sloam.Porosity.Value        0.4071
+pfset Geom.v2.Porosity.Type          Constant
+pfset Geom.v2.Porosity.Value         0.4386
 
-pfset Geom.loam.Porosity.Type          Constant
-pfset Geom.loam.Porosity.Value         0.4386
+pfset Geom.v3.Porosity.Type          Constant
+pfset Geom.v3.Porosity.Value         0.4386
 
-pfset Geom.cloam.Porosity.Type          Constant
-pfset Geom.cloam.Porosity.Value        0.4449
+pfset Geom.v4.Porosity.Type          Constant
+pfset Geom.v4.Porosity.Value         0.4386
 
-pfset Geom.clay.Porosity.Type          Constant
-pfset Geom.clay.Porosity.Value         0.4701
+pfset Geom.v5.Porosity.Type          Constant
+pfset Geom.v5.Porosity.Value         0.4386
 
-pfset Geom.ac1.Porosity.Type          Constant
-pfset Geom.ac1.Porosity.Value         0.33
+pfset Geom.v6.Porosity.Type          Constant
+pfset Geom.v6.Porosity.Value         0.4386
 
-pfset Geom.ac2.Porosity.Type          Constant
-pfset Geom.ac2.Porosity.Value         0.33
+pfset Geom.v7.Porosity.Type          Constant
+pfset Geom.v7.Porosity.Value         0.4386
 
-pfset Geom.ac3.Porosity.Type          Constant
-pfset Geom.ac3.Porosity.Value         0.33
+pfset Geom.v8.Porosity.Type          Constant
+pfset Geom.v8.Porosity.Value         0.4386
 
-pfset Geom.ac4.Porosity.Type          Constant
-pfset Geom.ac4.Porosity.Value         0.33
+pfset Geom.v9.Porosity.Type          Constant
+pfset Geom.v9.Porosity.Value         0.4386
 
-pfset Geom.ac5.Porosity.Type          Constant
-pfset Geom.ac5.Porosity.Value         0.33
+pfset Geom.a1.Porosity.Type          Constant
+pfset Geom.a1.Porosity.Value         0.4071
 
-pfset Geom.ac6.Porosity.Type          Constant
-pfset Geom.ac6.Porosity.Value         0.33
+pfset Geom.a2.Porosity.Type          Constant
+pfset Geom.a2.Porosity.Value         0.4071
+
+pfset Geom.a3.Porosity.Type          Constant
+pfset Geom.a3.Porosity.Value         0.4071
+
+pfset Geom.a4.Porosity.Type          Constant
+pfset Geom.a4.Porosity.Value         0.4071
+
+pfset Geom.a5.Porosity.Type          Constant
+pfset Geom.a5.Porosity.Value         0.4071
+
+pfset Geom.a6.Porosity.Type          Constant
+pfset Geom.a6.Porosity.Value         0.4071
 
 #-----------------------------------------------------------------------------
 # Relative Permeability
-# http://science.sciencemag.org/content/sci/suppl/2016/07/27/353.6297.377.DC1/Maxwell.SM.pdf
 #-----------------------------------------------------------------------------
 pfset Phase.RelPerm.Type               VanGenuchten
-pfset Phase.RelPerm.GeomNames          "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
+pfset Phase.RelPerm.GeomNames          "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6" 
 
-pfset Geom.sand.RelPerm.Alpha         3.55 
-pfset Geom.sand.RelPerm.N             4.16
+pfset Geom.v1.RelPerm.Alpha         0.4597
+pfset Geom.v1.RelPerm.N             1.4652
+pfset Geom.v1.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v1.RelPerm.MinPressureHead   $VG_pmin 
 
-pfset Geom.sloam.RelPerm.Alpha        2.69
-pfset Geom.sloam.RelPerm.N            2.45
+pfset Geom.v2.RelPerm.Alpha         0.4597
+pfset Geom.v2.RelPerm.N             1.4652
+pfset Geom.v2.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v2.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.loam.RelPerm.Alpha         1.12
-pfset Geom.loam.RelPerm.N             2.48
+pfset Geom.v3.RelPerm.Alpha         0.4597
+pfset Geom.v3.RelPerm.N             1.4652
+pfset Geom.v3.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v3.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.cloam.RelPerm.Alpha        1.58
-pfset Geom.cloam.RelPerm.N            2.41
+pfset Geom.v4.RelPerm.Alpha         0.4597
+pfset Geom.v4.RelPerm.N             1.4652
+pfset Geom.v4.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v4.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.clay.RelPerm.Alpha         1.51
-pfset Geom.clay.RelPerm.N             2.26
+pfset Geom.v5.RelPerm.Alpha         0.4597
+pfset Geom.v5.RelPerm.N             1.4652
+pfset Geom.v5.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v5.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.ac1.RelPerm.Alpha        1.0
-pfset Geom.ac1.RelPerm.N            3.0
+pfset Geom.v6.RelPerm.Alpha         0.4597
+pfset Geom.v6.RelPerm.N             1.4652
+pfset Geom.v6.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v6.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.ac2.RelPerm.Alpha        1.0
-pfset Geom.ac2.RelPerm.N            3.0
+pfset Geom.v7.RelPerm.Alpha         0.4597
+pfset Geom.v7.RelPerm.N             1.4652
+pfset Geom.v7.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v7.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.ac3.RelPerm.Alpha        1.0
-pfset Geom.ac3.RelPerm.N            3.0
+pfset Geom.v8.RelPerm.Alpha         0.4597
+pfset Geom.v8.RelPerm.N             1.4652
+pfset Geom.v8.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v8.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.ac4.RelPerm.Alpha        1.0
-pfset Geom.ac4.RelPerm.N            3.0
+pfset Geom.v9.RelPerm.Alpha         0.4597
+pfset Geom.v9.RelPerm.N             1.4652
+pfset Geom.v9.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.v9.RelPerm.MinPressureHead   $VG_pmin
 
-pfset Geom.ac5.RelPerm.Alpha        1.0
-pfset Geom.ac5.RelPerm.N            3.0
+pfset Geom.a1.RelPerm.Alpha       0.39
+pfset Geom.a1.RelPerm.N           1.4
+pfset Geom.a1.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a1.RelPerm.MinPressureHead   $VG_pmin 
 
-pfset Geom.ac6.RelPerm.Alpha        1.0
-pfset Geom.ac6.RelPerm.N            3.0
+pfset Geom.a2.RelPerm.Alpha       0.39
+pfset Geom.a2.RelPerm.N           1.4
+pfset Geom.a2.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a2.RelPerm.MinPressureHead   $VG_pmin 
+
+pfset Geom.a3.RelPerm.Alpha       0.39
+pfset Geom.a3.RelPerm.N           1.4
+pfset Geom.a3.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a3.RelPerm.MinPressureHead   $VG_pmin 
+
+pfset Geom.a4.RelPerm.Alpha       0.39
+pfset Geom.a4.RelPerm.N           1.4
+pfset Geom.a4.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a4.RelPerm.MinPressureHead   $VG_pmin 
+
+pfset Geom.a5.RelPerm.Alpha       0.39
+pfset Geom.a5.RelPerm.N           1.4
+pfset Geom.a5.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a5.RelPerm.MinPressureHead   $VG_pmin 
+
+pfset Geom.a6.RelPerm.Alpha       0.39
+pfset Geom.a6.RelPerm.N           1.4
+pfset Geom.a6.RelPerm.NumSamplePoints   $VG_points
+pfset Geom.a6.RelPerm.MinPressureHead   $VG_pmin 
 
 #---------------------------------------------------------
 # Saturation
 #---------------------------------------------------------
 pfset Phase.Saturation.Type              VanGenuchten
-pfset Phase.Saturation.GeomNames         "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
+pfset Phase.Saturation.GeomNames         "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
 
-pfset Geom.sand.Saturation.Alpha        3.55
-pfset Geom.sand.Saturation.N            4.16
-pfset Geom.sand.Saturation.SRes         0.14
-pfset Geom.sand.Saturation.SSat         1.0
+pfset Geom.v1.Saturation.Alpha        0.4597
+pfset Geom.v1.Saturation.N            1.4652
+pfset Geom.v1.Saturation.SRes         0.21
+pfset Geom.v1.Saturation.SSat         1.0
 
-pfset Geom.sloam.Saturation.Alpha       2.69
-pfset Geom.sloam.Saturation.N           2.45
-pfset Geom.sloam.Saturation.SRes        0.1
-pfset Geom.sloam.Saturation.SSat        1.0
+pfset Geom.v2.Saturation.Alpha        0.4597
+pfset Geom.v2.Saturation.N            1.4652
+pfset Geom.v2.Saturation.SRes         0.21
+pfset Geom.v2.Saturation.SSat         1.0
 
-pfset Geom.loam.Saturation.Alpha        1.12
-pfset Geom.loam.Saturation.N            2.48
-pfset Geom.loam.Saturation.SRes         0.15
-pfset Geom.loam.Saturation.SSat         1.0
+pfset Geom.v3.Saturation.Alpha        0.4597
+pfset Geom.v3.Saturation.N            1.4652
+pfset Geom.v3.Saturation.SRes         0.21
+pfset Geom.v3.Saturation.SSat         1.0
 
-pfset Geom.cloam.Saturation.Alpha       1.58
-pfset Geom.cloam.Saturation.N           2.41
-pfset Geom.cloam.Saturation.SRes        0.18
-pfset Geom.cloam.Saturation.SSat        1.0
+pfset Geom.v4.Saturation.Alpha        0.4597
+pfset Geom.v4.Saturation.N            1.4652
+pfset Geom.v4.Saturation.SRes         0.21
+pfset Geom.v4.Saturation.SSat         1.0
 
-pfset Geom.clay.Saturation.Alpha        1.51
-pfset Geom.clay.Saturation.N            2.26
-pfset Geom.clay.Saturation.SRes         0.21
-pfset Geom.clay.Saturation.SSat         1.0
+pfset Geom.v5.Saturation.Alpha        0.4597
+pfset Geom.v5.Saturation.N            1.4652
+pfset Geom.v5.Saturation.SRes         0.21
+pfset Geom.v5.Saturation.SSat         1.0
 
-pfset Geom.ac1.Saturation.Alpha       1.0
-pfset Geom.ac1.Saturation.N           3.0
-pfset Geom.ac1.Saturation.SRes        0.001
-pfset Geom.ac1.Saturation.SSat        1.0
+pfset Geom.v6.Saturation.Alpha        0.4597
+pfset Geom.v6.Saturation.N            1.4652
+pfset Geom.v6.Saturation.SRes         0.21
+pfset Geom.v6.Saturation.SSat         1.0
 
-pfset Geom.ac2.Saturation.Alpha       1.0
-pfset Geom.ac2.Saturation.N           3.0
-pfset Geom.ac2.Saturation.SRes        0.001
-pfset Geom.ac2.Saturation.SSat        1.0
+pfset Geom.v7.Saturation.Alpha        0.4597
+pfset Geom.v7.Saturation.N            1.4652
+pfset Geom.v7.Saturation.SRes         0.21
+pfset Geom.v7.Saturation.SSat         1.0
 
-pfset Geom.ac3.Saturation.Alpha       1.0
-pfset Geom.ac3.Saturation.N           3.0
-pfset Geom.ac3.Saturation.SRes        0.001
-pfset Geom.ac3.Saturation.SSat        1.0
+pfset Geom.v8.Saturation.Alpha        0.4597
+pfset Geom.v8.Saturation.N            1.4652
+pfset Geom.v8.Saturation.SRes         0.21
+pfset Geom.v8.Saturation.SSat         1.0
 
-pfset Geom.ac4.Saturation.Alpha       1.0
-pfset Geom.ac4.Saturation.N           3.0
-pfset Geom.ac4.Saturation.SRes        0.001
-pfset Geom.ac4.Saturation.SSat        1.0
+pfset Geom.v9.Saturation.Alpha        0.4597
+pfset Geom.v9.Saturation.N            1.4652
+pfset Geom.v9.Saturation.SRes         0.21
+pfset Geom.v9.Saturation.SSat         1.0
 
-pfset Geom.ac5.Saturation.Alpha       1.0
-pfset Geom.ac5.Saturation.N           3.0
-pfset Geom.ac5.Saturation.SRes        0.001
-pfset Geom.ac5.Saturation.SSat        1.0
+pfset Geom.a1.Saturation.Alpha        0.39
+pfset Geom.a1.Saturation.N            1.4
+pfset Geom.a1.Saturation.SRes         0.1
+pfset Geom.a1.Saturation.SSat         1.0
 
-pfset Geom.ac6.Saturation.Alpha       1.0
-pfset Geom.ac6.Saturation.N           3.0
-pfset Geom.ac6.Saturation.SRes        0.001
-pfset Geom.ac6.Saturation.SSat        1.0
+pfset Geom.a2.Saturation.Alpha        0.39
+pfset Geom.a2.Saturation.N            1.4
+pfset Geom.a2.Saturation.SRes         0.1
+pfset Geom.a2.Saturation.SSat         1.0
+
+pfset Geom.a3.Saturation.Alpha        0.39
+pfset Geom.a3.Saturation.N            1.4
+pfset Geom.a3.Saturation.SRes         0.1
+pfset Geom.a3.Saturation.SSat         1.0
+
+pfset Geom.a4.Saturation.Alpha        0.39
+pfset Geom.a4.Saturation.N            1.4
+pfset Geom.a4.Saturation.SRes         0.1
+pfset Geom.a4.Saturation.SSat         1.0
+
+pfset Geom.a5.Saturation.Alpha        0.39
+pfset Geom.a5.Saturation.N            1.4
+pfset Geom.a5.Saturation.SRes         0.1
+pfset Geom.a5.Saturation.SSat         1.0
+
+pfset Geom.a6.Saturation.Alpha        0.39
+pfset Geom.a6.Saturation.N            1.4
+pfset Geom.a6.Saturation.SRes         0.1
+pfset Geom.a6.Saturation.SSat         1.0
 
 #-----------------------------------------------------------------------------
 # Wells
@@ -423,10 +511,6 @@ pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.RefGeom     domain
 pfset Geom.domain.ICPressure.RefPatch    z-upper
 
-#pfset ICPressure.Type                   "PFBFile"
-#pfset ICPressure.GeomNames              "domain"
-#pfset Geom.domain.ICPressure.FileName   "./bonnRadar_ic_press.pfb"
-
 #
 #-----------------------------------------------------------------------------
 # Phase sources:
@@ -440,14 +524,6 @@ pfset PhaseSources.water.Geom.domain.Value	 0.0
 #-----------------------------------------------------------------------------
 pfset KnownSolution				 NoKnownSolution
 
-##---------------------------------------------------------
-## Spinup Flags
-###---------------------------------------------------------
-#pfset OverlandFlowSpinUp           1
-#pfset OverlandSpinupDampP1  10.0
-#pfset OverlandSpinupDampP2  0.1
-#
-
 # Set solver parameters
 #-----------------------------------------------------------------------------
 pfset Solver					 Richards
@@ -455,7 +531,7 @@ pfset Solver.MaxIter				 10000
 
 pfset Solver.TerrainFollowingGrid                True
 
-pfset Solver.Nonlinear.MaxIter			 1000
+pfset Solver.Nonlinear.MaxIter			 100
 pfset Solver.Nonlinear.ResidualTol		 1e-5
 pfset Solver.Nonlinear.EtaChoice		 Walker1
 pfset Solver.Nonlinear.EtaChoice		 EtaConstant
@@ -464,10 +540,13 @@ pfset Solver.Nonlinear.UseJacobian		 False
 pfset Solver.Nonlinear.DerivativeEpsilon	 1e-16
 pfset Solver.Nonlinear.StepTol			 1e-12
 pfset Solver.Nonlinear.Globalization		 LineSearch
-pfset Solver.Linear.KrylovDimension		 70
-pfset Solver.Linear.MaxRestart			 7
+pfset Solver.Linear.KrylovDimension		 30
+pfset Solver.Linear.MaxRestart			 2
 
-pfset Solver.Linear.Preconditioner                       PFMGOctree
+pfset Solver.Linear.Preconditioner                       PFMG
+#pfset Solver.Linear.Preconditioner			 MGSemi
+pfset Solver.Linear.Preconditioner.MGSemi.MaxIter	 1
+pfset Solver.Linear.Preconditioner.MGSemi.MaxLevels	 10
 pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12
@@ -486,4 +565,6 @@ pfset Solver.WriteCLMBinary			        False
 #-----------------------------------------------------------------------------
 # Run and Unload the ParFlow output files
 #-----------------------------------------------------------------------------
+#pfrun default_single
+#pfundist default_single
 pfwritedb rurlaf 

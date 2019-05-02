@@ -8,9 +8,9 @@ route "${cblue}<< always_cos${cnormal}"
 configure_cos(){
 route "${cblue}>> configure_cos${cnormal}"
 comment "   cp Makefile to cosmo dir"
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $cosdir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config2/Makefile $cosdir >> $log_file 2>> $err_file
 check
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Fopts $cosdir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config2/Fopts $cosdir >> $log_file 2>> $err_file
 check
   c_configure_cos
   if [[ $withOAS == "true" ]]; then
@@ -48,7 +48,7 @@ substitutions_cos(){
 route "${cblue}>> substitutions_cos${cnormal}"
  c_substitutions_cos
  comment "   cp ObjFiles & ObjDependencies in $cosdir"
-   patch "$rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj*" $cosdir 
+   patch "$rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config2/Obj*" $cosdir 
  check
    if [[ $withOASMCT == "true" ]] ; then
      comment "   sed replace old mod_prism includes from cos oas files"
