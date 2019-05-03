@@ -24,7 +24,7 @@ pfset Process.Topology.R 1
 #------------------------------------------------------------------------
 pfset ComputationalGrid.Lower.X			 0.0
 pfset ComputationalGrid.Lower.Y			 0.0
-pfset ComputationalGrid.Lower.Z			 -30.
+pfset ComputationalGrid.Lower.Z			   0.
 
 pfset ComputationalGrid.DX			 160.
 pfset ComputationalGrid.DY		         240. 

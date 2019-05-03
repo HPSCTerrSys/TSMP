@@ -85,6 +85,8 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/ascii2pfb_slope.tcl $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
+          cp $forcingdir_pfl/*.pfsol $rundir >> $log_file 2>> $err_file
+        check
           cp $forcingdir_pfl/xslope*.pfb $rundir >> $log_file 2>> $err_file
           cp $forcingdir_pfl/yslope*.pfb $rundir >> $log_file 2>> $err_file
         check
