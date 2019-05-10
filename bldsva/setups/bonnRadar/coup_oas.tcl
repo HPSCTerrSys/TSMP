@@ -457,17 +457,18 @@ pfset Solver.TerrainFollowingGrid                True
 
 pfset Solver.Nonlinear.MaxIter			 1000
 pfset Solver.Nonlinear.ResidualTol		 1e-5
-pfset Solver.Nonlinear.EtaChoice		 Walker1
+pfset Solver.Nonlinear.EtaChoice		 Walker2
 pfset Solver.Nonlinear.EtaChoice		 EtaConstant
 pfset Solver.Nonlinear.EtaValue			 0.001
-pfset Solver.Nonlinear.UseJacobian		 False
+pfset Solver.Nonlinear.UseJacobian		 True
 pfset Solver.Nonlinear.DerivativeEpsilon	 1e-16
 pfset Solver.Nonlinear.StepTol			 1e-12
 pfset Solver.Nonlinear.Globalization		 LineSearch
-pfset Solver.Linear.KrylovDimension		 70
+pfset Solver.Linear.KrylovDimension		 1000
 pfset Solver.Linear.MaxRestart			 7
 
-pfset Solver.Linear.Preconditioner                       PFMGOctree
+pfset Solver.Linear.Preconditioner               PFMGOctree
+pfset Solver.Linear.Preconditioner.SymmetricMat  Nonsymmetric
 pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12
