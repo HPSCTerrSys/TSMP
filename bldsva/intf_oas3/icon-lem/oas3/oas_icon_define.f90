@@ -2,7 +2,9 @@ MODULE oas_icon_define
 
 USE mo_kind,  ONLY : wp
 USE netcdf
+#ifdef COUP_OAS_ICON
 USE mod_oasis
+#endif
 
 IMPLICIT NONE
 

@@ -26,7 +26,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultOptC="-O2"
 
   profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="scorep --thread=none " ; profRun="scalasca -analyse" ; profVar=""  ;fi
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
