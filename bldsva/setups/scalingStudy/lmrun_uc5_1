@@ -278,9 +278,9 @@ cat > INPUT_IO  << end_input_io
   lcheck=.TRUE.,
   lwrite_const=.TRUE.,
   l_fi_filter=.TRUE.,
-!    ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
+    ncomb=__ncomb_start__,$nsteps,__dump_cos_interval__,
 !  ncomb=__ncomb_start__,$nsteps,50,
-  ncomb=14400,20400,50
+!  ncomb=14400,20400,50
   nunit_of_time=1,
   yform_write='ncdf',
   ydir='$OUTPUT',
@@ -290,7 +290,7 @@ cat > INPUT_IO  << end_input_io
          'NCCLOUD   ','NCICE     ','NCRAIN    ','NCSNOW    ',
          'NCGRAUPEL ','NCHAIL    ','REFF_C    ','REFF_I    ',
          'RAIN_GSP  ','SNOW_GSP  ','RAIN_CON  ','SNOW_CON  ',
-         'TOT_PREC  ','HAIL_GSP  ','TKVH      ','TKVM      ',
+         'TOT_PREC  ','HAIL_GSP  ',
          'T_G       ','QV_S      ','PS        ',
          'ASOB_S    ','ATHB_S    ','ASHFL_S   ','ALHFL_S   ',
          'AUMFL_S   ','AVMFL_S   '
@@ -332,7 +332,7 @@ end_input_dyn
 cat > INPUT_PHY << end_input_phy
  &PHYCTL
     lgsp=.TRUE.,
-      itype_gscp=2727,
+      itype_gscp=2473,
       lsuper_coolw=.TRUE.,
     lrad=.TRUE.,
       nradcoarse=1,
@@ -387,6 +387,62 @@ cat > INPUT_DIA << end_input_dia
   stationlist_tot= 0, 0, 50.730,  7.071, 'Bonn_Radar',
  /
 end_input_dia
+
+cat > INPUT_IDEAL << end_input_artifctl
+ &ARTIFCTL
+ ldebug_artif = .true.,
+  idbg_artif_level = 5,
+ irefatm = 2,
+  p0sl = 1e5,       ! reference surface (z = 0.0 m) pressure [Pa]
+  t0sl = 300.0,     ! reference surface temperature [K]
+  dt0lp = 42.0,     ! logarithmic temperature gradient [K]
+  delta_t = 75.0,   ! temperature diff. surface - stratosphere [K]
+  h_scal = 10000.0, ! e-folding height of exponential adjustment to the stratosphere temp. [m]
+  bvref = 0.01,     ! constant Brund-Vaisala-frequency for irefatm=3 [1/s]
+ ivctype = 2,
+  zspacing_type = 'predefined',! sub-type of coordinate spec.
+  vcflat = 11000.0,         ! height, above which coordinate levels become flat [m]
+ linit_realoro = .false.,
+  href_oro=140.0,
+  itype_topo = 0, 
+  lhill = .false., .false., .false.,
+ itype_soil_c = 1, 
+  z0_c      = 0.01,        ! z_0 in m
+  fr_land_c = 1.0,         ! land fraction, dimensionless
+  soiltyp_c = 6.0,         ! clay loam soiltype, dimensionless
+  plcov_c   = 0.2,         ! plant cover, dimensionless
+  lai_c     = 0.9,         ! LAI, dimensionless
+  rootdp_c  = 0.6,         ! root depth in m
+  for_e_c   = 0.0,         ! area fraction of evergreen forests
+  for_d_c   = 0.0,         ! area fraction of decidious forests
+  h_ice_c   = 0.1,         ! ice thickness in m
+ itype_soil_tw = 1, 
+  t_surf_c  = -1.0,     ! baseline t_s (if < 0, the atmosphere temperature at the surface is used)
+  t_soil_c  = 287.0,   ! t_soil in K (if < 0, t_s is taken instead) for all soiltypes except glaciers)
+  wf_soil_c = 0.3,      ! soil water saturation, dimensionless (0 ... 1)
+  t_snow_c  = -1.0,     ! t_snow in K (if < 0, t_s is taken instead)
+  w_snow_c  = 0.0,      ! snow water equivalent in m H2O
+  w_i_c     = 0.0,      ! interception storage on plants in m H2O
+  t_ice_c   = -1.0,     ! T at the snow-ice or air-ice interf. in K (if < 0, t_s is taken instead) 
+  t_water_c = -1.0,     ! T at the water-ice or water-air interface in K (if < 0, t_s is taken instead)
+ itype_artifprofiles = 1, 
+ rasofile = '$rasoinput',
+ ! itype_anaprof_tqv = 2, 
+  !itype_anaprof_uv = 3,
+  !  nlayers_poly = 6,
+  !  p_base_poly = 1e5,
+  !  h_poly    =    0.0,300.  ,1500.0,5000.0,10000  ,13000.0,
+  !  t_poly    = 299.9,299.9 , 299.9,276.5 , 243.5 , 219.5,
+  !  tgr_poly  =  0.00,0.000 , 0.0052,0.0066,0.008 , -0.0007,
+  !  rh_poly   =  0.656,0.356 , 0.356,0.321 ,0.321  , 0.021,
+  !  rhgr_poly =  0.001,0.000 ,1.0E-5,0.000 ,1.0E-4 , 0.0, 
+   ! u_infty   = 0.5,
+ linitw_followeta = .true.,
+ lnosurffluxes_m = .false.,
+ lnosurffluxes_h = .false.,
+ ltempdist = .false., .false., .false.,.false.,
+/
+end_input_artifctl
 
 namelists
 

@@ -24,7 +24,6 @@ set clmwork = ${DART_DIR}/clm/work
 set pflwork = ${DART_DIR}/parflow/work
 
 # Update the dart namelist
-./git_to_dart.csh
 cd ${coswork}
 echo $coswork
 sed "s,__nens__,${ensemble_size}," -i input.nml

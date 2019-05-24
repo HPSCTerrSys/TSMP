@@ -3,12 +3,10 @@
 # usage: ./archive_hist.csh $rundir $ensemble_size
 #
 echo "-------------------------------------------------------------------"
-echo "History files will be archived in the "$HOME" directory"
+echo "History files will be archived in the "$WORK" directory"
 echo "usage: ./archive_hist.csh rundir ensemble_size"
 echo "-------------------------------------------------------------------"
 echo " "
-
-cd $HOME
 
 set rundir = $1
 set ensemble_size = $2
@@ -16,7 +14,8 @@ set outputdir = $rundir:t
 set numInst = `echo "($ensemble_size - 1)" | bc`
 
 echo $outputdir
-cd $HOME
+cd $WORK
+cd TEMP
 mkdir $outputdir
 cd $outputdir
 

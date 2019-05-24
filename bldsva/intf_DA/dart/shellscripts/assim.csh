@@ -1,9 +1,11 @@
 #!/bin/csh
-# "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
+# "Usage: ./assim.csh N c num_days", N=0 or 1, c="clm", "cosmo", "parflow"
 #
 #set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
-set MODEL_PATH="$WORK/dart_Synthetic_d10/PM_run/perfectModel"
-set num_days = 13
+#set MODEL_PATH="$WORK/dart_Synthetic_d10/PM_run/perfectModel"
+set MODEL_PATH=$WORK/rundart
+set inst = 9
+set num_days = $3
 
 # SELECT COMPONENT MODEL FOR ASSIMILATION
 if ($2 == "cosmo") then
@@ -47,7 +49,7 @@ endif
 foreach irun (`seq 1 $num_days`)
 
 if ($2 == "parflow") then
-set model_dir = `printf $MODEL_PATH%02d $irun`
+set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
 if ($irun == 1) then
   set model_dir0 = $model_dir
 endif
@@ -77,7 +79,7 @@ ln -sf $pfbsoil pfb_soil.nc
 endif  #$2 == "parflow"
 
 if ($2 == "clm") then
-set model_dir = `printf $MODEL_PATH%02d $irun`
+set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
 if ($irun == 1) then
   set model_dir0 = $model_dir
 endif
@@ -100,7 +102,7 @@ ln -sf $clmrst0 clm_restart_s.nc
 endif  #$2 == "clm"
 
 if ($2 == "cosmo") then
-set model_dir = `printf $MODEL_PATH%02d $irun`
+set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
 set cosrst = `ls -1 $model_dir/cosrst/lrff* | tail -n -1`
 set cosout = `ls -1 $model_dir/cosout/lfff* | tail -n -1`
  

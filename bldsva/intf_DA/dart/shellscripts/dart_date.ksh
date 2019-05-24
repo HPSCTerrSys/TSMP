@@ -1,7 +1,7 @@
 #!/bin/ksh
 
 #SBATCH --ignore-pbs
-#SBATCH --job-name="dartCOSMO"
+#SBATCH --job-name="dartDATE"
 #SBATCH --nodes=1
 #SBATCH --ntasks=48
 #SBATCH --ntasks-per-node=48
@@ -44,8 +44,6 @@ rm cosmo_prior
 
 # Copy namelist and executable to rundirectory--------#TODO-
 cp $DART_DIR/input.nml .
-cp $DART_DIR/filter .
-cp $DART_DIR/dart_to_cosmo .
 cp $DART_DIR/cosmo_to_dart .
 
 
@@ -81,31 +79,6 @@ clmext=`grep clmext $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
 dIndat=`grep defaultInitDate $timefile_path/cosmo_prior_time.txt | cut -d' ' -f2`
 
 echo $clmext $cosrbin $coshist
-
-ln -s $DART_DIR/obs_seq.$dIndat obs_seq.out || exit 2
-
-#for filter?
-ln -s tsmp_instance_0/cosrst/$cosrbin cosmo_prior
-ln -s tsmp_instance_0/cosout/$coshist cosmo.nc
-echo "CPS 2"
-#for filter?
-
-date
-#Machine Specific
-srun  -n $numInst  ./filter || exit 3  >> log_file 2>> err_file
-date
-
-for instance in {0..$(($numInst-1))}
-do
-  cd tsmp_instance_$instance
-  dartinstance=$(( $instance + 1 ))
-  filterRestartName=`printf ../filter_restart.%04d $dartinstance`
-  ln -s $filterRestartName dart_posterior 
-  ../dart_to_cosmo || exit 4
-  cd ..
-done
-
-wait
 
 echo "ready" > ready.txt
 exit 0

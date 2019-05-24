@@ -793,7 +793,8 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
     sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed end time to pfl namelist."
-  sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+    sed "s/__stop_pfl_bldsva__/$runstep_clm/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+#    sed "s/__stop_pfl_bldsva__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file

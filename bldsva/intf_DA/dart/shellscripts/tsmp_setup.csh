@@ -26,7 +26,7 @@ set refsetup      = "idealRTD"
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
-set testcasedir   = /daten01/z4/database/TestCases/idealRTD 
+set testcasedir   = $HOME/database/idealRTD 
 #
 #User Settings End Here
 
@@ -47,7 +47,7 @@ else if ($inrst == 3) then
   set assimC = 'parflow'
 endif
 #-------------------------------------------------------------------------
-# Block 1, 
+# tsmp_setup: Block 1, 
 # Setup the terrsysmp version, reference setup to use, and ensemble numbers
 # and the machine to use. Run setup for the initial run, and restart runs
 #-------------------------------------------------------------------------
@@ -67,7 +67,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
   if ($icycle == 1) then
     #
     echo "-------------------------------------------------------------------"
-    echo "Block 1:  Setting up the inital terrsysmp"
+    echo "tsmp_setup: Block 1:  Setting up the inital terrsysmp"
     echo "-------------------------------------------------------------------"
     echo " "
     #
@@ -85,7 +85,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
   else if ($icycle > 1) then
     #
     echo "-------------------------------------------------------------------"
-    echo "Block 2 Make the restart runs ....TODO dates "
+    echo "tsmp_setup: Block 2 Make the restart runs ....TODO dates "
     echo "-------------------------------------------------------------------"
     echo " "
     #
@@ -177,14 +177,14 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
 #end
 
 echo "-------------------------------------------------------------------"
-echo "Block 2:  Perturb seed number and leafcn"
+echo "tsmp_setup: Block 2:  Perturb seed number and leafcn"
 echo "-------------------------------------------------------------------"
 echo " "
 
 $shellpath/perturb_model_param.csh $rundir $ensemble_size $map_fn
 
 echo "-------------------------------------------------------------------"
-echo "Block 3:  Updating the setup directory with default script"
+echo "tsmp_setup: Block 3:  Updating the setup directory with default script"
 echo "-------------------------------------------------------------------"
 echo " "
 

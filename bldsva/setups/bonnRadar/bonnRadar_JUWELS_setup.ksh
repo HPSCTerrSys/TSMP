@@ -1,10 +1,10 @@
-#! /bin/ksh
+# /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/homea/hbn33/hbn331/database/bonnRadar/clm"
-  defaultFDCOS="/gpfs/homea/hbn33/hbn331/database/bonnRadar/cosmo/2015070400"
-  defaultFDOAS="/gpfs/homea/hbn33/hbn331/database/bonnRadar/oasis3"
-  defaultFDPFL="/gpfs/homea/hbn33/hbn331/database/bonnRadar/parflow"
+  defaultFDCLM="/p/project/chbn33/hbn331/database/bonnRadar/clm"
+  defaultFDCOS="/p/project/chbn33/hbn331/database/bonnRadar/cosmo/2014111500"
+  defaultFDOAS="/p/project/chbn33/hbn331/database/bonnRadar/oasis3"
+  defaultFDPFL="/p/project/chbn33/hbn331/database/bonnRadar/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/bonnRadar/lnd.stdin 
@@ -12,39 +12,39 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/bonnRadar/coup_oas.tcl
 
   defaultNppn=48
-  defaultCLMProcX=2
-  defaultCLMProcY=2
-  defaultCOSProcX=20
+  defaultCLMProcX=42
+  defaultCLMProcY=1
+  defaultCOSProcX=12
   defaultCOSProcY=12
-  defaultPFLProcX=8
-  defaultPFLProcY=8
-  
-  defaultStartDate="2015-07-04 00"
-  defaultInitDate="2015-07-04 00"
-  defaultRunhours=48
+  defaultPFLProcX=21
+  defaultPFLProcY=14
+
+  defaultStartDate="2014-11-15 00"
+  defaultInitDate="2014-11-15 00"
+  defaultRunhours=72
 
   defaultDumpCLM=1
   defaultDumpCOS=1
-  defaultDumpPFL=1	
+  defaultDumpPFL=1
 
-  gx_clm=320
-  gy_clm=320
-  dt_clm=90
-  res="0320x0320"
+  gx_clm=294
+  gy_clm=294
+  dt_clm=3600
+  res="0294x0294"
 
   gx_cos=300
   gy_cos=300
   dt_cos=6
   nbndlines=3
 
-  gx_pfl=320
-  gy_pfl=320
-  dt_pfl=0.025
+  gx_pfl=294
+  gy_pfl=294
+  dt_pfl=1.0
   pflrunname="rurlaf"
-  base_pfl=0.0025
+  base_pfl=0.01
 
   cplfreq1=90
-  cplfreq2=90
+  cplfreq2=3600
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
