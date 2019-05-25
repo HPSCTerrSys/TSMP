@@ -727,6 +727,7 @@ check
       cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
     check
   fi
+  export SCOREP_WRAPPER=on
 route "${cblue}<<< c_make_pfl${cnormal}"
 }
 
