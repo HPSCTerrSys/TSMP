@@ -11,6 +11,10 @@ route "${cblue}>> configure_clm${cnormal}"
   flags=""
   ccc="$profComp $mpiPath/bin/mpicc "
   cfc="$profComp $mpiPath/bin/mpif90 "
+  if [[ $profiling == "scalasca" ]]; then
+    ccc="scorep-mpicc "
+    cfc="scorep-mpif90 "
+  fi
   flags+="-mpi_lib $mpiPath/lib "
   c_configure_clm
 route "${cblue}<< configure_clm${cnormal}"

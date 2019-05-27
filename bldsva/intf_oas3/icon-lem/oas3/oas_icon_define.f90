@@ -2,9 +2,7 @@ MODULE oas_icon_define
 
 USE mo_kind,  ONLY : wp
 USE netcdf
-#ifdef COUP_OAS_ICON
 USE mod_oasis
-#endif
 
 IMPLICIT NONE
 
@@ -23,7 +21,7 @@ TYPE :: t_oas_field
   INTEGER             :: vid
 END TYPE t_oas_field
 TYPE(t_oas_field), DIMENSION(11)  :: oas_snd_meta
-TYPE(t_oas_field), DIMENSION(9)  :: oas_rcv_meta
+TYPE(t_oas_field), DIMENSION(8)  :: oas_rcv_meta
 REAL, ALLOCATABLE     :: oas_snd_field(:,:), oas_rcv_field(:,:)
 REAL(wp), ALLOCATABLE :: oas_rcv_field_icon(:,:,:)
 

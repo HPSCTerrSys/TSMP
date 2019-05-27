@@ -108,6 +108,184 @@ integer :: ai, aj ,ani , anj , an , owner, last_owner
  cpl_scheme = .False. !INV Scheme
 #endif
 
+ ndlon = alatlon%ni
+ ndlat = alatlon%nj
+
+ 
+
+ ! For the moment OASIS4 not able to process 2D subdomain with non contiguous unmasked points (land points) 
+ ! (12/2010)
+ ! To compare OASIS3/OASIS4 behaviours, we do the same with OASIS3
+ !
+ CALL MPI_Barrier(kl_comm, nerror)
+#define WITHAUXFILES
+#ifdef WITHAUXFILES
+ IF ( masterproc ) THEN
+   !
+   CALL prism_start_grids_writing (write_aux_files)
+   !
+   ALLOCATE( zclo(ndlon, 4), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zclo' )
+     RETURN
+   ENDIF
+   ALLOCATE( zcla(ndlat, 4), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zcla' )
+     RETURN
+   ENDIF
+   ALLOCATE( zlon(ndlon), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlon' )
+     RETURN
+   ENDIF
+   ALLOCATE( zlat(ndlat), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating zlat' )
+     RETURN
+   ENDIF
+   ALLOCATE( tmp_2D(ndlon*ndlat,8), stat = nerror )
+   IF ( nerror > 0 ) THEN
+     CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating tmp_2D' )
+     RETURN
+   ENDIF
+
+   ALLOCATE(oas_mask(ndlon*ndlat))
+   IF ( nerror > 0 ) THEN
+      CALL prism_abort_proto( ncomp_id, 'oas_clm_define', 'Failure in allocating oas_mask' )
+      RETURN
+   ENDIF
+
+      
+   ! -----------------------------------------------------------------
+   ! ... Define the elements, i.e. specify the corner points for each
+   !     volume element. 
+   !     We only need to give the 4 horizontal corners
+   !     for a volume element plus the vertical position of the upper
+   !     and lower face. Nevertheless the volume element has 8 corners.
+   ! -----------------------------------------------------------------
+
+   ! -----------------------------------------------------------------
+   ! ... Define centers and corners 
+   ! -----------------------------------------------------------------
+   !  1: lower left corner. 2,: lower right corner.
+   !  3: upper right corner. 4,: upper left corner.
+   !  using latlon%edges :  global edges (N,E,S,W)
+   !
+   ! Latitudes
+   ! Assumes lats are constant on an i line
+   !
+    zlat(:) = alatlon%latc(1:ndlat)
+   !
+   IF (alatlon%latc(ndlat) > alatlon%latc(1)) THEN  ! South to North grid
+      zcla(1,1) = alatlon%edges(3)
+      zcla(ndlat,2) = alatlon%edges(1)
+    !
+      DO jj = 2, ndlat
+         jgm1 = jj - 1
+         zcla(jj,1) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
+         zcla(jgm1,2) = zcla(jj,1)
+      ENDDO 
+
+   ELSE                                      ! North to South grid
+      zcla(ndlat,1) = alatlon%edges(3)
+      zcla(1,2) = alatlon%edges(1)
+      !
+      DO jj = 2, ndlat
+        jgm1 = jj - 1
+        zcla(jj,2) = ( alatlon%latc(jj) + alatlon%latc(jgm1) ) * 0.5_r8
+        zcla(jgm1,1) = zcla(jj,2)
+      ENDDO
+
+   ENDIF
+
+   ! Longitudes
+   !
+   zlon(:) = alatlon%lonc(1:ndlon)
+   !
+   zclo(:,1) = alatlon%edges(4)
+   zclo(:,2) = alatlon%edges(2)
+
+   dx = zlon(2)-zlon(1)
+
+   DO ji = 2, ndlon
+      zclo(ji,1) = zclo(ji,1) + ( ji -1 ) * dx
+      zclo(ji-1,2) = zclo(ji,1)
+   ENDDO 
+
+   DO ji = 1, ndlon  ! make sure that all centers are nearby corners regarding the longitude...
+     IF( zlon(ji) - zclo(ji,1) < -300._r8 )   zlon(ji) = zlon(ji) + 360._r8
+     IF( zlon(ji) - zclo(ji,1) >  300._r8 )   zlon(ji) = zlon(ji) - 360._r8
+   END DO
+
+
+   ! -----------------------------------------------------------------
+   ! ... Define the mask
+   ! -----------------------------------------------------------------
+   DO jj = 1, ndlat
+   DO ji = 1, ndlon
+     jg    = (jj-1)*ndlon + ji
+     IF ( amask(jg) == 1 ) THEN
+        oas_mask(jg) = 0
+     ELSE
+        oas_mask(jg) = 1
+     ENDIF
+   ENDDO
+   ENDDO
+
+   CALL flush(nulout)
+
+   ! -----------------------------------------------------------------
+   ! ... Write info on OASIS auxillary files (if needed)
+   ! ----------------------------------------------------------------
+
+   IF ( write_aux_files == 1 ) THEN
+ 
+    DO jj = 1, ndlat
+    DO ji = 1, ndlon
+       tmp_2D(ji+(jj-1)*ndlon,1) = zlon(ji)
+       tmp_2D(ji+(jj-1)*ndlon,2) = zlat(jj)
+    ENDDO
+    ENDDO
+
+   CALL prism_write_grid (clgrd, ndlon*ndlat, 1, tmp_2D(:,1), tmp_2D(:,2))
+
+    DO jj = 1, ndlat
+    DO ji = 1, ndlon
+     tmp_2D(ji+(jj-1)*ndlon,1) = zclo(ji,1)
+     tmp_2D(ji+(jj-1)*ndlon,2) = zclo(ji,2)
+     tmp_2D(ji+(jj-1)*ndlon,5) = zcla(jj,1)
+     tmp_2D(ji+(jj-1)*ndlon,7) = zcla(jj,2)
+    ENDDO
+    ENDDO
+
+    ! Fill missing corners for longitude
+    tmp_2D(:,3) = tmp_2D(:,2)
+    tmp_2D(:,4) = tmp_2D(:,1)
+
+    ! Fill missing corners for latitude
+    tmp_2D(:,6) = tmp_2D(:,5)
+    tmp_2D(:,8) = tmp_2D(:,7)
+
+    CALL prism_write_corner (clgrd, ndlon*ndlat, 1, 4, tmp_2D(:,1:4), tmp_2D(:,5:8))
+
+    ! tbd CALL prism_write_angle (clgrd, ndlon*ndlat, 1, angle)
+
+    CALL prism_write_mask (clgrd, ndlon*ndlat, 1, oas_mask)
+
+    ! EM tbd Fill areas with true values
+    tmp_2D(:,1) = 1 
+!CPS        CALL prism_write_area (clgrd, ndlon*ndlat, 1, tmp_2D(:,1))
+
+    CALL prism_terminate_grids_writing()
+        
+  ENDIF                      ! write_aux_files = 1
+
+  WRITE(nulout,*) ' oasclm: oas_clm_define: prism_terminate_grids'
+  CALL flush(nulout)
+  DEALLOCATE(tmp_2D, oas_mask, zclo, zcla, zlon, zlat)
+ ENDIF                       ! masterproc
+#endif
 
 !FG  The following piece of code querries the number, length and offset of 
 !    contiguous parts in the lat/lon representation. This is done in a 
@@ -123,6 +301,42 @@ WRITE(*,*) 'CLM defining partition'
 ALLOCATE(igparal(200))
 
 igparal(1) = 3  !orange partition
+
+#if (1 == 0)
+CALL get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
+
+c=1
+off=(adecomp%gdc2j(begg)-1)*ndlon +adecomp%gdc2i(begg) -1
+leng=1
+
+do it1=begg+1,endg
+
+  i=adecomp%gdc2i(it1)
+  im1=adecomp%gdc2i(it1-1)
+  j=adecomp%gdc2j(it1)
+  if(j.eq.1) then
+        jm1=-1
+  else
+    jm1=adecomp%gdc2j(it1-1)
+  endif
+
+  if( (i-1.eq.im1) .or. (i.eq.1 .and. jm1.eq.j-1 .and. im1.eq.ndlon)  ) then
+    leng=leng+1
+  else
+    igparal(c*2+1) = off
+    igparal(c*2+2) = leng
+    igparal(2) = c
+    off=(adecomp%gdc2j(it1)-1)*ndlon +adecomp%gdc2i(it1) -1
+    c=c+1
+    leng=1
+  endif
+
+enddo
+igparal(c*2+1) = off
+igparal(c*2+2) = leng
+igparal(2) = c
+
+#endif
 
 ani = adomain%ni
 anj = adomain%nj
@@ -205,7 +419,6 @@ CALL MPI_Barrier(kl_comm, nerror)
   ssnd(14)%clname='CLMPHOTO'      ! photosynthesis rate (umol CO2 m-2s-1)
   ssnd(15)%clname='CLMPLRES'      ! plant respiration (umol CO2 m-2s-1)
 !MU (12.04.13)
-  !ssnd(16)%clname='CLMEMISS'
 
   !CMS: from 101 to 200 are the sending fields from CLM to PFL
   ssnd(101)%clname='CLMFLX01'    !  evapotranspiration fluxes sent to PFL for each soil layer  

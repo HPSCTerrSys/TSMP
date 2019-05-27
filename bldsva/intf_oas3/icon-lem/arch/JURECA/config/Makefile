@@ -20,8 +20,8 @@ exec_prefix = build/x86_64-unknown-linux-gnu
 bindir = ${exec_prefix}/bin
 libdir = ${exec_prefix}/lib
 
-NETCDFFROOT    = /usr/local/software/jureca/Stages/2016a/software/netCDF-Fortran/4.4.3-ipsmpi-2016a
-NETCDFROOT     = /usr/local/software/jureca/Stages/2016a/software/netCDF/4.4.0-ipsmpi-2016a
+NETCDFFROOT    = /usr/local/software/jureca/Stages/2019a/software/netCDF-Fortran/4.4.5-ipsmpi-2016a
+NETCDFROOT     = /usr/local/software/jureca/Stages/2019a/software/netCDF/4.6.3-ipsmpi-2016a
 NETCDFLIBPATH  = $(NETCDFROOT)/lib64
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
 NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
@@ -34,15 +34,15 @@ CDI_INCLUDE =
 OASIS_LIB      = __cpllib__
 OASIS_INCLUDE  = __cplinc__
 
-HDF5ROOT       = /usr/local/software/jureca/Stages/2016a/software/HDF5/1.8.16-ipsmpi-2016a
+HDF5ROOT       = /usr/local/software/jureca/Stages/2019a/software/HDF5/1.10.5-ipsmpi-2019a
 HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
 HDF5_INCLUDE   = -I$(HDF5ROOT)/include
 
-SZIPROOT       = /usr/local/software/jureca/Stages/2016a/software/Szip/2.1-iccifort-2016.2.181-GCC-4.9.3-2.25
+SZIPROOT       = /usr/local/software/jureca/Stages/2019a/software/Szip/2.1-iccifort-2016.2.181-GCC-4.9.3-2.25
 SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
 SZIP_INCLUDE   = -I$(SZIPROOT)/include
 
-ZLIBROOT       = /usr/local/software/jureca/Stages/2016a/software/zlib/1.2.8-iccifort-2016.2.181-GCC-4.9.3-2.25
+ZLIBROOT       = /usr/local/software/jureca/Stages/2019a/software/zlib/1.2.11-GCCcore-8.3.0
 ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
 ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
 
@@ -54,7 +54,7 @@ XML2ROOT       =
 XML2_LIB       = 
 XML2_INCLUDE   = 
 
-MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.1.5-1-iccifort-2016.2.181-GCC-4.9.3-2.25
+MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.2.2-1-iccifort-2019.3.199-GCC-8.3.0
 MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
 MPI_INCLUDE    = -I$(MPIROOT)/include
 
@@ -74,12 +74,12 @@ INCLUDES       = $(INCLUDE)
 AS             = as
 
 CC             = icc
-CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__
+CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__ -xMIC-AVX512
 FC             = ifort
-FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
+FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS -xMIC-AVX512
 FlibFLAGS      = $(INCLUDES) -module  ../module 
 F77            = ifort
-F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE
+F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -xMIC-AVX512
 
 AR             = xiar
 ARFLAGS        = crv
