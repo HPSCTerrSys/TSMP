@@ -52,7 +52,7 @@ route "${cblue}>>> c_make_icon${cnormal}"
   check
   comment "    make icon"
     export SCOREP_WRAPPER=on
-    make -j8 -f $icondir/Makefile >> $log_file 2>> $err_file
+    make -j16 -f $icondir/Makefile >> $log_file 2>> $err_file
   check
 
   comment "    cp icon binary to $bindir"
@@ -331,7 +331,7 @@ c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
   comment "    make oasis"
     export SCOREP_WRAPPER=on
-    make -j4 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
+    make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
   if [[ $withPDAF == "true" ]]; then
@@ -512,7 +512,6 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     if [[ $spmd == "off" ]] ; then ; flags+="-nospmd " ; fi
     flags+="-maxpft $maxpft -rtm $rtm -usr_src $usr_src "
     if [[ $withCOS == "true" ]] ; then ; flags+="-oas3_cos " ; fi
-    if [[ $withICON == "true" ]] ; then ; flags+="-oas3_icon " ; fi
     if [[ $withPFL == "true" ]] ; then ; flags+="-oas3_pfl " ; fi
     if [[ $withPFL == "false" && $withCOS == "false" && $withICON == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
     flags+="-nc_inc $ncdfPath/include "

@@ -14,7 +14,12 @@ comment "    fix JURECA specific library path"
 git checkout -- configure
 sed -i.bak s@NETCDFROOT/lib@NETCDFROOT/lib64@g configure
 check
-NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-fortran=intel --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/homea/slts/slts23/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
+if [[ $profiling == "scalasca" ]]; then
+  export SCOREP_WRAPPER=off
+  CC=scorep-mpicc F90=scorep-mpif90 F77=scorep-mpif77 NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-fortran=intel --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/p/project/cslts/brdar1/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
+else
+  NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-fortran=intel --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/p/project/cslts/brdar1/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
+fi
 comment "   cp Makefile to icon dir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
 check
@@ -31,15 +36,23 @@ check
 comment "   sed cplFlag to icon Makefile"
   sed -i "s@__cplflg__@$cplFlag@" $file >> $log_file 2>> $err_file
 check
-comment "   sed __comCC__ to icon Makefile"
-  sed -i "s@__comCC__@${prefix}gcc@" $file >> $log_file 2>> $err_file
-check
-comment "   sed __comF77 to icon Makefile"
-  sed -i "s@__comF77__@${prefix}gfortran@" $file >> $log_file 2>> $err_file
-check
-comment "   sed __comF90 to icon Makefile"
-  sed -i "s@__comF90__@${prefix}gfortran@" $file >> $log_file 2>> $err_file
-check
+if [[ $profiling == "scalasca" ]]; then
+  comment "   sed compilers + profiling to icon Makefile"
+    sed -i "s@__comCC__@scorep-mpicc@" $file >> $log_file 2>> $err_file
+  check
+    sed -i "s@__comF77__@scorep-mpif77@" $file >> $log_file 2>> $err_file
+  check
+    sed -i "s@__comF90__@scorep-mpif90@" $file >> $log_file 2>> $err_file
+  check
+else
+  comment "   sed compilers to icon Makefile"
+    sed -i "s@__comCC__@$mpiPath/bin/mpicc@" $file >> $log_file 2>> $err_file
+  check
+    sed -i "s@__comF77__@$mpiPath/bin/mpif77@" $file >> $log_file 2>> $err_file
+  check
+    sed -i "s@__comF90__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  check
+fi
 comment "   sed cplLib to icon Makefile"
   sed -i "s@__cpllib__@$cplLib@" $file >> $log_file 2>> $err_file
 check
@@ -51,6 +64,7 @@ route "${cblue}<< configure_icon${cnormal}"
 
 make_icon(){
 route "${cblue}>> make_icon${cnormal}"
+  export SCOREP_WRAPPER=on
   c_make_icon
 route "${cblue}<< make_icon${cnormal}"
 }
