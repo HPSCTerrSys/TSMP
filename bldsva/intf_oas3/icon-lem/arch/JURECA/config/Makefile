@@ -20,8 +20,8 @@ exec_prefix = build/x86_64-unknown-linux-gnu
 bindir = ${exec_prefix}/bin
 libdir = ${exec_prefix}/lib
 
-NETCDFFROOT    = /usr/local/software/jureca/Stages/2019a/software/netCDF-Fortran/4.4.5-ipsmpi-2016a
-NETCDFROOT     = /usr/local/software/jureca/Stages/2019a/software/netCDF/4.6.3-ipsmpi-2016a
+NETCDFFROOT    = $(EBROOTNETCDFMINFORTRAN)
+NETCDFROOT     = $(EBROOTNETCDF)
 NETCDFLIBPATH  = $(NETCDFROOT)/lib64
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
 NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
@@ -34,15 +34,15 @@ CDI_INCLUDE =
 OASIS_LIB      = __cpllib__
 OASIS_INCLUDE  = __cplinc__
 
-HDF5ROOT       = /usr/local/software/jureca/Stages/2019a/software/HDF5/1.10.5-ipsmpi-2019a
+HDF5ROOT       = $(EBROOTHDF5)
 HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
 HDF5_INCLUDE   = -I$(HDF5ROOT)/include
 
-SZIPROOT       = /usr/local/software/jureca/Stages/2019a/software/Szip/2.1-iccifort-2016.2.181-GCC-4.9.3-2.25
+SZIPROOT       = $(EBROOTSZIP)
 SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
 SZIP_INCLUDE   = -I$(SZIPROOT)/include
 
-ZLIBROOT       = /usr/local/software/jureca/Stages/2019a/software/zlib/1.2.11-GCCcore-8.3.0
+ZLIBROOT       = $(EBROOTZLIB)
 ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
 ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
 
@@ -54,7 +54,7 @@ XML2ROOT       =
 XML2_LIB       = 
 XML2_INCLUDE   = 
 
-MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.2.2-1-iccifort-2019.3.199-GCC-8.3.0
+MPIROOT        = $(EBROOTPSMPI)
 MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
 MPI_INCLUDE    = -I$(MPIROOT)/include
 
