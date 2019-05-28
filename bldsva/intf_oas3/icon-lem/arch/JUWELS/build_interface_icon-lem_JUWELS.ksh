@@ -64,7 +64,6 @@ route "${cblue}<< configure_icon${cnormal}"
 
 make_icon(){
 route "${cblue}>> make_icon${cnormal}"
-  export SCOREP_WRAPPER=on
   c_make_icon
 route "${cblue}<< make_icon${cnormal}"
 }

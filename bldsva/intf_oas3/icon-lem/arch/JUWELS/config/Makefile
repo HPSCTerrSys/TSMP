@@ -76,10 +76,10 @@ AS             = as
 CC             = __comCC__
 CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__
 FC             = __comF90__
-FFLAGS         = $(INCLUDES) -J../module -I../src -I../support -I../module __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__ICON__ -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
+FFLAGS         = $(INCLUDES) -J../module -I../src -I../support -I../module __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__ICON__ -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS -ffree-line-length-512
 FlibFLAGS      = $(INCLUDES) -J../module 
 F77            = __comF77__
-F77FLAGS       = __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE
+F77FLAGS       = __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -ffree-line-length-512
 
 AR             = ar
 ARFLAGS        = crv
