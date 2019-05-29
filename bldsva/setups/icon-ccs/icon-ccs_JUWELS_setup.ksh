@@ -1,8 +1,8 @@
 #! /bin/ksh
 
 initSetup(){
-  source /etc/profile.d/modules.sh
-  module load Intel ParaStationMPI CDO NCO
+  source /gpfs/software/juwels/lmod/lmod/init/ksh
+  module load GCC ParaStationMPI CDO NCO
 
   defaultFDOAS="/p/project/cslts/local/data/terrsysmp/icon-ccs"
   defaultFDCLM="/p/project/cslts/local/data/terrsysmp/icon-ccs"
