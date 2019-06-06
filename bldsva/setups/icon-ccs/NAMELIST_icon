@@ -12,7 +12,7 @@
 / 
 &run_nml
  num_lev     = 64,      ! number of full levels of vertical grid
- dtime       = 0.5     ! [s] timestep in seconds
+ dtime       = __dt_icon_bldsva__     ! [s] timestep in seconds
  ltestcase   = .TRUE.       ! run testcase                 --> testcase_ctl
  ldynamics   = .TRUE.       ! dynamics
  ltransport  = .TRUE.       ! transport
@@ -20,7 +20,7 @@
  ntracer     =  1           ! number of tracers - default 0
  ltimer      = .true.       ! 
  timers_level = 100         !
- msg_level   = 12          ! detailed report during integration
+ msg_level   = 5            ! detailed report during integration
  output      = 'nml','totint'      
  profiling_output = 3
 /
@@ -31,16 +31,15 @@
  divavg_cntrwgt  = 0.50
 /
 &nh_testcase_nml
- nh_test_name      = 'CBL'  !test case identifier
+ nh_test_name      = 'CBL_ccs'  !test case identifier
  u_cbl             = 0.0, 0.0  !u_cbl(1)=constant, u_cbl(2)=gradient, default=0
  v_cbl             = 0.0, 0.0  !v_cbl(1)=constant, v_cbl(2)=gradient, default=0
+ th_prof           = 1         !1=Dipankar, 2=Patton
  th_cbl            = 290.0, 0.006  !th_cbl(1)=constant, th_cbl(2)=gradient
 /
 &les_nml
- is_dry_cbl        = .TRUE. 
- shflx             =  0.1  ! kinematic surface heat flux
- lhflx             =  0.0  ! knematic latent heat flux 
- isrfc_type        = 2     !2=Fixed flux, 5=fixed SST, 3=fixed bflux
+ is_dry_cbl        = .FALSE. 
+ isrfc_type        = 1     ! 1=terra, 2=Fixed flux, 5=fixed SST, 3=fixed bflux
  ufric             = 0.45
  expname           = 'ccs'
  avg_interval_sec = 900.
@@ -56,19 +55,25 @@
 &nwp_phy_nml
 inwp_gscp       = 0
 inwp_convection = 0
-inwp_radiation  = 0
+inwp_radiation  = 2
 inwp_cldcover   = 0
 inwp_turb       = 5
 inwp_satad      = 0
-inwp_surface    = 0
+inwp_surface    = 1
+dt_rad          = 300
+/
+&radiation_nml
+izenith         = 6
+albedo_type     = 1
+ccs_zsct        = 1000.0 !1365.0
 /
 &turbdiff_nml
 lconst_z0 = .TRUE.
-const_z0  = 0.0003
+const_z0  = 0.3
 /
 &transport_nml
- ihadv_tracer = 0,0,0,0,0,0,0
- ivadv_tracer = 0,0,0,0,0,0,0
+ ihadv_tracer = 2,2,0,0,0,0,0
+ ivadv_tracer = 3,3,0,0,0,0,0
 /
 &nonhydrostatic_nml
  iadv_rhotheta = 2
@@ -85,19 +90,46 @@ const_z0  = 0.0003
  stretch_fac     = 0.9       ! stretching towards model top (1.0 default; smaller - bigger top level thickness)
 /
 &io_nml
- dt_checkpoint    = 3600 ! [s] trigger new restart file
+ dt_checkpoint    = 86400 ! [s] trigger new restart file
  lkeep_in_sync    = .true.
 /
 &output_nml
  filetype         = 4
  dom              = -1
- output_start     = "2008-09-01T00:00:00Z"
- output_end       = "2008-09-01T00:15:00Z"
- output_interval  = "PT30M"
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'ccs_land'
+ output_grid      = .TRUE.
+ ml_varlist       = 'group:dwd_fg_sfc_vars','shfl_s','lhfl_s','z_pbl','obukhov_length'
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'ccs_rad'
+ output_grid      = .TRUE.
+ ml_varlist       = 'group:rad_vars','albvisdir','albnirdir','emis_rad'
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
  file_interval    = "P01D"
  include_last     = .TRUE.
  remap            = 0   ! triangular grid
  output_filename  = 'ccs_insta'
  output_grid      = .TRUE.
- ml_varlist       = 'u','v','w','temp','theta_v','pres_sfc','pres','tkvh','z_ifc','z_mc','rho','shfl_s','lhfl_s','tke'
+ ml_varlist       = 'u','v','w','temp','qv','qc','theta_v','pres_sfc','pres','tkvh','z_ifc','z_mc','rho','wth3d','wthd3d'
 /
+

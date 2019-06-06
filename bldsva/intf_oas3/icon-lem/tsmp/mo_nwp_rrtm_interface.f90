@@ -515,7 +515,6 @@ CONTAINS
 #else
       t_sf = lnd_prog%t_g(:,:)
 #endif
-      emissivity = ext_data%atm%emis_rad(:,:)
 
 !$OMP PARALLEL PRIVATE(jb,i_startidx,i_endidx,dust_tunefac)
 !$OMP DO ICON_OMP_GUIDED_SCHEDULE
@@ -566,7 +565,7 @@ CONTAINS
         & alb_nir_dir=prm_diag%albnirdir(:,jb) ,&!< in surface albedo for near IR range, direct
         & alb_vis_dif=prm_diag%albvisdif(:,jb),&!< in surface albedo for visible range, diffuse
         & alb_nir_dif=prm_diag%albnirdif(:,jb),&!< in surface albedo for near IR range, diffuse
-        & emis_rad=emissivity(:,jb),&!< in longwave surface emissivity
+        & emis_rad   =ext_data%atm%emis_rad(:,jb),&!< in longwave surface emissivity
         & tk_sfc     =prm_diag%tsfctrad(:,jb) ,&!< in surface temperature
                               !
                               ! atmosphere: pressure, tracer mixing ratios and temperature

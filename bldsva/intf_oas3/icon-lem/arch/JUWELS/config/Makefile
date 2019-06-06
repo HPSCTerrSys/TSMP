@@ -67,7 +67,7 @@ PROFILE_INCLUDE =
 
 OTHER_LIBS     = 
 
-LIBS           = -L../lib -lsupport -lself -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
+LIBS           = -L../lib -lsupport -lself -lmtime $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
 INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE) $(OASIS_INCLUDE)
 INCLUDES       = $(INCLUDE)
 
@@ -76,15 +76,15 @@ AS             = as
 CC             = __comCC__
 CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__
 FC             = __comF90__
-FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
-FlibFLAGS      = $(INCLUDES) -module  ../module 
+FFLAGS         = $(INCLUDES) -J../module -I../src -I../support -I../module __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__ICON__ -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS -ffree-line-length-512
+FlibFLAGS      = $(INCLUDES) -J../module 
 F77            = __comF77__
-F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -xMIC-AVX512
+F77FLAGS       = __cplflg__ -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -O2 -msse2 -g -mpc64 -cpp -D__LOOP_EXCHANGE -ffree-line-length-512
 
-AR             = xiar
+AR             = ar
 ARFLAGS        = crv
 
-LDFLAGS        = -I../src -I../support -I../module -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__
+LDFLAGS        = -I../src -I../support -I../module -g -mpc64 -cpp -D__LOOP_EXCHANGE -D__ICON__
 
 SRCDIRS        = externals/self/src externals/mtime/src blas lapack support src
 OBJDIRS        = build/x86_64-unknown-linux-gnu/externals/self/src build/x86_64-unknown-linux-gnu/externals/mtime/src build/x86_64-unknown-linux-gnu/blas build/x86_64-unknown-linux-gnu/lapack build/x86_64-unknown-linux-gnu/support build/x86_64-unknown-linux-gnu/src

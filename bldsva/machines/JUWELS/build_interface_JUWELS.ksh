@@ -28,7 +28,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultOptC="-O2"
 
   profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="scorep --thread=none " ; profRun="scalasca -analyse" ; profVar=""  ;fi
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
@@ -71,7 +71,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --mail-type=slts
+#SBATCH --account=slts
 
 cd $rundir
 source $rundir/loadenvs

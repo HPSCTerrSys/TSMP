@@ -51,7 +51,8 @@ route "${cblue}>>> c_make_icon${cnormal}"
     cd $icondir >> $log_file 2>> $err_file
   check
   comment "    make icon"
-    make -j8 -f $icondir/Makefile >> $log_file 2>> $err_file
+    export SCOREP_WRAPPER=on
+    make -j16 -f $icondir/Makefile >> $log_file 2>> $err_file
   check
 
   comment "    cp icon binary to $bindir"
@@ -81,6 +82,10 @@ if [[ $withOAS == "true" ]]; then
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rrtm_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
   check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rg_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
 fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
 }
@@ -94,6 +99,22 @@ check
 
 comment "  cp namelist to rundir"
   cp ${namelist_icon} $rundir >> $log_file 2>> $err_file
+check
+
+comment "  sed dt to namelist"
+  sed "s,__dt_icon_bldsva__,$dt_icon," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed start time to namelist"
+  dSD=($defaultStartDate)
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed end time to namelist"
+  dED=($defaultEndDate)
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"
@@ -139,7 +160,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
   check
   comment "    make cosmo"
     export SCOREP_WRAPPER=on
-    make -f $cosdir/Makefile >> $log_file 2>> $err_file
+    make -j4 -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
@@ -260,7 +281,7 @@ cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600/$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600./$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -308,7 +329,8 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
-  comment "    make oasis j16" 
+  comment "    make oasis"
+    export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
@@ -449,7 +471,11 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
   fi
+  if [[ $withICON=="true" ]]; then
+  rtime=$(( ($runhours*3600 + $cplfreq1/10)*10 ))  # with icon in tenths of second
+  else
   rtime=$(($runhours*3600 + $cplfreq1))
+  fi
   if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
   comment "   sed sim time into namcouple"
     sed "s/totalruntime/$rtime/" -i $rundir/namcouple >> $log_file 2>> $err_file
@@ -486,7 +512,6 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     if [[ $spmd == "off" ]] ; then ; flags+="-nospmd " ; fi
     flags+="-maxpft $maxpft -rtm $rtm -usr_src $usr_src "
     if [[ $withCOS == "true" ]] ; then ; flags+="-oas3_cos " ; fi
-    if [[ $withICON == "true" ]] ; then ; flags+="-oas3_icon " ; fi
     if [[ $withPFL == "true" ]] ; then ; flags+="-oas3_pfl " ; fi
     if [[ $withPFL == "false" && $withCOS == "false" && $withICON == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
     flags+="-nc_inc $ncdfPath/include "
@@ -652,7 +677,6 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
-  export SCOREP_WRAPPER=off
   comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
   check
@@ -664,8 +688,12 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
-    echo "$pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file"
+    export SCOREP_WRAPPER=off
+    if [[ $withICON == "true" ]]; then
+    $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim -DCOUP_OAS_ICON" CFLAGS="$cflagsSim -DCOUP_OAS_ICON" >> $log_file 2>> $err_file
+    else
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+    fi
   check
   comment "    patch pfsimulator/parflow_lib/problem_phase_rel_perm.c "
     sed -i "s@inline double VanGLookupSpline@double VanGLookupSpline@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
@@ -728,6 +756,7 @@ check
       cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
     check
   fi
+  export SCOREP_WRAPPER=on
 route "${cblue}<<< c_make_pfl${cnormal}"
 }
 
