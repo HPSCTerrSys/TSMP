@@ -10,10 +10,6 @@ route "${cblue}>> configure_icon${cnormal}"
 comment "    cd to icon dir"
   cd $icondir >> $log_file 2>> $err_file
 check
-comment "    fix JURECA specific library path"
-git checkout -- configure
-sed -i.bak s@NETCDFROOT/lib@NETCDFROOT/lib64@g configure
-check
 if [[ $profiling == "scalasca" ]]; then
   export SCOREP_WRAPPER=off
   CC=scorep-mpicc F90=scorep-mpif90 F77=scorep-mpif77 NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-fortran=intel --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/p/project/cslts/brdar1/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
