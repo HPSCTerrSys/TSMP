@@ -69,7 +69,7 @@ if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
   check
-  comment "    replace files with coupling. Add files to icon/src "
+  comment "    replace coupling files in ICON code. Add files to icon/src "
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure/ >> $log_file 2>> $err_file
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
@@ -85,6 +85,51 @@ if [[ $withOAS == "true" ]]; then
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rg_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+  comment "    replace icon-ccs files in ICON code. Add files to icon/src "
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nonhydro_types.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nonhydro_state.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_vdfmain.f90 $icondir/src/atm_phy_edmf/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_turb_interface.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_sgs_turbulence.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_turbulent_diagnostic.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_interface_les.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_surface_les.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_sgs_turbmetric.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation.f90 $icondir/src/atm_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation_config.f90 $icondir/src/configure_model >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_config.f90 $icondir/src/configure_model >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_lnd_state.f90 $icondir/src/lnd_phy_nwp >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_soil_ml.f90 $icondir/src/lnd_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_soil_init.f90 $icondir/src/lnd_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_ext_data_init.f90 $icondir/src/shr_horizontal >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_torus_exp.f90 $icondir/src/testcases >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases.f90 $icondir/src/testcases >> $log_file 2>> $err_file
   check
 fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
