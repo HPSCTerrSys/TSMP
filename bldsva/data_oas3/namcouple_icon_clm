@@ -1,5 +1,5 @@
  $NFIELDS
-  19
+  19 
  $END
 #
  $RUNTIME
@@ -11,7 +11,7 @@
  $END
 #
  $NLOGPRT
-  10 0
+  0 0
  $END
 #
  $NBMODEL
@@ -24,115 +24,115 @@
 #
 #
  $STRINGS
-ICOTEMPE CLMTEMPE 1 cplfreq1 1 icon01.nc EXPOUT
+ICOTEMPE CLMTEMPE 1 cplfreq1 1 icon01.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0 
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOUWIND CLMUWIND 1 cplfreq1 1 icon02.nc EXPOUT
+ICOUWIND CLMUWIND 1 cplfreq1 1 icon02.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOVWIND CLMVWIND 1 cplfreq1 1 icon03.nc EXPOUT
+ICOVWIND CLMVWIND 1 cplfreq1 1 icon03.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOSPWAT CLMSPWAT 1 cplfreq1 1 icon04.nc EXPOUT
+ICOSPWAT CLMSPWAT 1 cplfreq1 1 icon04.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOTHICK CLMTHICK 1 cplfreq1 1 icon05.nc EXPOUT
+ICOTHICK CLMTHICK 1 cplfreq1 1 icon05.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOPRESS CLMPRESS 1 cplfreq1 1 icon06.nc EXPOUT
+ICOPRESS CLMPRESS 1 cplfreq1 1 icon06.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICODIRSW CLMDIRSW 1 cplfreq1 1 icon07.nc EXPOUT
+ICODIRSW CLMDIRSW 1 cplfreq1 1 icon07.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICODIFSW CLMDIFSW 1 cplfreq1 1 icon08.nc EXPOUT
+ICODIFSW CLMDIFSW 1 cplfreq1 1 icon08.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOLONGW CLMLONGW 1 cplfreq1 1 icon09.nc EXPOUT
+ICOLONGW CLMLONGW 1 cplfreq1 1 icon09.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOCVPRE CLMCVPRE 1 cplfreq1 1 icon10.nc EXPOUT
+ICOCVPRE CLMCVPRE 1 cplfreq1 1 icon10.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-ICOGSPRE CLMGSPRE 1 cplfreq1 1 icon11.nc EXPOUT
+ICOGSPRE CLMGSPRE 1 cplfreq1 1 icon11.nc EXPORTED
 ngiconx 1 ngclmx 1 gicon gclm SEQ=1
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 # FROM CLM TO ICOMO
-CLM_TAUX ICO_TAUX 1 cplfreq1 1 clm04.nc EXPOUT
+CLM_TAUX ICO_TAUX 1 cplfreq1 1 clm04.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLM_TAUY ICO_TAUY 1 cplfreq1 1 clm05.nc EXPOUT
+CLM_TAUY ICO_TAUY 1 cplfreq1 1 clm05.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMLATEN ICOLHFLX 1 cplfreq1 1 clm07.nc EXPOUT
+CLMLATEN ICOLHFLX 1 cplfreq1 1 clm07.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMSENSI ICOSHFLX 1 cplfreq1 1 clm06.nc EXPOUT
+CLMSENSI ICOSHFLX 1 cplfreq1 1 clm06.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMINFRA ICOINFRA 1 cplfreq1 1 clm01.nc EXPOUT
+CLMINFRA ICOINFRA 1 cplfreq1 1 clm01.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0 
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1 
 #
-CLMALBED ICOALBED 1 cplfreq1 1 clm02.nc EXPOUT
+CLMALBED ICOALBED 1 cplfreq1 1 clm02.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLMALBEI ICOALBEI 1 cplfreq1 1 clm03.nc EXPOUT
+CLMALBEI ICOALBEI 1 cplfreq1 1 clm03.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
  DISTWGT U SCALAR LATLON 1 1
 #
-CLM_TSF1 ICOTGRND 1 cplfreq1 1 clm09.nc EXPOUT
+CLM_TSF1 ICOTGRND 1 cplfreq1 1 clm09.nc EXPORTED
 ngclmx 1 ngiconx 1 gclm gicon SEQ=2
 P 0 P 0
 SCRIPR
