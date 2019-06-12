@@ -55,7 +55,7 @@ XML2_LIB       =
 XML2_INCLUDE   = 
 
 MPIROOT        = $(EBROOTPSMPI)
-MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
+MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi
 MPI_INCLUDE    = -I$(MPIROOT)/include
 
 LAPACKROOT     = 

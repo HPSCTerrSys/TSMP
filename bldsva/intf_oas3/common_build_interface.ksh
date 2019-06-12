@@ -557,6 +557,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     if [[ $spmd == "off" ]] ; then ; flags+="-nospmd " ; fi
     flags+="-maxpft $maxpft -rtm $rtm -usr_src $usr_src "
     if [[ $withCOS == "true" ]] ; then ; flags+="-oas3_cos " ; fi
+    if [[ $withICON == "true" ]] ; then ; flags+="-oas3_icon " ; fi
     if [[ $withPFL == "true" ]] ; then ; flags+="-oas3_pfl " ; fi
     if [[ $withPFL == "false" && $withCOS == "false" && $withICON == "false" ]] ; then ; flags+="-cps_catch $cps_catch " ; fi
     flags+="-nc_inc $ncdfPath/include "
