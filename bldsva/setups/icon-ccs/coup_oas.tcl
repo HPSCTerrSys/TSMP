@@ -283,15 +283,15 @@ pfset Mannings.Geom.domain.Value	      5.52e-6
 #---------------------------------------------------------
 # Initial conditions: water pressure
 #---------------------------------------------------------
-#pfset ICPressure.Type			          "PFBFile"
-#pfset ICPressure.GeomNames		          "domain"
-#pfset Geom.domain.ICPressure.FileName     "/p/scratch/cjibg34/jibg3401/data/tsmp_parflow_gwt/gwt_2m_seed01/ccs.out.press.00072.pfb"
+pfset ICPressure.Type			          "PFBFile"
+pfset ICPressure.GeomNames		          "domain"
+pfset Geom.domain.ICPressure.FileName     "/p/project/cslts/local/data/terrsysmp/icon-ccs/ccs.out.press.00072.pfb"
 #
-pfset ICPressure.Type                    HydroStaticPatch
-pfset ICPressure.GeomNames               domain
-pfset Geom.domain.ICPressure.Value       -2.0
-pfset Geom.domain.ICPressure.RefGeom     domain
-pfset Geom.domain.ICPressure.RefPatch    z-upper
+#pfset ICPressure.Type                    HydroStaticPatch
+#pfset ICPressure.GeomNames               domain
+#pfset Geom.domain.ICPressure.Value       -2.0
+#pfset Geom.domain.ICPressure.RefGeom     domain
+#pfset Geom.domain.ICPressure.RefPatch    z-upper
 
 #-----------------------------------------------------------------------------
 # Phase sources:
