@@ -31,30 +31,30 @@ substitutions_clm(){
 route "${cblue}>> substitutions_clm${cnormal}"
    c_substitutions_clm
   comment "   cp m_FileResolve.F90 and shr_sys_mod.F90 to usr.src folder"
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/m_FileResolv.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_oas3/clm3_5-icon/arch/$platform/src/m_FileResolv.F90 $clmdir/bld/usr.src	
   check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/shr_sys_mod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_oas3/clm3_5-icon/arch/$platform/src/shr_sys_mod.F90 $clmdir/bld/usr.src
   check
   if [[ $withOASMCT == "true" ]] ; then
     comment "   replace files for oasis3-mct and parallel clm coupling"
-        patch $rootdir/bldsva/intf_oas3/clm3_5/mct/atmdrvMod.F90 $clmdir/bld/usr.src/ 
+        patch $rootdir/bldsva/intf_oas3/clm3_5-icon/mct/atmdrvMod.F90 $clmdir/bld/usr.src/ 
     check
-        patch $rootdir/bldsva/intf_oas3/clm3_5/mct/decompMod.F90 $clmdir/bld/usr.src/
+        patch $rootdir/bldsva/intf_oas3/clm3_5-icon/mct/decompMod.F90 $clmdir/bld/usr.src/
     check
-        patch "$rootdir/bldsva/intf_oas3/clm3_5/mct/oas*" $clmdir/src/oas3/ 
+        patch "$rootdir/bldsva/intf_oas3/clm3_5-icon/mct/oas*" $clmdir/src/oas3/ 
     check
-        patch "$rootdir/bldsva/intf_oas3/clm3_5/mct/receive*" $clmdir/src/oas3/
+        patch "$rootdir/bldsva/intf_oas3/clm3_5-icon/mct/receive*" $clmdir/src/oas3/
     check
-        patch "$rootdir/bldsva/intf_oas3/clm3_5/mct/send*" $clmdir/src/oas3/
+        patch "$rootdir/bldsva/intf_oas3/clm3_5-icon/mct/send*" $clmdir/src/oas3/
     check
   fi
 
   comment "   cp new clm configure & Makefile.in to clm/bld/"
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/configure $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5-icon/arch/$platform/config/configure $clmdir/bld 
   check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/Makefile.in $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5-icon/arch/$platform/config/Makefile.in $clmdir/bld 
   check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/config_clm_defaults.xml $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5-icon/arch/$platform/config/config_clm_defaults.xml $clmdir/bld 
   check
 route "${cblue}<< substitutions_clm${cnormal}"
 }
