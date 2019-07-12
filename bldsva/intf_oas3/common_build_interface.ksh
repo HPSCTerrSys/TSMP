@@ -39,9 +39,6 @@ route "${cblue}>>> c_configure_icon${cnormal}"
     sed -i "/__oasismakefile__/d" $file >> $log_file 2>> $err_file
     check
   fi
-  comment "    make clean icon"
-    make clean >> $log_file 2>> $err_file
-  check
 route "${cblue}<<< c_configure_icon${cnormal}"
 }
 

@@ -470,9 +470,7 @@ CONTAINS
     INTEGER:: i_startblk, i_endblk    !> blocks
     INTEGER:: i_startidx, i_endidx    !< slices
     INTEGER:: i_nchdom                !< domain index
-#ifdef COUP_OAS_ICON
     REAL(wp) :: t_sf(nproma,pt_patch%nblks_c)
-#endif
 
     i_nchdom  = MAX(1,pt_patch%n_childdom)
     jg        = pt_patch%id

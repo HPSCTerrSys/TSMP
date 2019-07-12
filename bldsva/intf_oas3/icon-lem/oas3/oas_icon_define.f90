@@ -1,7 +1,9 @@
 MODULE oas_icon_define
+#ifdef COUP_OAS_ICON
 
 USE mo_kind,  ONLY : wp
 USE netcdf
+
 USE mod_oasis
 
 IMPLICIT NONE
@@ -29,5 +31,6 @@ PUBLIC :: &
  oas_comp_id, oas_comp_name, kl_comm, oas_error, oas_nlat, &
  oas_nlon, oas_var_nodims, oas_vshape, oas_part, &
  oas_snd_field, oas_rcv_field, oas_snd_meta, oas_rcv_meta
+#endif
 
 END MODULE oas_icon_define
