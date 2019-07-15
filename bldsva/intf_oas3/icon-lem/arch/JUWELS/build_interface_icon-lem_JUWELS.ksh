@@ -10,6 +10,10 @@ route "${cblue}>> configure_icon${cnormal}"
 comment "    cd to icon dir"
   cd $icondir >> $log_file 2>> $err_file
 check
+comment "    patch icon configure"
+  sed -i "s@CDFROOT/lib@CDFROOT/lib64@" configure >> $log_file 2>> $err_file
+  sed -i "s@CDFROOT)/lib@CDFROOT)/lib64@" configure >> $log_file 2>> $err_file
+check
 if [[ $profiling == "scalasca" ]]; then
   export SCOREP_WRAPPER=off
   CC=scorep-mpicc F90=scorep-mpif90 F77=scorep-mpif77 NETCDFROOT=$EBROOTNETCDF NETCDFFROOT=$EBROOTNETCDFMINFORTRAN ./configure --with-mpi --disable-ocean --disable-jsbach --without-yac --with-grib-api=/p/project/cslts/brdar1/sw/grib_api-1.25.0 >> $log_file 2>> $err_file
@@ -18,8 +22,6 @@ else
 fi
 comment "   cp Makefile to icon dir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
-check
-route "cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir"
 check
 comment "   sed oasisdir to icon Makefile"
   sed -i "s@__oasisdir__@$oasdir@" $icondir/Makefile >> $log_file 2>> $err_file

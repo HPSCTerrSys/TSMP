@@ -56,6 +56,7 @@ MODULE mo_nwp_sfc_interface
   USE mo_physical_constants,  ONLY: lh_v => alv, lh_s => als, t0_melt =>tmelt
   !USE mo_nwp_lnd_state,       ONLY: p_lnd_state
   !USE mo_dynamics_config,     ONLY: nnow
+  USE oas_icon_define,        ONLY: oas_rcv_field_icon
 #endif
 
   

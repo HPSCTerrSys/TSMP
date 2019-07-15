@@ -58,7 +58,7 @@ MODULE mo_nwp_rrtm_interface
     &                                  calculate_time_interpolation_weights
 
 #ifdef COUP_OAS_ICON
-  USE oas_icon_define
+  USE oas_icon_define,         ONLY: oas_rcv_field_icon
 #endif
 
   IMPLICIT NONE
