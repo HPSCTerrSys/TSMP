@@ -671,7 +671,11 @@ comment "  sed dump interval namelist"
   sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 comment "  sed runtime to namelist"
-  runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+  if [[ $withICON == "true" ]]; then
+    runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+  else
+    runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+  fi
   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 comment "  sed restart file path to namelist"
