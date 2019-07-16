@@ -26,8 +26,8 @@ set refsetup      = "idealRTD"
 set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
-set testcasedir   = $HOME/database/idealRTD 
-#
+set testcasedir   = $TSMP_DATA/idealRTD 
+
 #User Settings End Here
 
 echo " "

@@ -10,6 +10,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
+#SBATCH --account=hbn33
 
 #PBS -N dartCLM 
 #PBS -l walltime=2:30:00
