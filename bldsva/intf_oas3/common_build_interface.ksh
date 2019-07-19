@@ -202,7 +202,7 @@ route "${cblue}>>> c_make_cos${cnormal}"
   check
   comment "    make cosmo"
     export SCOREP_WRAPPER=on
-    make -j4 -f $cosdir/Makefile >> $log_file 2>> $err_file
+    make -f $cosdir/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
