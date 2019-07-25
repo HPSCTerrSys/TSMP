@@ -31,7 +31,7 @@ module load darshan-runtime/3.1.6
 module load darshan-util/3.1.6
 
 # scalasca
-## !! module load Scalasca/2.3.1 (available in 2017b, check again later)
+module load Scalasca/2.4
 
 # Needed for e.g. for WRF/grib2
 module load libpng/.1.6.34

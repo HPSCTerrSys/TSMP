@@ -28,6 +28,8 @@ module load netCDF/4.6.1
 module load netCDF-Fortran/4.4.4
 module load parallel-netcdf/1.10.0
 
+# profiling tools
+module load Scalasca/2.4
 
 # standard analysis and vis. libs and tools 
 module load NCO/4.7.7
