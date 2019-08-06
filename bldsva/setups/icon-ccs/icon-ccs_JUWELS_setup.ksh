@@ -84,11 +84,11 @@ EOF
   dt_icon=0.5
 
   cd $rmp_folder
-  cdo setgrid,tgrid.txt $gclm clmgrid1.nc >> $log_file 2>> $err_file
-  ncks -O -x -v EDGEN,EDGES,EDGEW,EDGEE,NUMLON clmgrid1.nc clmgrid.nc >> $log_file 2>> $err_file
 
   if [[ $withPFL == "true" && $withCLM == "true" ]]; then
   # perform pfl-clm remapping
+  cdo setgrid,tgrid.txt $gclm clmgrid1.nc >> $log_file 2>> $err_file
+  ncks -O -x -v EDGEN,EDGES,EDGEW,EDGEE,NUMLON clmgrid1.nc clmgrid.nc >> $log_file 2>> $err_file
   ln -s clmgrid.nc pflgrid.nc >> $log_file 2>> $err_file
   comment "  Generating weight file: clm2pfl DISTWGT"
   cdo -P 8 gendis,pflgrid.nc pflgrid.nc rmp_gclm_to_gpfl_DISTWGT.nc >> $log_file 2>> $err_file
