@@ -18,7 +18,6 @@ module load jsctools/.0.1
 module load GCC/8.3.0
 module load ParaStationMPI/5.2.2-1
 
-stop
 # libs for ParFlow/TerrSysMP
 module load Tcl/8.6.9
 module load Hypre/2.15.1
