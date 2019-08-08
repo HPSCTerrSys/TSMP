@@ -14,8 +14,8 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
-  #defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
+  defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
+  #defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
@@ -108,7 +108,6 @@ end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
 start_clm=$((($numInst*($nproc_cos+$nproc_icon))+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
-
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}

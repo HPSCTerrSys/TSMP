@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/homea/hbn33/hbn331/database/idealRTD/clm"
-  defaultFDCOS="/gpfs/homea/hbn33/hbn331/database/idealRTD/cosmo"
-  defaultFDOAS="/gpfs/homea/hbn33/hbn331/database/idealRTD/oasis3"
-  defaultFDPFL="/gpfs/homea/hbn33/hbn331/database/idealRTD/parflow"
+  defaultFDCLM="$TSMP_DATA/idealRTD/clm"
+  defaultFDCOS="$TSMP_DATA/idealRTD/cosmo"
+  defaultFDOAS="$TSMP_DATA/idealRTD/oasis3"
+  defaultFDPFL="$TSMP_DATA/idealRTD/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
@@ -13,7 +13,7 @@ initSetup(){
 
   defaultNppn=48
   defaultCLMProcX=2
-  defaultCLMProcY=2
+  defaultCLMProcY=1
   defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2

@@ -12,7 +12,7 @@ echo " "
 set rundir = $1
 set ensemble_size = $2
 set map_fn_file = $3
-set clm_forcing_dir = "${HOME}/database/idealRTD/clm/"
+set testcasedir = "$TSMP_DATA/idealRTD/"
 # set clm_forcing_dir = "/daten01/z4/database/TestCases/idealRTD/clm/"
 #Read the map_fn_file
 set map_fn =
@@ -51,8 +51,8 @@ foreach instance (`seq 0 $numInst`)
 
  #clm
  #Perturb leaf c:n and root distribution
- cp ${clm_forcing_dir}/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
- cp ${clm_forcing_dir}/perturb_surf/surfdata_${minstance}_0014x0024.nc ./surfdata_0014x0024.nc
+ cp ${testcasedir}/clm/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
+ cp ${testcasedir}/clm/perturb_surf/surfdata_${minstance}_0014x0024.nc ./surfdata_0014x0024.nc
 
  set leafcn_def = `echo "(24.1+49.*0.125)" | bc`
  set leafcn = `echo "($leafcn_def-$minstance*0.25)" | bc`
