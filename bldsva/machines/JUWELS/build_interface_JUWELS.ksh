@@ -119,7 +119,6 @@ if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
   done
  done
 fi
->>>>>>> origin/master
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}
