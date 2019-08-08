@@ -39,9 +39,6 @@ route "${cblue}>>> c_configure_icon${cnormal}"
     sed -i "/__oasismakefile__/d" $file >> $log_file 2>> $err_file
     check
   fi
-  comment "    make clean icon"
-    make clean >> $log_file 2>> $err_file
-  check
 route "${cblue}<<< c_configure_icon${cnormal}"
 }
 
@@ -51,7 +48,8 @@ route "${cblue}>>> c_make_icon${cnormal}"
     cd $icondir >> $log_file 2>> $err_file
   check
   comment "    make icon"
-    make -j8 -f $icondir/Makefile >> $log_file 2>> $err_file
+    export SCOREP_WRAPPER=on
+    make -j16 -f $icondir/Makefile >> $log_file 2>> $err_file
   check
 
   comment "    cp icon binary to $bindir"
@@ -68,7 +66,7 @@ if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
   check
-  comment "    replace files with coupling. Add files to icon/src "
+  comment "    replace coupling files in ICON code. Add files to icon/src "
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_mpi.f90 $icondir/src/parallel_infrastructure/ >> $log_file 2>> $err_file
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_atmo_model.f90 $icondir/src/drivers/ >> $log_file 2>> $err_file
@@ -80,6 +78,55 @@ if [[ $withOAS == "true" ]]; then
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rad_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rrtm_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_rg_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
+  check
+  comment "    replace icon-ccs files in ICON code. Add files to icon/src "
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nonhydro_types.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nonhydro_state.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_vdfmain.f90 $icondir/src/atm_phy_edmf/ >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_turb_interface.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_sgs_turbulence.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_turbulent_diagnostic.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_interface_les.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_surface_les.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_sgs_turbmetric.f90 $icondir/src/atm_phy_les >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation.f90 $icondir/src/atm_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation_config.f90 $icondir/src/configure_model >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_config.f90 $icondir/src/configure_model >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_lnd_state.f90 $icondir/src/lnd_phy_nwp >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_soil_ml.f90 $icondir/src/lnd_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nwp_soil_init.f90 $icondir/src/lnd_phy_schemes >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_les_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_radiation_nml.f90 $icondir/src/namelists >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_ext_data_init.f90 $icondir/src/shr_horizontal >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_torus_exp.f90 $icondir/src/testcases >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases.f90 $icondir/src/testcases >> $log_file 2>> $err_file
   check
 fi
 route "${cblue}<<< c_substitutions_icon${cnormal}"
@@ -94,6 +141,22 @@ check
 
 comment "  cp namelist to rundir"
   cp ${namelist_icon} $rundir >> $log_file 2>> $err_file
+check
+
+comment "  sed dt to namelist"
+  sed "s,__dt_icon_bldsva__,$dt_icon," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed start time to namelist"
+  dSD=($defaultStartDate)
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed end time to namelist"
+  dED=($defaultEndDate)
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
 check
 
 route "${cblue}<<< c_setup_icon${cnormal}"
@@ -260,7 +323,7 @@ cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600/$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600./$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -308,7 +371,8 @@ route "${cblue}<<< c_configure_oas${cnormal}"
 
 c_make_oas(){
 route "${cblue}>>> c_make_oas${cnormal}"
-  comment "    make oasis j16" 
+  comment "    make oasis"
+    export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
@@ -449,7 +513,11 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
   fi
+  if [[ $withICON=="true" ]]; then
+  rtime=$(( ($runhours*3600 + $cplfreq1/10)*10 ))  # with icon in tenths of second
+  else
   rtime=$(($runhours*3600 + $cplfreq1))
+  fi
   if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
   comment "   sed sim time into namcouple"
     sed "s/totalruntime/$rtime/" -i $rundir/namcouple >> $log_file 2>> $err_file
@@ -603,7 +671,11 @@ comment "  sed dump interval namelist"
   sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 comment "  sed runtime to namelist"
-  runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+  if [[ $withICON == "true" ]]; then
+    runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+  else
+    runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+  fi
   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
 comment "  sed restart file path to namelist"
@@ -652,7 +724,6 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
     flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
 
-  export SCOREP_WRAPPER=off
   comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
   check
@@ -664,8 +735,12 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi 
 
   comment "    configure pfsimulator"
-    echo "$pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file"
+    export SCOREP_WRAPPER=off
+    if [[ $withICON == "true" ]]; then
+    $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim -DCOUP_OAS_ICON" CFLAGS="$cflagsSim -DCOUP_OAS_ICON" >> $log_file 2>> $err_file
+    else
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
+    fi
   check
   comment "    patch pfsimulator/parflow_lib/problem_phase_rel_perm.c "
     sed -i "s@inline double VanGLookupSpline@double VanGLookupSpline@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
@@ -728,6 +803,7 @@ check
       cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
     check
   fi
+  export SCOREP_WRAPPER=on
 route "${cblue}<<< c_make_pfl${cnormal}"
 }
 

@@ -115,10 +115,7 @@ CALL MPI_Barrier(kl_comm, ier)
  ! Call OASIS at each time step but field sent to other model only at coupling time step
  ! (accumulation otherwise, if asked in the SMIOC configuration file)
  !
- WRITE(*,*) "Slavko CLM: putting var ", ssnd(kid)%clname, " with min,max=", &
-   MINVAL(buffer_array), " ", MAXVAL(buffer_array)
  CALL prism_put_proto( ssnd(kid)%nid, kstep*10, buffer_array, kinfo )
- WRITE(*,*) "Slavko CLM: put var ", ssnd(kid)%clname
 
 deallocate(buffer_array)
 

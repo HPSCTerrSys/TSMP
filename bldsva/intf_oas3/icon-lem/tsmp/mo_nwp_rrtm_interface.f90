@@ -58,7 +58,7 @@ MODULE mo_nwp_rrtm_interface
     &                                  calculate_time_interpolation_weights
 
 #ifdef COUP_OAS_ICON
-  USE oas_icon_define
+  USE oas_icon_define,         ONLY: oas_rcv_field_icon
 #endif
 
   IMPLICIT NONE
@@ -470,9 +470,7 @@ CONTAINS
     INTEGER:: i_startblk, i_endblk    !> blocks
     INTEGER:: i_startidx, i_endidx    !< slices
     INTEGER:: i_nchdom                !< domain index
-#ifdef COUP_OAS_ICON
     REAL(wp) :: t_sf(nproma,pt_patch%nblks_c)
-#endif
 
     i_nchdom  = MAX(1,pt_patch%n_childdom)
     jg        = pt_patch%id
@@ -515,7 +513,6 @@ CONTAINS
 #else
       t_sf = lnd_prog%t_g(:,:)
 #endif
-      emissivity = ext_data%atm%emis_rad(:,:)
 
 !$OMP PARALLEL PRIVATE(jb,i_startidx,i_endidx,dust_tunefac)
 !$OMP DO ICON_OMP_GUIDED_SCHEDULE
@@ -566,7 +563,7 @@ CONTAINS
         & alb_nir_dir=prm_diag%albnirdir(:,jb) ,&!< in surface albedo for near IR range, direct
         & alb_vis_dif=prm_diag%albvisdif(:,jb),&!< in surface albedo for visible range, diffuse
         & alb_nir_dif=prm_diag%albnirdif(:,jb),&!< in surface albedo for near IR range, diffuse
-        & emis_rad=emissivity(:,jb),&!< in longwave surface emissivity
+        & emis_rad   =ext_data%atm%emis_rad(:,jb),&!< in longwave surface emissivity
         & tk_sfc     =prm_diag%tsfctrad(:,jb) ,&!< in surface temperature
                               !
                               ! atmosphere: pressure, tracer mixing ratios and temperature

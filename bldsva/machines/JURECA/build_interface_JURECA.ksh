@@ -26,7 +26,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultOptC="-O2"
 
   profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="scorep --thread=none " ; profRun="scalasca -analyse" ; profVar=""  ;fi
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
@@ -114,8 +114,12 @@ if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
   for iter in {1..$nproc_cos}
   do
     if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
+    if [[ $withICON == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
   done
  done
+fi
+
+if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}
  do
   for iter in {1..$nproc_icon}

@@ -53,6 +53,10 @@ MODULE mo_nwp_sfc_interface
 
 #ifdef COUP_OAS_ICON
   USE oas_icon_define
+  USE mo_physical_constants,  ONLY: lh_v => alv, lh_s => als, t0_melt =>tmelt
+  !USE mo_nwp_lnd_state,       ONLY: p_lnd_state
+  !USE mo_dynamics_config,     ONLY: nnow
+  USE oas_icon_define,        ONLY: oas_rcv_field_icon
 #endif
 
   
@@ -232,6 +236,10 @@ CONTAINS
     REAL(wp) :: lhfl_bs_t   (nproma)
     REAL(wp) :: lhfl_pl_t   (nproma, nlev_soil)
     REAL(wp) :: rstom_t     (nproma)
+
+#ifdef COUP_OAS_ICON
+    REAL(wp) :: qhfl_help(nproma,p_patch%nblks_c)
+#endif
 
 !--------------------------------------------------------------
 
@@ -619,11 +627,21 @@ CONTAINS
         &  zlhfl_sfc     = lhfl_s_t              , & !OUT latent   heat flux surface interface     (W/m2) 
         &  zqhfl_sfc     = qhfl_s_t                ) !OUT moisture flux surface interface          (kg/m2/s) 
 #else
-        prm_diag%umfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,4)
-        prm_diag%vmfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,5)
-        prm_diag%shfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,6) 
-        prm_diag%lhfl_s_t(:,:,1) = oas_rcv_field_icon(:,:,7)
-        !qhfl_s_t = 
+        prm_diag%umfl_s_t(:,:,1) = -oas_rcv_field_icon(:,:,4)
+        prm_diag%vmfl_s_t(:,:,1) = -oas_rcv_field_icon(:,:,5)
+        prm_diag%shfl_s_t(:,:,1) = -oas_rcv_field_icon(:,:,6) 
+        prm_diag%lhfl_s_t(:,:,1) = -oas_rcv_field_icon(:,:,7)
+
+        lnd_prog_new%t_s_t     (:,:,1) = oas_rcv_field_icon(:,:,8)
+        lnd_prog_new%t_g_t     (:,:,1) = oas_rcv_field_icon(:,:,8)
+
+        ! SBr, CHa: follow steps as in terra_multlay
+         DO jc = i_startidx, i_endidx
+           !qhfl_help(jc,jb) = 0.5_wp+SIGN(0.5_wp, p_lnd_state(1)%p_prog_lnd(nnow(1))%t_s_t(jc,jb,1))
+           qhfl_help(jc,jb) = 0.5_wp+SIGN(0.5_wp, oas_rcv_field_icon(jc,jb,8) - t0_melt)
+           prm_diag%qhfl_s_t(jc,jb,1) = prm_diag%lhfl_s_t(jc,jb,1) / &
+             (qhfl_help(jc,jb)*lh_v + (1._wp-qhfl_help(jc,jb)*lh_s))
+         END DO
 #endif
 
 
@@ -663,8 +681,10 @@ CONTAINS
         DO ic = 1, i_count
           jc = ext_data%atm%idx_lst_t(ic,jb,isubs)
           lnd_prog_new%t_snow_t  (jc,jb,isubs) = t_snow_new_t  (ic)         
+#ifndef COUP_OAS_ICON
           lnd_prog_new%t_s_t     (jc,jb,isubs) = t_s_new_t     (ic)              
           lnd_prog_new%t_g_t     (jc,jb,isubs) = t_g_t         (ic)
+#endif
           ! qv_s may violate the saturation constraint in cases of numerical instability
           lnd_diag%qv_s_t        (jc,jb,isubs) = MIN(qv_s_t    (ic), &
             spec_humi(sat_pres_water(t_g_t(ic)),ps_t(ic)) )
@@ -691,8 +711,8 @@ CONTAINS
 #ifndef COUP_OAS_ICON
           prm_diag%shfl_s_t      (jc,jb,isubs) = shfl_s_t      (ic)
           prm_diag%lhfl_s_t      (jc,jb,isubs) = lhfl_s_t      (ic)
-#endif
           prm_diag%qhfl_s_t      (jc,jb,isubs) = qhfl_s_t      (ic)
+#endif
 
 
           IF(lmulti_snow) THEN
@@ -827,9 +847,11 @@ CONTAINS
 
              prm_diag%lhfl_bs_t     (jc,jb,is1) = prm_diag%lhfl_bs_t     (jc,jb,is2)
              lnd_diag%rstom_t       (jc,jb,is1) = lnd_diag%rstom_t       (jc,jb,is2)
+#ifndef COUP_OAS_ICON
              prm_diag%shfl_s_t      (jc,jb,is1) = prm_diag%shfl_s_t      (jc,jb,is2)
              prm_diag%lhfl_s_t      (jc,jb,is1) = prm_diag%lhfl_s_t      (jc,jb,is2)
              prm_diag%qhfl_s_t      (jc,jb,is1) = prm_diag%qhfl_s_t      (jc,jb,is2)
+#endif
              prm_diag%albdif_t      (jc,jb,is1) = prm_diag%albdif_t      (jc,jb,is2)
 
              lnd_prog_new%t_so_t    (jc,:,jb,is1) = lnd_prog_new%t_so_t    (jc,:,jb,is2)          

@@ -151,21 +151,16 @@ CONTAINS
 #endif
 #endif
 
-    WRITE(*,*) 'Slavko: entered atmo'
-
     !---------------------------------------------------------------------
     ! construct the atmo model
     CALL construct_atmo_model(atm_namelist_filename,shr_namelist_filename)
 
     !---------------------------------------------------------------------
-    WRITE(*,*) 'Slavko: constructed atmo'
     ! construct the coupler
     !
     IF ( is_coupled_run() ) THEN
       CALL construct_atmo_coupler(p_patch)
     ENDIF
-
-    WRITE(*,*) 'Slavko: returned after coupler'
 
     !---------------------------------------------------------------------
     ! 12. The hydrostatic and nonhydrostatic models branch from this point
@@ -175,7 +170,6 @@ CONTAINS
       CALL atmo_hydrostatic
 
     CASE(inh_atmosphere)
-      WRITE(*,*) 'Slavko: entering nonhydrostatic'
       CALL atmo_nonhydrostatic
 
     CASE DEFAULT
@@ -242,7 +236,6 @@ CONTAINS
       CALL read_restart_header("atm")
     ENDIF
 
-    WRITE(*,*) 'Slavko: end read_restart_head'
     !---------------------------------------------------------------------
 
     ! 1.1 Read namelists (newly) specified by the user; fill the
@@ -250,7 +243,6 @@ CONTAINS
     !---------------------------------------------------------------------
 
     CALL read_atmo_namelists(atm_namelist_filename,shr_namelist_filename)
-    WRITE(*,*) 'Slavko: end read_namelist'
 
     !---------------------------------------------------------------------
     ! 1.2 Cross-check namelist setups
@@ -258,7 +250,6 @@ CONTAINS
 
     !! DR end temporary hack !!
     CALL atm_crosscheck
-    WRITE(*,*) 'Slavko: end atm_crosscheck'
 
 #ifdef MESSY
     CALL messy_setup(n_dom)
@@ -280,7 +271,6 @@ CONTAINS
     !-------------------------------------------------------------------
     ! 3.1 Initialize the mpi work groups
     !-------------------------------------------------------------------
-    WRITE(*,*) 'Slavko: set_mpi_work'
     CALL set_mpi_work_communicators(p_test_run, l_test_openmp, num_io_procs, num_restart_procs, &
                &                    num_prefetch_proc)
 
@@ -438,7 +428,6 @@ CONTAINS
           &                     p_patch(jg)%parent_child_index)
       ENDDO
     ENDIF
-    WRITE(*,*) 'Slavko: end transfer_grf_state'
 
 
     !-------------------------------------------------------------------
@@ -540,8 +529,6 @@ CONTAINS
     oas_nlat = p_patch(1)%n_patch_cells_g
     oas_nlon = 1
 
-    WRITE(*,*) 'Slavko: ICO defining partition'
-
     ALLOCATE( oas_part(2+p_patch(1)%n_patch_cells) )
     oas_part(1) = 4
     rl_start = grf_bdywidth_c+1
@@ -562,7 +549,6 @@ CONTAINS
     CALL oasis_def_partition(oas_part_id, oas_part, oas_error, oas_nlat*oas_nlon)
     IF (oas_error /= 0) &
       CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_partition')
-    WRITE(*,*) 'ICO defined partition'
 
     ! setup partitions for OASIS3-MCT
     !
@@ -570,8 +556,6 @@ CONTAINS
     oas_var_nodims(2) = 1   ! 'bundle' always 1 in OASIS3-MCT
     oas_vshape(1)     = 1
     oas_vshape(2)     = oas_part(2)
-
-    WRITE(*,*) 'ICO defining variables'
 
     ! define variables for OASIS3-MCT
     !
@@ -604,7 +588,6 @@ CONTAINS
         CALL message('Failure in oasis_def_var for ', oas_snd_meta(jg)%clpname)
         CALL oasis_abort(oas_comp_id, oas_comp_name, '')
       END IF
-      WRITE(*,*) 'Slavko: defined put var'
     END DO
     DO jg = 1, SIZE(oas_rcv_meta)
       CALL oasis_def_var(oas_rcv_meta(jg)%vid, oas_rcv_meta(jg)%clpname, oas_part_id, &
@@ -613,14 +596,9 @@ CONTAINS
         CALL message('Failure in oasis_def_var for ', oas_rcv_meta(jg)%clpname)
         CALL oasis_abort(oas_comp_id, oas_comp_name, '')
       END IF
-      WRITE(*,*) 'Slavko: defined rcv var'
     END DO
 
-    WRITE(*,*) 'Slavko: defining vars !!!'
     CALL oasis_enddef(oas_error)
-    WRITE(*,*) 'Slavko: defined vars !!!'
-
-    WRITE(*,*) 'ICO defined variables'
 
     ! allocate memory for data exchange
     ALLOCATE( oas_snd_field(oas_vshape(1):oas_vshape(2),11), stat=oas_error )
@@ -632,8 +610,6 @@ CONTAINS
     ALLOCATE( oas_rcv_field_icon(nproma, p_patch(1)%nblks_c,11), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
-
-    WRITE(*,*) 'ICO allocated rcv variables'
 
     ! initialize buffers
     oas_snd_field = -1000.
