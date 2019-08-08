@@ -113,8 +113,10 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        #comment "   create sloap pfb with tclsh"
-        #  tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+        
+        #Done from DA script
+        #comment "   create initial pfb with tclsh"
+        #tclsh $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         #check
               
 

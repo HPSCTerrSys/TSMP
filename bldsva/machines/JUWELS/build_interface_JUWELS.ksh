@@ -105,15 +105,15 @@ start_clm=$((($numInst*$nproc_cos)+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
 
 #CPS
-if [[ $numInst > 1 ]] then
- for instance in {$startInst..$(($startInst+$numInst-1))}
- do
-  for iter in {1..$nproc_cos}
-  do
-    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap.txt ;fi
-  done
- done
-fi
+#if [[ $numInst > 1 && $withOASMCT == "false" ]] then
+# for instance in {$startInst..$(($startInst+$numInst-1))}
+# do
+#  for iter in {1..$nproc_cos}
+#  do
+#    if [[ $withCOS == "true" ]] then ; echo $instance >>  $rundir/instanceMap1.txt ;fi
+#  done
+# done
+#fi
 #CPS
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then

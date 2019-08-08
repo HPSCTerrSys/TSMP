@@ -75,7 +75,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
     # Added clmrstfil to run with CLM spinup states
     # Parflow spinup states is used directly as initial PFB file, no need to specify here
     set clmrstfil = "./clm_restart.nc"
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run --wtime=02:00:00
     set rundir         = $WORK/run$sdate
     #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #set rundir        = $tsmpdir"/run/"$temp_dir
