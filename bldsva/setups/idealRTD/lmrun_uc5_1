@@ -273,7 +273,7 @@ cat > INPUT_ORG << end_input_org
   rain_n0_factor = 0.1,
   ! pat_len: Length scale (m) of subscale surface patterns over land.
   pat_len=500.0, 
-  tur_len=__turlen__,
+  tur_len=150.0,
   z0m_dia=0.2,
   ! rlam_heat: scaling factor for the thickness of the laminar boundary layer for heat (default=-1.0)
   rlam_heat=1.0,
@@ -370,7 +370,7 @@ cat > INPUT_IO  << end_input_io
          'QC        ','QR        ','QS        ','QI        ','QG        ','RELHUM    ',
          'T_S       ','T_G       ','T_SO      ','W_SO      ','SOBS_RAD  ','THBS_RAD  ',
          'SHFL_S    ','LHFL_S    ','UMFL_S    ','VMFL_S    ','PS        ',
-         'SWDIR_S   ','SWDIFD_S  ','LWD_S     ','HPBL      ','TOT_PREC  ',
+         'SWDIR_S   ','SWDIFD_S  ','LWD_S     ','HPBL      ',
          'QV_S      ','TCH       ','TCM       ','T_2M      ','QV_2M     ',
   ! Type of vertical averaging for yvarpl and yvarzl (p- and z-levels interpolated values):
   ! itype_vertint = 1 : cubic spline (default)

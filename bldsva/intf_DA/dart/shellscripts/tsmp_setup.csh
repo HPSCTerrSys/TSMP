@@ -1,13 +1,14 @@
 #!/bin/csh
 # Script to setup terrsymp runs with cycle
-# usage: ./tsmp_setup.csh cycle nrst ens map_fn machine
+# usage: ./tsmp_setup.csh cycle nrst ens map_fn machine compiler
 #  cycle  = 1 for initial run
 #  cycle  > 1 for restart run
 #  nrst   = 0 for normal restart
 #  nrst   = 1,2,3 for restart with cosmo,clm,parflow assimilation
 #  ens    = ensemble size
 #  map_fn = mapping of ensemble members
-# machine = JURECA, CLUMA2
+# machine = JURECA, JUWELS, CLUMA2
+# compiler = Intel, Gnu
 # Input needed are 
 # --- defaultStartDate = "2008-05-08 00"
 # --- defaultInitDate  = "2008-05-09 00"
@@ -39,6 +40,7 @@ set inrst   = $2
 set ensemble_size = $3
 set map_fn = $4
 set machine = $5
+set compiler = $6
 if ($inrst <= 1) then
   set assimC = 'cosmo'
 else if ($inrst == 2) then
@@ -75,7 +77,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
     # Added clmrstfil to run with CLM spinup states
     # Parflow spinup states is used directly as initial PFB file, no need to specify here
     set clmrstfil = "./clm_restart.nc"
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run --wtime=02:00:00
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -O $compiler -j "$clmrstfil" -I $sdate -N $ensemble_size -r $WORK/run --wtime=02:00:00
     set rundir         = $WORK/run$sdate
     #set temp_dir      = $machine"_"$tsmpver"_clm-cos-pfl_"$refsetup"_"$sdate
     #set rundir        = $tsmpdir"/run/"$temp_dir
@@ -140,6 +142,8 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
     echo "Moving into " $WORK/"run"$sdate 
 
     set numInst = `echo "($ensemble_size - 1)" | bc`
+    #
+    source loadenvs
     #
     foreach instance (`seq 0 $numInst`)
       cd  "tsmp_instance_"$instance

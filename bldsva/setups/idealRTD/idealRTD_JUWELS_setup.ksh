@@ -93,18 +93,15 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-        comment "   copy parflow soil ID and geodata into rundir"
+        comment "   copy initial pressure and script into rundir"
         cp $forcingdir_pfl/pfb*.nc $rundir/ >> $log_file 2>> $err_file
         check
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        # Specific perturbed surface data and spinup pressure data are copied using DART scripts
-
-        #  cp $forcingdir_pfl/rur_ic_press.pfb $rundir >> $log_file 2>> $err_file
-        #check
-        #  chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-        chmod u+w $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/rur_ic_press.pfb $rundir >> $log_file 2>> $err_file
+        check
+          chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
@@ -113,11 +110,9 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        
-        #Done from DA script
-        #comment "   create initial pfb with tclsh"
-        #tclsh $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-        #check
+        comment "   create sloap pfb with tclsh"
+          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+        check
               
 
   fi 

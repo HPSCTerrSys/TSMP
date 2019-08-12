@@ -559,7 +559,7 @@ interactive(){
 printState(){
   print ""
   print "${cred}(1)${cnormal} platform (default=$def_platform): ${cgreen}$platform${cnormal}"
-  print "${cred}(45)${cnormal} Couple-Scheme (default=$def_compiler): ${cgreen}$compiler ${cnormal}"
+  print "${cred}(45)${cnormal} compiler (default=$def_compiler): ${cgreen}$compiler ${cnormal}"
   print "${cred}(2)${cnormal} version (default=$def_version): ${cgreen}$version${cnormal}"
   print "${cred}(3)${cnormal} combination (default=$def_combination): ${cgreen}$combination${cnormal}"
   print "${cred}(4)${cnormal} refSetup (default=$def_refSetup): ${cgreen}$refSetup${cnormal}"
