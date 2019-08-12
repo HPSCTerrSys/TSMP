@@ -58,9 +58,14 @@ route "${cblue}>> configure_pfl${cnormal}"
   check
     sed "s/-l /  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
   check
+
   elif [[ $compiler == "Intel" ]] ; then
+
   comment "   sed correct linker command in pfsimulator"
     sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  comment "   sed correct linker command in pftools"
+    sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+
   fi
 
 route "${cblue}<< configure_pfl${cnormal}"
