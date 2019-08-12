@@ -55,6 +55,8 @@ getDefaults(){
   def_profiling="no"
   def_cplscheme=""
   def_mode=""
+  #CPS added compiler flag
+  def_compiler="Gnu" 
 }
 
 #####################################################
@@ -63,6 +65,7 @@ getDefaults(){
 
 setDefaults(){
   platform=$def_platform
+  compiler=$def_compiler
   if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
   version=$def_version
   if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
@@ -540,6 +543,7 @@ interactive(){
                   if [[ $numb == 38 ]] ; then ; read dump_clm ; fi
                   if [[ $numb == 39 ]] ; then ; read dump_cos ; fi
                   if [[ $numb == 44 ]] ; then ; read dump_icon ; fi
+                  if [[ $numb == 45 ]] ; then ; read compiler ; fi
                 done
                 interactive
           ;;
@@ -555,6 +559,7 @@ interactive(){
 printState(){
   print ""
   print "${cred}(1)${cnormal} platform (default=$def_platform): ${cgreen}$platform${cnormal}"
+  print "${cred}(45)${cnormal} Couple-Scheme (default=$def_compiler): ${cgreen}$compiler ${cnormal}"
   print "${cred}(2)${cnormal} version (default=$def_version): ${cgreen}$version${cnormal}"
   print "${cred}(3)${cnormal} combination (default=$def_combination): ${cgreen}$combination${cnormal}"
   print "${cred}(4)${cnormal} refSetup (default=$def_refSetup): ${cgreen}$refSetup${cnormal}"
@@ -605,7 +610,6 @@ printState(){
   print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
   print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
   print "${cred}(43)${cnormal} Dump interval for icon.  (default=$def_dump_icon): ${cgreen}$dump_icon ${cnormal}"
-
 }
 
 
@@ -711,6 +715,7 @@ getRoot(){
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
+  USAGE+="[O:compiler? Compiler used.]:[compiler:='$def_compiler']"
   USAGE+="[P:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
   USAGE+="[N:numinst? Number of instances of TerrSysMP. Currently only works with Oasis3-MCT - ignored otherwise.]:[numinst:='$def_numInst']"
   USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
@@ -799,6 +804,7 @@ getRoot(){
     I)  exp_id="$OPTARG" ; args=1 ;;
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
+    O)  compiler="$OPTARG" ; args=1 ;;
 
     l)  restfile_pfl="$OPTARG"; args=1 ;;
     j)  restfile_clm="$OPTARG"; args=1 ;;
