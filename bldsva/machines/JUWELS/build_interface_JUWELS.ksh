@@ -7,15 +7,24 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JUWELS"
-  . $rootdir/bldsva/machines/$platform/loadenvs >> $log_file 2>> $err_file
+  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
+
+  #CPS Remove hardwiring of compiler, introducing compiler switch 
+  if [[ $compiler == "Intel" ]] ; then
+  #Intel GRIB
   defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-  #defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
+
+  elif [[ $compiler == "Gnu" ]] ; then
+  #GNU GRIB
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
+  fi
+
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
@@ -46,7 +55,7 @@ route "${cblue}<< finalizeMachine${cnormal}"
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
 comment "   copy JUWELS module load script into rundirectory"
-  cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
+  cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
 
 mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
