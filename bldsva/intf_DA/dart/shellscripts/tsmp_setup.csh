@@ -143,7 +143,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
 
     set numInst = `echo "($ensemble_size - 1)" | bc`
     #
-    source loadenvs
+    #source loadenvs
     #
     foreach instance (`seq 0 $numInst`)
       cd  "tsmp_instance_"$instance
