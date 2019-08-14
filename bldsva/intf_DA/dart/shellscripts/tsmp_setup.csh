@@ -127,7 +127,7 @@ cp $defDir/def/lmrun_uc5_1_DA $defDir/lmrun_uc5_1
 
     cd $tsmpdir/bldsva
 
-    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -I $sdate -N $ensemble_size -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil" -r $WORK/run
+    ./setup_tsmp.ksh -v $tsmpver -V $refsetup -m $machine -O $compiler -I $sdate -N $ensemble_size -s "$defaultInitDate[2]" -S "$defaultStartDate[2]"  -j "$clmrstfil" -k "$cosrstfil" -l "$pflrstfil" -r $WORK/run
 
     echo " "
     echo " Update the restart files for the corresponding instances ..."

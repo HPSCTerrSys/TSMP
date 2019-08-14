@@ -80,7 +80,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=slts
+#SBATCH --account=hbn33 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
