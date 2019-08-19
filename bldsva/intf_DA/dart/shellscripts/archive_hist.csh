@@ -2,6 +2,7 @@
 
 # usage: ./archive_hist.csh $rundir $ensemble_size
 #
+set cmd = cp 
 echo "-------------------------------------------------------------------"
 echo "History files will be archived in the "$WORK" directory"
 echo "usage: ./archive_hist.csh rundir ensemble_size"
@@ -15,6 +16,11 @@ set numInst = `echo "($ensemble_size - 1)" | bc`
 
 echo $outputdir
 cd $WORK
+if ( -d ./TEMP ) then
+  echo TEMP exists
+else
+  mkdir TEMP
+endif
 cd TEMP
 mkdir $outputdir
 cd $outputdir
@@ -29,33 +35,33 @@ foreach instance (`seq 0 $numInst`)
     cd $dir
     mkdir clmout
     mkdir pflout
-    mv $rundir/$dir/cosout .
+    ${cmd} -rf $rundir/$dir/cosout .
     cd cosout
     mkdir ivr
-    mv lfff00000000c* ivr/
+    ${cmd} lfff00000000c* ivr/
     cd ..
     cd clmout
-    mv $rundir/$dir/clmoas.clm2.h0* .
+    ${cmd} $rundir/$dir/clmoas.clm2.h0* .
     cd ..
     cd pflout
     mkdir satur
     mkdir press
     cd satur
-    mv $rundir/$dir/rurlaf.out.satur* .
+    ${cmd} $rundir/$dir/rurlaf.out.satur* .
     rm *.dist
     cd ..
     cd press
-    mv $rundir/$dir/rurlaf.out.press* .
+    ${cmd} $rundir/$dir/rurlaf.out.press* .
     rm *.dist
     cd ..
     cd ..
-    mv $rundir/$dir/timing_all .
-    mv $rundir/$dir/YUTIMING .
-    mv $rundir/$dir/YUPRMASS .
-    mv $rundir/$dir/lnd.stdin .
-    mv $rundir/$dir/lmrun_uc .
-    mv $rundir/$dir/coup_oas.tcl .
-    mv $rundir/$dir/rurlaf.out.log .
+    ${cmd} $rundir/$dir/timing_all .
+    ${cmd} $rundir/$dir/YUTIMING .
+    ${cmd} $rundir/$dir/YUPRMASS .
+    ${cmd} $rundir/$dir/lnd.stdin .
+    ${cmd} $rundir/$dir/lmrun_uc .
+    ${cmd} $rundir/$dir/coup_oas.tcl .
+    ${cmd} $rundir/$dir/rurlaf.out.log .
     cd ..
     chmod -R a=+rwx $dir
   endif
