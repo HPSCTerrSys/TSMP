@@ -53,7 +53,10 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 !
 ! !USES:
     use mod_tsmp, &
-        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm
+        only: pf_statevec_fortran,                      &
+              tag_model_parflow,                        &
+              tag_model_clm,                            &
+              tag_model_cosmo
     use mod_parallel_model, &
         only: model
 #if defined CLMSA
@@ -63,6 +66,9 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use enkf_clm_mod, only: clm_statevec
     !kuw end
+#endif
+#if defined COUP_OAS_COS
+    USE enkf_cosmo_mod, ONLY: cos_statevec
 #endif
 
   IMPLICIT NONE
@@ -96,5 +102,12 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
  end if
  !kuw end
 #endif
+
+#if defined COUP_OAS_COS
+    if (model == tag_model_cosmo) then
+        state_p = cos_statevec
+    end if
+#endif
+
   
 END SUBROUTINE collect_state_pdaf

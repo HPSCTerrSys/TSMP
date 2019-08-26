@@ -65,6 +65,10 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
     use enkf_clm_mod, only: clm_statevec
     !kuw end
 #endif
+#if defined COUP_OAS_COS
+    USE enkf_cosmo_mod, ONLY: cos_statevec
+#endif
+
     IMPLICIT NONE
   
     ! !ARGUMENTS:
@@ -98,6 +102,12 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 
     end if
     !kuw end
+#endif
+
+#if defined COUP_OAS_COS
+    if (model == tag_model_cos) then
+        cos_statevec = state_p
+    end if
 #endif
 
 END SUBROUTINE distribute_state_pdaf

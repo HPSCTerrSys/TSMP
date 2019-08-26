@@ -54,7 +54,7 @@ SUBROUTINE init_pdaf()
         mpi_success, mpi_comm_world, mpi_integer, mype_model
     use mod_tsmp, &
         only: pf_statevecsize, nprocpf, tag_model_parflow, tag_model_clm, nprocclm, pf_statevec, pf_statevec_fortran, &
-        idx_map_subvec2state, idx_map_subvec2state_fortran
+        idx_map_subvec2state, idx_map_subvec2state_fortran, tag_model_cosmo
     USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
         ONLY: n_modeltasks, task_id, COMM_filter, COMM_couple, filterpe
     USE mod_assimilation, &      ! Variables for assimilation
@@ -78,6 +78,10 @@ SUBROUTINE init_pdaf()
     use enkf_clm_mod, only: clm_statevecsize
 #endif
     ! kuw end
+
+#if defined OAS_COUP_COS
+    USE enkf_cosmo_mod, ONLY: cos_statevecsize
+#endif
 
     use, intrinsic :: iso_c_binding
 
@@ -151,6 +155,16 @@ SUBROUTINE init_pdaf()
        !dim_state_p =  (endg-begg+1) * nlevsoi
        !print *,"CLM: dim_state_p is ",dim_state_p
        dim_state_p = clm_statevecsize
+    end if
+#endif
+
+#if defined OAS_COUP_COS
+    if (model == tag_model_cosmo) then
+       !call get_proc_global(numg,numl,numc,nump)
+       !call get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
+       !dim_state_p =  (endg-begg+1) * nlevsoi
+       !print *,"CLM: dim_state_p is ",dim_state_p
+       dim_state_p = cos_statevecsize
     end if
 #endif
 

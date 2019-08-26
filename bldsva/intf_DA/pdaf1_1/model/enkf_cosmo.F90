@@ -395,6 +395,14 @@ use enkf_cosmo_mod
 cos_start = nstart
 !kuw end
 
+!=============
+! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+! state of cosmo
+!=============
+CALL define_cos_vars
+CALL set_cos_assimilate
+CALL define_cos_statevec
+
 end subroutine cosmo_init
 
 
