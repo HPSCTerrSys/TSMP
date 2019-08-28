@@ -93,6 +93,8 @@ void read_enkfpar(char *parname)
   /* get settings for COSMO */
   nproccosmo      = iniparser_getint(pardict,"COSMO:nprocs",0);
   dtmult_cosmo    = iniparser_getint(pardict,"COSMO:dtmult",0);
+  string          = iniparser_getstring(pardict, "COSMO:assim_vars", "");
+  strcpy(assim_vars_cos, string);
 
 
 /* ERROR CHECKING */

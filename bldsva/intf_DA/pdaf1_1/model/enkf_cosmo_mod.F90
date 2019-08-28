@@ -165,6 +165,8 @@ INTEGER                             :: cos_statevecsize
 ! The array of COSMO variables. If you want to enable more than 20 variables,
 ! you have to increase the number of elements in the array.
 TYPE(COS_VAR), DIMENSION(20)        :: cos_vars
+! String with variable names, which should be assimilated
+CHARACTER(c_char), BIND(C,name="COSMO:assim_vars"), TARGET :: cos_assim_str
 
 !==============================================================================
 
@@ -179,6 +181,7 @@ CONTAINS
 ! state of cosmo
 !=============
 SUBROUTINE define_cos_vars
+  WRITE (*, *) "CALLED ROUTINE TO DEFINE COSMO VARIABLE"
   !=============================================================================
   ! Defines the available variables, which can be changed by PDAF
   ! Currently, this list contains only prognostic variables, obtained from
@@ -266,6 +269,42 @@ SUBROUTINE set_cos_assimilate
   ! `cos_vars_assimilate` is set to .TRUE., while all other variables are not
   ! assimilated. Needs to be implemented in the future.
   !=============================================================================
+  IMPLICIT NONE
+  INTEGER                     :: var_idx = 1
+  INTEGER                     :: curr_idx = 1
+  CHARACTER(len=10)           :: curr_var
+  INTEGER                     :: var_pos = 1
+
+  WRITE (*, *) "CALLED ROUTINE TO SET VARIABLES WHICH SHOULD BE ASSIMILATED"
+  WRITE (*, *) "VARIABLES TO ASSIMILATE:\n"
+  WRITE (*, *) cos_assim_str
+
+
+  ! Set all variables to assimilate False
+  DO var_pos=1, SIZE(cos_vars)
+    cos_vars(i) % assimilate = .FALSE.
+  END DO
+
+  ! Scan namelist string
+  DO
+    var_idx = SCAN(cos_assim_str(curr_idx:), ',')
+    IF (var_idx == 0)
+      EXIT
+    END IF
+    ! Get current variable from namelist substrng
+    curr_var = cos_assim_str(curr_idx:curr_idx+var_idx-1)
+    DO var_pos=1, SIZE(cos_vars)
+      ! Compare substring with variables in cos_vars
+      ! If found set assimilate True
+      IF (TRIM(curr_var) == TRIM(cos_vars(i) % name))
+        WRITE (*, *) cos_vars(i) % name, " will be assimilated"
+        cos_vars(i) % assimilate = .TRUE.
+        EXIT
+      END IF
+    END DO
+    curr_idx = curr_idx + var_idx + 1
+  END DO
+
 END SUBROUTINE set_cos_assimilate
 
 SUBROUTINE define_cos_statevec
@@ -278,11 +317,17 @@ SUBROUTINE define_cos_statevec
   IMPLICIT NONE
   INTEGER                     :: var_cnt
 
+  WRITE (*, *) "CALLED ROUTINE TO DEFINE STATEVEC SIZE"
+
+
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate)
+      WRITE (*, *) cos_vars(i) % name, " has a size of ", cos_var(var_cnt) % size
       cos_statevecsize = cos_statevecsize + cos_var(var_cnt) % size
     END IF
   END DO
+
+  WRITE (*, *) "STATE VEC SIZE:", cos_statevecsize
 
   ALLOCATE(cos_statevec(cos_statevecsize))
 END SUBROUTINE define_cos_statevec
@@ -298,14 +343,21 @@ SUBROUTINE set_cos_statevec
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
+  WRITE (*, *) "CALLED ROUTINE TO SET STATEVEC"
+
+
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate)
       new_pos = curr_pos + cos_var(var_cnt) % size
       IF (cos_vars(var_cnt) % rank == 4)
+        WRITE (*, *) cos_vars(var_cnt) % name, " will be set from 4D to ", &
+                curr_pos, ":", new_pos
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value4d, .TRUE.       &
         )
       ELSE
+        WRITE (*, *) cos_vars(var_cnt) % name, " will be set from 3D to ", &
+                curr_pos, ":", new_pos
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value3d, .TRUE.       &
         )
@@ -327,15 +379,24 @@ SUBROUTINE update_cos_vars
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
+  WRITE (*, *) "CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
+
+
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate)
       new_pos = curr_pos + cos_var(var_cnt) % size
       IF (cos_vars(var_cnt) % rank == 4)
+        WRITE (*, *) cos_vars(var_cnt) % name, " will be updated from ", &
+                curr_pos, ":", new_pos, " to 4D"
+
         cos_vars(var_cnt) % value4d(:, :, :, :) = RESHAPE(    &
                 cos_statevec(curr_pos:new_pos),               &
                 SHAPE(cos_vars(var_cnt) % value4d)            &
         )
       ELSE
+        WRITE (*, *) cos_vars(var_cnt) % name, " will be updated from ", &
+                curr_pos, ":", new_pos, " to 3D"
+
         cos_vars(var_cnt) % value3d(:, :, :, :) = RESHAPE(    &
                 cos_statevec(curr_pos:new_pos),               &
                 SHAPE(cos_vars(var_cnt) % value3d)            &
@@ -351,6 +412,8 @@ SUBROUTINE teardown_cos_statevec
   ! This subroutine is used to deallocate the COSMO state vector for PDAF and
   ! the array of COSMO variables
   !=============================================================================
+  WRITE (*, *) "CALLED ROUTINE TO DEALLOCATE COSMO variables"
+
   DEALLOCATE(cos_statevec)
   DEALLOCATE(cos_vars)
 END SUBROUTINE teardown_cos_statevec
