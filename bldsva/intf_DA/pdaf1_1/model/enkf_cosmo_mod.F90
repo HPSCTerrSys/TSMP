@@ -1,4 +1,9 @@
 module enkf_cosmo_mod
+
+USE iso_c_binding
+USE shr_kind_mod    , ONLY : r8 => shr_kind_r8, SHR_KIND_CL
+USE shr_orb_mod
+
 USE info_lm_f90,         ONLY: info_define, info_readnl, info_print
 
 USE data_parameters,     ONLY:   ireals, iintegers
@@ -143,16 +148,16 @@ integer :: cos_start
 ! Own type to specify cosmo variable with pointer to value
 TYPE COS_VAR
   ! Name of variable, specifies name for namelist (advanced usage)
-  CHARACTER (LEN=10)                :: name
+  CHARACTER (LEN=10)                :: name = ""
   ! Value of the variable, for memory reasons a pointer towards the value
   ! There are 3d and 4d variables in COSMO, therefore we need two different
   ! pointers
   REAL  (KIND=ireals), POINTER      :: value3d(:, :, :)
   REAL  (KIND=ireals), POINTER      :: value4d(:, :, :, :)
   ! Array size of the variable
-  INTEGER                           :: size
+  INTEGER                           :: size = 0
   ! Array rank, is used to set the right pointer
-  INTEGER                           :: rank
+  INTEGER                           :: rank = 0
   ! If the value of the variable should be included in the state vector of PDAF
   ! (default = TRUE, will be later FALSE)
   LOGICAL                           :: assimilate = .FALSE.
@@ -166,7 +171,7 @@ INTEGER                             :: cos_statevecsize
 ! you have to increase the number of elements in the array.
 TYPE(COS_VAR), DIMENSION(20)        :: cos_vars
 ! String with variable names, which should be assimilated
-CHARACTER(c_char), BIND(C,name="COSMO:assim_vars"), TARGET :: cos_assim_str
+CHARACTER(c_char), BIND(C,name="assim_vars_cos") :: assim_vars_cos
 
 !==============================================================================
 
@@ -181,7 +186,7 @@ CONTAINS
 ! state of cosmo
 !=============
 SUBROUTINE define_cos_vars
-  WRITE (*, *) "CALLED ROUTINE TO DEFINE COSMO VARIABLE"
+  print *,"CALLED ROUTINE TO DEFINE COSMO VARIABLE"
   !=============================================================================
   ! Defines the available variables, which can be changed by PDAF
   ! Currently, this list contains only prognostic variables, obtained from
@@ -269,15 +274,15 @@ SUBROUTINE set_cos_assimilate
   ! `cos_vars_assimilate` is set to .TRUE., while all other variables are not
   ! assimilated. Needs to be implemented in the future.
   !=============================================================================
-  IMPLICIT NONE
+!  IMPLICIT NONE
   INTEGER                     :: var_idx = 1
   INTEGER                     :: curr_idx = 1
   CHARACTER(len=10)           :: curr_var
   INTEGER                     :: var_pos = 1
 
-  WRITE (*, *) "CALLED ROUTINE TO SET VARIABLES WHICH SHOULD BE ASSIMILATED"
-  WRITE (*, *) "VARIABLES TO ASSIMILATE:\n"
-  WRITE (*, *) cos_assim_str
+  print *,"CALLED ROUTINE TO SET VARIABLES WHICH SHOULD BE ASSIMILATED"
+  print *,"VARIABLES TO ASSIMILATE:"
+  print *,assim_vars_cos
 
 
   ! Set all variables to assimilate False
@@ -287,17 +292,17 @@ SUBROUTINE set_cos_assimilate
 
   ! Scan namelist string
   DO
-    var_idx = SCAN(cos_assim_str(curr_idx:), ',')
-    IF (var_idx == 0)
+    var_idx = SCAN(assim_vars_cos(curr_idx:), ',')
+    IF (var_idx == 0) THEN
       EXIT
     END IF
     ! Get current variable from namelist substrng
-    curr_var = cos_assim_str(curr_idx:curr_idx+var_idx-1)
+    curr_var = assim_vars_cos(curr_idx:curr_idx+var_idx-1)
     DO var_pos=1, SIZE(cos_vars)
       ! Compare substring with variables in cos_vars
       ! If found set assimilate True
-      IF (TRIM(curr_var) == TRIM(cos_vars(i) % name))
-        WRITE (*, *) cos_vars(i) % name, " will be assimilated"
+      IF (TRIM(curr_var) == TRIM(cos_vars(i) % name)) THEN
+        print *,cos_vars(i) % name, " will be assimilated"
         cos_vars(i) % assimilate = .TRUE.
         EXIT
       END IF
@@ -314,20 +319,21 @@ SUBROUTINE define_cos_statevec
   ! used to allocate the state vector. In future, there will be another loop to
   ! set the variables to assimilate based on the DA namelist.
   !=============================================================================
-  IMPLICIT NONE
+!  IMPLICIT NONE
   INTEGER                     :: var_cnt
 
-  WRITE (*, *) "CALLED ROUTINE TO DEFINE STATEVEC SIZE"
+  print *,"CALLED ROUTINE TO DEFINE STATEVEC SIZE"
 
+  cos_statevecsize = 0
 
   DO var_cnt=1, SIZE(cos_vars)
-    IF (cos_vars(var_cnt) % assimilate)
-      WRITE (*, *) cos_vars(i) % name, " has a size of ", cos_var(var_cnt) % size
-      cos_statevecsize = cos_statevecsize + cos_var(var_cnt) % size
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      print *,cos_vars(i) % name, " has a size of ", cos_vars(var_cnt) % size
+      cos_statevecsize = cos_statevecsize + cos_vars(var_cnt) % size
     END IF
   END DO
 
-  WRITE (*, *) "STATE VEC SIZE:", cos_statevecsize
+  print *,"STATE VEC SIZE:", cos_statevecsize
 
   ALLOCATE(cos_statevec(cos_statevecsize))
 END SUBROUTINE define_cos_statevec
@@ -338,25 +344,25 @@ SUBROUTINE set_cos_statevec
   ! value of these assimilation variables are then used to set the COSMO state
   ! vector for PDAF.
   !=============================================================================
-  IMPLICIT NONE
+!  IMPLICIT NONE
   INTEGER                     :: var_cnt
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
-  WRITE (*, *) "CALLED ROUTINE TO SET STATEVEC"
+  print *,"CALLED ROUTINE TO SET STATEVEC"
 
 
   DO var_cnt=1, SIZE(cos_vars)
-    IF (cos_vars(var_cnt) % assimilate)
-      new_pos = curr_pos + cos_var(var_cnt) % size
-      IF (cos_vars(var_cnt) % rank == 4)
-        WRITE (*, *) cos_vars(var_cnt) % name, " will be set from 4D to ", &
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      new_pos = curr_pos + cos_vars(var_cnt) % size
+      IF (cos_vars(var_cnt) % rank == 4) THEN
+        print *,cos_vars(var_cnt) % name, " will be set from 4D to ", &
                 curr_pos, ":", new_pos
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value4d, .TRUE.       &
         )
       ELSE
-        WRITE (*, *) cos_vars(var_cnt) % name, " will be set from 3D to ", &
+        print *,cos_vars(var_cnt) % name, " will be set from 3D to ", &
                 curr_pos, ":", new_pos
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value3d, .TRUE.       &
@@ -374,19 +380,19 @@ SUBROUTINE update_cos_vars
   ! PDAF state vector.
   !=============================================================================
 
-  IMPLICIT NONE
+!  IMPLICIT NONE
   INTEGER                     :: var_cnt
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
-  WRITE (*, *) "CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
+  print *,"CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
 
 
   DO var_cnt=1, SIZE(cos_vars)
-    IF (cos_vars(var_cnt) % assimilate)
-      new_pos = curr_pos + cos_var(var_cnt) % size
-      IF (cos_vars(var_cnt) % rank == 4)
-        WRITE (*, *) cos_vars(var_cnt) % name, " will be updated from ", &
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      new_pos = curr_pos + cos_vars(var_cnt) % size
+      IF (cos_vars(var_cnt) % rank == 4) THEN
+        print *,cos_vars(var_cnt) % name, " will be updated from ", &
                 curr_pos, ":", new_pos, " to 4D"
 
         cos_vars(var_cnt) % value4d(:, :, :, :) = RESHAPE(    &
@@ -394,10 +400,10 @@ SUBROUTINE update_cos_vars
                 SHAPE(cos_vars(var_cnt) % value4d)            &
         )
       ELSE
-        WRITE (*, *) cos_vars(var_cnt) % name, " will be updated from ", &
+        print *,cos_vars(var_cnt) % name, " will be updated from ", &
                 curr_pos, ":", new_pos, " to 3D"
 
-        cos_vars(var_cnt) % value3d(:, :, :, :) = RESHAPE(    &
+        cos_vars(var_cnt) % value3d(:, :, :) = RESHAPE(    &
                 cos_statevec(curr_pos:new_pos),               &
                 SHAPE(cos_vars(var_cnt) % value3d)            &
         )
@@ -412,10 +418,9 @@ SUBROUTINE teardown_cos_statevec
   ! This subroutine is used to deallocate the COSMO state vector for PDAF and
   ! the array of COSMO variables
   !=============================================================================
-  WRITE (*, *) "CALLED ROUTINE TO DEALLOCATE COSMO variables"
+  print *,"CALLED ROUTINE TO DEALLOCATE COSMO variables"
 
   DEALLOCATE(cos_statevec)
-  DEALLOCATE(cos_vars)
 END SUBROUTINE teardown_cos_statevec
 
 !==============================================================================

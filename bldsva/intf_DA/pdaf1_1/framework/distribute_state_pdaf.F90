@@ -54,7 +54,7 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
     !
     ! !USES:
     use mod_tsmp, &
-        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm
+        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm, tag_model_cosmo
     use mod_parallel_model, &
         only: model, mype_world
 #if defined CLMSA
@@ -105,7 +105,7 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 #endif
 
 #if defined COUP_OAS_COS
-    if (model == tag_model_cos) then
+    if (model == tag_model_cosmo) then
         cos_statevec = state_p
     end if
 #endif

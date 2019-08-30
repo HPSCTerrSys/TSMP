@@ -7,7 +7,7 @@
 module --force purge
 
 # Only necessary if modules are missing after maintenence
-module use /gpfs/software/juwels/otherstages/
+module use /gpfs/software/juwels/otherstages
 
 module load Stages/2018a
 #
@@ -20,6 +20,7 @@ module load .juwels-env
 # Only necessary if modules are missing after maintenence
 module load GCC/7.3.0
 module load ParaStationMPI/5.2.1-1
+module load imkl/2018.2.199
 
 # libs for TerrSysMP
 module load Tcl/.8.6.8

@@ -63,7 +63,8 @@ nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ce
 
 #DA
 if [[ $withPDAF == "true" ]] ; then
-  srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst)) -filtertype 2 -subtype 1 -delt_obs $delta_obs -rms_obs 0.03 -obs_filename swc_crp"
+  srun="srun -n $mpitasks ./tsmp-pdaf -n_modeltasks $(($numInst-$startInst))
+  -filtertype 4 -subtype 1 -delt_obs $delta_obs -rms_obs 0.03 -obs_filename swc_crp"
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
