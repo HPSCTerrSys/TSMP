@@ -171,7 +171,7 @@ INTEGER                             :: cos_statevecsize
 ! you have to increase the number of elements in the array.
 TYPE(COS_VAR), DIMENSION(20)        :: cos_vars
 ! String with variable names, which should be assimilated
-CHARACTER(c_char), BIND(C,name="assim_vars_cos") :: assim_vars_cos
+character(kind=C_char), BIND(C,NAME="assim_vars_cos") :: C_assim_vars_cos(20*10)
 
 !==============================================================================
 
@@ -186,7 +186,9 @@ CONTAINS
 ! state of cosmo
 !=============
 SUBROUTINE define_cos_vars
-  print *,"CALLED ROUTINE TO DEFINE COSMO VARIABLE"
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "CALLED ROUTINE TO DEFINE COSMO VARIABLE"
+  END IF
   !=============================================================================
   ! Defines the available variables, which can be changed by PDAF
   ! Currently, this list contains only prognostic variables, obtained from
@@ -204,13 +206,13 @@ SUBROUTINE define_cos_vars
   cos_vars(2) % value4d        => v
   cos_vars(2) % size           =  SIZE(v)
   cos_vars(2) % rank           =  4
-  cos_vars(2) % assimilate     =  .TRUE.
+  cos_vars(2) % assimilate     =  .FALSE.
 
   cos_vars(3) % name           =  'W'
   cos_vars(3) % value4d        => w
   cos_vars(3) % size           =  SIZE(w)
   cos_vars(3) % rank           =  4
-  cos_vars(3) % assimilate     =  .TRUE.
+  cos_vars(3) % assimilate     =  .FALSE.
 
   cos_vars(4) % name           =  'T'
   cos_vars(4) % value4d        => t
@@ -222,43 +224,43 @@ SUBROUTINE define_cos_vars
   cos_vars(5) % value4d        => qv
   cos_vars(5) % size           =  SIZE(qv)
   cos_vars(5) % rank           =  4
-  cos_vars(5) % assimilate     =  .TRUE.
+  cos_vars(5) % assimilate     =  .FALSE.
 
   cos_vars(6) % name           =  'QC'
   cos_vars(6) % value4d        => qc
   cos_vars(6) % size           =  SIZE(qc)
   cos_vars(6) % rank           =  4
-  cos_vars(6) % assimilate     =  .TRUE.
+  cos_vars(6) % assimilate     =  .FALSE.
 
   cos_vars(7) % name           =  'QI'
   cos_vars(7) % value4d        => qi
   cos_vars(7) % size           =  SIZE(qi)
   cos_vars(7) % rank           =  4
-  cos_vars(7) % assimilate     =  .TRUE.
+  cos_vars(7) % assimilate     =  .FALSE.
 
   cos_vars(8) % name           =  'QR'
   cos_vars(8) % value4d        => qr
   cos_vars(8) % size           =  SIZE(qr)
   cos_vars(8) % rank           =  4
-  cos_vars(8) % assimilate     =  .TRUE.
+  cos_vars(8) % assimilate     =  .FALSE.
 
   cos_vars(9) % name           =  'QS'
   cos_vars(9) % value4d        => qs
   cos_vars(9) % size           =  SIZE(qs)
   cos_vars(9) % rank           =  4
-  cos_vars(9) % assimilate     =  .TRUE.
+  cos_vars(9) % assimilate     =  .FALSE.
 
   cos_vars(10) % name          =  'QG'
   cos_vars(10) % value4d       => qg
   cos_vars(10) % size          =  SIZE(qg)
   cos_vars(10) % rank          =  4
-  cos_vars(10) % assimilate    =  .TRUE.
+  cos_vars(10) % assimilate    =  .FALSE.
 
   cos_vars(11) % name          =  'PP'
   cos_vars(11) % value4d       => pp
   cos_vars(11) % size          =  SIZE(pp)
   cos_vars(11) % rank          =  4
-  cos_vars(11) % assimilate    =  .TRUE.
+  cos_vars(11) % assimilate    =  .FALSE.
 
   cos_vars(12) % name          =  'TKE'
   cos_vars(12) % value4d       => tke
@@ -277,33 +279,46 @@ SUBROUTINE set_cos_assimilate
 !  IMPLICIT NONE
   INTEGER                     :: var_idx = 1
   INTEGER                     :: curr_idx = 1
-  CHARACTER(len=10)           :: curr_var
+  CHARACTER(LEN=10)           :: curr_var
   INTEGER                     :: var_pos = 1
+  CHARACTER(LEN=20*10)          :: assim_vars_cos
 
-  print *,"CALLED ROUTINE TO SET VARIABLES WHICH SHOULD BE ASSIMILATED"
-  print *,"VARIABLES TO ASSIMILATE:"
-  print *,assim_vars_cos
+  DO curr_idx=1, LEN(assim_vars_cos)
+    IF (C_assim_vars_cos(curr_idx) == C_NULL_CHAR) EXIT
+    assim_vars_cos(curr_idx:curr_idx) = C_assim_vars_cos(curr_idx)
+  END DO
+  IF (curr_idx <= LEN(assim_vars_cos)) assim_vars_cos(curr_idx:) = ' '
 
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "CALLED ROUTINE TO SET VARIABLES WHICH SHOULD BE ASSIMILATED"
+    print *, "VARIABLES TO ASSIMILATE:"
+    print *, assim_vars_cos
+    print *, LEN(assim_vars_cos)
+    print *, SIZE(cos_vars)
+  END IF
 
   ! Set all variables to assimilate False
   DO var_pos=1, SIZE(cos_vars)
     cos_vars(i) % assimilate = .FALSE.
+    IF (my_cart_id .EQ. 0) THEN
+      print *, cos_vars(var_pos) % name, " deactivated"
+    END IF
   END DO
 
   ! Scan namelist string
   DO
     var_idx = SCAN(assim_vars_cos(curr_idx:), ',')
-    IF (var_idx == 0) THEN
-      EXIT
-    END IF
+    IF (var_idx == 0) EXIT
     ! Get current variable from namelist substrng
     curr_var = assim_vars_cos(curr_idx:curr_idx+var_idx-1)
     DO var_pos=1, SIZE(cos_vars)
       ! Compare substring with variables in cos_vars
       ! If found set assimilate True
       IF (TRIM(curr_var) == TRIM(cos_vars(i) % name)) THEN
-        print *,cos_vars(i) % name, " will be assimilated"
-        cos_vars(i) % assimilate = .TRUE.
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_pos) % name, " will be assimilated"
+        END IF
+        cos_vars(var_pos) % assimilate = .TRUE.
         EXIT
       END IF
     END DO
@@ -322,18 +337,24 @@ SUBROUTINE define_cos_statevec
 !  IMPLICIT NONE
   INTEGER                     :: var_cnt
 
-  print *,"CALLED ROUTINE TO DEFINE STATEVEC SIZE"
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "CALLED ROUTINE TO DEFINE STATEVEC SIZE"
+  END IF
 
   cos_statevecsize = 0
 
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate) THEN
-      print *,cos_vars(i) % name, " has a size of ", cos_vars(var_cnt) % size
+      IF (my_cart_id .EQ. 0) THEN
+        print *, cos_vars(var_cnt) % name, " has a size of ", cos_vars(var_cnt) % size
+      END IF
       cos_statevecsize = cos_statevecsize + cos_vars(var_cnt) % size
     END IF
   END DO
 
-  print *,"STATE VEC SIZE:", cos_statevecsize
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "STATE VEC SIZE:", cos_statevecsize
+  END IF
 
   ALLOCATE(cos_statevec(cos_statevecsize))
 END SUBROUTINE define_cos_statevec
@@ -349,28 +370,43 @@ SUBROUTINE set_cos_statevec
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
-  print *,"CALLED ROUTINE TO SET STATEVEC"
+  IF (my_cart_id .EQ. 0) THEN
+    print *,"CALLED ROUTINE TO SET STATEVEC"
+    print *,"Number of variables", SIZE(cos_vars)
+  END IF
 
 
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate) THEN
       new_pos = curr_pos + cos_vars(var_cnt) % size
       IF (cos_vars(var_cnt) % rank == 4) THEN
-        print *,cos_vars(var_cnt) % name, " will be set from 4D to ", &
-                curr_pos, ":", new_pos
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_cnt) % name, " will be set from 4D (, ", &
+                  SHAPE(cos_vars(var_cnt) % value4d), ") to ", curr_pos, &
+                  ":", new_pos
+        END IF
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value4d, .TRUE.       &
         )
       ELSE
-        print *,cos_vars(var_cnt) % name, " will be set from 3D to ", &
-                curr_pos, ":", new_pos
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_cnt) % name, " will be set from 4D (, ", &
+                  SHAPE(cos_vars(var_cnt) % value4d), ") to ", curr_pos, &
+                  ":", new_pos
+        END IF
         cos_statevec(curr_pos:new_pos) = PACK(            &
                 cos_vars(var_cnt) % value3d, .TRUE.       &
         )
       END IF
+      IF (my_cart_id .EQ. 0) THEN
+        print *, 'SET ', cos_vars(var_cnt) % name, " has starting value: ", &
+                cos_statevec(curr_pos)
+      END IF
+
       curr_pos = new_pos
     END IF
   END DO
+
 END SUBROUTINE set_cos_statevec
 
 SUBROUTINE update_cos_vars
@@ -385,32 +421,63 @@ SUBROUTINE update_cos_vars
   INTEGER                     :: curr_pos = 1
   INTEGER                     :: new_pos = 1
 
-  print *,"CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
+  END IF
+
+  IF (my_cart_id .EQ. 0) THEN
+    print *, 'U has starting value: ', u(1, 1, 1, 1)
+    print *, 'T has starting value: ', t(1, 1, 1, 1)
+  END IF
 
 
   DO var_cnt=1, SIZE(cos_vars)
     IF (cos_vars(var_cnt) % assimilate) THEN
+      IF (my_cart_id .EQ. 0) THEN
+        print *, 'UPDATE: ', cos_vars(var_cnt) % name, &
+                " has starting value: ", cos_statevec(curr_pos)
+      END IF
       new_pos = curr_pos + cos_vars(var_cnt) % size
       IF (cos_vars(var_cnt) % rank == 4) THEN
-        print *,cos_vars(var_cnt) % name, " will be updated from ", &
-                curr_pos, ":", new_pos, " to 4D"
-
-        cos_vars(var_cnt) % value4d(:, :, :, :) = RESHAPE(    &
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_cnt) % name, " will be updated from ", &
+                   curr_pos, ":", new_pos, " to 4D ", &
+                   SHAPE(cos_vars(var_cnt) % value4d)
+          print *, SIZE(cos_vars(var_cnt) % value4d)
+          print *, new_pos-curr_pos
+        END IF
+        cos_vars(var_cnt) % value4d = RESHAPE(    &
                 cos_statevec(curr_pos:new_pos),               &
                 SHAPE(cos_vars(var_cnt) % value4d)            &
         )
+        IF (my_cart_id .EQ. 0) THEN
+          print *, 'COSMO variable: ', cos_vars(var_cnt) % name, &
+                   " has starting value: ", cos_vars(var_cnt) % value4d(1, 1, 1, 1)
+        END IF
       ELSE
-        print *,cos_vars(var_cnt) % name, " will be updated from ", &
-                curr_pos, ":", new_pos, " to 3D"
-
-        cos_vars(var_cnt) % value3d(:, :, :) = RESHAPE(    &
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_cnt) % name, " will be updated from ", &
+                  curr_pos, ":", new_pos, " to 3D", &
+                  SHAPE(cos_vars(var_cnt) % value3d)
+        END IF
+        cos_vars(var_cnt) % value3d = RESHAPE(    &
                 cos_statevec(curr_pos:new_pos),               &
                 SHAPE(cos_vars(var_cnt) % value3d)            &
         )
+        IF (my_cart_id .EQ. 0) THEN
+          print *, 'COSMO variable: ', cos_vars(var_cnt) % name, &
+                   " has starting value: ", cos_vars(var_cnt) % value3d(1, 1, 1)
+        END IF
       END IF
       curr_pos = new_pos
     END IF
   END DO
+
+  IF (my_cart_id .EQ. 0) THEN
+    print *, 'U has starting value: ', u(1, 1, 1, 1)
+    print *, 'T has starting value: ', t(1, 1, 1, 1)
+  END IF
+
 END SUBROUTINE update_cos_vars
 
 SUBROUTINE teardown_cos_statevec
@@ -418,7 +485,9 @@ SUBROUTINE teardown_cos_statevec
   ! This subroutine is used to deallocate the COSMO state vector for PDAF and
   ! the array of COSMO variables
   !=============================================================================
-  print *,"CALLED ROUTINE TO DEALLOCATE COSMO variables"
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "CALLED ROUTINE TO DEALLOCATE COSMO state vector"
+  END IF
 
   DEALLOCATE(cos_statevec)
 END SUBROUTINE teardown_cos_statevec

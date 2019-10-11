@@ -178,9 +178,9 @@ void integrate_tsmp() {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
     int tsclm;
     tsclm = (int) ( (double) da_interval / dt );
-    //printf("CLM: advancing (%d clm time steps)\n",tsclm);
+    printf("CLM: advancing (%d clm time steps)\n",tsclm);
     clm_advance(&tsclm);
-    //printf("CLM: advancing finished\n",tsclm);
+    printf("CLM: advancing finished\n",tsclm);
 #endif
   }
 
@@ -210,8 +210,9 @@ void integrate_tsmp() {
     int tscos;
     tscos = (int) ((double) da_interval / dt);
     tscos = tscos * dtmult_cosmo;
-    //printf("tscos is %d",tscos);
+    printf("COSMO: advancing (%d cosmo time steps)\n",tscos);
     cosmo_advance(&tscos);
+    printf("COSMO: advancing finished\n", tscos);
 #endif
   }
 

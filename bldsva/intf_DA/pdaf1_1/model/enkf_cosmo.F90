@@ -400,7 +400,8 @@ cos_start = nstart
 ! state of cosmo
 !=============
 CALL define_cos_vars
-CALL set_cos_assimilate
+! Deactivated due to consistent errors in set assimilate
+!CALL set_cos_assimilate
 CALL define_cos_statevec
 
 end subroutine cosmo_init
@@ -421,6 +422,10 @@ integer(c_int),intent(in) :: cos_dt
 
   !timeloop: DO ntstep = nstart , nstop
   write(*,*)'advancing cosmo from ',cos_start,' to ',(cos_start+cos_dt-1)
+
+  ! Tobias Finn: Added setting of COSMO state vector
+!  WRITE(*, *) 'COSMO -> PDAF Before the loop'
+!  call set_cos_statevec()
 
   timeloop: DO ntstep = cos_start,(cos_start+cos_dt-1)
 
@@ -908,6 +913,8 @@ integer(c_int),intent(in) :: cos_dt
     write(*,*) 'advancing cosmo finished'
   ENDIF
 
+  ! Tobias Finn: Added setting of COSMO state vector
+  call set_cos_statevec()
 
   cos_start = cos_start + cos_dt
 end subroutine cosmo_advance
@@ -978,6 +985,12 @@ use enkf_cosmo_mod
   IF (lasync_io .OR. (num_compute > 1) ) THEN
     CALL mpe_io_shutdown()
   ENDIF
+
+  !=============
+  ! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+  ! state of cosmo
+  !=============
+  CALL teardown_cos_statevec()
 
 !------------------------------------------------------------------------------
 !- Section 8: Part of the IO-PEs

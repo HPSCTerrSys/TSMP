@@ -45,6 +45,12 @@ SUBROUTINE assimilate_pdaf()
     !        ONLY: mype_world, abort_parallel
     USE mod_assimilation, &      ! Variables for assimilation
         ONLY: filtertype
+    ! TF 200107: Testing purpose
+    USE enkf_cosmo_mod, ONLY: cos_statevec
+    use mod_tsmp, &
+            only: pf_statevec_fortran, tag_model_parflow, tag_model_clm, tag_model_cosmo
+    use mod_parallel_model, &
+            only: model, mype_world
 
     IMPLICIT NONE
 
@@ -55,7 +61,6 @@ SUBROUTINE assimilate_pdaf()
 
     ! Local variables
     INTEGER :: status_pdaf       ! PDAF status flag
-
 
     ! External subroutines
     EXTERNAL :: collect_state_pdaf, & ! Routine to collect a state vector from model fields
@@ -119,6 +124,12 @@ SUBROUTINE assimilate_pdaf()
         !    localize_covar_pdaf, add_obs_error_pdaf, init_obscovar_pdaf, &
         !    next_observation_pdaf, status_pdaf)
     END IF
+    ! TF 200107: Testing purpose
+#if defined COUP_OAS_COS
+    if (model == tag_model_cosmo) then
+        cos_statevec = cos_statevec + 1
+    end if
+#endif
 
   ! Check for errors during execution of PDAF
 
