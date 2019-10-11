@@ -38,7 +38,8 @@ foreach instance (`seq 0 $numInst`)
     ${cmd} -rf $rundir/$dir/cosout .
     cd cosout
     mkdir ivr
-    ${cmd} lfff00000000c* ivr/
+    #always mv here
+    mv lfff00000000c* ivr/
     cd ..
     cd clmout
     ${cmd} $rundir/$dir/clmoas.clm2.h0* .

@@ -64,7 +64,9 @@ foreach instance (`seq 0 $numInst`)
  #sed "s,80 -0.30  6.0 3.0 0.05000,80 -0.30 $roota $rootb 0.05000," -i  pft-physiology.c070207 
 
  #cosmo
- set turlength = `echo "(200.-$minstance*2.5)" | bc`
+ echo "no perturbation of turbulennt length scale"
+# set turlength = `echo "(200.-$minstance*2.5)" | bc`
+ set turlength = 100.
  if ( -f lmrun_uc ) then
    sed "s,__turlen__,${turlength}," -i lmrun_uc
    ./lmrun_uc execluma

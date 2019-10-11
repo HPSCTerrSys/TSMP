@@ -25,7 +25,7 @@ character(len=*), parameter :: revdate  = "$Date: Wed Apr 11 2018 $"
 integer  :: level, num_cols, num_levs,num_dates, i,k, iunit
 real(r8) :: lat, lon, sw_err_var, uv_err_var, ps_err_var
 real(r8) :: lat_data(10), lon_data(10), level_data(7)
-integer  :: yyyy, daysinmonth(12),mm(90), dd_data(90), hh, mn, ss
+integer  :: yyyy, daysinmonth(12),mm(60), dd_data(60), hh, mn, ss
 character(len=1024) :: filename
 
 !This is based in CLM grids
@@ -42,8 +42,8 @@ yyyy = 2008
 hh   = 0
 mn   = 0
 ss   = 0
-mm(1)      = 5
-dd_data(1) = 9
+mm(1)      = 6
+dd_data(1) = 7
 ! Open an output file and write header info
 iunit = get_unit()
 open(unit = iunit, file = 'column_rand.out')
@@ -54,7 +54,7 @@ read(*, *) num_cols
 write(*, *) 'input the number of model levels:7'
 read(*, *) num_levs
 
-write(*, *) 'input the number of dates:13'
+write(*, *) 'input the number of dates:30'
 read(*, *) num_dates
 
 ! Output the total number of obs

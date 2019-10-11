@@ -1,69 +1,82 @@
 #!/bin/csh
-# "Usage: ./assim.csh N c num_days", N=0 or 1, c="clm", "cosmo", "parflow"
+# Extract Synthetic Observations in five steps (Step 1 to 5)
+# "Usage: ./assim.csh model" 
+# P. Shrestha
+# User Settings
+# model ="clm", "cosmo", "parflow"
+# inst -> randomly selected member number as PM
+# st_day -> start day of experiment
+# en_day -> end day of experiment - 1
+set MODEL_PATH=$WORK/OL/rundart
+set inst = 19      
+set st_day = 30 
+set en_day = 89 
+# Do not change below
 #
-#set MODEL_PATH="$ARCH/modelData/ideal_RTD_perfect/CLUMA2_1.2.0MCT_clm-cos-pfl_idealRTD_perfectModel"
-#set MODEL_PATH="$WORK/dart_Synthetic_d10/PM_run/perfectModel"
-set MODEL_PATH=$WORK/rundart
-set inst = 9
-set num_days = $3
 
 # SELECT COMPONENT MODEL FOR ASSIMILATION
-if ($2 == "cosmo") then
-  set DART_DIR="$HOME/DART/lanai/models/terrsysmp/cosmo/work"
-else if ($2 == "clm") then
-  set DART_DIR="$HOME/DART/lanai/models/terrsysmp/clm/work"
-else if ($2 == "parflow") then
-  set DART_DIR="$HOME/DART/lanai/models/terrsysmp/parflow/work"
+if ($1 == "cosmo") then
+  set DART_DIR="$TRAINHOME/DART/lanai/models/terrsysmp/cosmo/work"
+else if ($1 == "clm") then
+  set DART_DIR="$TRAINHOME/DART/lanai/models/terrsysmp/clm/work"
+else if ($1 == "parflow") then
+  set DART_DIR="$TRAINHOME/DART/lanai/models/terrsysmp/parflow/work"
 endif
 
-# SELECT COMPILATION
-if ($1 == 0) then
-echo "-------------------------------------------------------------------------------"
-echo "Update DART Source Code..."
-echo "-------------------------------------------------------------------------------"
-./git_to_dart.csh
-endif
-cd $DART_DIR 
+## SELECT COMPILATION
+#if ($1 == 0) then
+#echo "-------------------------------------------------------------------------------"
+#echo "Update DART Source Code..."
+#echo "-------------------------------------------------------------------------------"
+#./git_to_dart.csh
+#endif
+#cd $DART_DIR 
 
-if ($1 == 0) then
-  echo "-------------------------------------------------------------------------------"
-  echo "Compiling..."
-  echo "-------------------------------------------------------------------------------"
-  ./quickbuild.csh -mpi
-  rm input.nml.*
-  echo "-------------------------------------------------------------------------------"
-  echo "Creating Perfect Obs..."
-  echo "-------------------------------------------------------------------------------"
-else if ($1 == 1) then
-  echo "-------------------------------------------------------------------------------"
-  echo "Creating Perfect Obs..."
-  echo "-------------------------------------------------------------------------------"
-else
-  echo "-------------------------------------------------------------------------------"
-  echo "Code not writtten for ..." $1
-  echo "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
-  echo "-------------------------------------------------------------------------------"
-  exit 1
-endif
+#if ($1 == 0) then
+#  echo "-------------------------------------------------------------------------------"
+#  echo "Compiling..."
+#  echo "-------------------------------------------------------------------------------"
+#  ./quickbuild.csh -mpi
+#  rm input.nml.*
+#  echo "-------------------------------------------------------------------------------"
+#  echo "Creating Perfect Obs..."
+#  echo "-------------------------------------------------------------------------------"
+#else if ($1 == 1) then
+#  echo "-------------------------------------------------------------------------------"
+#  echo "Creating Perfect Obs..."
+#  echo "-------------------------------------------------------------------------------"
+#else
+#  echo "-------------------------------------------------------------------------------"
+#  echo "Code not writtten for ..." $1
+#  echo "Usage: ./assim.csh N c", N=0 or 1, c="clm", "cosmo", "parflow"
+#  echo "-------------------------------------------------------------------------------"
+#  exit 1
+#endif
 #
-foreach irun (`seq 1 $num_days`)
+cd $DART_DIR 
+#
+foreach irun (`seq $st_day $en_day`)
 
-if ($2 == "parflow") then
+# counter for column_rand outputs which start from 1 always
+set ctr = `echo "($irun - $st_day + 1)" | bc`
+
+if ($1 == "parflow") then
 set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
-if ($irun == 1) then
-  set model_dir0 = $model_dir
+if ($irun == $st_day) then
+#  set model_dir0 = $model_dir
+   set model_dir0 = `printf $MODEL_PATH%02d 1`/tsmp_instance_$inst
 endif
 set prspfb = `ls -1 $model_dir/rurlaf.out.press*.pfb | tail -n -1`
 set satpfb = `ls -1 $model_dir/rurlaf.out.satur*.pfb | tail -n -1`
 set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
 set clmrst0 = `ls -1 $model_dir0/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
-set pfbsoil = `ls -1 $HOME/database/idealRTD/parflow/pfb_sID*.nc`
+set pfbsoil = `ls -1 $TSMP_DATA/idealRTD/parflow/pfb_sID*.nc`
 echo $clmrst
 set pflgrd = `ls $model_dir/grids.nc`
  
-set colum_exp = `printf column_export_out_%02d $irun`
+set colum_exp = `printf column_export_out_%02d $ctr`
 echo "------------------------------------------------------------------------    -------"
-echo `pwd`
+echo $colum_exp "    " $irun
 echo " "
 echo "------------------------------------------------------------------------    -------"
 rm dart_prior pflgrid.nc clm_restart.nc 
@@ -76,18 +89,19 @@ ln -sf $clmrst clm_restart.nc
 ln -sf $clmrst0 clm_restart_s.nc
 ln -sf $pfbsoil pfb_soil.nc
 #&model_nml has the above names for restart and netcdf file
-endif  #$2 == "parflow"
+endif  #$1 == "parflow"
 
-if ($2 == "clm") then
+if ($1 == "clm") then
 set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
-if ($irun == 1) then
-  set model_dir0 = $model_dir
+if ($irun == $st_day) then
+#  set model_dir0 = $model_dir
+  set model_dir0 = `printf $MODEL_PATH%02d 1`/tsmp_instance_$inst
 endif
 set clmrst = `ls -1 $model_dir/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
 set clmrst0 = `ls -1 $model_dir0/clmoas.clm2.r.*.nc | tail -n -2 | head -n 1`
 set clmout = `ls -1 $model_dir/clmoas.clm2.h0*.nc | tail -n -1`
 
-set colum_exp = `printf column_export_out_%02d $irun`
+set colum_exp = `printf column_export_out_%02d $ctr`
 echo "-------------------------------------------------------------------------------"
 echo `pwd`
 echo " "
@@ -99,14 +113,14 @@ ln -sf $clmout clm_history.nc
 ln -sf $clmrst clm_restart.nc 
 ln -sf $clmrst0 clm_restart_s.nc
 #&model_nml has the above names for restart and netcdf file
-endif  #$2 == "clm"
+endif  #$1 == "clm"
 
-if ($2 == "cosmo") then
+if ($1 == "cosmo") then
 set model_dir = `printf $MODEL_PATH%02d $irun`/tsmp_instance_$inst
 set cosrst = `ls -1 $model_dir/cosrst/lrff* | tail -n -1`
 set cosout = `ls -1 $model_dir/cosout/lfff* | tail -n -1`
  
-set colum_exp = `printf column_export_out_%02d $irun`
+set colum_exp = `printf column_export_out_%02d $ctr`
  
 echo "-------------------------------------------------------------------------------"
 echo `pwd`
@@ -117,18 +131,18 @@ rm perfect_restart
 rm obs_seq.in dart_log.*
 ln -sf $cosout cosmo.nc
 ln -sf $cosrst cosmo_prior
-endif #$2 == "cosmo"
+endif #$1 == "cosmo"
 
 echo $DART_DIR
-if ($irun == 1) then
+if ($irun == $st_day) then
 #Generates output for create_obs_sequence, hardwired for Radiosonde Tempearture
 echo "-------------------------------------------------------------------------------"
-echo "Run column_rand ..."
+echo "Step 1: Run column_rand ..."
 echo "-------------------------------------------------------------------------------"
 ./column_rand
 #Generate set_def.out
 echo "-------------------------------------------------------------------------------"
-echo "Run create_obs_sequence"
+echo "Step 2: Run create_obs_sequence"
 echo "-------------------------------------------------------------------------------"
 ./create_obs_sequence < column_rand.out
 endif
@@ -139,19 +153,19 @@ echo $defaultInitDate[2]
 sleep 3 
 echo " "
 echo "-------------------------------------------------------------------------------"
-echo "Run create_fixed_network_seq..."
+echo "Step 3: Run create_fixed_network_seq..."
 echo "-------------------------------------------------------------------------------"
 ./create_fixed_network_seq <$colum_exp
 wait
 
 echo "-------------------------------------------------------------------------------"
-echo " Run "${2}"_to_dart"
+echo " Step 4: Run "${1}"_to_dart"
 echo "-------------------------------------------------------------------------------"
-./${2}_to_dart
+./${1}_to_dart
 
 # creates 3 files including obs_seq.perfect 
 echo "-------------------------------------------------------------------------------"
-echo "Harvest model data: perfect_model_obs"
+echo "Step 5: Harvest model data: perfect_model_obs"
 echo "-------------------------------------------------------------------------------"
 ./perfect_model_obs
 mv obs_seq.perfect obs_seq.$defaultInitDate[2]
