@@ -110,7 +110,7 @@ pfset Cell.29.dzScale.Value                   0.02
 pfset TimingInfo.BaseUnit		     0.0025
 pfset TimingInfo.StartCount		     0.0
 pfset TimingInfo.StartTime		     0.0
-pfset TimingInfo.StopTime		     12.0025 
+pfset TimingInfo.StopTime		     1.0025 
 pfset TimeStep.Type			         Constant
 pfset TimeStep.Value		     	 0.0125 
 pfset TimingInfo.DumpInterval		 1
