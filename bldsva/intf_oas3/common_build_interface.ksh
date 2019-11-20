@@ -848,9 +848,12 @@ route "${cblue}<<< c_substitutions_pfl${cnormal}"
 c_setup_pfl(){
 route "${cblue}>>> c_setup_pfl${cnormal}"
 
-  comment "   copy parflow namelist to rundir."
+  if [ ! -f "$rundir/coup_oas.tcl" ]; then
+    comment "  $rundir/coup_oas.tcl does not exist, is copied, see c_setup_pfl()"
     cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-  check
+    check
+  fi
+
   comment "   sed nproc x to pfl namelist."
     sed "s/__nprocx_pfl_bldsva__/$px_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check

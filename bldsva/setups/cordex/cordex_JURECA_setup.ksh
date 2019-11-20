@@ -111,6 +111,11 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
+        if [ ! -f "$rundir/coup_oas.tcl" ]; then
+          comment "  parflow namelist is copied to rundir. See cordex_JURECA_setup.ksh :: $rundir/coup_oas.tcl "
+          cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+          check
+        fi
           sed "s,__pfl_solidinput_filename__,/p/project/cslts/slts06/forcings/testdata_EU_std/ParFlow/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
         check
 	comment "   create sloap pfb with tclsh"
