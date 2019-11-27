@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/clm"
-  defaultFDCOS="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/cosmo"
-  defaultFDOAS="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/oasis3"
-  defaultFDPFL="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/parflow"
+  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/clm"
+  defaultFDCOS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/cosmo"
+  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/oasis3"
+  defaultFDPFL="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
@@ -134,7 +134,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__pfl_solidinput_filename__,/gpfs/homea/slts/slts06/forcings/testdata_EU_std/ParFlow/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+          sed "s,__pfl_solidinput_filename__,$defaultFDPFL/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
 	check
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
