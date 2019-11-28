@@ -205,6 +205,7 @@ setCombination(){
 compileClm(){
 route "${cblue}> c_compileClm${cnormal}"
   comment "  source clm interface script"
+    comment "intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_clm
@@ -213,13 +214,10 @@ route "${cblue}> c_compileClm${cnormal}"
   comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
-    if [[ $withICON == "true" ]]; then
-      clmicon="${mList[1]}"
-      clmicon=${clmicon%'-icon'}
-      cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
-    else
-      cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
-    fi
+    # remove '-icon' from the mList[1] name
+    clmicon="${mList[1]}"
+    clmicon=${clmicon%'-icon'}
+    cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
   check
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
