@@ -164,6 +164,7 @@ SUBROUTINE init_pdaf()
        !call get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
        !dim_state_p =  (endg-begg+1) * nlevsoi
        !print *,"CLM: dim_state_p is ",dim_state_p
+        print *, "PDAF STATE VECTOR SIZE: ", cos_statevecsize
        dim_state_p = cos_statevecsize
     end if
 #endif

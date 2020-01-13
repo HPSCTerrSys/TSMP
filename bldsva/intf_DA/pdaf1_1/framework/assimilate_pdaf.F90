@@ -127,7 +127,7 @@ SUBROUTINE assimilate_pdaf()
     ! TF 200107: Testing purpose
 #if defined COUP_OAS_COS
     if (model == tag_model_cosmo) then
-        cos_statevec = cos_statevec + 1
+        cos_statevec = cos_statevec + 0.1
     end if
 #endif
 

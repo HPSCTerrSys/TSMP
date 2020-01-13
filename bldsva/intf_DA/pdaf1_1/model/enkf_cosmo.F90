@@ -399,10 +399,10 @@ cos_start = nstart
 ! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
 ! state of cosmo
 !=============
-CALL define_cos_vars
+CALL define_cos_vars()
 ! Deactivated due to consistent errors in set assimilate
 !CALL set_cos_assimilate
-CALL define_cos_statevec
+!CALL define_cos_statevec()
 
 end subroutine cosmo_init
 
@@ -914,7 +914,8 @@ integer(c_int),intent(in) :: cos_dt
   ENDIF
 
   ! Tobias Finn: Added setting of COSMO state vector
-  call set_cos_statevec()
+  CALL define_cos_statevec()
+  CALL set_cos_statevec()
 
   cos_start = cos_start + cos_dt
 end subroutine cosmo_advance

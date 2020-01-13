@@ -164,7 +164,7 @@ TYPE COS_VAR
 END TYPE COS_VAR
 
 ! The state vector of COSMO. These values are modified by PDAF
-REAL(r8), ALLOCATABLE               :: cos_statevec(:)
+REAL(KIND=ireals), ALLOCATABLE      :: cos_statevec(:)
 ! The state vector size of COSMO, will define the length of the state vector
 INTEGER                             :: cos_statevecsize
 ! The array of COSMO variables. If you want to enable more than 20 variables,
@@ -200,7 +200,7 @@ SUBROUTINE define_cos_vars
   cos_vars(1) % value4d        => u
   cos_vars(1) % size           =  SIZE(u)
   cos_vars(1) % rank           =  4
-  cos_vars(1) % assimilate     =  .TRUE.
+  cos_vars(1) % assimilate     =  .FALSE.
 
   cos_vars(2) % name           =  'V'
   cos_vars(2) % value4d        => v
@@ -218,7 +218,7 @@ SUBROUTINE define_cos_vars
   cos_vars(4) % value4d        => t
   cos_vars(4) % size           =  SIZE(t)
   cos_vars(4) % rank           =  4
-  cos_vars(4) % assimilate     =  .TRUE.
+  cos_vars(4) % assimilate     =  .FALSE.
 
   cos_vars(5) % name           =  'QV'
   cos_vars(5) % value4d        => qv
@@ -281,7 +281,7 @@ SUBROUTINE set_cos_assimilate
   INTEGER                     :: curr_idx = 1
   CHARACTER(LEN=10)           :: curr_var
   INTEGER                     :: var_pos = 1
-  CHARACTER(LEN=20*10)          :: assim_vars_cos
+  CHARACTER(LEN=20*10)        :: assim_vars_cos
 
   DO curr_idx=1, LEN(assim_vars_cos)
     IF (C_assim_vars_cos(curr_idx) == C_NULL_CHAR) EXIT
@@ -311,6 +311,8 @@ SUBROUTINE set_cos_assimilate
     IF (var_idx == 0) EXIT
     ! Get current variable from namelist substrng
     curr_var = assim_vars_cos(curr_idx:curr_idx+var_idx-1)
+    IF (my_cart_id .EQ. 0) THEN
+      print *, 'Found "', curr_var, '" as substring'
     DO var_pos=1, SIZE(cos_vars)
       ! Compare substring with variables in cos_vars
       ! If found set assimilate True
@@ -352,11 +354,18 @@ SUBROUTINE define_cos_statevec
     END IF
   END DO
 
-  IF (my_cart_id .EQ. 0) THEN
-    print *, "STATE VEC SIZE:", cos_statevecsize
+  IF (ALLOCATED(cos_statevec)) THEN
+    print *, my_cart_id, " - ", "COSMO State vector was already allocated, ", &
+            "I will deallocate vector"
+    print *, my_cart_id, " - ", "COSMO State vector size: ", SIZE(cos_statevec)
+    DEALLOCATE(cos_statevec)
   END IF
-
   ALLOCATE(cos_statevec(cos_statevecsize))
+
+  IF (my_cart_id .EQ. 0) THEN
+    print *, "Desired STATE VEC SIZE:", cos_statevecsize
+    print *, "Actual STATE VEC SIZE:", SIZE(cos_statevec)
+  END IF
 END SUBROUTINE define_cos_statevec
 
 SUBROUTINE set_cos_statevec
@@ -371,8 +380,9 @@ SUBROUTINE set_cos_statevec
   INTEGER                     :: new_pos = 1
 
   IF (my_cart_id .EQ. 0) THEN
-    print *,"CALLED ROUTINE TO SET STATEVEC"
-    print *,"Number of variables", SIZE(cos_vars)
+    print *,"CALLED ROUTINE TO SET STATEVEC\n"
+    print *,"Number of variables", SIZE(cos_vars), "\n"
+    print *,"State vec size", SIZE(cos_statevec)
   END IF
 
 
@@ -407,6 +417,12 @@ SUBROUTINE set_cos_statevec
     END IF
   END DO
 
+  IF (my_cart_id .EQ. 0) THEN
+    print *,"FINISHED ROUTINE TO SET STATEVEC\n"
+    print *,"Number of variables", SIZE(cos_vars), "\n"
+    print *,"State vec size", SIZE(cos_statevec)
+  END IF
+
 END SUBROUTINE set_cos_statevec
 
 SUBROUTINE update_cos_vars
@@ -422,7 +438,8 @@ SUBROUTINE update_cos_vars
   INTEGER                     :: new_pos = 1
 
   IF (my_cart_id .EQ. 0) THEN
-    print *, "CALLED ROUTINE TO UPDATE VARIABLES IN COSMO"
+    print *, "CALLED ROUTINE TO UPDATE VARIABLES IN COSMO\n"
+    print *, "State vec size", SIZE(cos_statevec)
   END IF
 
   IF (my_cart_id .EQ. 0) THEN
@@ -438,6 +455,10 @@ SUBROUTINE update_cos_vars
                 " has starting value: ", cos_statevec(curr_pos)
       END IF
       new_pos = curr_pos + cos_vars(var_cnt) % size
+      IF ( new_pos > SIZE(cos_statevec)+1 ) THEN
+        print *, '*** ERROR ***', 'Out of bounds! desired element: ', new_pos, &
+                 ' Vector size: ', SIZE(cos_statevec)
+      END IF
       IF (cos_vars(var_cnt) % rank == 4) THEN
         IF (my_cart_id .EQ. 0) THEN
           print *, cos_vars(var_cnt) % name, " will be updated from ", &
