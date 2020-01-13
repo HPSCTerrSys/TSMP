@@ -400,8 +400,9 @@ cos_start = nstart
 ! state of cosmo
 !=============
 CALL define_cos_vars()
-! Deactivated due to consistent errors in set assimilate
-!CALL set_cos_assimilate
+CALL set_cos_assimilate()
+! Deactivation of COSMO state vector allocation due to problems with
+! missleading allocation of size 1
 !CALL define_cos_statevec()
 
 end subroutine cosmo_init
@@ -422,11 +423,6 @@ integer(c_int),intent(in) :: cos_dt
 
   !timeloop: DO ntstep = nstart , nstop
   write(*,*)'advancing cosmo from ',cos_start,' to ',(cos_start+cos_dt-1)
-
-  ! Tobias Finn: Added setting of COSMO state vector
-!  WRITE(*, *) 'COSMO -> PDAF Before the loop'
-!  call set_cos_statevec()
-
   timeloop: DO ntstep = cos_start,(cos_start+cos_dt-1)
 
     IF ( (izdebug > 1) .AND. (.NOT. lbdclim)) THEN
@@ -914,6 +910,8 @@ integer(c_int),intent(in) :: cos_dt
   ENDIF
 
   ! Tobias Finn: Added setting of COSMO state vector
+  ! Allocation of COSMO state vector is needed at this position due to a
+  ! strange allocation beforehand
   CALL define_cos_statevec()
   CALL set_cos_statevec()
 
