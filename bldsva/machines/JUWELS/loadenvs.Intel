@@ -26,6 +26,7 @@ module load grib_api/.1.26.0
 #wgrib ? on JUWELS?
 #module load wgrib/1.8.1.2c
 
+module load Scalasca/2.4
 
 # libs for TerrSysMP
 module load Tcl/.8.6.8

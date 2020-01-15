@@ -80,6 +80,8 @@ route "${cblue}>> substitutions_oas${cnormal}"
   check
     sed -i "s/use m_Rear/use ${prefix}m_Rear/g" * >> $log_file 2>> $err_file
   check
+    sed -i "s/use m_SPMD/use ${prefix}m_SPMD/g" * >> $log_file 2>> $err_file
+  check
   comment "   cd in psmile-source dir"
     cd ${oasdir}/lib/psmile/src >> $log_file 2>> $err_file
   check

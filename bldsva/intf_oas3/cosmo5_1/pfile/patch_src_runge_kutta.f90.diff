@@ -1,0 +1,44 @@
+---  src_runge_kutta.f90	2014-11-28 12:18:36.000000000 +0100
++++  src_runge_kutta.f90	2019-12-04 12:52:07.098540000 +0100
+@@ -444,6 +444,9 @@
+   ztmkvh,               & !
+   ztch,                 & !
+   ztcm,                 & !
++#ifdef COUP_OAS_COS
++  ztcw,                 & !
++#endif
+   zkh,                  & !
+   ztmkvw,               & !
+   ztmkvtke,             & !
+@@ -1161,9 +1164,19 @@
+     CALL model_abort (my_cart_id, 100+izerror, yzerrmsg, yzroutine)
+   END IF
+ 
++#ifdef COUP_OAS_COS
++  ALLOCATE (ztcw(ie,je), STAT=izstata)
++
++  IF ( izstata /= 0 ) THEN 
++    yzerrmsg="allocation of ztcw"
++    CALL model_abort (my_cart_id, izstata, yzerrmsg, yzroutine)
++  END IF
++#endif
++
+   ALLOCATE ( za1t(ke1), za2t(ke1), zpia(ie,je,ke), zpianf(ie,je,ke1),    &
+     ztmkvm(ie,je,ke), ztmkvh(ie,je), ztch(ie,je), ztcm(ie,je),           &
+     ztheta(ie,je,ke), zkh(ie,je,ke), STAT=izstata )
++
+   IF ( izstata /= 0 ) THEN
+     yzerrmsg="allocation of za1t"
+     CALL model_abort (my_cart_id, 100+izerror, yzerrmsg, yzroutine)
+@@ -1839,6 +1852,11 @@
+ 
+   DEALLOCATE ( wcon, STAT=izstatd )
+   DEALLOCATE ( zsqrtgrho_r_s, zsqrtgrho_r_u, zsqrtgrho_r_v, STAT=izstatd )
++
++#ifdef COUP_OAS_COS
++  DEALLOCATE ( ztcw, STAT=izstatd )
++#endif
++
+   DEALLOCATE ( za1t, za2t, zpia, zpianf, ztmkvm, ztmkvh, ztch, ztcm, zkh,  &
+                ztheta, STAT=izstatd )
+   IF ( lvertdiff_w )  DEALLOCATE ( ztmkvw, zsqrtgrho_r_w, STAT=izstatd )

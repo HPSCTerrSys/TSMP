@@ -227,14 +227,65 @@ route "${cblue}<<< c_make_cos${cnormal}"
 
 
 c_substitutions_cos(){
+
 route "${cblue}>>> c_substitutions_cos${cnormal}"
   comment "    copy oas3 interface to cosmo/src "
     patch $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src 
   check
-  comment "    replace files with coupling. Add files to cosmo/src "
-    patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
+    cp  $rootdir/cosmo5_1/LOCAL/TWOMOM/src_twomom_sb* $cosdir/src
   check
-
+  comment "    replace files with coupling. Add files to cosmo/src "
+  # patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
+  check
+  comment "	copy the diff files to cosmo src : from $rootdir/bldsva/intf_oas3/${mList[2]}/pfile"
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/pfile/patch* $cosdir/src 
+  check
+  comment "     apply diff files on the original files using patch command in $cosdir/src "
+   /usr/bin/patch  -d $cosdir/src -i patch_src_radiation.f90.diff -o src_radiation1.f90
+    cp $cosdir/src/src_radiation1.f90 $cosdir/src/src_radiation.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_data_fields.f90.diff -o data_fields1.f90  
+    cp $cosdir/src/data_fields1.f90  $cosdir/src/data_fields.f90
+  check
+#    patch  -d $cosdir/src -i patch_phillips_nucleation.incf.diff  -o phillips_nucleation1.incf >> $log_pfile 2>> $err_pfile
+#    cp $cosdir/src/phillips_nucleation1.incf $cosdir/src/phillips_nucleation.incf
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_lmorg.f90.diff -o lmorg1.f90 
+    cp $cosdir/src/lmorg1.f90 $cosdir/src/lmorg.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_artifdata.f90.diff -o src_artifdata1.f90
+    cp $cosdir/src/src_artifdata1.f90 $cosdir/src/src_artifdata.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_setup_vartab.f90.diff -o src_setup_vartab1.f90
+    cp $cosdir/src/src_setup_vartab1.f90 $cosdir/src/src_setup_vartab.f90
+  check
+    /usr/bin/patch -d $cosdir/src -i patch_src_twomom_sb.f90.diff -o src_twomom_sb1.f90
+    cp $cosdir/src/src_twomom_sb1.f90  $cosdir/src/src_twomom_sb.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_environment.f90.diff -o environment1.f90
+    cp $cosdir/src/environment1.f90 $cosdir/src/environment.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_organize_physics.f90.diff -o organize_physics1.f90
+    cp $cosdir/src/organize_physics1.f90 $cosdir/src/organize_physics.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_allocation.f90.diff -o src_allocation1.f90
+    cp $cosdir/src/src_allocation1.f90 $cosdir/src/src_allocation.f90
+  check
+   /usr/bin/patch  -d $cosdir/src -i patch_src_gridpoints.f90.diff -o src_gridpoints1.f90
+    cp $cosdir/src/src_gridpoints1.f90 $cosdir/src/src_gridpoints.f90
+  check
+    /usr/bin/patch -d $cosdir/src -i patch_src_runge_kutta.f90.diff -o src_runge_kutta1.f90
+    cp $cosdir/src/src_runge_kutta1.f90 $cosdir/src/src_runge_kutta.f90
+  check
+   /usr/bin/patch -d $cosdir/src -i patch_src_slow_tendencies_rk.f90.diff -o src_slow_tendencies_rk1.f90
+    cp $cosdir/src/src_slow_tendencies_rk1.f90 $cosdir/src/src_slow_tendencies_rk.f90
+  check
+#    patch -d $cosdir/src -i patch_src_twomom_sb_interface.f90.diff  -o src_twomom_sb_interface1.f90
+#    cp $cosdir/src/src_twomom_sb_interface1.f90 $cosdir/src/src_twomom_sb_interface.f90
+#  check
+   
+    rm -rf $cosdir/src/*1.f90
+    rm -rf $cosdir/src/*1.incf
 #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
@@ -544,6 +595,11 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   comment "    create new build dir"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
+  comment "    create oas3 dir in $clmdir/src"
+    mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
+  check
+  comment "    copy oas_clm_init.F90 to  $clmdir/src/oas3"
+    cp rootdir/bldsva/intf_oas3/${mList[1]}/pfile/oas_clm_init.F90 $clmdir/src/oas3
 
     spmd="on"       # settings are [on   | off       ] (default is off)
     maxpft="1"        # settings are 4->17               (default is 4)

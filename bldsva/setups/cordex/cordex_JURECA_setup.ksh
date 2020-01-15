@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/clm"
-  defaultFDCOS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/cosmo"
-  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/oasis3"
-  defaultFDPFL="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/parflow"
+  defaultFDCLM="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/clm"
+  defaultFDCOS="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/cosmo"
+  defaultFDOAS="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/oasis3"
+  defaultFDPFL="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
