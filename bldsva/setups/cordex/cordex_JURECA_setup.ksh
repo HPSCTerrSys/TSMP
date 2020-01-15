@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/clm"
-  defaultFDCOS="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/cosmo"
-  defaultFDOAS="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/oasis3"
-  defaultFDPFL="/p/scratch/cslts/shared_data/rcmod_TSMP-ref_SLTS/TestCases/cordex/parflow"
+  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval/input/clm"
+  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval/input/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 

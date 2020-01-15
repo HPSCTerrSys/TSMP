@@ -34,22 +34,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
     cflagsSim=" -qopenmp "
-    if [[ $compiler == "Gnu" ]]; then
-      cflagsSim=" -fopenmp "
-    fi
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
 
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"
     sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@-l -l@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
   comment "   sed correct linker command in pftools"
     sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@-l -l@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
 check
 
 
