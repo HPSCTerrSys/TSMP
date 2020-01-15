@@ -55,13 +55,13 @@ substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
     comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder, src.$compiler"
-    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
  
   comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
   check
     if [[ $withOASMCT == "true" ]] ; then 
       comment "   sed replace old mod_prism includes from pfl oas files"

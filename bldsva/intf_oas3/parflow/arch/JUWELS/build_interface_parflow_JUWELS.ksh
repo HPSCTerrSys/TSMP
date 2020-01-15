@@ -81,9 +81,9 @@ route "${cblue}<< make_pfl${cnormal}"
 substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
   comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
  
   c_substitutions_pfl
