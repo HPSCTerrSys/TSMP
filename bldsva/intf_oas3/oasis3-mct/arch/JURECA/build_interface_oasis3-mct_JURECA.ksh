@@ -130,7 +130,11 @@ route "${cblue}>> configure_oas${cnormal}"
     sed -i "s@__lib__@-L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file
   check
   comment "   sed precision to oas Makefile"
-    sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
+    if [[ $compiler == "Intel" ]]; then
+      sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
+    fi
   check
 
 route "${cblue}<< configure_oas${cnormal}"

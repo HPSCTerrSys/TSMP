@@ -27,33 +27,13 @@ route "${cblue}<< substitutions_da${cnormal}"
 configure_da(){
 route "${cblue}>> configure_da${cnormal}"
   export PDAF_DIR=$dadir
-  if [[ $compiler == "Gnu" ]]; then
-    export PDAF_ARCH=linux_gfortran
-  else
-    export PDAF_ARCH=linux_ifort_jureca
-  fi
+  export PDAF_ARCH=linux_gnu_generic_x86
 
 #PDAF part
-  file=$dadir/make.arch/${PDAF_ARCH}.h
+  file=$dadir/make.arch/linux_gnu_generic_x86.h
   
   comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
-  check
-
-  comment "   sed comFC dir to $file" 
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comFC__@scorep-mpif90@" $file >> $log_file 2>> $err_file  
-    else
-      sed -i "s@__comFC__@${mpiPath}/bin/mpif90@" $file >> $log_file 2>> $err_file  
-    fi
-  check
-
-  comment "   sed comCC dir to $file" 
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comCC__@scorep-mpicc@" $file >> $log_file 2>> $err_file  
-    else
-      sed -i "s@__comCC__@${mpiPath}/bin/mpicc@" $file >> $log_file 2>> $err_file  
-    fi
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/linux_gnu_generic_x86.h $file >> $log_file 2>> $err_file
   check
 
   comment "   sed MPI dir to $file" 
@@ -61,11 +41,7 @@ route "${cblue}>> configure_da${cnormal}"
   check
 
   comment "   sed LIBS to $file"
-  if [[ $compiler == "Gnu" ]]; then
-    sed -i "s@__LIBS__@ -ldl $lapackPath/mkl/lib/intel64/libmkl_gf_lp64.a $lapackPath/mkl/lib/intel64/libmkl_gnu_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  else
-    sed -i "s@__LIBS__@ $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  fi
+    sed -i "s@__LIBS__@  -L${lapackPath}/lib64 -llapack  -lblas -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
   check
 
   comment "   sed optimizations to $file"
@@ -97,9 +73,9 @@ route "${cblue}>> configure_da${cnormal}"
   pf=""
  
   if [[ $withOAS == "false" && $withPFL == "true" ]] ; then
-     importFlags+="-I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include "
+     importFlags+="-I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/include "
      cppdefs+=" ${pf}-DPARFLOW_STAND_ALONE "
-     libs+=" -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
+     libs+=" -L$hyprePath/lib -L$siloPath/lib -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
      obj+=' $(OBJPF) '
   fi
 
@@ -120,20 +96,20 @@ route "${cblue}>> configure_da${cnormal}"
   fi 
 
   if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
-     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include "
+     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/include "
      cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
+     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip -L$hyprePath/lib -L$siloPath/lib -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
      obj+=' $(OBJCLM) $(OBJPF) '
   fi
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "true" ]] ; then
-     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include -I$cosdir/obj "
+     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/include -I$cosdir/obj "
      cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 ${pf}-DCOUP_OAS_PFL "
      if [[ $cplscheme == "true" ]] ; then ; cppdefs+=" ${pf}-DCPL_SCHEME_F " ; fi
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip $grib1Path/libgrib1.a -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo -lcosmo $grib1Path/libgrib1.a"
+     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip $grib1Path/libgrib1.a -L$hyprePath/lib -L$siloPath/lib -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo -lcosmo $grib1Path/libgrib1.a"
      obj+=' $(OBJCLM) $(OBJCOSMO) $(OBJPF) '
   fi
 
@@ -181,15 +157,10 @@ route "${cblue}<< configure_da${cnormal}"
 make_da(){
 route "${cblue}>> make_da${cnormal}"
   export PDAF_DIR=$dadir
-  if [[ $compiler == "Gnu" ]]; then
-    export PDAF_ARCH=linux_gfortran
-  else
-    export PDAF_ARCH=linux_ifort_jureca
-  fi
+  export PDAF_ARCH=linux_gnu_generic_x86
 
   comment "   cd to $dadir/src"
     cd $dadir/src >> $log_file 2>> $err_file
-    mkdir -p ../lib >> $log_file 2>> $err_file
   check
   comment "   make pdaf"
     make >> $log_file 2>> $err_file
