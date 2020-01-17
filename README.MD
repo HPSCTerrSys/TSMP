@@ -1,104 +1,115 @@
+# TSMP
+This readme contains a short instruction for external and internal users (within Forschungszentrum Jülich) on how to prepare TSMP package and how to provide the model components. 
+As an example to test the TSMP system, you will find in the step 6, an instruction to build, setup and run Euro-cordex.11 test case.
 
-#********* History********************* #
+## Table of contents
+* [Introduction]
+* [Downloading TSMP Interface]
+* [Downloading Model Components]
+* [Creating and running the Euro-cordex standard test case]
+* [Contact](#contact)
 
-15.01.2020 written by Abouzar Ghasesmi
+## Introduction
+The TAMP package contains only a coupling interface for different versions of model components.
+IGB3 institute provides the model components for internal users, who are working in Forschungszentrum Jülich, as explained below. 
+External users should provide the model components by thier own. 
+Through this readme $basedir is the address of terrsysmp directory in your machine (cd to terrsysmp directory and then export basedir=`pwd`).  
 
-#********* History********************* #
+* Internal users
+The model components cane be downloaded from IGB3-Gitlab repository (https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src) .
+Since the authentification to IGB3-Gitlab is based on a SSH-key, then internal users are requested to copy thier public SSH-key to IGB3-Gitlab repository.
+The model components available in IGB3-Gitlab are: Cosmo5.01, Parflow3.2, CLM3.5, oasis3-mct.
 
-What comes in the follwoing is a short readme for Terrsysmp package for external and internal users (within Forschungszentrum Jülich). 
-As an example to test the Terrsysmp system you will find in the step 6 an instruction to build, setup and run Euro-cordex.11 test case.
+* External users
+The model components should be downloaded from the respective websites as indicated in the following section.
+External users are also requested to take care of the software modules as well as compiler and MPI wrapper that needed to be loaded for building TSMP interface. 
+The path to the modules,compiler and MPI wrapper should be set in $basedir/bldsva/machines/<machin name>/build_interface_<machin name>.ksh. 
+See for example  $basedir/bldsva/machines/JUWELS/build_interface_JUWELS.ksh.
 
-1- Cloning the terrsysmp package which is available in TSMP-GitHub repository using:
+Note also that model components should be copied inside the $basedir directory and be renamed as suggested in the follwoing.
+
+## Downloading TSMP Interface
+In your preferred directory and for current release version, type
+
 git clone https://......GitHub/terrsysmp
-The terrsysmp package contains only a coupling interface for different versions of model components.
-IGB3 institue provides the model components for internal users (within Forschungszentrum Jülich) as explained in the step 1-2, while external users 
-should provide them by thier own as explained in the step 1-1.
+cd terrsysmp
+export basedir=`pwd`
 
-1-1 Externla users should download the model component from the respective websites as indicated in the steps 2,3,4 and 5.
-External users are also requested to take care of the software modules as well as compiler and MPI wrapper that needed to be loaded for building Terrsysmp system. 
-The path to the modules,compiler and MPI wrapper should be set in .../terrsysmp/bldsva/machines/<machin name>/build_interface_<machin name>.ksh. 
-See for example  ../terrsysmp/bldsva/machines/JUWELS/build_interface_JUWELS.ksh.
-
-1-2 Internal users can download the model component from IGB3-gitlab repository (https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src)
-Since the authentification to IGB3-gitlab is based on a ssh key, then internal users are requested to copy public thier SSH-key to IGB3-gitlab repository.
-The model components available in IGB3-gitlab are: Cosmo5.01, Cosmo4_21, Parflow3.2, Parflow, CLM3.5, oasis3-mct, pdaf1_1.
-
-1-3 Note also that model components should be copied inside the terrsysmp directory and be renamed as suggested in the follwoing.
-
-2- Atmospheric Model (COSMO/ICON)
-COSMO/ICON itself is free for academic R&D work.
+## Downloading Model Components
+* Atmospheric Model (COSMO)
+COSMO is free for academic R&D work.
 
 - COSMO5_1
-Get license (https://git2.meteo.uni-bonn.de/projects/terrsysmp/wiki/License) and download from DWD.
-Rename the folder to cosmo5_1
+External users need to get a license (https://git2.meteo.uni-bonn.de/projects/terrsysmp/wiki/License) and download the model from DWD or http://www.cosmo-model.org .
+Internal users:
+cd to $basedir
+git clone git@icg4geo.icg.kfa-juelich.de:ModelSystems/tsmp_src/cosmo5.01.git
+Rename the folder to cosmo5_1:
+mv cosmo5.01 COSMO5_1
 
-- ICON
-The ICON LEM source code can be obtained via GIT. To access the GIT repository you have to be registered. The authentification to GIT is based on a ssh key.
-Create an ssh-key (see below) and send public key to Monika Esch (MPI-M) at monika.esch@mpimet.mpg.de and describe why you need ICON for.
-If your access to ICON git repository is approved, download ICON as follows:
-1) git clone --recursive git@git.mpimet.mpg.de:icon-lem.git
-2) cd icon-lem
-3) git checkout -b icon-lem-2.1.00-alpha remotes/origin/icon-lem-2.1.00-alpha
-4) git submodule update
-Rename the folder to icon-lem
-
-3- Land Surface Model (CLM)
-The repository for CLMX.X are different as CLM3.5 is available as an offline model but the newer versions are part of the CESM repository
+* Land Surface Model (CLM)
+The repositories for CLMX.X are different as CLM3.5 is available as an offline model but the newer versions are part of the CESM repository
 
 - CLM3.5
-Available from http://www.cgd.ucar.edu/tss/clm/distribution/clm3.5/
-Rename the folder to clm3_5
+External users need to get CLM3.5 from http://www.cgd.ucar.edu/tss/clm/distribution/clm3.5/
+Internal users:
+cd to $basedir and download the model:
+git clone git@icg4geo.icg.kfa-juelich.de:ModelSystems/tsmp_src/clm3.5.git
+Rename the folder to clm3_5:
+mv clm3.5 clm3_5
 
-- CLM4.0
-Users will need to register in the CESM portal: http://www2.cesm.ucar.edu/models/cesm1.2/
-svn co -r 76850 --username guestuser --password [password] https://svn-ccsm-models.cgd.ucar.edu/cesm1/release_tags/cesm1_2_1 cesm1_2_1
-OR
-svn co -r 76850 https://svn-ccsm-models.cgd.ucar.edu/cesm1/release_tags/cesm1_2_1 cesm1_2_1
-Rename the folder to clm4_0 and copy it to ../terrsysmp directory
-- CLM5.0
-UPDATE PENDING ...
 
-3- Groundwater Model (ParFlow)
-Available from https://github.com/parflow/parflow
-Information on releases available at https://github.com/parflow/parflow/releases
+* Groundwater Model (ParFlow)
+External users need to get parflow3.2 from https://github.com/parflow/parflow.
+Information on releases available at https://github.com/parflow/parflow/releases.
+cd to $basedir and download the model and Download the model:
 git clone --branch v3.2.0 https://github.com/parflow/parflow.git
 
-4- External Coupler (OASIS3-MCT)
-OASIS3-MCT-V2.0 is used to coupl the model components, and is available in Terrsysmp GitHub repository under the CERFACS license (https://verc.enes.org/oasis).
-Rename the folder to oasis3-mct
+Internal users:
+cd to $basedir and download the model:
+git clone git@icg4geo.icg.kfa-juelich.de:ModelSystems/tsmp_src/parflow3.2.git
+git clone --branch v3.2.0 https://github.com/parflow/parflow.git
 
-5- Data Assimilation Framework (PDAF)
-wikipage for Parallel Data Assimilation Framework (PDAF) http://pdaf.awi.de/trac/wiki
-To download new releases for PDAF, you need to register at http://pdaf.awi.de/register/index.php
-Currently the newest available PDAF Version 1.13.2, has been successfully tested with Terrsysmp Interface. Release notes for PDAF's different version can be found at http://pdaf.awi.de/trac/wiki/ReleaseNotes
-When you download the PDAF after registering, you need to extract or untar the PDAF files and folders. you need to replace the older pdaf1_1 in terrsysmp/pdaf1_1 with newer one. So if you are downloading PDAF Version 1.13.2. After extracting the tar files you get a folder PDAF-D_V1.13.2. Just rename this folder from PDAF-D_V1.13.2 to pdaf1_1 and place it in terrsysmp folder.
-Please note pdaf1_1 in path terrsysmp/bldsva/intf_DA/pdaf1_1 is the terrsysmp interface to terrsysmp/pdaf1_1, it doesnt have the data assimilation algorithms.
+Rename the folder to parflow3_2:
+mv parflow3.2 parflow3_2
 
-6- Building terrsysmp system and setup the Cordex.11 test case.
-After locating the model components in terrsysmp directory, 
-follwoing the steps below, you can build terrsysmp system and setup the cordex.11 test case.
+* External Coupler (OASIS3-MCT)
+OASIS3-MCT-V2.0 is used to coupl the model components, and is available in TSMP-GitHub repository under the CERFACS license (https://verc.enes.org/oasis).
+Both Internal and External users can download the model from TSMP-GitHub.
+----
 
-6-1 Downloading the input files necessary for running Euro-cordex.11 test case:
-cd to the root directory .../terrsysmp and run the script "download_input_cordex11.ksh"
+Internal users can also downlaod it from IGB3-Gitlab.
+cd to $basedir and download it via:
+git clone git@icg4geo.icg.kfa-juelich.de:ModelSystems/tsmp_src/oasis3-mct.git
 
-6-2 cd to .../terrsysmp/bldsva directory and build the coupled "clm-cos-pfl" system using Intel compiler.
+## Creating and running the Euro-cordex standard test case.
+After locating the model components in $basedir directory, 
+follwoing the steps below, you can build TSMP system and setup the cordex.11 test case.
+
+1- Downloading the input files necessary for running Euro-cordex.11 test case:
+cd to $basedir directory and run the script "download_input_cordex11.ksh"
+
+2- cd to $basedir/bldsva directory and build the coupled "clm-cos-pfl" system using Intel compiler.
 
 ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m <machin name> -O Intel
 
-6-3 (Optional, better not to mess up the root directory and run directory) export your work directory using
+3- (Optional, better not to mess up the root directory and run directory) export your work directory using
 export WORK=
 
-6-4 If you export your work directory then run:
+4- If you export your work directory then run:
 ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m <machin name> -I _cordex -r $WORK/run -O Intel
 if NOT
 ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m <machin name> -I _cordex  -O Intel
 
-6-5 cd to the run directory and change "#SBATCH " lines in "tsmp_slm_run.bsh" script accordingly.
+5- cd to the run directory and change "#SBATCH " lines in "tsmp_slm_run.bsh" script accordingly.
 
-6-6 Submit the job using "sbatch tsmp_slm_run.bsh".
+6- Submit the job using "sbatch tsmp_slm_run.bsh".
 
-
-
-
-
-
+## Contact
+Dr. Abouzar Ghasemi
+Jülich Supercomputing Centre (JSC)
+Wilhelm-Johnen-Straße
+52425 Jülich, Germany
+Phone: +49 2461 61-2312
+Fax: +49 2461 61-6656
+email: a.ghasemi@fz-juelich.de
