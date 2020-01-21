@@ -33,3 +33,7 @@ else
     exit
 fi
 
+# move data to ../terrsysmp directory
+mv tsmp_eur11_eraint_eval ../
+
+
