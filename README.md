@@ -6,7 +6,7 @@ TSMP allows for a physically-based representation of transport processes of mass
 
 TSMP is extensively used for idealized and real data process and sensitivity studies in water cycle research, for climate change simulations, data assimilation studies including reanalyses, as well as experimental real time forecasting and monitoring simulations, ranging from individual catchments to continental model domains. TSMP runs on notebooks as well on latest supercomputers using a range of compilers.
 
-TSMP development has been driven by groups within the [Centre for High-Performance Scientific Computing in Terrestrial Systems](http://www.hpsc-terrsys.de) (HPSC-TerrSys), as part of the [Geoverbund ABC/J](http://www.geoverbund-abcj.de/geoverbund/EN/Home/home_node.html), the geoscientific network of the University of Cologne, Bonn University, RWTH Aachen University, and the Research Centre Jülich. The current team is anchored in Jülich and Bonn in Germany.
+TSMP development has been driven by groups within the [Centre for High-Performance Scientific Computing in Terrestrial Systems](http://www.hpsc-terrsys.de) (HPSC-TerrSys), as part of the [Geoverbund ABC/J](http://www.geoverbund-abcj.de/geoverbund/EN/Home/home_node.html), the geoscientific network of the University of Cologne, Bonn University, RWTH Aachen University, and the Research Centre Juelich. The current team is anchored in Juelich and Bonn in Germany.
 
 **Visit**
 
@@ -29,7 +29,7 @@ This very short user guide only covers one variant on how the model can be setup
 
 TSMP uses a multiple program multiple data (MPMD) execution model where states (e.g., near surface air temperature) and fluxes (e.g., latent and sensible heat fluxes) are passed between the atmospheric, land surface and hydrologic/groundwater component models along compartmental interfaces through the OASIS3 or the parallel OASIS3-MCT coupling interface.
 
-TSMP essentially consists only of the interface that combines the specific versions of different component models in a modular (different combinations of component models) and flexible (different spatial and temporal resolutions) way. During the install process, before the compilation of the component models, the source code of the component models is patched by the setup shell scripts, implementing the necessary coupling functionalities.  
+TSMP essentially consists only of the interface that combines the specific versions of different component models in a modular (different combinations of component models) and flexible (different spatial and temporal resolutions) way. During the install process, before the compilation of the component models, the source code of the component models is patched by the setup shell scripts, implementing the necessary coupling functionalities.
 
 Please note: For licensing and maintenance reasons, we do not provide any source code of any of the component models or the coupler library. The users should download the component models from their respective websites. TSMP has various setup options: each component model standalone (ParFlow, CLM, COSMO), only land surface and hydrology / groundwater (CLM+ParFlow), only land surface and atmosphere (CLM+COSMO), or fully coupled (ParFlow, CLM, COSMO). Because the patches are designed for specific versions of the models, it is required to get the exact original, unaltered version as specified.
 
@@ -99,9 +99,9 @@ Authenticate with your GitLab web GUI user name and password and clone the repos
 Rename the component model directories:
 
 ```shell
-   mv cosmo5.01 cosmo5_1
-   mv clm3.5 clm3_5
-   mv parflow3.2 parflow3_2
+   mv cosmo5.01_fresh cosmo5_1
+   mv clm3.5_fresh clm3_5
+   mv parflow3.2_fresh parflow3_2
 ```
 
 #### External users
@@ -153,7 +153,7 @@ The input files which necessary for running the EURO-CORDEX evaluation run test 
 Before building TerrSysMP, first check what build options are there
 
 ```shell
-   cd $TSMP_DIR
+   cd $TSMP_DIR/bldsva
    ./build_tsmp.ksh -a
 ```
 
