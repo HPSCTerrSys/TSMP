@@ -596,7 +596,7 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
   comment "    copy oas_clm_init.F90 to  $clmdir/src/oas3"
-    cp $rootdir/bldsva/intf_oas3/${mList[1]}/pfile/oas_clm_init.F90 $clmdir/src/oas3
+    cp $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/oas_clm_init.F90 $clmdir/src/oas3
 
     spmd="on"       # settings are [on   | off       ] (default is off)
     maxpft="1"        # settings are 4->17               (default is 4)

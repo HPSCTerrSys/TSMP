@@ -16,15 +16,15 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
 
   #CPS Remove hardwiring of compiler, introducing compiler switch 
-  if [[ $compiler == "Intel" ]] ; then
+#  if [[ $compiler == "Intel" ]] ; then
   #Intel GRIB
-  defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
+#  defaultGribPath="/p/project/cslts/local/juwels/grib1_DWD/lib/"
 
-  elif [[ $compiler == "Gnu" ]] ; then
+#  elif [[ $compiler == "Gnu" ]] ; then
   #GNU GRIB
-  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
-  fi
-
+#  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
+#  fi
+  defaultGribPath="$EBROOTGRIB_API"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
