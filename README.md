@@ -50,9 +50,9 @@ To get a man-page for the usage of this scripts, do:
    ./setup_tsmp.ksh --man
 ```
 
-### <a name="ref_exp"></a> The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP v1.2.0
+### <a name="ref_exp"></a> The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP v1.2.1
 
-This test case uses the current TSMP release version v1.2.0 with OASIS3/OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2. A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
+This test case uses the current TSMP release version v1.2.1 with OASIS3/OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2. A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies
 
