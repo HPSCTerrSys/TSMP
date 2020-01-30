@@ -175,7 +175,7 @@ An example for the JURECA HPC system at the Juelich Supercomputing Centre is her
 
 For HPSC-TerrSys users:
 
-To configure TSMP for the [EURO-CORDEX test case experiment](#ref_exp):
+To configure TSMP for the [EURO-CORDEX test case experiment](#ref_exp) on JURECA machine (on JUWELS just change -m JURECA to -m JUWELS):
 
 ```shell
    cd $TSMP_DIR/bldsva
