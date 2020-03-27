@@ -20,7 +20,7 @@ check
   if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
   file=$cosdir/Fopts 
 comment "   sed comflg to cos Makefile"
-  sed -i "s@__comflg__@$optComp -ffree-line-length-0 -I$ncdfPath/include $cplInc -cpp -DGRIBDWD -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comflg__@$optComp -ffree-line-length-0 -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
@@ -32,7 +32,9 @@ comment "   sed ld to cos Makefile"
   sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
-  sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib -L$ncdfPath/lib/ -lnetcdff -lnetcdf@" $file >> $log_file 2>> $err_file
+comment "   grin api path: $gribPath "
+check
+  sed -i "s@__lib__@-L$gribPath/lib -lgrib_api_f90 -lgrib_api $cplLib -L$ncdfPath/lib -lnetcdff -lnetcdf@" $file >> $log_file 2>> $err_file
 check
 route "${cblue}<< configure_cos${cnormal}"
 }

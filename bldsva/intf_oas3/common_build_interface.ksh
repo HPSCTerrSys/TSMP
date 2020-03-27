@@ -778,7 +778,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi
 
     flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
-    flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
+    flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-hdf5=$hdf5path --with-amps-sequential-io"
 
   comment "    cd to pfsimulator"
     cd $pfldir/pfsimulator >> $log_file 2>> $err_file
@@ -813,6 +813,7 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
     fi
 
   comment "    configure pftools"
+  check
     $pfldir/pftools/configure $flagsTools >> $log_file 2>> $err_file
   check
   export SKIN_MODE=mpi
@@ -966,14 +967,15 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
       sed "s,__pfl_ICPpressureFileName__,$restfile_pfl," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file
   check
     fi
-
+  
   export PARFLOW_DIR=$bindir
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check
 
   comment "   create parflow db with tclsh from namelist."
-    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
 

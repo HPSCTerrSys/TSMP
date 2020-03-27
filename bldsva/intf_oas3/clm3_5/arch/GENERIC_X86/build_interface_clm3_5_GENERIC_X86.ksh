@@ -7,7 +7,9 @@ route "${cblue}<< always_clm${cnormal}"
 
 configure_clm(){
 route "${cblue}>> configure_clm${cnormal}"
-  cplLib="-lnetcdff "
+  mpiPathi=$defaultMpiPath
+comment "   mpipath is set for Openmpi as defualt MPI wrapper: $mpiPathi "
+  cplLib="-lnetcdff -lnetcdf "
   flags=""
   ccc="$mpiPath/bin/mpicc "
   cfc="$mpiPath/bin/mpif90 "
