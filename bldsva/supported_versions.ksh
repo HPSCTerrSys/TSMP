@@ -17,6 +17,7 @@ platforms+=(
         ["GENERIC_X86"]="Generic Linux x86 machine"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUWELS"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
+        ["MISTRAL"]="DKRZ (Hamburg ) - general purpose Linux Cluster"
 )
 
 # list of available versions for a platform
@@ -26,6 +27,7 @@ availability+=(
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
+        ["MISTRAL"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT 4.1.0MCT 3.0.0MCTPDAF "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 3.0.0MCTPDAF "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
         ["CLUMA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
@@ -121,6 +123,7 @@ setups+=(
 setupsAvail+=(
 	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse "
+        ["MISTRAL"]=" nrw cordex idealRTD  "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "
