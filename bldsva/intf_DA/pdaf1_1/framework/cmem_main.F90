@@ -1,3 +1,4 @@
+module get_tb_cmem
 ! Copyright 2006-2014 ECMWF.
 !
 ! This software is licensed under the terms of the Apache Licence Version 2.0
@@ -5,8 +6,9 @@
 !
 ! In applying this licence, ECMWF does not waive the privileges and immunities granted to it by
 ! virtue of its status as an intergovernmental organisation nor does it submit to any jurisdiction.
+contains
 !
-SUBROUTINE CMEM_MAIN(m_state_p,dim_obs_p)
+SUBROUTINE cmem_main(LS,SATinfo,TB,step)
 !
 !
 !
@@ -63,62 +65,58 @@ USE YOMLUN, ONLY : NULOUT, NULTMP
 USE YOMCMEMPAR
 USE YOMCMEMFIELDS
 USE YOMCMEMSOIL
-USE YOMCMEMVEG, ONLY : wc_veg, tb_veg, w_eff, bj, tauN, & 
+USE YOMCMEMVEG,ONLY : wc_veg, tb_veg, w_eff, bj, tauN, & 
                       & tb_veg, tau_veg, t_veg, a_geo, a_geoL, a_geoH,tth,ttv
-USE YOMCMEMATM, ONLY : tau_atm, tb_au, tb_ad, tb_toa, tb_tov,fZ,tair 
-!-------------------------------------!PSG
-use rdclm_wrcmem     ! PSG: module with subroutines to read/write CLM NetCDF
+USE YOMCMEMATM,ONLY : tau_atm, tb_au, tb_ad, tb_toa, tb_tov,fZ,tair 
+
 use clm4cmem         ! PSG: module with toolbox for CLM integration
-use yomcmemnetcdf, only: NTIMES, NLATS, NLONS, NINC  ! PSG: compativility
+use yomcmemnetcdf,    only: NTIMES, NLATS, NLONS, NINC  ! PSG: compativility
 use SatOperator      ! PSG: module with toolbox for Satellite Operator
-!-------------------------------------!PSG end
+use rdclm_wrcmem,     only:info_CLM_file 
 ! LSN: read data from clm memory
-use rdclm_wrcmempdaf
-use mod_tsmp,      only: pf_statevecsize
+use rdclm4pdaf       ! LSN: module with subroutines to read CLM vars 4 pdaf
+use mod_tsmp,         only: pf_statevecsize
+use mod_assimilation, only : dim_obs,obs_filename
 IMPLICIT NONE
 !
 INTEGER(KIND=JPIM) :: JJPOL 
 REAL(KIND = JPRM) :: RSN(2), ESN(2)
 REAL(KIND = JPRM) :: tfrac(JPCMEMTILE)
 !
-!-------------------------------------!PSG
-! PSG: following lines are input and output paramemeteres 
-! for subroutine only
-! character(LEN=100), dimension(:), allocatable :: CLM_fname, inparam_fname  
-character*200:: CLM_fname, inparam_fname, surf_fname
-type(SATELLITE) :: SAT 
-! real,intent(inout) ::state_p
-INTEGER, INTENT(in) :: dim_obs_p   ! Dimension of observed state
-real,intent(inout) :: m_state_p(dim_obs_p) ! PE-local observed state
-!LSN:i_idx is the index in xcoord_fortran/ycoord_fortran/pf_statevec_fortran
-integer :: i
-!
-! PSG: end of subroutine parameters definition.
-
+! LSN: following lines are input and output paramemeteres for subroutine only 
+ INTEGER, INTENT(in) :: step 
+CHARACTER (len = 110) :: current_observation_filename
+!CHARACTER (len = 200):: CLMNAME,SURFNAME !inparam_fname 
+TYPE(SATELLITE),ALLOCATABLE :: SAT
+TYPE(SATELLITE),INTENT(IN) :: SATinfo 
+INTEGER :: i
+LOGICAL :: exist
+INTEGER(kind=JPIM) :: Nvars(3)       !PSG:
+TYPE(CLM_DATA),ALLOCATABLE :: CLMVARS            !PSG:
+TYPE(CLM_DATA),INTENT(IN) :: LS
+REAL,INTENT(OUT) :: TB(dim_obs)
+! *****************************************************************************
 ! 1.0 Model SETUP
-! ------------------------------------!PSG end
 !
 ! 1. Get information on the input files and allocate variables accordingly
-!------------------------------------------------------------------------------
-!------------------------------------!PSG
-integer(kind=JPIM) :: Nvars(3)       !PSG:
-type(CLM_DATA),allocatable :: CLMVARS            !PSG:
 ! assign CLMVARS array
 allocate(CLMVARS) 
-
-
+CLMVARS       = LS
+allocate(SAT)
+SAT           = SATinfo
 ! Assigning input parameters to the CMEM global parameters
 
-CLM_fname = "/p/scratch/cjicg41/jicg4175/day4/run/clm_00000.clm2.h0.2013-04-05-03600.nc"
-inparam_fname = "/p/project/chbn29/hbn29q/terrsysmp/bldsva/intf_DA/pdaf1_1/framework/input"
-surf_fname = '/p/scratch/cjicg41/jicg4175/day4/input_clm/surfdata.nc'
+!CLM_fname     = "/p/scratch/cjicg41/jicg4175/clmoas_0.clm2.h0.2015-07-31-03600.nc"
+!inparam_fname = "/p/project/chbn29/hbn29q/terrsysmp/bldsva/intf_DA/pdaf1_1/framework/input"
+!surf_fname    = '/p/scratch/chbn29/hbn291/tsmp/data/rv010re010/surfdata_0302x0267.nc'
 
-CLNAME        = trim(CLM_fname)
-INPUTNAMLST   = trim(inparam_fname)
+!CLNAME        = trim(CLM_fname)
+!SURFNAME      = trim(surf_fname)
+!INPUTNAMLST   = trim(inparam_fname)
 
-WRITE(NULOUT,*) 'The input file is '
-WRITE(NULOUT,*) CLM_fname
-!------------------------------------!PSG end
+WRITE(NULOUT,*) '***** Community Microwave Emission Modelling Platform***** '
+!WRITE(NULOUT,*) 'The input file is '
+!WRITE(NULOUT,*) CLM_fname
 !
 CALL CMEM_SETUP
 !  
@@ -128,21 +126,21 @@ SELECT CASE ( CFINOUT )
 !
 ! LSN: new case for PDAF support, reading input from state_p
   CASE ('pdaf')
-     call read_satellite_info(INPUTSATINFO,SAT)
+     !write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
+     !write(*,*) current_observation_filename
+     !call read_satellite_info(current_observation_filename,SAT)
      NINC   = size(SAT%theta)
-     call info_CLM_file(CLNAME,Ntot=Nvars,SURF=surf_fname)
+     call info_CLM_file(CLMNAME,Ntot=Nvars,SURF=SURFNAME)
      NLONS  = Nvars(1)
      NLATS  = Nvars(2)
      NTIMES = 1
      N      = NLONS*NLATS
-     print*,'Nvars is ',Nvars
      Nvars(3) = 1
+     IF (LGPRINT) WRITE(NULOUT,*) 'Nvars is ',Nvars
 ! ----------------------------------!LSN end
 !  CASE ( 'ifs' )
 !
-END SELECT
-!
-!
+END SELECT!
 !
 ! 1.2 Allocate variables according to the size of input 
 !
@@ -200,38 +198,22 @@ ALLOCATE ( fsurf_emis(N,2) )
 ALLOCATE ( fteffC(N,3) )  
 !
 ! 2. Read input data
-!      ---------------
 !
 SELECT CASE (CFINOUT)
-!!
-!-----------------------------------PSG
-    CASE ('clm')   ! PSG: following 3 lines clm4cmem implementations:
-        WRITE(NULOUT,*) 'Read CLM is done'
-        call read_CLM_file(CLNAME,inhr=1,SAT=SAT,LS=CLMVARS)
-        ! WRITE(NULOUT,*) 'Read CLM is done'
-        call memory_cmem_forcing(CLMVARS)
-!----------------------------------PSG end
-    CASE ('pdaf')  !LSN: following lines pdaf4cmem implementations
-        WRITE(NULOUT,*) 'Read CLM is done'
-        !call read_CLM_file(CLNAME,inhr=1,SAT=SAT,LS=CLMVARS,SURF=surf_fname)
-        call read_CLM_pdaf(CLMVARS,SAT,Nvars)
-        WRITE(NULOUT,*) 'Read CLM memory is done'
-        call memory_cmem_forcing(CLMVARS)
 
-!   CALL RDCMEMIFS
+    CASE ('pdaf')  !LSN: following lines pdaf4cmem implementations
+       
+         call memory_cmem_forcing(CLMVARS)
 !
 END SELECT
-!
 !
 WRITE(NULOUT,*) 'Read input files done'
 !
 IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
 !
     WRITE(NULOUT,*) JJINC
-
 !
-    CALL CMEM_INIT
-! 
+    CALL CMEM_INIT 
 !
 !   2.0 deallocate variables that are not useful anymore
 !
@@ -247,7 +229,7 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
 !   3. Compute toa brightness temperatures
 !    -----------------------------------
 !
-    WRITE(NULOUT,*) 'CMEM_main, compute TB field'
+    IF (LGPRINT) WRITE(NULOUT,*) 'CMEM_main, compute TB field'
 !
 !
 
@@ -458,8 +440,8 @@ if(CFINOUT.eq.'pdaf'.and.allocated(TB_HV)) then
     end if
 end if
 
-print *, 'TB_H is ',TB_HV(1,1,1,JJINC,1),TB_HV(NLONS,NLATS,1,JJINC,1)
-print *, 'TB_H is ',TB_HV(1,1,2,JJINC,1),TB_HV(NLONS,NLATS,2,JJINC,1)
+IF (LGPRINT) WRITE(NULOUT,*) 'TB H polarization are ',TB_HV(1,1,1,JJINC,1),TB_HV(NLONS,NLATS,1,JJINC,1)
+IF (LGPRINT) WRITE(NULOUT,*) 'TB V polarization are ',TB_HV(1,1,2,JJINC,1),TB_HV(NLONS,NLATS,2,JJINC,1)
 
 ! WRITE(CANGLE,'(I2)') INT(SAT%theta(JJINC))  ! PSG: changing theta
 !---------------------------------PSG end
@@ -467,42 +449,28 @@ print *, 'TB_H is ',TB_HV(1,1,2,JJINC,1),TB_HV(NLONS,NLATS,2,JJINC,1)
 ! 4. Write outputs 
 !-----------------
 !
-WRITE(NULOUT,*) 'CMEM_main, write output'
+IF (LGPRINT) WRITE(NULOUT,*) 'CMEM_main, write output'
 !
     SELECT CASE (CFINOUT)
 !
-!------------------------------------PSG
-      CASE ('clm') ! PSG: CLM case
-          if(JPHISTLEV.lt.4_JPIM.or.JPHISTLEV.eq.5_JPIM) then
-             ! PSG: Writing High-res NetCDF only.
-             CALL WRCMEMNETCDF
-          end if
-          if(JPHISTLEV.eq.4_JPIM.and.JJINC.eq.NINC) then
-             ! PSG: Writing Satellite Operator NetCDF only.
-             CLNAME='./output/out_level4_'//CNAMEID//'_'//cfreq//'_'//trim(SAT%name)//'.nc'
-             call write_satellite_operator(SAT,CLNAME)
-          else if(JPHISTLEV.eq.5_JPIM.and.JJINC.eq.NINC) then
-             ! PSG: Writing High-res level1 AND satellite opertor NetCDFs.
-             CLNAME='./output/out_level4_'//CNAMEID//'_'//cfreq//'_'//trim(SAT%name)//'.nc'
-             call write_satellite_operator(SAT,CLNAME)
-          else if(JPHISTLEV.eq.6_JPIM.and.JJINC.eq.NINC) then
-             WRITE(NULOUT,*) 'Data to keep in memory! no file storated!'
-          else
-             WRITE(NULOUT,*) JJINC
-             WRITE(NULOUT,*) NINC
-             WRITE(NULOUT,*) 'ERROR by selecting the write JPHISTLEV param.'
-          end if
-!------------------------------------PSG end
-! LSN: output brightness temperature
+! LSN: output the global brightness temperature 
       CASE ('pdaf')
-          WRITE(NULOUT,*) 'Data to keep in memory! no file storated!'    
-          m_state_p(:) = reshape(SAT%TBSAT_HV(:,:,2,NTIMES),(/dim_obs_p/))
-          print *, "TB is",SAT%TBSAT_HV
-!          
-!  CASE ('ifs')
-!!
-!    CALL WRCMEMIFS
-!
+              
+          TB(:) = reshape(SAT%TBSAT_HV(:,1,NINC,NTIMES),(/dim_obs/))
+          
+          ! write brightness temperature to .txt file for debug
+          IF (LGPRINT) WRITE(NULOUT,*) "TB is",SAT%TBSAT_HV 
+          inquire(file="./TB_observation.txt", exist=exist)
+          if (exist) then
+              open(10, file="./TB_observation.txt", status="old", position="append", action="write")
+          else
+              open(10, file="./TB_observation.txt", status="new", action="write")
+          end if
+          
+          write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
+          write(10,*) 'The current observation file is ', current_observation_filename
+          write(10,'(5f9.3)') SAT%TBSAT_HV
+
     END SELECT
 !
 ENDDO IANGLE ! PSG: end over loop theta_inc
@@ -577,9 +545,12 @@ DEALLOCATE (z_lsm)
 DEALLOCATE (ftheta_inc)  ! PSG: deallocation of pixel-based incidence angle
 DEALLOCATE (TB_HV)  ! PSG: deallocating TB multi-dimensional temporal varible
 DEALLOCATE (CLMVARS)
+DEALLOCATE (SAT)
 !
 SELECT CASE (CFINOUT)
 !
 END SELECT
 
-END SUBROUTINE CMEM_MAIN
+END SUBROUTINE cmem_main
+
+end module get_tb_cmem

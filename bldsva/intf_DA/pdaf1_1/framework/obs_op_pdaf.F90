@@ -49,23 +49,37 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p, dim_obs
+        ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB
    use mod_parallel_model, &
-        only: model
+        only: model,mype_model,npes_model,mype_world,npes_world
    use mod_tsmp, &
-        only: tag_model_clm 
-   use mod_read_obs, &
-        only: idx_obs_nc
-     IMPLICIT NONE
+        only: tag_model_clm,nprocpf 
 
+   ! LSN: module load for the implementation of CMEM model
+   USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
+        ONLY:n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter,&
+            MPI_DOUBLE_PRECISION         
+   USE spmdMod      , only : masterproc,iam,mpicom,npes
+   use clm4cmem     , only: SATELLITE,CLM_DATA
+   USE rdclm4pdaf   , only: read_CLM_pdaf
+   USE get_tb_cmem  , only: cmem_main
+   USE rdclm_wrcmem , only: read_satellite_info
+   USE YOMCMEMPAR   , only: INPUTNAMLST, CLMNAME, SURFNAME,LGPRINT
+   IMPLICIT NONE
 ! !ARGUMENTS:
   INTEGER, INTENT(in) :: step               ! Currrent time step
   INTEGER, INTENT(in) :: dim_p              ! PE-local dimension of state
   INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
   REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
   REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
-  integer :: i,dim_obs_l
-  ! type(SATELLITE), intent(out) :: SAT 
+
+  character*200:: CLM_fname, inparam_fname, surf_fname
+  TYPE(SATELLITE),ALLOCATABLE :: SAT
+  TYPE(CLM_DATA), ALLOCATABLE :: CLMVARS             
+  REAL,DIMENSION(1) :: TB(dim_obs)  
+  INTEGER :: i, nerror
+  CHARACTER (len = 110) :: current_observation_filename
+! type(SATELLITE), intent(out) :: SAT 
 ! !CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
@@ -78,31 +92,50 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! *** Perform application of measurement    ***
 ! *** operator H on vector or matrix column ***
 ! *********************************************
+  ! LSN: the original observation operator of soil moisture in Parflow
+  !DO i = 1, dim_obs_p
+  !   m_state_p(i) = state_p(obs_index_p(i))
+  !END DO
+  
+  ! LSN: the implementation of CMEM model here
+  IF (model == tag_model_clm) THEN
+     
+     allocate(CLMVARS)  ! assign CLMVARS array
+     surf_fname    = './obs/surf_fname.nc'
+     SURFNAME      = trim(surf_fname)
+     CLM_fname     = './obs/CLM_fname.nc'
+     CLMNAME       = trim(CLM_fname)     
+     inparam_fname = './obs/input'
+     INPUTNAMLST   = trim(inparam_fname)
 
+     LGPRINT = .True.
+  
+     write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
+     write(*,*) 'The current observation file is ', current_observation_filename
+     allocate(SAT)  !assign SAT array
+     call read_satellite_info(current_observation_filename,SAT)
+
+     call read_CLM_pdaf(LS=CLMVARS,SAT=SAT)
+     WRITE(*,*) 'Read CLM memory is done'
+     
+     IF (masterproc) THEN      
+        call cmem_main(LS=CLMVARS,SATinfo=SAT,TB=TB,step=step)    
+     END IF
+     
+  END IF
+  
+  CALL MPI_Barrier(COMM_filter, nerror) 
+
+  !Broadcasts brightness temperature (TB) from the master process to all
+  !other processes of COMM_filter
+  CALL MPI_Bcast(TB, dim_obs, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter, nerror)
+  
   DO i = 1, dim_obs_p
-     m_state_p(i) = state_p(obs_index_p(i))
+     m_state_p(i) = TB(obs_index_p_TB(i))
   END DO
-
-  if (model == tag_model_clm) then
-     call CMEM_MAIN(m_state_p,dim_obs_p)
-     ! select the obs in my domain
-     !dim_obs_l = 1
-     !do i = 1, dim_obs
-     !  do j = begg, endg
-     !      deltax = abs(lon(j)-clmobs_lon(i))
-     !      deltay = abs(lat(j)-clmobs_lat(i))
-     !      if((deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))) then
-     !         dim_obs_p = dim_obs_p + 1
-     !      end if
-     !   end do
-     !end do
-     ! saving the size of local observation vector to variable dim_state_p
-     !dim_state_p = dim_obs_p
-
-     !DO i = 1, dim_obs_l    
-     !   call CMEM_MAIN(m_state_p,i,dim_obs_l)
-     !END DO
-  end if
-
-
+ 
+  IF (ALLOCATED(SAT)) DEALLOCATE(SAT)
+  IF (ALLOCATED(CLMVARS)) DEALLOCATE(CLMVARS)
+  
+  !LSN: the end of the implementation of CMEM model here
 END SUBROUTINE obs_op_pdaf

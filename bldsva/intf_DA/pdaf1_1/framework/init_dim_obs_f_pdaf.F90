@@ -63,7 +63,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        ONLY: obs, obs_index_p, dim_obs, obs_filename, pressure_obserr_p, &
        clm_obserr_p, local_dims_obs, obs_p, global_to_local, dim_obs_p, obs_id_p, &
        longxy, latixy, longxy_obs, latixy_obs, var_id_obs, maxlon, minlon, maxlat, &
-       minlat, maxix, minix, maxiy, miniy, lon_var_id, ix_var_id, lat_var_id, iy_var_id 
+       minlat, maxix, minix, maxiy, miniy, lon_var_id, ix_var_id, lat_var_id, iy_var_id, &
+       obs_index_p_TB 
   Use mod_read_obs, &
        only: idx_obs_nc, pressure_obs, pressure_obserr, multierr, read_obs_nc_multiscalar_clm_files, &
        read_obs_nc, clean_obs_nc, x_idx_obs_nc, y_idx_obs_nc, read_obs_nc_multiscalar_files, &
@@ -326,6 +327,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
            do j = 1, enkf_subvecsize
               if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
                  obs_index_p(count) = j
+                 obs_index_p_TB(count) = i !LSN: only for TB
                  obs_p(count) = pressure_obs(i)
                  var_id_obs(count) = var_id_obs_nc(k,m)
                  if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
@@ -344,6 +346,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
         do j = 1, enkf_subvecsize
            if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
               obs_index_p(count) = j
+              obs_index_p_TB(count) = i !LSN: only for TB
               obs_p(count) = pressure_obs(i)
               if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
               count = count + 1

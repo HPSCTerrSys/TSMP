@@ -95,7 +95,38 @@ OBJ_USER_GEN  = init_ens.o \
 		init_obs_pdaf.o \
 		mod_read_obs.o \
 		init_dim_obs_pdaf.o \
-		obs_op_pdaf.o
+                parkind1.o \
+                yomlun_ifsaux.o \
+                yomlun.o abor1.o \
+                yomcmemnetcdf.o \
+                yomcmempar.o \
+                yomcmemsoil.o \
+                yomcmemveg.o \
+                yomcmematm.o \
+                yomcmemfields.o \
+                cmem_setup.o \
+                vegtable.o \
+                atm_sub.o \
+                cmem_init.o \
+                dielice_sub.o \
+                dielwat_sub.o \
+                dielsoil_sub.o \
+                teff_sub.o \
+                fresnel_sub.o \
+                wilheit_sub.o \
+                rghref_sub.o \
+                veg_sub.o \
+                cmem_soil.o \
+                cmem_veg.o \
+                cmem_snow.o \
+                cmem_atm.o \
+                cmem_rtm.o \
+                toolbox_clm4cmem.o \
+                toolbox_SatOperator.o \
+                toolbox_rdclmwrcmem.o \
+                rdclm4pdaf.o \
+                cmem_main.o \
+                obs_op_pdaf.o                
 
 # User-supplied routines for ESTKF/SEIK/ETKF
 OBJ_USER_SEIK = prodrinva_pdaf.o \
@@ -118,8 +149,7 @@ OBJ_USER_LOCAL = init_n_domains_pdaf.o \
 		init_dim_obs_f_pdaf.o \
 		init_obs_f_pdaf.o \
 		obs_op_f_pdaf.o \
-		localize_covar_pdaf.o
-
+                localize_covar_pdaf.o 
 # Full list of user-supplied routines for online modes
 OBJ_PDAF_USER = $(OBJ_USER_GEN) $(OBJ_USER_SEIK) $(OBJ_USER_ENKF) $(OBJ_USER_LOCAL)
 

@@ -77,7 +77,8 @@ IF (LOFFCMEM) NULTMP = 77
 IF (LOFFCMEM) NULNAM = 14 
 
 ! Open namelist:
-OPEN(NULNAM,FILE='/p/project/chbn29/hbn29q/terrsysmp/bldsva/intf_DA/pdaf1_1/framework/input',STATUS='OLD')
+!OPEN(NULNAM,FILE='/p/project/chbn29/hbn29q/terrsysmp/bldsva/intf_DA/pdaf1_1/framework/input',STATUS='OLD')
+OPEN(NULNAM,FILE='obs/input',STATUS='OLD')
 
 ! Read Definition namelist
 READ (NULNAM,NML=namdef)
@@ -114,20 +115,20 @@ WRITE(NULOUT,*)  'Defaults options: ', CNAMEID
 
 ! 2.2 Default radiometrique configuration (NAMRAD):
 
-fghz = 1.4_JPRM 
-theta = 50._JPRM 
+!fghz = 1.4_JPRM 
+!theta = 50._JPRM 
 
 ! 2.3 Define the soil input soil layer depth (NAMLEV):
 
-nlay_soil_mw = 1.0_JPRM  ! number of soil layer for radiometric model
-nlay_soil_ls_default = 3.0_JPRM  ! number of soil layer for radiometric model
-nlay_soil_ls   = nlay_soil_ls_default  ! default number of soil layer for radiometric model
-ALLOCATE (z_lsm(nlay_soil_ls_default)) ! Land Surface model layers
+!nlay_soil_mw = 1.0_JPRM  ! number of soil layer for radiometric model
+!nlay_soil_ls_default = 3.0_JPRM  ! number of soil layer for radiometric model
+!nlay_soil_ls   = nlay_soil_ls_default  ! default number of soil layer for radiometric model
+!ALLOCATE (z_lsm(nlay_soil_ls_default)) ! Land Surface model layers
 ! HTESSEL
-z_lsm(1) = 0.07_JPRM        ! input soil layers depths
-z_lsm(2) = 0.28_JPRM
-z_lsm(3) = 1.0_JPRM
-WRITE(NULOUT,*) 'LSM layers depth: ',z_lsm(:)
+!z_lsm(1) = 0.07_JPRM        ! input soil layers depths
+!z_lsm(2) = 0.28_JPRM
+!z_lsm(3) = 1.0_JPRM
+!WRITE(NULOUT,*) 'LSM layers depth: ',z_lsm(:)
 
 ! ORCHIDEE
 !z1 = 0.02151_JPRM
@@ -148,29 +149,28 @@ READ (NULNAM,NML=namrad)
 REWIND(NULNAM)
 READ (NULNAM,NML=namlev)
 
+!WRITE(CFREQ,'(I3.3)') NINT(fghz*10._JPRM)
+!WRITE(CANGLE,'(I2)') INT(THETA) 
+!WRITE(NULOUT,*) 'Number of Layer in the MW model: ',nlay_soil_mw
+!WRITE(NULOUT,*) 'Number of Layer in the LSM: ',nlay_soil_ls
 
-WRITE(CFREQ,'(I3.3)') NINT(fghz*10._JPRM)
-WRITE(CANGLE,'(I2)') INT(THETA) 
-WRITE(NULOUT,*) 'Number of Layer in the MW model: ',nlay_soil_mw
-WRITE(NULOUT,*) 'Number of Layer in the LSM: ',nlay_soil_ls
+!IF ( nlay_soil_ls .ne. nlay_soil_ls_default ) Then
 
-IF ( nlay_soil_ls .ne. nlay_soil_ls_default ) Then
-
- SELECT CASE (CFINOUT)
+! SELECT CASE (CFINOUT)
  !
-  CASE ('netcdf') ! netcdfcase
+!  CASE ('netcdf') ! netcdfcase
  !   
-  DEALLOCATE(z_lsm) ! netcdfcase
-  ALLOCATE (z_lsm(nlay_soil_ls)) ! netcdfcase
-  OPEN(NULTMP,FILE='LSM_VERTICAL_RESOL.asc',status='old') ! netcdfcase
-  READ (NULTMP,*) (z_lsm(i),i=1,nlay_soil_ls)  ! netcdfcase
-  WRITE(NULOUT,*) ' NETCDF IO: LSM layers depth: ',z_lsm(:) ! netcdfcase
-  CLOSE(NULTMP)    ! netcdfcase
+!  DEALLOCATE(z_lsm) ! netcdfcase
+!  ALLOCATE (z_lsm(nlay_soil_ls)) ! netcdfcase
+!  OPEN(NULTMP,FILE='LSM_VERTICAL_RESOL.asc',status='old') ! netcdfcase
+!  READ (NULTMP,*) (z_lsm(i),i=1,nlay_soil_ls)  ! netcdfcase
+!  WRITE(NULOUT,*) ' NETCDF IO: LSM layers depth: ',z_lsm(:) ! netcdfcase
+!  CLOSE(NULTMP)    ! netcdfcase
  !
  !-------------------------------------! PSG
-  CASE('clm') ! PSG: for clm case
-   DEALLOCATE(z_lsm) ! PSG: CLMcase
-   ALLOCATE (z_lsm(nlay_soil_ls)) ! PSG: CLMcase    
+!  CASE('clm') ! PSG: for clm case
+!   DEALLOCATE(z_lsm) ! PSG: CLMcase
+!   ALLOCATE (z_lsm(nlay_soil_ls)) ! PSG: CLMcase    
    ! PSG: the elements for z_lsm will be passed by memory from
    ! PSG: the subroutine: memory_cmem_forcing()
  !-------------------------------------! PSG end 
@@ -178,15 +178,15 @@ IF ( nlay_soil_ls .ne. nlay_soil_ls_default ) Then
  !CASE ('ifs')
  !
  !
- END SELECT
+! END SELECT
 
 
-ELSE
+!ELSE
 
-  WRITE(NULOUT,*) 'DEFAULT vertical resolution:'
-  WRITE(NULOUT,*) 'HTESSEL 3-layer input considered'
+!  WRITE(NULOUT,*) 'DEFAULT vertical resolution:'
+!  WRITE(NULOUT,*) 'HTESSEL 3-layer input considered'
 
-ENDIF
+!ENDIF
 
 ! 3.1 check namelist option exist
 ! -------------------------------
@@ -208,7 +208,7 @@ IF(CITVEG/= 'Tsurf'.AND.CITVEG/= 'Tair'.AND.CITVEG/= 'Tir') CALL ABOR1('Wrong CI
 
 !-------------------------------------! PSG: following line includes 'clm' as option
 IF(CFINOUT/= 'netcdf'.and.CFINOUT/= 'clm'.and.CFINOUT/= 'pdaf' )&
-& CALL ABOR1('Wrong CFINOUT choice.  Choose netcdf or ascii')
+& CALL ABOR1('Wrong CFINOUT choice.  Choose netcdf, ascii or pdaf')
 !-------------------------------------
 ! 4 Set Constants, and make conversions
 !-------------------------------------

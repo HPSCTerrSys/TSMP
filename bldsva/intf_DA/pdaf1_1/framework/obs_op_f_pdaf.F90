@@ -58,18 +58,23 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   ! !USES:
   USE mod_assimilation, &
        ONLY: obs_index_p, local_dims_obs, obs_id_p, m_id_f, &
-       var_id_obs, dim_obs_p
+       var_id_obs, dim_obs_p, dim_obs,obs_filename,obs_index_p_TB
   USE mod_parallel_pdaf, &
-       ONLY: mype_filter, npes_filter, comm_filter, MPI_DOUBLE, &
-       MPI_DOUBLE_PRECISION, MPI_INT, MPI_SUM
-  USE mod_read_obs, & 
-       ONLY: var_id_obs_nc 
+       ONLY: mype_filter, npes_filter, comm_filter, &
+             n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter, &
+             MPI_DOUBLE, MPI_DOUBLE_PRECISION, MPI_INT,MPI_SUM
+  
+  ! LSN: module load for the implementation of CMEM model 
+  use mod_parallel_model, &
+        only: model,mype_model,npes_model,mype_world,npes_world
   use mod_tsmp, &
-#if defined CLMSA
-  only: point_obs
-#else
-  only: point_obs
-#endif
+        only: tag_model_clm,nprocpf
+  USE spmdMod      , only: masterproc,iam,mpicom,npes
+  use clm4cmem     , only: SATELLITE,CLM_DATA
+  USE rdclm4pdaf   , only: read_CLM_pdaf
+  USE get_tb_cmem  , only: cmem_main
+  USE rdclm_wrcmem , only: read_satellite_info
+  USE YOMCMEMPAR   , only: INPUTNAMLST, CLMNAME, SURFNAME,LGPRINT
 
   IMPLICIT NONE
 
@@ -88,12 +93,17 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
 
   ! local variables
   INTEGER :: ierror, max_var_id
-  INTEGER :: i                         ! Counter
+  INTEGER :: i,nerror                  ! Counter
   REAL, ALLOCATABLE :: m_state_tmp(:)  ! Temporary process-local state vector
   INTEGER, ALLOCATABLE :: local_dis(:) ! Displacement array for gathering
   INTEGER, ALLOCATABLE :: m_id_p_tmp(:)
   INTEGER, ALLOCATABLE :: m_id_f_tmp(:)
-
+  
+  CHARACTER*200:: CLM_fname, inparam_fname, surf_fname
+  TYPE(SATELLITE),ALLOCATABLE :: SAT
+  TYPE(CLM_DATA),ALLOCATABLE :: CLMVARS
+  REAL,DIMENSION(1) :: TB(dim_obs)
+  CHARACTER (len = 110) :: current_observation_filename
   ! *********************************************
   ! *** Perform application of measurement    ***
   ! *** operator H on vector or matrix column ***
@@ -108,16 +118,58 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   if(allocated(m_id_f_tmp)) deallocate(m_id_f_tmp)
   allocate(m_id_f_tmp(dim_obs_f))
 
-  DO i = 1, local_dims_obs(mype_filter+1)
-     m_state_tmp(i) = state_p(obs_index_p(i))
-     m_id_p_tmp(i)  = obs_id_p(obs_index_p(i))
-  END DO
+  !DO i = 1, local_dims_obs(mype_filter+1)
+  !   m_state_tmp(i) = state_p(obs_index_p(i))
+  !   m_id_p_tmp(i)  = obs_id_p(obs_index_p(i))
+  !END DO
   
+  ! LSN: the implementation of CMEM model here
+   IF (model == tag_model_clm) THEN
+     
+     allocate(CLMVARS)  ! assign CLMVARS array
+     surf_fname    ='./obs/surf_fname.nc'
+     SURFNAME      = trim(surf_fname)
+     CLM_fname     ='./obs/CLM_fname.nc'
+     CLMNAME       = trim(CLM_fname)
+     inparam_fname = './obs/input'
+     INPUTNAMLST   = trim(inparam_fname)
+     
+     LGPRINT = .False.
+       
+     write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
+     write(*,*) 'The current observation file is ', current_observation_filename
+     allocate(SAT)  !assign SAT array
+     call read_satellite_info(current_observation_filename,SAT)
+
+     call read_CLM_pdaf(LS=CLMVARS,SAT=SAT)
+     WRITE(*,*) 'Read CLM memory is done'
+     
+     IF (masterproc) THEN      
+        call cmem_main(LS=CLMVARS,SATinfo=SAT,TB=TB,step=step)    
+     END IF
+     
+  END IF
+  
+  CALL MPI_Barrier(COMM_filter, nerror) 
+
+  !Broadcasts brightness temperature (TB) from the master process to all
+  !other processes of COMM_filter
+  CALL MPI_Bcast(TB, dim_obs, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter,nerror)
+  
+  DO i = 1, dim_obs_p
+     m_state_tmp(i)  = TB(obs_index_p_TB(i))
+     m_id_p_tmp(i)   = obs_id_p(obs_index_p_TB(i))
+  END DO
+ 
+  IF (ALLOCATED(SAT)) DEALLOCATE(SAT)
+  IF (ALLOCATED(CLMVARS)) DEALLOCATE(CLMVARS)
+  ! LSN: the end of the implementation of CMEM model here
+ 
   ! Gather full observed state
   ALLOCATE(local_dis(npes_filter))
 
-  print *,'local_dims_obs(mype_filter+1) ', local_dims_obs(mype_filter+1)
-  print *,'dim_obs_p ', dim_obs_p
+  !print *,'local_dims_obs(mype_filter+1) ', local_dims_obs(mype_filter+1)
+  !print *,'dim_obs_p ', dim_obs_p
 
   local_dis(1) = 0
   DO i = 2, npes_filter

@@ -144,6 +144,7 @@ subroutine check_n_observationfile(fn,nn)
   character(len = nf90_max_name) :: recorddimname
 
   call check(nf90_open(fn, nf90_nowrite, ncid))
+  write(*,*) fn
   !call check(nf90_inq_dimid(ncid, dim_name, dimid))
   !call check(nf90_inquire_dimension(ncid, dimid, recorddimname, nn))
   call check( nf90_inq_varid(ncid, varname, varid) )

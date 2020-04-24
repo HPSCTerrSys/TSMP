@@ -142,29 +142,35 @@ contains
   ! ---------------------------------------------------------------
   subroutine read_satellite_info(IN_fname,SAT)
     use clm4cmem, only : SATELLITE
+    USE YOMCMEMPAR,    ONLY: LGPRINT  
     implicit none
+
     ! INPUT VARIABLES:
     character(len=*), intent(in) :: IN_fname
-    type(SATELLITE), intent(inout) :: SAT
+    type(SATELLITE), intent(out) :: SAT
+
     ! -- local variables
     integer :: rdncid, pix_dimid, inc_dimid
     integer :: varid, NPIXELS, NINCS
 
-    call check( nf90_open(trim(IN_fname), nf90_nowrite, rdncid))
+    call check( nf90_open(IN_fname, nf90_nowrite, rdncid))
+    ! call check( nf90_open(current_observation_filename, nf90_nowrite, rdncid))
     ! Define the dimensions.
+  
     call check( nf90_inq_dimid(rdncid, "NINC", inc_dimid))
     call check( nf90_inq_dimid(rdncid, "NPIXEL", pix_dimid))
 
     call check( nf90_inquire_dimension(rdncid,pix_dimid,len=NPIXELS))
     call check( nf90_inquire_dimension(rdncid,inc_dimid,len=NINCS))
+ 
     ! Allocating variables in SATELLITE:
     ! NOTE: SAT%TBSAT_HV is allocated by TBSAT_OPERATOR()
     if(allocated(SAT%theta)) deallocate(SAT%theta)
     allocate(SAT%theta(NINCS))
-
+     
     if(allocated(SAT%lon_foprt)) deallocate(SAT%lon_foprt)
     allocate(SAT%lon_foprt(NPIXELS))
-
+     
     if(allocated(SAT%lat_foprt)) deallocate(SAT%lat_foprt)
     allocate(SAT%lat_foprt(NPIXELS))
 
@@ -175,23 +181,24 @@ contains
     SAT%OrbitFileName = trim(IN_fname)
     call check( nf90_inq_varid(rdncid,"THETA_INC", varid))
     call check( nf90_get_var(rdncid,varid,SAT%theta))
-
-    call check( nf90_inq_varid(rdncid,"LONG", varid))
+    IF (LGPRINT) WRITE(*,*) 'SAT%theta', SAT%theta
+    call check( nf90_inq_varid(rdncid,"lon", varid))
     call check( nf90_get_var(rdncid,varid,SAT%lon_foprt))
-
-    call check( nf90_inq_varid(rdncid,"LATI", varid))
+    IF (LGPRINT) WRITE(*,*) 'SAT%lon_foprt', SAT%lon_foprt
+    call check( nf90_inq_varid(rdncid,"lat", varid))
     call check( nf90_get_var(rdncid,varid,SAT%lat_foprt))
-
+     
     call check( nf90_inq_varid(rdncid,"INCLI", varid))
     call check( nf90_get_var(rdncid,varid,SAT%incl_foprt))
-
+     
     call check( nf90_get_att(rdncid,nf90_global,"SATELLITE_name",SAT%name))
-   call check( nf90_get_att(rdncid,nf90_global,"Orbit_altitude_km",SAT%orbit))
-   call check( nf90_get_att(rdncid,nf90_global,"Orbit_azimuth_deg",SAT%azimuth))
-   call check( nf90_get_att(rdncid,nf90_global,"SENSOR_antenna_m",SAT%antenna))
-   call check( nf90_get_att(rdncid,nf90_global,"SENSOR_wavelength_m",SAT%wavelength))
-
+    call check( nf90_get_att(rdncid,nf90_global,"Orbit_altitude_km",SAT%orbit))
+    call check( nf90_get_att(rdncid,nf90_global,"Orbit_azimuth_deg",SAT%azimuth))
+    call check( nf90_get_att(rdncid,nf90_global,"SENSOR_antenna_m",SAT%antenna))
+    call check( nf90_get_att(rdncid,nf90_global,"SENSOR_wavelength_m",SAT%wavelength))
+     
     call check( nf90_close(rdncid))
+   
     return
   end subroutine read_satellite_info
   ! ------------- end of read satellite information ---------------
