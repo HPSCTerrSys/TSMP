@@ -97,6 +97,8 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
  if (model == tag_model_clm) then
      !sw_c  => clm3%g%l%c%cws%h2osoi_vol
      !state_p = reshape(sw_c,shape(state_p))
+!     print *, "lsn: check here"     
+!print *, clm3%g%l%c%cws%h2osoi_vol
      state_p = clm_statevec
  end if
  !kuw end

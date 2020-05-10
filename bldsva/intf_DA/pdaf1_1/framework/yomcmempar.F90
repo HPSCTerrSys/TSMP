@@ -151,8 +151,7 @@ LOGICAL                   :: LOMASK_AUTO       !! For masking in case of wrong i
 CHARACTER(LEN=JPCHARLEN) ::  CFINOUT        !! Input/output file format
 
 !!!type(SATELLITE) :: SAT    ! PSG: to hold Sensor's all information
-CHARACTER(LEN=JPCHARLEN) ::  INPUTNAMLST, INPUTSATINFO,CLMNAME,SURFNAME ! PSG: input files
-!CHARACTER(LEN=JPCHARLEN) :: SURFNAME,CLMNAME,CLM_fname,surf_fname,inparam_fname
+CHARACTER(LEN=JPCHARLEN) ::  INPUTNAMLST, INPUTSATINFO ! PSG: input files
 
 REAL(KIND = JPRM) :: fghz        
 REAL(KIND = JPRM) :: theta      

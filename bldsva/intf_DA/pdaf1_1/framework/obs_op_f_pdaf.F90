@@ -74,7 +74,7 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   USE rdclm4pdaf   , only: read_CLM_pdaf
   USE get_tb_cmem  , only: cmem_main
   USE rdclm_wrcmem , only: read_satellite_info
-  USE YOMCMEMPAR   , only: INPUTNAMLST, CLMNAME, SURFNAME,LGPRINT
+  USE YOMCMEMPAR   , only: INPUTNAMLST,LGPRINT
 
   IMPLICIT NONE
 
@@ -99,7 +99,7 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   INTEGER, ALLOCATABLE :: m_id_p_tmp(:)
   INTEGER, ALLOCATABLE :: m_id_f_tmp(:)
   
-  CHARACTER*200:: CLM_fname, inparam_fname, surf_fname
+  CHARACTER*200:: inparam_fname
   TYPE(SATELLITE),ALLOCATABLE :: SAT
   TYPE(CLM_DATA),ALLOCATABLE :: CLMVARS
   REAL,DIMENSION(1) :: TB(dim_obs)
@@ -127,10 +127,6 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
    IF (model == tag_model_clm) THEN
      
      allocate(CLMVARS)  ! assign CLMVARS array
-     surf_fname    ='./obs/surf_fname.nc'
-     SURFNAME      = trim(surf_fname)
-     CLM_fname     ='./obs/CLM_fname.nc'
-     CLMNAME       = trim(CLM_fname)
      inparam_fname = './obs/input'
      INPUTNAMLST   = trim(inparam_fname)
      

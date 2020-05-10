@@ -60,41 +60,46 @@ SUBROUTINE cmem_main(LS,SATinfo,TB,step)
 !
 !------------------------------------------------------------------------------
 !
-USE PARKIND1, ONLY : JPIM, JPRM
-USE YOMLUN, ONLY : NULOUT, NULTMP
+USE PARKIND1,         ONLY : JPIM, JPRM
+USE YOMLUN,           ONLY : NULOUT, NULTMP
 USE YOMCMEMPAR
 USE YOMCMEMFIELDS
 USE YOMCMEMSOIL
-USE YOMCMEMVEG,ONLY : wc_veg, tb_veg, w_eff, bj, tauN, & 
-                      & tb_veg, tau_veg, t_veg, a_geo, a_geoL, a_geoH,tth,ttv
-USE YOMCMEMATM,ONLY : tau_atm, tb_au, tb_ad, tb_toa, tb_tov,fZ,tair 
-
-use clm4cmem         ! PSG: module with toolbox for CLM integration
-use yomcmemnetcdf,    only: NTIMES, NLATS, NLONS, NINC  ! PSG: compativility
-use SatOperator      ! PSG: module with toolbox for Satellite Operator
-use rdclm_wrcmem,     only:info_CLM_file 
+USE YOMCMEMVEG,       ONLY : wc_veg, tb_veg, w_eff, bj, tauN, & 
+                         & tb_veg, tau_veg, t_veg, a_geo, a_geoL, a_geoH,tth,ttv
+USE YOMCMEMATM,       ONLY : tau_atm, tb_au, tb_ad, tb_toa, tb_tov,fZ,tair 
+! PSG: module with toolbox for CLM integration
+use clm4cmem         
+use decompMod,        only: get_proc_global,adecomp
+! PSG: compativility
+use yomcmemnetcdf,    only: NTIMES, NLATS, NLONS, NINC  
+! PSG: module with toolbox for Satellite Operator
+use SatOperator      
 ! LSN: read data from clm memory
-use rdclm4pdaf       ! LSN: module with subroutines to read CLM vars 4 pdaf
+use rdclm4pdaf      
 use mod_tsmp,         only: pf_statevecsize
 use mod_assimilation, only : dim_obs,obs_filename
+
 IMPLICIT NONE
-!
-INTEGER(KIND=JPIM) :: JJPOL 
-REAL(KIND = JPRM) :: RSN(2), ESN(2)
-REAL(KIND = JPRM) :: tfrac(JPCMEMTILE)
-!
-! LSN: following lines are input and output paramemeteres for subroutine only 
- INTEGER, INTENT(in) :: step 
-CHARACTER (len = 110) :: current_observation_filename
-!CHARACTER (len = 200):: CLMNAME,SURFNAME !inparam_fname 
+
+INTEGER(KIND = JPIM):: JJPOL 
+REAL(KIND = JPRM)   :: RSN(2), ESN(2)
+REAL(KIND = JPRM)   :: tfrac(JPCMEMTILE) 
+INTEGER, INTENT(in) :: step 
+INTEGER             :: numg           ! total number of gridcells across all processors
+INTEGER             :: numl           ! total number of landunits across all processors
+INTEGER             :: numc           ! total number of columns across all processors
+INTEGER             :: nump           ! total number of pfts across all processors
+
+CHARACTER (len = 110)       :: current_observation_filename 
 TYPE(SATELLITE),ALLOCATABLE :: SAT
-TYPE(SATELLITE),INTENT(IN) :: SATinfo 
-INTEGER :: i
-LOGICAL :: exist
-INTEGER(kind=JPIM) :: Nvars(3)       !PSG:
-TYPE(CLM_DATA),ALLOCATABLE :: CLMVARS            !PSG:
-TYPE(CLM_DATA),INTENT(IN) :: LS
-REAL,INTENT(OUT) :: TB(dim_obs)
+TYPE(SATELLITE),INTENT(IN)  :: SATinfo 
+INTEGER                     :: i
+LOGICAL                     :: exist
+INTEGER(kind=JPIM)          :: Nvars(3)       
+TYPE(CLM_DATA),ALLOCATABLE  :: CLMVARS          
+TYPE(CLM_DATA),INTENT(IN)   :: LS
+REAL,INTENT(OUT)            :: TB(dim_obs)
 ! *****************************************************************************
 ! 1.0 Model SETUP
 !
@@ -106,36 +111,29 @@ allocate(SAT)
 SAT           = SATinfo
 ! Assigning input parameters to the CMEM global parameters
 
-!CLM_fname     = "/p/scratch/cjicg41/jicg4175/clmoas_0.clm2.h0.2015-07-31-03600.nc"
-!inparam_fname = "/p/project/chbn29/hbn29q/terrsysmp/bldsva/intf_DA/pdaf1_1/framework/input"
-!surf_fname    = '/p/scratch/chbn29/hbn291/tsmp/data/rv010re010/surfdata_0302x0267.nc'
-
-!CLNAME        = trim(CLM_fname)
-!SURFNAME      = trim(surf_fname)
-!INPUTNAMLST   = trim(inparam_fname)
-
 WRITE(NULOUT,*) '***** Community Microwave Emission Modelling Platform***** '
-!WRITE(NULOUT,*) 'The input file is '
-!WRITE(NULOUT,*) CLM_fname
-!
+
 CALL CMEM_SETUP
-!  
+  
 ! Read input file and get information on grid size N 
-!
+
 SELECT CASE ( CFINOUT )
-!
+
 ! LSN: new case for PDAF support, reading input from state_p
   CASE ('pdaf')
-     !write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
-     !write(*,*) current_observation_filename
-     !call read_satellite_info(current_observation_filename,SAT)
-     NINC   = size(SAT%theta)
-     call info_CLM_file(CLMNAME,Ntot=Nvars,SURF=SURFNAME)
-     NLONS  = Nvars(1)
-     NLATS  = Nvars(2)
-     NTIMES = 1
-     N      = NLONS*NLATS
+     
+     CALL get_proc_global(numg,numl,numc,nump)
+
+     NLONS    = adecomp%gdc2i(numg)
+     Nvars(1) = NLONS
+     NLATS    = adecomp%gdc2j(numg)
+     Nvars(2) = NLATS
+     ! LSN: NTIME is always to be 1 for instantaneous
+     NTIMES   = 1
      Nvars(3) = 1
+     N        = NLONS*NLATS
+     Nvars(3) = 1
+     NINC     = size(SAT%theta)
      IF (LGPRINT) WRITE(NULOUT,*) 'Nvars is ',Nvars
 ! ----------------------------------!LSN end
 !  CASE ( 'ifs' )

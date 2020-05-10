@@ -64,27 +64,27 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
    USE rdclm4pdaf   , only: read_CLM_pdaf
    USE get_tb_cmem  , only: cmem_main
    USE rdclm_wrcmem , only: read_satellite_info
-   USE YOMCMEMPAR   , only: INPUTNAMLST, CLMNAME, SURFNAME,LGPRINT
+   USE YOMCMEMPAR   , only: INPUTNAMLST,LGPRINT
    IMPLICIT NONE
 ! !ARGUMENTS:
-  INTEGER, INTENT(in) :: step               ! Currrent time step
-  INTEGER, INTENT(in) :: dim_p              ! PE-local dimension of state
-  INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
-  REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
-  REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
+  INTEGER, INTENT(in)   :: step               ! Currrent time step
+  INTEGER, INTENT(in)   :: dim_p              ! PE-local dimension of state
+  INTEGER, INTENT(in)   :: dim_obs_p          ! Dimension of observed state
+  REAL, INTENT(in)      :: state_p(dim_p)     ! PE-local model state
+  REAL, INTENT(out)     :: m_state_p(dim_obs_p) ! PE-local observed state
 
-  character*200:: CLM_fname, inparam_fname, surf_fname
+  character*200         :: inparam_fname
   TYPE(SATELLITE),ALLOCATABLE :: SAT
   TYPE(CLM_DATA), ALLOCATABLE :: CLMVARS             
-  REAL,DIMENSION(1) :: TB(dim_obs)  
-  INTEGER :: i, nerror
+  REAL,DIMENSION(1)     :: TB(dim_obs)  
+  INTEGER               :: i, nerror
   CHARACTER (len = 110) :: current_observation_filename
-! type(SATELLITE), intent(out) :: SAT 
-! !CALLING SEQUENCE:
+ 
+! CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
 ! Called by: PDAF_enkf_analysis_rlm, PDAF_enkf_analysis_rsm
-!EOP
+! EOP
 
 ! *** local variables ***
 
@@ -101,10 +101,6 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   IF (model == tag_model_clm) THEN
      
      allocate(CLMVARS)  ! assign CLMVARS array
-     surf_fname    = './obs/surf_fname.nc'
-     SURFNAME      = trim(surf_fname)
-     CLM_fname     = './obs/CLM_fname.nc'
-     CLMNAME       = trim(CLM_fname)     
      inparam_fname = './obs/input'
      INPUTNAMLST   = trim(inparam_fname)
 
