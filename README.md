@@ -6,7 +6,7 @@ TSMP allows for a physically-based representation of transport processes of mass
 
 TSMP is extensively used for idealized and real data process and sensitivity studies in water cycle research, for climate change simulations, data assimilation studies including reanalyses, as well as experimental real time forecasting and monitoring simulations, ranging from individual catchments to continental model domains. TSMP runs on notebooks as well on latest supercomputers using a range of compilers.
 
-TSMP development has been driven by groups within the [Centre for High-Performance Scientific Computing in Terrestrial Systems](http://www.hpsc-terrsys.de) (HPSC-TerrSys), as part of the [Geoverbund ABC/J](http://www.geoverbund-abcj.de/geoverbund/EN/Home/home_node.html), the geoscientific network of the University of Cologne, Bonn University, RWTH Aachen University, and the Research Centre Juelich. The current team is anchored in Juelich and Bonn in Germany.
+TSMP development has been driven by groups within the [Centre for High-Performance Scientific Computing in Terrestrial Systems](http://www.hpsc-terrsys.de) (HPSC-TerrSys), as part of the [Geoverbund ABC/J](http://www.geoverbund-abcj.de/geoverbund/EN/Home/home_node.html), the geoscientific network of the University of Cologne, Bonn University, RWTH Aachen University, and the Research Centre Jülich. The current team is anchored in Jülich and Bonn in Germany.
 
 **Visit**
 
@@ -157,7 +157,7 @@ Before building TerrSysMP, first check what build options are there
    ./build_tsmp.ksh -a
 ```
 
-Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the COSMO NWP and regional climate model (cos); this is a built on the JURECA HPC system of Juelich Supercomputing Centre using Intel compilers and ParaStation MPI:
+Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the COSMO NWP and regional climate model (cos); this is a built on the JURECA HPC system of Jülich Supercomputing Centre using Intel compilers and ParaStation MPI:
 
 ```shell
    cd $TSMP_DIR/bldsva
@@ -169,7 +169,7 @@ A note to external users:
 The path to the modules, compiler and MPI wrapper can be set in:  
 `$TSMP_DIR/bldsva/machines/<your_machine_name>/build_interface_<your_machine_name>.ksh`
 
-An example for the JURECA HPC system at the Juelich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JURECA/build_interface_JURECA.ksh` and an example for the ini file to set up the environment is in `$TSMP_DIR/bldsva/machines/JURECA/loadenvs_2018a`.
+An example for the JURECA HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JURECA/build_interface_JURECA.ksh` and an example for the ini file to set up the environment is in `$TSMP_DIR/bldsva/machines/JURECA/loadenvs_2018a`.
 
 ### <a name="ref_step5"></a> Step 6: Setup and configuration of the respective usage and test case
 
