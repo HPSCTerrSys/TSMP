@@ -29,17 +29,17 @@ This very short user guide only covers one variant on how the model can be setup
 
 TSMP uses a multiple program multiple data (MPMD) execution model where states (e.g., near surface air temperature) and fluxes (e.g., latent and sensible heat fluxes) are passed between the atmospheric, land surface and hydrologic/groundwater component models along compartmental interfaces through the OASIS3 or the parallel OASIS3-MCT coupling interface.
 
-TSMP essentially consists only of the interface that combines the specific versions of different component models in a modular (different combinations of component models) and flexible (different spatial and temporal resolutions) way. During the install process, before the compilation of the component models, the source code of the component models is patched by the setup shell scripts, implementing the necessary coupling functionalities.
+TSMP essentially consists of the interface that combines the specific versions of different component models in a modular (various combinations of component models) and flexible (various spatial and temporal resolutions) way. During the install process, before the compilation of the component models, the source code of the component models is patched by the setup shell scripts, implementing the necessary coupling functionalities.
 
-Please note: For licensing and maintenance reasons, we do not provide any source code of any of the component models or the coupler library. The users should download the component models from their respective websites. TSMP has various setup options: each component model standalone (ParFlow, CLM, COSMO), only land surface and hydrology / groundwater (CLM+ParFlow), only land surface and atmosphere (CLM+COSMO), or fully coupled (ParFlow, CLM, COSMO). Because the patches are designed for specific versions of the models, it is required to get the exact original, unaltered version as specified.
+Please note: For licensing and maintenance reasons, we do not provide any source code of any of the component models or the coupler library. The users should download the component models from their respective websites. TSMP has various setup options: each component model standalone (ParFlow, CLM, COSMO), only land surface and hydrology / groundwater (CLM+ParFlow), only land surface and atmosphere (CLM+COSMO), or fully coupled (ParFlow, CLM, COSMO). Since the patches are designed for specific versions of the models, it is required to get the exact original, unaltered version as specified.
 
-During the build and compile step ([step 5 below](#ref_step4)) multiple predefined coupled model combinations (which component models and which version) as well as predefined HPC systems and operating environments can be chosen. Via so-called machinefiles the built and execution environment can be centrally adjusted to the respective HPC systems. A generic machinefile for x86-64 GNU/Linux systems with a GNU Compiler Collection and a standard scientific software stack is also provided. Many predefined built environments are provided for the machines which are available to the HPSC-TerrSys users.
+During the build and compile step ([step 5 below](#ref_step4)) multiple predefined coupled model combinations (of component models and their versions) as well as predefined HPC systems and operating environments can be chosen. Via so-called machinefiles the built and execution environment can be centrally adjusted to the respective HPC systems. A generic machinefile for x86-64 GNU/Linux systems with a GNU Compiler Collection and a standard scientific software stack is also provided. Many predefined built environments are provided for the machines which are available to the HPSC-TerrSys users.
 
 During the setup and configuration step ([step 6 below](#ref_step5)), TSMP is configured for different, predefined test cases or numerical experiments, for which we also provide input data via a dedicated data server. Here we document one specific experiment. The [TSMP user guide](#ref_doc) will contain a complete list.
 
 **Throughout this quick start guide a destinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
 
-The two most important scripts to build setup TSMP are:
+The two most important scripts to build and setup TSMP are:
 
 * `build_tsmp.ksh` to built and compile TSMP (one component model after the other)
 * `setup_tsmp.ksh` to setup one of the predefined experiments
@@ -139,9 +139,9 @@ Available from https://verc.enes.org/oasis/.
 
 ### Step 4: Retrieving the test case input data
 
-HPSC-TerrSys provides for each officially documented and supported test case experiment all required, pre-processed input data (as well as reference simulation results in the future).
+For each officially documented and supported test case experiment, HPSC-TerrSys provides all required, pre-processed input data (as well as reference simulation results in the future).
 
-The input files which necessary for running the EURO-CORDEX evaluation run test case:
+The input files which are necessary for running the `EURO-CORDEX evaluation run` test case:
 
 ```shell
    cd $TSMP_DIR/bldsva
