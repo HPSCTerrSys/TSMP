@@ -13,17 +13,6 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
-
-  #CPS Remove hardwiring of compiler, introducing compiler switch 
-#  if [[ $compiler == "Intel" ]] ; then
-  #Intel GRIB
-#  defaultGribPath="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-
-#  elif [[ $compiler == "Gnu" ]] ; then
-  #GNU GRIB
-#  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
-#  fi
   defaultGribPath="$EBROOTGRIB_API"
   defaultGribapiPath="$EBROOTGRIB_API"
   defaultJasperPath="$EBROOTJASPER"
@@ -34,10 +23,9 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
-
-  profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
+  defaultOptC="-O2 -xHost"
+  profilingImpl=" no scalasca "
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi  
 
   # Default Processor settings
   defaultwtime="01:00:00"
