@@ -25,7 +25,7 @@ module load Scalasca
 
 # libs for TerrSysMP
 module load Tcl/.8.6.8
-#module load Hypre/2.14.0
+module load Hypre/2.14.0
 module load Silo/4.10.2
 #grib1 dwd
 module load netCDF/4.6.1
