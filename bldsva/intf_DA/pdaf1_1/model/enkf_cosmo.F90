@@ -423,6 +423,7 @@ integer(c_int),intent(in) :: cos_dt
 
   !timeloop: DO ntstep = nstart , nstop
   write(*,*)'advancing cosmo from ',cos_start,' to ',(cos_start+cos_dt-1)
+
   timeloop: DO ntstep = cos_start,(cos_start+cos_dt-1)
 
     IF ( (izdebug > 1) .AND. (.NOT. lbdclim)) THEN

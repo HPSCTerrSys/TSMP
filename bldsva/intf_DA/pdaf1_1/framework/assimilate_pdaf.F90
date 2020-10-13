@@ -45,6 +45,7 @@ SUBROUTINE assimilate_pdaf()
     !        ONLY: mype_world, abort_parallel
     USE mod_assimilation, &      ! Variables for assimilation
         ONLY: filtertype
+
     IMPLICIT NONE
 
     ! !CALLING SEQUENCE:
@@ -54,6 +55,7 @@ SUBROUTINE assimilate_pdaf()
 
     ! Local variables
     INTEGER :: status_pdaf       ! PDAF status flag
+
 
     ! External subroutines
     EXTERNAL :: collect_state_pdaf, & ! Routine to collect a state vector from model fields
@@ -117,6 +119,7 @@ SUBROUTINE assimilate_pdaf()
         !    localize_covar_pdaf, add_obs_error_pdaf, init_obscovar_pdaf, &
         !    next_observation_pdaf, status_pdaf)
     END IF
+
   ! Check for errors during execution of PDAF
 
 !   IF (status_pdaf /= 0) THEN

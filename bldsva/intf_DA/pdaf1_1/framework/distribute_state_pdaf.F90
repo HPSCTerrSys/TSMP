@@ -108,8 +108,6 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 #if defined COUP_OAS_COS
     if (model == tag_model_cosmo) then
         cos_statevec = state_p
-        ! Added for testing purpose
-        cos_statevec(:) = 999999
     end if
 #endif
 
