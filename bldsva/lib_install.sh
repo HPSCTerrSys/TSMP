@@ -148,7 +148,7 @@ if [ $? -ne 0 ]; then
 fi
 unzip 4.4.4.zip >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://confluence.ecmwf.int/download/attachments/3473437/grib_api-1.25.0-Source.tar.gz?api=v2`
+pwget=`wget https://datapub.fz-juelich.de/slts/tsmp_testcases/TSMP_lib/grib_api-1.25.0-Source.tar.gz%3fapi=v2`
 if [ $? -ne 0 ]; then
     echo "Grib-api can not be downloaded!!!check wget command"
     exit
