@@ -10,29 +10,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
-
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
-
-  #CPS Remove hardwiring of compiler, introducing compiler switch 
-#  if [[ $compiler == "Intel" ]] ; then
-  #Intel GRIB
-#  defaultGribPath="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-
-#  elif [[ $compiler == "Gnu" ]] ; then
-  #GNU GRIB
-#  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
-#  fi
-  defaultGribPath="$EBROOTGRIB_API"
-  defaultGribapiPath="$EBROOTGRIB_API"
+  defaultGribPath="$EBROOTECCODES"
+  defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
-  defaultTclPath="$EBROOTTCL"
+  defaultTclPath="/p/project/cslts/local/juwels/tcl8.6.8"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-
+#
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
@@ -71,7 +59,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
