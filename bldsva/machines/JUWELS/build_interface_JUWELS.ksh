@@ -10,18 +10,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
-
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGribPath="$EBROOTGRIB_API"
-  defaultGribapiPath="$EBROOTGRIB_API"
+  defaultGribPath="$EBROOTECCODES"
+  defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
-  defaultTclPath="$EBROOTTCL"
+  defaultTclPath="/p/project/cslts/local/juwels/tcl8.6.8"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-
+#
   # Default Compiler/Linker optimization
   defaultOptC="-O2 -xHost"
   profilingImpl=" no scalasca "
@@ -59,7 +58,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn

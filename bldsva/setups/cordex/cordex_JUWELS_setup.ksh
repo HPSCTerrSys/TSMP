@@ -92,6 +92,15 @@ route "${cblue}>> finalizeSetup${cnormal}"
     fi  
   fi  
 
+  if [[ $withCOS == "true" ]] then
+    comment "  sed gribapi definitions and samples to namelist"
+     p_samp=$gribPath/share/eccodes/samples/
+     p_def=$gribPath/share/eccodes/definitions/
+     sed "s,__definitions__,$p_def," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+     sed "s,__samples__,$p_samp," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+    check
+  fi
+
   if [[ $withPFL == "true" ]] then
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file

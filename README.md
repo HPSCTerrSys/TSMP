@@ -55,20 +55,28 @@ To get a man-page for the usage of this scripts, do:
 This test case uses the current TSMP release version v1.2.1 with OASIS3/OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2. A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies
+For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA, all necessary software modules are loaded automatically through a "loadenv" file located in directory JUWELS or JURECA in machines directory. The users of other HPC systems should provide an appropriate "loadenv" files for loading the modules and locate it in `machines/<machine_name>`, similar to JURECA and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a "loadenv" file in the directory `machines/GENERIC_X86`. For more information on using this script please see the README in branch **TSMP_x86_64**.
 
-The following libraries are required to run the EURO-CORDEX experiment:
-
+* gfortran
+* gcc
+* g++
+* ksh
+* bash
+* zlib
+* curl
+* make
+* python
+* OpenMPI 
 * netCDF
-* GRIB
+* HDF5
+* GRIBAPI
 * TCL
 * Hypre
 * Silo
 * Lapack
-* Jasper
 
-For HPSC-TerrSys users suitable initialisation files exist that automatically load all necessary software modules and set up all required environment variables whenever needed during the build and setup processes as well as at simulation time.
-
-External users have to make sure these dependencies are met. A short guide on how the TSMP built system can be expanded to account for your local situation (software modules, compiler, MPI wrapper) will be provided shortly. The best starting point is to use the generic GNU compiler built. A hint on how to proceed is given in [step 5 below](#ref_step4).
+A short guide on how the TSMP built system can be expanded to account for your local situation (software modules, compiler, MPI wrapper) will be provided shortly. The best starting point is to use the generic GNU compiler built. A hint on how to proceed is given in [step 5 below](#ref_step4).
+The following libraries are required to run the EURO-CORDEX experiment:
 
 ### Step 2: Get the TSMP interface
 
