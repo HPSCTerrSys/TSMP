@@ -24,9 +24,9 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF \
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT "
         ["MISTRAL"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT 4.1.0MCT 3.0.0MCTPDAF "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 3.0.0MCTPDAF "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
@@ -52,6 +52,7 @@ versions+=(
         ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
 	["1.4.0MCT"]="4.0.0 old clm3_5 and Parflow but new icon-lem with Oasis3-MCT"
 	["1.4.1MCT"]="4.0.0 old clm3_5 but new icon-lem and Parflow3_2 with Oasis3-MCT"
+        ["4.1.0MCT"]="4.1.0 clm3_5-icon icon-lem Parflow3_2 Oasis3-MCT"
 )
 
 
@@ -75,6 +76,7 @@ modelVersion+=(
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
 	["1.4.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow"
 	["1.4.1MCT"]="oasis3-mct clm3_5-icon icon-lem parflow3_2"
+        ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow3_2"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -98,6 +100,7 @@ combinations+=(
         ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
 	["1.4.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 	["1.4.1MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+        ["4.1.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 )
 
 #list of supported testcases for a certain machine.
@@ -121,7 +124,7 @@ setups+=(
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy icon-ccs icon-ccs-s icon-ccs-snwp icon-cbl-nwp nrw-icon icon-ccs-scunbo "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse "
         ["MISTRAL"]=" nrw cordex idealRTD  "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "

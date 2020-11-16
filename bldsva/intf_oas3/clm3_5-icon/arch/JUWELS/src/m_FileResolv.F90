@@ -95,10 +95,10 @@ CONTAINS
 
    character(len=*), parameter	:: myname = 'MCT(MPEU)::FileResolv'
 
-#if SYSUNICOS || CPRCRAY
+#if SYSUNIICON || CPRCRAY
    integer, external  :: ishell
 #else
-   !integer, external  :: system     
+   integer, external  :: system     
    !COMMENT OUT FOR GNU, CMS; CPS
 #endif
    character(len=255) :: path, host, dirn, basen, head, tail, cmd, filen
@@ -181,7 +181,7 @@ CONTAINS
       if ( .not. ( fexists .and. caching ) ) then
          cmd = trim(remote_cp) // ' ' // &
                trim(host) // ':' // trim(fname) // ' . '
-#if SYSUNICOS || CPRCRAY
+#if SYSUNIICON || CPRCRAY
          rc = ishell ( cmd ) 
 #else
          rc = system ( cmd ) 
@@ -231,7 +231,7 @@ CONTAINS
         else                                          ! keep   file.gz
              cmd = trim(gunzip) // ' -c ' // trim(fname) // ' > ' // trim(head)
         end if
-#if SYSUNICOS || CPRCRAY
+#if SYSUNIICON || CPRCRAY
         rc = ishell ( cmd ) 
 #else
         rc = system ( cmd ) 

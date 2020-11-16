@@ -10,6 +10,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
+
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   defaultGribPath="$EBROOTECCODES"
@@ -20,7 +21,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-#
+
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
 
@@ -59,7 +60,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TSMP"
+#SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn

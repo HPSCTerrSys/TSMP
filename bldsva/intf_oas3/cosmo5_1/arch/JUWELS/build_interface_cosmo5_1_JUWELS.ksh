@@ -33,7 +33,7 @@ comment "   sed ld to cos Makefile"
   sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
-  sed -i "s@__lib__@-L$gribPath/lib/ $cplLib -L$ncdfPath/lib/ -leccodes_f90 -leccodes -lnetcdff@" $file >> $log_file 2>> $err_file
+  sed -i "s@__lib__@-L$gribPath/lib/ $cplLib -L$ncdfPath/lib/ -lgrib_api_f90 -lnetcdff@" $file >> $log_file 2>> $err_file
 check
 route "${cblue}<< configure_cos${cnormal}"
 }

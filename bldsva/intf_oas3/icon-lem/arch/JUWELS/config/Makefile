@@ -5,8 +5,8 @@ SHELL = /bin/bash
 ARCH = x86_64
 OS   = linux-gnu
 
-HOST = juwels01
-SITE = fzj.de
+HOST = 
+SITE = 
 
 srcdir = .
 
@@ -20,8 +20,8 @@ exec_prefix = build/x86_64-unknown-linux-gnu
 bindir = ${exec_prefix}/bin
 libdir = ${exec_prefix}/lib
 
-NETCDFFROOT    = $(EBROOTNETCDFMINFORTRAN)
-NETCDFROOT     = $(EBROOTNETCDF)
+NETCDFFROOT    = __netcdffroot__
+NETCDFROOT     = __netcdfroot__
 NETCDFLIBPATH  = $(NETCDFROOT)/lib64
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
 NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
@@ -34,21 +34,17 @@ CDI_INCLUDE =
 OASIS_LIB      = __cpllib__
 OASIS_INCLUDE  = __cplinc__
 
-HDF5ROOT       = $(EBROOTHDF5)
+HDF5ROOT       = __hdf5root__
 HDF5_LIB       = -L$(HDF5ROOT)/lib -lhdf5_hl -lhdf5
 HDF5_INCLUDE   = -I$(HDF5ROOT)/include
 
-SZIPROOT       = $(EBROOTSZIP)
+SZIPROOT       = __sziproot__
 SZIP_LIB       = -L$(SZIPROOT)/lib -lsz
 SZIP_INCLUDE   = -I$(SZIPROOT)/include
 
-ZLIBROOT       = $(EBROOTZLIB)
+ZLIBROOT       = __zlibroot__
 ZLIB_LIB       = -L$(ZLIBROOT)/lib -lz
 ZLIB_INCLUDE   = -I$(ZLIBROOT)/include
-
-GRIBAPIROOT    = /p/project/cslts/brdar1/sw/grib_api-1.25.0
-GRIBAPI_LIB    = -L$(GRIBAPIROOT)/lib -lgrib_api
-GRIBAPI_INCLUDE= -I$(GRIBAPIROOT)/include
 
 SCTROOT        = 
 SCT_LIB        = 
@@ -58,9 +54,16 @@ XML2ROOT       =
 XML2_LIB       = 
 XML2_INCLUDE   = 
 
-MPIROOT        = $(EBROOTPSMPI)
-MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi
-MPI_INCLUDE    = -I$(MPIROOT)/include
+GRIBAPIROOT     = __eccoderoot__
+GRIBAPI_LIB     = -L$(EBROOTECCODES)/lib -leccodes_f90 -leccodes
+GRIBAPI_INCLUDE = -I$(EBROOTECCODES)/include
+
+
+
+
+#MPIROOT        = /usr/local/software/jureca/Stages/2016a/software/psmpi/5.1.5-1-iccifort-2016.2.181-GCC-4.9.3-2.25
+#MPI_LIB        = -L$(MPIROOT)/lib -L$(MPIROOT)/lib -lmpi -lmpifort
+#MPI_INCLUDE    = -I$(MPIROOT)/include
 
 LAPACKROOT     = 
 LAPACK_LIB_PATH= 
@@ -71,8 +74,8 @@ PROFILE_INCLUDE =
 
 OTHER_LIBS     = 
 
-LIBS           = -L../lib -lsupport -lself -lmtime $(LAPACK_LIB) $(NETCDF_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(GRIBAPI_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
-INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(GRIBAPI_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE) $(OASIS_INCLUDE)
+LIBS           = -L../lib -lsupport -lself -lmtime -lirng $(LAPACK_LIB) $(NETCDF_LIB) $(GRIBAPI_LIB) $(CDI_LIB) $(HDF5_LIB) $(SZIP_LIB) $(ZLIB_LIB) $(XML2_LIB) $(MPI_LIB) $(PROFILE_LIB) $(SCT_LIB) $(OTHER_LIBS) $(OASIS_LIB)
+INCLUDE        = -I../include -I../../../src/include $(MPI_INCLUDE) $(NETCDF_INCLUDE) $(GRIBAPI_INCLUDE) $(CDI_INCLUDE) $(HDF5_INCLUDE) $(SZIP_INCLUDE) $(ZLIB_INCLUDE) $(XML2_INCLUDE) $(PROFILE_INCLUDE) $(SCT_INCLUDE) $(OASIS_INCLUDE)
 INCLUDES       = $(INCLUDE)
 
 AS             = as
@@ -80,15 +83,15 @@ AS             = as
 CC             = __comCC__
 CFLAGS         = $(INCLUDE) -std=gnu99 -march=native -O2 -DHAVE_LIBNETCDF -DHAVE_CF_INTERFACE -DHAVE_LIBSZ -DHAVE_NETCDF4 -DHAVE_LIBHDF5 -DHAVE_NETCDF2 -DpgiFortran -D__ICON__
 FC             = __comF90__
-FFLAGS         = $(INCLUDES) -J../module -I../src -I../support -I../module __cplflg__ -g -O2 -msse2 -cpp -std=f2008 -fimplicit-none -fmax-identifier-length=63 -ffree-line-length-512 -Wall -Wcharacter-truncation -Wconversion -Wunderflow -Wunused-parameter -D__LOOP_EXCHANGE -D__ICON__ -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__
-FlibFLAGS      = $(INCLUDES) -J../module 
+FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
+FlibFLAGS      = $(INCLUDES) -module  ../module 
 F77            = __comF77__
-F77FLAGS       = __cplflg__ -march=native -g -O2 -ffast-math -mpc64 -cpp -D__LOOP_EXCHANGE -fbacktrace -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffree-line-length-512 -D__LOOP_EXCHANGE
+F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE
 
-AR             = ar
+AR             = xiar
 ARFLAGS        = crv
 
-LDFLAGS        = -I../src -I../support -I../module -g -march=native -O3 -ffast-math -D__LOOP_EXCHANGE -D__ICON__
+LDFLAGS        = -I../src -I../support -I../module -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__
 
 SRCDIRS        = externals/self/src externals/mtime/src blas lapack support src
 OBJDIRS        = build/x86_64-unknown-linux-gnu/externals/self/src build/x86_64-unknown-linux-gnu/externals/mtime/src build/x86_64-unknown-linux-gnu/blas build/x86_64-unknown-linux-gnu/lapack build/x86_64-unknown-linux-gnu/support build/x86_64-unknown-linux-gnu/src
@@ -155,7 +158,7 @@ distclean:
 	-rm -rf doc/html
 	-rm -rf doc/latex
 	-rm -rf html/[a-z]*
-	-rm -f src/messy
+	-rm -f src/messy_interface
 
 doc:
 	doxygen doc/resources/doxyfile_icon_html

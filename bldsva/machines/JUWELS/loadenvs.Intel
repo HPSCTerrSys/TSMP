@@ -20,7 +20,9 @@ module load netCDF-Fortran/4.5.3
 module load parallel-netcdf/1.12.1
 module load cURL/7.71.1
 module load Szip/.2.1.1
+module load NCO/4.9.5
 ml Python/3.8.5
+
 #
 export PATH="/p/project/cslts/local/juwels/tcl8.6.8/bin:$PATH"
 export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8/lib:$LD_LIBRARY_PATH"
