@@ -640,7 +640,7 @@ CONTAINS
            !qhfl_help(jc,jb) = 0.5_wp+SIGN(0.5_wp, p_lnd_state(1)%p_prog_lnd(nnow(1))%t_s_t(jc,jb,1))
            qhfl_help(jc,jb) = 0.5_wp+SIGN(0.5_wp, oas_rcv_field_icon(jc,jb,8) - t0_melt)
            prm_diag%qhfl_s_t(jc,jb,1) = prm_diag%lhfl_s_t(jc,jb,1) / &
-             (qhfl_help(jc,jb)*lh_v + (1._wp-qhfl_help(jc,jb)*lh_s))
+                 (qhfl_help(jc,jb)*lh_v + (1._wp-qhfl_help(jc,jb))*lh_s) !SPo correct calculation
          END DO
 #endif
 
