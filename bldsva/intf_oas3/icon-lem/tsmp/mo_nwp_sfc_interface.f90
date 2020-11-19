@@ -53,7 +53,8 @@ MODULE mo_nwp_sfc_interface
 
 #ifdef COUP_OAS_ICON
   USE oas_icon_define
-  USE mo_physical_constants,  ONLY: lh_v => alv, lh_s => als, t0_melt =>tmelt
+  USE mo_physical_constants,  ONLY: lh_v => alv, lh_s => als, t0_melt =>tmelt,        &
+                                    r_d   => rd, rvd_m_o=>vtmpc1 ! SPo add rd & r_v/r_d - 1 
   !USE mo_nwp_lnd_state,       ONLY: p_lnd_state
   !USE mo_dynamics_config,     ONLY: nnow
   USE oas_icon_define,        ONLY: oas_rcv_field_icon
@@ -239,6 +240,7 @@ CONTAINS
 
 #ifdef COUP_OAS_ICON
     REAL(wp) :: qhfl_help(nproma,p_patch%nblks_c)
+    REAL(wp) :: qv_s_help(nproma,p_patch%nblks_c)
 #endif
 
 !--------------------------------------------------------------
@@ -642,6 +644,23 @@ CONTAINS
            prm_diag%qhfl_s_t(jc,jb,1) = prm_diag%lhfl_s_t(jc,jb,1) / &
                  (qhfl_help(jc,jb)*lh_v + (1._wp-qhfl_help(jc,jb))*lh_s) !SPo correct calculation
          END DO
+
+        ! SPo calculate effective qv_s based on clm fluxes following
+        ! terra_multlay
+        DO jc = i_startidx, i_endidx
+           qv_s_help(jc,jb) =  prm_diag%tvh_t(jc,jb,1) * &
+               p_diag%pres_sfc(jc,jb)/(r_d*lnd_prog_new%t_g_t(jc,jb,1) * &
+               (1._wp + rvd_m_o * lnd_diag%qv_s_t(jc,jb,1))) + 1.E-6_wp
+           lnd_diag%qv_s_t(jc,jb,1) = p_prog_rcf%tracer(jc,nlev,jb,iqv) - &
+                                      prm_diag%qhfl_s_t(jc,jb,1) / qv_s_help(jc,jb)
+           ! SPo qv_s may violate the saturation constraint 
+           lnd_diag%qv_s_t(jc,jb,1) = MIN(lnd_diag%qv_s_t(jc,jb,1), &
+               spec_humi(sat_pres_water(lnd_prog_new%t_g_t(jc,jb,1)),p_diag%pres_sfc(jc,jb)))
+!           !SPo limiter
+!           lnd_diag%qv_s_t(jc,jb,1) = min(max(1.E-5_wp,lnd_diag%qv_s_t(jc,jb,1)),1E-1_wp)
+        END DO
+
+
 #endif
 
 
@@ -684,10 +703,10 @@ CONTAINS
 #ifndef COUP_OAS_ICON
           lnd_prog_new%t_s_t     (jc,jb,isubs) = t_s_new_t     (ic)              
           lnd_prog_new%t_g_t     (jc,jb,isubs) = t_g_t         (ic)
-#endif
           ! qv_s may violate the saturation constraint in cases of numerical instability
           lnd_diag%qv_s_t        (jc,jb,isubs) = MIN(qv_s_t    (ic), &
             spec_humi(sat_pres_water(t_g_t(ic)),ps_t(ic)) )
+#endif
           lnd_prog_new%w_snow_t  (jc,jb,isubs) = w_snow_new_t  (ic)          
           lnd_prog_new%rho_snow_t(jc,jb,isubs) = rho_snow_new_t(ic)        
           lnd_diag%h_snow_t      (jc,jb,isubs) = h_snow_t      (ic)
