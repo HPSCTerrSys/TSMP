@@ -1,14 +1,15 @@
-#! /bin/ksh
+#! /usr/bin/ksh
 
 
 getMachineDefaults(){
 route "${cblue}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/jusuf/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JUWELS: loadenvs.$compiler"
-  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  comment "   source and load Modules on JUSUF :$rootdir/bldsva/machines/$platform/loadenvs.$compiler"
+  source $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
+
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
@@ -20,15 +21,16 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-#
+
   # Default Compiler/Linker optimization
-  defaultOptC="-O2 -xHost"
-  profilingImpl=" no scalasca "
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi  
+  defaultOptC="-O2"
+
+  profilingImpl=" no scalasca "  
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
-  defaultwtime="00:10:00"
-  defaultQ="devel"
+  defaultwtime="01:00:00"
+  defaultQ="batch"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
@@ -41,7 +43,7 @@ route "${cblue}<< finalizeMachine${cnormal}"
 
 createRunscript(){
 route "${cblue}>> createRunscript${cnormal}"
-comment "   copy JUWELS module load script into rundirectory"
+comment "   copy JURECA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
 
@@ -58,7 +60,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TSMP"
+#SBATCH --job-name="TerrSysMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
@@ -67,7 +69,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=slts 
+#SBATCH --account=slts
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
@@ -104,6 +106,7 @@ end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
 start_clm=$((($numInst*($nproc_cos+$nproc_icon))+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
+
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}
