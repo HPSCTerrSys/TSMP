@@ -49,10 +49,13 @@ To get a man-page for the usage of this scripts, do:
    ./build_tsmp.ksh --man
    ./setup_tsmp.ksh --man
 ```
+### <a name="ver_his"></a> TSMP version history
+The model components used in TSMP for the versions v1.2.1, v1.2.2 and v1.2.3 are OASIS3-MCT v2, COSMO v5.01, CLM v3.5 and ParFlow 3.2. TSMP supports ParFlow 3.7 from version v1.3.3 onward. However, the other model components in version v1.3.3 are the same as the previous one.
+Note that **ParFlow 3.7 is cloned automatically via TSMP from the GitHub repository** https://github.com/hokkanen/parflow.git.
 
-### <a name="ref_exp"></a> The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP v1.2.1
+### <a name="ref_exp"></a> The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP  
 
-This test case uses the current TSMP release version v1.2.1 with OASIS3/OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2. A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
+This test case uses the current TSMP release version v1.2.1 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2 (ParFlow 3.7 from TSMP version v1.3.3 onward).  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies
 For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA, all necessary software modules are loaded automatically through a "loadenv" file located in directory JUWELS or JURECA in machines directory. The users of other HPC systems should provide an appropriate "loadenv" files for loading the modules and locate it in `machines/<machine_name>`, similar to JURECA and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a "loadenv" file in the directory `machines/GENERIC_X86`. For more information on using this script please see the README in branch **TSMP_x86_64**.
@@ -104,6 +107,7 @@ Authenticate with your GitLab web GUI user name and password and clone the repos
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
 ```
+It should be noted that ParFlow 3.7 is cloned automatically via TSMP v1.3.3 from the GitHub repository https://github.com/hokkanen/parflow.git. \
 Rename the component model directories:
 
 ```shell
@@ -140,6 +144,9 @@ Alternatively:
    git clone --branch v3.2.0 https://github.com/parflow/parflow.git
    mv parflow parflow3_2
 ```
+##### ParFlow v3.7
+As indicated in [TSMP version history](#ver_his), this version is automatically cloned  and configured via TSMP interface. It is available from https://github.com/hokkanen/parflow.git under branch oas-gpu. 
+
 
 ##### OASIS3-MCT v2.0
 
@@ -169,26 +176,42 @@ Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (cl
 
 ```shell
    cd $TSMP_DIR/bldsva
-   ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JURECA -O Intel
+   ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel
 ```
+For building ParFlow 3.7 on GPU:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel -A GPU
+```
+
 
 A note to external users:
 
 The path to the modules, compiler and MPI wrapper can be set in:  
 `$TSMP_DIR/bldsva/machines/<your_machine_name>/build_interface_<your_machine_name>.ksh`
 
-An example for the JURECA HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JURECA/build_interface_JURECA.ksh` and an example for the ini file to set up the environment is in `$TSMP_DIR/bldsva/machines/JURECA/loadenvs_2018a`.
+An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JURECA.ksh` \
+and an example to load the environment modules or the needed software compatible with Intel compiler version 2020 is in `$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel`.
 
 ### <a name="ref_step5"></a> Step 6: Setup and configuration of the respective usage and test case
 
 For HPSC-TerrSys users:
 
-To configure TSMP for the [EURO-CORDEX test case experiment](#ref_exp) on JURECA machine (on JUWELS just change -m JURECA to -m JUWELS):
+To configure TSMP for the [EURO-CORDEX test case experiment](#ref_exp) on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 ```shell
    cd $TSMP_DIR/bldsva
-   ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JURECA -I _cordex -O Intel
+   ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel
 ```
+
+For configuring TSMP for a heterogeneous job:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
+```
+In this heterogeneous job ParFlow 3.7 will run on GPU while Cosmo and CLM on CPU.
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
 

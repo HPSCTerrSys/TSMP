@@ -761,143 +761,45 @@ route "${cblue}<<< c_setup_clm${cnormal}"
 
 
 c_configure_pfl(){
-
-
 route "${cblue}>>> c_configure_pfl${cnormal}"
-    if [[ $withOAS == "true" ]] ; then 
-      flagsSim+="--with-amps=oas3 --with-oas3 "  
-      flagsTools+="--with-amps=oas3 --with-oas3 "
-    else 
-#DA
-      if [[ $withPDAF == "true" ]] ; then
-        flagsSim+="--with-amps=da " 
-        flagsTools+="--with-amps=da "
-      else
-        flagsSim+="--with-amps=mpi1 " 
-        flagsTools+="--with-amps=mpi1 "
-      fi
-    fi
-
-    flagsSim+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-amps-sequential-io --enable-timing"
-    flagsTools+="--prefix=$pfldir --with-hypre=$hyprePath --with-silo=$siloPath --with-tcl=$tclPath --with-amps-sequential-io"
-
-  comment "    cd to pfsimulator"
-    cd $pfldir/pfsimulator >> $log_file 2>> $err_file
+  
+  comment "    cd to pfl build directory "
+    cd $PARFLOW_BLD >> $log_file 2>> $err_file
   check
-
-    if [[ -e "$pfldir/pfsimulator/Makefile" ]] ; then
-      comment "    make pfsimulator very clean"
-        make -f $pfldir/pfsimulator/Makefile veryclean >> $log_file 2>> $err_file
-      check
-    fi 
-
-  comment "    configure pfsimulator"
-    export SCOREP_WRAPPER=off
-    if [[ $withICON == "true" ]]; then
-    $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim -DCOUP_OAS_ICON" CFLAGS="$cflagsSim -DCOUP_OAS_ICON" >> $log_file 2>> $err_file
-    else
-    $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim" CFLAGS="$cflagsSim" >> $log_file 2>> $err_file
-    fi
-  check
-  comment "    patch pfsimulator/parflow_lib/problem_phase_rel_perm.c "
-    sed -i "s@inline double VanGLookupSpline@double VanGLookupSpline@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
-    sed -i "s@inline double VanGLookupLinear@double VanGLookupLinear@" $pfldir/pfsimulator/parflow_lib/problem_phase_rel_perm.c >> $log_file 2>> $err_file
-  check
-  comment "    cd to pftools"
-    cd $pfldir/pftools >> $log_file 2>> $err_file
-  check
-
-    if [[ -e "$pfldir/pftools/Makefile" ]] ; then
-      comment "    make pftools very clean"
-        make -f $pfldir/pftools/Makefile veryclean >> $log_file 2>> $err_file
-      check
-    fi
-
-  comment "    configure pftools"
-    $pfldir/pftools/configure $flagsTools >> $log_file 2>> $err_file
-  check
-  export SKIN_MODE=mpi
-
-  comment "    sed libs to /parflow_exe/Makefile"
-    sed -i "s@__libs__@$libsSim@" $pfldir/pfsimulator/parflow_exe/Makefile >> $log_file 2>> $err_file
+  export CC=$pcc 
+  export FC=$pfc 
+  export F77=$pf77 
+  export CXX=$pcxx
+  
+  comment "    configure pfsimulator and pftools"
+  cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
 route "${cblue}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
 route "${cblue}>>> c_make_pfl${cnormal}"
-comment "    cd to pfsimulator" 
-  cd $pfldir/pfsimulator >> $log_file 2>> $err_file
+  comment "    cd to pfl build directory "
+  cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
-comment "    make pfsimulator"
-  export SCOREP_WRAPPER=on
-  make -f $pfldir/pfsimulator/Makefile >> $log_file 2>> $err_file
+comment "    make pfsimulator and pftools"
+  make  >> $log_file 2>> $err_file
 check
-comment "    make install pfsimulator"
-  make -f $pfldir/pfsimulator/Makefile install >> $log_file 2>> $err_file
-check
-
-  export SCOREP_WRAPPER=off
-comment "    cd to pftools"
-  cd $pfldir/pftools >> $log_file 2>> $err_file
-check
-comment "    make pftools"
-  make -f $pfldir/pftools/Makefile >> $log_file 2>> $err_file
-check
-comment "    make install pftools"
-  make -f $pfldir/pftools/Makefile install >> $log_file 2>> $err_file
+comment "    make install pfsimulator and pftools"
+  make install >> $log_file 2>> $err_file
 check
 comment "    cp pfl bin to $bindir"
-  cp -R $pfldir/bin $bindir >> $log_file 2>> $err_file
+  cp -R $pfldir/bin/bin $bindir >> $log_file 2>> $err_file
 check
-#DA
-  if [[ $withPDAF == "true" ]]; then
-    comment "    cp libs to $bindir/libs"
-      cp $pfldir/pfsimulator/lib/* $bindir/libs >> $log_file 2>> $err_file
-    check
-  else
-    comment "    cp binary to $bindir"
-      cp $pfldir/bin/parflow $bindir >> $log_file 2>> $err_file
-    check
-  fi
-  export SCOREP_WRAPPER=on
+
+comment "    cp binary to $bindir"
+ cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
+check
 route "${cblue}<<< c_make_pfl${cnormal}"
 }
 
 c_substitutions_pfl(){
 route "${cblue}>>> c_substitutions_pfl${cnormal}"
-  comment "    copy oas3 interface to parflow/pfsimulator/amps "
-    patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
-  check
-
-  comment "    copy fix for hardwired MPI_COMM_WORLD in amps "
-    patch "$rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/amps*" $pfldir/pfsimulator/amps/mpi1
-  check
-    patch "$rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/pf_pfmg*" $pfldir/pfsimulator/parflow_lib 
-  check
-#DA
-  if [[ $withPDAF == "true" ]]; then
-    comment "    sed DA amps into configure"
-      sed "/\"\$with_amps\" in\s*/ a\
-  da\)\\
-    AMPS=da\\
-  ;;
-      " -i $pfldir/pfsimulator/configure $pfldir/pftools/configure >> $log_file 2>> $err_file
-    check
-    comment "    copy fix for PDAF into $pfldir"
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
-    check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
-    check
-      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
-    check
-      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg.c
-    check
-      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg_octree.c
-    check
-      sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_smg.c
-    check
-  fi
 
 route "${cblue}<<< c_substitutions_pfl${cnormal}"
 }
