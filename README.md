@@ -50,7 +50,7 @@ To get a man-page for the usage of this scripts, do:
    ./setup_tsmp.ksh --man
 ```
 ### <a name="ver_his"></a> TSMP version history
-The model components used in TSMP for the versions v1.2.1, v1.2.2 and v1.2.3 are OASIS3-MCT v2, COSMO v5.01, CLM v3.5 and ParFlow 3.2. TSMP supports ParFlow 3.7 from version v1.3.3 onward. However, the other model components in version v1.3.3 are the same as the previous one.
+The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5 and ParFlow 3.2 (for versions v1.2.1, v1.2.2 and v1.2.3) and ParFlow 3.7 for version v1.3.3. TSMP supports ParFlow 3.7 from version v1.3.3 onward.
 Note that **ParFlow 3.7 is cloned automatically via TSMP from the GitHub repository** https://github.com/hokkanen/parflow.git.
 
 ### <a name="ref_exp"></a> The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP  

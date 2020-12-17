@@ -378,10 +378,10 @@ route "${cblue}< c_compileDA${cnormal}"
 
 runCompilation(){
 # run model compilation
-#  if [[ $withOAS == "true" ]] ; then ; compileOasis ; fi # must be called first bc of dependecies
+  if [[ $withOAS == "true" ]] ; then ; compileOasis ; fi # must be called first bc of dependecies
 
-#  if [[ $withCLM == "true" ]] ; then ; compileClm ; fi
-#  if [[ $withCOS == "true" ]] ; then ; compileCosmo ; fi
+  if [[ $withCLM == "true" ]] ; then ; compileClm ; fi
+  if [[ $withCOS == "true" ]] ; then ; compileCosmo ; fi
   if [[ $withICON == "true" ]] ; then ; compileIcon ; fi
   if [[ $withPFL == "true" ]] ; then ; compileParflow ; fi
 
