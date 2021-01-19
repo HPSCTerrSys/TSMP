@@ -64,9 +64,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
 #SBATCH -N 4 --ntasks-per-node=48 -p batch
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=48 -p batch
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
 
 cd $rundir
