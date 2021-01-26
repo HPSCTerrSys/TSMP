@@ -6,42 +6,29 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
   . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JUWELS"
+  comment "   source and load Modules on JUWELS: loadenvs.$compiler"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
-
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
-
-  #CPS Remove hardwiring of compiler, introducing compiler switch 
-  if [[ $compiler == "Intel" ]] ; then
-  #Intel GRIB
-  defaultGrib1Path="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-
-  elif [[ $compiler == "Gnu" ]] ; then
-  #GNU GRIB
-  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
-  fi
-
-  defaultGribapiPath="$EBROOTGRIB_API"
+  defaultGribPath="$EBROOTECCODES"
+  defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-
+#
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
-
-  profilingImpl=" no scalasca "  
-  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
+  defaultOptC="-O2 -xHost"
+  profilingImpl=" no scalasca "
+  if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi  
 
   # Default Processor settings
-  defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultwtime="00:10:00"
+  defaultQ="devel"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
 }
@@ -71,7 +58,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
@@ -80,7 +67,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=hbn33 
+#SBATCH --account=slts 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 

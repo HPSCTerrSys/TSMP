@@ -1,0 +1,38 @@
+---  src_allocation.f90	2014-11-28 12:18:36.000000000 +0100
++++  src_allocation.f90	2019-12-04 12:52:07.145337000 +0100
+@@ -496,6 +496,10 @@
+ !   turbulent coefficients at the surface 
+     tcm      ,      & ! transfer coefficient for momentum               ( -- )
+     tch      ,      & ! transfer coefficient for heat and moisture      ( -- )
++#ifdef COUP_OAS_COS
++    tcw      ,      & ! transfer coefficient for          moisture      ( -- )
++    trad_clm ,      & ! radiative temperature in CLM as bottom BC       ( K  )
++#endif
+     tfm      ,      & ! factor of laminar transfer of momentum            --
+     tfh      ,      & ! factor of laminar transfer of scalars             --
+     tfv      ,      & ! laminar reduction factor for evaporation        ( -- )
+@@ -1135,7 +1139,13 @@
+   ALLOCATE ( sotr_par(ie,je)    , STAT=izl ) ; sotr_par= 0.0_wp  ; ist = ist + izl
+   ALLOCATE ( thhr   (ie,je,ke)  , STAT=izl ) ; thhr    = 0.0_wp  ; ist = ist + izl
+   ALLOCATE ( clc_sgs(ie,je,ke)  , STAT=izl ) ; clc_sgs = 0.0_wp  ; ist = ist + izl
++#ifdef COUP_OAS_COS
++  ALLOCATE ( tcw    (ie,je)     , STAT=izl ) ; tcw     = 0.0_wp  ; ist = ist + izl
++  ALLOCATE ( trad_clm(ie,je)    , STAT=izl ) ; trad_clm= 0.0_wp  ; ist = ist + izl
++  ALLOCATE ( alb_rad(ie,je,2)   , STAT=izl ) ; alb_rad = 0.0_wp  ; ist = ist + izl
++#else
+   ALLOCATE ( alb_rad(ie,je)     , STAT=izl ) ; alb_rad = 0.0_wp  ; ist = ist + izl
++#endif
+   IF ( nradcoarse > 1 ) THEN
+     ALLOCATE ( alb_rad_coarse(ie,je) , STAT=izl ) ; alb_rad_coarse = 0.0_wp  ; ist = ist + izl
+   ENDIF
+@@ -1729,6 +1739,10 @@
+   ENDIF
+   DEALLOCATE ( tcm    , STAT=istat )
+   DEALLOCATE ( tch    , STAT=istat )
++#ifdef COUP_OAS_COS
++  DEALLOCATE ( tcw    , STAT=istat )
++  DEALLOCATE (trad_clm, STAT=istat )
++#endif
+   DEALLOCATE ( tfm    , STAT=istat )
+   DEALLOCATE ( tfh    , STAT=istat )
+   DEALLOCATE ( tfv    , STAT=istat )

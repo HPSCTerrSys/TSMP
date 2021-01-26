@@ -227,14 +227,65 @@ route "${cblue}<<< c_make_cos${cnormal}"
 
 
 c_substitutions_cos(){
+
 route "${cblue}>>> c_substitutions_cos${cnormal}"
   comment "    copy oas3 interface to cosmo/src "
     patch $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src 
   check
-  comment "    replace files with coupling. Add files to cosmo/src "
-    patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
+    cp  $rootdir/cosmo5_1/LOCAL/TWOMOM/src_twomom_sb* $cosdir/src
   check
-
+  comment "    replace files with coupling. Add files to cosmo/src "
+  # patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
+  check
+  comment "	copy the diff files to cosmo src : from $rootdir/bldsva/intf_oas3/${mList[2]}/pfile"
+    cp $rootdir/bldsva/intf_oas3/${mList[2]}/pfile/patch* $cosdir/src 
+  check
+  comment "     apply diff files on the original files using patch command in $cosdir/src "
+   /usr/bin/patch  -d $cosdir/src -i patch_src_radiation.f90.diff -o src_radiation1.f90
+    cp $cosdir/src/src_radiation1.f90 $cosdir/src/src_radiation.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_data_fields.f90.diff -o data_fields1.f90  
+    cp $cosdir/src/data_fields1.f90  $cosdir/src/data_fields.f90
+  check
+#    patch  -d $cosdir/src -i patch_phillips_nucleation.incf.diff  -o phillips_nucleation1.incf >> $log_pfile 2>> $err_pfile
+#    cp $cosdir/src/phillips_nucleation1.incf $cosdir/src/phillips_nucleation.incf
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_lmorg.f90.diff -o lmorg1.f90 
+    cp $cosdir/src/lmorg1.f90 $cosdir/src/lmorg.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_artifdata.f90.diff -o src_artifdata1.f90
+    cp $cosdir/src/src_artifdata1.f90 $cosdir/src/src_artifdata.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_setup_vartab.f90.diff -o src_setup_vartab1.f90
+    cp $cosdir/src/src_setup_vartab1.f90 $cosdir/src/src_setup_vartab.f90
+  check
+    /usr/bin/patch -d $cosdir/src -i patch_src_twomom_sb.f90.diff -o src_twomom_sb1.f90
+    cp $cosdir/src/src_twomom_sb1.f90  $cosdir/src/src_twomom_sb.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_environment.f90.diff -o environment1.f90
+    cp $cosdir/src/environment1.f90 $cosdir/src/environment.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_organize_physics.f90.diff -o organize_physics1.f90
+    cp $cosdir/src/organize_physics1.f90 $cosdir/src/organize_physics.f90
+  check
+    /usr/bin/patch  -d $cosdir/src -i patch_src_allocation.f90.diff -o src_allocation1.f90
+    cp $cosdir/src/src_allocation1.f90 $cosdir/src/src_allocation.f90
+  check
+   /usr/bin/patch  -d $cosdir/src -i patch_src_gridpoints.f90.diff -o src_gridpoints1.f90
+    cp $cosdir/src/src_gridpoints1.f90 $cosdir/src/src_gridpoints.f90
+  check
+    /usr/bin/patch -d $cosdir/src -i patch_src_runge_kutta.f90.diff -o src_runge_kutta1.f90
+    cp $cosdir/src/src_runge_kutta1.f90 $cosdir/src/src_runge_kutta.f90
+  check
+   /usr/bin/patch -d $cosdir/src -i patch_src_slow_tendencies_rk.f90.diff -o src_slow_tendencies_rk1.f90
+    cp $cosdir/src/src_slow_tendencies_rk1.f90 $cosdir/src/src_slow_tendencies_rk.f90
+  check
+#    patch -d $cosdir/src -i patch_src_twomom_sb_interface.f90.diff  -o src_twomom_sb_interface1.f90
+#    cp $cosdir/src/src_twomom_sb_interface1.f90 $cosdir/src/src_twomom_sb_interface.f90
+#  check
+   
+    rm -rf $cosdir/src/*1.f90
+    rm -rf $cosdir/src/*1.incf
 #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
@@ -300,6 +351,7 @@ check
 comment "  sed date to namelist"
   sed "s/init_y_bldsva/$(date '+%Y' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
+comment "  sed init_m_bldsva to namelist"  
   sed "s/init_m_bldsva/$(date '+%m' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
   sed "s/init_d_bldsva/$(date '+%d' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
@@ -323,7 +375,7 @@ cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__dump_cos_interval__/ $(python -c "print $dump_cos*(3600/$dt_cos)")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__dump_cos_interval__/ $(python -c "print ($dump_cos*(3600/$dt_cos))")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -423,7 +475,7 @@ route "${cblue}>>> c_setup_oas${cnormal}"
   if [[ $withCESM == "true" || $withOASMCT == "true" ]] ; then ; ncpl_exe3=$nproc_clm ; fi
 
 
-  if [[ $withICON == "true" ]]; then
+  if [[ $withICON == "true" ]] then
     sed "s/ngiconx/$gx_icon/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
@@ -544,6 +596,8 @@ route "${cblue}>>> c_configure_clm${cnormal}"
   comment "    create new build dir"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
+  comment "    copy oas_clm_init.F90 to  $clmdir/src/oas3"
+    cp $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/oas_clm_init.F90 $clmdir/src/oas3
 
     spmd="on"       # settings are [on   | off       ] (default is off)
     maxpft="1"        # settings are 4->17               (default is 4)
@@ -619,6 +673,9 @@ route "${cblue}<<< c_make_clm${cnormal}"
 
 c_substitutions_clm(){
 route "${cblue}>>> c_substitutions_clm${cnormal}"
+  comment "    create oas3 dir in $clmdir/src"
+    mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
+  check
   comment "    copy oas3 interface to clm/src "
     patch $rootdir/bldsva/intf_oas3/${mList[1]}/mct $clmdir/src
   check
@@ -874,7 +931,7 @@ route "${cblue}>>> c_setup_pfl${cnormal}"
   check
   comment "   sed end time to pfl namelist."
 #    sed "s/__stop_pfl_bldsva__/$runstep_clm/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-    sed "s/__stop_pfl_bldsva__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
@@ -948,7 +1005,7 @@ route "${cblue}>>> c_setup_da${cnormal}"
     sed "s/__dt__/$dt_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check
   comment "   sed endtime into pdaf namelist."
-    sed "s/__endtime__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  sed "s/__endtime__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check
   comment "   sed clmproc into pdaf namelist."
     sed "s/__clmproc__/$nproc_clm/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
@@ -957,7 +1014,7 @@ route "${cblue}>>> c_setup_da${cnormal}"
     sed "s/__cosproc__/$nproc_cos/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
   comment "   sed dtmult into pdaf namelist."
-    sed "s/__dtmult__/$(python -c "print ${dt_pfl} * 3600 / ${dt_cos}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
 route "${cblue}<<< c_setup_da${cnormal}"

@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/clm"
-  defaultFDCOS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/cosmo"
-  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/oasis3"
-  defaultFDPFL="/p/scratch/cslts/slts00/tsmp/TestCases/cordex/parflow"
+  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval/input/clm"
+  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval/input/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
@@ -91,6 +91,15 @@ route "${cblue}>> finalizeSetup${cnormal}"
       done
     fi  
   fi  
+
+  if [[ $withCOS == "true" ]] then
+    comment "  sed gribapi definitions and samples to namelist"
+     p_samp=$gribPath/share/eccodes/samples/
+     p_def=$gribPath/share/eccodes/definitions/
+     sed "s,__definitions__,$p_def," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+     sed "s,__samples__,$p_samp," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+    check
+  fi
 
   if [[ $withPFL == "true" ]] then
         comment "   cd to rundir"

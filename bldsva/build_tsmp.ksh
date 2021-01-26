@@ -21,7 +21,7 @@ getDefaults(){
   # pathes will be set to tested platform defaults if empty
   def_mpiPath=""
   def_ncdfPath=""
-  def_grib1Path=""
+  def_gribPath=""
   def_tclPath=""
   def_hyprePath=""
   def_siloPath=""
@@ -82,7 +82,7 @@ setDefaults(){
   ncdfPath=$def_ncdfPath
   lapackPath=$def_lapackPath
   pncdfPath=$def_pncdfPath
-  grib1Path=$def_grib1Path
+  gribPath=$def_gribPath
   tclPath=$def_tclPath
   hyprePath=$def_hyprePath
   siloPath=$def_siloPath
@@ -118,7 +118,7 @@ setDefaults(){
 clearMachineSelection(){
   mpiPath=""
   ncdfPath=""
-  grib1Path=""
+  gribPath=""
   tclPath=""
   hyprePath=""
   siloPath=""
@@ -144,7 +144,7 @@ setSelection(){
 
   if [[ $mpiPath == "" ]] then ; mpiPath=$defaultMpiPath ; fi
   if [[ $ncdfPath == "" ]] then ; ncdfPath=$defaultNcdfPath  ; fi
-  if [[ $grib1Path == "" ]] then ; grib1Path=$defaultGrib1Path ; fi
+  if [[ $gribPath == "" ]] then ; gribPath=$defaultGribPath ; fi
   if [[ $tclPath == "" ]] then ; tclPath=$defaultTclPath ; fi
   if [[ $hyprePath == "" ]] then ; hyprePath=$defaultHyprePath ; fi
   if [[ $siloPath == "" ]] then ; siloPath=$defaultSiloPath ; fi
@@ -484,7 +484,7 @@ interactive(){
 		  if [[ $numb == 17 ]] ; then ; read siloPath ; fi
 		  if [[ $numb == 18 ]] ; then ; read hyprePath ; fi
 	 	  if [[ $numb == 19 ]] ; then ; read tclPath ; fi
-		  if [[ $numb == 20 ]] ; then ; read grib1Path ; fi
+		  if [[ $numb == 20 ]] ; then ; read gribPath ; fi
 		  if [[ $numb == 21 ]] ; then ; read ncdfPath ; fi
  		  if [[ $numb == 22 ]] ; then ; read pncdfPath ; fi
 		  if [[ $numb == 23 ]] ; then ; read lapackPath ; fi
@@ -541,7 +541,7 @@ printState(){
   print "${cred}(17)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
   print "${cred}(18)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath ${cnormal}"
   print "${cred}(19)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
-  print "${cred}(20)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
+  print "${cred}(20)${cnormal} grib path (default=$defaultGribPath): ${cgreen}$gribPath ${cnormal}"
   print "${cred}(21)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
   print "${cred}(22)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
   print "${cred}(23)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
@@ -685,7 +685,7 @@ getRoot(){
   #automatically determine root dir
   cpwd=`pwd`
   if [[ "$0" == '/'*  ]] ; then
-    #absolut path
+    #absolute path
     estdir=`echo "$0" | sed 's@/bldsva/build_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
     call=$0
   else
@@ -730,8 +730,8 @@ getRoot(){
   USAGE+="[i:interactive?Interactive mode - command line arguments and defaults will be overwritten during the interactive session (This is the default without arguments).]"
   USAGE+="[a:avail?Prints a listing of every machine with available versions. The script will exit afterwards.]"
   USAGE+="[t:tutorial?Prints a tutorial/description on how to add new versions and platforms to this script. The script will exit afterwards.]"
-  USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
-  USAGE+="[B:bindir?Absolut path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
+  USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
+  USAGE+="[B:bindir?Absolute path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
    
   USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$def_platform']"
@@ -768,7 +768,7 @@ getRoot(){
   USAGE+="[H:hyprepath?Include Path for Hypre. The machine default will be taken if ''.]:[hyprepath:='$hyprePath']"
   USAGE+="[S:silopath?Include Path for Silo. The machine default will be taken if ''.]:[silopath:='$siloPath']"
   USAGE+="[T:tclpath?Include Path for TCL. The machine default will be taken if ''.]:[tclpath:='$tclPath']"
-  USAGE+="[G:grib1path?Include Path for Grib1. The machine default will be taken if ''.]:[grib1path:='$grib1Path']"
+  USAGE+="[G:gribpath?Include Path for Grib1. The machine default will be taken if ''.]:[gribpath:='$gribPath']"
   USAGE+="[M:mpipath?Include Path for MPI. The machine default will be taken if ''.]:[mpipath:='$mpiPath']"
   USAGE+="[N:ncdfpath?Include Path for NetCDF. The machine default will be taken if ''.]:[ncdfpath:='$ncdfPath']"
   USAGE+="[P:pncdfpath?Include Path for PNetCDF. The machine default will be taken if ''.]:[pncdfpath:='$pncdfPath']"
@@ -812,7 +812,7 @@ getRoot(){
 
     M)  mpiPath="$OPTARG" ; args=1 ;;
     N)  ncdfPath="$OPTARG" ; args=1 ;;
-    G)  grib1Path="$OPTARG" ; args=1 ;;
+    G)  gribPath="$OPTARG" ; args=1 ;;
     T)  tclPath="$OPTARG" ; args=1 ;;
     H)  hyprePath="$OPTARG" ; args=1 ;;
     S)  siloPath="$OPTARG" ; args=1 ;; 

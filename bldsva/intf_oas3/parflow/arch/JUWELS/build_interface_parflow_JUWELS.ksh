@@ -80,11 +80,21 @@ route "${cblue}<< make_pfl${cnormal}"
 
 substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
-  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
+
+  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder, src.$compiler"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
+
+  comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/
+
+#  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
+#    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+#  check
+#    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+#  check
  
   c_substitutions_pfl
 
@@ -96,7 +106,7 @@ route "${cblue}>> substitutions_pfl${cnormal}"
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c 
   check 
   comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
   check
 
     if [[ $withOASMCT == "true" ]] ; then 
