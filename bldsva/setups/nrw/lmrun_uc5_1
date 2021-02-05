@@ -248,7 +248,7 @@ cat > INPUT_IO  << end_input_io
    nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
    ytunit_restart='f',
 
-!  yform_read='grb1',
+  yform_read='apix',
  /
  &DATABASE
  /
