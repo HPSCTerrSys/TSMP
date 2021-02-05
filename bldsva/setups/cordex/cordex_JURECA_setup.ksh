@@ -13,12 +13,21 @@ initSetup(){
 
 
   defaultNppn=128
-  defaultCLMProcX=3
-  defaultCLMProcY=8
-  defaultCOSProcX=16
-  defaultCOSProcY=18
-  defaultPFLProcX=9
-  defaultPFLProcY=8
+  if [[ $processor == "GPU" ]]; then
+    defaultCLMProcX=6
+    defaultCLMProcY=8
+    defaultCOSProcX=16
+    defaultCOSProcY=16
+    defaultPFLProcX=1
+    defaultPFLProcY=4
+  else
+    defaultCLMProcX=3
+    defaultCLMProcY=8
+    defaultCOSProcX=16
+    defaultCOSProcY=18
+    defaultPFLProcX=9
+    defaultPFLProcY=8
+  fi
 
   defaultStartDate="2016-05-01 12"
   defaultInitDate="2016-05-01 12"
