@@ -32,12 +32,17 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-     [[ -d $rootdir/parflow3_7 ]] && echo "clean $rootdir/parflow3_7 \n " && rm -rf $rootdir/parflow3_7
-    comment "    git clone parflow3_7 \n"
+    if [ -d ${rootdir}/${mList[3]} ] ; then
+     comment "   remove ${mList[3]}"
+     rm -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
+     check
+    fi
+    comment "    git clone parflow3_7 "
      cd $rootdir
-     git clone https://github.com/hokkanen/parflow.git
+     git clone https://github.com/hokkanen/parflow.git >> $log_file 2>> $err_file
     check
      mv parflow parflow3_7
+     cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
      cd $pfldir
@@ -57,14 +62,22 @@ route "${cblue}>> configure_pfl${cnormal}"
         flagsSim+=" -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared"
        check
        comment "    git clone  RAPIDS Memory Manager "
-        [[ -d $RMM_ROOT ]] && echo "clean $RMM_ROOT \n" && rm -rf $RMM_ROOT
-        git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+       if [ -d $RMM_ROOT ] ; then 
+        comment "  remove $RMM_ROOT "
+        rm -rf $RMM_ROOT >> $log_file 2>> $err_file
+        check
+       fi
+       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
        check
-       comment "    install RMM: RAPIDS Memory Manager "
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
-        cmake .. -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
-        make -j6  >> $log_file 2>> $err_file
+       comment "    configure RMM: RAPIDS Memory Manager "
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+       check
+       comment "    make RMM "
+        make -j  >> $log_file 2>> $err_file
+       check
+       comment "    make install RMM "
         make install >> $log_file 2>> $err_file
        check
     fi
