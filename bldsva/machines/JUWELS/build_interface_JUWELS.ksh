@@ -28,7 +28,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
-  defaultwtime="00:10:00"
+  defaultwtime="01:00:00"
   defaultQ="devel"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
