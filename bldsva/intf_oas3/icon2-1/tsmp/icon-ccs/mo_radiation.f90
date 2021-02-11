@@ -605,7 +605,7 @@ CONTAINS
       IF (PRESENT(zsct)) zsct = tsi_radt
       ! SBr, CHa: change the global mean insolation to ccs_zsct
       zsct = ccs_zsct
-    WRITE(*,*) "zstunde: ", zstunde
+!    WRITE(*,*) "zstunde: ", zstunde
     ENDIF
 
   END SUBROUTINE pre_radiation_nwp
