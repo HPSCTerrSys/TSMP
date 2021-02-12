@@ -1,0 +1,236 @@
+!
+&parallel_nml
+ nproma         = 16
+ p_test_run     = .false.
+ l_test_openmp  = .false.
+ l_log_checks   = .false.
+ write_div_to_file = .FALSE.
+ num_prefetch_proc = 0
+/
+&grid_nml
+ ! cell_type is not used = 3            ! triangular cells
+ dynamics_grid_filename = "dedomain_coarse_3nest_R4994m.nc"
+ dynamics_parent_grid_id = 0
+ lfeedback         = .false.
+ l_limited_area    = .true.
+/ 
+&initicon_nml
+ init_mode              =  2 !4=cosmo, 2=ifs, 3=combined
+! ana_varnames_map_file  = '$ICON_BASE_PATH/run/ana_varnames_map_file.txt'
+! latbc_varnames_map_file = '$ICON_BASE_PATH/run/dict.latbc'
+ nlevsoil_in            =  4
+ lread_ana              = .false.
+ ltile_coldstart        = .true.
+/
+&run_nml
+ num_lev     = 150,         ! number of full levels of vertical grid
+ lvert_nest = .true.
+ dtime       = 12           ! [s] timestep in seconds
+ ldynamics   = .TRUE.       ! dynamics
+ ltestcase   = .FALSE.      ! testcase
+ ltransport  = .TRUE.       ! transport
+ iforcing    = 3  !
+ ltimer      = .true.       !
+ timers_level = 10          !
+ profiling_output = 1       !
+ msg_level   = 6 !12           ! detailed report during integration
+ output      = 'nml','totint'
+/
+&dynamics_nml
+ iequations  = 3       ! 1: hydrost. atmosphere
+ lcoriolis   = .FALSE.
+ idiv_method     = 1
+ divavg_cntrwgt  = 0.50
+/
+&transport_nml
+ lclip_tracer = .FALSE.
+/
+&limarea_nml
+ itype_latbc     = 1
+ dtime_latbc     = 3600.
+! dt_latbc        = 'PT01H'
+! nlev_latbc      = 40
+ latbc_path      = '/p/project/cslts/poll1/data/germany/forc_data/'
+ latbc_filename  = 'latbc_dedomain_coarse_3nest_R4994m_<y><m><d><h>.nc'
+ latbc_varnames_map_file = '/p/project/cslts/poll1/data/germany/dict.latbc'
+/
+&diffusion_nml
+ lhdiff_temp  = .TRUE.
+ lhdiff_vn    = .TRUE.
+ lhdiff_w     = .TRUE.
+ hdiff_order  = 5
+/
+&nwp_phy_nml
+ inwp_gscp       = 2 !4 for two moment
+ inwp_convection = 4
+ inwp_sso        = 1
+ inwp_gwd        = 1
+ inwp_radiation  = 1
+ inwp_cldcover   = 1
+ inwp_turb       = 1
+ inwp_satad      = 1
+ inwp_surface    = 1
+ latm_above_top  = .true.
+ efdt_min_raylfric = 7200.
+ itype_z0         = 2
+ dt_rad           = 1440.
+ dt_conv          = 180.
+ dt_sso           = 360.
+ dt_gwd           = 720.
+/
+&turbdiff_nml
+  tkhmin        = 0.75
+  tkmmin        = 0.75
+  tkmmin_strat  = 4
+  tur_len       = 500 
+  pat_len       = 750.
+  c_diff        = 0.2
+  rat_sea       = 7.0
+  ltkesso       = .true.
+  frcsmot       = 0.2   ! these 2 switches together apply vertical smoothing of the TKE source terms
+  imode_frcsmot = 2     ! in the tropics (only), which reduces the moist bias in the tropical lower troposphere
+ ! use horizontal shear production terms with 1/SQRT(Ri) scaling to prevent unwanted side effects:
+  itype_sher    = 3
+  ltkeshs       = .true.
+  a_hshr        = 2.0
+  alpha0        = 0.0123
+  alpha0_max    = 0.0335
+  icldm_turb    = 1
+/
+&lnd_nml
+ ntiles   = 3
+ nlev_snow = 1
+ lmulti_snow = .false.
+ itype_heatcond = 3
+ idiag_snowfrac = 1
+ lsnowtile = .false.
+ ! frlnd_thrhld = 0.5
+ ! frlake_thrhld = 0.5
+ ! frsea_thrhld = 0.5
+ lseaice   = .false.
+ llake     = .false.
+ itype_lndtbl   = 2
+ itype_evsl     = 4
+ cwimax_ml      = 5.e-4
+ c_soil         = 1.25
+ c_soil_urb     = 0.5
+/
+&radiation_nml
+ irad_o3 = 7
+ irad_aero = 6
+/
+!&transport_nml
+! ihadv_tracer = 2,2,0,0,0,0,0
+! ivadv_tracer = 3,3,0,0,0,0,0
+!/
+&interpol_nml
+ nudge_zone_width  = 8
+ lsq_high_ord      = 2
+ rbf_vec_scale_c   = 0.25
+ rbf_vec_scale_v   = 0.4
+ rbf_vec_scale_e   = 0.3
+ rbf_scale_mode_ll = 1 !2=default for automatic calculations 1 for selve
+/
+&gridref_nml
+ grf_intmethod_e  = 5  !6 default
+ grf_scalfbk      = 1
+ grf_tracfbk      = 1
+ denom_diffu_v    = 150.
+ l_mass_consvcorr = .true.
+ l_density_nudging = .true.
+/
+&nonhydrostatic_nml
+ iadv_rhotheta    =  2
+ ivctype          =  2
+ itime_scheme     =  4
+ exner_expol      =  0.333
+ vwind_offctr     =  0.25
+ damp_height      =  15000.
+ rayleigh_coeff   =  0.25
+ lhdiff_rcf       = .true.
+ divdamp_fac      =  0.004
+ divdamp_order    =  4
+ l_open_ubc       = .true.
+ igradp_method    =  3
+ l_zdiffu_t       = .true.
+ thslp_zdiffu     =  0.02
+ thhgtd_zdiffu    =  125.
+ htop_moist_proc  =  22500.
+ hbot_qvsubstep   =  24000.
+/
+&sleve_nml
+ min_lay_thckn   = 20.
+ top_height      = 21000.
+ stretch_fac     = 0.75 ! default 0.9 to have more layer in the PBL
+ decay_scale_1   = 4000.
+ decay_scale_2   = 2500.
+ decay_exp       = 1.2
+ flat_height     = 16000.
+/
+&io_nml
+ dt_checkpoint    = 86400 ! [s] trigger new restart file
+ lkeep_in_sync    = .true.
+ restart_file_type = 5
+ output_nml_dict  = "dict.germany"
+ netcdf_dict      = "dict.germany"
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'out_germany_land'
+ output_grid      = .TRUE.
+ ml_varlist       = 'group:dwd_fg_sfc_vars','shfl_s','lhfl_s'
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ steps_per_file   = 1
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'out_germany_rad'
+ output_grid      = .TRUE.
+ ml_varlist       = 'group:rad_vars','albvisdir','albnirdir'
+/
+&output_nml
+ filetype         = 4
+ m_levels        = "(nlev-55)...nlev+1"
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ steps_per_file   = 1
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'out_germany_insta'
+ output_grid      = .TRUE.
+ ml_varlist       = 'u','v','w','temp','qv','qc','theta_v','pres','tkvh','z_ifc','z_mc'
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ m_levels        = "(nlev-55)...nlev+1"
+ output_bounds   = 0.,86400.,86400.          ! start, end, increment (1 day, 1 hour)
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ steps_per_file   = 1
+ include_last     = .TRUE.
+ output_filename  = 'out_germany_const'
+ ml_varlist       =  'z_mc','z_ifc','topography_c','lai','plcov','soiltyp','fr_land','fr_lake','gz0'
+ output_grid      = .TRUE.
+/
+&extpar_nml
+ itopo          = 1
+ n_iter_smooth_topo = 1
+ heightdiff_threshold = 3000.
+/
