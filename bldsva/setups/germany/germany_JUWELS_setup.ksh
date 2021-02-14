@@ -36,7 +36,7 @@ initSetup(){
 
   defaultStartDate="2013-05-28 00"
   defaultInitDate=$defaultStartDate 
-  defaultRunhours=24
+  defaultRunhours=23
   defaultEndDate="$(date -d "${defaultInitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
 
   defaultDumpCLM=1

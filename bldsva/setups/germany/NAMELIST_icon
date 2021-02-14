@@ -194,7 +194,6 @@
  output_end       = "__endtime_icon_bldsva__"
  output_interval  = "PT15M"
  file_interval    = "P01D"
- steps_per_file   = 1
  include_last     = .TRUE.
  remap            = 0   ! triangular grid
  output_filename  = 'out_germany_rad'
@@ -205,15 +204,15 @@
  filetype         = 4
  m_levels        = "(nlev-55)...nlev+1"
  dom              = -1
+ output_bounds   = 0.,86400.,1800.
  output_start     = "__starttime_icon_bldsva__"
  output_end       = "__endtime_icon_bldsva__"
- output_interval  = "PT15M"
- file_interval    = "P01D"
  steps_per_file   = 1
  include_last     = .TRUE.
  remap            = 0   ! triangular grid
  output_filename  = 'out_germany_insta'
  output_grid      = .TRUE.
+ filename_format  = "<output_filename>_DOM<physdom>_<levtype>_<datetime2>"
  ml_varlist       = 'u','v','w','temp','qv','qc','theta_v','pres','tkvh','z_ifc','z_mc'
 /
 &output_nml

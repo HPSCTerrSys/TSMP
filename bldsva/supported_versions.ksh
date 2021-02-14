@@ -124,7 +124,7 @@ setups+=(
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy icon-ccs icon-ccs-s icon-ccs-snwp icon-cbl-nwp nrw-icon icon-ccs-scunbo "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy icon-ccs icon-ccs-s icon-ccs-snwp icon-cbl-nwp nrw-icon icon-ccs-scunbo germany "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse "
         ["MISTRAL"]=" nrw cordex idealRTD  "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
