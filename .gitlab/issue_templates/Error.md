@@ -1,13 +1,12 @@
+/title: TSMP error
+
 ## Describe the problem
 A clear and concise description of what the error is
 
-
-## Version and Component Models
-
+## Version and Component Models 
 TSMP-Version: (git-commit or Version number)
 
 Build command:
-
 ``` bash
 	./build_tsmp.ksh ...
 ```
@@ -16,14 +15,12 @@ Build command:
 - COSMO-Version: (version)
 - ParFlow-Version: (version)
 - OASIS-Version: (version)
-
 - PDAF-Version: (version)
 
 ## Machine
 Let us know in which machine you encountered the problem
 
 ## Error message
-
 ``` bash
 	(paste error message, last few error lines)
 ```
