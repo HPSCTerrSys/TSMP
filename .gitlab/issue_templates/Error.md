@@ -1,9 +1,8 @@
-# Error Description #
+## Describe the problem
+A clear and concise description of what the error is
 
-(Short description of error)
 
-
-## Version and Component Models ##
+## Version and Component Models
 
 TSMP-Version: (git-commit or Version number)
 
@@ -20,9 +19,20 @@ Build command:
 
 - PDAF-Version: (version)
 
+## Machine
+Let us know in which machine you encountered the problem
+
 ## Error message
 
 ``` bash
 	(paste error message, last few error lines)
 ```
 
+## Expected behavior
+If applicable, describe briefly what you expected to happen.
+
+## Screenshots
+If applicable, add screenshots to help explain your problem.
+
+## Additional context
+Add any other context about the problem here.
