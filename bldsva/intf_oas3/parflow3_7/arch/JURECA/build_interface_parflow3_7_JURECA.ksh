@@ -9,7 +9,7 @@ configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
-    export PFV="oas-gpu"
+#    export PFV="oas-gpu"
     export RMM_ROOT=$pfldir/rmm
 #
     C_FLAGS="-fopenmp -Wall -Werror"
@@ -39,7 +39,8 @@ route "${cblue}>> configure_pfl${cnormal}"
     fi
     comment "    git clone parflow3_7 "
      cd $rootdir
-     git clone https://github.com/hokkanen/parflow.git >> $log_file 2>> $err_file
+#     git clone https://github.com/hokkanen/parflow.git >> $log_file 2>> $err_file
+     git clone https://github.com/parflow/parflow.git >> $log_file 2>> $err_file
     check
      mv parflow parflow3_7
      cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
@@ -47,9 +48,9 @@ route "${cblue}>> configure_pfl${cnormal}"
      mkdir -p $PARFLOW_BLD
      cd $pfldir
     check
-    comment "    git checkout to $PFV \n"
-     git checkout ${PFV} >> $log_file 2>> $err_file
-    check
+#    comment "    git checkout to $PFV \n"
+#     git checkout ${PFV} >> $log_file 2>> $err_file
+#    check
     comment " parflow is configured for $processor "
     check
     if [[ $processor == "GPU" ]]; then
