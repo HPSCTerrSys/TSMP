@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/work/slts/slts00/tsmp/TestCases/nrw/clm"
-  defaultFDCOS="/gpfs/work/slts/slts00/tsmp/TestCases/nrw/cosmo"
-  defaultFDOAS="/gpfs/work/slts/slts00/tsmp/TestCases/nrw/oasis3"
-  defaultFDPFL="/gpfs/work/slts/slts00/tsmp/TestCases/nrw/parflow"
+  defaultFDCLM="$rootdir/tsmp_nrw/input/clm"
+  defaultFDCOS="$rootdir/tsmp_nrw/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_nrw/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_nrw/input/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/nrw/lmrun_uc 
@@ -18,10 +18,10 @@ initSetup(){
   defaultCOSProcY=8
   defaultPFLProcX=3
   defaultPFLProcY=4
-  
+ 
   defaultStartDate="2008-05-08 00"
   defaultInitDate="2008-05-08 00"
-  defaultRunhours=3
+  defaultRunhours=24
 
   defaultDumpCLM=1
   defaultDumpCOS=1
@@ -29,22 +29,22 @@ initSetup(){
 
   gx_clm=300
   gy_clm=300
-  dt_clm=900
+  dt_clm=90
   res="0300x0300"
 
   gx_cos=150
   gy_cos=150
   dt_cos=10
-  nbndlines=4
+  nbndlines=3
 
   gx_pfl=300
   gy_pfl=300
-  dt_pfl=0.25
+  dt_pfl=0.025
   pflrunname="rurlaf"
   base_pfl=0.0025
 
-  cplfreq1=900
-  cplfreq2=900
+  cplfreq1=90
+  cplfreq2=90
 
   delta_obs=1
  
@@ -93,7 +93,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           cd $rundir >> $log_file 2>> $err_file
         check
 
-        comment "   copy slopes and slope script into rundir"
+        comment "   copy slopes and ascii2pfb into rundir"
           cp $forcingdir_pfl/ascii2pfb_slopes.tcl $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
           cp $forcingdir_pfl/*slope.pfb* $rundir >> $log_file 2>> $err_file
@@ -111,10 +111,12 @@ route "${cblue}>> finalizeSetup${cnormal}"
           tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check		
 	
-	comment "   copy soilind and soilind script into rundir"
+	comment "   copy soilind, ics and  asc2pfb into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
           cp $forcingdir_pfl/*Soil* $rundir >> $log_file 2>> $err_file
+        check
+          cp $forcingdir_pfl/*.ics.pfb* $rundir >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/*Soil* $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         check
