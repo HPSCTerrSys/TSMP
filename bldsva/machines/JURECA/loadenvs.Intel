@@ -4,14 +4,14 @@
 #for standard user
 #
 module --force purge
-module use /p/software/jurecadc/otherstages
+module use $OTHERSTAGES
 module load Stages/2020
 module load Intel/2020.2.254-GCC-9.3.0
 module load ParaStationMPI/5.4.7-1
 #
 module load Hypre/2.20.0
 module load Silo/4.10.2
-#module load Tcl/8.6.10 # this version is not compatible with ParFlow3.2
+module load Tcl/8.6.10 # this version is not compatible with ParFlow3.2
 #
 module load ecCodes/2.18.0
 module load HDF5/1.10.6
@@ -22,10 +22,11 @@ module load cURL/7.71.1
 module load Szip/.2.1.1
 module load Python/3.8.5
 module load NCO/4.9.5
+module load CMake/3.18.0
 #module load CDO/1.9.8 yet not available with intel. only available with Gcc9.3
 #
-export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8"
-export PATH="/p/project/cslts/local/juwels/tcl8.6.8/bin:$PATH"
-export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8/lib:$LD_LIBRARY_PATH"
+#export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8"
+#export PATH="/p/project/cslts/local/juwels/tcl8.6.8/bin:$PATH"
+#export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8/lib:$LD_LIBRARY_PATH"
 #
 module li

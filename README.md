@@ -152,7 +152,7 @@ As indicated in [TSMP version history](#ver_his), this version is automatically 
 
 Available from https://verc.enes.org/oasis/.
 
-### Step 4: Retrieving the test case input data
+### Step 4: Retrieving the test case input data (NRW and EURO-CORDEX)
 
 For each officially documented and supported test case experiment, HPSC-TerrSys provides all required, pre-processed input data (as well as reference simulation results in the future).
 
@@ -160,7 +160,14 @@ The input files which are necessary for running the `EURO-CORDEX evaluation run`
 
 ```shell
    cd $TSMP_DIR/bldsva
-   ./download_data_for_test_cases.ksh
+   ./download_data_for_test_cases.ksh cordex
+```
+
+and for `NRW` test case:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./download_data_for_test_cases.ksh nrw
 ```
 
 ### <a name="ref_step4"></a> Step 5: Build TSMP, interface and component models
@@ -212,6 +219,20 @@ For configuring TSMP for a heterogeneous job:
    ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
 ```
 In this heterogeneous job ParFlow 3.7 will run on GPU while Cosmo and CLM on CPU.
+
+To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
+
+```shell
+   cd $TSMP_DIR/bldsva
+ ./setup_tsmp.ksh -v 3.1.0MCT -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
+```
+
+To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
+
+```shell
+   cd $TSMP_DIR/bldsva
+ ./setup_tsmp.ksh -v 3.1.0MCT -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
+```
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
 

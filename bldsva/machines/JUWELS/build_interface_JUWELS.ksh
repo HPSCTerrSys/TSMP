@@ -27,7 +27,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi  
 
   # Default Processor settings
-  defaultwtime="00:10:00"
+  defaultwtime="01:00:00"
   defaultQ="devel"
 
 route "${cblue}<< getMachineDefaults${cnormal}"
@@ -63,9 +63,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
 #SBATCH -N 4 --ntasks-per-node=48 -p batch
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=48 -p batch
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
 
 cd $rundir
