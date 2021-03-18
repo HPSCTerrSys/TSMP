@@ -378,12 +378,12 @@ softSanityCheck(){
 
 interactive(){
   clear
-  print "${cblue}##############################################${cnormal}"
-  print "${cblue}         Interactive installation...          ${cnormal}"
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
+  print "${cyellow}         Interactive installation...          ${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   print "The following variables are needed:"
   printState
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   PS3="Your selection(1-3)?"
   select ret in "!!!start!!!" "edit" "exit"
   do
@@ -615,7 +615,7 @@ printState(){
 
 listAvailabilities(){
 
-  print ${cblue}"A list of details for each available platform."${cnormal}
+  print ${cyellow}"A list of details for each available platform."${cnormal}
   print ""
   for p in "${!platforms[@]}" ; do
     printf "%-20s #%s\n" "$p" "${platforms[$p]}"
@@ -631,7 +631,7 @@ listAvailabilities(){
 
 
   print ""
-  print ${cblue}"A list of details for each version."${cnormal} 
+  print ${cyellow}"A list of details for each version."${cnormal} 
   print ""
   for v in "${!versions[@]}" ; do
     printf "%-20s #%s\n" "$v" "${versions[$v]}"
@@ -643,7 +643,7 @@ listAvailabilities(){
     done
   done
   print ""
-  print ${cblue}"A list of details for each setup."${cnormal}
+  print ${cyellow}"A list of details for each setup."${cnormal}
   print ""
   for v in "${!setups[@]}" ; do
     printf "%-20s #%s\n" "$v" "${setups[$v]}"
@@ -685,7 +685,7 @@ getRoot(){
 #               Main
 #######################################
 
-  cblue=$(tput setaf 4)
+  cyellow=$(tput setaf 4)
   cnormal=$(tput sgr0)
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
@@ -737,7 +737,8 @@ getRoot(){
   USAGE+="[E:forcedirclm? Forcing directory for clm. This will replace the default forcing dir from the reference setup.]:[forcedirclm:='']"
   USAGE+="[f:namcos? Namelist for Cosmo. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namcos:='']"
   USAGE+="[Z:namicon? Namelist for icon. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namicon:='']"
-  USAGE+="[U:forcediricon? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcediricon:='']"
+  USAGE+="[U:forcediricon? Forcing directory for ICON. This will replace the default forcing dir from the reference setup.]:[forcediricon:='']"
+  USAGE+="[F:forcedircosmo? Forcing directory for Cosmo. This will replace the default forcing dir from the reference setup.]:[forcedircosmo:='']"
   USAGE+="[g:nampfl? Namelist for ParFlow. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[nampfl:='']"
 #DA
   USAGE+="[h:namda? Namelist for data assimilation. This script will always try to substitute the placeholders by the reference setup values. Make sure your namelist and placeholders are compatible with the reference setup. If you don't wont the substitution remove placeholders from your namelist. This flag will replace the default namelist from the reference setup ]:[namda:='']"
@@ -946,7 +947,7 @@ check
 
   for instance in {$startInst..$(($startInst+$numInst-1))}
   do
-  route ${cblue}"> creating instance: $instance"${cnormal}
+  route ${cyellow}"> creating instance: $instance"${cnormal}
     # Ensemble only creation
     if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) && $withPDAF == "false" ]] ; then 
       rundir=$origrundir/tsmp_instance_$instance
@@ -999,7 +1000,7 @@ check
     else	
       finalizeSetup
     fi
-  route ${cblue}"< creating instance: $instance"${cnormal}
+  route ${cyellow}"< creating instance: $instance"${cnormal}
   done
 
 #DA
