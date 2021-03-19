@@ -540,8 +540,7 @@ CONTAINS
       CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx, i_endidx, rl_start, rl_end)
       DO jc = i_startidx, i_endidx
         c = c + 1
-!SPo correct indexing
-!        jg = idx_1d(jc,jb)
+        jg = idx_1d(jc,jb)
 !        oas_part(jg+2) = p_patch(1)%cells%decomp_info%glb_index(jg)
         oas_part(c+2) = p_patch(1)%cells%decomp_info%glb_index(jg)
       END DO
