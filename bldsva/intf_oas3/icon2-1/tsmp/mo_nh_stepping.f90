@@ -339,6 +339,7 @@ MODULE mo_nh_stepping
   INTEGER :: rl_start, rl_end, i_startblk, i_endblk, jb, jc, &
     i_startidx, i_endidx, ii, oas_i
   CHARACTER(len=1024) :: oas_message
+  INTEGER :: oas_prt = 6
 #endif
 
 !!$  INTEGER omp_get_num_threads
@@ -442,6 +443,11 @@ MODULE mo_nh_stepping
         &                      prm_diag(1) ) !inout
     END IF
 
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis send fields'
+      FLUSH(oas_prt)
+    END IF
+
     oas_snd_field(:,7) = 0._wp
     oas_snd_field(:,8) = 0._wp
     
@@ -481,6 +487,11 @@ MODULE mo_nh_stepping
         CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
       END IF
     END DO
+
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis receive fields'
+      FLUSH(oas_prt)
+    END IF
 
     DO oas_i = 1, SIZE(oas_rcv_meta)
       WRITE(oas_message,*) 'Init receiving  ', oas_rcv_meta(oas_i)%clpname,&

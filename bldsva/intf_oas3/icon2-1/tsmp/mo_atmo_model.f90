@@ -172,6 +172,8 @@ CONTAINS
     CASE(inh_atmosphere)
       CALL atmo_nonhydrostatic
 
+    IF (msg_level > 30) CALL message(TRIM(routine),'iconoas: inh atmo_nonhydrostatic') !SPo
+
     CASE DEFAULT
       CALL finish( TRIM(routine),'unknown choice for iequations.')
     END SELECT
@@ -221,6 +223,7 @@ CONTAINS
 #ifdef COUP_OAS_ICON
     INTEGER :: i_startblk, i_endblk, jb, jc, i_startidx, i_endidx, &
                rl_start, rl_end, c
+    INTEGER :: oas_prt = 6
 #endif
 
     ! initialize global registry of lon-lat grids
@@ -523,6 +526,12 @@ CONTAINS
 #endif
 
 #ifdef COUP_OAS_ICON
+
+    IF(msg_level >= 30 ) then
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis start' !SPo
+      FLUSH(oas_prt)
+    END IF
+
     IF (n_dom > 1) CALL oasis_abort(oas_comp_id, &
       'oas_icon_partition', 'Number of ICON domain > 1 when coupled to CLM.')
 
@@ -547,9 +556,22 @@ CONTAINS
     END DO
     oas_part(2) = c
 
+
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis decomp'
+      FLUSH(oas_prt)
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' c = ',c,' oas_nlat=',oas_nlat
+      FLUSH(oas_prt)
+    END IF
+
     CALL oasis_def_partition(oas_part_id, oas_part, oas_error, oas_nlat*oas_nlon)
     IF (oas_error /= 0) &
       CALL oasis_abort(oas_comp_id, oas_comp_name, 'Failure in oasis_def_partition')
+
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis_def_parition finished'
+      FLUSH(oas_prt)
+    END IF
 
     ! setup partitions for OASIS3-MCT
     !
@@ -599,6 +621,11 @@ CONTAINS
       END IF
     END DO
 
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis_def_var finished'
+      FLUSH(oas_prt)
+    END IF
+
     CALL oasis_enddef(oas_error)
 
     ! allocate memory for data exchange
@@ -611,6 +638,11 @@ CONTAINS
     ALLOCATE( oas_rcv_field_icon(nproma, p_patch(1)%nblks_c,11), stat=oas_error )
     IF (oas_error > 0) CALL oasis_abort(oas_comp_id, oas_comp_name, &
       'Failure in allocating icon receive buffers' )
+
+    IF(msg_level >= 30 ) then !SPo
+      WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis allocate buffers'
+      FLUSH(oas_prt)
+    END IF
 
     ! initialize buffers
     oas_snd_field = -1000.
