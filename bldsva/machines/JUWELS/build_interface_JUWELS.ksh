@@ -23,7 +23,13 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 #
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+  elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+  else
+      defaultOptC="-O2" # Default
+  fi
 
   profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
