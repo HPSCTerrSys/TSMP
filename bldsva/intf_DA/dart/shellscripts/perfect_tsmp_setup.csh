@@ -24,7 +24,7 @@ set tsmpdir       = $HOME/terrsysmp
 set archivedir    = "tsmp"
 set shellpath     = $HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts
 set DART_DIR      = "$HOME/DART/lanai/models/terrsysmp/cosmo/work"
-set clm_forcing_dir = "$HOME/database/idealRTD/clm/"
+set testcasedir   = "$TSMP_DATA/idealRTD/"
 #
 #User Settings End Here
 
@@ -73,19 +73,19 @@ if ($icycle == 1) then
      # Update Model States
      #ParFlow
      echo " Using the spinup parflow states ...." $map_fn
-     cp $HOME/database/idealRTD/restart/tsmp_instance_${map_fn}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
+     cp $testcasedir/restart/tsmp_instance_${map_fn}/rurlaf.out.press.00096.pfb ./rur_ic_press.pfb
      tclsh ascii2pfb.tcl
 
      #cosmo
      set rasonum = `printf raso_IdealSnd_0000LT_%02d $map_fn`
      sed "s,raso_IdealSnd_0000LT.dat,$rasonum.dat," -i lmrun_uc
      rm cosmo_in/raso_IdealSnd_0000LT_*
-     cp $HOME/database/idealRTD/cosmo/$rasonum.dat cosmo_in/
+     cp $testcasedir/cosmo/$rasonum.dat cosmo_in/
      ./lmrun_uc execluma
 
      #clm
      echo " Using the spinup clm states ...."
-     cp $HOME/database/idealRTD/restart/tsmp_instance_${map_fn}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
+     cp $testcasedir/restart/tsmp_instance_${map_fn}/clmoas.clm2.r.2008-05-08-00000.nc ./clm_restart.nc
 
 else if ($icycle > 1) then
     #
@@ -158,8 +158,8 @@ endif
 
  #clm
  #Perturb leaf c:n and root distribution
- cp ${clm_forcing_dir}/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
- cp ${clm_forcing_dir}/perturb_surf/surfdata_${map_fn}_0014x0024.nc ./surfdata_0014x0024.nc
+ cp ${testcasedir}/clm/inputdata/lnd/clm2/pftdata/pft-physiology.c070207 .
+ cp ${testcasedir}/clm/perturb_surf/surfdata_${map_fn}_0014x0024.nc ./surfdata_0014x0024.nc
 
  set leafcn_def = `echo "(24.1+49.*0.125)" | bc`
  set leafcn = `echo "($leafcn_def-$map_fn*0.25)" | bc`

@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_pfl(){
-route "${cblue}>> always_pfl${cnormal}"
-route "${cblue}<< always_pfl${cnormal}"
+route "${cyellow}>> always_pfl${cnormal}"
+route "${cyellow}<< always_pfl${cnormal}"
 }
 
 configure_pfl(){ 
-route "${cblue}>> configure_pfl${cnormal}"
+route "${cyellow}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
@@ -33,11 +33,17 @@ route "${cblue}>> configure_pfl${cnormal}"
     flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    cflagsSim=" -fopenmp "
+    if [[ $compiler == "Gnu" ]] ; then  
+      cflagsSim=" -fopenmp "  
+    elif [[ $compiler == "Intel" ]] ; then 
+      cflagsSim=" -qopenmp "  
+    fi
+
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
   
     c_configure_pfl
-
+  
+  if [[ $compiler == "Gnu" ]] ; then
   comment "   sed correct linker command in pfsimulator"
     sed "s/ gfortran /  -lgfortran  /g" -i $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
@@ -53,23 +59,42 @@ route "${cblue}>> configure_pfl${cnormal}"
     sed "s/-l /  /g" -i $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
   check
 
-route "${cblue}<< configure_pfl${cnormal}"
+  elif [[ $compiler == "Intel" ]] ; then
+
+  comment "   sed correct linker command in pfsimulator"
+    sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+  comment "   sed correct linker command in pftools"
+    sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+
+  fi
+
+route "${cyellow}<< configure_pfl${cnormal}"
 }
 
 make_pfl(){ 
-route "${cblue}>> make_pfl${cnormal}"
+route "${cyellow}>> make_pfl${cnormal}"
   c_make_pfl
-route "${cblue}<< make_pfl${cnormal}"
+route "${cyellow}<< make_pfl${cnormal}"
 }
 
 
 substitutions_pfl(){
-route "${cblue}>> substitutions_pfl${cnormal}"
-  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+route "${cyellow}>> substitutions_pfl${cnormal}"
+
+  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder, src.$compiler"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
+
+  comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src.$compiler/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/
+
+#  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
+#    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+#  check
+#    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+#  check
  
   c_substitutions_pfl
 
@@ -96,15 +121,15 @@ route "${cblue}>> substitutions_pfl${cnormal}"
       check
     fi
 
-route "${cblue}<< substitutions_pfl${cnormal}"
+route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
 setup_pfl(){
-route "${cblue}>> setup_pfl${cnormal}"
+route "${cyellow}>> setup_pfl${cnormal}"
   c_setup_pfl
 
-route "${cblue}<< setup_pfl${cnormal}"
+route "${cyellow}<< setup_pfl${cnormal}"
 }
 
 

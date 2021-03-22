@@ -6,18 +6,20 @@
 #SBATCH --ntasks-per-node=48
 #SBATCH --output=TSMPLoopCntr-out.%j
 #SBATCH --error=TSMPLoopCntr-err.%j
-#SBATCH --time=00:05:00
+#SBATCH --time=00:30:00
+#SBATCH --account="hbn33"
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
 
 
 #JOBCHAIN NAMELIST
-SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
-DPATH="$HOME/DART/lanai/models/terrsysmp/"
+SPATH="$TRAINHOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
+DPATH="$TRAINHOME/DART/lanai/models/terrsysmp/"
 MACHINE="JUWELS"        #(which machine are your running on)
-NUMCYCLE=90             #(number of days to run , number of JOBS = 2*$numCycle - 1)
-NRST=1                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
-NENS=48                 #Ensemble Size
+COMPILER="Intel"        #which compiler
+NUMCYCLE=30             #(number of days to run , number of JOBS = 2*$numCycle - 1)
+NRST=0                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
+NENS=48                #Ensemble Size (max 49 based on spinup)
 MAP_FN="$SPATH/map_fn.txt"  #Mapping matrix for ensemble runs
 RUNSFX="rundart"
 ASSIMC=""
@@ -26,6 +28,10 @@ JOBSCRIPT1="tsmp_slm_run.bsh"
 #JOBCHAIN NAMELIST
 #------------
 
+# Clean up space 
+rm mpiMPMD*
+rm TSMPLoopCntr*
+ 
 # Need to run dart to get time output files
 if [[ $NRST == 0 ]] ; then ; ASSIMC="date" ; fi
 if [[ $NRST == 1 ]] ; then ; ASSIMC="cosmo" ; fi
@@ -52,7 +58,7 @@ if [[ $STEP == "run" ]] then
     echo " "
     # 1: (Script to create the rundirectory with multiple instances e.g. rundar01)
     if [[ $ICYCLE = "1" ]] then ; NRST=0 ; fi
-    ./tsmp_setup.csh $ICYCLE $NRST $NENS $MAP_FN $MACHINE
+    ./tsmp_setup.csh $ICYCLE $NRST $NENS $MAP_FN $MACHINE $COMPILER
 
     # 2: Submit jobscript for terrsysmp run
     RUNNAME=`printf $RUNSFX%02d ${ICYCLE}`

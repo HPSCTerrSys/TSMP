@@ -1,0 +1,10 @@
+--- SurfaceAlbedoMod.F90	2007-04-24 23:49:05.000000000 +0200
++++ SurfaceAlbedoMod.F90	2019-12-04 12:52:05.722945000 +0100
+@@ -531,7 +531,6 @@
+                 albsod = alblak(ib)
+                 albsoi = albsod
+              end if
+-
+              albgrd(c,ib) = albsod*(1._r8-frac_sno(c)) + albsnd(c,ib)*frac_sno(c)
+              albgri(c,ib) = albsoi*(1._r8-frac_sno(c)) + albsni(c,ib)*frac_sno(c)
+           end if

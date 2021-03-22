@@ -1,0 +1,58 @@
+# Slavko Bradr
+# JSC/SLTS
+# February 2018
+
+module --force purge
+module use /usr/local/software/jureca/OtherStages
+module load Stages/2019a
+
+# Loading the compiler and MPI library
+module load Intel
+module load ParaStationMPI
+
+#dev work
+module load git
+
+#grib api 
+module load grib_api
+
+#wgrib
+module load wgrib
+
+
+# scalasca
+module load Scalasca/2.5
+
+# Needed for TerrSysMP
+module load Tcl
+module load Hypre
+module load Silo
+## grib DWD old/new -- not yet installed via modules
+
+# Misc other libs needed for some dev work and NCL e.g.
+module load cURL
+module load g2lib
+module load g2clib
+module load Szip
+module load cairo
+module load makedepend
+
+# HDF5
+module load HDF5
+module load HDF
+
+# NetCDF etc.
+module load netCDF
+module load netCDF-Fortran
+module load parallel-netcdf
+module load UDUNITS
+
+# geo tools
+module load NCO
+module load CDO
+module load ncview
+module load NCL
+##PANOPLY -- not yet installed via modules
+
+# misc
+module li

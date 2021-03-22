@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/homea/hbn33/hbn331/database/idealRTD/clm"
-  defaultFDCOS="/gpfs/homea/hbn33/hbn331/database/idealRTD/cosmo"
-  defaultFDOAS="/gpfs/homea/hbn33/hbn331/database/idealRTD/oasis3"
-  defaultFDPFL="/gpfs/homea/hbn33/hbn331/database/idealRTD/parflow"
+  defaultFDCLM="$TSMP_DATA/idealRTD/clm"
+  defaultFDCOS="$TSMP_DATA/idealRTD/cosmo"
+  defaultFDOAS="$TSMP_DATA/idealRTD/oasis3"
+  defaultFDPFL="$TSMP_DATA/idealRTD/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
@@ -13,7 +13,7 @@ initSetup(){
 
   defaultNppn=48
   defaultCLMProcX=2
-  defaultCLMProcY=2
+  defaultCLMProcY=1
   defaultCOSProcX=3
   defaultCOSProcY=2
   defaultPFLProcX=2
@@ -69,7 +69,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -113,11 +113,13 @@ route "${cblue}>> finalizeSetup${cnormal}"
         check
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         check
-        #comment "   create sloap pfb with tclsh"
-        #  tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+        
+        #Done from DA script
+        #comment "   create initial pfb with tclsh"
+        #tclsh $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
         #check
               
 
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

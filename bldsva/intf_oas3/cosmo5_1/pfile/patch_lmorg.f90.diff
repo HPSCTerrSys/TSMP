@@ -1,0 +1,37 @@
+---  lmorg.f90	2014-11-28 12:18:36.000000000 +0100
++++  lmorg.f90	2019-12-04 12:52:07.036741000 +0100
+@@ -1038,7 +1038,7 @@
+     END IF
+   ENDIF
+ 
+-#if defined COUP_OAS
++#if defined COUP_OAS_COS
+   CALL oas_cos_define
+ !OASIS4 only
+ !  CALL oas_cos_update_time(0)
+@@ -1644,7 +1644,7 @@
+       dt = 2.0_wp * dt
+     ENDIF
+ 
+-#if defined COUP_OAS
++#if defined COUP_OAS_COS
+ ! OASIS4 only
+ !    CALL oas_cos_update_time(ntstep+1)
+ #endif
+@@ -2546,6 +2546,7 @@
+ 
+   ! compute t_g on the full domain including boundaries
+   ! (all fields are given on full domain)
++#if !defined COUP_OAS_COS
+   IF(lmulti_layer .AND. lmulti_snow) THEN
+     CALL tgcom ( t_g (:,:,nnew), t_snow_mult(:,:,1,nnew), &
+                  zt_s(:,:)     , w_snow(:,:,nnew), &
+@@ -2559,7 +2560,7 @@
+                  1, ie, 1, je)
+ !US              istartpar, iendpar, jstartpar, jendpar )
+   ENDIF
+-
++#endif 
+   ! compute density of moist air for time-level nnow        
+   CALL calrho ( t(:,:,:,nnow), pp(:,:,:,nnow), qv_now(:,:,:), qc_now(:,:,:),  &
+                 qrs, p0, rho, ie, je, ke, r_d, rvd_m_o)

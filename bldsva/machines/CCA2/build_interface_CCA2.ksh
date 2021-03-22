@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
 
   comment "   init lmod functionality"
     . /opt/modules/default/init/ksh  >> $log_file 2>> $err_file
@@ -33,18 +33,18 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime="00:30:00"
   defaultQ="np"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 
 comment "   copy CCA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
@@ -125,6 +125,6 @@ EOF
 comment "   change permission of runscript"
 chmod 755 $rundir/tsmp_pbs_run.ksh >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

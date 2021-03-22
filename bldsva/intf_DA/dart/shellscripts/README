@@ -1,4 +1,4 @@
-#MACHINE for JURECA
+#MACHINE for JURECA/JUWELS
 #source $HOME/DART/lanai/mkmf/loadenvs
 # Desription
 # -----------
@@ -9,6 +9,8 @@
 ./git_to_dart.csh 
 # Note, make sure NETCDF_FORTRAN points to the library compiled using 
 # the compiler specified in DART/lanai/mkmf/mkmf.template !
+
+source $HOME/shared/loadenvJUWELS.XXX  # This is important otherwise compiler spefific tcl is not loaded locally
 
 # With any updates the codes need to be rebuilt, for component specific build
 

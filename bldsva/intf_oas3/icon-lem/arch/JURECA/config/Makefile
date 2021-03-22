@@ -22,7 +22,7 @@ libdir = ${exec_prefix}/lib
 
 NETCDFFROOT    = $(EBROOTNETCDFMINFORTRAN)
 NETCDFROOT     = $(EBROOTNETCDF)
-NETCDFLIBPATH  = $(NETCDFROOT)/lib64
+NETCDFLIBPATH  = $(NETCDFROOT)/lib
 NETCDF_LIB     = -L$(NETCDFFROOT)/lib -lnetcdff -L$(NETCDFLIBPATH)/ -lnetcdf
 NETCDF_INCLUDE = -I$(NETCDFROOT)/include -I$(NETCDFFROOT)/include
 
@@ -79,7 +79,7 @@ FC             = __comF90__
 FFLAGS         = $(INCLUDES) -module  ../module -I../src -I../support -I../module __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -D__ICON__ -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -D__withoas__ -D__NO_ICON_OCEAN__ -D__NO_JSBACH__ -D__NO_ICON_TESTBED__ -DHAVE_FC_ATTRIBUTE_CONTIGUOUS
 FlibFLAGS      = $(INCLUDES) -module  ../module 
 F77            = __comF77__
-F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -xMIC-AVX512
+F77FLAGS       = __cplflg__ -g -pc64 -fpp -D__LOOP_EXCHANGE -assume realloc_lhs -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE -O2 -msse2 -fltconsistency -g -pc64 -fpp -traceback  -D__LOOP_EXCHANGE
 
 AR             = xiar
 ARFLAGS        = crv

@@ -1,4 +1,4 @@
-# /bin/ksh
+#! /bin/ksh
 
 initSetup(){
   defaultFDCLM="/p/project/chbn33/hbn331/database/bonnRadar/clm"
@@ -12,20 +12,20 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/bonnRadar/coup_oas.tcl
 
   defaultNppn=48
-  defaultCLMProcX=42
-  defaultCLMProcY=1
+  defaultCLMProcX=2
+  defaultCLMProcY=2
   defaultCOSProcX=12
   defaultCOSProcY=12
-  defaultPFLProcX=21
+  defaultPFLProcX=10
   defaultPFLProcY=14
+  
+  defaultStartDate="2008-01-01 00"
+  defaultInitDate="2008-01-01 00"
+  defaultRunhours=8760
 
-  defaultStartDate="2014-11-15 00"
-  defaultInitDate="2014-11-15 00"
-  defaultRunhours=72
-
-  defaultDumpCLM=1
+  defaultDumpCLM=120
   defaultDumpCOS=1
-  defaultDumpPFL=1
+  defaultDumpPFL=120	
 
   gx_clm=294
   gy_clm=294
@@ -68,7 +68,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -133,5 +133,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }
