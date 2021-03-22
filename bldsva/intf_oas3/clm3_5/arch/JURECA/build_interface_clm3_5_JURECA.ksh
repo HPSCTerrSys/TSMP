@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_clm(){
-route "${cblue}>> always_clm${cnormal}"
-route "${cblue}<< always_clm${cnormal}"
+route "${cyellow}>> always_clm${cnormal}"
+route "${cyellow}<< always_clm${cnormal}"
 }
 
 configure_clm(){
-route "${cblue}>> configure_clm${cnormal}"
+route "${cyellow}>> configure_clm${cnormal}"
   cplLib="-lnetcdff "
   flags=""
   ccc="$profComp $mpiPath/bin/mpicc "
@@ -17,18 +17,18 @@ route "${cblue}>> configure_clm${cnormal}"
   fi
   flags+="-mpi_lib $mpiPath/lib "
   c_configure_clm
-route "${cblue}<< configure_clm${cnormal}"
+route "${cyellow}<< configure_clm${cnormal}"
 }
 
 make_clm(){
-route "${cblue}>> make_clm${cnormal}"
+route "${cyellow}>> make_clm${cnormal}"
   c_make_clm
-route "${cblue}<< make_clm${cnormal}"
+route "${cyellow}<< make_clm${cnormal}"
 }
 
 
 substitutions_clm(){
-route "${cblue}>> substitutions_clm${cnormal}"
+route "${cyellow}>> substitutions_clm${cnormal}"
    c_substitutions_clm
   comment "   cp m_FileResolve.F90 and shr_sys_mod.F90 to usr.src folder"
     patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src/m_FileResolv.F90 $clmdir/bld/usr.src	
@@ -56,12 +56,12 @@ route "${cblue}>> substitutions_clm${cnormal}"
   check
     patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/config_clm_defaults.xml $clmdir/bld 
   check
-route "${cblue}<< substitutions_clm${cnormal}"
+route "${cyellow}<< substitutions_clm${cnormal}"
 }
 
 
 setup_clm(){
-route "${cblue}>> setupClm${cnormal}"
+route "${cyellow}>> setupClm${cnormal}"
   seconds_clm=$(($hh*3600))
 #  runstep_clm=$(($runhours*3600/$dt_clm))
   rpointer=$rundir/lnd.clmoas.rpointer
@@ -74,5 +74,5 @@ check
   c_setup_clm
 
 
-route "${cblue}<< setupClm${cnormal}"
+route "${cyellow}<< setupClm${cnormal}"
 }

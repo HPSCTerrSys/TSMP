@@ -2,15 +2,15 @@
 #
 
 always_oas(){
-route "${cblue}>> always_oas${cnormal}"
+route "${cyellow}>> always_oas${cnormal}"
   liboas=""
   libpsmile="$oasdir/$platform/lib/libpsmile.MPI1.a $oasdir/$platform/lib/libmct.a $oasdir/$platform/lib/libmpeu.a $oasdir/$platform/lib/libscrip.a"
   incpsmile="-I$oasdir/$platform/build/lib/psmile.MPI1"
-route "${cblue}<< always_oas${cnormal}"
+route "${cyellow}<< always_oas${cnormal}"
 }
 
 substitutions_oas(){
-route "${cblue}>> substitutions_oas${cnormal}"
+route "${cyellow}>> substitutions_oas${cnormal}"
   comment "    cp TopMakefileOasis3 to make_dir"
     patch $rootdir/bldsva/intf_oas3/oasis3-mct/tsmp/TopMakefileOasis3 $oasdir/util/make_dir/
   check
@@ -87,11 +87,11 @@ route "${cblue}>> substitutions_oas${cnormal}"
     sed -i "s/\(${prefix}\)*mct_/${prefix}mct_/g" * >> $log_file 2>> $err_file
   check
     
-route "${cblue}<< substitutions_oas${cnormal}"
+route "${cyellow}<< substitutions_oas${cnormal}"
 }
 
 configure_oas(){
-route "${cblue}>> configure_oas${cnormal}"
+route "${cyellow}>> configure_oas${cnormal}"
   file=${oasdir}/util/make_dir/make.oas3
   comment "   cp juwels oasis3-mct makefile to /util/make_dir/"
     cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/$platform/config/make.intel_juwels_oa3 $file >> $log_file 2>> $err_file
@@ -131,21 +131,21 @@ route "${cblue}>> configure_oas${cnormal}"
     sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
   check
 
-route "${cblue}<< configure_oas${cnormal}"
+route "${cyellow}<< configure_oas${cnormal}"
 }
 
 make_oas(){
-route "${cblue}>> make_oas${cnormal}"
+route "${cyellow}>> make_oas${cnormal}"
   c_make_oas
-route "${cblue}<< make_oas${cnormal}"
+route "${cyellow}<< make_oas${cnormal}"
 }
 
 
 setup_oas(){
-route "${cblue}>> setupOas${cnormal}"
+route "${cyellow}>> setupOas${cnormal}"
 
   c_setup_oas
 
-route "${cblue}<< setupOas${cnormal}"
+route "${cyellow}<< setupOas${cnormal}"
 }
 

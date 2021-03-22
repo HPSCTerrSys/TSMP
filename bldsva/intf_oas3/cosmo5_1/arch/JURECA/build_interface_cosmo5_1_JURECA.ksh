@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_cos(){
-route "${cblue}>> always_cos${cnormal}"
-route "${cblue}<< always_cos${cnormal}"
+route "${cyellow}>> always_cos${cnormal}"
+route "${cyellow}<< always_cos${cnormal}"
 }
 
 configure_cos(){
-route "${cblue}>> configure_cos${cnormal}"
+route "${cyellow}>> configure_cos${cnormal}"
 comment "   cp Makefile to cosmo dir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $cosdir >> $log_file 2>> $err_file
 check
@@ -44,18 +44,18 @@ check
 comment "   sed libs to cos Makefile"
   sed -i "s@__lib__@-L$gribPath/lib/ $cplLib -L$ncdfPath/lib/ -leccodes_f90 -leccodes -lnetcdff@" $file >> $log_file 2>> $err_file
 check
-route "${cblue}<< configure_cos${cnormal}"
+route "${cyellow}<< configure_cos${cnormal}"
 }
 
 make_cos(){
-route "${cblue}>> make_cos${cnormal}"
+route "${cyellow}>> make_cos${cnormal}"
   c_make_cos
-route "${cblue}<< make_cos${cnormal}"
+route "${cyellow}<< make_cos${cnormal}"
 }
 
 
 substitutions_cos(){
-route "${cblue}>> substitutions_cos${cnormal}"
+route "${cyellow}>> substitutions_cos${cnormal}"
  c_substitutions_cos
  comment "   cp ObjFiles & ObjDependencies in $cosdir"
    patch "$rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj*" $cosdir 
@@ -71,13 +71,13 @@ route "${cblue}>> substitutions_cos${cnormal}"
        sed -i "s/USE mod_prism.*//" $cosdir/src/oas3/oas_cos_define.F90 >> $log_file 2>> $err_file
      check
    fi
-route "${cblue}<< substitutions_cos${cnormal}"
+route "${cyellow}<< substitutions_cos${cnormal}"
 }
 
 setup_cos(){
-route "${cblue}>> setupCos${cnormal}"
+route "${cyellow}>> setupCos${cnormal}"
 
   c_setup_cos
 
-route "${cblue}<< setupCos${cnormal}" 
+route "${cyellow}<< setupCos${cnormal}" 
 }
