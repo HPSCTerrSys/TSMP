@@ -21,6 +21,7 @@ getDefaults(){
   # pathes will be set to tested platform defaults if empty
   def_mpiPath=""
   def_ncdfPath=""
+  def_grib1path=""
   def_gribPath=""
   def_tclPath=""
   def_hyprePath=""
@@ -82,6 +83,7 @@ setDefaults(){
   ncdfPath=$def_ncdfPath
   lapackPath=$def_lapackPath
   pncdfPath=$def_pncdfPath
+  grib1Path=$def_grib1Path
   gribPath=$def_gribPath
   tclPath=$def_tclPath
   hyprePath=$def_hyprePath
@@ -118,6 +120,7 @@ setDefaults(){
 clearMachineSelection(){
   mpiPath=""
   ncdfPath=""
+  grib1Path=""
   gribPath=""
   tclPath=""
   hyprePath=""
@@ -144,6 +147,7 @@ setSelection(){
 
   if [[ $mpiPath == "" ]] then ; mpiPath=$defaultMpiPath ; fi
   if [[ $ncdfPath == "" ]] then ; ncdfPath=$defaultNcdfPath  ; fi
+  if [[ $grib1Path == "" ]] then ; grib1Path=$defaultGrib1Path ; fi
   if [[ $gribPath == "" ]] then ; gribPath=$defaultGribPath ; fi
   if [[ $tclPath == "" ]] then ; tclPath=$defaultTclPath ; fi
   if [[ $hyprePath == "" ]] then ; hyprePath=$defaultHyprePath ; fi
