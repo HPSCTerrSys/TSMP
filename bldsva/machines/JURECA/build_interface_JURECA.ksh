@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
   . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
@@ -13,6 +13,7 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
+  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
@@ -32,17 +33,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime="01:00:00"
   defaultQ="dc-cpu-devel"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy JURECA module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
@@ -216,6 +217,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

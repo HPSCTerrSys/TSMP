@@ -20,7 +20,7 @@
 
 
 c_configure_icon(){
-route "${cblue}>>> c_configure_icon${cnormal}"
+route "${cyellow}>>> c_configure_icon${cnormal}"
   file=$icondir/Makefile
   cplFlag=""
   cplLib=""
@@ -39,11 +39,11 @@ route "${cblue}>>> c_configure_icon${cnormal}"
     sed -i "/__oasismakefile__/d" $file >> $log_file 2>> $err_file
     check
   fi
-route "${cblue}<<< c_configure_icon${cnormal}"
+route "${cyellow}<<< c_configure_icon${cnormal}"
 }
 
 c_make_icon(){
-route "${cblue}>>> c_make_icon${cnormal}"
+route "${cyellow}>>> c_make_icon${cnormal}"
   comment "    cd to icon dir"
     cd $icondir >> $log_file 2>> $err_file
   check
@@ -56,12 +56,12 @@ route "${cblue}>>> c_make_icon${cnormal}"
   cp $icondir/build/x86_64-unknown-linux-gnu/bin/icon $bindir >> $log_file 2>> $err_file
   check
 
-route "${cblue}<<< c_make_icon${cnormal}"
+route "${cyellow}<<< c_make_icon${cnormal}"
 }
 
 
 c_substitutions_icon(){
-route "${cblue}>>> c_substitutions_icon${cnormal}"
+route "${cyellow}>>> c_substitutions_icon${cnormal}"
 if [[ $withOAS == "true" ]]; then
   comment "    copy oas3 interface to icon/src "
     cp -R $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $icondir/src >> $log_file 2>> $err_file
@@ -129,11 +129,11 @@ if [[ $withOAS == "true" ]]; then
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases.f90 $icondir/src/testcases >> $log_file 2>> $err_file
   check
 fi
-route "${cblue}<<< c_substitutions_icon${cnormal}"
+route "${cyellow}<<< c_substitutions_icon${cnormal}"
 }
 
 c_setup_icon(){
-route "${cblue}>>> c_setup_icon${cnormal}"
+route "${cyellow}>>> c_setup_icon${cnormal}"
 
 comment "  cp add_run_routines to rundir"
   cp $rootdir/bldsva/setups/common/add_run_routines $rundir >> $log_file 2>> $err_file
@@ -159,7 +159,7 @@ comment "  sed end time to namelist"
   sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
 check
 
-route "${cblue}<<< c_setup_icon${cnormal}"
+route "${cyellow}<<< c_setup_icon${cnormal}"
 }
 
 
@@ -170,7 +170,7 @@ route "${cblue}<<< c_setup_icon${cnormal}"
 
 
 c_configure_cos(){
-route "${cblue}>>> c_configure_cos${cnormal}"
+route "${cyellow}>>> c_configure_cos${cnormal}"
   comment "    cd to cosmo dir"
     cd $cosdir >> $log_file 2>> $err_file
   check
@@ -192,11 +192,11 @@ route "${cblue}>>> c_configure_cos${cnormal}"
       cplLib="$liboas $libpsmile"
       cplInc="$incpsmile"
     fi
-route "${cblue}<<< c_configure_cos${cnormal}"
+route "${cyellow}<<< c_configure_cos${cnormal}"
 }
 
 c_make_cos(){
-route "${cblue}>>> c_make_cos${cnormal}"
+route "${cyellow}>>> c_make_cos${cnormal}"
   comment "    cd to cosmo dir"
     cd $cosdir >> $log_file 2>> $err_file
   check
@@ -222,71 +222,82 @@ route "${cblue}>>> c_make_cos${cnormal}"
     check
   fi
 
-route "${cblue}<<< c_make_cos${cnormal}"
+route "${cyellow}<<< c_make_cos${cnormal}"
 }
 
 
 c_substitutions_cos(){
 
-route "${cblue}>>> c_substitutions_cos${cnormal}"
+route "${cyellow}>>> c_substitutions_cos${cnormal}"
+
   comment "    copy oas3 interface to cosmo/src "
     patch $rootdir/bldsva/intf_oas3/${mList[2]}/oas3 $cosdir/src 
   check
+
+  if [[ ${mList[2]} == cosmo5_1 ]] ; then
     cp  $rootdir/cosmo5_1/LOCAL/TWOMOM/src_twomom_sb* $cosdir/src
-  check
-  comment "    replace files with coupling. Add files to cosmo/src "
-  # patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
-  check
-  comment "	copy the diff files to cosmo src : from $rootdir/bldsva/intf_oas3/${mList[2]}/pfile"
-    cp $rootdir/bldsva/intf_oas3/${mList[2]}/pfile/patch* $cosdir/src 
-  check
-  comment "     apply diff files on the original files using patch command in $cosdir/src "
-   /usr/bin/patch  -d $cosdir/src -i patch_src_radiation.f90.diff -o src_radiation1.f90
-    cp $cosdir/src/src_radiation1.f90 $cosdir/src/src_radiation.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_data_fields.f90.diff -o data_fields1.f90  
-    cp $cosdir/src/data_fields1.f90  $cosdir/src/data_fields.f90
-  check
-#    patch  -d $cosdir/src -i patch_phillips_nucleation.incf.diff  -o phillips_nucleation1.incf >> $log_pfile 2>> $err_pfile
-#    cp $cosdir/src/phillips_nucleation1.incf $cosdir/src/phillips_nucleation.incf
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_lmorg.f90.diff -o lmorg1.f90 
-    cp $cosdir/src/lmorg1.f90 $cosdir/src/lmorg.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_src_artifdata.f90.diff -o src_artifdata1.f90
-    cp $cosdir/src/src_artifdata1.f90 $cosdir/src/src_artifdata.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_src_setup_vartab.f90.diff -o src_setup_vartab1.f90
-    cp $cosdir/src/src_setup_vartab1.f90 $cosdir/src/src_setup_vartab.f90
-  check
-    /usr/bin/patch -d $cosdir/src -i patch_src_twomom_sb.f90.diff -o src_twomom_sb1.f90
-    cp $cosdir/src/src_twomom_sb1.f90  $cosdir/src/src_twomom_sb.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_environment.f90.diff -o environment1.f90
-    cp $cosdir/src/environment1.f90 $cosdir/src/environment.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_organize_physics.f90.diff -o organize_physics1.f90
-    cp $cosdir/src/organize_physics1.f90 $cosdir/src/organize_physics.f90
-  check
-    /usr/bin/patch  -d $cosdir/src -i patch_src_allocation.f90.diff -o src_allocation1.f90
-    cp $cosdir/src/src_allocation1.f90 $cosdir/src/src_allocation.f90
-  check
-   /usr/bin/patch  -d $cosdir/src -i patch_src_gridpoints.f90.diff -o src_gridpoints1.f90
-    cp $cosdir/src/src_gridpoints1.f90 $cosdir/src/src_gridpoints.f90
-  check
-    /usr/bin/patch -d $cosdir/src -i patch_src_runge_kutta.f90.diff -o src_runge_kutta1.f90
-    cp $cosdir/src/src_runge_kutta1.f90 $cosdir/src/src_runge_kutta.f90
-  check
-   /usr/bin/patch -d $cosdir/src -i patch_src_slow_tendencies_rk.f90.diff -o src_slow_tendencies_rk1.f90
-    cp $cosdir/src/src_slow_tendencies_rk1.f90 $cosdir/src/src_slow_tendencies_rk.f90
-  check
-#    patch -d $cosdir/src -i patch_src_twomom_sb_interface.f90.diff  -o src_twomom_sb_interface1.f90
-#    cp $cosdir/src/src_twomom_sb_interface1.f90 $cosdir/src/src_twomom_sb_interface.f90
-#  check
-   
-    rm -rf $cosdir/src/*1.f90
-    rm -rf $cosdir/src/*1.incf
-#DA
+    check
+  fi
+
+  if [[ ${mList[2]} == cosmo4_21 ]] ; then
+    comment "    replace files with coupling. Add files to cosmo/src "
+      patch "$rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/*" $cosdir/src 
+    check
+  fi
+
+  if [[ ${mList[2]} == cosmo5_1 ]] ; then
+    comment "	copy the diff files to cosmo src : from $rootdir/bldsva/intf_oas3/${mList[2]}/pfile"
+      cp $rootdir/bldsva/intf_oas3/${mList[2]}/pfile/patch* $cosdir/src 
+    check
+    comment "     apply diff files on the original files using patch command in $cosdir/src "
+     /usr/bin/patch  -d $cosdir/src -i patch_src_radiation.f90.diff -o src_radiation1.f90
+      cp $cosdir/src/src_radiation1.f90 $cosdir/src/src_radiation.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_data_fields.f90.diff -o data_fields1.f90  
+      cp $cosdir/src/data_fields1.f90  $cosdir/src/data_fields.f90
+    check
+    #    patch  -d $cosdir/src -i patch_phillips_nucleation.incf.diff  -o phillips_nucleation1.incf >> $log_pfile 2>> $err_pfile
+    #    cp $cosdir/src/phillips_nucleation1.incf $cosdir/src/phillips_nucleation.incf
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_lmorg.f90.diff -o lmorg1.f90 
+      cp $cosdir/src/lmorg1.f90 $cosdir/src/lmorg.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_src_artifdata.f90.diff -o src_artifdata1.f90
+      cp $cosdir/src/src_artifdata1.f90 $cosdir/src/src_artifdata.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_src_setup_vartab.f90.diff -o src_setup_vartab1.f90
+      cp $cosdir/src/src_setup_vartab1.f90 $cosdir/src/src_setup_vartab.f90
+    check
+      /usr/bin/patch -d $cosdir/src -i patch_src_twomom_sb.f90.diff -o src_twomom_sb1.f90
+      cp $cosdir/src/src_twomom_sb1.f90  $cosdir/src/src_twomom_sb.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_environment.f90.diff -o environment1.f90
+      cp $cosdir/src/environment1.f90 $cosdir/src/environment.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_organize_physics.f90.diff -o organize_physics1.f90
+      cp $cosdir/src/organize_physics1.f90 $cosdir/src/organize_physics.f90
+    check
+      /usr/bin/patch  -d $cosdir/src -i patch_src_allocation.f90.diff -o src_allocation1.f90
+      cp $cosdir/src/src_allocation1.f90 $cosdir/src/src_allocation.f90
+    check
+     /usr/bin/patch  -d $cosdir/src -i patch_src_gridpoints.f90.diff -o src_gridpoints1.f90
+      cp $cosdir/src/src_gridpoints1.f90 $cosdir/src/src_gridpoints.f90
+    check
+      /usr/bin/patch -d $cosdir/src -i patch_src_runge_kutta.f90.diff -o src_runge_kutta1.f90
+      cp $cosdir/src/src_runge_kutta1.f90 $cosdir/src/src_runge_kutta.f90
+    check
+     /usr/bin/patch -d $cosdir/src -i patch_src_slow_tendencies_rk.f90.diff -o src_slow_tendencies_rk1.f90
+      cp $cosdir/src/src_slow_tendencies_rk1.f90 $cosdir/src/src_slow_tendencies_rk.f90
+    check
+    #    patch -d $cosdir/src -i patch_src_twomom_sb_interface.f90.diff  -o src_twomom_sb_interface1.f90
+    #    cp $cosdir/src/src_twomom_sb_interface1.f90 $cosdir/src/src_twomom_sb_interface.f90
+    #  check
+
+      rm -rf $cosdir/src/*1.f90
+      rm -rf $cosdir/src/*1.incf
+  fi
+
+  #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
 	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/data_parallel.f90 $cosdir/src/ 
@@ -298,11 +309,11 @@ route "${cblue}>>> c_substitutions_cos${cnormal}"
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_setup.f90 $cosdir/src/ 
     check
   fi
-route "${cblue}<<< c_substitutions_cos${cnormal}"
+route "${cyellow}<<< c_substitutions_cos${cnormal}"
 }
 
 c_setup_cos(){
-route "${cblue}>>> c_setup_cos${cnormal}"
+route "${cyellow}>>> c_setup_cos${cnormal}"
 
 comment "  cp namelist to rundir"
   cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
@@ -400,7 +411,7 @@ if [[ $withPDAF == "true" ]] ; then
   cp $rundir/INPUT_IO $rundir/INPUT_IO_$(printf "%05d" $(($instance-$startInst)))     
 fi
 
-route "${cblue}<<< c_setup_cos${cnormal}"
+route "${cyellow}<<< c_setup_cos${cnormal}"
 }
 
 ############################ 
@@ -408,7 +419,7 @@ route "${cblue}<<< c_setup_cos${cnormal}"
 ############################
 
 c_configure_oas(){
-route "${cblue}>>> c_configure_oas${cnormal}"
+route "${cyellow}>>> c_configure_oas${cnormal}"
   comment "    sed oasis rootdir to Makefile"
     sed -i "s@__oasisroot__@$oasdir@" $file >> $log_file 2>> $err_file
   check
@@ -418,11 +429,11 @@ route "${cblue}>>> c_configure_oas${cnormal}"
   comment "    make clean oasis"
     make -f $oasdir/util/make_dir/TopMakefileOasis3 realclean >> $log_file 2>> $err_file
   check
-route "${cblue}<<< c_configure_oas${cnormal}"
+route "${cyellow}<<< c_configure_oas${cnormal}"
 }
 
 c_make_oas(){
-route "${cblue}>>> c_make_oas${cnormal}"
+route "${cyellow}>>> c_make_oas${cnormal}"
   comment "    make oasis"
     export SCOREP_WRAPPER=on
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
@@ -433,12 +444,12 @@ route "${cblue}>>> c_make_oas${cnormal}"
     cp $libpsmile $bindir/libs >> $log_file 2>> $err_file
   check
   fi
-route "${cblue}<<< c_make_oas${cnormal}"
+route "${cyellow}<<< c_make_oas${cnormal}"
 }
 
 
 c_substitutions_oas(){
-route "${cblue}>>> c_substitutions_oas${cnormal}"
+route "${cyellow}>>> c_substitutions_oas${cnormal}"
   comment "    sed absolut include paths to Makefile"
     sed -i "s@include make.inc@include $oasdir/util/make_dir/make.inc@" ${oasdir}/util/make_dir/TopMakefileOasis3 >> $log_file 2>> $err_file
   check
@@ -455,11 +466,11 @@ route "${cblue}>>> c_substitutions_oas${cnormal}"
        patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*"  ${oasdir}/lib/psmile/src
      check
   fi
-route "${cblue}<<< c_substitutions_oas${cnormal}"
+route "${cyellow}<<< c_substitutions_oas${cnormal}"
 }
 
 c_setup_oas(){
-route "${cblue}>>> c_setup_oas${cnormal}"
+route "${cyellow}>>> c_setup_oas${cnormal}"
 
   comment "   copy cf_name_table to rundir"
     cp $rootdir/bldsva/data_oas3/cf_name_table.txt $rundir >> $log_file 2>> $err_file
@@ -579,7 +590,7 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
 
-route "${cblue}<<< c_setup_oas${cnormal}"
+route "${cyellow}<<< c_setup_oas${cnormal}"
 }
 
 
@@ -589,7 +600,7 @@ route "${cblue}<<< c_setup_oas${cnormal}"
 
 
 c_configure_clm(){
-route "${cblue}>>> c_configure_clm${cnormal}"
+route "${cyellow}>>> c_configure_clm${cnormal}"
   comment "    clean clm by removing build dir"
     rm -rf $clmdir/build >> $log_file 2>> $err_file
   check
@@ -638,11 +649,11 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     export SCOREP_WRAPPER=off
     $clmdir/bld/configure -fc "$cfc" -cc "$ccc" $flags -fflags "$cplInc" -ldflags "$cplLib" -fopt "$optComp" -cppdefs "$cppdef"  >> $log_file 2>> $err_file
   check
-route "${cblue}<<< c_configure_clm${cnormal}"
+route "${cyellow}<<< c_configure_clm${cnormal}"
 }
 
 c_make_clm(){
-route "${cblue}>>> c_make_clm${cnormal}"
+route "${cyellow}>>> c_make_clm${cnormal}"
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
@@ -667,12 +678,12 @@ route "${cblue}>>> c_make_clm${cnormal}"
       cp $clmdir/build/clm $bindir >> $log_file 2>> $err_file
     check
   fi 
-route "${cblue}<<< c_make_clm${cnormal}"
+route "${cyellow}<<< c_make_clm${cnormal}"
 }
 
 
 c_substitutions_clm(){
-route "${cblue}>>> c_substitutions_clm${cnormal}"
+route "${cyellow}>>> c_substitutions_clm${cnormal}"
   comment "    create oas3 dir in $clmdir/src"
     mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
   check
@@ -692,12 +703,12 @@ route "${cblue}>>> c_substitutions_clm${cnormal}"
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
   fi	
-route "${cblue}<<< c_substitutions_clm${cnormal}"
+route "${cyellow}<<< c_substitutions_clm${cnormal}"
 }
 
 
 c_setup_clm(){
-route "${cblue}>>> c_setup_clm${cnormal}"
+route "${cyellow}>>> c_setup_clm${cnormal}"
 
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
@@ -751,7 +762,7 @@ if [[ $withPDAF == "true" ]] ; then
   cp $rundir/lnd.stdin $rundir/lnd.stdin_$(printf "%05d" $(($instance-$startInst)))     
 fi
 
-route "${cblue}<<< c_setup_clm${cnormal}"
+route "${cyellow}<<< c_setup_clm${cnormal}"
 }
 
 
@@ -761,7 +772,7 @@ route "${cblue}<<< c_setup_clm${cnormal}"
 
 
 c_configure_pfl(){
-route "${cblue}>>> c_configure_pfl${cnormal}"
+route "${cyellow}>>> c_configure_pfl${cnormal}"
   
   comment "    cd to pfl build directory "
     cd $PARFLOW_BLD >> $log_file 2>> $err_file
@@ -774,11 +785,11 @@ route "${cblue}>>> c_configure_pfl${cnormal}"
   comment "    configure pfsimulator and pftools"
   cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
-route "${cblue}<<< c_configure_pfl${cnormal}"
+route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
-route "${cblue}>>> c_make_pfl${cnormal}"
+route "${cyellow}>>> c_make_pfl${cnormal}"
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
@@ -795,17 +806,17 @@ check
 comment "    cp binary to $bindir"
  cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
 check
-route "${cblue}<<< c_make_pfl${cnormal}"
+route "${cyellow}<<< c_make_pfl${cnormal}"
 }
 
 c_substitutions_pfl(){
-route "${cblue}>>> c_substitutions_pfl${cnormal}"
+route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-route "${cblue}<<< c_substitutions_pfl${cnormal}"
+route "${cyellow}<<< c_substitutions_pfl${cnormal}"
 }
 
 c_setup_pfl(){
-route "${cblue}>>> c_setup_pfl${cnormal}"
+route "${cyellow}>>> c_setup_pfl${cnormal}"
 
   if [ ! -f "$rundir/coup_oas.tcl" ]; then
     comment "  $rundir/coup_oas.tcl does not exist, is copied, see c_setup_pfl()"
@@ -880,7 +891,7 @@ sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i
   check
 
 
-route "${cblue}<<< c_setup_pfl${cnormal}"
+route "${cyellow}<<< c_setup_pfl${cnormal}"
 }
 
 
@@ -890,7 +901,7 @@ route "${cblue}<<< c_setup_pfl${cnormal}"
 
 
 c_setup_pdaf(){
-route "${cblue}>>> c_setup_da${cnormal}"
+route "${cyellow}>>> c_setup_da${cnormal}"
   comment "   copy pdaf namelist to rundir."
     cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
@@ -919,5 +930,5 @@ route "${cblue}>>> c_setup_da${cnormal}"
   sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
-route "${cblue}<<< c_setup_da${cnormal}"
+route "${cyellow}<<< c_setup_da${cnormal}"
 }
