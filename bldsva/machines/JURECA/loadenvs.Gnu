@@ -4,8 +4,7 @@
 
 module --force purge
 module use $OTHERSTAGES
-#module load Stages/2020
-module load Stages/Devel-2020
+module load Stages/2020
 module load GCC/9.3.0
 module load ParaStationMPI/5.4.7-1
 
