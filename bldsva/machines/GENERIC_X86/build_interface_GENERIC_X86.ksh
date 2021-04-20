@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultMpiPath="/opt/mpich-3.2.1"
   defaultNcdfPath="/usr"
   defaultGrib1Path="/opt//DWD-libgrib1_20110128/lib"
@@ -26,17 +26,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime=""
   defaultQ=""
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 
 mpitasks=$((numInst * ($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
@@ -109,6 +109,6 @@ fi
 comment "   change permission of runscript and mapfile"
 chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

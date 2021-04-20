@@ -21,6 +21,7 @@ getDefaults(){
   # pathes will be set to tested platform defaults if empty
   def_mpiPath=""
   def_ncdfPath=""
+  def_grib1path=""
   def_gribPath=""
   def_tclPath=""
   def_hyprePath=""
@@ -84,6 +85,7 @@ setDefaults(){
   ncdfPath=$def_ncdfPath
   lapackPath=$def_lapackPath
   pncdfPath=$def_pncdfPath
+  grib1Path=$def_grib1Path
   gribPath=$def_gribPath
   tclPath=$def_tclPath
   hyprePath=$def_hyprePath
@@ -120,6 +122,7 @@ setDefaults(){
 clearMachineSelection(){
   mpiPath=""
   ncdfPath=""
+  grib1Path=""
   gribPath=""
   tclPath=""
   hyprePath=""
@@ -147,6 +150,7 @@ setSelection(){
 
   if [[ $mpiPath == "" ]] then ; mpiPath=$defaultMpiPath ; fi
   if [[ $ncdfPath == "" ]] then ; ncdfPath=$defaultNcdfPath  ; fi
+  if [[ $grib1Path == "" ]] then ; grib1Path=$defaultGrib1Path ; fi
   if [[ $gribPath == "" ]] then ; gribPath=$defaultGribPath ; fi
   if [[ $tclPath == "" ]] then ; tclPath=$defaultTclPath ; fi
   if [[ $hyprePath == "" ]] then ; hyprePath=$defaultHyprePath ; fi
@@ -207,13 +211,13 @@ setCombination(){
 
 
 compileClm(){
-route "${cblue}> c_compileClm${cnormal}"
+route "${cyellow}> c_compileClm${cnormal}"
   comment "  source clm interface script"
     comment "intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_clm
-    if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cblue}< c_compileClm${cnormal}" ; return  ;fi 
+    if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
   comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
@@ -234,16 +238,16 @@ route "${cblue}> c_compileClm${cnormal}"
     if [[ ${options["clm"]} == "make" || ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       make_clm
     fi
-route "${cblue}< c_compileClm${cnormal}"
+route "${cyellow}< c_compileClm${cnormal}"
 }
 
 compileIcon(){
-route "${cblue}> c_compileIcon${cnormal}"
+route "${cyellow}> c_compileIcon${cnormal}"
   comment "  source icon interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_icon
-    if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cblue}< c_compileIcon${cnormal}" ;  return  ;fi 
+    if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
     if [[ ${options["icon"]} == "fresh" ]] ; then 
   comment "  backup icon dir to: $icondir"
       rm -rf $icondir >> $log_file 2>> $err_file
@@ -261,16 +265,16 @@ route "${cblue}> c_compileIcon${cnormal}"
     if [[ ${options["icon"]} == "make" || ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
       make_icon
     fi
-route "${cblue}< c_compileIcon${cnormal}"
+route "${cyellow}< c_compileIcon${cnormal}"
 }
 
 compileCosmo(){
-route "${cblue}> c_compileCosmo${cnormal}"
+route "${cyellow}> c_compileCosmo${cnormal}"
   comment "  source cos interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_cos
-    if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cblue}< c_compileCosmo${cnormal}" ;  return  ;fi 
+    if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
   comment "  backup cos dir to: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
@@ -288,16 +292,16 @@ route "${cblue}> c_compileCosmo${cnormal}"
     if [[ ${options["cos"]} == "make" || ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
       make_cos
     fi
-route "${cblue}< c_compileCosmo${cnormal}"
+route "${cyellow}< c_compileCosmo${cnormal}"
 }
 
 compileOasis(){
-route "${cblue}> c_compileOasis${cnormal}"
+route "${cyellow}> c_compileOasis${cnormal}"
   comment "  source oas interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_oas
-    if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cblue}< c_compileOasis${cnormal}" ; return  ;fi 
+    if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
   comment "  backup oas dir to: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
@@ -315,16 +319,16 @@ route "${cblue}> c_compileOasis${cnormal}"
     if [[ ${options["oas"]} == "make" || ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
       make_oas
     fi
-route "${cblue}< c_compileOasis${cnormal}"
+route "${cyellow}< c_compileOasis${cnormal}"
 }
 
 compileParflow(){
-route "${cblue}> c_compileParflow${cnormal}"
+route "${cyellow}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
-    if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cblue}< c_compileParflow${cnormal}" ;return  ;fi 
+    if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
      comment "  backup pfl dir to: $pfldir"
        if [ -d $pfldir ] ; then ; rm -rf $pfldir >> $log_file 2>> $err_file ;fi
@@ -343,18 +347,18 @@ route "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["pfl"]} == "make" || ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       make_pfl
     fi
-route "${cblue}< c_compileParflow${cnormal}"
+route "${cyellow}< c_compileParflow${cnormal}"
 }
 
 
 #DA
 compileDA(){
-route "${cblue}> c_compileParflow${cnormal}"
+route "${cyellow}> c_compileDA${cnormal}"
   comment "  source da interface script"
     . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_da
-    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cblue}< c_compileDA${cnormal}" ;return  ;fi 
+    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cyellow}< c_compileDA${cnormal}" ;return  ;fi 
     if [[ ${options["da"]} == "fresh" ]] ; then 
   comment "  backup da dir to: $dadir"
       rm -rf $dadir >> $log_file 2>> $err_file
@@ -372,7 +376,7 @@ route "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["da"]} == "make" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
       make_da
     fi  
-route "${cblue}< c_compileDA${cnormal}"
+route "${cyellow}< c_compileDA${cnormal}"
 }
 
 
@@ -392,12 +396,12 @@ runCompilation(){
 
 interactive(){
   clear
-  print "${cblue}##############################################${cnormal}"
-  print "${cblue}         Interactive installation...          ${cnormal}"
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
+  print "${cyellow}         Interactive installation...          ${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   print "The following variables are needed:"
   printState
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   PS3="Your selection(1-3)?"
   select ret in "!!!start!!!" "edit" "exit"
   do  
@@ -652,7 +656,7 @@ softSanityCheck(){
 
 listAvailabilities(){
    
-  print ${cblue}"A list of all supported versions for a special platform."${cnormal}
+  print ${cyellow}"A list of all supported versions for a special platform."${cnormal}
   print ""
   for p in "${!platforms[@]}" ; do
     printf "%-20s #%s\n" "$p" "${platforms[$p]}"
@@ -661,7 +665,7 @@ listAvailabilities(){
     done
   done
   print ""
-  print ${cblue}"A list of details for each version."${cnormal}	
+  print ${cyellow}"A list of details for each version."${cnormal}	
   print ""
   for v in "${!versions[@]}" ; do
     printf "%-20s #%s\n" "$v" "${versions[$v]}"
@@ -711,7 +715,7 @@ getRoot(){
 #		Main
 #######################################
 
-  cblue=$(tput setaf 4)
+  cyellow=$(tput setaf 3)
   cnormal=$(tput sgr0)   #9
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)

@@ -381,12 +381,12 @@ softSanityCheck(){
 
 interactive(){
   clear
-  print "${cblue}##############################################${cnormal}"
-  print "${cblue}         Interactive installation...          ${cnormal}"
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
+  print "${cyellow}         Interactive installation...          ${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   print "The following variables are needed:"
   printState
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   PS3="Your selection(1-3)?"
   select ret in "!!!start!!!" "edit" "exit"
   do
@@ -620,7 +620,7 @@ printState(){
 
 listAvailabilities(){
 
-  print ${cblue}"A list of details for each available platform."${cnormal}
+  print ${cyellow}"A list of details for each available platform."${cnormal}
   print ""
   for p in "${!platforms[@]}" ; do
     printf "%-20s #%s\n" "$p" "${platforms[$p]}"
@@ -636,7 +636,7 @@ listAvailabilities(){
 
 
   print ""
-  print ${cblue}"A list of details for each version."${cnormal} 
+  print ${cyellow}"A list of details for each version."${cnormal} 
   print ""
   for v in "${!versions[@]}" ; do
     printf "%-20s #%s\n" "$v" "${versions[$v]}"
@@ -648,7 +648,7 @@ listAvailabilities(){
     done
   done
   print ""
-  print ${cblue}"A list of details for each setup."${cnormal}
+  print ${cyellow}"A list of details for each setup."${cnormal}
   print ""
   for v in "${!setups[@]}" ; do
     printf "%-20s #%s\n" "$v" "${setups[$v]}"
@@ -690,7 +690,7 @@ getRoot(){
 #               Main
 #######################################
 
-  cblue=$(tput setaf 4)
+  cyellow=$(tput setaf 4)
   cnormal=$(tput sgr0)
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
@@ -954,7 +954,7 @@ check
 
   for instance in {$startInst..$(($startInst+$numInst-1))}
   do
-  route ${cblue}"> creating instance: $instance"${cnormal}
+  route ${cyellow}"> creating instance: $instance"${cnormal}
     # Ensemble only creation
     if [[ $numInst > 1 && ( $withOASMCT == "true" || $withOAS == "false"   ) && $withPDAF == "false" ]] ; then 
       rundir=$origrundir/tsmp_instance_$instance
@@ -1007,7 +1007,7 @@ check
     else	
       finalizeSetup
     fi
-  route ${cblue}"< creating instance: $instance"${cnormal}
+  route ${cyellow}"< creating instance: $instance"${cnormal}
   done
 
 #DA
