@@ -101,7 +101,6 @@ CONTAINS
    integer, external  :: system     
    !COMMENT OUT FOR GNU, CMS; CPS
 #endif
-
    character(len=255) :: path, host, dirn, basen, head, tail, cmd, filen
 
    integer i, rc
