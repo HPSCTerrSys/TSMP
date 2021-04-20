@@ -33,9 +33,10 @@ route "${cyellow}>> configure_pfl${cnormal}"
     fi
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    cflagsSim=" -qopenmp "
-    if [[ $compiler == "Gnu" ]]; then
-      cflagsSim=" -fopenmp "
+    if [[ $compiler == "Gnu" ]] ; then  
+      cflagsSim=" -fopenmp "  
+    elif [[ $compiler == "Intel" ]] ; then 
+      cflagsSim=" -qopenmp "  
     fi
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
 

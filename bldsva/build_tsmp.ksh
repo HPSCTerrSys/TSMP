@@ -353,7 +353,7 @@ route "${cyellow}< c_compileParflow${cnormal}"
 
 #DA
 compileDA(){
-route "${cyellow}> c_compileParflow${cnormal}"
+route "${cyellow}> c_compileDA${cnormal}"
   comment "  source da interface script"
     . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh >> $log_file 2>> $err_file
   check
