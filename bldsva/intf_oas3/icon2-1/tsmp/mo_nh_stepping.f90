@@ -514,9 +514,11 @@ MODULE mo_nh_stepping
       !  END DO
       !END DO
       
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: Init icon transforming received vars"
-      CALL message(routine, oas_message)
+      IF(msg_level > 30 ) THEN
+        WRITE(oas_message,*) "ICONOAS: Init icon transforming received vars"
+        CALL message(routine, oas_message)
+      END IF
+
       rl_start = grf_bdywidth_c+1
       rl_end   = min_rlcell_int
       i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
@@ -529,15 +531,17 @@ MODULE mo_nh_stepping
           oas_rcv_field_icon(jc,jb,oas_i) = oas_rcv_field(ii,oas_i)
         END DO
       END DO
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: Init icon transformed received vars"
-      CALL message(routine, oas_message)
+
+      IF(msg_level > 30 ) THEN
+        WRITE(oas_message,*) "ICONOAS: Init icon transformed received vars"
+        CALL message(routine, oas_message)
 
       ! check:
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: init for ", oas_i, " got rank0-local min, max=", &
+        WRITE(oas_message,*) "ICONOAS: Init for ", oas_i, " got rank0-local min, max=", &
           MINVAL(oas_rcv_field(:,oas_i)), MAXVAL(oas_rcv_field(:,oas_i))
-    END DO
+        CALL message(routine, oas_message)
+      END IF
+        END DO
               
 #endif
 
@@ -1715,18 +1719,25 @@ MODULE mo_nh_stepping
       END IF
     END DO
 
-    IF(msg_level > 30 ) &
-      WRITE(oas_message,*) 'Slavko: sim_time= ', sim_time
-    CALL message(routine, oas_message)
+    IF(msg_level > 30 ) THEN
+      WRITE(oas_message,*) 'ICONOAS: sim_time= ', sim_time
+      CALL message(routine, oas_message)
+    END IF
+
     DO oas_i = 1, SIZE(oas_rcv_meta)
-      IF(msg_level > 30 ) &
+      IF(msg_level > 30 ) THEN
         WRITE(oas_message,*) 'Receiving  ', oas_rcv_meta(oas_i)%clpname,&
           " at t=", sim_time_oas
-      CALL message(routine, oas_message)
+        CALL message(routine, oas_message)
+      END IF
+
       CALL oasis_get(oas_rcv_meta(oas_i)%vid, sim_time_oas, oas_rcv_field(:,oas_i), oas_error)
-      IF(msg_level > 30 ) &
+
+      IF(msg_level > 30 ) THEN
         WRITE(oas_message,*) 'Received  ', oas_rcv_meta(oas_i)%clpname, 'at t=', sim_time_oas
-      CALL message(routine, oas_message)
+        CALL message(routine, oas_message)
+      END IF
+
       IF (oas_error .NE. OASIS_Ok .AND. oas_error .LT. OASIS_Recvd) THEN
         WRITE(oas_message,*) 'Failure in oasis_get of ', oas_rcv_meta(oas_i)%clpname
         CALL oasis_abort(oas_comp_id, oas_comp_name, oas_message)
@@ -1741,9 +1752,11 @@ MODULE mo_nh_stepping
       !  END DO
       !END DO
       
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: icon transforming received vars"
-      CALL message(routine, oas_message)
+      IF(msg_level > 30 ) THEN
+        WRITE(oas_message,*) "ICONOAS: icon transforming received vars"
+        CALL message(routine, oas_message)
+      END IF
+
       rl_start = grf_bdywidth_c+1
       rl_end   = min_rlcell_int
       i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
@@ -1756,14 +1769,16 @@ MODULE mo_nh_stepping
           oas_rcv_field_icon(jc,jb,oas_i) = oas_rcv_field(ii,oas_i)
         END DO
       END DO
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: icon transformed received vars"
-      CALL message(routine, oas_message)
+
+      IF(msg_level > 30 ) THEN
+        WRITE(oas_message,*) "ICONOAS: icon transformed received vars"
+        CALL message(routine, oas_message)
 
       ! check:
-      IF(msg_level > 30 ) &
-        WRITE(oas_message,*) "Slavko: for ", oas_i, " got rank0-local min, max=", &
+        WRITE(oas_message,*) "ICONOAS: for ", oas_i, " got rank0-local min, max=", &
           MINVAL(oas_rcv_field(:,oas_i)), MAXVAL(oas_rcv_field(:,oas_i))
+        CALL message(routine, oas_message)
+      END IF
     END DO
     
 #endif
