@@ -875,6 +875,8 @@ check
   finalizeMachine
 
   echo "" >> $log_file
+  echo "Git Configuration" >> $log_file
+  echo "-----------------" >> $log_file
   echo "Git (TSMP):" >> $log_file
   git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
   git -C ${rootdir} rev-parse HEAD >> $log_file
@@ -908,6 +910,7 @@ check
       git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[4]} rev-parse HEAD >> $log_file
   fi
+  echo "" >> $log_file
 
   runCompilation
 
