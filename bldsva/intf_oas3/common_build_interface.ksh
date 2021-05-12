@@ -772,11 +772,35 @@ route "${cyellow}<<< c_setup_clm${cnormal}"
 
 c_configure_eclm(){
 route "${cyellow}>>> c_configure_clm${cnormal}"
+  comment "    Using land component model eCLM (experimental) \n"
+  comment "    Checking if eCLM repo is valid..."
+  cd ${clmdir}
+  git status >> $log_file 2>> $err_file
+  check
+  comment "    Running CMake configure step..."
+  ECLM_BUILD_DIR=${clmdir}/build >> $log_file 2>> $err_file
+  timer_start=$(date +%s)
+  cmake -S src -B "${ECLM_BUILD_DIR}" \
+      -DCMAKE_INSTALL_PREFIX="$bindir" \
+      -DCMAKE_C_COMPILER=mpicc \
+      -DCMAKE_Fortran_COMPILER=mpifort >> $log_file 2>> $err_file
+  check
+  timer_end=$(date +%s)
+  comment "    Configure step took $(date -u -d "0 $timer_end sec - $timer_start sec" +"%S") seconds\n"
 route "${cyellow}<<< c_configure_clm${cnormal}"
 }
 
 c_make_eclm(){
   route "${cyellow}>>> c_make_clm${cnormal}"
+  comment "    Building eCLM..."
+  timer_start=$(date +%s)
+  cmake --build "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
+  check
+  timer_end=$(date +%s)
+  comment "    Build succeeded! Build duration: $(date -u -d "0 $timer_end sec - $timer_start sec" +"%H:%M:%S")\n"
+  comment "    Installing eCLM..."
+  cmake --install "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
+  check
   route "${cyellow}<<< c_make_clm${cnormal}"
 }
 

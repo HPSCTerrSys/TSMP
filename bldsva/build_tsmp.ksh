@@ -219,7 +219,12 @@ route "${cyellow}> c_compileClm${cnormal}"
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then
-      if [ -d $clmdir ] ; then
+      if [[ ${mList[1]} == "eclm" ]] ; then
+        rm -rf $clmdir >> $log_file 2>> $err_file
+        git clone https://github.com/HPSCTerrSys/eCLM.git $clmdir >> $log_file 2>> $err_file
+        check
+        comment "  eCLM successfully cloned from https://github.com/HPSCTerrSys/eCLM.git \n"
+      else
         comment "  backup clm dir to: $clmdir"
         rm -rf $clmdir >> $log_file 2>> $err_file
         check
