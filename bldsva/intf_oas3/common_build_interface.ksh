@@ -765,6 +765,30 @@ fi
 route "${cyellow}<<< c_setup_clm${cnormal}"
 }
 
+############################ 
+# eCLM interface methods
+############################
+
+
+c_configure_eclm(){
+route "${cyellow}>>> c_configure_clm${cnormal}"
+route "${cyellow}<<< c_configure_clm${cnormal}"
+}
+
+c_make_eclm(){
+  route "${cyellow}>>> c_make_clm${cnormal}"
+  route "${cyellow}<<< c_make_clm${cnormal}"
+}
+
+c_substitutions_clm(){
+route "${cyellow}>>> c_substitutions_clm${cnormal}"
+route "${cyellow}<<< c_substitutions_clm${cnormal}"
+}
+
+c_setup_eclm(){
+  route "${cyellow}>>> c_setup_clm${cnormal}"
+  route "${cyellow}<<< c_setup_clm${cnormal}"
+}
 
 ############################ 
 #Parflow interface methods

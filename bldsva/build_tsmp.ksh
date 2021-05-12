@@ -218,15 +218,17 @@ route "${cyellow}> c_compileClm${cnormal}"
   check
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
-    if [[ ${options["clm"]} == "fresh" ]] ; then 
-  comment "  backup clm dir to: $clmdir"
-      rm -rf $clmdir >> $log_file 2>> $err_file
-  check
-    # remove '-icon' from the mList[1] name
-    clmicon="${mList[1]}"
-    clmicon=${clmicon%'-icon'}
-    cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
-  check
+    if [[ ${options["clm"]} == "fresh" ]] ; then
+      if [ -d $clmdir ] ; then
+        comment "  backup clm dir to: $clmdir"
+        rm -rf $clmdir >> $log_file 2>> $err_file
+        check
+        # remove '-icon' from the mList[1] name
+        clmicon="${mList[1]}"
+        clmicon=${clmicon%'-icon'}
+        cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
+        check
+      fi
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       substitutions_clm
