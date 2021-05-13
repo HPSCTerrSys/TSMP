@@ -893,7 +893,11 @@ check
     comment "  source clm build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
     check
-    if [[ $withPDAF == "false" ]] ; then
+    if [[ ${mList[1]} == "eclm" ]] ; then
+        comment "   Creating symlink to eclm.exe"
+        ln -s $bindir/bin/eclm.exe $rundir/eclm.exe >> $log_file 2>> $err_file
+        check
+    elif [[ $withPDAF == "false" ]] ; then
       comment "  cp clm exe to $rundir" 
         cp $bindir/clm $rundir >> $log_file 2>> $err_file
       check

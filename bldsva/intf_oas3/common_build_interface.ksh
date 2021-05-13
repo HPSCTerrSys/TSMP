@@ -814,6 +814,9 @@ route "${cyellow}>>> c_make_eclm${cnormal}"
   comment "    Installing eCLM"
   cmake --install "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
   check
+  comment "    Installing clm5nl-gen"
+  pip3 install --user $clmdir/namelist_generator >> $log_file 2>> $err_file
+  check
 route "${cyellow}<<< c_make_eclm${cnormal}"
 }
 
