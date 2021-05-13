@@ -204,9 +204,17 @@ setCombination(){
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi
+
+  # workaround to enable OASIS3-MCT build for eCLM without checking
+  # for COSMO/ICON/Parflow. MCT is a hard dependency of eCLM.
+  if [[ $withCLM == "true" && $mList[1] == "eclm" ]] ; then
+    case "$version" in *MCT*)
+      withOAS="true"
+      withOASMCT="true" ;;
+    esac
+  fi
 #DA
   case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
-
 }
 
 
@@ -221,9 +229,9 @@ route "${cyellow}> c_compileClm${cnormal}"
     if [[ ${options["clm"]} == "fresh" ]] ; then
       if [[ ${mList[1]} == "eclm" ]] ; then
         rm -rf $clmdir >> $log_file 2>> $err_file
+        comment "   Cloning eCLM from https://github.com/HPSCTerrSys/eCLM.git"
         git clone https://github.com/HPSCTerrSys/eCLM.git $clmdir >> $log_file 2>> $err_file
         check
-        comment "  eCLM successfully cloned from https://github.com/HPSCTerrSys/eCLM.git \n"
       else
         comment "  backup clm dir to: $clmdir"
         rm -rf $clmdir >> $log_file 2>> $err_file

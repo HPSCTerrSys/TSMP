@@ -7,7 +7,15 @@ route "${cyellow}<< always_clm${cnormal}"
 
 configure_clm(){
 route "${cyellow}>> configure_clm${cnormal}"
-    c_configure_eclm
+  #
+  # Uncomment these lines to customize build options.
+  #
+  # ECLM_CC=/path/to/mpicc
+  # ECLM_FC=/path/to/mpifort
+  # ECLM_CMAKE_VARS+=" -DBUILD_VAR1=VALUE1"
+  # ECLM_CMAKE_VARS+=" -DBUILD_VAR2=VALUE2"
+  #
+  c_configure_eclm
 route "${cyellow}<< configure_clm${cnormal}"
 }
 

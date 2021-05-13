@@ -25,11 +25,11 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF \
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT"
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT"
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
         ["JUSUF"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT"
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
         ["MISTRAL"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT 4.1.0MCT 3.0.0MCTPDAF "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 3.0.0MCTPDAF "
         ["CCA2"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT "
@@ -80,7 +80,7 @@ modelVersion+=(
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
 	["1.4.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow"
 	["1.4.1MCT"]="oasis3-mct clm3_5-icon icon-lem parflow3_2"
-        ["5.0.0"]="oasis3-mct eclm"
+        ["5.0.0"]="mct eclm"
         ["5.0.0MCT"]="oasis3-mct eclm"
 )
 
