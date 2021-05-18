@@ -77,7 +77,7 @@ To get a man-page for the usage of this scripts, do:
 ```
 ## TSMP version history <a name="ver_his"></a> 
 The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.7 for version v1.3.3. TSMP supports ParFlow 3.7 from version v1.3.3 onward.
-Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf-stable`. Note that **ParFlow 3.7 is cloned automatically via TSMP from the official ParFlow GitHub repository** https://github.com/parflow/parflow.git.
+Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf-stable`. Note that **ParFlow 3.7 is cloned automatically via TSMP from the official ParFlow GitHub repository** https://github.com/parflow/parflow.git while ParFlow 3.2 needs to be provided by user.
 
 # The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP <a name="ref_exp"></a>
 
@@ -309,9 +309,9 @@ Creating run directory for HPSC-TerrSys users:
 Not that heterogeneous job will be possible only for TSMP with ParFlow3.7 which is available from version v1.3.3.
 
 # NRW Test case <a name="nrw_test"></a>
-NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out over a one clear sky day (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
+NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
 ParFlow) configuration of TSMP. The atmospheric component uses a constant lateral spatial resolution of about 1 km and a variable vertical discretization into 50 levels gradually coarsening from the bottom (20 m) to the top (22000 m). Initial and lateral boundary conditions for the atmospheric model are obtained from the operational weather forecast model
-COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](#ref_step3) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](#ref_step5).\
+COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](#ref_step3) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](#ref_step5). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
 To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 ```shell
