@@ -685,7 +685,7 @@ getRoot(){
 #               Main
 #######################################
 
-  cyellow=$(tput setaf 4)
+  cyellow=$(tput setaf 3)
   cnormal=$(tput sgr0)
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
