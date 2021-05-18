@@ -12,7 +12,7 @@ module load ParaStationMPI/5.2.2-1
 
 module load Hypre/2.15.1
 module load Silo/4.10.2
-module load Tcl/8.6.9 # this version is not compatible with ParFlow3.2
+# module load Tcl/8.6.9 # this version is not compatible with ParFlow3.2
 
 module load HDF5/1.10.5
 module load netCDF/4.6.3
@@ -25,7 +25,7 @@ module load Python/2.7.16
 module load CMake
 module load NCO
 #module load CDO/1.9.5
-#export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8_gcc803"
-#export PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/bin:$PATH"
-#export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/lib:$LD_LIBRARY_PATH"
+export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8_gcc803"
+export PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/bin:$PATH"
+export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/lib:$LD_LIBRARY_PATH"
 module li
