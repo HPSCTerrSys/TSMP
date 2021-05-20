@@ -705,6 +705,54 @@ getRoot(){
   
 }
 
+getGitInfo(){
+
+  echo "" >> $log_file
+  echo "Git Configuration" >> $log_file
+  echo "-----------------" >> $log_file
+  echo "Git (TSMP):" >> $log_file
+  git -C ${rootdir} remote -v >> $log_file
+  git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
+  git -C ${rootdir} rev-parse HEAD >> $log_file
+  if [[ $withOAS == "true" ]] ; then
+    echo "Git (${mList[0]}):" >> $log_file
+    git -C ${rootdir}/${mList[0]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[0]} rev-parse HEAD >> $log_file
+  fi
+  if [[ $withCLM == "true" ]] ; then
+    echo "Git (${mList[1]}):" >> $log_file
+    git -C ${rootdir}/${mList[1]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[1]} rev-parse HEAD >> $log_file
+  fi
+  if [[ $withCOS == "true" ]] ; then
+    echo "Git (${mList[2]}):" >> $log_file
+    git -C ${rootdir}/${mList[2]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
+  fi
+  if [[ $withICON == "true" ]] ; then
+    echo "Git (${mList[2]}):" >> $log_file
+    git -C ${rootdir}/${mList[2]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
+  fi
+  if [[ $withPFL == "true" ]] ; then
+    echo "Git (${mList[3]}):" >> $log_file
+    git -C ${rootdir}/${mList[3]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[3]} rev-parse HEAD >> $log_file
+  fi
+  if [[ $withPDAF == "true" ]] ; then
+    echo "Git (${mList[4]}):" >> $log_file
+    git -C ${rootdir}/${mList[4]} remote -v >> $log_file
+    git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir}/${mList[4]} rev-parse HEAD >> $log_file
+  fi
+  echo "" >> $log_file
+}
+
 #######################################
 #		Main
 #######################################
@@ -874,50 +922,7 @@ check
   finalizeSelection
   finalizeMachine
 
-  echo "" >> $log_file
-  echo "Git Configuration" >> $log_file
-  echo "-----------------" >> $log_file
-  echo "Git (TSMP):" >> $log_file
-  git -C ${rootdir} remote -v >> $log_file
-  git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
-  git -C ${rootdir} rev-parse HEAD >> $log_file
-  if [[ $withOAS == "true" ]] ; then
-      echo "Git (${mList[0]}):" >> $log_file
-      git -C ${rootdir}/${mList[0]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[0]} rev-parse HEAD >> $log_file
-  fi
-  if [[ $withCLM == "true" ]] ; then
-      echo "Git (${mList[1]}):" >> $log_file
-      git -C ${rootdir}/${mList[1]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[1]} rev-parse HEAD >> $log_file
-  fi
-  if [[ $withCOS == "true" ]] ; then
-      echo "Git (${mList[2]}):" >> $log_file
-      git -C ${rootdir}/${mList[2]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
-  fi
-  if [[ $withICON == "true" ]] ; then
-      echo "Git (${mList[2]}):" >> $log_file
-      git -C ${rootdir}/${mList[2]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
-  fi
-  if [[ $withPFL == "true" ]] ; then
-      echo "Git (${mList[3]}):" >> $log_file
-      git -C ${rootdir}/${mList[3]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[3]} rev-parse HEAD >> $log_file
-  fi
-  if [[ $withPDAF == "true" ]] ; then
-      echo "Git (${mList[4]}):" >> $log_file
-      git -C ${rootdir}/${mList[4]} remote -v >> $log_file
-      git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[4]} rev-parse HEAD >> $log_file
-  fi
-  echo "" >> $log_file
+  getGitInfo
 
   runCompilation
 
