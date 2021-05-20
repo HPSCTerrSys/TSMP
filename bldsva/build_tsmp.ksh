@@ -715,59 +715,67 @@ getGitInfo(){
 
   comment "  Log Git information (TSMP)"
     echo "Git (TSMP):" >> $log_file
-    git -C ${rootdir} remote -v >> $log_file
+    git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
     git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir} rev-parse HEAD >> $log_file
+    echo "" >> $log_file
   check
 
   if [[ $withOAS == "true" ]] ; then
     comment "  Write Git information (${mList[0]})"
       echo "Git (${mList[0]}):" >> $log_file
-      git -C ${rootdir}/${mList[0]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
   if [[ $withCLM == "true" ]] ; then
     comment "  Write Git information (${mList[1]})"
       echo "Git (${mList[1]}):" >> $log_file
-      git -C ${rootdir}/${mList[1]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
   if [[ $withCOS == "true" ]] ; then
     comment "  Write Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
-      git -C ${rootdir}/${mList[2]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
   if [[ $withICON == "true" ]] ; then
     comment "  Write Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
-      git -C ${rootdir}/${mList[2]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
   if [[ $withPFL == "true" ]] ; then
     comment "  Write Git information (${mList[3]})"
       echo "Git (${mList[3]}):" >> $log_file
-      git -C ${rootdir}/${mList[3]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
   if [[ $withPDAF == "true" ]] ; then
     comment "  Write Git information (${mList[4]})"
       echo "Git (${mList[4]}):" >> $log_file
-      git -C ${rootdir}/${mList[4]} remote -v >> $log_file
+      git -C ${rootdir}/${mList[4]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[4]} rev-parse HEAD >> $log_file
+      echo "" >> $log_file
     check
   fi
+  echo "----------------------" >> $log_file
   echo "" >> $log_file
 
   route "${cyellow}> getGitInfo${cnormal}"
