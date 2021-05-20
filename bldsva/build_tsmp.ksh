@@ -722,7 +722,7 @@ getGitInfo(){
   check
 
   if [[ $withOAS == "true" ]] ; then
-    comment "  Write Git information (${mList[0]})"
+    comment "  Log Git information (${mList[0]})"
       echo "Git (${mList[0]}):" >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
@@ -731,7 +731,7 @@ getGitInfo(){
     check
   fi
   if [[ $withCLM == "true" ]] ; then
-    comment "  Write Git information (${mList[1]})"
+    comment "  Log Git information (${mList[1]})"
       echo "Git (${mList[1]}):" >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
@@ -740,7 +740,7 @@ getGitInfo(){
     check
   fi
   if [[ $withCOS == "true" ]] ; then
-    comment "  Write Git information (${mList[2]})"
+    comment "  Log Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
@@ -749,7 +749,7 @@ getGitInfo(){
     check
   fi
   if [[ $withICON == "true" ]] ; then
-    comment "  Write Git information (${mList[2]})"
+    comment "  Log Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
@@ -758,7 +758,7 @@ getGitInfo(){
     check
   fi
   if [[ $withPFL == "true" ]] ; then
-    comment "  Write Git information (${mList[3]})"
+    comment "  Log Git information (${mList[3]})"
       echo "Git (${mList[3]}):" >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
@@ -767,7 +767,7 @@ getGitInfo(){
     check
   fi
   if [[ $withPDAF == "true" ]] ; then
-    comment "  Write Git information (${mList[4]})"
+    comment "  Log Git information (${mList[4]})"
       echo "Git (${mList[4]}):" >> $log_file
       git -C ${rootdir}/${mList[4]} rev-parse --absolute-git-dir >> $log_file
       git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
