@@ -767,11 +767,10 @@ getGitInfo(){
     check
   fi
   if [[ $withPDAF == "true" ]] ; then
-    comment "  Log Git information (${mList[4]})"
-      echo "Git (${mList[4]}):" >> $log_file
-      git -C ${rootdir}/${mList[4]} rev-parse --absolute-git-dir >> $log_file
-      git -C ${rootdir}/${mList[4]} rev-parse --abbrev-ref HEAD >> $log_file
-      git -C ${rootdir}/${mList[4]} rev-parse HEAD >> $log_file
+    comment "  Log version information (${mList[4]})"
+      echo "Version (${mList[4]}):" >> $log_file
+      echo ${rootdir}/${mList[4]} >> $log_file
+      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
       echo "" >> $log_file
     check
   fi
