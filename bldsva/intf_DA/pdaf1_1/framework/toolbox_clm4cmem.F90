@@ -66,8 +66,11 @@ module clm4cmem
      real(kind=JPRM) :: orbit
      real(kind=JPRM) :: antenna, azimuth, wavelength
      real(kind=JPRM), allocatable, dimension(:) :: theta, incl_foprt, time
-     real(kind=JPRM), allocatable, dimension(:) :: lon_foprt, lat_foprt
+     real(kind=JPRM), allocatable, dimension(:) :: lon_foprt, lat_foprt,lon,lat
+     ! pixel/polarization/inc/time
      real(kind=JPRM), allocatable, dimension(:,:,:,:) :: TBSAT_HV
+     ! lon/lat/inc/time
+     real(kind=JPRM), allocatable, dimension(:,:,:,:) :: TB_H,TB_V
      character(len=300) :: OrbitFileName
   end type SATELLITE
 
@@ -82,9 +85,10 @@ module clm4cmem
      real, dimension(:), allocatable :: theta
      real, dimension(:), allocatable :: lats, lons, time, levlak, levsoi
      ! 2D variables:
-     real, dimension(:,:), allocatable :: Z, WATER, LSM, CVL, CVH
-     real, dimension(:,:), allocatable :: TVL, TVH, CLAY, SAND
-     real, dimension(:,:), allocatable :: latixy, longxy, slope, aspect
+     real, dimension(:,:), allocatable    :: Z, WATER, LSM, CVL, CVH
+     integer, dimension(:,:), allocatable :: TVL, TVH!, CLAY, SAND
+     real, dimension(:,:), allocatable    :: CLAY, SAND
+     real, dimension(:,:), allocatable    :: latixy, longxy, slope, aspect
      ! 3D variables:
      real, dimension(:,:,:), allocatable :: LAI, theta_inc
      ! 4D variables:
@@ -143,7 +147,7 @@ contains
     Zwe = 0.0_JPRM
     Zwe(1,:) = Z(2,:)-Z(1,:)
     Zwe(Nx,:) = Z(Nx,:)-Z(Nx-1,:)
-    Zwe(2:Nx,:) = (Z(3:Nx,:)-Z(1:Nx-2,:))/2.  ! [km]
+    Zwe(2:Nx-1,:) = (Z(3:Nx,:)-Z(1:Nx-2,:))/2.  ! [km]
     ! Calculating grid South-North grid gradient:
     Zsn = 0.0_JPRM
     Zsn(:,1) = Z(:,2)-Z(:,1)

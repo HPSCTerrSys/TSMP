@@ -43,6 +43,7 @@ REAL(KIND=JPRM) :: N
 REAL(KIND=JPRM) :: sigma, sigma_eff
 REAL(KIND=JPRM) :: tau_w, tau_sw
 REAL(KIND=JPRM) :: eps_w0, eps_sw0, a, bb
+!COMPLEX(KIND=JPRM) :: ew, j
 COMPLEX :: ew, j
 !---------------------------------------------------------------------------
 
@@ -83,8 +84,7 @@ SELECT CASE (medium)
 
   CASE ( 0 ) ! pure water
     eps_w0 = 88.045_JPRM - 0.4147_JPRM * T + 6.295e-4_JPRM * T**2_JPRM + 1.075e-5_JPRM * T**3_JPRM 
-    ew = eps_winf + (eps_w0 - eps_winf) / (1. - j * omega * tau_w)
-    
+    ew = eps_winf + (eps_w0 - eps_winf) / (1._JPRM - j * omega * tau_w)
   CASE ( 1 )
     CALL ION_CONDUCT (T,sal,sigma)
     ! Debye expression '41

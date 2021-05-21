@@ -91,10 +91,6 @@ OBJ_USER_GEN  = init_ens.o \
 		prepoststep_ens_pdaf.o \
 		next_observation_pdaf.o \
 		distribute_state_pdaf.o \
-		collect_state_pdaf.o \
-		init_obs_pdaf.o \
-		mod_read_obs.o \
-		init_dim_obs_pdaf.o \
                 parkind1.o \
                 yomlun_ifsaux.o \
                 yomlun.o abor1.o \
@@ -126,6 +122,10 @@ OBJ_USER_GEN  = init_ens.o \
                 toolbox_rdclmwrcmem.o \
                 rdclm4pdaf.o \
                 cmem_main.o \
+                collect_state_pdaf.o \
+                init_obs_pdaf.o \
+                mod_read_obs.o \
+                init_dim_obs_pdaf.o \
                 obs_op_pdaf.o                
 
 # User-supplied routines for ESTKF/SEIK/ETKF

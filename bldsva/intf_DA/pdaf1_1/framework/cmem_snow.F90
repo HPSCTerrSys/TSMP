@@ -31,7 +31,7 @@ SUBROUTINE CMEM_SNOW(rsn,PDSW,DLUMI,esn)
 ! INPUT:
 ! rsn   = REFLECTIVITY BETWEEN THE SNOW AND GROUND AT (1, H-POL. 2, V.)
 ! TLUMI = TEMPERATURE OF SNOW (DEGREES C)
-! PDSW  = SNOW DENSITY (G/CM^3)
+! PDSW  = SNOW DENSITY (kg/M^3)
 ! DLUMI= THICKNESS OF SNOW LAYER (M)
 ! PPDIAM    = SNOW GRAIN SIZE (DIAMETER) (MM) from field
 ! PPDIAM computed using snow grain size function parameter ZGRAINA & ZGRAINB following:
@@ -50,7 +50,7 @@ USE PARKIND1, ONLY : JPIM, JPRM
 USE YOMCMEMPAR, ONLY : fghz, omega, k, sintheta, costheta, tfreeze, rhowat, pi, LGPRINT
 USE YOMCMEMATM, ONLY : tb_tov
 USE YOMCMEMSOIL, ONLY : eps_winf, eps_0, XMV, tsoil
-
+USE YOMLUN   , ONLY : NULOUT
 IMPLICIT NONE
 
 COMPLEX :: CIM, EPSA, EPSB, EPSC, EPSMARKA, CN2, RF
@@ -60,6 +60,7 @@ INTEGER(KIND=JPIM) :: i
 REAL(KIND=JPRM) :: rsn(2)
 REAL(KIND=JPRM) :: esn(2)
 REAL(KIND=JPRM) :: PICE, Y0
+!REAL(KIND=JPRM),INTENT(IN) :: PDSW,DLUMI
 REAL(KIND=JPRM) :: TLUMI,PDSW,DLUMI
 REAL(KIND=JPRM) :: PPDIAM 
 REAL(KIND=JPRM), PARAMETER :: PPQ2MOD = 0.96
@@ -81,6 +82,10 @@ REAL(KIND=JPRM), PARAMETER      :: ZGRAINB = 1.1e-13
 
 COMPLEX :: eps_ice
 !------------------------------------------------------------------------------
+! LSN: SNOW DENSITY transfer from (kg/m^3) to (G/CM^3) 
+PDSW = PDSW/1000.
+
+IF (LGPRINT) WRITE(*,*) 'cmem_snow:',rsn,PDSW,DLUMI
 
 ! snow temperature [C] set equal to the surface soil temperature
 TLUMI = tsoil(1)-tfreeze

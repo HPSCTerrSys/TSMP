@@ -58,24 +58,21 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   ! !USES:
   USE mod_assimilation, &
        ONLY: obs_index_p, local_dims_obs, obs_id_p, m_id_f, &
-       var_id_obs, dim_obs_p, dim_obs,obs_filename,obs_index_p_TB
+       var_id_obs, dim_obs_p, dim_obs,obs_filename,obs_index_p_TB,&
+       ens_TB,member_TB
   USE mod_parallel_pdaf, &
        ONLY: mype_filter, npes_filter, comm_filter, &
              n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter, &
-             MPI_DOUBLE, MPI_DOUBLE_PRECISION, MPI_INT,MPI_SUM
+             MPI_DOUBLE, MPI_DOUBLE_PRECISION, MPI_INT,MPI_SUM,&
+             MPI_INTEGER,filterpe,MPI_SUCCESS,mype_couple
   
   ! LSN: module load for the implementation of CMEM model 
   use mod_parallel_model, &
         only: model,mype_model,npes_model,mype_world,npes_world
   use mod_tsmp, &
-        only: tag_model_clm,nprocpf
+        only: tag_model_clm,nprocpf,nprocclm,lcmem !SPo add lcmem
   USE spmdMod      , only: masterproc,iam,mpicom,npes
-  use clm4cmem     , only: SATELLITE,CLM_DATA
-  USE rdclm4pdaf   , only: read_CLM_pdaf
-  USE get_tb_cmem  , only: cmem_main
-  USE rdclm_wrcmem , only: read_satellite_info
-  USE YOMCMEMPAR   , only: INPUTNAMLST,LGPRINT
-
+  
   IMPLICIT NONE
 
   ! !ARGUMENTS:
@@ -92,18 +89,17 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   !EOP
 
   ! local variables
-  INTEGER :: ierror, max_var_id
-  INTEGER :: i,nerror                  ! Counter
-  REAL, ALLOCATABLE :: m_state_tmp(:)  ! Temporary process-local state vector
-  INTEGER, ALLOCATABLE :: local_dis(:) ! Displacement array for gathering
-  INTEGER, ALLOCATABLE :: m_id_p_tmp(:)
-  INTEGER, ALLOCATABLE :: m_id_f_tmp(:)
+  INTEGER                     :: ierror, max_var_id
+  INTEGER                     :: i,nerror,j,nproc      ! Counter
+  REAL, ALLOCATABLE           :: m_state_tmp(:)! Temporary process-local state vector
+  INTEGER, ALLOCATABLE        :: local_dis(:)  ! Displacement array for gathering
+  INTEGER, ALLOCATABLE        :: m_id_p_tmp(:)
+  INTEGER, ALLOCATABLE        :: m_id_f_tmp(:)
   
-  CHARACTER*200:: inparam_fname
-  TYPE(SATELLITE),ALLOCATABLE :: SAT
-  TYPE(CLM_DATA),ALLOCATABLE :: CLMVARS
-  REAL,DIMENSION(1) :: TB(dim_obs)
-  CHARACTER (len = 110) :: current_observation_filename
+  CHARACTER*200               :: inparam_fname
+  REAL,DIMENSION(1)           :: TB(dim_obs)
+  REAL,ALLOCATABLE            :: ens_TB_tmp(:,:)
+  CHARACTER (len = 110)       :: OBSFILE
   ! *********************************************
   ! *** Perform application of measurement    ***
   ! *** operator H on vector or matrix column ***
@@ -117,49 +113,65 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   allocate(m_id_f(dim_obs_f))
   if(allocated(m_id_f_tmp)) deallocate(m_id_f_tmp)
   allocate(m_id_f_tmp(dim_obs_f))
-
-  !DO i = 1, local_dims_obs(mype_filter+1)
-  !   m_state_tmp(i) = state_p(obs_index_p(i))
-  !   m_id_p_tmp(i)  = obs_id_p(obs_index_p(i))
-  !END DO
   
-  ! LSN: the implementation of CMEM model here
-   IF (model == tag_model_clm) THEN
-     
-     allocate(CLMVARS)  ! assign CLMVARS array
-     inparam_fname = './obs/input'
-     INPUTNAMLST   = trim(inparam_fname)
-     
-     LGPRINT = .False.
-       
-     write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
-     write(*,*) 'The current observation file is ', current_observation_filename
-     allocate(SAT)  !assign SAT array
-     call read_satellite_info(current_observation_filename,SAT)
+  IF (lcmem) THEN
 
-     call read_CLM_pdaf(LS=CLMVARS,SAT=SAT)
-     WRITE(*,*) 'Read CLM memory is done'
-     
-     IF (masterproc) THEN      
-        call cmem_main(LS=CLMVARS,SATinfo=SAT,TB=TB,step=step)    
-     END IF
-     
-  END IF
-  
-  CALL MPI_Barrier(COMM_filter, nerror) 
+   CALL MPI_Barrier(COMM_filter, nerror)
+   ! if (model == tag_model_clm) then
 
-  !Broadcasts brightness temperature (TB) from the master process to all
-  !other processes of COMM_filter
-  CALL MPI_Bcast(TB, dim_obs, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter,nerror)
-  
-  DO i = 1, dim_obs_p
-     m_state_tmp(i)  = TB(obs_index_p_TB(i))
-     m_id_p_tmp(i)   = obs_id_p(obs_index_p_TB(i))
-  END DO
+      if(.not.allocated(ens_TB_tmp)) ALLOCATE(ens_TB_tmp(dim_obs,n_modeltasks))
+      if(.not.allocated(ens_TB)) ALLOCATE(ens_TB(dim_obs,n_modeltasks))
+      if(.not.allocated(member_TB)) then
+         ALLOCATE(member_TB(nprocpf+nprocclm))
+         do i = 1, nprocpf+nprocclm
+            member_TB(i) = 1
+         end do
+      end if
+
+      ! LSN: Broadcasts brightness temperature ensemble (ens_TB) from 
+      ! the master process to all other processes of COMM_filter   
+      CALL MPI_Bcast(ens_TB, dim_obs*n_modeltasks, MPI_DOUBLE_PRECISION,&
+                    nprocpf, COMM_filter, nerror)
+      IF (mype_filter == nprocpf.AND.member_TB(1)==1) THEN
+         write(*,*) 'obs_op_pdaf: ens_TB is', ens_TB
+      END IF
+
+      DO i = 1, dim_obs
+         DO j = 1, n_modeltasks
+            ens_TB_tmp(i,j) = ens_TB(i,j)
+         END DO
+      END DO
+
+      DO i = 1, dim_obs
+         TB(i) = ens_TB_tmp(i,member_TB(mype_filter+1))
+      END DO
+
+      ! LSN: member_TB is a set of counter for member loop
+      IF (member_TB(mype_filter+1) == n_modeltasks) THEN
+         member_TB(mype_filter+1) = 1
+      ELSE
+         member_TB(mype_filter+1) = member_TB(mype_filter+1)+1
+      END IF
+
+      ! LSN: assign ens_TB instead of state_p to m_state_p
+      DO i = 1,  local_dims_obs(mype_filter+1)
+         m_state_tmp(i)  = TB(obs_index_p_TB(i))
+         m_id_p_tmp(i)   = obs_id_p(obs_index_p_TB(i))
+      END DO
  
-  IF (ALLOCATED(SAT)) DEALLOCATE(SAT)
-  IF (ALLOCATED(CLMVARS)) DEALLOCATE(CLMVARS)
-  ! LSN: the end of the implementation of CMEM model here
+
+      IF (ALLOCATED(ens_TB_tmp)) DEALLOCATE(ens_TB_tmp)
+      !LSN: the end of the implementation of CMEM model here
+   CALL MPI_Barrier(COMM_filter, nerror)
+
+ ELSE
+    ! point observations
+    ! LSN: the original observation operator of soil moisture in Parflow 
+    DO i = 1, local_dims_obs(mype_filter+1)
+       m_state_tmp(i) = state_p(obs_index_p(i))
+       m_id_p_tmp(i)  = obs_id_p(obs_index_p(i))
+    END DO
+ END IF
  
   ! Gather full observed state
   ALLOCATE(local_dis(npes_filter))

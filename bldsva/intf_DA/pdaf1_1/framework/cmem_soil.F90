@@ -70,8 +70,8 @@ REAL,ALLOCATABLE   ::tlv(:)
 REAL,ALLOCATABLE   ::zlv(:)
 REAL,ALLOCATABLE   ::wclv(:)
 
-COMPLEX(KIND=JPRM) :: ew, j
-
+!COMPLEX(KIND=JPRM) :: ew, j
+COMPLEX :: ew, j
 !------------------------------------------------------------------------------
 ! 0.0 Initialize
 !------------------------------------------------------------------------------
@@ -103,6 +103,7 @@ ALLOCATE (wclv(nlay_soil_ls))
 zsoil(1) = z_lsm(1)
 tsoil(1) = ftl_lsm(JJ,1) 
 wcsoil(1) = fwc_lsm(JJ,1)
+!IF(JJ==2500.or.JJ==2499) WRITE(*,*) 'cmem_soil 1:',JJ,fwc_lsm(JJ,1),fsand(JJ),fclay(JJ),frho_b(JJ),fp(JJ),fsal_wat(JJ),z_lsm(1),ftl_lsm(JJ,1)
 
 IF (nlay_soil_mw > 1) THEN
 ! OLD interpol adapted to arrays for lsm and mw, but still not flexible (and still wrong...)
@@ -186,7 +187,8 @@ DO jls = 1, nlay_soil_ls
       zlv(jls)  = z_lsm(jls)
 ENDDO
 
-
+!IF(JJ==2500.or.JJ==2499) WRITE(*,*) 'cmem_soil 2:',JJ,wcsoil,tsoil,zsoil
+!IF(JJ==2500.or.JJ==2499) WRITE(*,*) 'cmem_soil 3:',JJ,wclv,tlv,zlv
 ! 2. Compute Smooth Surface Reflectivity of surface
 !    -----------------------------------------------
 TILE: SELECT CASE (JCMEMTILE)  
@@ -207,16 +209,18 @@ TILE: SELECT CASE (JCMEMTILE)
     SELECT CASE ( ((t_eff(2)-tfreeze) < -0.5) )
       CASE ( .TRUE. )  ! water is pure ice
         CALL DIEL_ICE (t_eff(2),ew)
+        IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil 2A.0:',ew
       CASE DEFAULT
-        medium = 1
+        medium = 2
         isal = 2
+        IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil Lv 2A.1:',ew,t_eff(2),sal_wat
         CALL DIEL_WAT (medium,isal,t_eff(2)-tfreeze,sal_wat,ew)
     END SELECT
-      
+     IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil Lv 2A.3:', ew 
     ! 2A.3. Compute Smooth Surface Reflectivity
     CALL FRESNEL (ew)           
 IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil 2A.3:', ew,t_eff(:)
-    
+IF (LGPRINT) WRITE(NULOUT,*) '--- it is water body, REFLSOL :',r_s(:)
 ! 2B. Soil tiles
 !------------------------------------------------------------------------------
   CASE ( :6 ) TILE
@@ -284,7 +288,7 @@ IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil 2A.3:', ew,t_eff(:)
      ENDIF
      eps = eps * (1.-frostfrac) + ef * frostfrac 
      eps_soil(JLAYER) = eps
-     
+!IF(JJ==2500.or.JJ==2499) WRITE(*,*) 'cmem_soil 4:',JJ,eps_soil,frostfrac,wc,tc     
   ENDDO
 
   ! 2B.3. Compute Smooth Surface Reflectivity
@@ -299,6 +303,7 @@ IF (LGPRINT) WRITE(NULOUT,*) '--- cmem soil 2A.3:', ew,t_eff(:)
 
 IF (LGPRINT) WRITE(NULOUT,*) '--- REFLSOL :',r_s(:)
 IF (LGPRINT) WRITE(NULOUT,*) '--- TEFF cmem soil 2B.3 :',t_eff(:)
+!IF(JJ==2500.or.JJ==2499) WRITE(*,*) 'cmem_soil 5:',JJ,eps_soil(1),r_s(:)
 END SELECT TILE 
 !------------------------------------------------------------------------------
 

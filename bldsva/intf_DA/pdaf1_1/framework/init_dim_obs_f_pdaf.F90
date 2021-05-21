@@ -276,11 +276,13 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 #endif
 
   IF (ALLOCATED(obs_index_p)) DEALLOCATE(obs_index_p)
+  IF (ALLOCATED(obs_index_p_TB)) DEALLOCATE(obs_index_p_TB)
   IF (ALLOCATED(obs_p)) DEALLOCATE(obs_p)
   IF (ALLOCATED(obs)) DEALLOCATE(obs)
   IF (ALLOCATED(var_id_obs)) DEALLOCATE(var_id_obs)  
   ALLOCATE(obs(dim_obs))
   ALLOCATE(obs_index_p(dim_obs_p))
+  ALLOCATE(obs_index_p_TB(dim_obs_p))
   ALLOCATE(obs_p(dim_obs_p))
   IF(point_obs.eq.0) ALLOCATE(var_id_obs(dim_obs_p))
 
@@ -399,6 +401,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
            do j = begg,endg
               if((longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k))) then
                  obs_index_p(count) = k 
+                 obs_index_p_TB(count) = k !LSN: only for TB
                  obs_p(count) = clm_obs(i)
                  var_id_obs(count) = var_id_obs_nc(l,m)
                  if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)

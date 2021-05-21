@@ -126,6 +126,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   INTEGER :: COMM_ensemble      ! Communicator of all PEs doing model tasks
   INTEGER :: mype_ens, npes_ens ! rank and size in COMM_ensemble
   INTEGER :: mype_couple, npes_couple ! Rank and size in COMM_couple
+  !INTEGER :: mype_couple, npes_couple ! Rank and size in COMM_couple
   INTEGER :: pe_index           ! Index of PE
   INTEGER :: my_color, color_couple ! Variables for communicator-splitting 
   LOGICAL :: iniflag            ! Flag whether MPI is initialized

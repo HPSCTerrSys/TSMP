@@ -52,7 +52,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 !
 ! !USES:
   USE mod_assimilation, &
-       ONLY: delt_obs
+       ONLY: delt_obs,step_TB
   USE mod_parallel_model, &
        ONLY: mype_world, total_steps
   USE mod_assimilation, &
@@ -85,6 +85,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
   !kuw: check, for observation file with at least 1 observation
   counter = stepnow
+  !step_TB = stepnow 
   !nsteps  = 0
   write(*,*) 'total_steps (in next_observation_pdaf): ',total_steps
   do
@@ -98,8 +99,9 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   nsteps = counter - stepnow
   write(*,*)'stepnow (in next_observation_pdaf):',stepnow
   write(*,*)'no_obs, nsteps, counter (in next_observation_pdaf): ',no_obs,nsteps,counter
+  step_TB = counter
   !kuw end
-
+ 
 
 
 

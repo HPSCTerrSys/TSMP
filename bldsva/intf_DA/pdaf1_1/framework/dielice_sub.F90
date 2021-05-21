@@ -24,13 +24,16 @@ SUBROUTINE DIEL_ICE (T,eps_ice)
 !---------------------------------------------------------------------------
 
 USE YOMCMEMPAR, ONLY : fghz, tfreeze, LGPRINT
+USE YOMLUN   , ONLY : NULOUT
+USE PARKIND1  ,ONLY : JPIM,JPRM
 
 IMPLICIT NONE
 
-REAL :: T
+REAL(KIND = JPRM),INTENT(IN) :: T
 REAL :: B1, B2, BB, DELTABETA, BETAM, BETA,THETA,ALFA
 REAL :: eir
-COMPLEX :: eps_ice, E
+COMPLEX :: E
+COMPLEX, INTENT(OUT):: eps_ice
 !---------------------------------------------------------------------------
 
 E=(0.,1.)
@@ -48,7 +51,7 @@ ALFA = (0.00504 + 0.0062 * THETA) * EXP(-22.1 * THETA)
 
 ! -------- REAL PART OF ICE EPSILON 
 eir = 3.1884 + 9.1e-4 * (T-tfreeze)
-
+IF (LGPRINT) WRITE(NULOUT,*) 'diel_ice: the input soil temperature is ',T
 eps_ice = eir - E*(ALFA/fghz + BETA *fghz)
    
 END SUBROUTINE DIEL_ICE

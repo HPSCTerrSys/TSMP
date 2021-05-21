@@ -306,6 +306,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               !obs_index_p(count) = j + (size(lon) * (clmobs_layer(i)-1))
               !obs_index_p(count) = j + ((endg-begg+1) * (clmobs_layer(i)-1))
               obs_index_p(count) = j-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+              obs_index_p_TB(count) = j-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1)) !LSN: only for TB
               !write(*,*) 'obs_index_p(',count,') is',obs_index_p(count)
               obs_p(count) = clm_obs(i)
               if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)

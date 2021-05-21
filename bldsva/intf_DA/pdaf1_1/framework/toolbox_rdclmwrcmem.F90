@@ -14,21 +14,29 @@ contains
   ! UNIVERSITY OF BONN, GERMANY
   ! See LICENCE
   ! ---------------------------------------------------------------
-  subroutine write_satellite_operator(SAT,OUT_fname,nc_out)
-    use clm4cmem, only : SATELLITE
+  subroutine write_satellite_operator(SAT,CLMVARS,OUT_fname,nc_out)
+    use clm4cmem, only : SATELLITE,CLM_DATA
     implicit none
     ! INPUT VARIABLES:
-    type(SATELLITE), intent(in) :: SAT
+    type(SATELLITE), intent(in)  :: SAT
+    type(CLM_DATA),  intent(in)  :: CLMVARS
     character(len=*), intent(in) :: OUT_fname
     character(len=*), optional, intent(in) :: nc_out
 
     ! Local VARIABLES
     character (len=:), allocatable :: nc_path_out
     integer :: I, J, idxstr ! JJ, N
-    integer :: pix_dimid, lon_varid, lat_varid, time_dimid, inc_dimid
-    integer :: wrncid, inc_varid, t_varid, tbh_varid, tbv_varid
-    integer :: NPIX, NLONS, NLATS, NTIME, NINC
-    integer :: tb_dimid(3)
+    integer :: pix_dimid,lon_varid,lat_varid,time_dimid,inc_dimid,lev_dimid
+    integer :: glon_varid,glat_varid,lat_dimid,lon_dimid
+    integer :: wrncid, inc_varid, t_varid, tbh_varid,&
+                  tbv_varid,gtbh_varid,gtbv_varid
+    integer :: gsm_varid,gst_varid,gsd_varid,gRSN_varid,gtskin_varid, &
+                  ginci_varid,gz_varid, gsand_varid,gclay_varid,gcvh_varid,&
+                  gcvl_varid,gtair_varid,gtvh_varid,gtvl_varid,glsm_varid,&
+                  gwater_varid,glai_varid,gslope_varid,gaspect_varid
+    integer :: NPIX, NLONS, NLATS, NTIME, NINC,NLEV
+    integer :: tb_dimid(4),SAT_tb_dimid(3),&
+                  f4D_dimid(4),f3D_dimid(3),f2D_dimid(2)
     integer :: datum_uhrzeit(8)
     character (len=21) ::DATESTRING
     character (len = *), parameter :: UNITS = "units"
@@ -40,9 +48,13 @@ contains
     character (len =100) :: FILETMP
 
     ! Populating variables:
-    NPIX = size(SAT%lon_foprt) ! should be same with lat_foprt
+    NPIX  = size(SAT%lon_foprt) ! should be same with lat_foprt
     NINC  = size(SAT%theta)
     NTIME = size(SAT%time)
+    NLONS = size(SAT%lon)
+    NLATS = size(SAT%lat)
+    NLEV  = size(CLMVARS%levsoi)
+    
     IF(.not.present(nc_out)) THEN
        nc_path_out = './'
     ELSE
@@ -54,17 +66,19 @@ contains
     ! -----------------------------------------------------------------
     ! Create the file.
     if (SHOWINFO) print*, "Creating satellite_output NetCDF"
+      
     call check( nf90_create(nc_path_out//trim(OUT_fname), nf90_clobber, wrncid))
     ! Define the dimensions.
     call check( nf90_def_dim(wrncid, "NPIXEL", NPIX, pix_dimid))
-    !!call check( nf90_def_dim(wrncid, "LONGITUDE", NLONS, lon_dimid))
-    !!call check( nf90_def_dim(wrncid, "LATITUDE", NLATS, lat_dimid))
+    call check( nf90_def_dim(wrncid, "GRIDLONG", NLONS, lon_dimid))
+    call check( nf90_def_dim(wrncid, "GRIDLAT", NLATS, lat_dimid))
     call check( nf90_def_dim(wrncid, "INC_ANGLE", NINC, inc_dimid))
     call check( nf90_def_dim(wrncid, "TIME", NTIME, time_dimid))
+    call check( nf90_def_dim(wrncid, "LEVEL", NLEV, lev_dimid))
 
     ! Define the variable
     call check( nf90_def_var(wrncid, "LONGITUDE", NF90_REAL,pix_dimid,lon_varid))
-    call check( nf90_put_att(wrncid, lon_varid, LONG_NAME, "Longitud"))
+    call check( nf90_put_att(wrncid, lon_varid, LONG_NAME, "Longitude"))
     call check( nf90_put_att(wrncid, lon_varid, SHORT_NAME, "lon"))
     call check( nf90_put_att(wrncid, lon_varid, UNITS, "degrees_east"))
 
@@ -84,8 +98,8 @@ contains
     call check( nf90_put_att(wrncid, t_varid, UNITS, "hour"))
 
     ! * Satellite Brightness temperatures H-pol
-    tb_dimid = (/ pix_dimid, inc_dimid, time_dimid /)
-    call check( nf90_def_var(wrncid, "TBSAT_H", NF90_REAL,tb_dimid,tbh_varid))
+    SAT_tb_dimid = (/ pix_dimid, inc_dimid, time_dimid /)
+    call check( nf90_def_var(wrncid, "TBSAT_H", NF90_REAL,SAT_tb_dimid,tbh_varid))
     call check( nf90_put_att(wrncid, tbh_varid, LONG_NAME, "Brightness Temperature H-pol"))
     call check( nf90_put_att(wrncid, tbh_varid, SHORT_NAME, "TB_H"))
     call check( nf90_put_att(wrncid, tbh_varid, UNITS, "K"))
@@ -93,36 +107,220 @@ contains
     !call check( nf90_put_att(wrncid, tbh_varid, VALID_RA, (/0.,400./)))
     !call check( nf90_put_att(wrncid, tbh_varid, FILL_VAL, NF90_FILL_REAL))
     ! * Satellite Brightness temperatures V-pol
-    call check( nf90_def_var(wrncid, "TBSAT_V", NF90_REAL,tb_dimid,tbv_varid))
+    call check( nf90_def_var(wrncid, "TBSAT_V", NF90_REAL,SAT_tb_dimid,tbv_varid))
     call check( nf90_put_att(wrncid, tbv_varid, LONG_NAME, "Brightness Temperature V-pol"))
     call check( nf90_put_att(wrncid, tbv_varid, SHORT_NAME, "TB_V"))
     call check( nf90_put_att(wrncid, tbv_varid, UNITS, "K"))
     call check( nf90_put_att(wrncid, tbv_varid, MISS_VAL, -99.))
     !call check( nf90_put_att(wrncid, tbv_varid, VALID_RA, (/0.,400./)))
     !call check( nf90_put_att(wrncid, tbv_varid, FILL_VAL, NF90_FILL_REAL))
+
+    ! * Grid Satellite Brightness temperatures H-pol
+    tb_dimid = (/ lon_dimid,lat_dimid,inc_dimid, time_dimid /)
+    call check( nf90_def_var(wrncid, "TB_H",NF90_REAL,tb_dimid,gtbh_varid))
+    call check( nf90_put_att(wrncid, gtbh_varid, LONG_NAME, "Grid Brightness Temperature H-pol"))
+    call check( nf90_put_att(wrncid, gtbh_varid, SHORT_NAME, "gTB_H"))
+    call check( nf90_put_att(wrncid, gtbh_varid, UNITS, "K"))
+    call check( nf90_put_att(wrncid, gtbh_varid, MISS_VAL, -99.))
+    ! * Grid Satellite Brightness temperatures V-pol
+    call check( nf90_def_var(wrncid, "TB_V",NF90_REAL,tb_dimid,gtbv_varid))
+    call check( nf90_put_att(wrncid, gtbv_varid, LONG_NAME, "Grid Brightness Temperature V-pol"))
+    call check( nf90_put_att(wrncid, gtbv_varid, SHORT_NAME, "gTB_V"))
+    call check( nf90_put_att(wrncid, gtbv_varid, UNITS, "K"))
+    call check( nf90_put_att(wrncid, gtbv_varid, MISS_VAL, -99.))
+    
+    f4D_dimid = (/ lon_dimid,lat_dimid,lev_dimid,time_dimid /)
+    f3D_dimid = (/ lon_dimid,lat_dimid,time_dimid /)
+    f2D_dimid = (/ lon_dimid,lat_dimid /)
+    ! * Grid longitude
+    call check( nf90_def_var(wrncid, "GRIDSLONG",NF90_REAL,f2D_dimid,glon_varid))
+    call check( nf90_put_att(wrncid, glon_varid, LONG_NAME, "Grids Longitude"))
+    call check( nf90_put_att(wrncid, glon_varid, SHORT_NAME, "glon"))
+    call check( nf90_put_att(wrncid, glon_varid, UNITS, "degrees_east"))
+    ! * Grid latitude
+    call check( nf90_def_var(wrncid, "GRIDSLAT", NF90_REAL,f2D_dimid,glat_varid))
+    call check( nf90_put_att(wrncid, glat_varid, LONG_NAME, "Grids Latitude"))
+    call check( nf90_put_att(wrncid, glat_varid, SHORT_NAME, "glat"))
+    call check( nf90_put_att(wrncid, glat_varid, UNITS, "degrees_north"))
+    ! * Grid soil moisture
+    call check( nf90_def_var(wrncid, "H2OSOI",NF90_REAL,f4D_dimid,gsm_varid))
+    call check( nf90_put_att(wrncid, gsm_varid, LONG_NAME, "soil moisture"))
+    call check( nf90_put_att(wrncid, gsm_varid, SHORT_NAME, "SWVL"))
+    call check( nf90_put_att(wrncid, gsm_varid, UNITS, "%/%"))
+    call check( nf90_put_att(wrncid, gsm_varid, MISS_VAL, -99.))
+    ! * Grid soil temperature
+    call check( nf90_def_var(wrncid, "TSOI",NF90_REAL,f4D_dimid,gst_varid))
+    call check( nf90_put_att(wrncid, gst_varid, LONG_NAME, "soil temperature"))
+    call check( nf90_put_att(wrncid, gst_varid, SHORT_NAME, "STL"))
+    call check( nf90_put_att(wrncid, gst_varid, UNITS, "K"))
+    call check( nf90_put_att(wrncid, gst_varid, MISS_VAL, -99.))
+    ! * Grid snow depth
+    call check( nf90_def_var(wrncid, "SNOWDEPTH",NF90_REAL,f3D_dimid,gsd_varid))
+    call check( nf90_put_att(wrncid, gsd_varid, LONG_NAME, "snow depth"))
+    call check( nf90_put_att(wrncid, gsd_varid, SHORT_NAME, "SD"))
+    call check( nf90_put_att(wrncid, gsd_varid, UNITS, "m"))
+    call check( nf90_put_att(wrncid, gsd_varid, MISS_VAL, -99.))
+    ! * Grid RSN
+    call check( nf90_def_var(wrncid, "RSN",NF90_REAL,f3D_dimid,gRSN_varid))
+    call check( nf90_put_att(wrncid, gRSN_varid, LONG_NAME, "RSN"))
+    call check( nf90_put_att(wrncid, gRSN_varid, SHORT_NAME, "RSN"))
+    call check( nf90_put_att(wrncid, gRSN_varid, UNITS, "unitless"))
+    call check( nf90_put_att(wrncid, gRSN_varid, MISS_VAL, -99.))
+    ! * Grid skin temperature
+    call check( nf90_def_var(wrncid, "TSKIN",NF90_REAL,f3D_dimid,gtskin_varid))
+    call check( nf90_put_att(wrncid, gtskin_varid, LONG_NAME, "soil skin temperature"))
+    call check( nf90_put_att(wrncid, gtskin_varid, SHORT_NAME, "TSKIN"))
+    call check( nf90_put_att(wrncid, gtskin_varid, UNITS, "K"))
+    call check( nf90_put_att(wrncid, gtskin_varid, MISS_VAL, -99.))
+    ! * Grid clay fraction
+    call check( nf90_def_var(wrncid, "CLAY",NF90_REAL,f3D_dimid,gclay_varid))
+    call check( nf90_put_att(wrncid, gclay_varid, LONG_NAME, "clay fraction"))
+    call check( nf90_put_att(wrncid, gclay_varid, SHORT_NAME, "CLAY"))
+    call check( nf90_put_att(wrncid, gclay_varid, UNITS, "%"))
+    call check( nf90_put_att(wrncid, gclay_varid, MISS_VAL, -99.))
+    ! * Grid sand fraction
+    call check( nf90_def_var(wrncid, "SAND",NF90_REAL,f3D_dimid,gsand_varid))
+    call check( nf90_put_att(wrncid, gsand_varid, LONG_NAME, "sand fraction"))
+    call check( nf90_put_att(wrncid, gsand_varid, SHORT_NAME, "SAND"))
+    call check( nf90_put_att(wrncid, gsand_varid, UNITS, "%"))
+    call check( nf90_put_att(wrncid, gsand_varid, MISS_VAL, -99.))
+    ! * Grid coverage of high vegetation
+    call check( nf90_def_var(wrncid, "CVH",NF90_REAL,f3D_dimid,gcvh_varid))
+    call check( nf90_put_att(wrncid, gcvh_varid, LONG_NAME, "coverage of high vegetation"))
+    call check( nf90_put_att(wrncid, gcvh_varid, SHORT_NAME, "CVH"))
+    call check( nf90_put_att(wrncid, gcvh_varid, UNITS, "binary"))
+    call check( nf90_put_att(wrncid, gcvh_varid, MISS_VAL, -99.))
+    ! * Grid coverage of low vegetation
+    call check( nf90_def_var(wrncid, "CVL",NF90_REAL,f3D_dimid,gcvl_varid))
+    call check( nf90_put_att(wrncid, gcvl_varid, LONG_NAME, "coverage of low vegetation"))
+    call check( nf90_put_att(wrncid, gcvl_varid, SHORT_NAME, "CVL"))
+    call check( nf90_put_att(wrncid, gcvl_varid, UNITS, "binary"))
+    call check( nf90_put_att(wrncid, gcvl_varid, MISS_VAL, -99.))
+    ! * Grid type of high vegetation
+    call check( nf90_def_var(wrncid, "TVH",NF90_REAL,f3D_dimid,gtvh_varid))
+    call check( nf90_put_att(wrncid, gtvh_varid, LONG_NAME, "type of high vegetation"))
+    call check( nf90_put_att(wrncid, gtvh_varid, SHORT_NAME, "TVH"))
+    call check( nf90_put_att(wrncid, gtvh_varid, UNITS, "index"))
+    call check( nf90_put_att(wrncid, gtvh_varid, MISS_VAL, -99.))
+    ! * Grid type of low vegetation
+    call check( nf90_def_var(wrncid, "TVL",NF90_REAL,f3D_dimid,gtvl_varid))
+    call check( nf90_put_att(wrncid, gtvl_varid, LONG_NAME, "type of low vegetation"))
+    call check( nf90_put_att(wrncid, gtvl_varid, SHORT_NAME, "TVL"))
+    call check( nf90_put_att(wrncid, gtvl_varid, UNITS, "index"))
+    call check( nf90_put_att(wrncid, gtvl_varid, MISS_VAL, -99.))
+    ! * Grid land coverage
+    call check( nf90_def_var(wrncid, "LSM",NF90_REAL,f3D_dimid,glsm_varid))
+    call check( nf90_put_att(wrncid, glsm_varid, LONG_NAME, "land coverage"))
+    call check( nf90_put_att(wrncid, glsm_varid, SHORT_NAME, "LSM"))
+    call check( nf90_put_att(wrncid, glsm_varid, UNITS, "binary"))
+    call check( nf90_put_att(wrncid, glsm_varid, MISS_VAL, -99.))
+    ! * Grid water coverage
+    call check( nf90_def_var(wrncid, "WATER",NF90_REAL,f3D_dimid,gwater_varid))
+    call check( nf90_put_att(wrncid, gwater_varid, LONG_NAME, "water coverage"))
+    call check( nf90_put_att(wrncid, gwater_varid, SHORT_NAME, "WATER"))
+    call check( nf90_put_att(wrncid, gwater_varid, UNITS, "binary"))
+    call check( nf90_put_att(wrncid, gwater_varid, MISS_VAL, -99.))
+    ! * Grid leaf area index
+    call check( nf90_def_var(wrncid, "LAI",NF90_REAL,f3D_dimid,glai_varid))
+    call check( nf90_put_att(wrncid, glai_varid, LONG_NAME, "leaf area index"))
+    call check( nf90_put_att(wrncid, glai_varid, SHORT_NAME, "LAI"))
+    call check( nf90_put_att(wrncid, glai_varid, UNITS, "index"))
+    call check( nf90_put_att(wrncid, glai_varid, MISS_VAL, -99.))
+    ! * Grid 2 meter air temperature
+    call check( nf90_def_var(wrncid, "TAIR",NF90_REAL,f3D_dimid,gtair_varid))
+    call check( nf90_put_att(wrncid, gtair_varid, LONG_NAME, "2 meter air temperature"))
+    call check( nf90_put_att(wrncid, gtair_varid, SHORT_NAME, "TAIR"))
+    call check( nf90_put_att(wrncid, gtair_varid, UNITS, "K"))
+    call check( nf90_put_att(wrncid, gtair_varid, MISS_VAL, -99.))
+    ! * Grid incidence angle
+    call check( nf90_def_var(wrncid, "INCIDENCE",NF90_REAL,f3D_dimid,ginci_varid))
+    call check( nf90_put_att(wrncid, ginci_varid, LONG_NAME, "incidence angel"))
+    call check( nf90_put_att(wrncid, ginci_varid, SHORT_NAME, "INCI"))
+    call check( nf90_put_att(wrncid, ginci_varid, UNITS, "degree"))
+    call check( nf90_put_att(wrncid, ginci_varid, MISS_VAL, -99.))
+     ! * Grid geopotential height
+    call check( nf90_def_var(wrncid,"Geopotential height",NF90_REAL,f3D_dimid,gz_varid))
+    call check( nf90_put_att(wrncid, gz_varid, LONG_NAME, "Geopotential height"))
+    call check( nf90_put_att(wrncid, gz_varid, SHORT_NAME, "Z"))
+    call check( nf90_put_att(wrncid, gz_varid, UNITS, "km"))
+    call check( nf90_put_att(wrncid, gz_varid, MISS_VAL, -99.))
+    ! * Grid slope
+    call check( nf90_def_var(wrncid,"SLOPE",NF90_REAL,f3D_dimid,gslope_varid))
+    call check( nf90_put_att(wrncid, gslope_varid, LONG_NAME, "slope"))
+    call check( nf90_put_att(wrncid, gslope_varid, SHORT_NAME, "SLOPE"))
+    call check( nf90_put_att(wrncid, gslope_varid, UNITS, "Hellingsgraad"))
+    call check( nf90_put_att(wrncid, gslope_varid, MISS_VAL, -99.))
+     ! * Grid aspect
+    call check( nf90_def_var(wrncid,"ASPECT",NF90_REAL,f3D_dimid,gaspect_varid))
+    call check( nf90_put_att(wrncid, gaspect_varid, LONG_NAME, "aspect"))
+    call check( nf90_put_att(wrncid, gaspect_varid, SHORT_NAME, "ASPECT"))
+    call check( nf90_put_att(wrncid, gaspect_varid, UNITS, "NaN"))
+    call check( nf90_put_att(wrncid, gaspect_varid, MISS_VAL, -99.))
+
+
     ! Putting global attributes
     call check( nf90_put_att(wrncid, NF90_GLOBAL, "title", "Satellite TB_HV"))
     call check( nf90_put_att(wrncid, NF90_GLOBAL, "orbit", trim(SAT%OrbitFileName)))
     call check( nf90_put_att(wrncid, NF90_GLOBAL, "sensor",trim(SAT%name)))
     call check( nf90_put_att(wrncid, NF90_GLOBAL, "creation",DATESTRING))
-    call check( nf90_put_att(wrncid, NF90_GLOBAL, "contact","pablosaa@uni-bonn.de"))
+    call check( nf90_put_att(wrncid, NF90_GLOBAL, "contact","slvv@uni-bonn.de"))
 
     call check(nf90_enddef(wrncid))  ! End of definition
 
-    ! Putting the values in variables
+    !call check( nf90_put_var(wrncid, lon_dimid, SAT%lon))
+    !call check( nf90_put_var(wrncid, lat_dimid, SAT%lat))
+    !call check( nf90_put_var(wrncid, lev_dimid, CLMVARS%levsoi))
+    !call check( nf90_put_var(wrncid, time_dimid, SAT%time))
+
+    ! Putting satellite values in variables
     if(allocated(SAT%theta).and.allocated(SAT%lon_foprt).and.&
          allocated(SAT%lat_foprt).and.allocated(SAT%time).and.&
+         allocated(SAT%TB_H).and.allocated(SAT%TB_V).and.&
          allocated(SAT%TBSAT_HV)) then
 
        call check(nf90_put_var(wrncid, lon_varid, SAT%lon_foprt))
        call check(nf90_put_var(wrncid, lat_varid, SAT%lat_foprt))
+     !  call check(nf90_put_var(wrncid, glon_varid, SAT%lon))
+     !  call check(nf90_put_var(wrncid, glat_varid, SAT%lat))
        call check(nf90_put_var(wrncid, inc_varid, SAT%theta))
        call check(nf90_put_var(wrncid, t_varid, SAT%time))
 
        call check(nf90_put_var(wrncid, tbh_varid, SAT%TBSAT_HV(:,1,:,:)))
        call check(nf90_put_var(wrncid, tbv_varid, SAT%TBSAT_HV(:,2,:,:)))
+       call check(nf90_put_var(wrncid, gtbh_varid, SAT%TB_H(:,:,:,:)))
+       call check(nf90_put_var(wrncid, gtbv_varid, SAT%TB_V(:,:,:,:)))
     else
        print*, 'Some SATELLITE variables are not allocated for NetCDF'
+    end if
+
+    ! Putting input values in variables
+    if(allocated(CLMVARS%SWVL).and.allocated(CLMVARS%STL).and.&
+         allocated(CLMVARS%SD).and.allocated(CLMVARS%RSN).and.&
+         allocated(CLMVARS%TSKIN).and.allocated(CLMVARS%longxy).and.&
+         allocated(CLMVARS%latixy)) then
+       call check(nf90_put_var(wrncid, glon_varid, CLMVARS%longxy))
+       call check(nf90_put_var(wrncid, glat_varid, CLMVARS%latixy))
+       call check(nf90_put_var(wrncid, gsm_varid, CLMVARS%SWVL))
+       call check(nf90_put_var(wrncid, gst_varid, CLMVARS%STL))
+       call check(nf90_put_var(wrncid, gsd_varid, CLMVARS%SD))
+       call check(nf90_put_var(wrncid, gRSN_varid, CLMVARS%RSN))
+       call check(nf90_put_var(wrncid, gtskin_varid, CLMVARS%TSKIN))
+       call check(nf90_put_var(wrncid, gsand_varid, CLMVARS%SAND))
+       call check(nf90_put_var(wrncid, gclay_varid, CLMVARS%CLAY))
+       call check(nf90_put_var(wrncid, gcvh_varid, CLMVARS%CVH))
+       call check(nf90_put_var(wrncid, gcvl_varid, CLMVARS%CVL))
+       call check(nf90_put_var(wrncid, gtvh_varid, CLMVARS%TVH))
+       call check(nf90_put_var(wrncid, gtvl_varid, CLMVARS%TVL))
+       call check(nf90_put_var(wrncid, glsm_varid, CLMVARS%LSM))
+       call check(nf90_put_var(wrncid, gwater_varid, CLMVARS%WATER))
+       call check(nf90_put_var(wrncid, glai_varid, CLMVARS%LAIL))
+       call check(nf90_put_var(wrncid, gtair_varid, CLMVARS%TAIR))
+       call check(nf90_put_var(wrncid, ginci_varid, CLMVARS%theta_inc))
+       call check(nf90_put_var(wrncid, gz_varid, CLMVARS%Z))
+       call check(nf90_put_var(wrncid, gslope_varid, CLMVARS%slope))
+       call check(nf90_put_var(wrncid, gaspect_varid, CLMVARS%aspect))
+    else
+       print*, 'Some CLM variables are not allocated for NetCDF'
     end if
     ! c) Closing NC file
     call check(nf90_close(wrncid))

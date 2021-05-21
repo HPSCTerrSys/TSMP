@@ -6,9 +6,14 @@ module get_tb_cmem
 !
 ! In applying this licence, ECMWF does not waive the privileges and immunities granted to it by
 ! virtue of its status as an intergovernmental organisation nor does it submit to any jurisdiction.
-contains
+! contains
+!use mod_assimilation, only: dim_obs
+!USE mod_parallel_pdaf,ONLY: n_modeltasks
+! REAL, ALLOCATABLE :: ens_TB(:) !simulated brightness temperature ensembles
+
 !
-SUBROUTINE cmem_main(LS,SATinfo,TB,step)
+contains
+SUBROUTINE cmem_main(LS,SATinfo,TB,n_obs,step)
 !
 !
 !
@@ -78,28 +83,30 @@ use SatOperator
 ! LSN: read data from clm memory
 use rdclm4pdaf      
 use mod_tsmp,         only: pf_statevecsize
-use mod_assimilation, only : dim_obs,obs_filename
+use mod_assimilation, only: dim_obs,obs_filename
+USE mod_parallel_pdaf,ONLY: task_id
+USE rdclm_wrcmem,     only: write_satellite_operator
 
 IMPLICIT NONE
 
 INTEGER(KIND = JPIM):: JJPOL 
 REAL(KIND = JPRM)   :: RSN(2), ESN(2)
 REAL(KIND = JPRM)   :: tfrac(JPCMEMTILE) 
-INTEGER, INTENT(in) :: step 
+INTEGER, INTENT(in) :: step,n_obs 
 INTEGER             :: numg           ! total number of gridcells across all processors
 INTEGER             :: numl           ! total number of landunits across all processors
 INTEGER             :: numc           ! total number of columns across all processors
 INTEGER             :: nump           ! total number of pfts across all processors
 
-CHARACTER (len = 110)       :: current_observation_filename 
+CHARACTER (len = 110)       :: OBSFILE,nc_out,OUT_frame 
 TYPE(SATELLITE),ALLOCATABLE :: SAT
 TYPE(SATELLITE),INTENT(IN)  :: SATinfo 
-INTEGER                     :: i
+INTEGER                     :: i,j
 LOGICAL                     :: exist
 INTEGER(kind=JPIM)          :: Nvars(3)       
 TYPE(CLM_DATA),ALLOCATABLE  :: CLMVARS          
 TYPE(CLM_DATA),INTENT(IN)   :: LS
-REAL,INTENT(OUT)            :: TB(dim_obs)
+REAL,INTENT(OUT)            :: TB(n_obs)
 ! *****************************************************************************
 ! 1.0 Model SETUP
 !
@@ -109,6 +116,7 @@ allocate(CLMVARS)
 CLMVARS       = LS
 allocate(SAT)
 SAT           = SATinfo
+! allocate(TB(n_obs))
 ! Assigning input parameters to the CMEM global parameters
 
 WRITE(NULOUT,*) '***** Community Microwave Emission Modelling Platform***** '
@@ -132,9 +140,8 @@ SELECT CASE ( CFINOUT )
      NTIMES   = 1
      Nvars(3) = 1
      N        = NLONS*NLATS
-     Nvars(3) = 1
      NINC     = size(SAT%theta)
-     IF (LGPRINT) WRITE(NULOUT,*) 'Nvars is ',Nvars
+     IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: Nvars is ',Nvars
 ! ----------------------------------!LSN end
 !  CASE ( 'ifs' )
 !
@@ -205,7 +212,7 @@ SELECT CASE (CFINOUT)
 !
 END SELECT
 !
-WRITE(NULOUT,*) 'Read input files done'
+WRITE(NULOUT,*) 'cmem_main: Read input files done'
 !
 IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
 !
@@ -222,12 +229,10 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
 !
 !    DEALLOCATE (fZ)
 !
-    IF (LGPRINT) WRITE(NULOUT,*) 'CMEM_main, end of 1.2'
-!
-!   3. Compute toa brightness temperatures
+    !   3. Compute toa brightness temperatures
 !    -----------------------------------
 !
-    IF (LGPRINT) WRITE(NULOUT,*) 'CMEM_main, compute TB field'
+    IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: computing TB field'
 !
 !
 
@@ -258,18 +263,18 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
                 tau_atm = ftau_atm(JJ) / costheta
                 tb_au = ftb_au(JJ)
                 tb_ad = ftb_ad(JJ)
-                IF (LGPRINT)  WRITE(NULOUT,*) '--- TBSKY up:' ,tb_au
-                IF (LGPRINT)  WRITE(NULOUT,*) '--- TBSKY down:' ,tb_ad
+                IF (LGPRINT)  WRITE(NULOUT,*) 'cmem_main: gird N and TBSKY up:',JJ,tb_au
+                IF (LGPRINT)  WRITE(NULOUT,*) 'cmem_main: gird N and TBSKY down:',JJ,tb_ad
                 t_veg = ftveg(JJ)
                 tair = ftair(JJ)
 !
 !
                 DO JCMEMTILE = 1, JPCMEMTILE 
 !
-                    IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF a',fteffC(JJ,:)
+                    IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF a',JJ,fteffC(JJ,:)
                     IF (ftfrac(JJ,JCMEMTILE) == 0.)   CYCLE  
 !
-                    IF (LGPRINT) WRITE(NULOUT,*) '----------- Tile',JCMEMTILE
+                    IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and its Tile type is',JJ,JCMEMTILE
 !
 !
 !          3.2 Compute surface emissivity    
@@ -281,62 +286,61 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
                    hrmodel = fhrmodel(JJ,1)
                    tsoildeep = ftl_lsm(JJ,nlay_soil_ls)
                    CALL CMEM_SOIL
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF bf',&
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF bf',JJ,&
                        & ftfrac(JJ,JCMEMTILE),fteffC(JJ,1),t_eff(1),fteffC(JJ,2),t_eff(2),&
                        & fteffC(JJ,3),t_eff(3)
                        fteffC(JJ,:) = fteffC(JJ,:) + ftfrac(JJ,JCMEMTILE) * t_eff(:)
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF b',fteffC(JJ,:)
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF b',JJ,fteffC(JJ,:)
                CASE ( 6 )
                    Nrh = fNrh_H(JJ)
                    Nrv = fNrv_H(JJ)
                    hrmodel = fhrmodel(JJ,2)
                    tsoildeep = ftl_lsm(JJ,1)
                    CALL CMEM_SOIL
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF bf',&
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF bf',JJ,&
                        & ftfrac(JJ,JCMEMTILE),fteffC(JJ,1),t_eff(1),fteffC(JJ,2),t_eff(2),&
                        & fteffC(JJ,3),t_eff(3)
                        fteffC(JJ,:) = fteffC(JJ,:) + ftfrac(JJ,JCMEMTILE) * t_eff(:)
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF c',fteffC(JJ,:)
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF c',JJ,fteffC(JJ,:)
                CASE (  3, 4 )
                    Nrh = fNrh_L(JJ)
                    Nrv = fNrv_L(JJ)
                    hrmodel = fhrmodel(JJ,1)
                    tsoildeep = ftl_lsm(JJ,nlay_soil_ls)
                    CALL CMEM_SOIL
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF bf',&
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF bf',JJ,&
                        & ftfrac(JJ,JCMEMTILE),fteffC(JJ,1),t_eff(1),fteffC(JJ,2),t_eff(2),&
                        & fteffC(JJ,3),t_eff(3)
                        fteffC(JJ,:) = fteffC(JJ,:) + ftfrac(JJ,JCMEMTILE) * t_eff(:)
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF d',fteffC(JJ,:)
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF d',JJ,fteffC(JJ,:)
                CASE ( 5 )
                    Nrh = fNrh_H(JJ)
                    Nrv = fNrv_H(JJ)
                    hrmodel = fhrmodel(JJ,2)
                    tsoildeep = ftl_lsm(JJ,nlay_soil_ls)
                    CALL CMEM_SOIL
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF bf',&
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF bf',JJ,&
                        & ftfrac(JJ,JCMEMTILE),fteffC(JJ,1),t_eff(1),fteffC(JJ,2),t_eff(2),&
                        & fteffC(JJ,3),t_eff(3)
                        fteffC(JJ,:) = fteffC(JJ,:) + ftfrac(JJ,JCMEMTILE) * t_eff(:)
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF e',fteffC(JJ,:)
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF e',JJ,fteffC(JJ,:)
                CASE ( 7 )
                    Nrh = 0.0_JPRM
                    Nrv = 0.0_JPRM
                    hrmodel = 0.0_JPRM
                    tsoildeep = ftl_lsm(JJ,nlay_soil_ls)
                    CALL CMEM_SOIL
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF bf',&
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF bf',JJ,&
                        & ftfrac(JJ,JCMEMTILE),fteffC(JJ,1),t_eff(1),fteffC(JJ,2),t_eff(2),&
                        & fteffC(JJ,3),t_eff(3)
                    !fteffC(JJ,1) = fteffC(JJ,1) + ftfrac(JJ,JCMEMTILE) * t_eff(1)
                    fteffC(JJ,2) = fteffC(JJ,2) + ftfrac(JJ,JCMEMTILE) * t_eff(2)
                    fteffC(JJ,3) = fteffC(JJ,3) + ftfrac(JJ,JCMEMTILE) * t_eff(3)
-                   IF (LGPRINT) WRITE(NULOUT,*) '--- Mean TEFF f',fteffC(JJ,:)
+                   IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and Mean TEFF f',JJ,fteffC(JJ,:)
             END SELECT
 !          
-!           3.3 Compute vegetation emissivity if present          
-!
-!
+!           3.3 Compute vegetation emissivity if present
+          !
             SELECT CASE (JCMEMTILE)  
                CASE ( 3, 4 )  ! Low vegetation
                    w_eff(:) = fw_effL(JJ,:) 
@@ -363,7 +367,6 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
                    tb_veg(:) = (/0.,0./)
            END SELECT     
 !
-!
 !          3.4 Compute top-of-vegetation brightness temperature
 !
            CALL CMEM_RTM
@@ -376,7 +379,8 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
                   DO JJPOL = 1,2    ! h- and v-polarization
                       RSN(JJPOL)=1._JPRM  - tb_tov(JJPOL) / ftl_lsm(JJ,1)
                   ENDDO
-                  CALL CMEM_SNOW(RSN,frsnow(JJ)/1000.,fsnowd(JJ),ESN)
+                  IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main:',RSN,frsnow(JJ)/1000.,fsnowd(JJ),ESN
+                  CALL CMEM_SNOW(RSN,frsnow(JJ),fsnowd(JJ),ESN)
            END SELECT    
 !    
 !
@@ -407,19 +411,17 @@ IANGLE: DO JJINC = 1_JPIM,NINC  ! PSG: here start loop over incidence angles
 !          Diagnostic Tau_veg
            ftau_veg(JJ,:) = ftau_veg(JJ,:) + ftfrac(JJ,JCMEMTILE) * tau_veg(:)   
 !          Diagnostic mean TEFF
-           IF (LGPRINT) WRITE(NULOUT,*) 'end of cmem tile loop',JCMEMTILE
-           IF (LGPRINT) WRITE(NULOUT,*) '                 TB TOV',tb_tov(:)
-           IF (LGPRINT) WRITE(NULOUT,*) '                 tb_soil',tb_soil(:)
-     
-!
+           IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and end of cmem tile loop',JJ,JCMEMTILE
+           IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and TB TOV',JJ,tb_tov(:)
+           IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and tb_soil',JJ,tb_soil(:)
+    !
        ENDDO ! end JCMEMTILE
-!
 !
 !      3.7 Top-of-Atmosphere brightness temperature
 !
-       IF (LGPRINT) WRITE(NULOUT,*) '--- TB no atm:',tb_toa(:)
+       IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and TB no atm:',JJ,tb_toa(:)
        ftb_toa(JJ,:) = tb_toa(:) * exp(-tau_atm) + ftb_au(JJ)   
-       IF (LGPRINT) WRITE(NULOUT,*) '--- TBTOA:',ftb_toa(JJ,:)
+       IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: gird N and TBTOA:',JJ,ftb_toa(JJ,:)
 !
 !
     END SELECT  ! end of mask selection
@@ -432,14 +434,21 @@ ENDDO FIELD
 if(CFINOUT.eq.'pdaf'.and.allocated(TB_HV)) then
     TB_HV(:,:,1,JJINC,:)=reshape(ftb_toa(:,1),(/NLONS,NLATS,NTIMES/))
     TB_HV(:,:,2,JJINC,:)=reshape(ftb_toa(:,2),(/NLONS,NLATS,NTIMES/))
+    
     ! PSG: when last incidence angle, calculate satellite-like data
+    ! LSN: when it is single-point footprint, the satellite operator isn't functioned
     if(JJINC.eq.NINC) then
-        call TBSAT_OPERATOR(SAT,CLMVARS,TB_HV)
+            if(NLONS.eq.1.and.NLATS.eq.1) then
+            if(.not.allocated(SAT%TBSAT_HV)) allocate(SAT%TBSAT_HV(NLONS*NLATS,2,NINC,NTIMES))
+            SAT%TBSAT_HV(1,:,NINC,NTIMES)=TB_HV(1,1,:,JJINC,1)
+        else
+            call TBSAT_OPERATOR(SAT,CLMVARS,TB_HV)
+        end if 
     end if
 end if
 
-IF (LGPRINT) WRITE(NULOUT,*) 'TB H polarization are ',TB_HV(1,1,1,JJINC,1),TB_HV(NLONS,NLATS,1,JJINC,1)
-IF (LGPRINT) WRITE(NULOUT,*) 'TB V polarization are ',TB_HV(1,1,2,JJINC,1),TB_HV(NLONS,NLATS,2,JJINC,1)
+IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: TB H polarization are ',TB_HV(1,1,1,JJINC,1),TB_HV(NLONS,NLATS,1,JJINC,1)
+IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: TB V polarization are ',TB_HV(1,1,2,JJINC,1),TB_HV(NLONS,NLATS,2,JJINC,1)
 
 ! WRITE(CANGLE,'(I2)') INT(SAT%theta(JJINC))  ! PSG: changing theta
 !---------------------------------PSG end
@@ -447,27 +456,42 @@ IF (LGPRINT) WRITE(NULOUT,*) 'TB V polarization are ',TB_HV(1,1,2,JJINC,1),TB_HV
 ! 4. Write outputs 
 !-----------------
 !
-IF (LGPRINT) WRITE(NULOUT,*) 'CMEM_main, write output'
+IF (LGPRINT) WRITE(NULOUT,*) 'cmem_main: write output'
 !
     SELECT CASE (CFINOUT)
 !
 ! LSN: output the global brightness temperature 
       CASE ('pdaf')
-              
-          TB(:) = reshape(SAT%TBSAT_HV(:,1,NINC,NTIMES),(/dim_obs/))
+          ! TB will be passed to m_state_p    
+          ! n_obs  = size(SAT%lon_foprt)
+          !allocate(TB(n_obs))
+          TB(:) = reshape(SAT%TBSAT_HV(:,1,NINC,NTIMES),(/n_obs/))
           
+          ! write SATELLITE synthetic data as NetCDF files
+          !DO i = 1, NLONS
+             SAT%lon = CLMVARS%lons
+          !ENDDO
+          !DO j = 1, NLATS
+             SAT%lat = CLMVARS%lats
+          !ENDDO
+          SAT%TB_H=reshape(ftb_toa(:,1),(/NLONS,NLATS,1,NTIMES/))
+          SAT%TB_V=reshape(ftb_toa(:,2),(/NLONS,NLATS,1,NTIMES/))
+
+          nc_out = './obs/'
+          write(OUT_frame,'(a, i5.5,i3.3)') 'TBSAT_',step,task_id 
+          call write_satellite_operator(SAT,CLMVARS,OUT_frame,nc_out) 
           ! write brightness temperature to .txt file for debug
-          IF (LGPRINT) WRITE(NULOUT,*) "TB is",SAT%TBSAT_HV 
-          inquire(file="./TB_observation.txt", exist=exist)
-          if (exist) then
-              open(10, file="./TB_observation.txt", status="old", position="append", action="write")
-          else
-              open(10, file="./TB_observation.txt", status="new", action="write")
-          end if
-          
-          write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
-          write(10,*) 'The current observation file is ', current_observation_filename
-          write(10,'(5f9.3)') SAT%TBSAT_HV
+          !IF (LGPRINT) WRITE(NULOUT,*) "TB is",SAT%TBSAT_HV 
+          !inquire(file="./TB_observation.txt", exist=exist)
+          !if (exist) then
+          !    open(10, file="./TB_observation.txt", status="old", position="append", action="write")
+          !else
+          !    open(10, file="./TB_observation.txt", status="new", action="write")
+          !end if
+          !
+          !write(OBSFILE, '(a, i5.5)') trim(obs_filename)//'.',step
+          !write(10,*) 'Simulated Brightness temperature regarding ', OBSFILE
+          !write(10,'(16f9.3)') SAT%TBSAT_HV
 
     END SELECT
 !
@@ -539,11 +563,12 @@ DEALLOCATE (frsnow)
 !
 DEALLOCATE (tsoil)
 DEALLOCATE (z_lsm)
-!
-DEALLOCATE (ftheta_inc)  ! PSG: deallocation of pixel-based incidence angle
-DEALLOCATE (TB_HV)  ! PSG: deallocating TB multi-dimensional temporal varible
+! LSN: deallocation block coming from after cmem_main
+DEALLOCATE (ftheta_inc)  ! LSN: deallocation of pixel-based incidence angle
+DEALLOCATE (TB_HV)       ! LSN: deallocating TB multi-dimensional temporal varible
 DEALLOCATE (CLMVARS)
 DEALLOCATE (SAT)
+! LSN: end of deallocations from location after cmem_main
 !
 SELECT CASE (CFINOUT)
 !

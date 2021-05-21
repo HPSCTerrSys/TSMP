@@ -20,29 +20,26 @@ contains
   subroutine read_CLM_pdaf(LS,SAT)
 
 !#if model == tag_model_clm
-   USE PARKIND1,      ONLY : JPIM
-   USE clmtype      , only : clm3,nameg,namec,namep
-   USE clm_varpar   , only : nlevsoi,nlevsno!,nlevgrnd
-   use shr_kind_mod,  only: r8 => shr_kind_r8
-   use clm4cmem,      only: SATELLITE, local_incidence, gradientm
-   use domainMod,     only: ldomain
-   use decompMod,     only: get_proc_global,get_proc_bounds,adecomp
-   ! use surfrdMod, only: pctpft
-   use mod_parallel_pdaf, only: COMM_filter
-   ! use mod_parallel_model, only: MPI_COMM_WORLD
-   use mod_tsmp,      only: idx_map_subvec2state_fortran,pf_statevecsize
-   ! use clm_varsur,    only: longxy, latixy
-   ! use mod_assimilation,  ONLY:longxy, latixy! obs_index_p
-   USE YOMCMEMPAR,    ONLY: LGPRINT
-   USE YOMLUN,        ONLY: NULOUT
-   !USE oas_clm_vardef
-   USE spmdMod      , only : masterproc,iam,mpicom,npes
-   USE spmdGathScatMod , only : gather_data_to_master
+   USE PARKIND1,         ONLY: JPIM
+   USE clmtype,          only: clm3,nameg,namec,namep
+   USE clm_varpar,       only: nlevsoi,nlevsno
+   use shr_kind_mod,     only: r8 => shr_kind_r8
+   use clm4cmem,         only: SATELLITE, local_incidence, gradientm
+   use domainMod,        only: ldomain
+   use decompMod,        only: get_proc_global,get_proc_bounds,adecomp
+   use mod_parallel_pdaf,only: COMM_filter,MPI_SUCCESS,MPI_DOUBLE_PRECISION
+   use mod_tsmp,         only: idx_map_subvec2state_fortran,pf_statevecsize
+   use mod_assimilation, ONLY: time,dim_state,dim_state_p_count,dim_state_p_stride!,longxy,latixy
+   USE YOMCMEMPAR,       ONLY: LGPRINT
+   USE YOMLUN,           ONLY: NULOUT
+   USE spmdMod,          only: masterproc,iam,mpicom,npes
+   USE spmdGathScatMod,  only: gather_data_to_master
    implicit none
    type(SATELLITE), intent(inout) :: SAT
    type(CLM_DATA), intent(out) :: LS
-   integer(kind=JPIM) :: Nvars(3)
+   integer(kind=JPIM) :: Nvars(3),nerror
    integer, dimension(:), allocatable :: idxlev
+   real,dimension(1)::state_clm(dim_state)
    
    INTEGER :: numg           ! total number of gridcells across all processors
    INTEGER :: numl           ! total number of landunits across all processors
@@ -53,7 +50,7 @@ contains
    integer :: begl, endl   ! per-proc beginning and ending landunit indices
    integer :: begg, endg   ! per-proc gridcell ending gridcell indices
    integer :: clm_begg,clm_endg 
-   integer :: nlev, idxtime=1
+   integer :: nlev
    
    integer :: NINC, NLATS, NLONS, NTIME, NLEVPFT, &
              ier,gi,i,j,k_lev,cc=1,offset=0,nlevgrnd
@@ -67,6 +64,7 @@ contains
    real(r8), pointer :: pclay(:,:)
    real(r8), pointer :: snowdp(:)
    real(r8), pointer :: snowliq(:)
+   real(r8), pointer :: snowice(:)
    real(r8), pointer :: frac_sno(:)
    real(r8), pointer :: t_soisno(:,:)
    real(r8), pointer :: t_grnd(:)
@@ -74,7 +72,7 @@ contains
    real(r8), pointer :: t_ref2m(:)
    integer , pointer :: itype(:)
    real(r8), pointer :: topo(:)
-   real(r8), pointer :: time(:)
+   !real(r8), pointer :: time(:)
    real(r8), pointer :: fcov(:)
 
    real(r8), pointer :: latdeg_PE(:)       !latitude (degrees)
@@ -85,6 +83,7 @@ contains
    real(r8), pointer :: pclay_PE(:,:)
    real(r8), pointer :: snowdp_PE(:)
    real(r8), pointer :: snowliq_PE(:)
+   real(r8), pointer :: snowice_PE(:)
    real(r8), pointer :: frac_sno_PE(:)
    real(r8), pointer :: t_soisno_PE(:,:)
    real(r8), pointer :: t_grnd_PE(:)
@@ -93,7 +92,8 @@ contains
    integer , pointer :: itype_PE(:)
    real(r8), pointer :: topo_PE(:)
    !real(r8), pointer :: time(:)
-   real(r8), pointer :: fcov_PE(:) 
+   real(r8), pointer :: fcov_PE(:)
+ 
    real(r8), pointer :: latdeg_tmp(:)       !latitude (degrees)
    real(r8), pointer :: londeg_tmp(:)       !longitude (degrees)
    real(r8), pointer :: z_tmp(:,:)          !layer depth (m) (-nlevsno+1:nlevgrnd) 
@@ -102,6 +102,7 @@ contains
    real(r8), pointer :: pclay_tmp(:,:)
    real(r8), pointer :: snowdp_tmp(:)
    real(r8), pointer :: snowliq_tmp(:)
+   real(r8), pointer :: snowice_tmp(:)
    real(r8), pointer :: frac_sno_tmp(:)
    real(r8), pointer :: t_soisno_tmp(:,:)
    real(r8), pointer :: t_grnd_tmp(:)
@@ -120,13 +121,14 @@ contains
    pclay_PE    => clm3%g%l%c%cps%pclay
    snowdp_PE   => clm3%g%l%c%cps%snowdp
    snowliq_PE  => clm3%g%l%c%cws%snowliq
+   snowice_PE  => clm3%g%l%c%cws%snowice
    frac_sno_PE => clm3%g%l%c%cps%frac_sno
    t_soisno_PE => clm3%g%l%c%ces%t_soisno
    t_grnd_PE   => clm3%g%l%c%ces%t_grnd
    tlai_PE     => clm3%g%l%c%p%pps%tlai
    t_ref2m_PE  => clm3%g%l%c%p%pes%t_ref2m
    itype_PE    => clm3%g%l%c%p%itype 
-   time        => clm3%g%l%c%p%pepv%days_active
+   !time        => clm3%g%l%c%p%pepv%days_active
    fcov_PE     => clm3%g%l%c%cws%fcov         
    topo_PE     => ldomain%topo
    
@@ -154,6 +156,7 @@ contains
          ALLOCATE(pclay(nlevsoi,numg), stat=ier)
          ALLOCATE(snowdp(numg), stat=ier)
          ALLOCATE(snowliq(numg), stat=ier)
+         ALLOCATE(snowice(numg), stat=ier)
          ALLOCATE(frac_sno(numg), stat=ier)
          ALLOCATE(t_soisno(nlevgrnd,numg), stat=ier)
          ALLOCATE(t_grnd(numg), stat=ier)
@@ -173,6 +176,7 @@ contains
    ALLOCATE(pclay_tmp(nlevsoi,begg:endg), stat=ier)
    ALLOCATE(snowdp_tmp(begg:endg), stat=ier)
    ALLOCATE(snowliq_tmp(begg:endg), stat=ier)
+   ALLOCATE(snowice_tmp(begg:endg), stat=ier)
    ALLOCATE(frac_sno_tmp(begg:endg), stat=ier)
    ALLOCATE(t_soisno_tmp(nlevgrnd,begg:endg), stat=ier)
    ALLOCATE(t_grnd_tmp(begg:endg), stat=ier)
@@ -201,6 +205,8 @@ contains
    CALL gather_data_to_master(snowdp_tmp,snowdp, clmlevel=namec)
    snowliq_tmp  = snowliq_PE
    CALL gather_data_to_master(snowliq_tmp, snowliq, clmlevel=namec)
+   snowice_tmp  = snowice_PE
+   CALL gather_data_to_master(snowice_tmp, snowice, clmlevel=namec)
    frac_sno_tmp   = frac_sno_PE
    CALL gather_data_to_master(frac_sno_tmp,frac_sno, clmlevel=namec)
    t_soisno_tmp = TRANSPOSE(t_soisno_PE)
@@ -235,13 +241,12 @@ contains
       if(i==1)   LS%lats(j) = latdeg(gi)
       if(j==1)   LS%lons(i) = londeg(gi)
    end do 
-   IF (LGPRINT) WRITE(NULOUT,*) 'input LS LAT/LON begins at ',LS%lats(1),LS%lons(1)
-   IF (LGPRINT) WRITE(NULOUT,*) 'input LS LAT/LON ends at ',LS%lats(NLATS),LS%lons(NLONS)
-   !WRITE(NULOUT,*) LS%lats,LS%lons   
+   IF (LGPRINT) WRITE(NULOUT,*) 'LS%LAT/LON begins at ',LS%lats(1),LS%lons(1)
+   IF (LGPRINT) WRITE(NULOUT,*) 'LS%LAT/LON ends at ',LS%lats(NLATS),LS%lons(NLONS)   
 
    ! Setting default values for input variables in case not passed in call  
    nlev         = nlevsoi
-   IF (LGPRINT) WRITE(NULOUT,*) 'input LS NLEV is ',nlev
+   IF (LGPRINT) WRITE(NULOUT,*) 'The number of levels is ',nlev
    allocate(idxlev(nlev))
    idxlev = (/(I,I=1,nlev)/)
    if(.not.allocated(LS%levsoi)) allocate(LS%levsoi(nlev))
@@ -253,11 +258,11 @@ contains
 
    LS%DATESTRING = '18/04/20 10:28:22'
    if(.not.allocated(LS%time)) allocate(LS%time(NTIME))
-   LS%time = time(idxtime)
+   LS%time = time
    NINC = size(SAT%theta)
    if(allocated(SAT%time)) deallocate(SAT%time)
    allocate(SAT%time(NTIME))
-   SAT%time = time(idxtime)
+   SAT%time = time
    IF (LGPRINT) WRITE(NULOUT,*) 'SAT time is ',SAT%time 
    
    ! 0 -> Reading TOPO:
@@ -279,13 +284,17 @@ contains
       j = adecomp%gdc2j(gi)
       LS%latixy(i,j) = latdeg(gi)
       LS%longxy(i,j) = londeg(gi)
+     ! LS%latixy(i,j) = latixy(gi)
+     ! LS%longxy(i,j) = longxy(gi)
    enddo
 
    IF (LGPRINT) WRITE(NULOUT,*) 'reading the longitude and latitude is done'
    IF (LGPRINT) WRITE(NULOUT,*) LS%latixy(1,1),LS%latixy(NLONS,NLATS)   
    IF (LGPRINT) WRITE(NULOUT,*) LS%longxy(1,1),LS%longxy(NLONS,NLATS)
    ! 0.2 -> calculating slope and aspect from TOPO Z:
-   allocate(LS%slope(NLONS,NLATS), LS%aspect(NLONS,NLATS))
+   allocate(LS%slope(NLONS,NLATS))
+   allocate(LS%aspect(NLONS,NLATS))
+   !allocate(LS%resol_km(2))
    allocate(LS%theta_inc(NLONS,NLATS,NINC))
    call gradientm(LS%Z, LS%longxy, LS%latixy, LS%slope,&
         LS%aspect, LS%resol_km)
@@ -295,7 +304,15 @@ contains
    LS%theta_inc = local_incidence(LS%slope, LS%aspect, SAT)
    IF (LGPRINT) WRITE(NULOUT,*) 'theta is ',LS%theta
    
-   ! 1. Making up soil moisture [%/%]        
+   ! 1. Making up soil moisture [%/%] 
+   !call MPI_recv(state_clm,dim_state,MPI_DOUBLE_PRECISION,0,0,comm_filter,nerror)
+   !if (nerror .ne. MPI_SUCCESS) then
+   !      print *,"mpi receive failed"
+   !      call MPI_Abort(MPI_COMM_WORLD, nerror)
+   !   end if
+   !print *, "CMEM-operator: receiving state vector succeeded"
+
+       
    allocate(LS%SWVL(NLONS,NLATS,nlev,NTIME))
    !LS%SWVL = reshape(swc, (/NLONS,NLATS,NTIME,nlev/))
    do gi = 1,numg
@@ -328,33 +345,39 @@ contains
    IF (LGPRINT) WRITE(NULOUT,*) 'soil temperature is',LS%STL(1,1,1,1),LS%STL(NLONS,NLATS,nlev,NTIME)
    
    ! 3. Making up snow depth
+   ! in CMEM, SD is Snow depth in water equivalent (m). However, snowdp in 
+   ! CLM is snow depth. Thus, we need snowliq(kg/m^2), snowice(kg/m^2),
+   ! and water density (1000 kg/m^3) to get SD and RSN.
    allocate(LS%SD(NLONS,NLATS,1,NTIME))
    !LS%SD = reshape(snowdp, (/NLONS,NLATS,1,NTIME/))
    do gi = 1,numg
       i = adecomp%gdc2i(gi)
       j = adecomp%gdc2j(gi)
-      if (snowdp(gi).EQ.1E+36) then
-         LS%SD(i,j,1,NTIME) = -1E+34
-      else
-         LS%SD(i,j,1,NTIME) = snowdp(gi)
-      end if
+    ! if (snowdp(gi).EQ.1E+36) then
+    !     LS%SD(i,j,1,NTIME) = -1E+34
+    !  else
+         LS%SD(i,j,1,NTIME) = (snowliq(gi)+snowice(gi))/1000
+    !  end if
+      if (LS%SD(i,j,1,NTIME).GE.10.0) then
+         LS%SD(i,j,1,NTIME) = 0.0
+      end if                             
    end do 
    IF (LGPRINT) WRITE(NULOUT,*) 'snow depth is ',LS%SD(1,1,1,NTIME),LS%SD(NLONS,NLATS,1,NTIME)
    
    ! 4. Making up snow density [kg/m^3]
-   !  water equivalent of snow/snow depth [m]
+   ! (snowliq[kg/m^2]+snowice[kg/m^2])/snow depth [m]
    allocate(LS%RSN(NLONS,NLATS,1,NTIME))
    do gi = 1,numg
       i = adecomp%gdc2i(gi)
       j = adecomp%gdc2j(gi)
-      if (snowdp(gi).EQ.1E+36.OR.snowdp(gi).LE.0.0) then
-         LS%RSN(i,j,1,NTIME) = -1E+34
-      elseif (snowliq(gi).LE.0.0.OR.snowliq(gi).EQ.1E+36) then
-         LS%RSN(i,j,1,NTIME) = -1E+34
-      else
-         LS%RSN(i,j,1,NTIME) = snowliq(gi)/snowdp(gi)
-      end if
-      if (LS%RSN(i,j,1,NTIME).LE.0.0) then
+     ! if (snowdp(gi).EQ.1E+36.OR.snowdp(gi).LE.0.0) then
+     !    LS%RSN(i,j,1,NTIME) = -1E+34
+     ! elseif (snowliq(gi).LE.0.0.OR.snowliq(gi).EQ.1E+36) then
+     !    LS%RSN(i,j,1,NTIME) = -1E+34
+     ! else
+         LS%RSN(i,j,1,NTIME) = (snowliq(gi)+snowice(gi))/snowdp(gi)
+     ! end if
+      if (LS%RSN(i,j,1,NTIME).LE.0.0.OR.LS%RSN(i,j,1,NTIME).GE.1000.0) then
          LS%RSN(i,j,1,NTIME) = 0.0
       end if
    end do
@@ -431,12 +454,12 @@ contains
       ! High veg
       if(itype(gi).ge.1 .and. itype(gi).le.8) then
       !      LS%CVH(i,j) = (1.0-fcov(gi))*frac_sno(gi)
-            LS%CVH(i,j) = 1.0
+            LS%CVH(i,j) = 1.0-fcov(gi)
             LS%CVL(i,j) = 0
       ! Low veg
       elseif(itype(gi).ge.9) then
             LS%CVH(i,j) = 0
-            LS%CVL(i,j) = 1.0
+            LS%CVL(i,j) = 1.0-fcov(gi)
       !      LS%CVL(i,j) = (1.0-fcov(gi))*frac_sno(gi)
       ! Bare soil
       else
@@ -486,6 +509,9 @@ contains
          LS%TVL(i,j)   = 0
       endif
    end do
+   IF (LGPRINT) WRITE(NULOUT,*) 'itype',LS%TVL(1,1),LS%TVL(NLONS,NLATS)
+   IF (LGPRINT) WRITE(NULOUT,*) 'itype',LS%TVH(1,1),LS%TVH(NLONS,NLATS)
+   IF (LGPRINT) WRITE(NULOUT,*) itype
 
    ! 7.3 water fraction [-] / land franction [-]
    if(allocated(LS%WATER)) deallocate(LS%WATER)
@@ -495,13 +521,13 @@ contains
    do gi = 1,numg
       i = adecomp%gdc2i(gi)
       j = adecomp%gdc2j(gi)
-      !if(fcov(gi).gt.0) then
+      if(fcov(gi).gt.0) then
          LS%WATER(i,j) = fcov(gi)
          LS%LSM(i,j)   = 1.0-fcov(gi)
-      !else
-      !   LS%WATER(i,j) = 0
-      !   LS%LSM(i,j)   = 1
-      !endif
+      else
+         LS%WATER(i,j) = 0
+         LS%LSM(i,j)   = 1
+      endif
    end do
 
    ! 7.4 LAI of low vegetation

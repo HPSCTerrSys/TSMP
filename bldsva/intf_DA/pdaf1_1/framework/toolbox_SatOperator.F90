@@ -43,6 +43,7 @@ module SatOperator
     lons  = CLMVARS%lons
     lats  = CLMVARS%lats
     resol_km = CLMVARS%resol_km
+    !write(*,*) 'resol_km is', resol_km
     NINC  = size(SAT%theta)
     NLONS = size(lons)
     NLATS = size(lats)
@@ -143,6 +144,8 @@ module SatOperator
 
           ! Convolution between TB-hires and Antenna Pattern:
           Wnn => Fnn(lon1:lon2,lat1:lat2)
+      !    write(*,*) 'Wnn size is ',size(Wnn) 
+     !     write(*,*) 'Wnn is ',Wnn
           do IT=1,NTIME
              ! for H-pol:
              Axy => TB(idxlon(lon1):idxlon(lon2),&
@@ -227,7 +230,7 @@ module SatOperator
     ! Number of pixels to cover the FOV_FWHM dimensions over Earth:
     NXpix = int(maxval(FoPrint_a)/resol_km(1))
     NYpix = int(maxval(FoPrint_b)/resol_km(2))
-    Npix  = 150 !2*max(NXpix,NYpix)  ! for a Fnn square matrix
+    Npix  = 2*max(NXpix,NYpix)  ! for a Fnn square matrix
     ij_org(:) = int((/Npix/2., Npix/2./))   ! Temporal
     
     if(.not.allocated(rr_a)) allocate(rr_a(Npix))

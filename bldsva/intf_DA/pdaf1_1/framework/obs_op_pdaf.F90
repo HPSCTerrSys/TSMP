@@ -49,22 +49,21 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB
+        ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB,&
+              ens_TB,member_TB
    use mod_parallel_model, &
-        only: model,mype_model,npes_model,mype_world,npes_world
+        only: model,mype_model,npes_model,mype_world,npes_world,COMM_model
    use mod_tsmp, &
-        only: tag_model_clm,nprocpf 
+        only: tag_model_clm,tag_model_parflow, &
+            nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local !SPo add lcmem
 
    ! LSN: module load for the implementation of CMEM model
    USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
         ONLY:n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter,&
-            MPI_DOUBLE_PRECISION         
-   USE spmdMod      , only : masterproc,iam,mpicom,npes
-   use clm4cmem     , only: SATELLITE,CLM_DATA
-   USE rdclm4pdaf   , only: read_CLM_pdaf
-   USE get_tb_cmem  , only: cmem_main
-   USE rdclm_wrcmem , only: read_satellite_info
-   USE YOMCMEMPAR   , only: INPUTNAMLST,LGPRINT
+            MPI_DOUBLE_PRECISION,MPI_INTEGER,filterpe,&
+            MPI_SUCCESS,mype_couple         
+   USE spmdMod      , only: masterproc,iam,mpicom,npes
+
    IMPLICIT NONE
 ! !ARGUMENTS:
   INTEGER, INTENT(in)   :: step               ! Currrent time step
@@ -73,12 +72,13 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   REAL, INTENT(in)      :: state_p(dim_p)     ! PE-local model state
   REAL, INTENT(out)     :: m_state_p(dim_obs_p) ! PE-local observed state
 
-  character*200         :: inparam_fname
-  TYPE(SATELLITE),ALLOCATABLE :: SAT
-  TYPE(CLM_DATA), ALLOCATABLE :: CLMVARS             
-  REAL,DIMENSION(1)     :: TB(dim_obs)  
-  INTEGER               :: i, nerror
-  CHARACTER (len = 110) :: current_observation_filename
+  character*200         :: inparam_fname 
+  REAL,DIMENSION(1)     :: TB(dim_obs)
+  REAL,ALLOCATABLE      :: ens_TB_tmp(:,:)
+  INTEGER               :: i,j, nerror,nproc
+  CHARACTER (len = 110) :: OBSFILE
+  !REAL,ALLOCATABLE      :: ens_TB(:)
+  !common /coeff/ ens_TB
  
 ! CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
@@ -92,46 +92,64 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! *** Perform application of measurement    ***
 ! *** operator H on vector or matrix column ***
 ! *********************************************
-  ! LSN: the original observation operator of soil moisture in Parflow
-  !DO i = 1, dim_obs_p
-  !   m_state_p(i) = state_p(obs_index_p(i))
-  !END DO
-  
-  ! LSN: the implementation of CMEM model here
-  IF (model == tag_model_clm) THEN
-     
-     allocate(CLMVARS)  ! assign CLMVARS array
-     inparam_fname = './obs/input'
-     INPUTNAMLST   = trim(inparam_fname)
+ !SPo add switch for cmem 
+ IF (lcmem) THEN 
 
-     LGPRINT = .True.
-  
-     write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.',step
-     write(*,*) 'The current observation file is ', current_observation_filename
-     allocate(SAT)  !assign SAT array
-     call read_satellite_info(current_observation_filename,SAT)
+   CALL MPI_Barrier(COMM_filter, nerror)
+   ! if (model == tag_model_clm) then
 
-     call read_CLM_pdaf(LS=CLMVARS,SAT=SAT)
-     WRITE(*,*) 'Read CLM memory is done'
+      if(.not.allocated(ens_TB_tmp)) ALLOCATE(ens_TB_tmp(dim_obs,n_modeltasks))
+      if(.not.allocated(ens_TB)) ALLOCATE(ens_TB(dim_obs,n_modeltasks))
+      if(.not.allocated(member_TB)) then
+         ALLOCATE(member_TB(nprocpf+nprocclm))
+         do i = 1, nprocpf+nprocclm
+            member_TB(i) = 1
+         end do
+      end if 
      
-     IF (masterproc) THEN      
-        call cmem_main(LS=CLMVARS,SATinfo=SAT,TB=TB,step=step)    
-     END IF
-     
-  END IF
-  
-  CALL MPI_Barrier(COMM_filter, nerror) 
+      ! LSN: Broadcasts brightness temperature ensemble (ens_TB) from 
+      ! the master process to all other processes of COMM_filter   
+      CALL MPI_Bcast(ens_TB, dim_obs*n_modeltasks, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter, nerror)
+      IF (mype_filter == nprocpf.AND.member_TB(mype_filter+1)==1) THEN 
+         write(*,*) 'obs_op_pdaf: ens_TB is', ens_TB
+      END IF 
 
-  !Broadcasts brightness temperature (TB) from the master process to all
-  !other processes of COMM_filter
-  CALL MPI_Bcast(TB, dim_obs, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter, nerror)
+      DO i = 1, dim_obs
+         DO j = 1, n_modeltasks
+            ens_TB_tmp(i,j) = ens_TB(i,j)
+         END DO
+      END DO      
+    
+      DO i = 1, dim_obs
+         TB(i) = ens_TB_tmp(i,member_TB(mype_filter+1))
+      END DO   
+      
+      ! LSN: member_TB is a set of counter for member loop
+      IF (member_TB(mype_filter+1) == n_modeltasks) THEN
+         member_TB(mype_filter+1) = 1
+      ELSE 
+         member_TB(mype_filter+1) = member_TB(mype_filter+1)+1
+      END IF
+
+      ! LSN: assign ens_TB instead of state_p to m_state_p
+      DO i = 1, dim_obs_p
+         m_state_p(i) = TB(obs_index_p_TB(i))
+         ! WRITE(*,*) 'obs_op_pdaf: member_TB is', member_TB(mype_filter+1)-1
+         WRITE(*,*) 'obs_op_pdaf: obs_index_p_TB(i) is ',obs_index_p_TB(i)
+         WRITE(*,*) 'obs_op_pdaf: TB(obs_index_p_TB(i)) is ',TB(obs_index_p_TB(i))
+      END DO
+   
   
-  DO i = 1, dim_obs_p
-     m_state_p(i) = TB(obs_index_p_TB(i))
-  END DO
- 
-  IF (ALLOCATED(SAT)) DEALLOCATE(SAT)
-  IF (ALLOCATED(CLMVARS)) DEALLOCATE(CLMVARS)
-  
-  !LSN: the end of the implementation of CMEM model here
+      IF (ALLOCATED(ens_TB_tmp)) DEALLOCATE(ens_TB_tmp)
+      !LSN: the end of the implementation of CMEM model here
+   CALL MPI_Barrier(COMM_filter, nerror)
+   ! end if  
+ ELSE
+   ! point observations
+   ! LSN: the original observation operator of soil moisture in Parflow
+   DO i = 1, dim_obs_p
+      m_state_p(i) = state_p(obs_index_p(i))
+   END DO
+ END IF
+
 END SUBROUTINE obs_op_pdaf
