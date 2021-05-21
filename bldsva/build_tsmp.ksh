@@ -716,6 +716,7 @@ getGitInfo(){
   comment "  Log Git information (TSMP)"
     echo "Git (TSMP):" >> $log_file
     git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
+    git -C ${rootdir} diff      --name-status HEAD >> $log_file
     git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir} rev-parse --short HEAD >> $log_file
     echo "" >> $log_file
@@ -725,6 +726,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[0]})"
       echo "Git (${mList[0]}):" >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[0]} diff      --name-status HEAD >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[0]} rev-parse --short HEAD >> $log_file
       echo "" >> $log_file
@@ -734,6 +736,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[1]})"
       echo "Git (${mList[1]}):" >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[1]} diff      --name-status HEAD >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[1]} rev-parse --short HEAD >> $log_file
       echo "" >> $log_file
@@ -743,6 +746,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
       echo "" >> $log_file
@@ -752,6 +756,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[2]})"
       echo "Git (${mList[2]}):" >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
       echo "" >> $log_file
@@ -761,6 +766,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[3]})"
       echo "Git (${mList[3]}):" >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[3]} diff      --name-status HEAD >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
       git -C ${rootdir}/${mList[3]} rev-parse --short HEAD >> $log_file
       echo "" >> $log_file
