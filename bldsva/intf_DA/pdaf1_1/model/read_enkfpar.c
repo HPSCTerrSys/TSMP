@@ -81,6 +81,8 @@ void read_enkfpar(char *parname)
   nreal                 = iniparser_getint(pardict,"DA:nreal",0);
   startreal             = iniparser_getint(pardict,"DA:startreal",0);
   //stat_dumpint          = iniparser_getint(pardict,"DA:stat_dumpinterval",1);
+  //SPo add lcmem : switch for CMEM
+  lcmem                 = iniparser_getboolean(pardict,"DA:lcmem",0);
   da_interval           = iniparser_getdouble(pardict,"DA:da_interval",1);
   stat_dumpoffset       = iniparser_getint(pardict,"DA:stat_dumpoffset",0);
   point_obs             = iniparser_getint(pardict,"DA:point_obs","");

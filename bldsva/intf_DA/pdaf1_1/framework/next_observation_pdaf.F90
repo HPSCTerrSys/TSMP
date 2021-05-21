@@ -52,7 +52,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 !
 ! !USES:
   USE mod_assimilation, &
-       ONLY: delt_obs, toffset
+       ONLY: delt_obs, toffset, step_TB
   USE mod_parallel_model, &
        ONLY: mype_world, total_steps
   USE mod_assimilation, &
@@ -85,6 +85,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
   !kuw: check, for observation file with at least 1 observation
 !  counter = stepnow 
+  !step_TB = stepnow 
   counter = stepnow 
   !nsteps  = 0
   write(*,*) 'total_steps (in next_observation_pdaf): ',total_steps
@@ -100,8 +101,9 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   nsteps = counter - stepnow
   write(*,*)'stepnow (in next_observation_pdaf):',stepnow
   write(*,*)'no_obs, nsteps, counter (in next_observation_pdaf): ',no_obs,nsteps,counter
+  step_TB = counter
   !kuw end
-
+ 
 
 
 
@@ -146,6 +148,7 @@ subroutine check_n_observationfile(fn,nn)
   character(len = nf90_max_name) :: recorddimname
 
   call check(nf90_open(fn, nf90_nowrite, ncid))
+  write(*,*) fn
   !call check(nf90_inq_dimid(ncid, dim_name, dimid))
   !call check(nf90_inquire_dimension(ncid, dimid, recorddimname, nn))
   call check( nf90_inq_varid(ncid, varname, varid) )

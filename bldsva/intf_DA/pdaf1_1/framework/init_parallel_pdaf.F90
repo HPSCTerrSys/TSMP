@@ -89,11 +89,11 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
  ! gh, universal pe world
    USE mod_parallel_model, &
         ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, &
-            mype_world, npes_world
+            mype_world, npes_world, model
   USE mod_parallel_pdaf, &
        ONLY: mype_filter, npes_filter, COMM_filter, filterpe, n_modeltasks, &
        local_npes_model, task_id, COMM_couple, MPIerr
-  ! Un-comment the following 2 lines in case a serial model is used 
+! Un-comment the following 2 lines in case a serial model is used 
 !   USE mod_parallel_pdaf, &
 !        ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, npes_world, mype_world
 !   then remove local declaration of npes_world and mype_world
@@ -126,6 +126,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   INTEGER :: COMM_ensemble      ! Communicator of all PEs doing model tasks
   INTEGER :: mype_ens, npes_ens ! rank and size in COMM_ensemble
   INTEGER :: mype_couple, npes_couple ! Rank and size in COMM_couple
+  !INTEGER :: mype_couple, npes_couple ! Rank and size in COMM_couple
   INTEGER :: pe_index           ! Index of PE
   INTEGER :: my_color, color_couple ! Variables for communicator-splitting 
   LOGICAL :: iniflag            ! Flag whether MPI is initialized

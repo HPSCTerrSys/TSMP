@@ -49,22 +49,42 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p
+        ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB,&
+              ens_TB,member_TB
+   use mod_parallel_model, &
+        only: model,mype_model,npes_model,mype_world,npes_world,COMM_model
+   use mod_tsmp, &
+        only: tag_model_clm,tag_model_parflow, &
+            nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local !SPo add lcmem
 
-  IMPLICIT NONE
+   ! LSN: module load for the implementation of CMEM model
+   USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
+        ONLY:n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter,&
+            MPI_DOUBLE_PRECISION,MPI_INTEGER,filterpe,&
+            MPI_SUCCESS,mype_couple         
+   USE spmdMod      , only: masterproc,iam,mpicom,npes
 
+   IMPLICIT NONE
 ! !ARGUMENTS:
-  INTEGER, INTENT(in) :: step               ! Currrent time step
-  INTEGER, INTENT(in) :: dim_p              ! PE-local dimension of state
-  INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
-  REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
-  REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
-  integer :: i
-! !CALLING SEQUENCE:
+  INTEGER, INTENT(in)   :: step               ! Currrent time step
+  INTEGER, INTENT(in)   :: dim_p              ! PE-local dimension of state
+  INTEGER, INTENT(in)   :: dim_obs_p          ! Dimension of observed state
+  REAL, INTENT(in)      :: state_p(dim_p)     ! PE-local model state
+  REAL, INTENT(out)     :: m_state_p(dim_obs_p) ! PE-local observed state
+
+  character*200         :: inparam_fname 
+  REAL,DIMENSION(1)     :: TB(dim_obs)
+  REAL,ALLOCATABLE      :: ens_TB_tmp(:,:)
+  INTEGER               :: i,j, nerror,nproc
+  CHARACTER (len = 110) :: OBSFILE
+  !REAL,ALLOCATABLE      :: ens_TB(:)
+  !common /coeff/ ens_TB
+ 
+! CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
 ! Called by: PDAF_enkf_analysis_rlm, PDAF_enkf_analysis_rsm
-!EOP
+! EOP
 
 ! *** local variables ***
 
@@ -72,9 +92,64 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! *** Perform application of measurement    ***
 ! *** operator H on vector or matrix column ***
 ! *********************************************
+ !SPo add switch for cmem 
+ IF (lcmem) THEN 
 
-  DO i = 1, dim_obs_p
-     m_state_p(i) = state_p(obs_index_p(i))
-  END DO
+   CALL MPI_Barrier(COMM_filter, nerror)
+   ! if (model == tag_model_clm) then
+
+      if(.not.allocated(ens_TB_tmp)) ALLOCATE(ens_TB_tmp(dim_obs,n_modeltasks))
+      if(.not.allocated(ens_TB)) ALLOCATE(ens_TB(dim_obs,n_modeltasks))
+      if(.not.allocated(member_TB)) then
+         ALLOCATE(member_TB(nprocpf+nprocclm))
+         do i = 1, nprocpf+nprocclm
+            member_TB(i) = 1
+         end do
+      end if 
+     
+      ! LSN: Broadcasts brightness temperature ensemble (ens_TB) from 
+      ! the master process to all other processes of COMM_filter   
+      CALL MPI_Bcast(ens_TB, dim_obs*n_modeltasks, MPI_DOUBLE_PRECISION, nprocpf, COMM_filter, nerror)
+      IF (mype_filter == nprocpf.AND.member_TB(mype_filter+1)==1) THEN 
+         write(*,*) 'obs_op_pdaf: ens_TB is', ens_TB
+      END IF 
+
+      DO i = 1, dim_obs
+         DO j = 1, n_modeltasks
+            ens_TB_tmp(i,j) = ens_TB(i,j)
+         END DO
+      END DO      
+    
+      DO i = 1, dim_obs
+         TB(i) = ens_TB_tmp(i,member_TB(mype_filter+1))
+      END DO   
+      
+      ! LSN: member_TB is a set of counter for member loop
+      IF (member_TB(mype_filter+1) == n_modeltasks) THEN
+         member_TB(mype_filter+1) = 1
+      ELSE 
+         member_TB(mype_filter+1) = member_TB(mype_filter+1)+1
+      END IF
+
+      ! LSN: assign ens_TB instead of state_p to m_state_p
+      DO i = 1, dim_obs_p
+         m_state_p(i) = TB(obs_index_p_TB(i))
+         ! WRITE(*,*) 'obs_op_pdaf: member_TB is', member_TB(mype_filter+1)-1
+         WRITE(*,*) 'obs_op_pdaf: obs_index_p_TB(i) is ',obs_index_p_TB(i)
+         WRITE(*,*) 'obs_op_pdaf: TB(obs_index_p_TB(i)) is ',TB(obs_index_p_TB(i))
+      END DO
+   
+  
+      IF (ALLOCATED(ens_TB_tmp)) DEALLOCATE(ens_TB_tmp)
+      !LSN: the end of the implementation of CMEM model here
+   CALL MPI_Barrier(COMM_filter, nerror)
+   ! end if  
+ ELSE
+   ! point observations
+   ! LSN: the original observation operator of soil moisture in Parflow
+   DO i = 1, dim_obs_p
+      m_state_p(i) = state_p(obs_index_p(i))
+   END DO
+ END IF
 
 END SUBROUTINE obs_op_pdaf

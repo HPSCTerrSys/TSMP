@@ -61,6 +61,12 @@ MODULE mod_assimilation
   REAL, ALLOCATABLE    :: obs(:)          ! Vector holding all observations for Global domain 
   REAL, ALLOCATABLE    :: obs_p(:)        ! Vector holding observations for PE-local domain
   INTEGER, ALLOCATABLE :: obs_index_p(:)  ! Vector holding state-vector indices of observations for PE-local domain
+  ! LSN
+  INTEGER, ALLOCATABLE :: obs_index_p_TB(:)  ! LSN: Vector holding state-vector indices of TB observations for PE-local domain
+  REAL,ALLOCATABLE     :: ens_TB(:,:)     ! LSN: Array hold TB ensembles 
+  INTEGER, ALLOCATABLE :: member_TB(:)    ! LSN: the member counter for the CMEM operator
+  INTEGER              :: step_TB         ! LSN: the step counter for the CMEM-operator
+  ! LSN end
   INTEGER, ALLOCATABLE :: obs_index_l(:)  ! Vector holding local state-vector indices of observations
   INTEGER, ALLOCATABLE :: local_dims_obs(:) ! Array for process-local observation dimensions
   INTEGER, ALLOCATABLE :: obs_nc2pdaf(:)  ! mapping ordering of obs between netcdf input and internal ordering in pdaf

@@ -62,7 +62,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 !hcp end
 #else
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, dim_state_p, &
-       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf
+       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf,obs_index_p_TB
 #endif
   Use mod_read_obs, &
        only: idx_obs_nc, pressure_obs, pressure_obserr, multierr, &
@@ -79,7 +79,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 
 
-#if defined CLMSA
+#if defined CLMSA 
   !kuw
   use shr_kind_mod, only: r8 => shr_kind_r8
   USE clmtype,                  ONLY : clm3
@@ -111,7 +111,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
   integer,allocatable :: local_dis(:),local_dim(:)
-#if defined CLMSA
+#if defined CLMSA 
   real(r8), pointer :: lon(:)
   real(r8), pointer :: lat(:)
   integer :: begp, endp   ! per-proc beginning and ending pft indices
@@ -125,7 +125,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   real    :: deltax, deltay !, deltaxy, y1 , x1, z1, x2, y2, z2, R, deltaxy_max
 #endif
 
-#if defined CLMSA
+#if defined CLMSA 
   lon   => clm3%g%londeg
   lat   => clm3%g%latdeg
   call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
@@ -138,6 +138,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   !  if I'm root in filter, read the nc file
   is_multi_observation_files = .true.
+  !LSN: is_multi_observation_files = .false.
   if (is_multi_observation_files) then
      write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.', step
 #if defined CLMSA
@@ -269,8 +270,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !ALLOCATE(obs_index(dim_obs_p))
   !ALLOCATE(obs(dim_obs_p))
   IF (ALLOCATED(obs_index_p)) DEALLOCATE(obs_index_p)
+  IF (ALLOCATED(obs_index_p_TB)) DEALLOCATE(obs_index_p_TB)
   IF (ALLOCATED(obs_p)) DEALLOCATE(obs_p)
   ALLOCATE(obs_index_p(dim_obs_p))
+  ALLOCATE(obs_index_p_TB(dim_obs_p))
   ALLOCATE(obs_p(dim_obs_p))
 
   ! allocate index for mapping between observations in nc input and sorted by pdaf
@@ -305,6 +308,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               !obs_index(count) = j
               !obs(count) = pressure_obs(i)
               obs_index_p(count) = j
+              obs_index_p_TB(count) = i !LSN: only for TB
               obs_p(count) = pressure_obs(i)
               if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
               obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
@@ -329,6 +333,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               !obs_index_p(count) = j + (size(lon) * (clmobs_layer(i)-1))
               !obs_index_p(count) = j + ((endg-begg+1) * (clmobs_layer(i)-1))
               obs_index_p(count) = j-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+              obs_index_p_TB(count) = j-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1)) !LSN: only for TB
               !write(*,*) 'obs_index_p(',count,') is',obs_index_p(count)
               obs_p(count) = clm_obs(i)
               if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)

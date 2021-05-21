@@ -25,7 +25,7 @@
 module mod_parallel_model
     use iso_c_binding
     include 'mpif.h'
-save
+!save
     ! mpi related
     integer :: npes_parflow
     integer :: coupcol

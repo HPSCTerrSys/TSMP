@@ -84,6 +84,7 @@ GLOBAL int pf_olfmasking;
 GLOBAL int pf_gwmasking;
 GLOBAL int pf_printgwmask;
 GLOBAL int pf_freq_paramupdate;
+GLOBAL int lcmem; //SPo 
 
 /* double */
 GLOBAL double *pmean,*satmean,*pvar,*satvar;
