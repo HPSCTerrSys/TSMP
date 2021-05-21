@@ -399,8 +399,8 @@ cat > INPUT_ASS << end_input_ass
  /
 end_input_ass
 
-export GRIB_DEFINITION_PATH=$EBROOTGRIB_API/share/grib_api/definitions/
-export GRIB_SAMPLES_PATH=$EBROOTGRIB_API/share/grib_api/samples/
+export GRIB_DEFINITION_PATH=__definitions__
+export GRIB_SAMPLES_PATH=__samples__
 
 namelists
 

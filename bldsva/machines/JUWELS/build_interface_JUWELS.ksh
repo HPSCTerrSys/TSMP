@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
   . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
@@ -10,50 +10,45 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
-
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  #defaultGrib1Path="/gpfs/homea/slts/slts00/local/jureca/grib1_DWD/grib1-DWD20110128.jureca_tc2015.07_psintel_opt_KGo/lib"
-
-  #CPS Remove hardwiring of compiler, introducing compiler switch 
-#  if [[ $compiler == "Intel" ]] ; then
-  #Intel GRIB
-#  defaultGribPath="/p/project/cslts/local/juwels/grib1_DWD/lib/"
-
-#  elif [[ $compiler == "Gnu" ]] ; then
-  #GNU GRIB
-#  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib"
-#  fi
-  defaultGribPath="$EBROOTGRIB_API"
-  defaultGribapiPath="$EBROOTGRIB_API"
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
+  defaultGribPath="$EBROOTECCODES"
+  defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-
+#
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+  elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+  else
+      defaultOptC="-O2" # Default
+  fi
 
   profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
-  defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultwtime="00:10:00"
+  defaultQ="devel"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy JUWELS module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
@@ -72,7 +67,7 @@ fi
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
@@ -81,7 +76,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=hbn33 
+#SBATCH --account=slts 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
@@ -199,6 +194,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 
