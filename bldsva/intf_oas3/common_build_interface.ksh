@@ -916,8 +916,8 @@ route "${cyellow}<<< c_substitutions_pfl${cnormal}"
 c_setup_pfl(){
 route "${cyellow}>>> c_setup_pfl${cnormal}"
 
-  if [ ! -f "$rundir/coup_oas.tcl" ]; then
-    comment "  $rundir/coup_oas.tcl does not exist, is copied, see c_setup_pfl()"
+  if [ $numInst > 1 ] || [! -f "$rundir/coup_oas.tcl" ]; then
+    comment "  $rundir/coup_oas.tcl does not exist (or for ensemble runs: numInst > 1), is copied, see c_setup_pfl()"
     cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
     check
   fi
