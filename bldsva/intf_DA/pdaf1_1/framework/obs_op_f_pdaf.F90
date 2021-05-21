@@ -65,6 +65,8 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
              n_modeltasks,task_id,COMM_filter,mype_filter,npes_filter, &
              MPI_DOUBLE, MPI_DOUBLE_PRECISION, MPI_INT,MPI_SUM,&
              MPI_INTEGER,filterpe,MPI_SUCCESS,mype_couple
+  !USE mod_read_obs, & 
+  !     ONLY: var_id_obs_nc 
   
   ! LSN: module load for the implementation of CMEM model 
   use mod_parallel_model, &

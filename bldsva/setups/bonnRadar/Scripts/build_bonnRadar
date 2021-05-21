@@ -1,15 +1,15 @@
 #!/bin/csh
 set tsmpver       = "1.2.0MCT"
 set refsetup      = "bonnRadar"
-set tsmpdir       = $HOME/terrsysmp
-set surfdata      = $HOME//database/bonnRadar/clm
-set machine       = "JURECA"
+set tsmpdir       = $PROJECT_chbn33/hbn331/terrsysmp
+set surfdata      = $PROJECT_chbn33/hbn331/database/bonnRadar/clm
+set machine       = "JUWELS"
 set sdate         = "HET"
 set mp_type       = 2683
 set ensemble_size = 1 
 set wtime         = "7:00:00" 
 set clmrstfil     = $surfdata/clm.${sdate}.r.2015-07-04-00000.nc
-
+set WORK          = $SCRATCH_chbn33/hbn331/
 # User Input
 
 set flag = $1
@@ -50,14 +50,7 @@ if ($flag == 2) then
   #CLM spinup
   ./setup_tsmp.ksh -v $tsmpver -c "pfl" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
 endif
-#COSMO standalone
-#./setup_tsmp.ksh -v $tsmpver -c "cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
-#
-#rm $surfdata/surfdata_0320x0320.nc
-#ln -s $surfdata/surfdata_${sdate}_0320x0320.nc $surfdata/surfdata_0320x0320.nc
-#./setup_tsmp.ksh -v $tsmpver -c "clm" -V $refsetup -Q $wtime -m $machine -I $sdate -r $WORK/run
-# -j "$clmrstfil"
-#
+
 if ($flag == 4) then
   echo "Setting COSMO-CLM run"
   #COSMO-CLM 
@@ -68,5 +61,14 @@ cd $WORK/run${sdate}${mp_type}
 ./lmrun_uc execluma
 #changed lnd.stdin
 #sed -i "s/surfdata_0320x0320.nc/surfdata_${sdate}_0320x0320.nc/"   $WORK/run${sdate}/lnd.stdin
+endif
+
+if ($flag == 5) then
+  echo "Setting COSMO run"
+./setup_tsmp.ksh -v $tsmpver -c "cos" -V $refsetup -Q $wtime -m $machine -I $sdate -N $ensemble_size -r $WORK/run
+#
+sed -i "s/itype_gscp=2727/itype_gscp=${mp_type}/" $WORK/run${sdate}${mp_type}/lmrun_uc
+cd $WORK/run${sdate}${mp_type}
+./lmrun_uc execluma
 endif
 exit 0

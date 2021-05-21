@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$HOME/database/rur/clm"
-  defaultFDOAS="$HOME/database/rur/oasis3"
-  defaultFDPFL="$HOME/database/rur/parflow"
+  defaultFDCLM="/p/project/chbn33/hbn331/database/rur/clm"
+  defaultFDOAS="/p/project/chbn33/hbn331/database/rur/oasis3"
+  defaultFDPFL="/p/project/chbn33/hbn331/database/rur/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/rur/lnd.stdin 
@@ -11,22 +11,22 @@ initSetup(){
 
 
   defaultNppn=48
-  defaultCLMProcX=10
-  defaultCLMProcY=16
-  defaultPFLProcX=5
-  defaultPFLProcY=22
+  defaultCLMProcX=4
+  defaultCLMProcY=3
+  defaultPFLProcX=12
+  defaultPFLProcY=7
 
-  defaultStartDate="2007-01-01 00"
-  defaultInitDate="2007-01-01 00"
+  defaultStartDate="2008-01-01 00"
+  defaultInitDate="2008-01-01 00"
   defaultRunhours=8760
 
-  gx_clm=720
-  gy_clm=752
+  gx_clm=360
+  gy_clm=376
   dt_clm=3600
-  res="0752x0720"
+  res="0376x0360"
 
-  gx_pfl=720
-  gy_pfl=752
+  gx_pfl=360
+  gy_pfl=376
   dt_pfl=1.0
   pflrunname="rurlaf"
   base_pfl=1.0
@@ -57,7 +57,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -85,6 +85,8 @@ route "${cblue}>> finalizeSetup${cnormal}"
         comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/ascii2pfb_slope.tcl $rundir/ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
+          cp $forcingdir_pfl/*.pfsol $rundir >> $log_file 2>> $err_file
+        check
           cp $forcingdir_pfl/xslope*.pfb $rundir >> $log_file 2>> $err_file
           cp $forcingdir_pfl/yslope*.pfb $rundir >> $log_file 2>> $err_file
         check
@@ -102,12 +104,12 @@ route "${cblue}>> finalizeSetup${cnormal}"
           tclsh ./ascii2pfb_slope.tcl >> $log_file 2>> $err_file
         check
 
-        comment "   copy initial pressure and script into rundir"
+        comment "   copy initial pressure, ksat, porosity and script into rundir"
           cp $forcingdir_pfl/ascii2pfb_psi.tcl $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
         check
-          cp $forcingdir_pfl/ptb*.pfb $rundir >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/Rur*.pfb $rundir >> $log_file 2>> $err_file
         check
-          chmod u+w $rundir/ptb*.pfb  $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/Rur*.pfb  $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
         check
         comment "   sed procs into pfbscript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_psi.tcl >> $log_file 2>> $err_file
@@ -122,5 +124,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
               
 
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

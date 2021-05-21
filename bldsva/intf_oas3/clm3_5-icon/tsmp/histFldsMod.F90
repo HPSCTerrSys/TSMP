@@ -222,6 +222,23 @@ contains
          avgflag='A', long_name='emitted infrared (longwave) radiation', &
          ptr_pft=clm3%g%l%c%p%pef%eflx_lwrad_out)
 
+    !SBr, CHa: output albedo in history file
+    call add_fld2d (fname='ALBD', units='proportion',type2d='numrad', &
+         avgflag='A', long_name='surface albedo (direct)', &
+         ptr_pft=clm3%g%l%c%p%pps%albd)
+                                                                        
+    call add_fld2d (fname='ALBI', units='proportion',type2d='numrad', &
+         avgflag='A', long_name='surface albedo (indirect)', &
+         ptr_pft=clm3%g%l%c%p%pps%albi)
+                                                                       
+    call add_fld2d (fname='ALBGRD', units='proportion',type2d='numrad', &
+         avgflag='A', long_name='ground albedo (direct)', &
+         ptr_col=clm3%g%l%c%cps%albgrd)
+
+    call add_fld2d (fname='ALBGRI', units='proportion',type2d='numrad', &
+         avgflag='A', long_name='ground albedo (indirect)', &
+         ptr_col=clm3%g%l%c%cps%albgri)
+
     ! Surface energy fluxes
 
     call add_fld1d (fname='FCTR', units='watt/m^2',  &

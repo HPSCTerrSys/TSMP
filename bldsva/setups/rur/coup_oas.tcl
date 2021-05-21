@@ -24,10 +24,10 @@ pfset Process.Topology.R 1
 #------------------------------------------------------------------------
 pfset ComputationalGrid.Lower.X			 0.0
 pfset ComputationalGrid.Lower.Y			 0.0
-pfset ComputationalGrid.Lower.Z			 -30.
+pfset ComputationalGrid.Lower.Z			   0.
 
-pfset ComputationalGrid.DX			 500.
-pfset ComputationalGrid.DY		         500. 
+pfset ComputationalGrid.DX			 160.
+pfset ComputationalGrid.DY		         240. 
 pfset ComputationalGrid.DZ			 1.00
 
 pfset ComputationalGrid.NX			 __ngpflx_bldsva__ 
@@ -46,41 +46,13 @@ pfset Domain.GeomName                            domain
 #---------------------------------------------------------
 # Domain Geometry Input 
 #---------------------------------------------------------
-pfset GeomInput.Names	                     "domaininput indinput"
-pfset GeomInput.domaininput.InputType         Box
-pfset GeomInput.domaininput.GeomName          domain
+pfset GeomInput.Names                        "solidinput"
+pfset GeomInput.solidinput.InputType         SolidFile
+pfset GeomInput.solidinput.GeomNames         domain
+pfset GeomInput.solidinput.FileName          "__forcingdir__/geom.pfsol"
 
-pfset Geom.domain.Lower.X                     [pfget ComputationalGrid.Lower.X] 
-pfset Geom.domain.Lower.Y                     [pfget ComputationalGrid.Lower.Y] 
-pfset Geom.domain.Lower.Z                     [pfget ComputationalGrid.Lower.Z] 
+pfset Geom.domain.Patches                    "top bottom perimeter"
 
-set DX                                        [pfget ComputationalGrid.DX]
-set DY                                        [pfget ComputationalGrid.DY]
-set NX                                        [pfget ComputationalGrid.NX]
-set NY                                        [pfget ComputationalGrid.NY]
-
-pfset Geom.domain.Upper.X                     [expr $NX*$DX]
-pfset Geom.domain.Upper.Y                     [expr $NY*$DY] 
-pfset Geom.domain.Upper.Z                     0.0
-pfset Geom.domain.Patches	             "x-lower x-upper y-lower y-upper z-lower z-upper"
-
-pfset GeomInput.indinput.InputType  IndicatorField
-pfset GeomInput.indinput.GeomNames  "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
-pfset Geom.indinput.FileName  "__forcingdir__/rurSoilInd.pfb"
-
-pfset GeomInput.v1.Value              1
-pfset GeomInput.v2.Value              2
-pfset GeomInput.v3.Value              3 
-pfset GeomInput.v4.Value              4 
-pfset GeomInput.v5.Value              5
-pfset GeomInput.v6.Value              6
-pfset GeomInput.v7.Value              7
-pfset GeomInput.a1.Value              11
-pfset GeomInput.a2.Value              12
-pfset GeomInput.a3.Value              13
-pfset GeomInput.a4.Value              14
-pfset GeomInput.a5.Value              15
-pfset GeomInput.a6.Value              16
 #-----------------------------------------------------------------------------
 # VARIABLE dz ASSIGNMENTS
 #-----------------------------------------------------------------------------
@@ -140,57 +112,14 @@ pfset Cycle.constant.alltime.Length      1
 pfset Cycle.constant.Repeat             -1
 
 #  HYDROLOGICAL PARAMETERS
-#Schaap and Leiz (1998), Soil Science
 #  SETUP AND VALUES
 #-----------------------------------------------------------------------------
 # Perm
 #-----------------------------------------------------------------------------
-pfset Geom.Perm.Names			"v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
-
-pfset Geom.v1.Perm.Type              Constant
-pfset Geom.v1.Perm.Value             0.0328
-
-pfset Geom.v2.Perm.Type              Constant
-pfset Geom.v2.Perm.Value             0.0328
-
-pfset Geom.v3.Perm.Type              Constant
-pfset Geom.v3.Perm.Value             0.0328
-
-pfset Geom.v4.Perm.Type              Constant
-pfset Geom.v4.Perm.Value             0.0328
-
-pfset Geom.v5.Perm.Type              Constant
-pfset Geom.v5.Perm.Value             0.0328
-
-pfset Geom.v6.Perm.Type              Constant
-pfset Geom.v6.Perm.Value             0.0328
-
-pfset Geom.v7.Perm.Type              Constant
-pfset Geom.v7.Perm.Value             0.0328
-
-pfset Geom.v8.Perm.Type              Constant
-pfset Geom.v8.Perm.Value             0.0328
-
-pfset Geom.v9.Perm.Type              Constant
-pfset Geom.v9.Perm.Value             0.0328
-
-pfset Geom.a1.Perm.Type              Constant
-pfset Geom.a1.Perm.Value             0.0045
-
-pfset Geom.a2.Perm.Type              Constant
-pfset Geom.a2.Perm.Value             0.0045
-
-pfset Geom.a3.Perm.Type              Constant
-pfset Geom.a3.Perm.Value             0.0045
-
-pfset Geom.a4.Perm.Type              Constant
-pfset Geom.a4.Perm.Value             0.0045
-
-pfset Geom.a5.Perm.Type              Constant
-pfset Geom.a5.Perm.Value             0.0045
-
-pfset Geom.a6.Perm.Type              Constant
-pfset Geom.a6.Perm.Value             0.0045
+pfset Geom.Perm.Names            "domain"
+pfset Geom.domain.Perm.Type      "Constant"
+pfset Geom.domain.Perm.Type      "PFBFile"
+pfset Geom.domain.Perm.FileName  "./Rur_8arcsec_ksat_aquifer_lowvar.pfb"
 
 pfset Perm.TensorType			 TensorByGeom
 pfset Geom.Perm.TensorByGeom.Names	 "domain"
@@ -203,7 +132,7 @@ pfset Geom.domain.Perm.TensorValZ	 1.0
 #-----------------------------------------------------------------------------
 pfset SpecificStorage.Type			 Constant
 pfset SpecificStorage.GeomNames			 "domain"
-pfset Geom.domain.SpecificStorage.Value		 1.0e-4
+pfset Geom.domain.SpecificStorage.Value		 0.001
 
 #-----------------------------------------------------------------------------
 # Phases
@@ -232,214 +161,29 @@ pfset Geom.Retardation.GeomNames	 ""
 #-----------------------------------------------------------------------------
 # Porosity
 #-----------------------------------------------------------------------------
-pfset Geom.Porosity.GeomNames         "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6" 
-
-pfset Geom.v1.Porosity.Type          Constant
-pfset Geom.v1.Porosity.Value         0.4386
-
-pfset Geom.v2.Porosity.Type          Constant
-pfset Geom.v2.Porosity.Value         0.4386
-
-pfset Geom.v3.Porosity.Type          Constant
-pfset Geom.v3.Porosity.Value         0.4386
-
-pfset Geom.v4.Porosity.Type          Constant
-pfset Geom.v4.Porosity.Value         0.4386
-
-pfset Geom.v5.Porosity.Type          Constant
-pfset Geom.v5.Porosity.Value         0.4386
-
-pfset Geom.v6.Porosity.Type          Constant
-pfset Geom.v6.Porosity.Value         0.4386
-
-pfset Geom.v7.Porosity.Type          Constant
-pfset Geom.v7.Porosity.Value         0.4386
-
-pfset Geom.v8.Porosity.Type          Constant
-pfset Geom.v8.Porosity.Value         0.4386
-
-pfset Geom.v9.Porosity.Type          Constant
-pfset Geom.v9.Porosity.Value         0.4386
-
-pfset Geom.a1.Porosity.Type          Constant
-pfset Geom.a1.Porosity.Value         0.4071
-
-pfset Geom.a2.Porosity.Type          Constant
-pfset Geom.a2.Porosity.Value         0.4071
-
-pfset Geom.a3.Porosity.Type          Constant
-pfset Geom.a3.Porosity.Value         0.4071
-
-pfset Geom.a4.Porosity.Type          Constant
-pfset Geom.a4.Porosity.Value         0.4071
-
-pfset Geom.a5.Porosity.Type          Constant
-pfset Geom.a5.Porosity.Value         0.4071
-
-pfset Geom.a6.Porosity.Type          Constant
-pfset Geom.a6.Porosity.Value         0.4071
+pfset Geom.Porosity.GeomNames         "domain"
+pfset Geom.domain.Porosity.Type     "PFBFile"
+pfset Geom.domain.Porosity.FileName "./Rur_8arcsec_poro.pfb"
 
 #-----------------------------------------------------------------------------
 # Relative Permeability
 #-----------------------------------------------------------------------------
 pfset Phase.RelPerm.Type               VanGenuchten
-pfset Phase.RelPerm.GeomNames          "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6" 
+pfset Phase.RelPerm.GeomNames          "domain"
 
-pfset Geom.v1.RelPerm.Alpha         0.4597
-pfset Geom.v1.RelPerm.N             1.4652
-pfset Geom.v1.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v1.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.v2.RelPerm.Alpha         0.4597
-pfset Geom.v2.RelPerm.N             1.4652
-pfset Geom.v2.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v2.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v3.RelPerm.Alpha         0.4597
-pfset Geom.v3.RelPerm.N             1.4652
-pfset Geom.v3.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v3.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v4.RelPerm.Alpha         0.4597
-pfset Geom.v4.RelPerm.N             1.4652
-pfset Geom.v4.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v4.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v5.RelPerm.Alpha         0.4597
-pfset Geom.v5.RelPerm.N             1.4652
-pfset Geom.v5.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v5.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v6.RelPerm.Alpha         0.4597
-pfset Geom.v6.RelPerm.N             1.4652
-pfset Geom.v6.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v6.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v7.RelPerm.Alpha         0.4597
-pfset Geom.v7.RelPerm.N             1.4652
-pfset Geom.v7.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v7.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v8.RelPerm.Alpha         0.4597
-pfset Geom.v8.RelPerm.N             1.4652
-pfset Geom.v8.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v8.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.v9.RelPerm.Alpha         0.4597
-pfset Geom.v9.RelPerm.N             1.4652
-pfset Geom.v9.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.v9.RelPerm.MinPressureHead   $VG_pmin
-
-pfset Geom.a1.RelPerm.Alpha       0.39
-pfset Geom.a1.RelPerm.N           1.4
-pfset Geom.a1.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a1.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.a2.RelPerm.Alpha       0.39
-pfset Geom.a2.RelPerm.N           1.4
-pfset Geom.a2.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a2.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.a3.RelPerm.Alpha       0.39
-pfset Geom.a3.RelPerm.N           1.4
-pfset Geom.a3.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a3.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.a4.RelPerm.Alpha       0.39
-pfset Geom.a4.RelPerm.N           1.4
-pfset Geom.a4.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a4.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.a5.RelPerm.Alpha       0.39
-pfset Geom.a5.RelPerm.N           1.4
-pfset Geom.a5.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a5.RelPerm.MinPressureHead   $VG_pmin 
-
-pfset Geom.a6.RelPerm.Alpha       0.39
-pfset Geom.a6.RelPerm.N           1.4
-pfset Geom.a6.RelPerm.NumSamplePoints   $VG_points
-pfset Geom.a6.RelPerm.MinPressureHead   $VG_pmin 
+pfset Geom.domain.RelPerm.Alpha         2.1
+pfset Geom.domain.RelPerm.N             2.1
 
 #---------------------------------------------------------
 # Saturation
 #---------------------------------------------------------
 pfset Phase.Saturation.Type              VanGenuchten
-pfset Phase.Saturation.GeomNames         "v1 v2 v3 v4 v5 v6 v7 v8 v9 a1 a2 a3 a4 a5 a6"
+pfset Phase.Saturation.GeomNames         "domain"
 
-pfset Geom.v1.Saturation.Alpha        0.4597
-pfset Geom.v1.Saturation.N            1.4652
-pfset Geom.v1.Saturation.SRes         0.21
-pfset Geom.v1.Saturation.SSat         1.0
-
-pfset Geom.v2.Saturation.Alpha        0.4597
-pfset Geom.v2.Saturation.N            1.4652
-pfset Geom.v2.Saturation.SRes         0.21
-pfset Geom.v2.Saturation.SSat         1.0
-
-pfset Geom.v3.Saturation.Alpha        0.4597
-pfset Geom.v3.Saturation.N            1.4652
-pfset Geom.v3.Saturation.SRes         0.21
-pfset Geom.v3.Saturation.SSat         1.0
-
-pfset Geom.v4.Saturation.Alpha        0.4597
-pfset Geom.v4.Saturation.N            1.4652
-pfset Geom.v4.Saturation.SRes         0.21
-pfset Geom.v4.Saturation.SSat         1.0
-
-pfset Geom.v5.Saturation.Alpha        0.4597
-pfset Geom.v5.Saturation.N            1.4652
-pfset Geom.v5.Saturation.SRes         0.21
-pfset Geom.v5.Saturation.SSat         1.0
-
-pfset Geom.v6.Saturation.Alpha        0.4597
-pfset Geom.v6.Saturation.N            1.4652
-pfset Geom.v6.Saturation.SRes         0.21
-pfset Geom.v6.Saturation.SSat         1.0
-
-pfset Geom.v7.Saturation.Alpha        0.4597
-pfset Geom.v7.Saturation.N            1.4652
-pfset Geom.v7.Saturation.SRes         0.21
-pfset Geom.v7.Saturation.SSat         1.0
-
-pfset Geom.v8.Saturation.Alpha        0.4597
-pfset Geom.v8.Saturation.N            1.4652
-pfset Geom.v8.Saturation.SRes         0.21
-pfset Geom.v8.Saturation.SSat         1.0
-
-pfset Geom.v9.Saturation.Alpha        0.4597
-pfset Geom.v9.Saturation.N            1.4652
-pfset Geom.v9.Saturation.SRes         0.21
-pfset Geom.v9.Saturation.SSat         1.0
-
-pfset Geom.a1.Saturation.Alpha        0.39
-pfset Geom.a1.Saturation.N            1.4
-pfset Geom.a1.Saturation.SRes         0.1
-pfset Geom.a1.Saturation.SSat         1.0
-
-pfset Geom.a2.Saturation.Alpha        0.39
-pfset Geom.a2.Saturation.N            1.4
-pfset Geom.a2.Saturation.SRes         0.1
-pfset Geom.a2.Saturation.SSat         1.0
-
-pfset Geom.a3.Saturation.Alpha        0.39
-pfset Geom.a3.Saturation.N            1.4
-pfset Geom.a3.Saturation.SRes         0.1
-pfset Geom.a3.Saturation.SSat         1.0
-
-pfset Geom.a4.Saturation.Alpha        0.39
-pfset Geom.a4.Saturation.N            1.4
-pfset Geom.a4.Saturation.SRes         0.1
-pfset Geom.a4.Saturation.SSat         1.0
-
-pfset Geom.a5.Saturation.Alpha        0.39
-pfset Geom.a5.Saturation.N            1.4
-pfset Geom.a5.Saturation.SRes         0.1
-pfset Geom.a5.Saturation.SSat         1.0
-
-pfset Geom.a6.Saturation.Alpha        0.39
-pfset Geom.a6.Saturation.N            1.4
-pfset Geom.a6.Saturation.SRes         0.1
-pfset Geom.a6.Saturation.SSat         1.0
+pfset Geom.domain.Saturation.Alpha        2.1
+pfset Geom.domain.Saturation.N            2.1
+pfset Geom.domain.Saturation.SRes         0.05
+pfset Geom.domain.Saturation.SSat         1.0
 
 #-----------------------------------------------------------------------------
 # Wells
@@ -450,32 +194,19 @@ pfset Wells.Names				 ""
 # Boundary Conditions: Pressure
 #-----------------------------------------------------------------------------
 
-pfset Geom.domain.Patches             "x-lower x-upper y-lower y-upper z-lower z-upper"
-pfset BCPressure.PatchNames [pfget Geom.domain.Patches]
+pfset Geom.domain.Patches                   "top bottom perimeter"
+pfset BCPressure.PatchNames                 [pfget Geom.domain.Patches]
+pfset Patch.top.BCPressure.Type             OverlandFlow
+pfset Patch.top.BCPressure.Cycle            "constant"
+pfset Patch.top.BCPressure.alltime.Value    0.0
 
-pfset Patch.x-lower.BCPressure.Type                   FluxConst
-pfset Patch.x-lower.BCPressure.Cycle                  "constant"
-pfset Patch.x-lower.BCPressure.alltime.Value          0.0
+pfset Patch.bottom.BCPressure.Type                   FluxConst
+pfset Patch.bottom.BCPressure.Cycle                  "constant"
+pfset Patch.bottom.BCPressure.alltime.Value          0.0
 
-pfset Patch.y-lower.BCPressure.Type                   FluxConst
-pfset Patch.y-lower.BCPressure.Cycle                  "constant"
-pfset Patch.y-lower.BCPressure.alltime.Value          0.0
-
-pfset Patch.z-lower.BCPressure.Type                   FluxConst
-pfset Patch.z-lower.BCPressure.Cycle                  "constant"
-pfset Patch.z-lower.BCPressure.alltime.Value          0.0
-
-pfset Patch.x-upper.BCPressure.Type                   FluxConst
-pfset Patch.x-upper.BCPressure.Cycle                  "constant"
-pfset Patch.x-upper.BCPressure.alltime.Value          0.0
-
-pfset Patch.y-upper.BCPressure.Type                   FluxConst
-pfset Patch.y-upper.BCPressure.Cycle                  "constant"
-pfset Patch.y-upper.BCPressure.alltime.Value          0.0
-
-pfset Patch.z-upper.BCPressure.Type                   OverlandFlow
-pfset Patch.z-upper.BCPressure.Cycle                  "constant"
-pfset Patch.z-upper.BCPressure.alltime.Value           0.0
+pfset Patch.perimeter.BCPressure.Type                   FluxConst
+pfset Patch.perimeter.BCPressure.Cycle                  "constant"
+pfset Patch.perimeter.BCPressure.alltime.Value          0.0
 
 #  TOPOGRAPHY & SLOPES IN
 #  BOTH X- & Y- DIRECTIONS
@@ -484,33 +215,31 @@ pfset Patch.z-upper.BCPressure.alltime.Value           0.0
 #---------------------------------------------------------
 pfset TopoSlopesX.Type			 "PFBFile"
 pfset TopoSlopesX.GeomNames		 "domain"
-pfset TopoSlopesX.FileName		 "__forcingdir__/xslope.pfb"
+pfset TopoSlopesX.FileName		 "__forcingdir__/xslope_srtm_8arcsec_1D_denoise.pfb"
 
 #---------------------------------------------------------
 # Topo slopes in y-direction
 #---------------------------------------------------------
 pfset TopoSlopesY.Type			 "PFBFile"
 pfset TopoSlopesY.GeomNames		 "domain"
-pfset TopoSlopesY.FileName		 "__forcingdir__/yslope.pfb"
+pfset TopoSlopesY.FileName		 "__forcingdir__/yslope_srtm_8arcsec_1D_denoise.pfb"
 
 #---------------------------------------------------------
 # Mannings coefficient
 #---------------------------------------------------------
 pfset Mannings.Type			 "Constant"
 pfset Mannings.GeomNames		 "domain"
-pfset Mannings.Geom.domain.Value	 5.52e-6
+pfset Mannings.Geom.domain.Value	 0.0001 
 
 #---------------------------------------------------------
 # Initial conditions: water pressure
 #---------------------------------------------------------
 #
 pfset ICPressure.Type                    __pfl_ICPpressureType__
+pfset ICPressure.Type                    "PFBFile"
 pfset ICPressure.GeomNames               domain
-pfset Geom.domain.ICPressure.Value       __pfl_ICPpressureValue__
+pfset Geom.domain.ICPressure.FileName    "./Rur_8arcsec_1D_suaquifer_lowvar.out.press.00010.pfb"
 pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
-pfset Geom.domain.ICPressure.RefGeom     domain
-pfset Geom.domain.ICPressure.RefPatch    z-upper
-
 #
 #-----------------------------------------------------------------------------
 # Phase sources:
@@ -527,26 +256,25 @@ pfset KnownSolution				 NoKnownSolution
 # Set solver parameters
 #-----------------------------------------------------------------------------
 pfset Solver					 Richards
-pfset Solver.MaxIter				 10000
+pfset Solver.MaxIter				 90000
 
 pfset Solver.TerrainFollowingGrid                True
 
-pfset Solver.Nonlinear.MaxIter			 100
+pfset Solver.Nonlinear.MaxIter			 1000
 pfset Solver.Nonlinear.ResidualTol		 1e-5
-pfset Solver.Nonlinear.EtaChoice		 Walker1
+pfset Solver.Nonlinear.EtaChoice		 Walker2
 pfset Solver.Nonlinear.EtaChoice		 EtaConstant
 pfset Solver.Nonlinear.EtaValue			 0.001
-pfset Solver.Nonlinear.UseJacobian		 False
+pfset Solver.Nonlinear.UseJacobian		 True 
 pfset Solver.Nonlinear.DerivativeEpsilon	 1e-16
 pfset Solver.Nonlinear.StepTol			 1e-12
 pfset Solver.Nonlinear.Globalization		 LineSearch
-pfset Solver.Linear.KrylovDimension		 30
+pfset Solver.Linear.KrylovDimension		 1000
 pfset Solver.Linear.MaxRestart			 2
 
-pfset Solver.Linear.Preconditioner                       PFMG
-#pfset Solver.Linear.Preconditioner			 MGSemi
-pfset Solver.Linear.Preconditioner.MGSemi.MaxIter	 1
-pfset Solver.Linear.Preconditioner.MGSemi.MaxLevels	 10
+pfset Solver.Linear.Preconditioner               PFMGOctree
+pfset Solver.Linear.Preconditioner.SymmetricMat  Nonsymmetric
+
 pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12

@@ -1,0 +1,73 @@
+##!/bin/bash
+
+module --force purge
+
+module load intel/18.0.4
+if [ $? -eq 0 ]; then
+    echo "module intel/18.0.4 is loaded!!"
+else
+    echo "FAIL to load intel/18.0.4!!"
+fi
+#
+module load openmpi/2.0.2p2_hpcx-intel14
+if [ $? -eq 0 ]; then
+    echo "module openmpi/2.0.2p2_hpcx-intel14 is loaded!!"
+else
+    echo "FAIL to load openmpi/2.0.2p2_hpcx-intel14!!"
+fi
+export PATH=$PATH:/pf/b/b380190/lib/tcl8.9.6/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/pf/b/b380190/lib/tcl8.9.6/lib
+
+export PATH=$PATH:/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sw/rhel6-x64/netcdf/netcdf_c-4.4.0-parallel-openmpi2-intel14/lib
+
+export PATH=$PATH:/sw/rhel6-x64/netcdf/netcdf_fortran-4.4.3-parallel-openmpi2-intel14/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sw/rhel6-x64/netcdf/netcdf_fortran-4.4.3-parallel-openmpi2-intel14/lib
+
+export PATH=$PATH:/sw/rhel6-x64/hdf5/hdf5-1.8.18-parallel-openmpi2-intel14/bin
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/sw/rhel6-x64/hdf5/hdf5-1.8.18-parallel-openmpi2-intel14/lib
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/pf/b/b380190/lib/grib_api_dir13/lib
+export GRIB_DEFINITION_PATH=/pf/b/b380190/lib/grib_api_dir13/share/grib_api/definitions/
+export GRIB_SAMPLES_PATH=/pf/b/b380190/lib/grib_api_dir13/share/grib_api/samples/
+#
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/pf/b/b380190/lib/DWD-libgrib1_20110128/lib
+#export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/pf/b/b380190/lib/grib_api_dir13/lib
+#
+
+
+
+#
+#module load gcc/7.1.0
+#if [ $? -eq 0 ]; then
+#    echo "module gcc/7.1.0 is loaded!!"
+#else
+#    echo "FAIL to load gcc/7.1.0!!"
+#fi
+#
+#module load cdo/1.9.7-magicsxx-gcc64
+#if [ $? -eq 0 ]; then
+#    echo "module cdo/1.9.7-magicsxx-gcc64 is loaded!!"
+#else
+#    echo "FAIL to load cdo/1.9.7-magicsxx-gcc64!!"
+#fi
+#
+#module load ncl/6.5.0-gccsys
+#if [ $? -eq 0 ]; then
+#    echo "module ncl/6.5.0-gccsys is loaded!!"
+#else
+#    echo "FAIL to load ncl/6.5.0-gccsys!!"
+#fi
+#
+#module load ncview/2.1.4-gcc48
+#if [ $? -eq 0 ]; then
+#    echo "module ncview/2.1.4-gcc48 is loaded!!"
+#else
+#    echo "FAIL to load ncview/2.1.4-gcc48!!"
+#fi
+
+#module load nco/4.7.5-gcc64
+#module load ncl/6.5.0-gccsys
+#module load cdo/1.9.7-magicsxx-gcc64
+#module load ncview/2.1.4-gcc48
+#module load python/2.7-ve0

@@ -1202,7 +1202,12 @@ ELSEIF (yaction == 'tracer') THEN
   ! Determine if all the satads should be done
   ! (like for the 1-moment schemes), not just the
   ! satad after the microphysics at the end of the timestep:
-  l2mom_satads = .FALSE.
+!CPS   l2mom_satads = .FALSE.
+!CPS Barrett et al. 2019 suggest time dependency of microphysical processes
+!CPS personal communication with Axel Seifert, also suggest that it is better
+!CPS to turn this on for all runs, as the time step dependency is less severe
+!CPS with .true.
+  l2mom_satads = .TRUE.
 
   ! However, l2mom_do_extra_satads = .TRUE. can only be used
   ! for itype_gscp = ??[6-9]? (e.g., 2767, but not 2737),

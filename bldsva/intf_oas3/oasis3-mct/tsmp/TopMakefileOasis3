@@ -53,10 +53,10 @@ makedirs:
 makemct:
 	@echo "=> Compiling library mpeu and mct"
 	(cd $(ARCHDIR)/build/lib/mctdir; cp -f -r -p $(LIBSRC)/mct/* .;\
-          export SKIN_MODE=none; \
+         export SCOREP_WRAPPER=off ;\
          ./configure MPIFC="$(F90)" FC="$(F90)" CC="$(CC)" \
          1>> $(LOG) 2>> $(ERR) ;\
-         export SKIN_MODE=mpi; \
+         export SCOREP_WRAPPER=on ; \
          $(MAKE) 1>> $(LOG) 2>> $(ERR) ; \
          cp -f ./*/lib*.a   $(ARCHDIR)/lib/; \
          cp -f ./*/*.o    $(ARCHDIR)/build/lib/mct/; \

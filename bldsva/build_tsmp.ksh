@@ -21,7 +21,8 @@ getDefaults(){
   # pathes will be set to tested platform defaults if empty
   def_mpiPath=""
   def_ncdfPath=""
-  def_grib1Path=""
+  def_grib1path=""
+  def_gribPath=""
   def_tclPath=""
   def_hyprePath=""
   def_siloPath=""
@@ -35,6 +36,9 @@ getDefaults(){
 
   #compiler optimization
   def_optComp=""   # will be set to platform defaults if empty
+
+  #compiler options, CPS remove hardwiring of compilers
+  def_compiler="Gnu"  # will be set to Gnu if empty
 
   #profiling
   def_profiling="no"
@@ -66,6 +70,7 @@ setDefaults(){
   rootdir=$def_rootdir
   bindir=$def_bindir
   optComp=$def_optComp
+  compiler=$def_compiler
   profiling=$def_profiling
   oasdir=$def_oasdir
   clmdir=$def_clmdir
@@ -79,6 +84,7 @@ setDefaults(){
   lapackPath=$def_lapackPath
   pncdfPath=$def_pncdfPath
   grib1Path=$def_grib1Path
+  gribPath=$def_gribPath
   tclPath=$def_tclPath
   hyprePath=$def_hyprePath
   siloPath=$def_siloPath
@@ -115,10 +121,12 @@ clearMachineSelection(){
   mpiPath=""
   ncdfPath=""
   grib1Path=""
+  gribPath=""
   tclPath=""
   hyprePath=""
   siloPath=""
   optComp=""
+  compiler=""
   clearPathSelection
 }
 
@@ -140,6 +148,7 @@ setSelection(){
   if [[ $mpiPath == "" ]] then ; mpiPath=$defaultMpiPath ; fi
   if [[ $ncdfPath == "" ]] then ; ncdfPath=$defaultNcdfPath  ; fi
   if [[ $grib1Path == "" ]] then ; grib1Path=$defaultGrib1Path ; fi
+  if [[ $gribPath == "" ]] then ; gribPath=$defaultGribPath ; fi
   if [[ $tclPath == "" ]] then ; tclPath=$defaultTclPath ; fi
   if [[ $hyprePath == "" ]] then ; hyprePath=$defaultHyprePath ; fi
   if [[ $siloPath == "" ]] then ; siloPath=$defaultSiloPath ; fi
@@ -148,7 +157,9 @@ setSelection(){
 
   #compiler optimization
   if [[ $optComp == "" ]] then ; optComp=$defaultOptC ; fi
-
+  
+  #compiler selection
+  if [[ $compiler == "" ]] then ; compiler=$defaultcompiler ; fi
 }
 
 finalizeSelection(){
@@ -196,23 +207,21 @@ setCombination(){
 
 
 compileClm(){
-route "${cblue}> c_compileClm${cnormal}"
+route "${cyellow}> c_compileClm${cnormal}"
   comment "  source clm interface script"
+    comment "intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_clm
-    if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cblue}< c_compileClm${cnormal}" ; return  ;fi 
+    if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
   comment "  backup clm dir to: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
-    if [[ $withICON == "true" ]]; then
-      clmicon="${mList[1]}"
-      clmicon=${clmicon%'-icon'}
-      cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
-    else
-      cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
-    fi
+    # remove '-icon' from the mList[1] name
+    clmicon="${mList[1]}"
+    clmicon=${clmicon%'-icon'}
+    cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
   check
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
@@ -225,16 +234,16 @@ route "${cblue}> c_compileClm${cnormal}"
     if [[ ${options["clm"]} == "make" || ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       make_clm
     fi
-route "${cblue}< c_compileClm${cnormal}"
+route "${cyellow}< c_compileClm${cnormal}"
 }
 
 compileIcon(){
-route "${cblue}> c_compileIcon${cnormal}"
+route "${cyellow}> c_compileIcon${cnormal}"
   comment "  source icon interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_icon
-    if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cblue}< c_compileIcon${cnormal}" ;  return  ;fi 
+    if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
     if [[ ${options["icon"]} == "fresh" ]] ; then 
   comment "  backup icon dir to: $icondir"
       rm -rf $icondir >> $log_file 2>> $err_file
@@ -252,16 +261,16 @@ route "${cblue}> c_compileIcon${cnormal}"
     if [[ ${options["icon"]} == "make" || ${options["icon"]} == "build" || ${options["icon"]} == "fresh" ]] ; then
       make_icon
     fi
-route "${cblue}< c_compileIcon${cnormal}"
+route "${cyellow}< c_compileIcon${cnormal}"
 }
 
 compileCosmo(){
-route "${cblue}> c_compileCosmo${cnormal}"
+route "${cyellow}> c_compileCosmo${cnormal}"
   comment "  source cos interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_cos
-    if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cblue}< c_compileCosmo${cnormal}" ;  return  ;fi 
+    if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
   comment "  backup cos dir to: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
@@ -279,16 +288,16 @@ route "${cblue}> c_compileCosmo${cnormal}"
     if [[ ${options["cos"]} == "make" || ${options["cos"]} == "build" || ${options["cos"]} == "fresh" ]] ; then
       make_cos
     fi
-route "${cblue}< c_compileCosmo${cnormal}"
+route "${cyellow}< c_compileCosmo${cnormal}"
 }
 
 compileOasis(){
-route "${cblue}> c_compileOasis${cnormal}"
+route "${cyellow}> c_compileOasis${cnormal}"
   comment "  source oas interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_oas
-    if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cblue}< c_compileOasis${cnormal}" ; return  ;fi 
+    if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
   comment "  backup oas dir to: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
@@ -306,16 +315,16 @@ route "${cblue}> c_compileOasis${cnormal}"
     if [[ ${options["oas"]} == "make" || ${options["oas"]} == "build" || ${options["oas"]} == "fresh" ]] ; then
       make_oas
     fi
-route "${cblue}< c_compileOasis${cnormal}"
+route "${cyellow}< c_compileOasis${cnormal}"
 }
 
 compileParflow(){
-route "${cblue}> c_compileParflow${cnormal}"
+route "${cyellow}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
     . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
-    if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cblue}< c_compileParflow${cnormal}" ;return  ;fi 
+    if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
   comment "  backup pfl dir to: $pfldir"
       rm -rf $pfldir >> $log_file 2>> $err_file
@@ -333,18 +342,18 @@ route "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["pfl"]} == "make" || ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       make_pfl
     fi
-route "${cblue}< c_compileParflow${cnormal}"
+route "${cyellow}< c_compileParflow${cnormal}"
 }
 
 
 #DA
 compileDA(){
-route "${cblue}> c_compileParflow${cnormal}"
+route "${cyellow}> c_compileDA${cnormal}"
   comment "  source da interface script"
     . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh >> $log_file 2>> $err_file
   check
     always_da
-    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cblue}< c_compileDA${cnormal}" ;return  ;fi 
+    if [[ ${options["da"]} == "skip" ]] ; then ; route "${cyellow}< c_compileDA${cnormal}" ;return  ;fi 
     if [[ ${options["da"]} == "fresh" ]] ; then 
   comment "  backup da dir to: $dadir"
       rm -rf $dadir >> $log_file 2>> $err_file
@@ -362,7 +371,7 @@ route "${cblue}> c_compileParflow${cnormal}"
     if [[ ${options["da"]} == "make" || ${options["da"]} == "build" || ${options["da"]} == "fresh" ]] ; then
       make_da
     fi  
-route "${cblue}< c_compileDA${cnormal}"
+route "${cyellow}< c_compileDA${cnormal}"
 }
 
 
@@ -382,12 +391,12 @@ runCompilation(){
 
 interactive(){
   clear
-  print "${cblue}##############################################${cnormal}"
-  print "${cblue}         Interactive installation...          ${cnormal}"
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
+  print "${cyellow}         Interactive installation...          ${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   print "The following variables are needed:"
   printState
-  print "${cblue}##############################################${cnormal}"
+  print "${cyellow}##############################################${cnormal}"
   PS3="Your selection(1-3)?"
   select ret in "!!!start!!!" "edit" "exit"
   do  
@@ -479,7 +488,7 @@ interactive(){
 		  if [[ $numb == 17 ]] ; then ; read siloPath ; fi
 		  if [[ $numb == 18 ]] ; then ; read hyprePath ; fi
 	 	  if [[ $numb == 19 ]] ; then ; read tclPath ; fi
-		  if [[ $numb == 20 ]] ; then ; read grib1Path ; fi
+		  if [[ $numb == 20 ]] ; then ; read gribPath ; fi
 		  if [[ $numb == 21 ]] ; then ; read ncdfPath ; fi
  		  if [[ $numb == 22 ]] ; then ; read pncdfPath ; fi
 		  if [[ $numb == 23 ]] ; then ; read lapackPath ; fi
@@ -497,6 +506,7 @@ interactive(){
 
                   if [[ $numb == 27 ]] ; then ; read readCLM ; fi
 		  if [[ $numb == 28 ]] ; then ; read freeDrain ; fi
+                  if [[ $numb == 29 ]] ; then ; read compiler ; fi
 		done	
 		interactive
 	  ;;
@@ -535,16 +545,17 @@ printState(){
   print "${cred}(17)${cnormal} silo path (default=$defaultSiloPath): ${cgreen}$siloPath ${cnormal}"
   print "${cred}(18)${cnormal} hypre path (default=$defaultHyprePath): ${cgreen}$hyprePath ${cnormal}"
   print "${cred}(19)${cnormal} tcl path (default=$defaultTclPath): ${cgreen}$tclPath ${cnormal}"
-  print "${cred}(20)${cnormal} grib1 path (default=$defaultGrib1Path): ${cgreen}$grib1Path ${cnormal}"
+  print "${cred}(20)${cnormal} grib path (default=$defaultGribPath): ${cgreen}$gribPath ${cnormal}"
   print "${cred}(21)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
   print "${cred}(22)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
   print "${cred}(23)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
-  print ""
+  print "${cred}(29)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
   print "${cred}(24)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
   print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
   print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
   print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
+  print "${cred}(24)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
 }
 
 check(){
@@ -639,7 +650,7 @@ softSanityCheck(){
 
 listAvailabilities(){
    
-  print ${cblue}"A list of all supported versions for a special platform."${cnormal}
+  print ${cyellow}"A list of all supported versions for a special platform."${cnormal}
   print ""
   for p in "${!platforms[@]}" ; do
     printf "%-20s #%s\n" "$p" "${platforms[$p]}"
@@ -648,7 +659,7 @@ listAvailabilities(){
     done
   done
   print ""
-  print ${cblue}"A list of details for each version."${cnormal}	
+  print ${cyellow}"A list of details for each version."${cnormal}	
   print ""
   for v in "${!versions[@]}" ; do
     printf "%-20s #%s\n" "$v" "${versions[$v]}"
@@ -678,7 +689,7 @@ getRoot(){
   #automatically determine root dir
   cpwd=`pwd`
   if [[ "$0" == '/'*  ]] ; then
-    #absolut path
+    #absolute path
     estdir=`echo "$0" | sed 's@/bldsva/build_tsmp.ksh@@'` #remove bldsva/configure machine to get rootpath
     call=$0
   else
@@ -694,11 +705,86 @@ getRoot(){
   
 }
 
+getGitInfo(){
+  # Write Git information to log file
+  route "${cyellow}> getGitInfo${cnormal}"
+
+  echo "" >> $log_file
+  echo "TSMP Git Configuration" >> $log_file
+  echo "----------------------" >> $log_file
+
+  comment "  Log Git information (TSMP)"
+    echo "Git (TSMP):" >> $log_file
+    git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
+    git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir} rev-parse --short HEAD >> $log_file
+    echo "" >> $log_file
+  check
+
+  if [[ $withOAS == "true" ]] ; then
+    comment "  Log Git information (${mList[0]})"
+      echo "Git (${mList[0]}):" >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withCLM == "true" ]] ; then
+    comment "  Log Git information (${mList[1]})"
+      echo "Git (${mList[1]}):" >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withCOS == "true" ]] ; then
+    comment "  Log Git information (${mList[2]})"
+      echo "Git (${mList[2]}):" >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withICON == "true" ]] ; then
+    comment "  Log Git information (${mList[2]})"
+      echo "Git (${mList[2]}):" >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withPFL == "true" ]] ; then
+    comment "  Log Git information (${mList[3]})"
+      echo "Git (${mList[3]}):" >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withPDAF == "true" ]] ; then
+    comment "  Log version information (${mList[4]})"
+      echo "Version (${mList[4]}):" >> $log_file
+      echo ${rootdir}/${mList[4]} >> $log_file
+      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  echo "----------------------" >> $log_file
+  echo "" >> $log_file
+
+  route "${cyellow}> getGitInfo${cnormal}"
+}
+
 #######################################
 #		Main
 #######################################
 
-  cblue=$(tput setaf 4)
+  cyellow=$(tput setaf 3)
   cnormal=$(tput sgr0)   #9
   cred=$(tput setaf 1)
   cgreen=$(tput setaf 2)
@@ -723,14 +809,15 @@ getRoot(){
   USAGE+="[i:interactive?Interactive mode - command line arguments and defaults will be overwritten during the interactive session (This is the default without arguments).]"
   USAGE+="[a:avail?Prints a listing of every machine with available versions. The script will exit afterwards.]"
   USAGE+="[t:tutorial?Prints a tutorial/description on how to add new versions and platforms to this script. The script will exit afterwards.]"
-  USAGE+="[R:rootdir?Absolut path to TerrSysMP root directory.]:[path:='$def_rootdir']"
-  USAGE+="[B:bindir?Absolut path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
+  USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
+  USAGE+="[B:bindir?Absolute path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
    
   USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$def_platform']"
 
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[o:optimization?Compiler optimisation flags.]:[optimization:='$def_optComp']"
+  USAGE+="[O:compiler?Compiler option flags.]:[compiler:='$def_compiler']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
@@ -760,7 +847,7 @@ getRoot(){
   USAGE+="[H:hyprepath?Include Path for Hypre. The machine default will be taken if ''.]:[hyprepath:='$hyprePath']"
   USAGE+="[S:silopath?Include Path for Silo. The machine default will be taken if ''.]:[silopath:='$siloPath']"
   USAGE+="[T:tclpath?Include Path for TCL. The machine default will be taken if ''.]:[tclpath:='$tclPath']"
-  USAGE+="[G:grib1path?Include Path for Grib1. The machine default will be taken if ''.]:[grib1path:='$grib1Path']"
+  USAGE+="[G:gribpath?Include Path for Grib1. The machine default will be taken if ''.]:[gribpath:='$gribPath']"
   USAGE+="[M:mpipath?Include Path for MPI. The machine default will be taken if ''.]:[mpipath:='$mpiPath']"
   USAGE+="[N:ncdfpath?Include Path for NetCDF. The machine default will be taken if ''.]:[ncdfpath:='$ncdfPath']"
   USAGE+="[P:pncdfpath?Include Path for PNetCDF. The machine default will be taken if ''.]:[pncdfpath:='$pncdfPath']"
@@ -778,6 +865,7 @@ getRoot(){
     m)  platform="$OPTARG" ; args=1 ;;
     p)  profiling="${OPTARG}" ; args=1 ;;
     o)  optComp="${OPTARG}" ; args=1 ;; 
+    O)  compiler="${OPTARG}" ; args=1 ;;
     v)  version="$OPTARG"  ;  args=1 ;;
     a)  listA="true" ;;
     t)  listTutorial ;;
@@ -803,7 +891,7 @@ getRoot(){
 
     M)  mpiPath="$OPTARG" ; args=1 ;;
     N)  ncdfPath="$OPTARG" ; args=1 ;;
-    G)  grib1Path="$OPTARG" ; args=1 ;;
+    G)  gribPath="$OPTARG" ; args=1 ;;
     T)  tclPath="$OPTARG" ; args=1 ;;
     H)  hyprePath="$OPTARG" ; args=1 ;;
     S)  siloPath="$OPTARG" ; args=1 ;; 
@@ -860,6 +948,9 @@ check
 
   finalizeSelection
   finalizeMachine
+
+  getGitInfo
+
   runCompilation
 
   echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file

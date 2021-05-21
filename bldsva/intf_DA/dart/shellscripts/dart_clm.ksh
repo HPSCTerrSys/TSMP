@@ -10,6 +10,7 @@
 #SBATCH --time=00:10:00
 #SBATCH --partition=batch
 #SBATCH --mail-type=ALL
+#SBATCH --account=hbn33
 
 #PBS -N dartCLM 
 #PBS -l walltime=2:30:00
@@ -27,7 +28,7 @@ export DART_DIR="$HOME/DART/lanai/models/terrsysmp/clm/work"
 export LD_LIBRARY_PATH="$EBROOTNETCDFMINFORTRAN/lib/":$LD_LIBRARY_PATH
 cd $LOGNAME
 #Machine Specific
-source $LOGNNAME/loadenvs
+source $LOGNAME/loadenvs
 
 export numInst=$2
 # Cleanup---------------
@@ -116,5 +117,3 @@ wait
 
 echo "ready" > ready.txt
 exit 0
-
-

@@ -128,9 +128,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 
  if (model == tag_model_parflow) then
      !print *, "Parflow: collect_state_pdaf, from subvecs to state_p"
-     do i=1,dim_p
-       state_p(i) = pf_statevec_fortran(i)
-     enddo
+     state_p = pf_statevec_fortran
  end if
 
  IF (lcmem) THEN

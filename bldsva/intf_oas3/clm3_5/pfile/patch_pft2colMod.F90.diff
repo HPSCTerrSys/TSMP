@@ -1,0 +1,41 @@
+--- pft2colMod.F90	2005-12-12 19:10:35.000000000 +0100
++++ pft2colMod.F90	2019-12-04 12:52:05.732203000 +0100
+@@ -16,6 +16,9 @@
+   use shr_kind_mod, only: r8 => shr_kind_r8
+   use subgridAveMod
+   use clmtype
++#if defined COUP_OAS_PFL
++  use clm_varpar   , only : nlevsoi !MS
++#endif
+ !
+ ! !PUBLIC TYPES:
+   implicit none
+@@ -62,6 +65,13 @@
+     integer :: filter_allc(ubc-lbc+1)    ! filter for all column points
+     real(r8), pointer :: ptrp(:)         ! pointer to input pft array
+     real(r8), pointer :: ptrc(:)         ! pointer to output column array
++#if defined COUP_OAS_PFL
++    !MS
++    integer :: i                         ! indices
++    real(r8), pointer :: ptrp_2(:,:)     ! pointer to input pft 2d array
++    real(r8), pointer :: ptrc_2(:,:)     ! pointer to output column 2d array
++    !MS
++#endif
+ ! -----------------------------------------------------------------
+ 
+     ! Set up a filter for all column points
+@@ -100,7 +110,13 @@
+     ptrp => clm3%g%l%c%p%pwf%qflx_tran_veg
+     ptrc => clm3%g%l%c%cwf%pwf_a%qflx_tran_veg
+     call p2c (num_nolakec, filter_nolakec, ptrp, ptrc)
+-
++#if defined COUP_OAS_PFL 
++    !CMS  here we make the averaging for each soil layer  
++    ptrp_2 => clm3%g%l%c%p%pwf%pfl_flx_tran_veg
++    ptrc_2 => clm3%g%l%c%cwf%pwf_a%pfl_flx_tran_veg
++    call p2c (nlevsoi, num_nolakec, filter_nolakec, ptrp_2, ptrc_2)
++    !CMS : end
++#endif
+     ptrp => clm3%g%l%c%p%pwf%qflx_evap_grnd
+     ptrc => clm3%g%l%c%cwf%pwf_a%qflx_evap_grnd
+     call p2c (num_nolakec, filter_nolakec, ptrp, ptrc)

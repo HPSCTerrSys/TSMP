@@ -6,8 +6,8 @@ cat << EOF > __rundir__/lnd.stdin
  caseid         = 'clmoas'
  ctitle         = 'clmoas'
  nsrest         =  0
- nelapse        =  160 ! __runstep_clm_bldsva__ 
- dtime          =  45. ! __dt_clm_bldsva__
+ nelapse        =  __runstep_clm_bldsva__ 
+ dtime          =  __dt_clm_bldsva__
  start_ymd      =  __yyyymmdd_bldsva__
  start_tod      =  __seconds_clm_bldsva__ 
 
@@ -29,7 +29,7 @@ cat << EOF > __rundir__/lnd.stdin
  mss_irt        =  0 
 
  hist_empty_htapes = .true.
- hist_fincl1       = ''
+ hist_fincl1       = 'H2OSOI','SOILLIQ','WT','FSH','FSH_G','FSDS','FSR','FSA','FGR','FGEV','FCTR','FCEV','FIRA','FLDS','FIRE','TBOT','TSA','QFLX_RAIN_GRND','QFLX_SNOW_GRND','QFLX_EVAP_TOT','ALBD','ALBGRD','ALBI','ALBGRI','TG','TSOI','TAUX','TAUY' 
 
  irad           =  1
  wrtdia         = .true.
