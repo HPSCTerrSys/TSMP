@@ -711,6 +711,87 @@ getRoot(){
   
 }
 
+getGitInfo(){
+  # Write Git information to log file
+  route "${cyellow}> getGitInfo${cnormal}"
+
+  echo "" >> $log_file
+  echo "TSMP Git Configuration" >> $log_file
+  echo "----------------------" >> $log_file
+
+  comment "  Log Git information (TSMP)"
+    echo "Git (TSMP):" >> $log_file
+    git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
+    git -C ${rootdir} diff      --name-status HEAD >> $log_file
+    git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
+    git -C ${rootdir} rev-parse --short HEAD >> $log_file
+    echo "" >> $log_file
+  check
+
+  if [[ $withOAS == "true" ]] ; then
+    comment "  Log Git information (${mList[0]})"
+      echo "Git (${mList[0]}):" >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[0]} diff      --name-status HEAD >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[0]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withCLM == "true" ]] ; then
+    comment "  Log Git information (${mList[1]})"
+      echo "Git (${mList[1]}):" >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[1]} diff      --name-status HEAD >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[1]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withCOS == "true" ]] ; then
+    comment "  Log Git information (${mList[2]})"
+      echo "Git (${mList[2]}):" >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withICON == "true" ]] ; then
+    comment "  Log Git information (${mList[2]})"
+      echo "Git (${mList[2]}):" >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withPFL == "true" ]] ; then
+    comment "  Log Git information (${mList[3]})"
+      echo "Git (${mList[3]}):" >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
+      git -C ${rootdir}/${mList[3]} diff      --name-status HEAD >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
+      git -C ${rootdir}/${mList[3]} rev-parse --short HEAD >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  if [[ $withPDAF == "true" ]] ; then
+    comment "  Log version information (${mList[4]})"
+      echo "Version (${mList[4]}):" >> $log_file
+      echo ${rootdir}/${mList[4]} >> $log_file
+      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      echo "" >> $log_file
+    check
+  fi
+  echo "----------------------" >> $log_file
+  echo "" >> $log_file
+
+  route "${cyellow}> getGitInfo${cnormal}"
+}
+
 #######################################
 #		Main
 #######################################
@@ -881,6 +962,9 @@ check
 
   finalizeSelection
   finalizeMachine
+
+  getGitInfo
+
   runCompilation
 
   echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
