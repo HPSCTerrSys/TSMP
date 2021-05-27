@@ -718,8 +718,7 @@ getGitInfo(){
     git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
   check
   git -C ${rootdir} diff      --name-status HEAD >> $log_file
-  git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
-  git -C ${rootdir} rev-parse --short HEAD >> $log_file
+  git -C ${rootdir} describe  --tags --always HEAD >> $log_file
   echo "" >> $log_file
 
   if [[ $withOAS == "true" ]] ; then
@@ -728,8 +727,7 @@ getGitInfo(){
       git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
     check
     git -C ${rootdir}/${mList[0]} diff      --name-status HEAD >> $log_file
-    git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[0]} rev-parse --short HEAD >> $log_file
+    git -C ${rootdir}/${mList[0]} describe  --tags --always HEAD >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCLM == "true" ]] ; then
@@ -738,8 +736,7 @@ getGitInfo(){
       git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
     check
     git -C ${rootdir}/${mList[1]} diff      --name-status HEAD >> $log_file
-    git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[1]} rev-parse --short HEAD >> $log_file
+    git -C ${rootdir}/${mList[1]} describe  --tags --always HEAD >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCOS == "true" ]] ; then
@@ -748,8 +745,7 @@ getGitInfo(){
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
     check
     git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+    git -C ${rootdir}/${mList[2]} describe  --tags --always HEAD >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withICON == "true" ]] ; then
@@ -758,8 +754,7 @@ getGitInfo(){
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
     check
     git -C ${rootdir}/${mList[2]} diff      --name-status HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} rev-parse --short HEAD >> $log_file
+    git -C ${rootdir}/${mList[2]} describe  --tags --always HEAD >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withPFL == "true" ]] ; then
@@ -768,8 +763,7 @@ getGitInfo(){
       git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
     check
     git -C ${rootdir}/${mList[3]} diff      --name-status HEAD >> $log_file
-    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[3]} rev-parse --short HEAD >> $log_file
+    git -C ${rootdir}/${mList[3]} describe  --tags --always HEAD >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withPDAF == "true" ]] ; then
