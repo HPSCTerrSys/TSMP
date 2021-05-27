@@ -783,7 +783,7 @@ getGitInfo(){
   echo "----------------------" >> $log_file
   echo "" >> $log_file
 
-  route "${cyellow}> getGitInfo${cnormal}"
+  route "${cyellow}< getGitInfo${cnormal}"
 }
 
 #######################################
