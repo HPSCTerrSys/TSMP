@@ -39,6 +39,7 @@ getDefaults(){
 
   #compiler options, CPS remove hardwiring of compilers
   def_compiler="Gnu"  # will be set to Gnu if empty
+  def_processor="CPU"
 
   #profiling
   def_profiling="no"
@@ -71,6 +72,7 @@ setDefaults(){
   bindir=$def_bindir
   optComp=$def_optComp
   compiler=$def_compiler
+  processor=$def_processor
   profiling=$def_profiling
   oasdir=$def_oasdir
   clmdir=$def_clmdir
@@ -127,6 +129,7 @@ clearMachineSelection(){
   siloPath=""
   optComp=""
   compiler=""
+  processor=""
   clearPathSelection
 }
 
@@ -160,6 +163,7 @@ setSelection(){
   
   #compiler selection
   if [[ $compiler == "" ]] then ; compiler=$defaultcompiler ; fi
+  if [[ $processor == "" ]] then ; processor=$defaultprocessor ; fi
 }
 
 finalizeSelection(){
@@ -326,11 +330,12 @@ route "${cyellow}> c_compileParflow${cnormal}"
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
-  comment "  backup pfl dir to: $pfldir"
-      rm -rf $pfldir >> $log_file 2>> $err_file
-  check
-      cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
-  check
+     comment "  backup pfl dir to: $pfldir"
+       if [ -d $pfldir ] ; then ; rm -rf $pfldir >> $log_file 2>> $err_file ;fi
+     check
+     comment "  copy ${rootdir}/${mList[3]} to $pfldir"
+       if [ -d ${rootdir}/${mList[3]} ] ;then ; cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file ;fi
+     check
     fi
     if [[ ${options["pfl"]} == "build" || ${options["pfl"]} == "fresh" ]] ; then
       substitutions_pfl
@@ -507,6 +512,7 @@ interactive(){
                   if [[ $numb == 27 ]] ; then ; read readCLM ; fi
 		  if [[ $numb == 28 ]] ; then ; read freeDrain ; fi
                   if [[ $numb == 29 ]] ; then ; read compiler ; fi
+                  if [[ $numb == 30 ]] ; then ; read processor ; fi
 		done	
 		interactive
 	  ;;
@@ -549,13 +555,13 @@ printState(){
   print "${cred}(21)${cnormal} ncdf path (default=$defaultNcdfPath): ${cgreen}$ncdfPath ${cnormal}"
   print "${cred}(22)${cnormal} pncdf path (default=$defaultPncdfPath): ${cgreen}$pncdfPath ${cnormal}"
   print "${cred}(23)${cnormal} lapack path (default=$defaultLapackPath): ${cgreen}$lapackPath ${cnormal}"
-  print "${cred}(29)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
   print "${cred}(24)${cnormal} optComp (default=$defaultOptComp): ${cgreen}$optComp ${cnormal}"
   print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
   print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
   print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
-  print "${cred}(24)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
+  print "${cred}(29)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
+  print "${cred}(30)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
 }
 
 check(){
@@ -818,6 +824,7 @@ getGitInfo(){
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
   USAGE+="[o:optimization?Compiler optimisation flags.]:[optimization:='$def_optComp']"
   USAGE+="[O:compiler?Compiler option flags.]:[compiler:='$def_compiler']"
+  USAGE+="[A:processor?Processor GPU or CPU.]:[processor:='$def_processor']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
@@ -896,7 +903,8 @@ getGitInfo(){
     H)  hyprePath="$OPTARG" ; args=1 ;;
     S)  siloPath="$OPTARG" ; args=1 ;; 
     P)  pnetcdfPath="$OPTARG" ; args=1 ;;
-    L)  lapackPath="$OPTARG" ; args=1 ;; 
+    L)  lapackPath="$OPTARG" ; args=1 ;;
+    A)  processor="$OPTARG" ; args=1 ;;
     esac
   done
 
