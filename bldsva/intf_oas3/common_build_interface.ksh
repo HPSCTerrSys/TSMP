@@ -878,7 +878,7 @@ comment "    cp binary to $bindir"
 check
   fi
 
-  if [[ ${mList[3]} == parflow3_7 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
