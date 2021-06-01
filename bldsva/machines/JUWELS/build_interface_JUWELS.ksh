@@ -16,7 +16,13 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
+  if [[ $compiler == "Gnu" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128/lib/"
+  elif [[ $compiler == "Intel" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
+  else
+    defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
+  fi
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
