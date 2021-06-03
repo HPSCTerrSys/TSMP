@@ -43,6 +43,8 @@ program pdaf_terrsysmp
 
 #if (defined COUP_OAS_COS)
     use data_parallel, only: cosmo_input_suffix
+    ! Tobias Finn: Added COSMO module
+    use enkf_cosmo_mod, only: update_cos_vars
 #endif
 
     implicit none
@@ -105,6 +107,12 @@ program pdaf_terrsysmp
         !print *,"Finished assimilation", tcycle
 
         !call print_update_pfb()
+#if (defined COUP_OAS_COS)
+        ! Tobias Finn: Added COSMO data assimilation
+        IF((model.eq.tag_model_cosmo)) THEN
+            CALL update_cos_vars()
+        END IF
+#endif
 #if defined CLMSA
         if((model.eq.tag_model_clm).and.(clmupdate_swc.ne.0)) then
           call update_clm()

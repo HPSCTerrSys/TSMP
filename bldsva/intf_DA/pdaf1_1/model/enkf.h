@@ -52,6 +52,7 @@ GLOBAL char pfoutfile_stat[500];
 GLOBAL char pfproblemname[100];
 GLOBAL char clminfile[100*2];
 GLOBAL char outdir[100];
+GLOBAL char assim_vars_cos[20*10];
 
 /* integers */
 GLOBAL int nprocpf;

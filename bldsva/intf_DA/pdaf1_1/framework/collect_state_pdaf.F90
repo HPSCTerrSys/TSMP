@@ -65,8 +65,9 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
         only: model,mype_model,npes_model,mype_world,npes_world,&
               COMM_model,mpi_comm_world
    use mod_tsmp, &
-        only: tag_model_clm,tag_model_parflow,pf_statevec_fortran, &
-            nprocpf,nprocclm,lcmem !SPo add lcmem
+        only: tag_model_clm,tag_model_parflow,tag_model_cosmo,&
+              pf_statevec_fortran, &
+              nprocpf,nprocclm,lcmem !SPo add lcmem
 
    ! LSN: module load for the implementation of CMEM model
    USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
@@ -88,6 +89,10 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use enkf_clm_mod, only: clm_statevec
     !kuw end
+#endif
+    ! To set the PDAF state to COSMO state
+#if defined COUP_OAS_COS
+    USE enkf_cosmo_mod, ONLY: cos_statevec
 #endif
 
   IMPLICIT NONE
@@ -214,5 +219,12 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
  end if
  !kuw end
 #endif
+    ! To set the PDAF state to COSMO state
+#if defined COUP_OAS_COS
+    if (model == tag_model_cosmo) then
+        state_p = cos_statevec
+    end if
+#endif
+
   
 END SUBROUTINE collect_state_pdaf

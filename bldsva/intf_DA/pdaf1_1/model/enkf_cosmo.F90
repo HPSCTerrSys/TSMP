@@ -395,6 +395,16 @@ use enkf_cosmo_mod
 cos_start = nstart
 !kuw end
 
+!=============
+! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+! state of cosmo
+!=============
+CALL define_cos_vars()
+CALL set_cos_assimilate()
+! Deactivation of COSMO state vector allocation due to problems with
+! missleading allocation of size 1
+!CALL define_cos_statevec()
+
 end subroutine cosmo_init
 
 
@@ -900,6 +910,11 @@ integer(c_int),intent(in) :: cos_dt
     write(*,*) 'advancing cosmo finished'
   ENDIF
 
+  ! Tobias Finn: Added setting of COSMO state vector
+  ! Allocation of COSMO state vector is needed at this position due to a
+  ! strange allocation beforehand
+  CALL define_cos_statevec()
+  CALL set_cos_statevec()
 
   cos_start = cos_start + cos_dt
 end subroutine cosmo_advance
@@ -970,6 +985,12 @@ use enkf_cosmo_mod
   IF (lasync_io .OR. (num_compute > 1) ) THEN
     CALL mpe_io_shutdown()
   ENDIF
+
+  !=============
+  ! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+  ! state of cosmo
+  !=============
+  CALL teardown_cos_statevec()
 
 !------------------------------------------------------------------------------
 !- Section 8: Part of the IO-PEs

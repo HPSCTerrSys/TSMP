@@ -54,7 +54,7 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
     !
     ! !USES:
     use mod_tsmp, &
-        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm
+        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm, tag_model_cosmo
     use mod_parallel_model, &
         only: model, mype_world
 #if defined CLMSA
@@ -65,6 +65,11 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
     use enkf_clm_mod, only: clm_statevec
     !kuw end
 #endif
+    ! To set the PDAF state to COSMO state
+#if defined COUP_OAS_COS
+    USE enkf_cosmo_mod, ONLY: cos_statevec
+#endif
+
     IMPLICIT NONE
   
     ! !ARGUMENTS:
@@ -98,6 +103,12 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 
     end if
     !kuw end
+#endif
+
+#if defined COUP_OAS_COS
+    if (model == tag_model_cosmo) then
+        cos_statevec = state_p
+    end if
 #endif
 
 END SUBROUTINE distribute_state_pdaf
