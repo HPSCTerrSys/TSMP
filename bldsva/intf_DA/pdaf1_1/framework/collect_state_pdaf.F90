@@ -91,7 +91,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
     !kuw end
 #endif
     ! To set the PDAF state to COSMO state
-#if defined COUP_OAS_COS
+#if (defined COUP_OAS_COS) && (!defined COUP_OAS_PFL)
     USE enkf_cosmo_mod, ONLY: cos_statevec
 #endif
 
@@ -220,7 +220,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
  !kuw end
 #endif
     ! To set the PDAF state to COSMO state
-#if defined COUP_OAS_COS
+#if (defined COUP_OAS_COS) && (!defined COUP_OAS_PFL)
     if (model == tag_model_cosmo) then
         state_p = cos_statevec
     end if

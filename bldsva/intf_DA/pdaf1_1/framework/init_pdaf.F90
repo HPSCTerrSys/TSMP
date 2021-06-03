@@ -79,7 +79,7 @@ SUBROUTINE init_pdaf()
 #endif
     ! kuw end
 
-#if defined COUP_OAS_COS
+#if (defined COUP_OAS_COS) && (!defined COUP_OAS_PFL)
     USE enkf_cosmo_mod, ONLY: cos_statevecsize
 #endif
 
@@ -158,7 +158,7 @@ SUBROUTINE init_pdaf()
     end if
 #endif
 
-#if defined COUP_OAS_COS
+#if (defined COUP_OAS_COS) && (!defined COUP_OAS_PFL)
     if (model == tag_model_cosmo) then
        !call get_proc_global(numg,numl,numc,nump)
        !call get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
