@@ -107,7 +107,7 @@ program pdaf_terrsysmp
         !print *,"Finished assimilation", tcycle
 
         !call print_update_pfb()
-#if (defined COUP_OAS_COS)
+#if (defined COUP_OAS_COS) && (!defined COUP_OAS_PFL)
         ! Tobias Finn: Added COSMO data assimilation
         IF((model.eq.tag_model_cosmo)) THEN
             CALL update_cos_vars()
