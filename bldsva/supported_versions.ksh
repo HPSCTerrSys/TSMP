@@ -27,7 +27,7 @@ availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF \
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 3.1.0MCTPDAF "
         ["JUSUF"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
         ["MISTRAL"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT 4.1.0MCT 3.0.0MCTPDAF "
@@ -54,6 +54,7 @@ versions+=(
         ["3.0.1MCT"]="3.0.1 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
         ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_7 and with Oasis3-MCT"
+        ["3.1.0MCTPDAF"]="3.1.0 with Oasis3-MCT and PDAF Data Assimilation"
 	["1.4.0MCT"]="4.0.0 old clm3_5 and Parflow but new icon-lem with Oasis3-MCT"
 	["1.4.1MCT"]="4.0.0 old clm3_5 but new icon-lem and Parflow3_2 with Oasis3-MCT"
 )
@@ -78,6 +79,7 @@ modelVersion+=(
         ["3.0.1MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_7"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
+        ["3.1.0MCTPDAF"]="oasis3 clm3_5 cosmo5_1 parflow3_7 pdaf1_1"
 	["1.4.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow"
 	["1.4.1MCT"]="oasis3-mct clm3_5-icon icon-lem parflow3_2"
 )
@@ -102,6 +104,7 @@ combinations+=(
         ["3.0.1MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["3.1.0MCTPDAF"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
 	["1.4.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 	["1.4.1MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 )
