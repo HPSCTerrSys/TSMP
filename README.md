@@ -18,9 +18,11 @@
     8. [Step 8: Simulation results](#ref_step8)
 3. [Heterogeneous Job using TSMP](#hetero_job)
 4. [NRW Test case](#nrw_test)
-5. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
-6. [To come](#To-come)
-7. [Documentation](#ref_doc)
+5. [IdealRTD (Idealized) Test case](#idealrtd_test)
+6. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
+7. [Patching the orginal source code](#patching)
+8. [To come](#To-come)
+9. [Documentation](#ref_doc)
 
 # Introduction <a name="introduction"></a>
 
@@ -319,10 +321,76 @@ To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change
  ./setup_tsmp.ksh -v 3.1.0MCT -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
 ```
 
+# IdealRTD (Idealized) Test case <a name="idealrtd_test"></a>
+We will use a horizontally homogeneous domain (Figure 1) to simulate the diurnal
+cycle of the atmospheric boundary layer with radiative forcing. A periodic boundary
+condition will be used in X and Y direction for COSMO, while the X- and Y-slopes are
+set to zero for ParFlow, so there is no lateral flow. The domain setup is summarized in the Table below.
+
+
+|        |  NX    |  NY  | NZ | dt(s) |
+| -----  | :----- | ----:|----:|----:|
+| cosmo  | 60    | 30  | 50 | 18 |
+| CLM    | 54    | 24  | 10 | 18 |
+| ParFlow| 54    | 24  | 30 | 18 |
+
+NX_clm = NX_pfl =NX_cos -2 *nboundlines
+
+The initial soil moisture content for the different soil textures (e.g., sandy loam, clay
+loam) is varied based on the ($\psi - \theta_vol$) van Genuchten relationship, to
+simulate the physical processes from water stressed environment to an atmospheric
+controlled environment. The groundwater table is specified at a depth of 5 m below
+the surface, with a spatially homogeneous and constant unsaturated zone above. The atmosphere is initialized with a semi-idealized sounding data obtained from
+Stuttgart (observations) at 00Z 07 Aug 2015. Ground and vegetation temperature are
+initialized horizontally homogeneous with a value of 287 K. The simulation will be
+integrated for 24 hours starting at midnight with an hourly output frequency.
+
+## Preprocessing of Input Data <a name="Preprocessing_idealrtd"></a>
+Here the user can generate the case-specific input data for ParFlow
+and CLM. Note that the COSMO model uses the same setup for all the ensemble
+members, that is, no need for ad-hoc editing. 
+Please download the Input data and preproccesing sript using:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./download_data_for_test_cases.ksh idealrtd
+```
+
+then 
+
+```shell
+   cd $TSMP_DIR/tsmp_idealrtd/pre-processing
+   source loadenvs.Gnu_2020
+   cd ../external
+   chmod 755 compile
+   ./compile
+   cd ../pre-processing-tools
+   ncl sva_surfdata_clm.ncl
+   ncl sva_iniPress_pfl.ncl
+   mv *.nc  ../input/clm
+   mv *.pfb ../input/parflow
+```
+
+Note that you have the possibilty to generate different Input data for CLM and parFlow by in the scripts `sva_iniPress_pfl.ncl` and `sva_surfdata_clm.ncl`.
+To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 3.1.0MCT -V idealRTD -m JUWELS -O Intel
+ ```
+
 # Automatic Porting of TSMP on x86 machines  <a name="TSMP_x86 "></a>
 
 For automatic porting of TSMP on x86  machines please use the branch `TSMP_x86_64`. \
 The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script "lib_install.sh" located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
+
+# Patching the orginal source code  <a name="patching "></a>
+
+In order to prepare the original Cosmo5_1 source code for coupling, the Cosmo source code is patched using the diff files which are located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/pfile`.
+The diff files are generated using the script `fpatch.sh` which is located in the same directory. Note that the patching is done only for cosmo5_1 source code.
+If the user aims to modify the coupling source files, should modify the files located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/tsmp` and run again the script `fpatch.sh` in order to generate the the new diff files accordingly.
+The necessary changes for making the ParFlow3.7 ready for coupling are already included in the official ParFlow3.7 release.
+The changed source files for CLM3.5 are located in  `$TSMP_DIR/bldsva/intf_oas3/clm3_5/tsmp` and will be copied by TSMP scripts to the user's source code directory of CLM3.5 '(`bld/usr.src`)
 
 # To come <a name="To-come"></a>
 
