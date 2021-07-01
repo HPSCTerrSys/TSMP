@@ -21,8 +21,10 @@
 5. [IdealRTD (Idealized) Test case](#idealrtd_test)
 6. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
 7. [Patching the orginal source code](#patching)
-8. [To come](#To-come)
-9. [Documentation](#ref_doc)
+8. [Long time climate simulation](#climate_sim)
+9. [Restart functionality for EURO-CORDEX test case](#restart)
+10. [To come](#To-come)
+11. [Documentation](#ref_doc)
 
 # Introduction <a name="introduction"></a>
 
@@ -391,6 +393,22 @@ The diff files are generated using the script `fpatch.sh` which is located in th
 If the user aims to modify the coupling source files, should modify the files located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/tsmp` and run again the script `fpatch.sh` in order to generate the the new diff files accordingly.
 The necessary changes for making the ParFlow3.7 ready for coupling are already included in the official ParFlow3.7 release.
 The changed source files for CLM3.5 are located in  `$TSMP_DIR/bldsva/intf_oas3/clm3_5/tsmp` and will be copied by TSMP scripts to the user's source code directory of CLM3.5 '(`bld/usr.src`)
+
+# Long time climate simulation  <a name="climate_sim"></a>
+
+## Implementation of non-const CO2 in TSMP <a name="CO2_Implementation"></a>
+
+CO2 is different for different RCP scenarios, and it can impact largely the results of TSMP simulations. In order to change CO2 value in CLM according to the RCP scenario you need to change the value of the variable `co2_s` which is sent from COSMO to CLM and is hard-coded in `$TSMP_DIR/ bldsva/intf_oas3/cosmo5_1/oas3/send_fld_2clm.F90`.
+Therefor the variable `co2_s` should be changed in order to vary CO2 in CLM depending on RCP scenarios. This means that if you want to do simulation for different RCP scenarios, you need to recompile the TSMP for each of them. Note that in order to change the CO2 value in COSMO according to RCP scenarios you need to change the COSMO namelist parameter `ico2_rad` in `INPUT_PHY`. For more
+
+# Restart functionality for EURO-CORDEX test case  <a name="restart"></a>
+
+TSMP generates automatically a script which does the simulation in two cycles.If interested please submit the job using the following:
+
+```shell
+   sbatch tsmp_restart.sh
+```
+This script can be a hint for you when you want to do long time climate simulation. For more info please contact "Niklas Wagner; n.wagner@fz-juelich.de"
 
 # To come <a name="To-come"></a>
 
