@@ -2,12 +2,12 @@
 #
 
 always_da(){
-route "${cyellow}>> always_da${cnormal}"
-route "${cyellow}<< always_da${cnormal}"
+route "${cblue}>> always_da${cnormal}"
+route "${cblue}<< always_da${cnormal}"
 }
 
 substitutions_da(){
-route "${cyellow}>> substitutions_da${cnormal}"
+route "${cblue}>> substitutions_da${cnormal}"
 
   comment "   mkdir  $dadir/interface"
     mkdir -p $dadir/interface  >> $log_file 2>> $err_file
@@ -21,23 +21,19 @@ route "${cyellow}>> substitutions_da${cnormal}"
     patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
   check
 
-route "${cyellow}<< substitutions_da${cnormal}"
+route "${cblue}<< substitutions_da${cnormal}"
 }
 
 configure_da(){
-route "${cyellow}>> configure_da${cnormal}"
+route "${cblue}>> configure_da${cnormal}"
   export PDAF_DIR=$dadir
-  if [[ $compiler == "Gnu" ]]; then
-    export PDAF_ARCH=linux_gfortran_openmpi_jureca
-  else
-    export PDAF_ARCH=linux_ifort_jureca
-  fi
+  export PDAF_ARCH=linux_ifort_jureca
 
 #PDAF part
-  file=$dadir/make.arch/${PDAF_ARCH}.h
+  file=$dadir/make.arch/linux_ifort_jureca.h
   
   comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/linux_ifort_jureca.h $file >> $log_file 2>> $err_file
   check
 
   comment "   sed comFC dir to $file" 
@@ -61,11 +57,7 @@ route "${cyellow}>> configure_da${cnormal}"
   check
 
   comment "   sed LIBS to $file"
-  if [[ $compiler == "Gnu" ]]; then
-    sed -i "s@__LIBS__@ -ldl $lapackPath/mkl/lib/intel64/libmkl_gf_lp64.a $lapackPath/mkl/lib/intel64/libmkl_gnu_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  else
     sed -i "s@__LIBS__@ $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  fi
   check
 
   comment "   sed optimizations to $file"
@@ -175,21 +167,16 @@ route "${cyellow}>> configure_da${cnormal}"
   check
 
 
-route "${cyellow}<< configure_da${cnormal}"
+route "${cblue}<< configure_da${cnormal}"
 }
 
 make_da(){
-route "${cyellow}>> make_da${cnormal}"
+route "${cblue}>> make_da${cnormal}"
   export PDAF_DIR=$dadir
-  if [[ $compiler == "Gnu" ]]; then
-    export PDAF_ARCH=linux_gfortran_openmpi_jureca
-  else
-    export PDAF_ARCH=linux_ifort_jureca
-  fi
+  export PDAF_ARCH=linux_ifort_jureca
 
   comment "   cd to $dadir/src"
     cd $dadir/src >> $log_file 2>> $err_file
-    mkdir -p ../lib >> $log_file 2>> $err_file
   check
   comment "   make pdaf"
     make >> $log_file 2>> $err_file
@@ -210,13 +197,13 @@ route "${cyellow}>> make_da${cnormal}"
   check
 
 
-route "${cyellow}<< make_da${cnormal}"
+route "${cblue}<< make_da${cnormal}"
 }
 
 
 setup_da(){
-route "${cyellow}>> setup_da${cnormal}"
+route "${cblue}>> setup_da${cnormal}"
   c_setup_pdaf
-route "${cyellow}<< setup_da${cnormal}"
+route "${cblue}<< setup_da${cnormal}"
 }
 

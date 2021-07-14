@@ -234,7 +234,9 @@ int type) /* PDAF: user defined type to convert
 			//now we do the inverse:
 			//if saturation < 1, we update the pressure:
 
-		        if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+		        /* if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01; */
+                        /* hcp truncate sat */
+		        if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
 			if (psdat[ips] < 1) {
 				head = pow(pow(s_dif / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
 				ppdat[ipp] = -head;
@@ -335,7 +337,9 @@ int type) /* PDAF: user defined type to convert
                                            + s_res;
                            }
                            */
-		           if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+		           /* if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01; */
+                           /* hcp truncate sat */
+		           if(psdat[ips] <= (s_res + 0.003)) psdat[ips] = s_res + 0.003;
 			   if (psdat[ips] < 1) {
 			   	head = pow(pow((s_sat-s_res) / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
 			   	ppdat[ipp] = -head;

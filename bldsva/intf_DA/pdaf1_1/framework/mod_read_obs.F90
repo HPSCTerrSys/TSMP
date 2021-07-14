@@ -46,6 +46,8 @@ module mod_read_obs
   real, allocatable :: pressure_obs(:)
   real, allocatable :: pressure_obserr(:)
   integer :: multierr=0, dim_nx, dim_ny
+  integer :: crns_flag=0   !hcp
+  real, allocatable :: depth_obs(:)   !hcp
 contains
   subroutine read_obs_nc()
     USE mod_assimilation, &
@@ -301,9 +303,12 @@ contains
     character (len = *), parameter :: x_idx_name = "ix"
     character (len = *), parameter :: y_idx_name = "iy"
     character (len = *), parameter :: z_idx_name = "iz"
+    character (len = *), parameter :: depth_name = "depth"  !hcp
+    integer :: depth_varid !hcp
     character(len = nf90_max_name) :: RecordDimName
     integer :: dimid, status
     integer :: haserr
+    integer :: deptherr
     character (len = *), intent(in) :: current_observation_filename
 
     call check( nf90_open(current_observation_filename, nf90_nowrite, ncid) )
@@ -340,6 +345,13 @@ contains
       allocate(pressure_obserr(dim_obs))
       !hcp fin
       call check(nf90_get_var(ncid, presserr_varid, pressure_obserr))
+    endif
+    deptherr = nf90_inq_varid(ncid, depth_name, depth_varid) 
+    if(deptherr == nf90_noerr) then
+      crns_flag = 1
+      if(allocated(depth_obs)) deallocate(depth_obs)
+      allocate(depth_obs(dim_obs))
+      call check(nf90_get_var(ncid, depth_varid, depth_obs))
     endif
 
     if(allocated(x_idx_obs_nc))deallocate(x_idx_obs_nc)
@@ -858,7 +870,8 @@ subroutine read_obs_nc_multiscalar_files(current_observation_filename)
     haserr = nf90_inq_varid(ncid, obserr_name, clmobserr_varid) 
     if(haserr == nf90_noerr) then
       multierr = 1
-      if(.not.allocated(clm_obserr)) allocate(clm_obserr(dim_obs))
+      if(allocated(clm_obserr)) deallocate(clm_obserr)  !hcp
+      allocate(clm_obserr(dim_obs))                     !hcp
       call check(nf90_get_var(ncid, clmobserr_varid, clm_obserr))
     endif
 
@@ -868,9 +881,13 @@ subroutine read_obs_nc_multiscalar_files(current_observation_filename)
     call check( nf90_inq_varid(ncid, lat_name, clmobs_lat_varid) )
     call check( nf90_get_var(ncid, clmobs_lat_varid, clmobs_lat) )
 
-    call check( nf90_inq_varid(ncid, layer_name, clmobs_layer_varid) )
-    call check( nf90_get_var(ncid, clmobs_layer_varid, clmobs_layer) )
-
+    haserr = nf90_inq_varid(ncid, layer_name, clmobs_layer_varid) 
+    if(haserr == nf90_noerr) then
+      call check( nf90_inq_varid(ncid, layer_name, clmobs_layer_varid) )
+      call check( nf90_get_var(ncid, clmobs_layer_varid, clmobs_layer) )
+    else
+      clmobs_layer(:)=1              !hcp for LST DA
+    endif
     call check( nf90_inq_varid(ncid, dr_name, dr_varid) )
     call check( nf90_get_var(ncid, dr_varid, clmobs_dr) )
 

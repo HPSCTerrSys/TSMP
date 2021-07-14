@@ -425,6 +425,15 @@ void enkfparflowadvance(double current_time, double dt)
 	  PF2ENKF(saturation_out, subvec_sat);
 	  PF2ENKF(porosity_out, subvec_porosity);
 	  for(i=0;i<enkf_subvecsize;i++) pf_statevec[i] = subvec_sat[i] * subvec_porosity[i];
+          double dz_glob=GetDouble("ComputationalGrid.DZ");  //hcp if crns update
+          int isc;
+          soilay = (double *) malloc(nz_glob * sizeof(double));
+          char key[IDB_MAX_KEY_LEN];
+          for (isc = 0; isc < nz_glob; isc++) {
+              sprintf(key, "Cell.%d.dzScale.Value", isc);
+              soilay[isc] = GetDouble(key);
+              soilay[isc] *= dz_glob;
+              }
 	}
 
 	/* create state vector: joint swc + pressure */
@@ -464,6 +473,9 @@ void enkfparflowfinalize() {
 	free(xcoord);
 	free(ycoord);
 	free(zcoord);
+        if(pf_updateflag == 2){
+        free(soilay);
+        }
 
 	fflush(NULL);
 	LogGlobals();
@@ -745,7 +757,14 @@ void update_parflow (int do_pupd) {
     for(i=nshift,j=0;i<(nshift+enkf_subvecsize);i++,j++) 
       subvec_param[j] = pf_statevec[i];
 
-    ENKF2PF(perm_xx,subvec_param);
+    if(pf_gwmasking != 1){
+      ENKF2PF(perm_xx,subvec_param);
+    }    // hcp gmasking with param 
+    else {
+//      printf("Kxx masked");	
+      ENKF2PF_masked(perm_xx, subvec_param,subvec_gwind);
+    }
+    // hcp fin
     handle = InitVectorUpdate(perm_xx, VectorUpdateAll);
     FinalizeVectorUpdate(handle);
  
@@ -753,7 +772,14 @@ void update_parflow (int do_pupd) {
     for(i=nshift,j=0;i<(nshift+enkf_subvecsize);i++,j++) 
       subvec_param[j] = pf_statevec[i] * pf_aniso_perm_y;
 
-    ENKF2PF(perm_yy,subvec_param);
+    if(pf_gwmasking != 1){
+      ENKF2PF(perm_yy,subvec_param);
+    }  // hcp gmasking with param 
+    else {
+//      printf("Kyy masked");	
+      ENKF2PF_masked(perm_yy, subvec_param,subvec_gwind);
+    }
+    // hcp fin
     handle = InitVectorUpdate(perm_yy, VectorUpdateAll);
     FinalizeVectorUpdate(handle);
  
@@ -761,7 +787,14 @@ void update_parflow (int do_pupd) {
     for(i=nshift,j=0;i<(nshift+enkf_subvecsize);i++,j++) 
       subvec_param[j] = pf_statevec[i] * pf_aniso_perm_z;
 
-    ENKF2PF(perm_zz,subvec_param);
+    if(pf_gwmasking != 1){
+      ENKF2PF(perm_zz,subvec_param);
+    }  // hcp gmasking with param 
+    else {
+//      printf("Kzz masked");	
+      ENKF2PF_masked(perm_zz, subvec_param,subvec_gwind);
+    }
+    // hcp fin
     handle = InitVectorUpdate(perm_zz, VectorUpdateAll);
     FinalizeVectorUpdate(handle);
  

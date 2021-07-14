@@ -54,7 +54,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   USE mod_assimilation, &
 #ifdef CLMSA
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, dim_state_p, &
-       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, &
+       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, depth_obs_p &
 !hcp 
 !CLMSA needs the physical  coordinates of the elements of state vector 
 !and observation array.        
@@ -62,22 +62,23 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 !hcp end
 #else
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, dim_state_p, &
-       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf
+       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, depth_obs_p, sc_p, &
+       idx_obs_nc_p
 #endif
   Use mod_read_obs, &
        only: idx_obs_nc, pressure_obs, pressure_obserr, multierr, &
        read_obs_nc, clean_obs_nc, x_idx_obs_nc, y_idx_obs_nc, &
        z_idx_obs_nc, read_obs_nc_multi, read_obs_nc_multi_clm, clm_obs, &
-       clmobs_lon, clmobs_lat,clmobs_layer, clmobs_dr, clm_obserr
+       clmobs_lon, clmobs_lat,clmobs_layer, clmobs_dr, clm_obserr, & 
+       crns_flag, depth_obs
   use mod_tsmp, &
 #if defined CLMSA
        only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
        tag_model_clm, point_obs
 #else
        only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-       tag_model_clm, point_obs
+       tag_model_clm, point_obs, nx_glob, ny_glob, nz_glob
 #endif
-
 
 #if defined CLMSA
   !kuw
@@ -111,6 +112,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
   integer,allocatable :: local_dis(:),local_dim(:)
+  integer :: k_count,nsc !hcp
+
 #if defined CLMSA
   real(r8), pointer :: lon(:)
   real(r8), pointer :: lat(:)
@@ -161,6 +164,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_bcast(dim_obs, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! broadcast multierr
   call mpi_bcast(multierr, 1, MPI_INTEGER, 0, comm_filter, ierror)
+  ! broadcast crns_flag
+  call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
 
 
   ! allocate for non-root procs
@@ -175,6 +180,12 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         if (multierr.eq.1) then
              if (allocated(pressure_obserr)) deallocate(pressure_obserr)
              allocate(pressure_obserr(dim_obs))
+        endif
+        
+        if (crns_flag.eq.1) then
+             if (allocated(depth_obs)) deallocate(depth_obs)
+             allocate(depth_obs(dim_obs))
+             depth_obs(:)=0.d0
         endif
         if(allocated(x_idx_obs_nc))deallocate(x_idx_obs_nc)
         allocate(x_idx_obs_nc(dim_obs))
@@ -210,6 +221,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !if(model == tag_model_parflow) then ! for all non-master proc
      call mpi_bcast(pressure_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      if(multierr.eq.1) call mpi_bcast(pressure_obserr, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
+     if(crns_flag.eq.1) call mpi_bcast(depth_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      call mpi_bcast(idx_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      ! broadcast xyz indices
      call mpi_bcast(x_idx_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
@@ -301,6 +313,14 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         if (allocated(pressure_obserr_p)) deallocate(pressure_obserr_p)
         allocate(pressure_obserr_p(dim_obs_p))
      endif
+     if(crns_flag.eq.1) then 
+        if (allocated(depth_obs_p)) deallocate(depth_obs_p)
+        allocate(depth_obs_p(dim_obs_p))
+        if (allocated(sc_p)) deallocate(sc_p)
+        allocate(sc_p(dim_obs_p))
+        if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
+        allocate(idx_obs_nc_p(dim_obs_p))
+     endif
      !hcp fin 
      count = 1
      do i = 1, dim_obs
@@ -312,11 +332,27 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               obs_index_p(count) = j
               obs_p(count) = pressure_obs(i)
               if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
+              if(crns_flag.eq.1) then
+                  depth_obs_p(count) = depth_obs(i)
+                  idx_obs_nc_p(count)=idx_obs_nc(i)
+                  Allocate(sc_p(count)%scol_obs_in(nz_glob-z_idx_obs_nc(i)+1))       
+              endif
               obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
               count = count + 1
            end if
         end do
      end do
+     do i = 1, dim_obs_p
+      if(crns_flag.eq.1) then 
+        nsc=size(sc_p(i)%scol_obs_in(:))
+        do k = 1, nsc
+          k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
+          do j = 1, enkf_subvecsize
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i)%scol_obs_in(nsc-k+1)=j
+          enddo
+        enddo
+      endif
+     enddo
   end if
   call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 #endif

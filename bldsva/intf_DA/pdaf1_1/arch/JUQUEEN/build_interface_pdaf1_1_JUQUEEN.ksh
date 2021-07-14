@@ -2,12 +2,12 @@
 #
 
 always_da(){
-route "${cyellow}>> always_da${cnormal}"
-route "${cyellow}<< always_da${cnormal}"
+route "${cblue}>> always_da${cnormal}"
+route "${cblue}<< always_da${cnormal}"
 }
 
 substitutions_da(){
-route "${cyellow}>> substitutions_da${cnormal}"
+route "${cblue}>> substitutions_da${cnormal}"
 
   comment "   mkdir  $dadir/interface"
     mkdir -p $dadir/interface  >> $log_file 2>> $err_file
@@ -21,11 +21,11 @@ route "${cyellow}>> substitutions_da${cnormal}"
     patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
   check
 
-route "${cyellow}<< substitutions_da${cnormal}"
+route "${cblue}<< substitutions_da${cnormal}"
 }
 
 configure_da(){
-route "${cyellow}>> configure_da${cnormal}"
+route "${cblue}>> configure_da${cnormal}"
   export PDAF_DIR=$dadir
   export PDAF_ARCH=ibm_xlf_mpi
 
@@ -157,11 +157,11 @@ route "${cyellow}>> configure_da${cnormal}"
   check
 
 
-route "${cyellow}<< configure_da${cnormal}"
+route "${cblue}<< configure_da${cnormal}"
 }
 
 make_da(){
-route "${cyellow}>> make_da${cnormal}"
+route "${cblue}>> make_da${cnormal}"
   export PDAF_DIR=$dadir
   export PDAF_ARCH=ibm_xlf_mpi
 
@@ -187,13 +187,13 @@ route "${cyellow}>> make_da${cnormal}"
   check
 
 
-route "${cyellow}<< make_da${cnormal}"
+route "${cblue}<< make_da${cnormal}"
 }
 
 
 setup_da(){
-route "${cyellow}>> setup_da${cnormal}"
+route "${cblue}>> setup_da${cnormal}"
   c_setup_pdaf
-route "${cyellow}<< setup_da${cnormal}"
+route "${cblue}<< setup_da${cnormal}"
 }
 
