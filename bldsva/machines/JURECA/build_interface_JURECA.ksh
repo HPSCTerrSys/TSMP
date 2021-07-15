@@ -7,13 +7,23 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
+    . $rootdir/bldsva/machines/$platform/loadenvs_tcl8_6_8.$compiler >> $log_file 2>> $err_file
+  else
+    . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  fi
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  if [[ $compiler == "Gnu" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Gnu/lib/"
+  elif [[ $compiler == "Intel" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  else
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  fi
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
@@ -31,7 +41,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultQ="dc-cpu-devel"
 
 route "${cyellow}<< getMachineDefaults${cnormal}"
 }
@@ -57,6 +67,34 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+if [[ $processor == "GPU" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N 2 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH packjob
+#SBATCH -N 1 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH packjob
+#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
+
+cd $rundir
+source $rundir/loadenvs
+export LD_LIBRARY_PATH="/p/scratch/cslts/ghasemi1/TSMP_github/TSMP/parflow3_7_JUWELS_3.1.0MCT_clm-cos-pfl/rmm/lib:\$LD_LIBRARY_PATH"
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+date
+echo "ready" > ready.txt
+exit 0
+EOF
+
+else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
@@ -87,7 +125,7 @@ exit 0
 
 EOF
 
-
+fi
 
 
 

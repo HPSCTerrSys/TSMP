@@ -33,7 +33,7 @@ program pdaf_terrsysmp
     use mod_tsmp
 
 #if (defined CLMSA)
-    use enkf_clm_mod, only: da_comm, statcomm, update_clm, clmupdate_swc, clmprint_et
+    use enkf_clm_mod, only: da_comm, statcomm, update_clm, clmupdate_swc, clmupdate_T, clmprint_et
     use mod_clm_statistics
 #elif (defined COUP_OAS_PFL || defined COUP_OAS_COS)
 !#else
@@ -106,7 +106,8 @@ program pdaf_terrsysmp
 
         !call print_update_pfb()
 #if defined CLMSA
-        if((model.eq.tag_model_clm).and.(clmupdate_swc.ne.0)) then
+!        if((model.eq.tag_model_clm).and.(clmupdate_swc.ne.0)) then
+        if((model.eq.tag_model_clm).and.((clmupdate_swc.ne.0).OR.(clmupdate_T.ne.0))) then !hcp
           call update_clm()
           call print_update_clm(tcycle,total_steps)
         endif

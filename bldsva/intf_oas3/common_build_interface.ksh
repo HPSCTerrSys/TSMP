@@ -775,6 +775,24 @@ c_configure_pfl(){
 
 
 route "${cyellow}>>> c_configure_pfl${cnormal}"
+
+  if [[ ${mList[3]} == parflow3_7 ]] ; then
+
+  comment "    cd to pfl build directory "
+  cd $PARFLOW_BLD >> $log_file 2>> $err_file
+  check
+  export CC=$pcc
+  export FC=$pfc
+  export F77=$pf77
+  export CXX=$pcxx
+
+  comment "    configure pfsimulator and pftools"
+  cmake ../ $flagsSim >> $log_file 2>> $err_file
+  check
+
+  fi
+
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -832,11 +850,35 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   comment "    sed libs to /parflow_exe/Makefile"
     sed -i "s@__libs__@$libsSim@" $pfldir/pfsimulator/parflow_exe/Makefile >> $log_file 2>> $err_file
   check
+
+  fi
+
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
+
+  if [[ ${mList[3]} == parflow3_7 ]] ; then
+comment "    cd to pfl build directory "
+  cd $PARFLOW_BLD >> $log_file 2>> $err_file
+check
+comment "    make pfsimulator and pftools"
+  make  >> $log_file 2>> $err_file
+check
+comment "    make install pfsimulator and pftools"
+  make install >> $log_file 2>> $err_file
+check
+comment "    cp pfl bin to $bindir"
+  cp -R $pfldir/bin/bin $bindir >> $log_file 2>> $err_file
+check
+
+comment "    cp binary to $bindir"
+ cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
+check
+  fi
+
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -872,11 +914,15 @@ check
     check
   fi
   export SCOREP_WRAPPER=on
+  fi
+
 route "${cyellow}<<< c_make_pfl${cnormal}"
 }
 
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
+
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
@@ -908,6 +954,8 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
     check
       sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_smg.c
     check
+  fi
+
   fi
 
 route "${cyellow}<<< c_substitutions_pfl${cnormal}"
