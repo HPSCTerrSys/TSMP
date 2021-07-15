@@ -86,19 +86,25 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   !kuw: check, for observation file with at least 1 observation
 !  counter = stepnow 
   !step_TB = stepnow 
-  counter = stepnow 
+!  if (stepnow.EQ.0) then
+!    counter = stepnow + toffset !hcp introduce offset in time
+    counter = stepnow 
+!  else
+!    counter = stepnow 
+!  endif
   !nsteps  = 0
   write(*,*) 'total_steps (in next_observation_pdaf): ',total_steps
   do
     !nsteps  = nsteps  + delt_obs 
     counter = counter + delt_obs
-    !if(counter>total_steps) exit
     if(counter>(total_steps+toffset)) exit
+!    if(counter>total_steps) exit
     write(fn, '(a, i5.5)') trim(obs_filename)//'.', counter
     call check_n_observationfile(fn,no_obs)
     if(no_obs>0) exit
   end do
-  nsteps = counter - stepnow
+!  nsteps = counter - stepnow -toffset
+  nsteps = counter - stepnow 
   write(*,*)'stepnow (in next_observation_pdaf):',stepnow
   write(*,*)'no_obs, nsteps, counter (in next_observation_pdaf): ',no_obs,nsteps,counter
   step_TB = counter

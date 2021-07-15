@@ -51,10 +51,13 @@ module enkf_clm_mod
 #if (defined CLMSA)
   integer :: da_comm
   integer :: clm_statevecsize
+  integer :: clm_paramsize !hcp LAI
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
   real(r8),allocatable :: clm_statevec(:)
+  real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
+  integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
@@ -110,9 +113,20 @@ module enkf_clm_mod
         clm_statevecsize = clm_statevecsize + 2*((endg-begg+1)*nlevsoi)
     endif
 
+    !hcp LST DA
+    if(clmupdate_T.eq.1) then
+      clm_varsize      =  endg-begg+1 
+      clm_paramsize =  endg-begg+1         !LAI
+      clm_statevecsize =  (endg-begg+1)*2  !TG, then TV
+    endif
+    !end hcp
+
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
+    
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    allocate(clm_statevec(clm_statevecsize))
+    if ((clmupdate_swc.NE.0) .OR. (clmupdate_T.NE.0)) allocate(clm_statevec(clm_statevecsize))  !hcp
+    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)
+    if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
   end subroutine
 
   subroutine set_clm_statevec()
@@ -123,6 +137,9 @@ module enkf_clm_mod
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
+    real(r8), pointer :: tvege(:)   !hcp
+    real(r8), pointer :: tgrou(:)   !hcp
+    real(r8), pointer :: ttlai(:)   !hcp
     integer :: i,j,cc=1,offset=0
     real(r8) :: swcave
     real(r8) :: swctmp(10)
@@ -130,6 +147,9 @@ module enkf_clm_mod
     swc   => clm3%g%l%c%cws%h2osoi_vol
     psand => clm3%g%l%c%cps%psand
     pclay => clm3%g%l%c%cps%pclay
+    tvege => clm3%g%l%c%p%pes%t_veg
+    tgrou => clm3%g%l%c%ces%t_grnd
+    ttlai => clm3%g%l%c%p%pps%tlai
 
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
@@ -137,13 +157,25 @@ module enkf_clm_mod
     endif
 
     ! write swc values to state vector
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-        clm_statevec(cc+offset) = swc(j,i)
-        cc = cc + 1
+    if(clmupdate_swc.NE.0) then       !hcp: not go through if swc not updated
+      cc = 1
+      do i=1,nlevsoi
+        do j=clm_begg,clm_endg
+          clm_statevec(cc+offset) = swc(j,i)
+          cc = cc + 1
+        end do
       end do
-    end do
+    endif                            
+    if(clmupdate_T.EQ.1) then       !hcp  LAI 
+      cc = 1
+        do j=clm_begg,clm_endg
+          clm_statevec(cc) = tgrou(j)
+          clm_statevec(cc+clm_varsize) = tvege(j)
+          clm_paramarr(cc) = ttlai(j)
+          cc = cc + 1
+        end do
+     write(*,*) 'b4 update, tgrou(beg) tvege(beg) ttlai(beg)=',tgrou(clm_begg), tvege(clm_begg), ttlai(clm_begg)
+    endif                            !hcp  LAI
 
     ! write average swc to state vector (CRP assimilation)
     if(clmupdate_swc.eq.2) then
@@ -183,6 +215,8 @@ module enkf_clm_mod
     real(r8), pointer :: watsat(:,:)
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
+    real(r8), pointer :: tvege(:)   !hcp
+    real(r8), pointer :: tgrou(:)   !hcp
 
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
@@ -195,6 +229,8 @@ module enkf_clm_mod
     watsat => clm3%g%l%c%cps%watsat
     psand => clm3%g%l%c%cps%psand
     pclay => clm3%g%l%c%cps%pclay
+    tvege => clm3%g%l%c%p%pes%t_veg    !hcp
+    tgrou => clm3%g%l%c%ces%t_grnd     !hcp
 
     dz            => clm3%g%l%c%cps%dz
     h2osoi_liq    => clm3%g%l%c%cws%h2osoi_liq
@@ -206,27 +242,37 @@ module enkf_clm_mod
     endif
 
     ! write updated swc back to CLM
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-        rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-        rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
-        !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
-        if(clm_statevec(cc+offset).le.0.0) then
-          swc(j,i)   = 0.05
-        else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
-          swc(j,i) = watsat(j,i)
-        else
-          swc(j,i)   = clm_statevec(cc+offset)
-        endif
-        ! update liquid water content
-        h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
-        ! update ice content
-        h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
-        cc = cc + 1
-      end do
-    end do
-
+    if(clmupdate_swc.NE.0) then      !hcp: not go through if swc not updated
+       cc = 1
+       do i=1,nlevsoi
+         do j=clm_begg,clm_endg
+           rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+           rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+           !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
+           if(clm_statevec(cc+offset).le.0.0) then
+             swc(j,i)   = 0.05
+           else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
+             swc(j,i) = watsat(j,i)
+           else
+             swc(j,i)   = clm_statevec(cc+offset)
+           endif
+           ! update liquid water content
+           h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
+           ! update ice content
+           h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+           cc = cc + 1
+         end do
+       end do
+    endif            
+    if(clmupdate_T.EQ.1) then      !hcp: TG, TV
+       cc = 1
+         do j=clm_begg,clm_endg
+           tgrou(j) = clm_statevec(cc) 
+           tvege(j) = clm_statevec(cc+clm_varsize) 
+           cc = cc + 1
+         end do
+         write(*,*) 'After update, tgrou(beg) tvege(beg)=',tgrou(clm_begg), tvege(clm_begg)
+    endif            
     !! update liquid water content
     !do j=clm_begg,clm_endg
     !  do i=1,nlevsoi

@@ -50,12 +50,17 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! !USES:
    USE mod_assimilation, &
         ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB,&
-              ens_TB,member_TB
+              ens_TB,member_TB, sc_p, &
+        depth_obs_p !, obs_p
+   USE mod_read_obs, ONLY: crns_flag !clm_obs
    use mod_parallel_model, &
         only: model,mype_model,npes_model,mype_world,npes_world,COMM_model
    use mod_tsmp, &
         only: tag_model_clm,tag_model_parflow, &
-            nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local !SPo add lcmem
+              nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local, & !SPo add lcmem
+              soilay, soilay_fortran, nz_glob 
+   USE, INTRINSIC :: iso_c_binding
+!   USE mod_parallel_model, ONLY: tcycle 
 
    ! LSN: module load for the implementation of CMEM model
    USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
@@ -63,6 +68,11 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
             MPI_DOUBLE_PRECISION,MPI_INTEGER,filterpe,&
             MPI_SUCCESS,mype_couple         
    USE spmdMod      , only: masterproc,iam,mpicom,npes
+
+#if defined CLMSA
+   USE enkf_clm_mod, & 
+        ONLY : clm_varsize, clm_paramarr, clmupdate_swc, clmupdate_T
+#endif
 
    IMPLICIT NONE
 ! !ARGUMENTS:
@@ -75,7 +85,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   character*200         :: inparam_fname 
   REAL,DIMENSION(1)     :: TB(dim_obs)
   REAL,ALLOCATABLE      :: ens_TB_tmp(:,:)
-  INTEGER               :: i,j, nerror,nproc
+  INTEGER               :: i,j,k,nerror,nproc
   CHARACTER (len = 110) :: OBSFILE
   !REAL,ALLOCATABLE      :: ens_TB(:)
   !common /coeff/ ens_TB
@@ -87,6 +97,17 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! EOP
 
 ! *** local variables ***
+
+! hcp test with hardcoding variable declaration
+real(8), dimension(:), allocatable :: soide !soil depth
+!real(8), dimension(0:12), parameter :: &
+! soide=(/0.d0,  0.02d0,  0.05d0,  0.1d0,  0.17d0, 0.3d0,  0.5d0, &
+!                0.8d0,   1.3d0,   2.d0,  3.d0, 5.d0,  12.d0/) !soil depth
+
+real(8) :: tot, avesm
+integer :: nsc
+! end of hcp 
+
 
 ! *********************************************
 ! *** Perform application of measurement    ***
@@ -151,5 +172,61 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
       m_state_p(i) = state_p(obs_index_p(i))
    END DO
  END IF
+
+#if defined CLMSA
+if (clmupdate_swc.NE.0) then
+  DO i = 1, dim_obs_p
+     m_state_p(i) = state_p(obs_index_p(i))
+  END DO
+endif
+if (clmupdate_T.EQ.1) then
+  DO i = 1, dim_obs_p
+     m_state_p(i) &
+    = (exp(-0.5*clm_paramarr(obs_index_p(i))) &
+                     *state_p(obs_index_p(i))**4 & 
+       +(1.-exp(-0.5*clm_paramarr(obs_index_p(i)))) &
+                     *state_p(clm_varsize+obs_index_p(i))**4)**0.25
+  END DO
+!  write(*,*) 'now is cycle ', tcycle
+!  write(*,*) 'obs_p =', obs_p(:)
+!  write(*,*) 'model LST', m_state_p(:)
+!  write(*,*) 'TG', state_p(obs_index_p(:))
+!  write(*,*) 'TV', state_p(clm_varsize+obs_index_p(:))
+endif
+#else
+ if (crns_flag.EQ.1) then
+     call C_F_POINTER(soilay,soilay_fortran,[nz_glob])
+     Allocate(soide(0:nz_glob))
+     soide(0)=0.d0
+     do i=1,nz_glob
+       soide(i)=soide(i-1)+soilay_fortran(nz_glob-i+1) 
+     enddo
+     do i = 1, dim_obs_p
+       nsc= size(sc_p(i)%scol_obs_in(:))
+       avesm=0.d0
+       do j=1, nsc-1
+           avesm=avesm+(1.d0-0.5d0*(soide(j)+soide(j-1))/depth_obs_p(i))*(soide(j)-soide(j-1)) &
+                 *state_p(sc_p(i)%scol_obs_in(j))/depth_obs_p(i)
+       enddo
+       avesm=avesm+(1.d0-0.5d0*(depth_obs_p(i)+soide(nsc-1))/depth_obs_p(i))*(depth_obs_p(i)-soide(nsc-1)) &
+             *state_p(sc_p(i)%scol_obs_in(nsc))/depth_obs_p(i)
+       tot=0.d0
+       do j=1, nsc-1
+           tot=tot+(1.d0-0.5d0*(soide(j)+soide(j-1))/depth_obs_p(i))*(soide(j)-soide(j-1)) &
+               /depth_obs_p(i)
+       enddo
+       tot=tot+(1.d0-0.5d0*(depth_obs_p(i)+soide(nsc-1))/depth_obs_p(i))*(depth_obs_p(i)-soide(nsc-1)) &
+          /depth_obs_p(i)
+
+       avesm=avesm/tot
+       m_state_p(i)=avesm
+     enddo
+     deallocate(soide)
+ else 
+  DO i = 1, dim_obs_p
+     m_state_p(i) = state_p(obs_index_p(i))
+  END DO
+ endif
+#endif
 
 END SUBROUTINE obs_op_pdaf

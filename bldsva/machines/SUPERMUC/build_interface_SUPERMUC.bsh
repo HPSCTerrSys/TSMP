@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
 ##### CHECK THIS!!!
 ###  comment "   init lmod functionality"
 ###  . /dss/dsshome1/01/di67zos/bshlmod >> $log_file 2>> $err_file
@@ -35,17 +35,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime="01:00:00"
   defaultQ="micro"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy SUPERMUC module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
 check
@@ -191,6 +191,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

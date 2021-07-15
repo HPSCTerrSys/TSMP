@@ -35,7 +35,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
   USE mod_read_obs,&
   ONLY: x_idx_obs_nc, y_idx_obs_nc, z_idx_obs_nc
 #if defined CLMSA
-   USE enkf_clm_mod, ONLY: init_clm_l_size
+   USE enkf_clm_mod, ONLY: init_clm_l_size, clmupdate_T
    USE mod_parallel_pdaf, ONLY: filterpe
 #endif
 !fin hcp
@@ -176,26 +176,45 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 !    call C_F_POINTER(zcoord,zcoord_fortran,[enkf_subvecsize])
 
     ! localize HP
-    ncellxy=dim_state/dim_l
-    DO j = 1, dim_obs
-      DO k=1,dim_l
-        DO i = 1, ncellxy
-!         dx = abs(longxy_obs(j) - longxy(i)-1)
-!         dy = abs(latixy_obs(j) - latixy(i)-1)
-         dx = abs(longxy_obs(j) - longxy(i))
-         dy = abs(latixy_obs(j) - latixy(i))
-         distance = sqrt(real(dx)**2 + real(dy)**2)
-    
-         ! Compute weight
-         CALL PDAF_local_weight(wtype, rtype, local_range, srange, distance, 1, 1, tmp, 1.0, weight, 0)
-    
-         ! Apply localization
-         HP(j,i+(k-1)*ncellxy) = weight * HP(j,i+(k-1)*ncellxy)
-
-        END DO
-      END DO
-    END DO
-    
+    ! ncellxy=dim_state/dim_l
+    if (clmupdate_T.EQ.0) then
+       ncellxy=dim_state/dim_l
+       DO j = 1, dim_obs
+         DO k=1,dim_l
+           DO i = 1, ncellxy
+            dx = abs(longxy_obs(j) - longxy(i))
+            dy = abs(latixy_obs(j) - latixy(i))
+            distance = sqrt(real(dx)**2 + real(dy)**2)
+       
+            ! Compute weight
+            CALL PDAF_local_weight(wtype, rtype, local_range, srange, distance, 1, 1, tmp, 1.0, weight, 0)
+       
+            ! Apply localization
+            HP(j,i+(k-1)*ncellxy) = weight * HP(j,i+(k-1)*ncellxy)
+   
+           END DO
+         END DO
+       END DO
+    else
+       ncellxy=dim_state/2
+       DO j = 1, dim_obs
+         DO k=1,2
+           DO i = 1, ncellxy
+            dx = abs(longxy_obs(j) - longxy(i))
+            dy = abs(latixy_obs(j) - latixy(i))
+            distance = sqrt(real(dx)**2 + real(dy)**2)
+       
+            ! Compute weight
+            CALL PDAF_local_weight(wtype, rtype, local_range, srange, distance, 1, 1, tmp, 1.0, weight, 0)
+       
+            ! Apply localization
+            HP(j,i+(k-1)*ncellxy) = weight * HP(j,i+(k-1)*ncellxy)
+   
+           END DO
+         END DO
+       END DO
+       
+    endif
     ! localize HPH^T
     DO j = 1, dim_obs
        DO i = 1, dim_obs
