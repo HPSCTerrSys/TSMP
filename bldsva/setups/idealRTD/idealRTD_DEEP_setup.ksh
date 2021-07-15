@@ -11,7 +11,7 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
-  defaultNppn=128  
+  defaultNppn=24
   defaultCLMProcX=2
   defaultCLMProcY=2
   defaultCOSProcX=6

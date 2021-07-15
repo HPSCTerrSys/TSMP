@@ -9,28 +9,23 @@ initSetup(){
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl
-  defaultRST=$rootdir/bldsva/setups/restart/tsmp_restart.sh
+  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl 
 
- defaultNppn=128
+
+  defaultNppn=24
+  defaultCLMProcX=3
+  defaultCLMProcY=8
+  defaultCOSProcX=12
+  defaultCOSProcY=16
   if [[ $processor == "GPU" ]]; then
-    defaultCLMProcX=6
-    defaultCLMProcY=8
-    defaultCOSProcX=16
-    defaultCOSProcY=16
     defaultPFLProcX=1
     defaultPFLProcY=4
   else
-    defaultCLMProcX=3
-    defaultCLMProcY=8
-    defaultCOSProcX=16
-    defaultCOSProcY=18
     defaultPFLProcX=9
     defaultPFLProcY=8
   fi
-  
-  defaultStartDate="2021-06-24 12"
-  defaultInitDate="2021-06-24 12"
+  defaultStartDate="2016-05-01 12"
+  defaultInitDate="2016-05-01 12"
   
   defaultDumpCLM=1
   defaultDumpCOS=1
@@ -103,8 +98,8 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 
   if [[ $withCOS == "true" ]] then
     comment "  sed gribapi definitions and samples to namelist"
-     p_samp=\$EBROOTECCODES/share/eccodes/samples/
-     p_def=\$EBROOTECCODES/share/eccodes/definitions/
+     p_samp=$gribPath/share/eccodes/samples/
+     p_def=$gribPath/share/eccodes/definitions/
      sed "s,__definitions__,$p_def," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
      sed "s,__samples__,$p_samp," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
     check
@@ -156,10 +151,5 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	check
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
-
-  comment "   copy restart script to rundir "
-   c_setup_rst
-  check
-
 route "${cyellow}<< finalizeSetup${cnormal}"
 }
