@@ -24,6 +24,7 @@ getDefaults(){
   def_namelist_icon=""
   def_namelist_oas=""
   def_namelist_pfl=""
+  def_restart_script=""
 #DA
   def_namelist_da=""
 
@@ -121,6 +122,7 @@ setDefaults(){
   namelist_icon=$def_namelist_icon
   namelist_oas=$def_namelist_oas
   namelist_pfl=$def_namelist_pfl
+  restart_script=$def_restart_script
 #DA
   namelist_da=$def_namelist_da
 
@@ -171,6 +173,7 @@ clearPathSelection(){
   namelist_icon=""
   namelist_pfl=""
   namelist_oas=""
+  restart_script=""
 #DA
   namelist_da=""
 }
@@ -199,6 +202,7 @@ setSelection(){
   if [[ $namelist_icon == "" ]] then ; namelist_icon=$defaultNLICON ; fi
   if [[ $namelist_oas == "" ]] then ; namelist_oas=$defaultNLOAS ; fi
   if [[ $namelist_pfl == "" ]] then ; namelist_pfl=$defaultNLPFL ; fi
+  if [[ $restart_script == "" ]] then ; restart_script=$defaultRST ; fi
 #DA
   if [[ $namelist_da == "" ]] then ; namelist_da=$defaultNLDA ; fi
 
