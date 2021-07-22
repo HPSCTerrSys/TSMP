@@ -756,6 +756,10 @@ route "${cblue}>>> c_substitutions_pfl${cnormal}"
     check
       patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
     check
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+    check
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
+    check
       patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
     check
       sed "s/MPI_COMM_WORLD/amps_CommWorld/g" -i $pfldir/pfsimulator/parflow_lib/pf_pfmg.c
