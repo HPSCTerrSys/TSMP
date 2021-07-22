@@ -694,7 +694,7 @@ getRoot(){
   #GetOpts definition
   USAGE=$'[-?\n@(#)$Id: TerrSysMP setup script 1.0 - '
   USAGE+=$' date: 10.10.2015 $\n]'
-  USAGE+="[-author?Fabian Gasper]"
+  USAGE+="[-author?Fabian Gasper <f.gasper@fz-juelich.de>]"
   USAGE+="[+NAME?TerrSysMP setup script]"
   USAGE+="[+DESCRIPTION?sets up TSMP run by handling namelists and copying necessary files into a run directory]"
   USAGE+="[b:bash?Bash mode - set command line arguments will overwrite default values (no interactive mode) (This is the default with arguments).]"

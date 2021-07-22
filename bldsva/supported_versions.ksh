@@ -22,7 +22,7 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 3.0.0MCTPDAF 1.1.0MCTPDAF "
+        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["JUQUEEN"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF "
         ["AGROCLUSTER"]=" 1.1.0 1.1.0MCT 1.1.0MCTPDAF 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.0MCTPDAF 3.1.0 3.1.0MCT"
@@ -82,7 +82,7 @@ combinations+=(
         ["1.2.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["1.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["1.1.0MCTPDAF"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
+        ["1.1.0MCTPDAF"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
         ["2.1.0"]=" clm cos pfl clm-cos "
         ["2.1.0MCT"]=" clm cos pfl clm-cos "
         ["2.0.5"]=" clm cos pfl clm-cos "
@@ -114,15 +114,36 @@ setups+=(
         ["bonn"]="flood area of interest"
         ["icon-ccs"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
         ["nrw-icon"]="150x150 (1.2km res) atmosphere 300x300 (0.5km res) land domain of North-Rhine-Westphalia"
+        ["ENS1"]="Neckar Ensemble part1"
+        ["ENS11"]="Neckar Ensemble part2"
+        ["VR1"]="Neckar VR version 1"
+        ["VR2"]="Neckar VR version 2"
+	["idealscale"]="Vincents ideal scaling tests"
+        ["S3Mnew"]="Intermediate SM Spinup 2018"
+        ["S3Mnewagg"]="Intermediate SM Spinup 2018 coarser grid"
+        ["S3MnewaggENS"]="Intermediate SM ENSEMBLE part0"
+        ["S3MnewaggENS1"]="Intermediate SM ENSEMBLE part1"
+        ["S3MnewaggENS2"]="Intermediate SM ENSEMBLE part2"
+        ["S3MnewaggENS3"]="Intermediate SM ENSEMBLE part3"
+        ["S3MnewaggENSindi"]="Intermediate SM ENSEMBLE individual runs"
+        ["S3MENShomoDA"]="Intermediate SM ENSEMBLE for DA"
+        ["S3MENShomoDA1"]="Intermediate SM ENSEMBLE for DA part1"
+        ["S3MENShomoDA2"]="Intermediate SM ENSEMBLE for DA part2"
+        ["S3MENShomoDA3"]="Intermediate SM ENSEMBLE for DA part3"
+        ["S3MENShomoDA4"]="Intermediate SM ENSEMBLE for DA part4"
+        ["S3MENShomoDAfull_test"]="Intermediate SM ENSEMBLE for DA just for testing"
+        ["S3MENShomoDAsel"]="Intermediate SM ENSEMBLE for DA complete"
+        ["testcase_day4"]="Fall school test case"
+        ["S3MENShomoDAcorr"]="corrected Intermediate SM ENSEMBLE for DA"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse ENS1 ENS11 VR1 VR2 idealscale S3Mnew S3Mnewagg S3MnewaggENS S3MnewaggENSindi S3MnewaggENS1 S3MnewaggENS2 S3MnewaggENS3 S3MENShomoDA S3MENShomoDA1 S3MENShomoDA2 S3MENShomoDA3 S3MENShomoDA4 S3MENShomoDAfull_test S3MENShomoDAsel testcase_day4 S3MENShomoDAcorr "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur bonnRadar bonn seabreeze smresponse "
         ["JUQUEEN"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
-	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
+	["CLUMA2"]=" nrw idealRTD multi-scale idealLES ENS1 "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "
 )

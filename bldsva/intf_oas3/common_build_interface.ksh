@@ -282,6 +282,7 @@ check
 
 if [[ $withPDAF == "true" ]] ; then
   cp $rundir/INPUT_IO $rundir/INPUT_IO_$(printf "%05d" $(($instance-$startInst)))     
+  cp $rundir/INPUT_ORG $rundir/INPUT_ORG_$(printf "%05d" $(($instance-$startInst)))
 fi
 
 route "${cblue}<<< c_setup_cos${cnormal}"
@@ -496,6 +497,8 @@ route "${cblue}>>> c_configure_clm${cnormal}"
     flags+="-clm_bld $clmdir/build "
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
+
+    cplInc+="-g -traceback -heap-arrays " # Mukund
 
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
