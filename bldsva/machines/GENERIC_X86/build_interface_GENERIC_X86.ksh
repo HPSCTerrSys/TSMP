@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultMpiPath="$rootdir/lib/openmpi"
   defaultNcdfPath="$rootdir/lib/netcdf"
   defaultGribPath="$rootdir/lib/gribapi"
@@ -32,17 +32,17 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime=""
   defaultQ=""
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 
 comment "   copy x86 module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenv_x86 $rundir
@@ -122,6 +122,6 @@ fi
 comment "   change permission of runscript and mapfile"
 chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

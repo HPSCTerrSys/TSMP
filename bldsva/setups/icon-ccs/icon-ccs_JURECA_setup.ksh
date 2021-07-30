@@ -125,7 +125,7 @@ EOF
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
 
   comment "  copy icon grid"
     ln -s $gicon $rundir/ >> $log_file 2>> $err_file
@@ -136,5 +136,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
     rm -r $rmp_folder
   check
 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

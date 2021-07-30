@@ -194,7 +194,10 @@ cat > INPUT_ORG << end_input_org
  ie_tot       = ie_tot_bldsva, je_tot = je_tot_bldsva,     ke_tot = 50,
  /
  &RUNCTL
-  hstart = __hstart__,   nstop  = $nsteps,    dt      = dt_cos_bldsva,    ydate_ini='$DATUM',
+  hstart = __hstart__,
+  nstop = $nsteps,
+  dt      = dt_cos_bldsva,
+  ydate_ini='$DATUM',
   nprocx = $NPX,  nprocy = $NPY,   nprocio = $NPIO,
   nboundlines = 4,
   lphys      = .TRUE.,   luse_rttov    = .FALSE.,  luseobs = .FALSE., leps = .FALSE.,
@@ -235,7 +238,7 @@ cat > INPUT_IO  << end_input_io
   lasync_io=.FALSE., ngribout=1,
    nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
    ytunit_restart='f',
-  yform_read='apix',
+  yform_read='ncdf',
 
 !  nincwait=30,
 !  nmaxwait=2400,
@@ -399,8 +402,8 @@ cat > INPUT_ASS << end_input_ass
  /
 end_input_ass
 
-export GRIB_DEFINITION_PATH=$EBROOTGRIB_API/share/grib_api/definitions/
-export GRIB_SAMPLES_PATH=$EBROOTGRIB_API/share/grib_api/samples/
+export GRIB_DEFINITION_PATH=__definitions__
+export GRIB_SAMPLES_PATH=__samples__
 
 namelists
 

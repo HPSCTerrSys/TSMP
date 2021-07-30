@@ -2,19 +2,20 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /usr/local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/$platform/loadenvs >> $log_file 2>> $err_file
+  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGribPath="$EBROOTGRIB_API"
-  defaultGribapiPath="$EBROOTGRIB_API"
+  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  defaultGribPath="$EBROOTECCODES"
+  defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
@@ -30,21 +31,21 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultQ="dc-cpu-devel"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy JURECA module load script into rundirectory"
-  cp $rootdir/bldsva/machines/$platform/loadenvs $rundir
+  cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
 
 mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
@@ -56,6 +57,34 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+if [[ $processor == "GPU" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N 2 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH packjob
+#SBATCH -N 1 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH packjob
+#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
+
+cd $rundir
+source $rundir/loadenvs
+export LD_LIBRARY_PATH="/p/scratch/cslts/ghasemi1/TSMP_github/TSMP/parflow3_7_JUWELS_3.1.0MCT_clm-cos-pfl/rmm/lib:\$LD_LIBRARY_PATH"
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+date
+echo "ready" > ready.txt
+exit 0
+EOF
+
+else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
@@ -86,7 +115,7 @@ exit 0
 
 EOF
 
-
+fi
 
 
 
@@ -188,6 +217,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 
