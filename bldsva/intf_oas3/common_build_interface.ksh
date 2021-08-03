@@ -1041,14 +1041,15 @@ sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i
       sed "s,__pfl_ICPpressureFileName__,$restfile_pfl," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file
   check
     fi
-
+  
   export PARFLOW_DIR=$bindir
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check
 
   comment "   create parflow db with tclsh from namelist."
-    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
 
