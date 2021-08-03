@@ -1,7 +1,3 @@
-***A note for branch TSMP_x86_64***
-
-This branch is a temporarily branch for automatic porting of TSMP on GENERIC_X86 Linux platform and will be merged to the master later on. Please go to section [Porting TSMP on GENERIC_X86 Linux platform](#ref_step11)  for automatic installation of necessary libraries for building TSMP. The instruction on how to build and how to configure TSMP for the cordex test case ([EURO-CORDEX test case experiment](#ref_exp)) are given in [step 5 ](#ref_step4) and [step 6 ](#ref_step5), respectively.
-
 # Table of contents
 1. [Introduction](#introduction)
 	1. [TSMP](#TSMP)
@@ -23,10 +19,10 @@ This branch is a temporarily branch for automatic porting of TSMP on GENERIC_X86
 3. [Heterogeneous Job using TSMP](#hetero_job)
 4. [NRW Test case](#nrw_test)
 5. [IdealRTD (Idealized) Test case](#idealrtd_test)
-6. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
-7. [Patching the orginal source code](#patching)
-8. [Long time climate simulation](#climate_sim)
-9. [Restart functionality for EURO-CORDEX test case](#restart)
+6. [Patching the orginal source code](#patching)
+7. [Long time climate simulation](#climate_sim)
+8. [Restart functionality for EURO-CORDEX test case](#restart)
+9. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
 10. [To come](#To-come)
 11. [Documentation](#ref_doc)
 
@@ -407,10 +403,6 @@ To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just c
    ./setup_tsmp.ksh -v 3.1.0MCT -V idealRTD -m JUWELS -O Intel
  ```
 
-# Automatic Porting of TSMP on x86 machines  <a name="TSMP_x86 "></a>
-
-For automatic porting of TSMP on x86  machines please use the branch `TSMP_x86_64`. \
-The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script "lib_install.sh" located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
 
 # Patching the orginal source code  <a name="patching "></a>
 
@@ -435,6 +427,14 @@ TSMP generates automatically a script which does the simulation in two cycles.If
    sbatch tsmp_restart.sh
 ```
 This script can be a hint for you when you want to do long time climate simulation. For more info please contact "Niklas Wagner; n.wagner@fz-juelich.de"
+
+
+# Automatic Porting of TSMP on x86 machines  <a name="TSMP_x86 "></a>
+
+For automatic porting of TSMP on x86  machines please use the branch `TSMP_x86_64`. \
+The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script "lib_install.sh" located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
+
+The instruction on how to build and how to configure TSMP for the cordex test case ([EURO-CORDEX test case experiment](#ref_exp)) are given in [step 5 ](#ref_step4) and [step 6 ](#ref_step5), respectively.
 
 # To come <a name="To-come"></a>
 
