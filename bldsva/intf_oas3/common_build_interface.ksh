@@ -296,7 +296,21 @@ route "${cyellow}>>> c_substitutions_cos${cnormal}"
       rm -rf $cosdir/src/*1.f90
       rm -rf $cosdir/src/*1.incf
   fi
-
+  # copy the changed file to $rootdir/bldsva/cosmo5_1/tsmp
+  comment "    copy the cosmo changed file for coupling to $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp "
+   cp $cosdir/src/src_slow_tendencies_rk.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_runge_kutta.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_gridpoints.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_allocation.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/organize_physics.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/environment.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_twomom_sb.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_setup_vartab.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_artifdata.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/lmorg.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/data_fields.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+   cp $cosdir/src/src_radiation.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+  check
   #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
@@ -375,7 +389,8 @@ comment "  sed start hour to namelist"
 sed "s/__hstart__/$cnt/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 comment "  sed restart interval to namelist"
-sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+#sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__nhour_restart_start__/$cnt/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
@@ -576,7 +591,7 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
   fi
-  if [[ $withICON=="true" ]]; then
+  if [[ $withICON == "true" ]]; then
   rtime=$(( ($runhours*3600 + $cplfreq1/10)*10 ))  # with icon in tenths of second
   else
   rtime=$(($runhours*3600 + $cplfreq1))
@@ -1026,14 +1041,15 @@ sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i
       sed "s,__pfl_ICPpressureFileName__,$restfile_pfl," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file
   check
     fi
-
+  
   export PARFLOW_DIR=$bindir
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check
 
   comment "   create parflow db with tclsh from namelist."
-    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
 
@@ -1078,3 +1094,34 @@ route "${cyellow}>>> c_setup_da${cnormal}"
 
 route "${cyellow}<<< c_setup_da${cnormal}"
 }
+
+c_setup_rst(){
+
+ comment " copy $restart_script to $rundir"
+   cp $restart_script $rundir >> $log_file 2>> $err_file
+ check
+
+ comment "   sed startDate into restart template."
+    sed 's/__startDate_bldsva__/"'"$startDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed initDate into restart template."
+    sed 's/__initDate_bldsva__/"'"$initDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed dt_clm into restart template."
+    sed "s/__dt_clm_bldsva__/$dt_clm/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed dt_cosmo into restart template."
+    sed "s/__dt_cos_bldsva__/$dt_cos/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed PARFLOW_DIR into restart template $bindir."
+#    sed "/__PARFLOW_DIR__/ \$bindir" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+    sed -i "s|__PARFLOW_DIR__|$bindir|" $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+#    sed "s/__PARFLOW_DIR__/$bindir/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+}
+

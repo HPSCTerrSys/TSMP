@@ -9,7 +9,8 @@ initSetup(){
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl 
+  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl
+  defaultRST=$rootdir/bldsva/setups/restart/tsmp_restart.sh 
 
 
   defaultNppn=48
@@ -24,14 +25,14 @@ initSetup(){
     defaultPFLProcX=9
     defaultPFLProcY=8
   fi
-  defaultStartDate="2016-05-01 12"
-  defaultInitDate="2016-05-01 12"
+  defaultStartDate="2021-06-24 12"
+  defaultInitDate="2021-06-24 12"
   
   defaultDumpCLM=1
   defaultDumpCOS=1
   defaultDumpPFL=1
   
-  defaultRunhours=3
+  defaultRunhours=12
 
   defaultDumpCLM=1
   defaultDumpCOS=1
@@ -151,5 +152,10 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	check
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
+
+  comment "   copy restart script to rundir "
+   c_setup_rst
+  check
+
 route "${cyellow}<< finalizeSetup${cnormal}"
 }
