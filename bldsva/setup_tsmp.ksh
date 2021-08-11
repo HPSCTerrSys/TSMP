@@ -1007,7 +1007,7 @@ check
     if [[ $withOAS == "true" ]] ; then ; setup_oas ;  fi
 
     if [[ $withPDAF == "true" ]] ; then
-      mv ${pflrunname}_$(printf "%05d" $instance).pfidb $origrundir/tsmp_instance_$(printf "%05d" $instance)   		
+      cp ${pflrunname}_$(printf "%05d" $instance).pfidb $origrundir/tsmp_instance_$(printf "%05d" $instance)   		
     else	
       finalizeSetup
     fi

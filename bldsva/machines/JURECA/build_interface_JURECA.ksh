@@ -7,13 +7,23 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  if [[ ${mList[3]} == parflow3_2 ]] ; then
+    . $rootdir/bldsva/machines/$platform/loadenvs_tcl8_6_8.$compiler >> $log_file 2>> $err_file
+  else
+    . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  fi
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  if [[ $compiler == "Gnu" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Gnu/lib/"
+  elif [[ $compiler == "Intel" ]] ; then
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  else
+    defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  fi
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"

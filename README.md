@@ -181,6 +181,10 @@ Alternatively:
 ##### ParFlow v3.7
 As indicated in [TSMP version history](#ver_his), this version is automatically cloned  and configured via TSMP interface. It is available from https://github.com/hokkanen/parflow.git under branch oas-gpu. 
 
+For TSMP to update automatically, you should rename the ParFlow directory as follows:
+```shell
+   mv parflow3_2 parflow3_7
+```
 
 ##### OASIS3-MCT v2.0
 
@@ -232,7 +236,7 @@ A note to external users:
 The path to the modules, compiler and MPI wrapper can be set in:  
 `$TSMP_DIR/bldsva/machines/<your_machine_name>/build_interface_<your_machine_name>.ksh`
 
-An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JURECA.ksh` \
+An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JUWELS.ksh` \
 and an example to load the environment modules or the needed software compatible with Intel compiler version 2020 is in `$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel`.
 
 #### Build TSMP on GENERIC_X86 Linux platform
