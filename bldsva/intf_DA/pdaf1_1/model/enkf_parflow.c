@@ -759,9 +759,10 @@ void update_parflow (int do_pupd) {
 
     if(pf_gwmasking != 1){
       ENKF2PF(perm_xx,subvec_param);
-    }    // hcp gmasking with param 
-    else {
-//      printf("Kxx masked");	
+    }
+    // hcp gmasking with param
+    if(pf_gwmasking == 1){
+//      printf("Kxx masked");
       ENKF2PF_masked(perm_xx, subvec_param,subvec_gwind);
     }
     // hcp fin
@@ -774,9 +775,10 @@ void update_parflow (int do_pupd) {
 
     if(pf_gwmasking != 1){
       ENKF2PF(perm_yy,subvec_param);
-    }  // hcp gmasking with param 
-    else {
-//      printf("Kyy masked");	
+    }
+    // hcp gmasking with param
+    if(pf_gwmasking == 1){
+//      printf("Kyy masked");
       ENKF2PF_masked(perm_yy, subvec_param,subvec_gwind);
     }
     // hcp fin
@@ -789,9 +791,10 @@ void update_parflow (int do_pupd) {
 
     if(pf_gwmasking != 1){
       ENKF2PF(perm_zz,subvec_param);
-    }  // hcp gmasking with param 
-    else {
-//      printf("Kzz masked");	
+    }
+    // hcp gmasking with param
+    if(pf_gwmasking == 1){
+//      printf("Kzz masked");
       ENKF2PF_masked(perm_zz, subvec_param,subvec_gwind);
     }
     // hcp fin

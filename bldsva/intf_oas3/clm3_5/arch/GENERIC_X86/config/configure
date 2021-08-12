@@ -759,15 +759,15 @@ if ($clm_build) {
     } elsif (defined $ENV{LIB_NETCDF}) {
 	$cfg = $ENV{LIB_NETCDF};
     } else {
-	$cfg = '/usr/lib';
+      $cfg = $opts{'nc_lib'};
   #$cfg = '/usr/lib/x86_64-linux-gnu';
     }
-    if (-f "$cfg/libnetcdf.a") {
-    $cfg = '/usr/lib/x86_64-linux-gnu';
+    if (-f "$cfg/libnetcdf.so") {
+    $cfg = $opts{'nc_lib'};
     if (-f "$cfg/libnetcdff.a") {
 	$cfg{'nc_lib'} = $cfg;
     } 
-  } else {
+  } else{
 	die <<"EOF";
 ** Cannot find libnetcdf.a in specified directory: $cfg
 ** 
@@ -851,13 +851,13 @@ if ($clm_build and $cfg{'spmd'}) {
 	    $cfg = '/usr/local/include';
 	}
     }
-    $cfg = '/opt/mpich-3.2.1/include/';
+    $cfg = $opts{'mpi_inc'};
     if ($cfg eq '' or -f "$cfg/mpif.h") {
 	$cfg{'mpi_inc'} = $cfg;
     } else {
 	die <<"EOF";
 ** Cannot find mpif.h in specified directory: $cfg
-** 
+**  $opts{'mpi_inc'}
 ** The MPI include directory is determined from the following set of options listed
 ** from highest to lowest precedence:
 ** * by the command-line option -mpi_inc
@@ -884,7 +884,7 @@ EOF
 	    $cfg = '/usr/local/lib';
 	}
     }
-    $cfg = '/opt/mpich-3.2.1/lib';
+    $cfg = $opts{'mpi_lib'};
     if ($cfg eq '') {
 	$cfg{'mpi_lib'} = $cfg;
 	$cfg{'mpi_lib_name'} = '';

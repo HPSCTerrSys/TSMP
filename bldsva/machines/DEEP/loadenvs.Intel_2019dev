@@ -1,0 +1,44 @@
+#!/bin/tcsh
+#2019-01-28_SBr
+#USAGE="source $0"
+#for bld and work w/ TerrSysMP on JUWELS
+#for standard user
+
+module --force purge
+
+# Only necessary if modules are missing after maintenence
+module use /gpfs/software/juwels/otherstages/
+
+module load Stages/Devel-2019a
+#
+# standard modules on Juwels
+module load jscslurm/.17.11.12
+module load jsctools/.0.1
+module load .juwels-env
+
+# Only necessary if modules are missing after maintenence
+module load Intel/2019.3.199-GCC-8.3.0
+module load IntelMPI/2019.6.154
+
+#grib api 
+module load grib_api/1.28.0 
+#wgrib ? on JUWELS?
+#module load wgrib/1.8.1.2c
+
+
+# libs for TerrSysMP
+module load Hypre/2.15.1
+module load Silo/4.10.2
+module load Tcl/8.6.9
+# HDF5
+module load HDF5/1.10.5
+
+# NetCDF etc.
+module load netCDF/4.6.3
+module load netCDF-Fortran/4.4.5
+
+# Misc other libs needed for some dev work and NCL e.g.
+module load cURL/7.64.1.lua
+module load Szip/.2.1.1
+
+module li
