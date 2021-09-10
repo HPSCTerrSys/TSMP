@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_cos(){
-route "${cblue}>> always_cos${cnormal}"
-route "${cblue}<< always_cos${cnormal}"
+route "${cyellow}>> always_cos${cnormal}"
+route "${cyellow}<< always_cos${cnormal}"
 }
 
 configure_cos(){
-route "${cblue}>> configure_cos${cnormal}"
+route "${cyellow}>> configure_cos${cnormal}"
 comment "   cp Makefile to cosmo dir"
    cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $cosdir >> $log_file 2>> $err_file
 check
@@ -20,7 +20,7 @@ check
   if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
   file=$cosdir/Fopts 
 comment "   sed comflg to cos Makefile"
-  sed -i "s@__comflg__@$optComp -ffree-line-length-0 -I$ncdfPath/include $cplInc -cpp -DGRIBDWD -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+  sed -i "s@__comflg__@$optComp -ffree-line-length-0 -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
 check
 comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
@@ -32,20 +32,22 @@ comment "   sed ld to cos Makefile"
   sed -i "s@__ld__@$mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
 check
 comment "   sed libs to cos Makefile"
-  sed -i "s@__lib__@$grib1Path/libgrib1.a $cplLib -L$ncdfPath/lib/ -lnetcdff -lnetcdf@" $file >> $log_file 2>> $err_file
+comment "   grin api path: $gribPath "
 check
-route "${cblue}<< configure_cos${cnormal}"
+  sed -i "s@__lib__@-L$gribPath/lib -lgrib_api_f90 -lgrib_api $cplLib -L$ncdfPath/lib -lnetcdff -lnetcdf@" $file >> $log_file 2>> $err_file
+check
+route "${cyellow}<< configure_cos${cnormal}"
 }
 
 make_cos(){
-route "${cblue}>> make_cos${cnormal}"
+route "${cyellow}>> make_cos${cnormal}"
   c_make_cos
-route "${cblue}<< make_cos${cnormal}"
+route "${cyellow}<< make_cos${cnormal}"
 }
 
 
 substitutions_cos(){
-route "${cblue}>> substitutions_cos${cnormal}"
+route "${cyellow}>> substitutions_cos${cnormal}"
  c_substitutions_cos
    comment "   cp ObjFiles & ObjDependencies in $cosdir"
      patch "$rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Obj*" $cosdir 
@@ -61,12 +63,12 @@ route "${cblue}>> substitutions_cos${cnormal}"
        sed -i "s/USE mod_prism.*//" $cosdir/src/oas3/oas_cos_define.F90 >> $log_file 2>> $err_file
      check
    fi
-route "${cblue}<< substitutions_cos${cnormal}"
+route "${cyellow}<< substitutions_cos${cnormal}"
 }
 
 setup_cos(){
-route "${cblue}>> setupCos${cnormal}"
+route "${cyellow}>> setupCos${cnormal}"
   c_setup_cos
 
-route "${cblue}<< setupCos${cnormal}" 
+route "${cyellow}<< setupCos${cnormal}" 
 }

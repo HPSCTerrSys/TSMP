@@ -1,45 +1,45 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/clm"
-  defaultFDCOS="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/cosmo"
-  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/oasis3"
-  defaultFDPFL="/p/scratch/cslts/slts00/tsmp/TestCases/idealRTD/parflow"
+  defaultFDCLM="$rootdir/tsmp_idealrtd/input/clm"
+  defaultFDCOS="$rootdir/tsmp_idealrtd/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_idealrtd/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_idealrtd/input/parflow"
 
   defaultNLCLM=$rootdir/bldsva/setups/idealRTD/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/idealRTD/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/idealRTD/coup_oas.tcl
 
 
-  defaultNppn=48
+  defaultNppn=128  
   defaultCLMProcX=2
   defaultCLMProcY=2
-  defaultCOSProcX=3
-  defaultCOSProcY=2
+  defaultCOSProcX=6
+  defaultCOSProcY=5
   defaultPFLProcX=2
   defaultPFLProcY=2
 
-  defaultStartDate="2008-05-08 00"
-  defaultInitDate="2008-05-08 00"
+  defaultStartDate="2015-08-07 00"
+  defaultInitDate="2015-08-07 00"
   defaultRunhours=24
 
-  defaultDumpCLM=3
-  defaultDumpCOS=3
-  defaultDumpPFL=3
+  defaultDumpCLM=1
+  defaultDumpCOS=1
+  defaultDumpPFL=1
 
 
-  gx_clm=24
-  gy_clm=14
+  gx_clm=54
+  gy_clm=24
   dt_clm=18
-  res="0014x0024"
+  res="0024x0054"
 
-  gx_cos=30
-  gy_cos=20
+  gx_cos=60
+  gy_cos=30
   dt_cos=18
   nbndlines=3
 
-  gx_pfl=24
-  gy_pfl=14
+  gx_pfl=54
+  gy_pfl=24
   dt_pfl=0.005
   pflrunname="rurlaf"
   base_pfl=0.0025
@@ -94,7 +94,7 @@ route "${cblue}>> finalizeSetup${cnormal}"
           cd $rundir >> $log_file 2>> $err_file
         check
         comment "   copy initial pressure and script into rundir"
-        cp $forcingdir_pfl/pfb*.nc $rundir/ >> $log_file 2>> $err_file
+        cp $forcingdir_pfl/*.pfb $rundir/ >> $log_file 2>> $err_file
         check
         comment "   copy initial pressure and script into rundir"
           cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file

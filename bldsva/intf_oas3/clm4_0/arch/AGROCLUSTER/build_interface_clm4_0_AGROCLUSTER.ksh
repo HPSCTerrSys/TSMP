@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_clm(){
-route "${cblue}>> always_clm${cnormal}"
-route "${cblue}<< always_clm${cnormal}"
+route "${cyellow}>> always_clm${cnormal}"
+route "${cyellow}<< always_clm${cnormal}"
 }
 
 configure_clm(){
-route "${cblue}>> configure_clm${cnormal}"
+route "${cyellow}>> configure_clm${cnormal}"
   cplFlag=""
   cplLib=""
   cplInc=""
@@ -95,11 +95,11 @@ route "${cblue}>> configure_clm${cnormal}"
     ./Buildconf/clm.buildnml.csh  >> $log_file 2>> $err_file
   check
 
-route "${cblue}<< configure_clm${cnormal}"
+route "${cyellow}<< configure_clm${cnormal}"
 }
 
 make_clm(){
-route "${cblue}>> make_clm${cnormal}"
+route "${cyellow}>> make_clm${cnormal}"
   comment "   cd to $clmdir/clmoas"
     cd $clmdir/clmoas >> $log_file 2>> $err_file
   check
@@ -109,12 +109,12 @@ route "${cblue}>> make_clm${cnormal}"
   comment "   copy clm exe to $bindir"
     cp $clmdir/clmoas/bld/cesm.exe $bindir/clm >> $log_file 2>> $err_file
   check
-route "${cblue}<< make_clm${cnormal}"
+route "${cyellow}<< make_clm${cnormal}"
 }
 
 
 substitutions_clm(){
-route "${cblue}>> substitutions_clm${cnormal}"
+route "${cyellow}>> substitutions_clm${cnormal}"
 
   comment "   cp new clm configure, Makefile XMLs and scripts to $clmdir"
     patch "$rootdir/bldsva/intf_oas3/${mList[1]}/arch/$platform/config/scripts/ccsm_utils/Machines/*" $clmdir/scripts/ccsm_utils/Machines/ 
@@ -176,12 +176,12 @@ route "${cblue}>> substitutions_clm${cnormal}"
   check
 
 
-route "${cblue}<< substitutions_clm${cnormal}"
+route "${cyellow}<< substitutions_clm${cnormal}"
 }
 
 
 setup_clm(){
-route "${cblue}>> setupClm${cnormal}"
+route "${cyellow}>> setupClm${cnormal}"
 
   withCESM="true"
   seconds_clm=$(($hh*3600))
@@ -198,5 +198,5 @@ check
 
   c_setup_clm  
 
-route "${cblue}<< setupClm${cnormal}"
+route "${cyellow}<< setupClm${cnormal}"
 }

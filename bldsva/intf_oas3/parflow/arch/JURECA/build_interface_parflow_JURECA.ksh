@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_pfl(){
-route "${cblue}>> always_pfl${cnormal}"
-route "${cblue}<< always_pfl${cnormal}"
+route "${cyellow}>> always_pfl${cnormal}"
+route "${cyellow}<< always_pfl${cnormal}"
 }
 
 configure_pfl(){
-route "${cblue}>> configure_pfl${cnormal}"
+route "${cyellow}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
@@ -33,9 +33,10 @@ route "${cblue}>> configure_pfl${cnormal}"
     fi
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    cflagsSim=" -qopenmp "
-    if [[ $compiler == "Gnu" ]]; then
-      cflagsSim=" -fopenmp "
+    if [[ $compiler == "Gnu" ]] ; then  
+      cflagsSim=" -fopenmp "  
+    elif [[ $compiler == "Intel" ]] ; then 
+      cflagsSim=" -qopenmp "  
     fi
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
 
@@ -54,18 +55,18 @@ check
 
 
 
-route "${cblue}<< configure_pfl${cnormal}"
+route "${cyellow}<< configure_pfl${cnormal}"
 }
 
 make_pfl(){
-route "${cblue}>> make_pfl${cnormal}"
+route "${cyellow}>> make_pfl${cnormal}"
   c_make_pfl
-route "${cblue}<< make_pfl${cnormal}"
+route "${cyellow}<< make_pfl${cnormal}"
 }
 
 
 substitutions_pfl(){
-route "${cblue}>> substitutions_pfl${cnormal}"
+route "${cyellow}>> substitutions_pfl${cnormal}"
   comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
     patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
@@ -97,15 +98,15 @@ route "${cblue}>> substitutions_pfl${cnormal}"
       check
     fi
 
-route "${cblue}<< substitutions_pfl${cnormal}"
+route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
 setup_pfl(){
-route "${cblue}>> setup_pfl${cnormal}"
+route "${cyellow}>> setup_pfl${cnormal}"
   c_setup_pfl
 
-route "${cblue}<< setup_pfl${cnormal}"
+route "${cyellow}<< setup_pfl${cnormal}"
 }
 
 

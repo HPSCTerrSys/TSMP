@@ -1,0 +1,32 @@
+#################################################################################
+# Seifert-Beheng 2-moment scheme package:
+#
+# Include this file immediately BEFORE the "normal" ObjDependendies in the Makefile,
+#  also BEFORE the ObjDependencies.radar in case of using radar forward operator EMRADSCOPE.
+#
+$(OBJDIR)/src_twomom_sb_interface.o:         $(SRCDIR)/src_twomom_sb_interface.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/src_lheating.o         \
+          $(OBJDIR)/pp_utilities.o           $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/time_utilities.o       \
+          $(OBJDIR)/src_twomom_sb.o          $(OBJDIR)/src_tracer.o
+	echo compiling src_twomom_sb_interface.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_twomom_sb_interface.f90 )
+#
+$(OBJDIR)/src_twomom_sb.o:                   $(SRCDIR)/src_twomom_sb.f90      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/parallel_utilities.o                                      \
+          $(SRCDIR)/phillips_nucleation.incf
+	echo compiling src_twomom_sb.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_twomom_sb.f90 )
+#
+
+
+pp_utilities_newdep     += $(OBJDIR)/src_twomom_sb.o
+src_input_newdep        += $(OBJDIR)/src_twomom_sb_interface.o
+src_relaxation_newdep   += $(OBJDIR)/src_twomom_sb_interface.o
+organize_physics_newdep += $(OBJDIR)/src_twomom_sb.o  $(OBJDIR)/src_twomom_sb_interface.o
+lmorg_newdep            += $(OBJDIR)/src_twomom_sb_interface.o
+radar_mie_lm_newdep     += $(OBJDIR)/src_twomom_sb.o

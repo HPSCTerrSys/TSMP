@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_icon(){
-route "${cblue}>> always_icon${cnormal}"
-route "${cblue}<< always_icon${cnormal}"
+route "${cyellow}>> always_icon${cnormal}"
+route "${cyellow}<< always_icon${cnormal}"
 }
 
 configure_icon(){
-route "${cblue}>> configure_icon${cnormal}"
+route "${cyellow}>> configure_icon${cnormal}"
 comment "    cd to icon dir"
   cd $icondir >> $log_file 2>> $err_file
 check
@@ -64,26 +64,26 @@ check
 comment "   sed cplInc to icon Makefile"
   sed -i "s@__cplinc__@$cplInc@" $file >> $log_file 2>> $err_file
 check
-route "${cblue}<< configure_icon${cnormal}"
+route "${cyellow}<< configure_icon${cnormal}"
 }
 
 make_icon(){
-route "${cblue}>> make_icon${cnormal}"
+route "${cyellow}>> make_icon${cnormal}"
   c_make_icon
-route "${cblue}<< make_icon${cnormal}"
+route "${cyellow}<< make_icon${cnormal}"
 }
 
 
 substitutions_icon(){
-route "${cblue}>> substitutions_icon${cnormal}"
+route "${cyellow}>> substitutions_icon${cnormal}"
  c_substitutions_icon
-route "${cblue}<< substitutions_icon${cnormal}"
+route "${cyellow}<< substitutions_icon${cnormal}"
 }
 
 setup_icon(){
-route "${cblue}>> setupIcon${cnormal}"
+route "${cyellow}>> setupIcon${cnormal}"
 
   c_setup_icon
 
-route "${cblue}<< setupIcon${cnormal}" 
+route "${cyellow}<< setupIcon${cnormal}" 
 }

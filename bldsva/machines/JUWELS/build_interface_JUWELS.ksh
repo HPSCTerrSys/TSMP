@@ -2,7 +2,7 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
+route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
   . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
@@ -13,36 +13,43 @@ route "${cblue}>> getMachineDefaults${cnormal}"
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
-  defaultTclPath="/p/project/cslts/local/juwels/tcl8.6.8"
+  defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+  elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+  else
+      defaultOptC="-O2" # Default
+  fi
 
   profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultQ="devel"
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy JUWELS module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
@@ -56,6 +63,34 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+if [[ $processor == "GPU" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N 4 --ntasks-per-node=48 -p batch
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=48 -p batch
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
+
+cd $rundir
+source $rundir/loadenvs
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+date
+echo "ready" > ready.txt
+exit 0
+EOF
+
+else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
@@ -69,7 +104,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=hbn33 
+#SBATCH --account=slts 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
@@ -86,6 +121,7 @@ exit 0
 
 EOF
 
+fi
 
 
 
@@ -187,6 +223,6 @@ chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
 chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 

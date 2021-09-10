@@ -2,17 +2,23 @@
 
 
 getMachineDefaults(){
-route "${cblue}>> getMachineDefaults${cnormal}"
-  defaultMpiPath="/opt/mpich-3.2.1"
-  defaultNcdfPath="/usr"
-  defaultGrib1Path="/opt//DWD-libgrib1_20110128/lib"
-  defaultGribapiPath="/usr"
+route "${cyellow}>> getMachineDefaults${cnormal}"
+  defaultMpiPath="$rootdir/lib/openmpi"
+  defaultNcdfPath="$rootdir/lib/netcdf"
+  defaultGribPath="$rootdir/lib/gribapi"
+  defaultGribapiPath="$rootdir/lib/gribapi"
   defaultJasperPath=""
-  defaultTclPath="/opt/tcl8.6.9"
-  defaultHyprePath="/opt/hypre-2.11.2"
-  defaultSiloPath="/opt/silo-4.10"
+#  defaultTclPath="/usr/lib/x86_64-linux-gnu"
+  defaultTclPath="$rootdir/lib/tcl"
+  defaultHyprePath="$rootdir/lib/hypre"
+  defaultSiloPath="$rootdir/lib/silo"
+  hdf5path="$rootdir/lib/hdf5"
   defaultLapackPath=""
-  defaultPncdfPath="/usr"
+  defaultPncdfPath=""
+  export PATH="$defaultTclPath/bin:$PATH"
+  export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$defaultSiloPath/lib"
+  #echo "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++"
+  #echo "tclsh is loaded "
 
   # Default Compiler/Linker optimization
   defaultOptC="-O2"
@@ -26,17 +32,23 @@ route "${cblue}>> getMachineDefaults${cnormal}"
   defaultwtime=""
   defaultQ=""
 
-route "${cblue}<< getMachineDefaults${cnormal}"
+route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
-route "${cblue}>> finalizeMachine${cnormal}"
-route "${cblue}<< finalizeMachine${cnormal}"
+route "${cyellow}>> finalizeMachine${cnormal}"
+route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
 
 createRunscript(){
-route "${cblue}>> createRunscript${cnormal}"
+route "${cyellow}>> createRunscript${cnormal}"
+
+comment "   copy x86 module load script into rundirectory"
+  cp $rootdir/bldsva/machines/$platform/loadenv_x86 $rundir
+check
+
+
 
 mpitasks=$((numInst * ($nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
 nnodes=`echo "scale = 2; $mpitasks / $nppn" | bc | perl -nl -MPOSIX -e 'print ceil($_);'`
@@ -52,6 +64,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
 cd $rundir
+source $rundir/loadenv_x86 
 date
 echo "started" > started.txt
 rm -rf YU*
@@ -109,6 +122,6 @@ fi
 comment "   change permission of runscript and mapfile"
 chmod 755 $rundir/tsmp_slm_run.bsh >> $log_file 2>> $err_file
 check
-route "${cblue}<< createRunscript${cnormal}"
+route "${cyellow}<< createRunscript${cnormal}"
 }
 
