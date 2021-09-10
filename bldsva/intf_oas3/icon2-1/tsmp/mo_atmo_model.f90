@@ -222,7 +222,7 @@ CONTAINS
     TYPE(t_RestartAttributeList), POINTER :: restartAttributes
 #ifdef COUP_OAS_ICON
     INTEGER :: i_startblk, i_endblk, jb, jc, i_startidx, i_endidx, &
-               rl_start, rl_end, c
+               rl_start, rl_end, c, cc
     INTEGER :: oas_prt = 6
 #endif
 
@@ -535,12 +535,25 @@ CONTAINS
     IF (n_dom > 1) CALL oasis_abort(oas_comp_id, &
       'oas_icon_partition', 'Number of ICON domain > 1 when coupled to CLM.')
 
+!    rl_start = 0
+!    rl_end   = grf_bdywidth_c
+!    cc = 0
+!    DO jb = i_startblk, i_endblk
+!      CALL get_indices_c(p_patch(1), jb, i_startblk, i_endblk, i_startidx, i_endidx, rl_start, rl_end)
+!      DO jc = i_startidx, i_endidx
+!        cc = cc + 1
+!      END DO
+!    END DO
+
+ !   oas_nlat = p_patch(1)%n_patch_cells_g - cc
     oas_nlat = p_patch(1)%n_patch_cells_g
     oas_nlon = 1
 
     ALLOCATE( oas_part(2+p_patch(1)%n_patch_cells) )
     oas_part(1) = 4
-    rl_start = grf_bdywidth_c+1
+!    rl_start = grf_bdywidth_c+1
+!    rl_start = 1 
+    rl_start = 1 !max_rlcell
     rl_end   = min_rlcell_int
     i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
     i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
@@ -556,6 +569,9 @@ CONTAINS
     END DO
     oas_part(2) = c
 
+!    call MPI_ALLREDUCE (c, csum, 1, mpi_integer, mpi_sum, &
+!              & MPI_COMM_WORLD, mpierr)
+!    oas_nlat = csum
 
     IF(msg_level >= 30 ) then !SPo
       WRITE(oas_prt,*) 'iconoas: ',TRIM(routine),' oasis decomp'

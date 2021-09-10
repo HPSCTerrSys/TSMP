@@ -451,7 +451,8 @@ MODULE mo_nh_stepping
     oas_snd_field(:,7) = 0._wp
     oas_snd_field(:,8) = 0._wp
     
-    rl_start = grf_bdywidth_c+1
+!    rl_start = grf_bdywidth_c+1
+    rl_start = 1
     rl_end   = min_rlcell_int
     i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
     i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
@@ -519,7 +520,8 @@ MODULE mo_nh_stepping
         CALL message(routine, oas_message)
       END IF
 
-      rl_start = grf_bdywidth_c+1
+!      rl_start = grf_bdywidth_c+1
+      rl_start = 1
       rl_end   = min_rlcell_int
       i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
       i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
@@ -1682,7 +1684,8 @@ MODULE mo_nh_stepping
     oas_snd_field(:,7) = 0._wp
     oas_snd_field(:,8) = 0._wp
     
-    rl_start = grf_bdywidth_c+1
+!    rl_start = grf_bdywidth_c+1
+    rl_start = 1
     rl_end   = min_rlcell_int
     i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
     i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
@@ -1758,6 +1761,7 @@ MODULE mo_nh_stepping
       END IF
 
       rl_start = grf_bdywidth_c+1
+      rl_start = 1
       rl_end   = min_rlcell_int
       i_startblk = p_patch(1)%cells%start_blk(rl_start, 1)
       i_endblk   = p_patch(1)%cells%end_blk(rl_end, MAX(1,p_patch(1)%n_childdom))
@@ -1774,7 +1778,7 @@ MODULE mo_nh_stepping
         WRITE(oas_message,*) "ICONOAS: icon transformed received vars"
         CALL message(routine, oas_message)
 
-      ! check:
+        ! check:
         WRITE(oas_message,*) "ICONOAS: for ", oas_i, " got rank0-local min, max=", &
           MINVAL(oas_rcv_field(:,oas_i)), MAXVAL(oas_rcv_field(:,oas_i))
         CALL message(routine, oas_message)
