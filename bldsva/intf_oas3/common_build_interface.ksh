@@ -53,7 +53,12 @@ route "${cblue}>>> c_make_icon${cnormal}"
   check
 
   comment "    cp icon binary to $bindir"
-  cp $icondir/build/x86_64-unknown-linux-gnu/bin/icon $bindir >> $log_file 2>> $err_file
+#  comment " SPo binary refSetup $refSetup mList ${mList[2]} "
+  if [[ ${mList[2]} == "icon2-622" ]] ; then
+    cp $icondir/bin/icon $bindir >> $log_file 2>> $err_file
+  else
+    cp $icondir/build/x86_64-unknown-linux-gnu/bin/icon $bindir >> $log_file 2>> $err_file  
+  fi
   check
 
 route "${cblue}<<< c_make_icon${cnormal}"
@@ -83,6 +88,9 @@ if [[ $withOAS == "true" ]]; then
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/mo_nwp_turbtrans_interface.f90 $icondir/src/atm_phy_nwp/ >> $log_file 2>> $err_file
   check
+fi # SPo
+#if [[ $refSetup == "icon2-1" ]] ; then
+if [[ ${mList[2]} == "icon2-1" ]] ; then
   comment "    replace icon-ccs files in ICON code. Add files to icon/src "
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nonhydro_types.f90 $icondir/src/atm_dyn_iconam/ >> $log_file 2>> $err_file
   check
@@ -128,7 +136,7 @@ if [[ $withOAS == "true" ]]; then
   check
     cp $rootdir/bldsva/intf_oas3/${mList[2]}/tsmp/icon-ccs/mo_nh_testcases.f90 $icondir/src/testcases >> $log_file 2>> $err_file
   check
-fi
+fi 
 route "${cblue}<<< c_substitutions_icon${cnormal}"
 }
 
