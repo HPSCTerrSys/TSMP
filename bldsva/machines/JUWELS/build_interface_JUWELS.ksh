@@ -10,6 +10,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
+
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
@@ -21,7 +22,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-#
+
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-O2" # Gnu

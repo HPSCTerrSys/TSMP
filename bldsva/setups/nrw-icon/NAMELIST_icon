@@ -7,7 +7,7 @@
  num_prefetch_proc = 0
 /
 &grid_nml
- dynamics_grid_filename = icon_nrw_150km_R1247m.nc
+ dynamics_grid_filename = __grid_icon_bldsva__.nc !grid_nrw_1247m.nc
  dynamics_parent_grid_id = 0
  lfeedback         = .FALSE.
  l_limited_area    = .TRUE.
@@ -19,9 +19,9 @@
  lread_ana              = .FALSE.
 /
 &run_nml
- num_lev     = 150
+ num_lev     = 80
  lvert_nest  = .FALSE.
- dtime       = 6.0
+ dtime       = __dt_icon_bldsva__     ! [s] timestep in seconds
  ldynamics   = .TRUE.       ! dynamics
  ltestcase   = .FALSE.      ! testcase
  ltransport  = .TRUE.       ! transport
@@ -29,7 +29,7 @@
  ltimer      = .TRUE.       ! 
  timers_level = 10          !
  profiling_output = 3       !
- msg_level   = 12           ! detailed report during integration
+ msg_level   = 35 !12           ! detailed report during integration
  output      = 'nml','totint'      
 /
 &dynamics_nml
@@ -45,8 +45,8 @@
  itype_latbc     = 1
  dtime_latbc     = 3600.
  nlev_latbc      = 50
- latbc_path      = "/work/jibg34/jibg3401/input_nrw/input_nrw_150km_R1247"
- latbc_filename  = "latbc_icon_nrw_150km_R1247m_<y><m><d><h>.nc"
+ latbc_path      = '__dir_icon_bldsva__/forcing' ! "/p/project/cslts/poll1/data/nrw/icon/forcing"
+ latbc_filename  = 'latbc___grid_icon_bldsva___<y><m><d><h>.nc' !"latbc_grid_nrw_1247m_<y><m><d><h>.nc"
  latbc_varnames_map_file = 'dict.latbc'
 /
 &diffusion_nml
@@ -56,11 +56,11 @@
  lhdiff_w         = .TRUE.
 /
 &nwp_phy_nml
-inwp_gscp          = 4      ! 4 for two moment
+inwp_gscp          = 2      ! 4 for two moment
 inwp_convection    = 0
 inwp_radiation     = 1
 inwp_cldcover      = 5
-inwp_turb          = 5
+inwp_turb          = 1
 inwp_satad         = 1
 inwp_surface       = 1
 latm_above_top     = .TRUE.
@@ -139,20 +139,59 @@ rbf_scale_mode_ll = 1 !2=default for automatic calculations
  dt_checkpoint    = 3600.
  lkeep_in_sync    = .TRUE.
  restart_file_type = 5
- output_nml_dict  = "dict.icon.hdcp2"
- netcdf_dict      = "dict.icon.hdcp2"
+ output_nml_dict  = "dict.icon.nrw"
+ netcdf_dict      = "dict.icon.nrw"
+/
+!&output_nml
+! dom              = 1
+! output_start     = "2013-04-24T00:00:00Z"
+! output_end       = "2013-04-24T01:00:00Z"
+! output_interval  = "PT10M"
+! file_interval    = "PT01H"
+! include_last     = .TRUE.
+! output_filename  = 'nrw_1247m'
+! filename_format  = "<output_filename>_DOM<physdom>_<levtype>_<datetime2>"
+! ml_varlist       = 'group:dwd_fg_atm_vars','group:dwd_fg_sfc_vars'
+! output_grid      = .TRUE.
+!/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'nrw_land'
+ output_grid      = .TRUE.
+ ml_varlist       = 'group:dwd_fg_sfc_vars','shfl_s','lhfl_s'
 /
 &output_nml
- dom              = 1
- output_start     = "2013-04-24T00:00:00Z"
- output_end       = "2013-04-24T01:00:00Z"
- output_interval  = "PT10M"
- file_interval    = "PT01H"
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
  include_last     = .TRUE.
- output_filename  = '1247_10m'
- filename_format  = "<output_filename>_DOM<physdom>_<levtype>_<datetime2>"
- ml_varlist       = 'group:dwd_fg_atm_vars','group:dwd_fg_sfc_vars'
+ remap            = 0   ! triangular grid
+ output_filename  = 'nrw_rad'
  output_grid      = .TRUE.
+ ml_varlist       = 'group:rad_vars','albvisdir','albnirdir','emis_rad'
+/
+&output_nml
+ filetype         = 4
+ dom              = -1
+ output_start     = "__starttime_icon_bldsva__"
+ output_end       = "__endtime_icon_bldsva__"
+ output_interval  = "PT15M"
+ file_interval    = "P01D"
+ include_last     = .TRUE.
+ remap            = 0   ! triangular grid
+ output_filename  = 'nrw_insta'
+ output_grid      = .TRUE.
+ ml_varlist       = 'u','v','w','temp','qv','qc','theta_v','pres_sfc','pres','tkvh','z_ifc','z_mc'
 /
 &extpar_nml
  itopo          = 1

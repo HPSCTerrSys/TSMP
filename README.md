@@ -16,15 +16,16 @@
     6. [Step 6: Setup and configuration of the respective usage and test case](#ref_step6)
     7. [Step 7: Run the test case](#ref_step7)
     8. [Step 8: Simulation results](#ref_step8)
-3. [Heterogeneous Job using TSMP](#hetero_job)
-4. [NRW Test case](#nrw_test)
-5. [IdealRTD (Idealized) Test case](#idealrtd_test)
-6. [Patching the orginal source code](#patching)
-7. [Long time climate simulation](#climate_sim)
-8. [Restart functionality for EURO-CORDEX test case](#restart)
-9. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
-10. [To come](#To-come)
-11. [Documentation](#ref_doc)
+3. [For ICON Users (HPSC-TerrSys users)](#foricon)	
+4. [Heterogeneous Job using TSMP](#hetero_job)
+5. [NRW Test case](#nrw_test)
+6. [IdealRTD (Idealized) Test case](#idealrtd_test)
+7. [Patching the orginal source code](#patching)
+8. [Long time climate simulation](#climate_sim)
+9. [Restart functionality for EURO-CORDEX test case](#restart)
+10. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
+11. [To come](#To-come)
+12. [Documentation](#ref_doc)
 
 # Introduction <a name="introduction"></a>
 
@@ -99,7 +100,7 @@ For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA
 * curl
 * make
 * python
-* OpenMPI 
+* OpenMPI
 * netCDF
 * HDF5
 * GRIBAPI
@@ -313,6 +314,128 @@ After a successful model run you will have model outputs form ParFlow, CLM and C
    ls -l clmoas*.nc
    ls -l cosmo_out/*.nc
 ```
+# For ICON Users (HPSC-TerrSys users) <a name="foricon"></a>
+
+### Step 0: JUDAC Storage Managment
+
+Please inform yourself about the storage managment. If you are new to the Jülich supercomputers, it is recomannded to visit "Introduction to the usage and programming of supercomputer resources in Jülich" course. The next date of this ocurse can be found here: https://www.fz-juelich.de/ias/jsc/EN/Expertise/Workshops/Courses/courses_node.html . Please, make yourself familiar with the different partitions of the JUDAC system as well:  
+> https://www.fz-juelich.de/ias/jsc/EN/Expertise/Datamanagement/JUDAC/FAQ/judac-FAQ_node.html
+
+It is recomannded to store no data at $HOME, your model data at $PROJECT and your experiment data at $SCRATCH.
+
+### Step 1: Dependencies
+See [step 1 above](#ref_step1)
+
+### Step 2: Get the TSMP interface
+
+Go to your preferred root directory (e.g., your $PROJECT directory) for the TSMP installation and get the `TSMP_iconcoup` branch from `gitlab` and set the environment variable `TSMP_DIR` to TSMP installation directory; for bash:
+
+```shell
+   git clone https://icg4geo.icg.kfa-juelich.de/spoll/tsmp.git
+   cd tsmp
+   export TSMP_DIR=$(pwd)
+   git checkout TSMP_iconcoup
+```
+
+### Step 3: Get the component models for this experiment
+
+Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of "fresh", also "legacy" repositories with specific code modifications may be retrieved). Choose the model components needed from your experiment, in case of any coupled model one need the external coupler "oasis3-mct".
+
+```shell
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
+```
+Rename the component model directories:
+
+```shell
+   mv icon2.1_legacy icon2-1
+   mv clm3.5_fresh clm3_5
+   mv parflow3.2_fresh parflow3_2
+```
+
+### Step 4: Build TSMP, interface and component models
+
+Before building TerrSysMP, first check what build options are there
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -a
+```
+
+Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the ICON NWP and regional climate model (icon); this is a built on the JUWELS HPC system of Jülich Supercomputing Centre using Intel compilers and ParaStation MPI:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 4.1.0MCT -c clm-icon-pfl -m JUWELS -O Intel
+```
+
+For ICON standalone version use:
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 4.1.0MCT -c icon -m JUWELS -O Intel
+```
+
+### Step 5: Setup and configuration of the respective usage and test case
+
+It is recommended to store your model data at scratch (please notice that data will be automatically deleted if there are not touched for a while). Please, edit *YOUR_PROJECT* and *YOUR_DIRECTORY* correspondingly.
+
+```shell
+   export EXP=/p/scratch/YOUR_PROJECT/YOUR_DIRECTORY
+```
+To configure TSMP for the Germany test case for ICON stand-alone on JUWELS machine:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 4.1.0MCT -V germany -m JUWELS -c icon -r $EXP/JUWELS_icon_4.1.0MCT_germany -I _experiment -O Intel
+```
+
+This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
+
+### Step 6: Run the test case
+
+Change into the run directory:
+
+```shell
+   cd $EXP/JUWELS_icon_4.1.0MCT_germany_experiment
+```
+
+Edit the scheduler settings (`#SBATCH` lines) accordingly to *YOUR_PROJECT* and run time of your experiment. Please do not change *nodes*, *ntasks* and *ntasks-per-node*:
+
+```shell
+   vi tsmp_slm_run.bsh
+```
+
+Proof if all necessary files are in your experiment directory:
+
+```shell
+   ls -lrth
+```
+
+Submit the job:
+
+```shell
+   sbatch tsmp_slm_run.bsh
+```
+
+Monitor your ICON simulation by
+
+```shell
+    tail -f mpiMPMD-err.*
+```
+
+### Step 7: Create own case (optional)
+
+> This step is for advanced users.
+
+In case you want create your own setup you can create your own direcory (*YOUR_CASE*) in the `TSMP_DIR`/setups and add the name of your case in the `setupsAvail` of your maschine (e.g. JUWELS) in the `supported_versions.ksh` file.
+
+```shell
+    mkdir $TSMP_DIR/bldsva/setups/YOUR_CASE
+    vi $TSMP_DIR/bldsva/supported_versions.ksh
+```
+Each setup needs a setup ksh-script with the naming convention *'YOUR_CASE'_'YOUR_MACHINE'_setup.ksh* (e.g. `germany_JUWELS_setup.ksh` for the germany test case on the JUWELS machine). Please, adjust the setup carefully, you can use the setups scripts from various test cases as blueprint. You can add the namelist of your component models in the direcotry of your case (e.g. icon_master.namelist and NAMELIST_icon for ICON).  
 
 # Heterogeneous Job using TSMP <a name="hetero_job"></a>
 
