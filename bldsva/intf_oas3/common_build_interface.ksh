@@ -487,7 +487,7 @@ route "${cyellow}>>> c_substitutions_oas${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
      comment "    cp PDAF fix to ${oasdir}/lib/psmile/src"
-       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*"  ${oasdir}/lib/psmile/src
+       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[0]}/mod_oasis*"  ${oasdir}/lib/psmile/src
      check
   fi
 route "${cyellow}<<< c_substitutions_oas${cnormal}"
