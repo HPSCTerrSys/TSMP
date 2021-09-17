@@ -39,11 +39,11 @@ SUBROUTINE shr_sys_system(str,rcode)
    integer(SHR_KIND_IN),intent(out) :: rcode  ! function return error code
 
    !----- functions -----
-#if (defined CRAY) || (defined UNICOSMP)
+#if (defined CRAY) || (defined UNIICONMP)
    integer(SHR_KIND_IN),external    :: ishell ! function to envoke shell command
 #endif
 #if (defined OSF1 || defined SUNOS || (defined LINUX && !defined G95) || (defined LINUX && !defined CATAMOUNT))
-   !integer(SHR_KIND_IN),external    :: system ! function to envoke shell command
+   integer(SHR_KIND_IN),external    :: system ! function to envoke shell command
    ! COMMENT OUT FOR GNU COMPILER , CMS CPS
 #endif
 
@@ -65,7 +65,7 @@ SUBROUTINE shr_sys_system(str,rcode)
 !-------------------------------------------------------------------------------
 
 
-#if (defined CRAY) || (defined UNICOSMP)
+#if (defined CRAY) || (defined UNIICONMP)
    rcode=ishell(str)
 #endif
 
@@ -82,7 +82,7 @@ SUBROUTINE shr_sys_system(str,rcode)
    rcode = system(str)
 #endif
 
-#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNICOSMP)
+#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNIICONMP)
    write(6,F00) 'ERROR: no implementation for this architecture'
    call shr_sys_abort(subName//'no implementation for this architecture')
 #endif
@@ -137,7 +137,7 @@ SUBROUTINE shr_sys_chdir(path, rcode)
    !----- local -----
    integer(SHR_KIND_IN)             :: lenpath ! length of path
 #if (defined AIX || defined OSF1 || defined SUNOS || (defined LINUX && !defined G95) || defined NEC_SX)
-   !integer(SHR_KIND_IN),external    :: chdir   ! AIX system call
+   integer(SHR_KIND_IN),external    :: chdir   ! AIX system call
    !COMMENT OUT FOR GNU COMPILER; CMS; CPS
 #endif
 
@@ -151,7 +151,7 @@ SUBROUTINE shr_sys_chdir(path, rcode)
 
    lenpath=len_trim(path)
 
-#if (defined IRIX64 || defined CRAY || defined UNICOSMP)
+#if (defined IRIX64 || defined CRAY || defined UNIICONMP)
    call pxfchdir(path, lenpath, rcode)
 #endif
 
@@ -163,7 +163,7 @@ SUBROUTINE shr_sys_chdir(path, rcode)
    rcode=chdir(path(1:lenpath))
 #endif
 
-#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNICOSMP)
+#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNIICONMP)
    write(6,F00) 'ERROR: no implementation for this architecture'
    call shr_sys_abort('no implementation of chdir for this machine')
 #endif
@@ -197,7 +197,7 @@ SUBROUTINE shr_sys_getenv(name, val, rcode)
 
    lenname=len_trim(name)
 
-#if (defined IRIX64 || defined CRAY || defined UNICOSMP)
+#if (defined IRIX64 || defined CRAY || defined UNIICONMP)
    call pxfgetenv(name, lenname, val, lenval, rcode)
 #endif
 
@@ -210,7 +210,7 @@ SUBROUTINE shr_sys_getenv(name, val, rcode)
    if (len_trim(val) >  SHR_KIND_CL) rcode = 2
 #endif
 
-#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNICOSMP)
+#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNIICONMP)
    write(6,F00) 'ERROR: no implementation for this architecture'
    call shr_sys_abort('no implementation of getenv for this machine')
 #endif
@@ -358,14 +358,14 @@ SUBROUTINE shr_sys_flush(unit)
 ! PURPOSE: an architecture independant system call
 !-------------------------------------------------------------------------------
 
-#if (defined IRIX64 || defined CRAY || defined OSF1 || defined SUNOS || defined LINUX || defined NEC_SX || defined UNICOSMP)
+#if (defined IRIX64 || defined CRAY || defined OSF1 || defined SUNOS || defined LINUX || defined NEC_SX || defined UNIICONMP)
    call flush(unit)
 #endif
 #if (defined AIX)
    call flush(unit)
 #endif
 
-#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNICOSMP)
+#if (!defined CRAY && !defined IRIX64 && !defined AIX && !defined OSF1 && !defined SUNOS && !defined LINUX && !defined NEC_SX && !defined UNIICONMP)
    write(6,F00) 'WARNING: no implementation for this architecture'
 #endif
 
