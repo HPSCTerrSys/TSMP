@@ -720,7 +720,7 @@ route "${cyellow}>>> c_substitutions_clm${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
   comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtype.F90 $clmdir/bld/usr.src
   check
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
