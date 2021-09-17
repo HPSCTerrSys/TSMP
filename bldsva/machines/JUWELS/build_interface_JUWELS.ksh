@@ -14,6 +14,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   fi
   check
 
+
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
   if [[ $compiler == "Gnu" ]] ; then
@@ -31,7 +32,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-#
+
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-O2" # Gnu
