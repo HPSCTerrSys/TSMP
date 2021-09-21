@@ -767,7 +767,10 @@ REAL (KIND=wp)             ::       &
 CHARACTER (LEN=25)  yzroutine
 CHARACTER (LEN=100) yzerrmsg 
 CHARACTER (LEN= 9)  yinput       ! Namelist INPUT file
-!!! BsC hat LEN=80 for yzerrmsg, LEN=15 for yinput
+
+!!! BsC
+! CHARACTER (LEN=80) yzerrmsg 
+! CHARACTER (LEN=15)  yinput       ! Namelist INPUT file
 
 #ifdef MESSY
 INTEGER(KIND =iintegers) :: syr, smo, sdy, shr, smi, sse
