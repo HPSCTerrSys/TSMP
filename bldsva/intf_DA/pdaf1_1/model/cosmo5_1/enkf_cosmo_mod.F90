@@ -213,6 +213,275 @@ integer :: cos_start
 
 CONTAINS
 
+!=============
+! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+! state of cosmo
+!=============
+
+
+! Own type to specify cosmo variable with pointer to value
+TYPE COS_VAR
+  ! Name of variable, specifies name for namelist (advanced usage)
+  CHARACTER (LEN=10)                :: name = ""
+  ! Value of the variable, for memory reasons a pointer towards the value
+  ! There are 3d and 4d variables in COSMO, therefore we need two different
+  ! pointers
+  REAL  (KIND=ireals), POINTER      :: value3d(:, :, :)
+  REAL  (KIND=ireals), POINTER      :: value4d(:, :, :, :)
+  ! Array size of the variable
+  INTEGER                           :: size = 0
+  ! Array rank, is used to set the right pointer
+  INTEGER                           :: rank = 0
+  ! If the value of the variable should be included in the state vector of PDAF
+  ! (default = TRUE, will be later FALSE)
+  LOGICAL                           :: assimilate = .FALSE.
+END TYPE COS_VAR
+
+! The state vector of COSMO. These values are modified by PDAF
+REAL(KIND=ireals), ALLOCATABLE      :: cos_statevec(:)
+! The state vector size of COSMO, will define the length of the state vector
+INTEGER                             :: cos_statevecsize
+! The array of COSMO variables. If you want to enable more than 20 variables,
+! you have to increase the number of elements in the array.
+TYPE(COS_VAR), DIMENSION(20)        :: cos_vars
+! String with variable names, which should be assimilated
+character(kind=C_char), BIND(C,NAME="assim_vars_cos") :: C_assim_vars_cos(20*10)
+
+!==============================================================================
+
+!==============================================================================
+! Internal procedures in lmorg
+!==============================================================================
+
+CONTAINS
+
+!=============
+! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
+! state of cosmo
+!=============
+SUBROUTINE define_cos_vars
+  !=============================================================================
+  ! Defines the available variables, which can be changed by PDAF
+  ! Currently, this list contains only prognostic variables, obtained from
+  ! `data_fields.f90`, but can be easily expanded.
+  !=============================================================================
+  cos_vars(1) % name           =  'U'
+  cos_vars(1) % value4d        => u
+  cos_vars(1) % size           =  SIZE(u)
+  cos_vars(1) % rank           =  4
+  cos_vars(1) % assimilate     =  .FALSE.
+
+  cos_vars(2) % name           =  'V'
+  cos_vars(2) % value4d        => v
+  cos_vars(2) % size           =  SIZE(v)
+  cos_vars(2) % rank           =  4
+  cos_vars(2) % assimilate     =  .FALSE.
+
+  cos_vars(3) % name           =  'W'
+  cos_vars(3) % value4d        => w
+  cos_vars(3) % size           =  SIZE(w)
+  cos_vars(3) % rank           =  4
+  cos_vars(3) % assimilate     =  .FALSE.
+
+  cos_vars(4) % name           =  'T'
+  cos_vars(4) % value4d        => t
+  cos_vars(4) % size           =  SIZE(t)
+  cos_vars(4) % rank           =  4
+  cos_vars(4) % assimilate     =  .FALSE.
+
+  cos_vars(5) % name           =  'QV'
+  cos_vars(5) % value4d        => qv
+  cos_vars(5) % size           =  SIZE(qv)
+  cos_vars(5) % rank           =  4
+  cos_vars(5) % assimilate     =  .FALSE.
+
+  cos_vars(6) % name           =  'QC'
+  cos_vars(6) % value4d        => qc
+  cos_vars(6) % size           =  SIZE(qc)
+  cos_vars(6) % rank           =  4
+  cos_vars(6) % assimilate     =  .FALSE.
+
+  cos_vars(7) % name           =  'QI'
+  cos_vars(7) % value4d        => qi
+  cos_vars(7) % size           =  SIZE(qi)
+  cos_vars(7) % rank           =  4
+  cos_vars(7) % assimilate     =  .FALSE.
+
+  cos_vars(8) % name           =  'QR'
+  cos_vars(8) % value4d        => qr
+  cos_vars(8) % size           =  SIZE(qr)
+  cos_vars(8) % rank           =  4
+  cos_vars(8) % assimilate     =  .FALSE.
+
+  cos_vars(9) % name           =  'QS'
+  cos_vars(9) % value4d        => qs
+  cos_vars(9) % size           =  SIZE(qs)
+  cos_vars(9) % rank           =  4
+  cos_vars(9) % assimilate     =  .FALSE.
+
+  cos_vars(10) % name          =  'QG'
+  cos_vars(10) % value4d       => qg
+  cos_vars(10) % size          =  SIZE(qg)
+  cos_vars(10) % rank          =  4
+  cos_vars(10) % assimilate    =  .FALSE.
+
+  cos_vars(11) % name          =  'PP'
+  cos_vars(11) % value4d       => pp
+  cos_vars(11) % size          =  SIZE(pp)
+  cos_vars(11) % rank          =  4
+  cos_vars(11) % assimilate    =  .FALSE.
+
+  cos_vars(12) % name          =  'TKE'
+  cos_vars(12) % value4d       => tke
+  cos_vars(12) % size          =  SIZE(tke)
+  cos_vars(12) % rank          =  4
+  cos_vars(12) % assimilate    =  .FALSE.
+
+END SUBROUTINE define_cos_vars
+
+SUBROUTINE set_cos_assimilate
+  !=============================================================================
+  ! The `assimilate` flag for variables within the namelist-driven
+  ! `cos_vars_assimilate` is set to .TRUE., while all other variables are not
+  ! assimilated.
+  !=============================================================================
+!  IMPLICIT NONE
+  INTEGER                     :: var_idx = 1
+  INTEGER                     :: curr_idx
+  CHARACTER(LEN=10)           :: curr_var
+  INTEGER                     :: var_pos
+  CHARACTER(LEN=20*10)        :: assim_vars_cos = ' '
+
+  DO curr_idx=1, LEN(assim_vars_cos)
+    IF (C_assim_vars_cos(curr_idx) == C_NULL_CHAR) EXIT
+    assim_vars_cos(curr_idx:curr_idx) = C_assim_vars_cos(curr_idx)
+  END DO
+
+  ! Set all variables to assimilate False
+  DO var_pos=1, SIZE(cos_vars)
+    cos_vars(i) % assimilate = .FALSE.
+  END DO
+
+  curr_idx = 1
+  ! Scan namelist string
+  DO
+    curr_var = assim_vars_cos(curr_idx:)
+    var_idx = SCAN(curr_var, ',')
+    ! Get current variable from namelist substrng
+    IF (var_idx > 0) THEN
+      curr_var = assim_vars_cos(curr_idx:curr_idx+var_idx-2)
+    END IF
+    DO var_pos=1, SIZE(cos_vars)
+      ! Compare substring with variables in cos_vars
+      ! If found set assimilate True
+      IF (TRIM(curr_var) == TRIM(cos_vars(var_pos) % name) .AND. &
+          LEN(TRIM(cos_vars(var_pos) % name))>0) THEN
+        IF (my_cart_id .EQ. 0) THEN
+          print *, cos_vars(var_pos) % name, " will be assimilated"
+        END IF
+        cos_vars(var_pos) % assimilate = .TRUE.
+        EXIT
+      END IF
+    END DO
+    IF (var_idx == 0) EXIT
+    curr_idx = curr_idx + var_idx
+  END DO
+
+END SUBROUTINE set_cos_assimilate
+
+SUBROUTINE define_cos_statevec
+  !=============================================================================
+  ! Loops through all available cosmo variables to find variables, which should
+  ! be assimilated. This procedure lead to a state vector size, which is then
+  ! used to allocate the state vector.
+  !=============================================================================
+  INTEGER                     :: var_cnt
+
+  cos_statevecsize = 0
+
+  DO var_cnt=1, SIZE(cos_vars)
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      cos_statevecsize = cos_statevecsize + cos_vars(var_cnt) % size
+    END IF
+  END DO
+
+  IF (ALLOCATED(cos_statevec)) THEN
+    DEALLOCATE(cos_statevec)
+  END IF
+  ALLOCATE(cos_statevec(cos_statevecsize))
+END SUBROUTINE define_cos_statevec
+
+SUBROUTINE set_cos_statevec
+  !=============================================================================
+  ! Loops through all cosmo variables, to find variables to assimilate. The
+  ! value of these assimilation variables are then used to set the COSMO state
+  ! vector for PDAF.
+  !=============================================================================
+  INTEGER                     :: var_cnt
+  INTEGER                     :: curr_pos
+  INTEGER                     :: new_pos
+
+  curr_pos = 1
+  DO var_cnt=1, SIZE(cos_vars)
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      new_pos = curr_pos + cos_vars(var_cnt) % size
+      IF (cos_vars(var_cnt) % rank == 4) THEN
+        cos_statevec(curr_pos:new_pos) = PACK(            &
+                cos_vars(var_cnt) % value4d, .TRUE.       &
+        )
+      ELSE
+        cos_statevec(curr_pos:new_pos) = PACK(            &
+                cos_vars(var_cnt) % value3d, .TRUE.       &
+        )
+      END IF
+      curr_pos = new_pos
+    END IF
+  END DO
+
+END SUBROUTINE set_cos_statevec
+
+SUBROUTINE update_cos_vars
+  !=============================================================================
+  ! Loops through all cosmo variables, to find variables to assimilate. The
+  ! value of these assimilation variables are then set to sliced values of the
+  ! PDAF state vector.
+  !=============================================================================
+  INTEGER                     :: var_cnt
+  INTEGER                     :: curr_pos
+  INTEGER                     :: new_pos
+
+  curr_pos = 1
+  DO var_cnt=1, SIZE(cos_vars)
+    IF (cos_vars(var_cnt) % assimilate) THEN
+      new_pos = curr_pos + cos_vars(var_cnt) % size
+      IF ( new_pos > SIZE(cos_statevec)+1 ) THEN
+        print *, '*** ERROR ***', 'Out of bounds! desired element: ', new_pos, &
+                 ' Vector size: ', SIZE(cos_statevec)
+      END IF
+      IF (cos_vars(var_cnt) % rank == 4) THEN
+        cos_vars(var_cnt) % value4d = RESHAPE(    &
+                cos_statevec(curr_pos:new_pos),               &
+                SHAPE(cos_vars(var_cnt) % value4d)            &
+        )
+      ELSE
+        cos_vars(var_cnt) % value3d = RESHAPE(    &
+                cos_statevec(curr_pos:new_pos),               &
+                SHAPE(cos_vars(var_cnt) % value3d)            &
+        )
+      END IF
+      curr_pos = new_pos
+    END IF
+  END DO
+END SUBROUTINE update_cos_vars
+
+SUBROUTINE teardown_cos_statevec
+  !=============================================================================
+  ! This subroutine is used to deallocate the COSMO state vector for PDAF and
+  ! the array of COSMO variables
+  !=============================================================================
+  DEALLOCATE(cos_statevec)
+END SUBROUTINE teardown_cos_statevec
+
 !==============================================================================
 !+ Internal procedure in "lmorg" for initializing each time step
 !------------------------------------------------------------------------------
