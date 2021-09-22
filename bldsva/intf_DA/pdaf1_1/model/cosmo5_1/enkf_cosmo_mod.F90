@@ -205,13 +205,6 @@ INTEGER (KIND=iintegers), ALLOCATABLE:: &
 !kuw: time step control for cosmo
 integer :: cos_start
 
-!==============================================================================
-
-!==============================================================================
-! Internal procedures in lmorg
-!==============================================================================
-
-CONTAINS
 
 !=============
 ! Changes by Tobias Finn to couple COSMO with PDAF such that PDAF can change the
