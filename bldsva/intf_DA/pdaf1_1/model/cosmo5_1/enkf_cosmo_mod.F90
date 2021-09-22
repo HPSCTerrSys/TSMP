@@ -1,4 +1,6 @@
 module enkf_cosmo_mod
+
+USE iso_c_binding
 USE info_lm_f90,         ONLY: info_define, info_readnl, info_print
 
 USE data_parameters,     ONLY:   wp, iintegers
