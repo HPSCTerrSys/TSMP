@@ -219,8 +219,8 @@ TYPE COS_VAR
   ! Value of the variable, for memory reasons a pointer towards the value
   ! There are 3d and 4d variables in COSMO, therefore we need two different
   ! pointers
-  REAL  (KIND=ireals), POINTER      :: value3d(:, :, :)
-  REAL  (KIND=ireals), POINTER      :: value4d(:, :, :, :)
+  REAL  (KIND=wp), POINTER      :: value3d(:, :, :)
+  REAL  (KIND=wp), POINTER      :: value4d(:, :, :, :)
   ! Array size of the variable
   INTEGER                           :: size = 0
   ! Array rank, is used to set the right pointer
@@ -231,7 +231,7 @@ TYPE COS_VAR
 END TYPE COS_VAR
 
 ! The state vector of COSMO. These values are modified by PDAF
-REAL(KIND=ireals), ALLOCATABLE      :: cos_statevec(:)
+REAL(KIND=wp), ALLOCATABLE      :: cos_statevec(:)
 ! The state vector size of COSMO, will define the length of the state vector
 INTEGER                             :: cos_statevecsize
 ! The array of COSMO variables. If you want to enable more than 20 variables,
