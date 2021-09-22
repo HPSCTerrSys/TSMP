@@ -284,53 +284,17 @@ SUBROUTINE define_cos_vars
   cos_vars(4) % rank           =  4
   cos_vars(4) % assimilate     =  .FALSE.
 
-  cos_vars(5) % name           =  'QV'
-  cos_vars(5) % value4d        => qv
-  cos_vars(5) % size           =  SIZE(qv)
-  cos_vars(5) % rank           =  4
-  cos_vars(5) % assimilate     =  .FALSE.
+  cos_vars(5) % name          =  'PP'
+  cos_vars(5) % value4d       => pp
+  cos_vars(5) % size          =  SIZE(pp)
+  cos_vars(5) % rank          =  4
+  cos_vars(5) % assimilate    =  .FALSE.
 
-  cos_vars(6) % name           =  'QC'
-  cos_vars(6) % value4d        => qc
-  cos_vars(6) % size           =  SIZE(qc)
-  cos_vars(6) % rank           =  4
-  cos_vars(6) % assimilate     =  .FALSE.
-
-  cos_vars(7) % name           =  'QI'
-  cos_vars(7) % value4d        => qi
-  cos_vars(7) % size           =  SIZE(qi)
-  cos_vars(7) % rank           =  4
-  cos_vars(7) % assimilate     =  .FALSE.
-
-  cos_vars(8) % name           =  'QR'
-  cos_vars(8) % value4d        => qr
-  cos_vars(8) % size           =  SIZE(qr)
-  cos_vars(8) % rank           =  4
-  cos_vars(8) % assimilate     =  .FALSE.
-
-  cos_vars(9) % name           =  'QS'
-  cos_vars(9) % value4d        => qs
-  cos_vars(9) % size           =  SIZE(qs)
-  cos_vars(9) % rank           =  4
-  cos_vars(9) % assimilate     =  .FALSE.
-
-  cos_vars(10) % name          =  'QG'
-  cos_vars(10) % value4d       => qg
-  cos_vars(10) % size          =  SIZE(qg)
-  cos_vars(10) % rank          =  4
-  cos_vars(10) % assimilate    =  .FALSE.
-
-  cos_vars(11) % name          =  'PP'
-  cos_vars(11) % value4d       => pp
-  cos_vars(11) % size          =  SIZE(pp)
-  cos_vars(11) % rank          =  4
-  cos_vars(11) % assimilate    =  .FALSE.
-
-  cos_vars(12) % name          =  'TKE'
-  cos_vars(12) % value4d       => tke
-  cos_vars(12) % size          =  SIZE(tke)
-  cos_vars(12) % rank          =  4
-  cos_vars(12) % assimilate    =  .FALSE.
+  cos_vars(6) % name          =  'TKE'
+  cos_vars(6) % value4d       => tke
+  cos_vars(6) % size          =  SIZE(tke)
+  cos_vars(6) % rank          =  4
+  cos_vars(6) % assimilate    =  .FALSE.
 
 END SUBROUTINE define_cos_vars
 
