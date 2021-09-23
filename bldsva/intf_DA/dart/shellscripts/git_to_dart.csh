@@ -10,7 +10,8 @@
 # 'models/terrsysmp/'.
 #
 # After the files are copied, it is required to build all the executables by kjj
-
+# T. Hoar, P. Shrestha
+#
 cat << EndOfText >! exclude-list.txt
 *.mod
 *.swp
@@ -34,13 +35,14 @@ preprocess
 EndOfText
 
 if ( ! $?TERRSYSMP ) then
-   set   TERRSYSMP = $HOME/terrsysmp
+   set   TERRSYSMP = $TRAINHOME/terrsysmp
 endif
 
 if ( ! $?DART ) then
-   set  DART = $HOME/DART/lanai
+   set  DART = $TRAINHOME/DART/lanai
 endif
 
+echo " "
 echo "Installing $TERRSYSMP into $DART"
 
 foreach FILE ( clm cosmo parflow )

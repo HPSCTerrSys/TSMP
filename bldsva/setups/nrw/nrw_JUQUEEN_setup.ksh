@@ -72,7 +72,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/clm3.5/Rur_NRW/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -130,5 +130,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
         tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
 	check
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

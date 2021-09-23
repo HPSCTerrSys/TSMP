@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_pfl(){
-route "${cblue}>> always_pfl${cnormal}"
-route "${cblue}<< always_pfl${cnormal}"
+route "${cyellow}>> always_pfl${cnormal}"
+route "${cyellow}<< always_pfl${cnormal}"
 }
 
 configure_pfl(){
-route "${cblue}>> configure_pfl${cnormal}"
+route "${cyellow}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
     cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
@@ -24,38 +24,53 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="${profComp} $mpiPath/bin/mpif77"
     pcxx="${profComp} $mpiPath/bin/mpic++"
     flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
+    if [[ $profiling == "scalasca" ]]; then
+      pcc="scorep-mpicc"
+      pfc="scorep-mpif90"
+      pf77="scorep-mpif77"
+      pcxx="scorep-mpic++"
+      flagsTools+="CC=scorep-mpicc FC=scorep-mpif90 F77=scorep-mpif77 "
+    fi
     libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
     fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    cflagsSim=" -qopenmp "
+    if [[ $compiler == "Gnu" ]] ; then  
+      cflagsSim=" -fopenmp "  
+    elif [[ $compiler == "Intel" ]] ; then 
+      cflagsSim=" -qopenmp "  
+    fi
     if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
 
     c_configure_pfl
 
   comment "   sed correct linker command in pfsimulator"
     sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@-l -l@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
   check
   comment "   sed correct linker command in pftools"
     sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
+    sed -i 's@-l -l@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
 check
 
 
 
-route "${cblue}<< configure_pfl${cnormal}"
+route "${cyellow}<< configure_pfl${cnormal}"
 }
 
 make_pfl(){
-route "${cblue}>> make_pfl${cnormal}"
+route "${cyellow}>> make_pfl${cnormal}"
   c_make_pfl
-route "${cblue}<< make_pfl${cnormal}"
+route "${cyellow}<< make_pfl${cnormal}"
 }
 
 
 substitutions_pfl(){
-route "${cblue}>> substitutions_pfl${cnormal}"
+route "${cyellow}>> substitutions_pfl${cnormal}"
   comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
  
   c_substitutions_pfl
@@ -68,7 +83,7 @@ route "${cblue}>> substitutions_pfl${cnormal}"
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c 
   check 
   comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
+    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src.$compiler/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
   check
 
     if [[ $withOASMCT == "true" ]] ; then 
@@ -83,15 +98,15 @@ route "${cblue}>> substitutions_pfl${cnormal}"
       check
     fi
 
-route "${cblue}<< substitutions_pfl${cnormal}"
+route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
 setup_pfl(){
-route "${cblue}>> setup_pfl${cnormal}"
+route "${cyellow}>> setup_pfl${cnormal}"
   c_setup_pfl
 
-route "${cblue}<< setup_pfl${cnormal}"
+route "${cyellow}<< setup_pfl${cnormal}"
 }
 
 

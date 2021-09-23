@@ -235,8 +235,8 @@ cat > INPUT_IO  << end_input_io
   lasync_io=.FALSE., ngribout=1,
    nhour_restart=__nhour_restart_start__,__nhour_restart_stop__,__nhour_restart_incr__,
    ytunit_restart='f',
+  yform_read='apix',
 
-!  yform_read='grb1',
 !  nincwait=30,
 !  nmaxwait=2400,
  /
@@ -286,7 +286,7 @@ cat > INPUT_IO  << end_input_io
     ncomb=0,$nsteps,60,
     lanalysis=.true.,
     lcheck=.true.,
-    yform_write='grb1',
+    yform_write='ncdf',
     lwrite_const=.true.,
     l_p_filter=.true.,
     l_z_filter=.true.,

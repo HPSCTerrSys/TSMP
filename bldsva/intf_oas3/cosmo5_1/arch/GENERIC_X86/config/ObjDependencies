@@ -1,0 +1,1403 @@
+#
+####################################################
+#
+#     Dependencies of the Data Modules
+#
+####################################################
+#
+$(OBJDIR)/kind_parameters.o:            $(SRCDIR)/kind_parameters.f90
+	echo compiling kind_parameters.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/kind_parameters.f90 )
+#
+$(OBJDIR)/data_1d_global.o:            $(SRCDIR)/data_1d_global.f90           \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_1d_global.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_1d_global.f90 )
+#
+$(OBJDIR)/data_block_fields.o:         $(SRCDIR)/data_block_fields.f90        \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_block_fields.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_block_fields.f90 )
+#
+$(OBJDIR)/data_constants.o:            $(SRCDIR)/data_constants.f90           \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_constants.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_constants.f90 )
+#
+$(OBJDIR)/data_convection.o:           $(SRCDIR)/data_convection.f90         \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_convection.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_convection.f90 )
+#
+$(OBJDIR)/data_fields.o:               $(SRCDIR)/data_fields.f90              \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_fields.f90      
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_fields.f90 )
+#
+$(OBJDIR)/data_flake.o:                $(SRCDIR)/data_flake.f90               \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_flake.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_flake.f90 )
+#
+$(OBJDIR)/data_gscp.o:                 $(SRCDIR)/data_gscp.f90               \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_gscp.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_gscp.f90 )
+#
+$(OBJDIR)/data_io.o:                   $(SRCDIR)/data_io.f90                  \
+           $(OBJDIR)/data_parameters.o                                        \
+           $(data_io_newdep)
+	echo compiling data_io.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_io.f90 )
+#
+$(OBJDIR)/data_lheat_nudge.o:          $(SRCDIR)/data_lheat_nudge.f90         \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_lheat_nudge.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_lheat_nudge.f90 )
+#
+$(OBJDIR)/data_lhn_diag.o:             $(SRCDIR)/data_lhn_diag.f90            \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_lhn_diag.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_lhn_diag.f90 )
+#
+$(OBJDIR)/data_modelconfig.o:          $(SRCDIR)/data_modelconfig.f90         \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_modelconfig.f90 
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_modelconfig.f90 )
+#
+$(OBJDIR)/data_nudge_all.o:            $(SRCDIR)/data_nudge_all.f90           \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_nudge_all.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_nudge_all.f90 )
+#
+$(OBJDIR)/data_nudge_gather.o:         $(SRCDIR)/data_nudge_gather.f90        \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_nudge_gather.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_nudge_gather.f90 )
+#
+$(OBJDIR)/data_nudge_local.o:          $(SRCDIR)/data_nudge_local.f90         \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_nudge_local.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_nudge_local.f90 )
+#
+$(OBJDIR)/data_nudge_spread.o:         $(SRCDIR)/data_nudge_spread.f90        \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_nudge_spread.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_nudge_spread.f90 )
+#
+$(OBJDIR)/data_obs_cdfin.o:            $(SRCDIR)/data_obs_cdfin.f90           \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_obs_cdfin.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_obs_cdfin.f90 )
+#
+$(OBJDIR)/data_obs_lib_cosmo.o:        $(SRCDIR)/data_obs_lib_cosmo.f90       \
+           $(OBJDIR)/data_constants.o  $(OBJDIR)/data_parameters.o
+	echo compiling data_obs_lib_cosmo.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_obs_lib_cosmo.f90 )
+#
+$(OBJDIR)/data_obs_process.o:          $(SRCDIR)/data_obs_process.f90         \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_obs_process.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_obs_process.f90 )
+#
+$(OBJDIR)/data_obs_qc_limits.o:        $(SRCDIR)/data_obs_qc_limits.f90       \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_obs_qc_limits.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_obs_qc_limits.f90 )
+#
+$(OBJDIR)/data_obs_record.o:           $(SRCDIR)/data_obs_record.f90          \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_obs_record.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_obs_record.f90 )
+#
+$(OBJDIR)/data_parallel.o:             $(SRCDIR)/data_parallel.f90            \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_parallel.f90  
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_parallel.f90 )
+#
+$(OBJDIR)/data_parameters.o:           $(SRCDIR)/data_parameters.f90          \
+          $(OBJDIR)/kind_parameters.o
+	echo compiling data_parameters.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_parameters.f90 )
+#
+$(OBJDIR)/data_radiation.o:            $(SRCDIR)/data_radiation.f90           \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_radiation.f90   
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_radiation.f90 )
+#
+$(OBJDIR)/data_runcontrol.o:           $(SRCDIR)/data_runcontrol.f90          \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_runcontrol.f90  
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_runcontrol.f90 )
+#
+$(OBJDIR)/data_satellites.o:           $(SRCDIR)/data_satellites.f90          \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_satellites.f90  
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_satellites.f90 )
+#
+$(OBJDIR)/data_soil.o:                 $(SRCDIR)/data_soil.f90                \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_soil.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_soil.f90 )
+#
+$(OBJDIR)/data_tracer.o:               $(SRCDIR)/data_tracer.f90              \
+           $(OBJDIR)/data_parameters.o       $(OBJDIR)/data_tracer_metadata.o \
+           $(OBJDIR)/data_io.o
+	echo compiling data_tracer.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_tracer.f90 )
+#
+$(OBJDIR)/data_tracer_metadata.o:      $(SRCDIR)/data_tracer_metadata.f90     \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_tracer_metadata.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_tracer_metadata.f90 )
+#
+$(OBJDIR)/data_traj.o:                 $(SRCDIR)/data_traj.f90                \
+           $(OBJDIR)/data_parameters.o       $(OBJDIR)/data_io.o
+	echo compiling data_traj.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_traj.f90 )
+#
+$(OBJDIR)/data_turbulence.o:           $(SRCDIR)/data_turbulence.f90          \
+           $(OBJDIR)/data_parameters.o
+	echo compiling data_turbulence.f90  
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/data_turbulence.f90 )
+#
+####################################################
+#
+#     Dependencies of Modules used for Assimilation
+#
+####################################################
+#
+$(OBJDIR)/mo_fdbk.o:                   $(SRCDIR)/mo_fdbk.f90                  \
+           $(OBJDIR)/mo_fdbk_tables.o        $(OBJDIR)/kind_parameters.o      \
+           $(OBJDIR)/mo_netcdf_param.o       $(OBJDIR)/mo_t_netcdf_file.o     \
+           $(OBJDIR)/environment.o
+	echo compiling mo_fdbk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_fdbk.f90 )
+#
+$(OBJDIR)/mo_fdbk_cosmo.o:             $(SRCDIR)/mo_fdbk_cosmo.f90            \
+           $(OBJDIR)/mo_fdbk.o               $(OBJDIR)/mo_netcdf_param.o      \
+           $(OBJDIR)/mo_t_netcdf_file.o 
+	echo compiling mo_fdbk_cosmo.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_fdbk_cosmo.f90 )
+#
+$(OBJDIR)/mo_fdbk_io.o:                $(SRCDIR)/mo_fdbk_io.f90               \
+           $(SRCDIR)/p_bcast.incf            $(SRCDIR)/p_scatter_derived.incf \
+           $(OBJDIR)/data_parallel.o         $(OBJDIR)/kind_parameters.o      \
+           $(OBJDIR)/mo_fdbk.o               $(OBJDIR)/mo_t_netcdf_file.o     \
+           $(OBJDIR)/environment.o
+	echo compiling mo_fdbk_io.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_fdbk_io.f90 )
+#
+$(OBJDIR)/mo_fdbk_tables.o:             $(SRCDIR)/mo_fdbk_tables.f90          \
+           $(OBJDIR)/mo_t_table.o
+	echo compiling mo_fdbk_tables.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_fdbk_tables.f90 )
+#
+$(OBJDIR)/mo_netcdf_param.o:            $(SRCDIR)/mo_netcdf_param.f90
+	echo compiling mo_netcdf_param.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_netcdf_param.f90 )
+#
+$(OBJDIR)/mo_t_netcdf_file.o:          $(SRCDIR)/mo_t_netcdf_file.f90         \
+           $(OBJDIR)/kind_parameters.o       $(OBJDIR)/mo_netcdf_param.o      \
+           $(OBJDIR)/mo_t_table.o 
+	echo compiling mo_t_netcdf_file.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_t_netcdf_file.f90 )
+#
+$(OBJDIR)/mo_t_table.o:                 $(SRCDIR)/mo_t_table.f90
+	echo compiling mo_t_table.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_t_table.f90 )
+#
+####################################################
+#
+#     Dependencies of OASIS utility 
+#
+####################################################
+#
+ifeq ($(WITHOAS),true)
+$(OBJDIR)/oas_cos_vardef.o:                  $(OASDIR)/oas_cos_vardef.F90     \
+	$(OBJDIR)/data_parameters.o
+	echo compiling oas_cos_vardef.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/oas_cos_vardef.F90 )
+#
+####################################################
+#
+#     Dependencies of the Utility Modules
+#
+####################################################
+#
+$(OBJDIR)/environment.o:                     $(SRCDIR)/environment.f90        \
+	$(OBJDIR)/data_parameters.o          $(OBJDIR)/utilities.o            \
+	$(OBJDIR)/oas_cos_vardef.o           
+	echo compiling environment.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(SRCDIR)/environment.f90 )
+
+else
+
+
+$(OBJDIR)/environment.o:                     $(SRCDIR)/environment.f90        \
+	$(OBJDIR)/data_parameters.o        $(OBJDIR)/utilities.o            
+	echo compiling environment.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(SRCDIR)/environment.f90 )
+
+endif
+
+
+#
+$(OBJDIR)/grid_metrics_utilities.o:     $(SRCDIR)/grid_metrics_utilities.f90  \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/environment.o
+	echo compiling grid_metrics_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/grid_metrics_utilities.f90 )
+#
+$(OBJDIR)/info_lm_f90.o:                     $(SRCDIR)/info_lm_f90.f90
+	echo compiling info_lm_f90.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/info_lm_f90.f90 )
+#
+$(OBJDIR)/io_metadata.o:                    $(SRCDIR)/io_metadata.f90         \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_satellites.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling io_metadata.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/io_metadata.f90 )
+#
+$(OBJDIR)/io_utilities.o:                    $(SRCDIR)/io_utilities.f90       \
+          $(OBJDIR)/data_parameters.o                                         \
+          $(OBJDIR)/mpe_io2.o                $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling io_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/io_utilities.f90 )
+#
+$(OBJDIR)/meteo_utilities.o:                 $(SRCDIR)/meteo_utilities.f90    \
+          $(OBJDIR)/data_parameters.o
+	echo compiling meteo_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/meteo_utilities.f90 )
+#
+$(OBJDIR)/mo_random.o:                  $(SRCDIR)/mo_random.f90               \
+           $(OBJDIR)/kind_parameters.o       $(OBJDIR)/environment.o
+	echo compiling mo_random.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mo_random.f90 )
+#
+$(OBJDIR)/netcdf_io.o:                      $(SRCDIR)/netcdf_io.f90           \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_satellites.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/io_utilities.o         \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_setup_vartab.o       $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling netcdf_io.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/netcdf_io.f90 )
+#
+$(OBJDIR)/numeric_utilities.o:               $(SRCDIR)/numeric_utilities.f90  \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/numeric_utilities_rk.o \
+          $(OBJDIR)/grid_metrics_utilities.o
+	echo compiling numeric_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/numeric_utilities.f90 )
+#
+$(OBJDIR)/numeric_utilities_rk.o:           $(SRCDIR)/numeric_utilities_rk.f90 \
+          $(OBJDIR)/data_parameters.o       $(OBJDIR)/data_runcontrol.o        \
+          $(OBJDIR)/data_parallel.o         $(OBJDIR)/data_modelconfig.o       \
+          $(OBJDIR)/data_fields.o           $(OBJDIR)/data_constants.o         \
+          $(OBJDIR)/environment.o           $(OBJDIR)/parallel_utilities.o     \
+          $(OBJDIR)/grid_metrics_utilities.o
+	echo compiling numeric_utilities_rk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/numeric_utilities_rk.f90 )
+#
+$(OBJDIR)/parallel_utilities.o:              $(SRCDIR)/parallel_utilities.f90 \
+          $(OBJDIR)/data_parameters.o                                         \
+          $(OBJDIR)/environment.o  # only necessary for sequential binary
+	echo compiling parallel_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/parallel_utilities.f90 )
+#
+$(OBJDIR)/pp_utilities.o:                    $(SRCDIR)/pp_utilities.f90       \
+          $(OBJDIR)/data_parameters.o                                         \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/numeric_utilities.o    \
+          $(OBJDIR)/environment.o                                             \
+          $(pp_utilities_newdep)
+	echo compiling pp_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/pp_utilities.f90 )
+#
+$(OBJDIR)/turbulence_utilities.o:            $(SRCDIR)/turbulence_utilities.f90 \
+          $(OBJDIR)/data_turbulence.o        $(OBJDIR)/data_parameters.o
+	echo compiling turbulence_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/turbulence_utilities.f90 )
+#
+$(OBJDIR)/time_utilities.o:                  $(SRCDIR)/time_utilities.f90     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o
+	echo compiling time_utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/time_utilities.f90 )
+#
+$(OBJDIR)/utilities.o:                       $(SRCDIR)/utilities.f90          \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_parameters.o
+	echo compiling utilities.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/utilities.f90 )
+#
+$(OBJDIR)/vgrid_refatm_utils.o:             $(SRCDIR)/vgrid_refatm_utils.f90  \
+           $(OBJDIR)/data_parameters.o
+	echo compiling vgrid_refatm_utils.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/vgrid_refatm_utils.f90 )
+#
+####################################################
+#
+#     Dependencies of the Public Utilities
+#
+####################################################
+#
+$(OBJDIR)/mpe_io2.o:                         $(SRCDIR)/mpe_io2.f90
+	echo compiling mpe_io2.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/mpe_io2.f90 )
+#
+# only on sequential platforms
+#
+$(OBJDIR)/dummy_mpi.o:                       $(SRCDIR)/dummy_mpi.f90 \
+           $(OBJDIR)/data_parameters.o
+	echo compiling dummy_mpi.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/dummy_mpi.f90 )
+#
+####################################################
+#
+#     Dependencies of the Source Modules
+#
+####################################################
+#
+$(OBJDIR)/gscp_interface.o:                  $(SRCDIR)/gscp_interface.f90     \
+          $(OBJDIR)/data_block_fields.o      $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/gscp_cloudice.o          $(OBJDIR)/gscp_graupel.o         \
+          $(OBJDIR)/gscp_kessler.o           $(OBJDIR)/gscp_hydor.o           \
+          $(OBJDIR)/src_block_fields.o       $(OBJDIR)/src_stoch_physics.o    \
+          $(OBJDIR)/time_utilities.o
+	echo compiling gscp_interface.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_interface.f90 )
+#
+$(OBJDIR)/gscp_data.o:                 $(SRCDIR)/gscp_data.f90               \
+           $(OBJDIR)/kind_parameters.o       $(OBJDIR)/data_constants.o      \
+           $(OBJDIR)/pp_utilities.o          $(OBJDIR)/utilities.o
+	echo compiling gscp_data.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_data.f90 )
+#
+$(OBJDIR)/gscp_cloudice.o:                   $(SRCDIR)/gscp_cloudice.f90      \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/gscp_data.o                                               \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_stoch_physics.o
+	echo compiling gscp_cloudice.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_cloudice.f90 )
+#
+$(OBJDIR)/gscp_graupel.o:                    $(SRCDIR)/gscp_graupel.f90       \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/gscp_data.o                                               \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_stoch_physics.o
+	echo compiling gscp_graupel.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_graupel.f90 )
+#
+$(OBJDIR)/gscp_hydor.o:                      $(SRCDIR)/gscp_hydor.f90         \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/gscp_data.o                                               \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_stoch_physics.o
+	echo compiling gscp_hydor.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_hydor.f90 )
+#
+$(OBJDIR)/gscp_kessler.o:                    $(SRCDIR)/gscp_kessler.f90       \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/gscp_data.o                                               \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_stoch_physics.o
+	echo compiling gscp_kessler.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/gscp_kessler.f90 )
+#
+$(OBJDIR)/src_block_fields.o:                $(SRCDIR)/src_block_fields.f90   \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/environment.o
+	echo compiling src_block_fields.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_block_fields.f90 )
+#
+$(OBJDIR)/src_block_fields_org.o:            $(SRCDIR)/src_block_fields_org.f90\
+          $(OBJDIR)/data_block_fields.o      $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o                                             \
+          $(OBJDIR)/src_stoch_physics.o      $(OBJDIR)/src_tracer.o
+	echo compiling src_block_fields_org.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_block_fields_org.f90 )
+#
+$(OBJDIR)/src_advection_rk.o:                $(SRCDIR)/src_advection_rk.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/time_utilities.o       \
+          $(OBJDIR)/environment.o                                             \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/numeric_utilities.o    \
+          $(OBJDIR)/numeric_utilities_rk.o   $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/grid_metrics_utilities.o $(OBJDIR)/src_tracer.o
+	echo compiling src_advection_rk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_advection_rk.f90 )
+#
+$(OBJDIR)/src_allocation.o:                  $(SRCDIR)/src_allocation.f90     \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_lhn_diag.o        \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o
+	echo compiling src_allocation.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_allocation.f90 )
+#
+$(OBJDIR)/src_artifdata.o:                   $(SRCDIR)/src_artifdata.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_soil.o            \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/grid_metrics_utilities.o $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_artifdata.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_artifdata.f90 )
+#
+$(OBJDIR)/src_conv_tiedtke.o:                $(SRCDIR)/src_conv_tiedtke.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_convection.o      \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_lheating.o         \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/environment.o          \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_conv_tiedtke.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_conv_tiedtke.f90 )
+#
+$(OBJDIR)/src_conv_shallow.o:                $(SRCDIR)/src_conv_shallow.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_convection.o      \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/src_tracer.o                                              \
+          $(OBJDIR)/environment.o
+	echo compiling src_conv_shallow.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_conv_shallow.f90 )
+#
+$(OBJDIR)/src_correl_cutoff.o:               $(SRCDIR)/src_correl_cutoff.f90  \
+          $(OBJDIR)/data_modelconfig.o  $(OBJDIR)/data_nudge_all.o            \
+          $(OBJDIR)/data_nudge_gather.o  $(OBJDIR)/data_nudge_spread.o        \
+          $(OBJDIR)/data_obs_lib_cosmo.o  $(OBJDIR)/data_parameters.o         \
+          $(OBJDIR)/data_runcontrol.o
+	echo compiling src_correl_cutoff.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_correl_cutoff.f90 )
+#
+$(OBJDIR)/src_diagbudget.o:                  $(SRCDIR)/src_diagbudget.f90     \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/environment.o
+	echo compiling src_diagbudget.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_diagbudget.f90 )
+#
+$(OBJDIR)/src_flake.o:                       $(SRCDIR)/src_flake.f90          \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/src_flake_sfcflx.o       $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o
+	echo compiling src_flake.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_flake.f90 )
+#
+$(OBJDIR)/src_gather_info.o:                 $(SRCDIR)/src_gather_info.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_gather.o      $(OBJDIR)/data_nudge_spread.o    \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_gather_info.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_gather_info.f90 )
+#
+$(OBJDIR)/src_gridpoints.o:                  $(SRCDIR)/src_gridpoints.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_soil.o              $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/environment.o          \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_gridpoints.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_gridpoints.f90 )
+#
+$(OBJDIR)/src_gscp.o:                        $(SRCDIR)/src_gscp.f90           \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_gscp.o              $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/pp_utilities.o         \
+          $(OBJDIR)/environment.o            $(OBJDIR)/src_lheating.o         \
+          $(OBJDIR)/src_stoch_physics.o      $(OBJDIR)/src_tracer.o
+	echo compiling src_gscp.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_gscp.f90 )
+#
+$(OBJDIR)/src_input.o:                       $(SRCDIR)/src_input.f90          \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_soil.o            \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/io_utilities.o         \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/vgrid_refatm_utils.o                                      \
+          $(src_input_newdep)
+	echo compiling src_input.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_input.f90 )
+#
+$(OBJDIR)/src_integrals.o:                   $(SRCDIR)/src_integrals.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/environment.o          \
+          $(OBJDIR)/grid_metrics_utilities.o
+	echo compiling src_integrals.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_integrals.f90 )
+#
+$(OBJDIR)/src_flake_sfcflx.o:                $(SRCDIR)/src_flake_sfcflx.f90   \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_parameters.o
+	echo compiling src_flake_sfcflx.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_flake_sfcflx.f90 )
+#
+$(OBJDIR)/src_leapfrog.o:                    $(SRCDIR)/src_leapfrog.f90       \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/numeric_utilities.o      $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/src_lheating.o           $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/hori_diffusion.o       \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_leapfrog.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_leapfrog.f90 )
+#
+$(OBJDIR)/src_lheat_nudge.o:                 $(SRCDIR)/src_lheat_nudge.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_lhn_diag.o          $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_obs_lib_cosmo.o                                      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/pp_utilities.o         \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/time_utilities.o       \
+          $(OBJDIR)/vgrid_refatm_utils.o     $(OBJDIR)/src_tracer.o
+	echo compiling src_lheat_nudge.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_lheat_nudge.f90 )
+#
+$(OBJDIR)/src_lheating.o:                    $(SRCDIR)/src_lheating.f90       \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_lheat_nudge.o     \
+                                             $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o
+	echo compiling src_lheating.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_lheating.f90 )
+#
+$(OBJDIR)/src_meanvalues.o:                  $(SRCDIR)/src_meanvalues.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o
+	echo compiling src_meanvalues.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_meanvalues.f90 )
+#
+$(OBJDIR)/src_mult_local.o:                  $(SRCDIR)/src_mult_local.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_gather.o      $(OBJDIR)/data_nudge_local.o     \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_obs_qc_limits.o     $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/mo_fdbk_tables.o                                          \
+          $(OBJDIR)/environment.o                                             \
+          $(OBJDIR)/src_obs_operator_conv.o  $(OBJDIR)/src_obs_qc_conv.o      \
+          $(OBJDIR)/src_tracer.o
+	echo compiling src_mult_local.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_mult_local.f90 )
+#
+$(OBJDIR)/src_mult_spread.o:                 $(SRCDIR)/src_mult_spread.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_gather.o      $(OBJDIR)/data_nudge_spread.o    \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/src_correl_cutoff.o
+	echo compiling src_mult_spread.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_mult_spread.f90 )
+#
+$(OBJDIR)/src_nudging.o:                     $(SRCDIR)/src_nudging.f90        \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_spread.o      $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/pp_utilities.o         \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_lheating.o           $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_nudging.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_nudging.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_blk.o:               $(SRCDIR)/src_obs_cdfin_blk.f90  \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_parameters.o                                         \
+          $(OBJDIR)/mo_fdbk_tables.o                                          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_cdfin_blk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_blk.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_comhead.o:           $(SRCDIR)/src_obs_cdfin_comhead.f90 \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o      \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o         \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/mo_netcdf_param.o         \
+          $(OBJDIR)/src_obs_cdfin_util.o                                         \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/environment.o
+	echo compiling src_obs_cdfin_comhead.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_comhead.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_gps.o:               $(SRCDIR)/src_obs_cdfin_gps.f90  \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_blk.o    \
+          $(OBJDIR)/src_obs_cdfin_comhead.o  $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_cdfin_gps.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_gps.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_mult.o:              $(SRCDIR)/src_obs_cdfin_mult.f90 \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_blk.o    \
+          $(OBJDIR)/src_obs_cdfin_comhead.o  $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o 
+	echo compiling src_obs_cdfin_mult.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_mult.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_org.o:               $(SRCDIR)/src_obs_cdfin_org.f90  \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_gps.o    \
+          $(OBJDIR)/src_obs_cdfin_mult.o     $(OBJDIR)/src_obs_cdfin_sing.o   \
+          $(OBJDIR)/src_obs_cdfin_util.o     $(OBJDIR)/src_obs_fdbk_in.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_cdfin_org.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_org.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_print.o:             $(SRCDIR)/src_obs_cdfin_print.f90 \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/src_obs_cdfin_util.o                                      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_cdfin_print.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_print.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_sing.o:              $(SRCDIR)/src_obs_cdfin_sing.f90 \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_blk.o    \
+          $(OBJDIR)/src_obs_cdfin_comhead.o  $(OBJDIR)/src_obs_cdfin_mult.o   \
+          $(OBJDIR)/src_obs_cdfin_util.o                                      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o 
+	echo compiling src_obs_cdfin_sing.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_sing.f90 )
+#
+$(OBJDIR)/src_obs_cdfin_util.o:              $(SRCDIR)/src_obs_cdfin_util.f90 \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/environment.o          \
+          $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_cdfin_util.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfin_util.f90 )
+#
+$(OBJDIR)/src_obs_cdfout_feedobs.o:          $(SRCDIR)/src_obs_cdfout_feedobs.f90 \
+          $(OBJDIR)/data_nudge_local.o       $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk.o                $(OBJDIR)/mo_fdbk_cosmo.o        \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/mo_netcdf_param.o      \
+          $(OBJDIR)/mo_t_netcdf_file.o       $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/src_obs_operator_conv.o                                   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o  
+	echo compiling src_obs_cdfout_feedobs.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_cdfout_feedobs.f90 )
+#
+$(OBJDIR)/src_obs_fdbk_in.o:                 $(SRCDIR)/src_obs_fdbk_in.f90    \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_io.o             $(OBJDIR)/mo_fdbk_tables.o       \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/mo_netcdf_param.o      \
+          $(OBJDIR)/mo_random.o              $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/src_stoch_physics.o
+	echo compiling src_obs_fdbk_in.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_fdbk_in.f90 )
+#
+$(OBJDIR)/src_obs_operator_conv.o:           $(SRCDIR)/src_obs_operator_conv.f90 \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/mo_fdbk_tables.o
+	echo compiling src_obs_operator_conv.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_operator_conv.f90 )
+#
+$(OBJDIR)/src_obs_print_vof.o:               $(SRCDIR)/src_obs_print_vof.f90  \
+          $(OBJDIR)/data_nudge_local.o       $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o  
+	echo compiling src_obs_print_vof.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_print_vof.f90 )
+#
+$(OBJDIR)/src_obs_proc_air.o:                $(SRCDIR)/src_obs_proc_air.f90   \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_proc_air.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_proc_air.f90 )
+#
+$(OBJDIR)/src_obs_proc_aof.o:                $(SRCDIR)/src_obs_proc_aof.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_process.o       $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/src_obs_cdfin_util.o     $(OBJDIR)/src_obs_proc_util.o    \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o 
+	echo compiling src_obs_proc_aof.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_proc_aof.f90 )
+#
+$(OBJDIR)/src_obs_proc_cdf.o:                $(SRCDIR)/src_obs_proc_cdf.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_nudge_all.o         $(OBJDIR)/data_obs_cdfin.o       \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_obs_process.o     \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/src_obs_cdfin_blk.o      $(OBJDIR)/src_obs_cdfin_org.o    \
+          $(OBJDIR)/src_obs_cdfin_print.o    $(OBJDIR)/src_obs_cdfin_util.o   \
+          $(OBJDIR)/src_obs_proc_air.o       $(OBJDIR)/src_obs_proc_util.o    \
+          $(OBJDIR)/src_obs_processing.o     $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o
+	echo compiling src_obs_proc_cdf.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_proc_cdf.f90 )
+#
+$(OBJDIR)/src_obs_proc_util.o:               $(SRCDIR)/src_obs_proc_util.f90  \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_process.o       $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/src_tracer.o                                              \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_proc_util.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_proc_util.f90 )
+#
+$(OBJDIR)/src_obs_processing.o:              $(SRCDIR)/src_obs_processing.f90 \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_obs_cdfin.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_process.o       $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/environment.o          \
+          $(OBJDIR)/mo_fdbk_tables.o         $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/src_obs_cdfin_org.o      $(OBJDIR)/src_obs_cdfin_print.o  \
+          $(OBJDIR)/src_obs_cdfin_util.o     $(OBJDIR)/src_obs_proc_air.o     \
+          $(OBJDIR)/src_obs_proc_aof.o       $(OBJDIR)/src_obs_proc_util.o    \
+          $(OBJDIR)/utilities.o 
+	echo compiling src_obs_processing.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_processing.f90 )
+#
+$(OBJDIR)/src_obs_qc_conv.o:                 $(SRCDIR)/src_obs_qc_conv.f90    \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_obs_record.o      \
+          $(OBJDIR)/data_obs_qc_limits.o     $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/mo_fdbk_tables.o
+	echo compiling src_obs_qc_conv.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_qc_conv.f90 )
+#
+$(OBJDIR)/src_obs_rad.o:                     $(SRCDIR)/src_obs_rad.f90        \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_fields.o                                             \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o                                         \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_satellites.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/mo_fdbk.o                $(OBJDIR)/mo_fdbk_tables.o       \
+          $(OBJDIR)/mo_fdbk_cosmo.o          $(OBJDIR)/mo_netcdf_param.o      \
+          $(OBJDIR)/src_obs_cdfin_util.o     $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o
+	echo compiling src_obs_rad.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_obs_rad.f90 )
+#
+$(OBJDIR)/src_obs_use_org.o:                 $(SRCDIR)/src_obs_use_org.f90    \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/src_gather_info.o      \
+          $(OBJDIR)/src_mult_local.o         $(OBJDIR)/src_mult_spread.o      \
+          $(OBJDIR)/src_nudging.o            $(OBJDIR)/src_obs_cdfout_feedobs.o\
+          $(OBJDIR)/src_obs_print_vof.o      $(OBJDIR)/src_obs_proc_cdf.o     \
+          $(OBJDIR)/src_obs_processing.o     $(OBJDIR)/src_sing_local.o       \
+          $(OBJDIR)/src_sing_spread.o        $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/time_utilities.o
+	echo compiling src_obs_use_org.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_obs_use_org.f90 )
+#
+$(OBJDIR)/src_output.o:                      $(SRCDIR)/src_output.f90         \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_satellites.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/data_nudge_all.o                                          \
+          $(OBJDIR)/src_artifdata.o                                           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/io_utilities.o         \
+          $(OBJDIR)/io_metadata.o                                             \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/numeric_utilities.o    \
+          $(OBJDIR)/grid_metrics_utilities.o $(OBJDIR)/netcdf_io.o            \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/pp_utilities.o         \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/vgrid_refatm_utils.o                                      \
+          $(src_output_newdep)
+	echo compiling src_output.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_output.f90 )
+#
+$(OBJDIR)/src_radiation.o:                   $(SRCDIR)/src_radiation.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_radiation.o         $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_soil.o              $(OBJDIR)/data_turbulence.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/vgrid_refatm_utils.o   \
+          $(src_radiation_newdep)
+	echo compiling src_radiation.f90 
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_radiation.f90 )
+#
+$(OBJDIR)/src_relaxation.o:                  $(SRCDIR)/src_relaxation.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_lheat_nudge.o     \
+          $(OBJDIR)/data_modelconfig.o                                        \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/src_lheating.o           $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/vgrid_refatm_utils.o   \
+          $(src_relaxation_newdep)
+	echo compiling src_relaxation.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_relaxation.f90 )
+#
+$(OBJDIR)/src_runge_kutta.o:                 $(SRCDIR)/src_runge_kutta.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_lheat_nudge.o       $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/numeric_utilities_rk.o   $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/numeric_utilities.o      $(OBJDIR)/time_utilities.o       \
+          $(OBJDIR)/hori_diffusion.o         $(OBJDIR)/fast_waves_rk.o        \
+          $(OBJDIR)/fast_waves_sc.o          $(OBJDIR)/src_advection_rk.o     \
+          $(OBJDIR)/src_lheating.o           $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/src_slow_tendencies_rk.o $(OBJDIR)/src_stoch_physics.o    \
+          $(OBJDIR)/vgrid_refatm_utils.o                                      \
+          $(src_runge_kutta_newdep)
+	echo compiling src_runge_kutta.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_runge_kutta.f90 )
+#
+$(OBJDIR)/src_sat_tbs.o:                     $(SRCDIR)/src_sat_tbs.f90        \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_satellites.o                                         \
+          $(OBJDIR)/parallel_utilities.o
+	echo compiling src_sat_tbs.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_sat_tbs.f90 )
+#
+$(OBJDIR)/src_sat_rttov.o:                   $(SRCDIR)/src_sat_rttov.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_satellites.o      \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/src_obs_rad.o
+	echo compiling src_sat_rttov.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_sat_rttov.f90 )
+#
+$(OBJDIR)/src_seaice.o:                      $(SRCDIR)/src_seaice.f90         \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_soil.o            \
+          $(OBJDIR)/data_turbulence.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/environment.o          \
+          $(OBJDIR)/src_tracer.o
+	echo compiling src_seaice.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_seaice.f90 )
+#
+$(OBJDIR)/src_setup.o:                       $(SRCDIR)/src_setup.f90          \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_convection.o      \
+          $(OBJDIR)/gscp_data.o              $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_soil.o            \
+          $(OBJDIR)/data_turbulence.o                                         \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/utilities.o              $(OBJDIR)/vgrid_refatm_utils.o   \
+          $(OBJDIR)/src_sso.o                $(OBJDIR)/src_block_fields.o
+	echo compiling src_setup.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_setup.f90 )
+#
+$(OBJDIR)/src_setup_vartab.o:                $(SRCDIR)/src_setup_vartab.f90   \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/environment.o
+	echo compiling src_setup_vartab.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG4) $(SRCDIR)/src_setup_vartab.f90 )
+#
+$(OBJDIR)/src_sfcana.o:                      $(SRCDIR)/src_sfcana.f90         \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_nudge_all.o         $(OBJDIR)/data_obs_lib_cosmo.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/io_metadata.o          \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o
+	echo compiling src_sfcana.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_sfcana.f90 )
+#
+$(OBJDIR)/src_sing_local.o:                  $(SRCDIR)/src_sing_local.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_gather.o      $(OBJDIR)/data_nudge_local.o     \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_obs_qc_limits.o   \
+          $(OBJDIR)/data_obs_record.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_turbulence.o                                         \
+          $(OBJDIR)/src_obs_operator_conv.o  $(OBJDIR)/src_obs_qc_conv.o      \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/environment.o          \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_sing_local.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_sing_local.f90 )
+#
+$(OBJDIR)/src_sing_spread.o:                 $(SRCDIR)/src_sing_spread.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_nudge_gather.o      $(OBJDIR)/data_nudge_spread.o    \
+          $(OBJDIR)/data_obs_lib_cosmo.o     $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/src_correl_cutoff.o
+	echo compiling src_sing_spread.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_sing_spread.f90 )
+#
+$(OBJDIR)/src_slow_tendencies_rk.o:       $(SRCDIR)/src_slow_tendencies_rk.f90\
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/grid_metrics_utilities.o $(OBJDIR)/environment.o          \
+          $(OBJDIR)/numeric_utilities_rk.o   $(OBJDIR)/numeric_utilities.o    \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/src_stoch_physics.o
+	echo compiling src_slow_tendencies_rk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/src_slow_tendencies_rk.f90 )
+#
+$(OBJDIR)/src_soil.o:                        $(SRCDIR)/src_soil.f90           \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_soil.o                                               \
+          $(OBJDIR)/src_tracer.o                                              \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o
+	echo compiling src_soil.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_soil.f90 )
+#
+$(OBJDIR)/src_soil_multlay.o:                $(SRCDIR)/src_soil_multlay.f90   \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                                                 \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_soil.o            \
+                                             $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/environment.o
+	echo compiling src_soil_multlay.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_soil_multlay.f90 )
+#
+$(OBJDIR)/src_spectral_nudging.o:          $(SRCDIR)/src_spectral_nudging.f90 \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_spectral_nudging.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_spectral_nudging.f90 )
+#
+$(OBJDIR)/src_sso.o:                         $(SRCDIR)/src_sso.f90            \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o
+	echo compiling src_sso.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_sso.f90 )
+#
+$(OBJDIR)/src_stoch_physics.o:               $(SRCDIR)/src_stoch_physics.f90  \
+          $(OBJDIR)/kind_parameters.o        $(OBJDIR)/data_constants.o       \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/mo_random.o                                               \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling src_stoch_physics.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_stoch_physics.f90 )
+#
+$(OBJDIR)/src_tracer.o:                      $(SRCDIR)/src_tracer.f90         \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/data_tracer_metadata.o                                    \
+          $(OBJDIR)/src_tracer_metadata.o
+	echo compiling src_tracer.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_tracer.f90 )
+#
+$(OBJDIR)/src_tracer_metadata.o:             $(SRCDIR)/src_tracer_metadata.f90\
+          $(OBJDIR)/data_tracer_metadata.o   $(OBJDIR)/data_parameters.o
+	echo compiling src_tracer_metadata.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_tracer_metadata.f90 )
+#
+$(OBJDIR)/src_traj.o:                        $(SRCDIR)/src_traj.f90           \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/data_traj.o                                               \
+          $(OBJDIR)/environment.o            $(OBJDIR)/grid_metrics_utilities.o\
+          $(OBJDIR)/io_utilities.o           $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/numeric_utilities.o      $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/pp_utilities.o                                            \
+          $(OBJDIR)/src_tracer.o
+	echo compiling src_traj.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_traj.f90 )
+#
+$(OBJDIR)/src_turbulence.o:                  $(SRCDIR)/src_turbulence.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/data_turbulence.o                                         \
+          $(OBJDIR)/grid_metrics_utilities.o $(OBJDIR)/environment.o          \
+          $(OBJDIR)/src_tracer.o
+	echo compiling src_turbulence.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/src_turbulence.f90 )
+#
+$(OBJDIR)/turbulence_interface.o:            $(SRCDIR)/turbulence_interface.f90\
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_turbulence.o                                         \
+          $(OBJDIR)/src_artifdata.o          $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/src_turbulence.o                                          \
+          $(OBJDIR)/turbulence_tran.o        $(OBJDIR)/turbulence_diff.o      \
+          $(OBJDIR)/environment.o
+	echo compiling turbulence_interface.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/turbulence_interface.f90 )
+#
+$(OBJDIR)/turbulence_tran.o:                 $(SRCDIR)/turbulence_tran.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_flake.o           \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_turbulence.o                                         \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/turbulence_utilities.o \
+          $(SRCDIR)/statement_functs.incf
+	echo compiling turbulence_tran.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/turbulence_tran.f90 )
+#
+$(OBJDIR)/turbulence_diff.o:                 $(SRCDIR)/turbulence_diff.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_flake.o           \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_turbulence.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/turbulence_utilities.o                                    \
+          $(SRCDIR)/statement_functs.incf
+	echo compiling turbulence_diff.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/turbulence_diff.f90 )
+#
+################################################################################
+#
+#  Dependencies of the external subroutines
+#
+################################################################################
+#
+$(OBJDIR)/dfi_initialization.o:              $(SRCDIR)/dfi_initialization.f90 \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                                                 \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_soil.o              $(OBJDIR)/data_satellites.o      \
+          $(OBJDIR)/src_meanvalues.o         $(OBJDIR)/src_gridpoints.o       \
+                                             $(OBJDIR)/environment.o          \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o
+	echo compiling dfi_initialization.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/dfi_initialization.f90 )
+#
+$(OBJDIR)/fast_waves.o:                      $(SRCDIR)/fast_waves.f90         \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/src_tracer.o                                              \
+          $(OBJDIR)/environment.o            $(OBJDIR)/time_utilities.o
+	echo compiling fast_waves.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/fast_waves.f90 )
+#
+$(OBJDIR)/fast_waves_rk.o:                   $(SRCDIR)/fast_waves_rk.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/src_artifdata.o          $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/grid_metrics_utilities.o \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/numeric_utilities_rk.o \
+          $(OBJDIR)/time_utilities.o
+	echo compiling fast_waves_rk.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/fast_waves_rk.f90 )
+#
+$(OBJDIR)/fast_waves_sc.o:                   $(SRCDIR)/fast_waves_sc.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/src_advection_rk.o       $(OBJDIR)/src_artifdata.o        \
+          $(OBJDIR)/environment.o            $(OBJDIR)/grid_metrics_utilities.o \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/vgrid_refatm_utils.o
+	echo compiling fast_waves_sc.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/fast_waves_sc.f90 )
+#
+$(OBJDIR)/hori_diffusion.o:                  $(SRCDIR)/hori_diffusion.f90     \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/environment.o            $(OBJDIR)/numeric_utilities.o    \
+          $(OBJDIR)/time_utilities.o
+	echo compiling hori_diffusion.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG3) $(SRCDIR)/hori_diffusion.f90 )
+#
+$(OBJDIR)/near_surface.o:                    $(SRCDIR)/near_surface.f90       \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_turbulence.o      \
+          $(OBJDIR)/meteo_utilities.o        $(OBJDIR)/environment.o          \
+          $(OBJDIR)/src_tracer.o
+	echo compiling near_surface.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/near_surface.f90 )
+#
+$(OBJDIR)/organize_assimilation.o:        $(SRCDIR)/organize_assimilation.f90 \
+          $(OBJDIR)/data_lheat_nudge.o    $(OBJDIR)/data_modelconfig.o        \
+          $(OBJDIR)/data_nudge_all.o      $(OBJDIR)/data_obs_lib_cosmo.o      \
+          $(OBJDIR)/data_parallel.o       $(OBJDIR)/data_parameters.o         \
+          $(OBJDIR)/data_runcontrol.o     $(OBJDIR)/environment.o             \
+          $(OBJDIR)/parallel_utilities.o  $(OBJDIR)/src_lheat_nudge.o         \
+          $(OBJDIR)/src_obs_use_org.o     $(OBJDIR)/src_sfcana.o
+	echo compiling organize_assimilation.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_assimilation.f90 )
+#
+$(OBJDIR)/organize_data.o:                   $(SRCDIR)/organize_data.f90      \
+                                             $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_nudge_all.o       \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/environment.o            $(OBJDIR)/io_utilities.o         \
+          $(OBJDIR)/netcdf_io.o                                               \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/src_artifdata.o        \
+          $(OBJDIR)/src_input.o              $(OBJDIR)/src_output.o           \
+          $(OBJDIR)/src_setup_vartab.o       $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/src_traj.o                                                \
+          $(OBJDIR)/mpe_io2.o                                                 \
+          $(organize_data_newdep)
+	echo compiling organize_data.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_data.f90 )
+#
+$(OBJDIR)/organize_diagnosis.o:              $(SRCDIR)/organize_diagnosis.f90 \
+          $(OBJDIR)/data_io.o                $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/environment.o          \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/src_diagbudget.o         $(OBJDIR)/src_gridpoints.o       \
+          $(OBJDIR)/src_integrals.o          $(OBJDIR)/src_meanvalues.o
+	echo compiling organize_diagnosis.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_diagnosis.f90 )
+#
+$(OBJDIR)/organize_dynamics.o:               $(SRCDIR)/organize_dynamics.f90  \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+                                             $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_runcontrol.o                                         \
+          $(OBJDIR)/environment.o            $(OBJDIR)/grid_metrics_utilities.o\
+          $(OBJDIR)/meteo_utilities.o                                         \
+          $(OBJDIR)/parallel_utilities.o     $(OBJDIR)/utilities.o            \
+                                             $(OBJDIR)/src_leapfrog.o         \
+          $(OBJDIR)/src_relaxation.o         $(OBJDIR)/src_runge_kutta.o      \
+          $(OBJDIR)/src_spectral_nudging.o   $(OBJDIR)/src_advection_rk.o     \
+          $(OBJDIR)/src_tracer.o
+	echo compiling organize_dynamics.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_dynamics.f90 )
+#
+$(OBJDIR)/organize_eps.o:                    $(SRCDIR)/organize_eps.f90       \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parameters.o      \
+          $(OBJDIR)/data_parallel.o          $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/vgrid_refatm_utils.o     $(OBJDIR)/src_stoch_physics.o    \
+          $(OBJDIR)/parallel_utilities.o
+	echo compiling organize_eps.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_eps.f90 )
+#
+$(OBJDIR)/organize_physics.o:                $(SRCDIR)/organize_physics.f90   \
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_tracer.o                                             \
+          $(OBJDIR)/gscp_interface.o                                          \
+          $(OBJDIR)/src_artifdata.o          $(OBJDIR)/src_conv_tiedtke.o     \
+          $(OBJDIR)/src_conv_shallow.o       $(OBJDIR)/src_flake.o            \
+          $(OBJDIR)/src_gscp.o               $(OBJDIR)/src_radiation.o        \
+          $(OBJDIR)/src_soil_multlay.o       $(OBJDIR)/src_soil.o             \
+          $(OBJDIR)/src_sso.o                $(OBJDIR)/src_seaice.o           \
+          $(OBJDIR)/src_turbulence.o         $(OBJDIR)/src_tracer.o           \
+          $(OBJDIR)/turbulence_interface.o                                    \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o                                          \
+          $(organize_physics_newdep)
+	echo compiling organize_physics.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_physics.f90 )
+#
+$(OBJDIR)/organize_satellites.o:             $(SRCDIR)/organize_satellites.f90\
+          $(OBJDIR)/data_fields.o            $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_satellites.o        $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/src_sat_tbs.o            $(OBJDIR)/src_sat_rttov.o        \
+          $(OBJDIR)/src_obs_rad.o                                             \
+          $(OBJDIR)/src_tracer.o             $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/environment.o
+	echo compiling organize_satellites.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/organize_satellites.f90 )
+#
+$(OBJDIR)/semi_implicit.o:                   $(SRCDIR)/semi_implicit.f90      \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/parallel_utilities.o   \
+          $(OBJDIR)/time_utilities.o
+	echo compiling semi_implicit.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/semi_implicit.f90 )
+#
+$(OBJDIR)/slow_tendencies.o:                 $(SRCDIR)/slow_tendencies.f90    \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_modelconfig.o     \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_runcontrol.o        $(OBJDIR)/data_turbulence.o      \
+          $(OBJDIR)/environment.o            $(OBJDIR)/numeric_utilities_rk.o \
+          $(OBJDIR)/data_tracer.o            $(OBJDIR)/src_tracer.o
+	echo compiling slow_tendencies.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG2) $(SRCDIR)/slow_tendencies.f90 )
+#
+################################################################################
+#
+#  Dependencies of OASIS utility continued 
+#
+################################################################################
+#
+#
+ifeq ($(WITHOAS),true)
+$(OBJDIR)/oas_cos_define.o:                  $(OASDIR)/oas_cos_define.F90     \
+	$(OBJDIR)/data_parameters.o        $(OBJDIR)/oas_cos_vardef.o       \
+	$(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_fields.o          \
+	$(OBJDIR)/data_parallel.o          $(OBJDIR)/parallel_utilities.o
+	echo compiling oas_cos_define.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5)  $(OASDIR)/oas_cos_define.F90 )
+
+$(OBJDIR)/oas_cos_init.o:                    $(OASDIR)/oas_cos_init.F90       \
+	$(OBJDIR)/oas_cos_vardef.o
+	echo compiling oas_cos_init.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5)  $(OASDIR)/oas_cos_init.F90 )
+
+$(OBJDIR)/oas_cos_finalize.o:                $(OASDIR)/oas_cos_finalize.F90   \
+	$(OBJDIR)/oas_cos_vardef.o
+	echo compiling oas_cos_finalize.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5)  $(OASDIR)/oas_cos_finalize.F90 )
+
+$(OBJDIR)/oas_cos_rcv.o:                    $(OASDIR)/oas_cos_rcv.F90         \
+	$(OBJDIR)/data_parameters.o       $(OBJDIR)/oas_cos_vardef.o        \
+	$(OBJDIR)/data_modelconfig.o      $(OBJDIR)/environment.o 
+	echo compiling oas_cos_rcv.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/oas_cos_rcv.F90 )
+
+$(OBJDIR)/oas_cos_snd.o:                    $(OASDIR)/oas_cos_snd.F90         \
+	$(OBJDIR)/data_parameters.o       $(OBJDIR)/oas_cos_vardef.o        \
+	$(OBJDIR)/data_modelconfig.o     
+	echo compiling oas_cos_snd.F90
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/oas_cos_snd.F90 )
+
+$(OBJDIR)/receive_fld_2clm.o:               $(OASDIR)/receive_fld_2clm.F90    \
+	$(OBJDIR)/data_modelconfig.o      $(OBJDIR)/oas_cos_vardef.o        \
+	$(OBJDIR)/data_parameters.o       $(OBJDIR)/data_parallel.o         \
+	$(OBJDIR)/data_runcontrol.o       $(OBJDIR)/data_constants.o        \
+	$(OBJDIR)/data_soil.o             $(OBJDIR)/data_fields.o           \
+        $(OBJDIR)/src_tracer.o
+	echo compiling receive_fld_2clm.F90 
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/receive_fld_2clm.F90 )
+
+$(OBJDIR)/send_fld_2clm.o:                  $(OASDIR)/send_fld_2clm.F90       \
+	$(OBJDIR)/data_modelconfig.o      $(OBJDIR)/oas_cos_vardef.o        \
+	$(OBJDIR)/data_parameters.o       $(OBJDIR)/data_parallel.o         \
+	$(OBJDIR)/data_runcontrol.o       $(OBJDIR)/data_fields.o           \
+        $(OBJDIR)/src_tracer.o
+	echo compiling send_fld_2clm.F90 
+	( cd $(OBJDIR) && $(F90) $(COMFLG5) $(OASDIR)/send_fld_2clm.F90 )
+endif
+#
+################################################################################
+#
+#  Dependencies of the Main Program
+#
+################################################################################
+#
+$(OBJDIR)/lmorg.o:                           $(SRCDIR)/lmorg.f90              \
+          $(OBJDIR)/data_constants.o         $(OBJDIR)/data_fields.o          \
+          $(OBJDIR)/data_flake.o             $(OBJDIR)/data_io.o              \
+          $(OBJDIR)/data_modelconfig.o       $(OBJDIR)/data_parallel.o        \
+          $(OBJDIR)/data_parameters.o        $(OBJDIR)/data_runcontrol.o      \
+          $(OBJDIR)/data_satellites.o                                         \
+          $(OBJDIR)/data_soil.o              $(OBJDIR)/data_tracer.o          \
+          $(OBJDIR)/src_tracer.o                                              \
+          $(OBJDIR)/environment.o            $(OBJDIR)/meteo_utilities.o      \
+          $(OBJDIR)/netcdf_io.o                                               \
+          $(OBJDIR)/src_allocation.o         $(OBJDIR)/src_artifdata.o        \
+          $(OBJDIR)/src_setup.o              $(OBJDIR)/src_traj.o             \
+          $(OBJDIR)/src_block_fields_org.o                                    \
+          $(OBJDIR)/time_utilities.o         $(OBJDIR)/utilities.o            \
+          $(OBJDIR)/mpe_io2.o                $(OBJDIR)/info_lm_f90.o          \
+          $(lmorg_newdep)
+	echo compiling lmorg.f90
+	( cd $(OBJDIR) && $(F90) $(COMFLG1) $(SRCDIR)/lmorg.f90 )
+#

@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/work/slts/slts00/tsmp/TestCases/ideal1200600/clm"
+  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/ideal1200600/clm"
   defaultFDCOS=""
-  defaultFDOAS="/work/slts/slts00/tsmp/TestCases/ideal1200600/oasis3"
+  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/ideal1200600/oasis3"
   defaultFDPFL=""
 
 
@@ -69,7 +69,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -86,5 +86,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
     fi  
   fi  
 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

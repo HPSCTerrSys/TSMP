@@ -135,6 +135,8 @@ pfset Cycle.constant.Repeat             -1
 
 #  HYDROLOGICAL PARAMETERS
 #Schaap and Leiz (1998), Soil Science
+# Later changed to
+# #http://science.sciencemag.org/content/sci/suppl/2016/07/27/353.6297.377.DC1/Maxwell.SM.pdf
 #  SETUP AND VALUES
 #-----------------------------------------------------------------------------
 # Perm
@@ -213,6 +215,7 @@ pfset Geom.Retardation.GeomNames	 ""
 
 #-----------------------------------------------------------------------------
 # Porosity
+# Consistent with CLM Porosity
 #-----------------------------------------------------------------------------
 pfset Geom.Porosity.GeomNames           "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
 
@@ -251,6 +254,7 @@ pfset Geom.ac6.Porosity.Value         0.33
 
 #-----------------------------------------------------------------------------
 # Relative Permeability
+# http://science.sciencemag.org/content/sci/suppl/2016/07/27/353.6297.377.DC1/Maxwell.SM.pdf
 #-----------------------------------------------------------------------------
 pfset Phase.RelPerm.Type               VanGenuchten
 pfset Phase.RelPerm.GeomNames          "sand sloam loam cloam clay ac1 ac2 ac3 ac4 ac5 ac6"
@@ -451,19 +455,20 @@ pfset Solver.MaxIter				 10000
 
 pfset Solver.TerrainFollowingGrid                True
 
-pfset Solver.Nonlinear.MaxIter			 500
+pfset Solver.Nonlinear.MaxIter			 1000
 pfset Solver.Nonlinear.ResidualTol		 1e-5
-pfset Solver.Nonlinear.EtaChoice		 Walker1
+pfset Solver.Nonlinear.EtaChoice		 Walker2
 pfset Solver.Nonlinear.EtaChoice		 EtaConstant
 pfset Solver.Nonlinear.EtaValue			 0.001
-pfset Solver.Nonlinear.UseJacobian		 False
+pfset Solver.Nonlinear.UseJacobian		 True
 pfset Solver.Nonlinear.DerivativeEpsilon	 1e-16
 pfset Solver.Nonlinear.StepTol			 1e-12
 pfset Solver.Nonlinear.Globalization		 LineSearch
-pfset Solver.Linear.KrylovDimension		 70
+pfset Solver.Linear.KrylovDimension		 1000
 pfset Solver.Linear.MaxRestart			 7
 
-pfset Solver.Linear.Preconditioner                       PFMGOctree
+pfset Solver.Linear.Preconditioner               PFMGOctree
+pfset Solver.Linear.Preconditioner.SymmetricMat  Nonsymmetric
 pfset Solver.PrintSubsurf				 False
 pfset Solver.Drop					 1E-20
 pfset Solver.AbsTol					 1E-12

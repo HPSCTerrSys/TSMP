@@ -3,6 +3,7 @@
 lappend auto_path $env(PARFLOW_DIR)/bin
 package require parflow
 namespace import Parflow::*
+puts $env(PARFLOW_DIR)
 #
 #For normal soils, need to fix near saturation CPS
 set VG_points 20000
@@ -559,9 +560,9 @@ pfset Solver.Linear.KrylovDimension		 30
 pfset Solver.Linear.MaxRestart			 8
 pfset Solver.MaxConvergenceFailures              8
 
-pfset Solver.Linear.Preconditioner               PFMGOctree
+#pfset Solver.Linear.Preconditioner               PFMGOctree
 
-#pfset Solver.Linear.Preconditioner                      PFMG
+pfset Solver.Linear.Preconditioner                      PFMG
 #pfset Solver.Linear.Preconditioner			 MGSemi
 #pfset Solver.Linear.Preconditioner.MGSemi.MaxIter	 1
 #pfset Solver.Linear.Preconditioner.MGSemi.MaxLevels	 10

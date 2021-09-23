@@ -5,17 +5,17 @@
  calendar             = "proleptic gregorian" 
  checkpointTimeIntval = "" 
  restartTimeIntval    = "" 
- experimentStartDate  = "2008-05-08T00:00:00Z" 
- experimentStopDate   = "2008-05-08T00:00:02Z" 
+ experimentStartDate  = __starttime_icon_bldsva__
+ experimentStopDate   = __endtime_icon_bldsva__
 /
 &time_nml
- ini_datetime_string = "2013-04-24T00:00:00Z"
- end_datetime_string = "2013-04-24T01:00:00Z"
+ ini_datetime_string = __starttime_icon_bldsva__
+ end_datetime_string = __endtime_icon_bldsva__
  dt_restart          = 5184000
 /
 &master_model_nml
   model_name="atmo"
-  model_namelist_filename="NAMELIST_nrw"
+  model_namelist_filename="NAMELIST_icon"
   model_type=1
   model_min_rank=0
   model_max_rank=65535

@@ -13,8 +13,8 @@
 
 #JOBCHAIN NAMELIST
 SPATH="$HOME/terrsysmp/bldsva/intf_DA/dart/shellscripts/"
-MACHINE="JURECA"        #(which machine are your running on)
-NUMCYCLE=14             #(number of days to run , number of JOBS = 2*$numCycle - 1)
+MACHINE="JUWELS"        #(which machine are your running on)
+NUMCYCLE=120             #(number of days to run , number of JOBS = 2*$numCycle - 1)
 NRST=1                  #, 1 or 2 or 3  (Which component to assimilate, 0: no assimilation, 1 cos, 2: clm, 3: parflow)
 MAP_FN=9                #Mapping matrix (selected ensemble member for perfect model run)
 RUNSFX="perfectModel"

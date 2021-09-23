@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/homea/hbn33/hbn331/database/bonnRadar/clm"
-  defaultFDCOS="/gpfs/homea/hbn33/hbn331/database/bonnRadar/cosmo/2015070400"
-  defaultFDOAS="/gpfs/homea/hbn33/hbn331/database/bonnRadar/oasis3"
-  defaultFDPFL="/gpfs/homea/hbn33/hbn331/database/bonnRadar/parflow"
+  defaultFDCLM="/p/project/chbn33/hbn331/database/bonnRadar/clm"
+  defaultFDCOS="/p/project/chbn33/hbn331/database/bonnRadar/cosmo/2014111500"
+  defaultFDOAS="/p/project/chbn33/hbn331/database/bonnRadar/oasis3"
+  defaultFDPFL="/p/project/chbn33/hbn331/database/bonnRadar/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/bonnRadar/lnd.stdin 
@@ -14,37 +14,37 @@ initSetup(){
   defaultNppn=48
   defaultCLMProcX=2
   defaultCLMProcY=2
-  defaultCOSProcX=20
+  defaultCOSProcX=12
   defaultCOSProcY=12
-  defaultPFLProcX=8
-  defaultPFLProcY=8
+  defaultPFLProcX=10
+  defaultPFLProcY=14
   
-  defaultStartDate="2015-07-04 00"
-  defaultInitDate="2015-07-04 00"
-  defaultRunhours=48
+  defaultStartDate="2008-01-01 00"
+  defaultInitDate="2008-01-01 00"
+  defaultRunhours=8760
 
-  defaultDumpCLM=1
+  defaultDumpCLM=120
   defaultDumpCOS=1
-  defaultDumpPFL=1	
+  defaultDumpPFL=120	
 
-  gx_clm=320
-  gy_clm=320
-  dt_clm=90
-  res="0320x0320"
+  gx_clm=294
+  gy_clm=294
+  dt_clm=3600
+  res="0294x0294"
 
   gx_cos=300
   gy_cos=300
   dt_cos=6
   nbndlines=3
 
-  gx_pfl=320
-  gy_pfl=320
-  dt_pfl=0.025
+  gx_pfl=294
+  gy_pfl=294
+  dt_pfl=1.0
   pflrunname="rurlaf"
-  base_pfl=0.0025
+  base_pfl=0.01
 
   cplfreq1=90
-  cplfreq2=90
+  cplfreq2=3600
 
   if [[ $withPFL == "false" && $withCOS == "true" ]]; then
     if [[ $cplscheme == "false" ]]; then
@@ -68,7 +68,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -133,5 +133,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

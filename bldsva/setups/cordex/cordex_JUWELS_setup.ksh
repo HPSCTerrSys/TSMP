@@ -1,15 +1,16 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/clm"
-  defaultFDCOS="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/cosmo"
-  defaultFDOAS="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/oasis3"
-  defaultFDPFL="/gpfs/work/slts/slts00/tsmp/TestCases/cordex/parflow"
+  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval/input/clm"
+  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval/input/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/cordex/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl 
+  defaultNLPFL=$rootdir/bldsva/setups/cordex/coup_oas.tcl
+  defaultRST=$rootdir/bldsva/setups/restart/tsmp_restart.sh 
 
 
   defaultNppn=48
@@ -17,17 +18,21 @@ initSetup(){
   defaultCLMProcY=8
   defaultCOSProcX=12
   defaultCOSProcY=16
-  defaultPFLProcX=9
-  defaultPFLProcY=8
-
-  defaultStartDate="2016-05-01 12"
-  defaultInitDate="2016-05-01 12"
+  if [[ $processor == "GPU" ]]; then
+    defaultPFLProcX=1
+    defaultPFLProcY=4
+  else
+    defaultPFLProcX=9
+    defaultPFLProcY=8
+  fi
+  defaultStartDate="2021-06-24 12"
+  defaultInitDate="2021-06-24 12"
   
   defaultDumpCLM=1
   defaultDumpCOS=1
   defaultDumpPFL=1
   
-  defaultRunhours=3
+  defaultRunhours=12
 
   defaultDumpCLM=1
   defaultDumpCOS=1
@@ -74,7 +79,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -91,6 +96,15 @@ route "${cblue}>> finalizeSetup${cnormal}"
       done
     fi  
   fi  
+
+  if [[ $withCOS == "true" ]] then
+    comment "  sed gribapi definitions and samples to namelist"
+     p_samp=$gribPath/share/eccodes/samples/
+     p_def=$gribPath/share/eccodes/definitions/
+     sed "s,__definitions__,$p_def," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+     sed "s,__samples__,$p_samp," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+    check
+  fi
 
   if [[ $withPFL == "true" ]] then
         comment "   cd to rundir"
@@ -134,9 +148,14 @@ route "${cblue}>> finalizeSetup${cnormal}"
 	check
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          sed "s,__pfl_solidinput_filename__,/gpfs/homea/slts/slts06/forcings/testdata_EU_std/ParFlow/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+          sed "s,__pfl_solidinput_filename__,$defaultFDPFL/geom_cordex0.11_436x424.pfsol," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
 	check
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+
+  comment "   copy restart script to rundir "
+   c_setup_rst
+  check
+
+route "${cyellow}<< finalizeSetup${cnormal}"
 }
