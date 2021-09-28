@@ -1077,8 +1077,26 @@ route "${cyellow}<<< c_setup_pfl${cnormal}"
 ############################
 
 
+c_substitutions_pdaf(){
+route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
+
+  comment "   mkdir  $dadir/interface"
+    mkdir -p $dadir/interface  >> $log_file 2>> $err_file
+  check
+
+  comment "   cp pdaf interface model to $dadir/interface"
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/model $dadir/interface 
+  check
+
+  comment "   cp pdaf interface framework to $dadir/interface"
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
+  check
+
+route "${cyellow}<<< c_substitutions_pdaf${cnormal}"
+}
+
 c_setup_pdaf(){
-route "${cyellow}>>> c_setup_da${cnormal}"
+route "${cyellow}>>> c_setup_pdaf${cnormal}"
   comment "   copy pdaf namelist to rundir."
     cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
@@ -1107,7 +1125,7 @@ route "${cyellow}>>> c_setup_da${cnormal}"
     sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
-route "${cyellow}<<< c_setup_da${cnormal}"
+route "${cyellow}<<< c_setup_pdaf${cnormal}"
 }
 
 c_setup_rst(){
