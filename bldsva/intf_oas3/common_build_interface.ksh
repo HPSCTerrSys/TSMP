@@ -1099,6 +1099,33 @@ route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
 route "${cyellow}<<< c_substitutions_pdaf${cnormal}"
 }
 
+c_make_pdaf(){
+route "${cyellow}>>> c_make_pdaf${cnormal}"
+
+  comment "   cd to $dadir/src"
+    cd $dadir/src >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf"
+    make >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/interface/model"
+    cd $dadir/interface/model >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf model"
+    make >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/interface/framework"
+    cd $dadir/interface/framework >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf framework"
+    make >> $log_file 2>> $err_file
+  check
+
+route "${cyellow}<<< c_make_pdaf${cnormal}"
+}
+
 c_setup_pdaf(){
 route "${cyellow}>>> c_setup_pdaf${cnormal}"
   comment "   copy pdaf namelist to rundir."
