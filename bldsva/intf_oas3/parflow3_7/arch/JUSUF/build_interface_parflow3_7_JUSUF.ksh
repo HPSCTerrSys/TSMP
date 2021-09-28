@@ -9,7 +9,7 @@ configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
-    export PFV="oas-gpu"
+    # export PFV="oas-gpu"
     export RMM_ROOT=$pfldir/rmm
 #
     C_FLAGS="-fopenmp -Wall -Werror"
@@ -32,22 +32,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-     [[ -d $rootdir/parflow3_7 ]] && echo "clean $rootdir/parflow3_7 \n " && rm -rf $rootdir/parflow3_7
-    comment "    git clone parflow3_7 \n"
-     cd $rootdir
-     git clone https://github.com/hokkanen/parflow.git
-    check
-     mv parflow parflow3_7
+    comment "    add parflow3_7 paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
-     cd $pfldir
     check
-    comment "    git checkout to $PFV \n"
-     git checkout ${PFV} >> $log_file 2>> $err_file
-    check
+
     comment " parflow is configured for $processor "
     check
     if [[ $processor == "GPU" ]]; then
+       cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
         module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
        check
