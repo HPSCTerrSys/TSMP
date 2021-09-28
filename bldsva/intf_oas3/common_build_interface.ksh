@@ -1092,6 +1092,10 @@ route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
     patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
   check
 
+  comment "   mkdir $dadir/lib"
+    mkdir -p $dadir/lib >> $log_file 2>> $err_file
+  check
+
 route "${cyellow}<<< c_substitutions_pdaf${cnormal}"
 }
 
