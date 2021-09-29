@@ -3,6 +3,7 @@
 lappend auto_path $env(PARFLOW_DIR)/bin
 package require parflow
 namespace import Parflow::*
+puts $env(PARFLOW_DIR)
 #
 #For normal soils, need to fix near saturation CPS
 set VG_points 20000

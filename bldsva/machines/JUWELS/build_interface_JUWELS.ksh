@@ -4,7 +4,7 @@
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /gpfs/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JUWELS: loadenvs.$compiler"
   if [[ ${mList[3]} == parflow3_2 ]] ; then
@@ -13,6 +13,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
     . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   fi
   check
+
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
@@ -31,7 +32,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-#
+
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-O2" # Gnu
