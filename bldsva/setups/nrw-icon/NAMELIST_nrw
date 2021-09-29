@@ -4,6 +4,7 @@
  l_test_openmp  = .FALSE.
  l_log_checks   = .FALSE.
  write_div_to_file = .TRUE.
+ num_prefetch_proc = 0
 /
 &grid_nml
  dynamics_grid_filename = icon_nrw_150km_R1247m.nc

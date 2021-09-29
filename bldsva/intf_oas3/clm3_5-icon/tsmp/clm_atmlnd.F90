@@ -78,7 +78,7 @@ type lnd2atm_type
   real(r8), pointer :: fsa(:)          !solar rad absorbed (total) (W/m**2)
   real(r8), pointer :: nee(:)          !net CO2 flux (kg C/m**2/s) [+ to atm]
 
-#ifdef COUP_OAS_ICON
+#if (defined COUP_OAS_ICON)
 !MU (11.04.13) 
   real(r8), pointer :: fpsn(:)         !photosynthesis rate (gross CO2 flux) (umol C/m**2/s)
   real(r8), pointer :: fplres(:)       !plant respiration rate (umol C/m**2/s)

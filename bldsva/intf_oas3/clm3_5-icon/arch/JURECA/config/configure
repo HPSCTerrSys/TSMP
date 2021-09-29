@@ -66,8 +66,7 @@ OPTIONS
      -clm_exedir <dir>  Directory where CLM executable will be created.
      -cc <name>         User specified C compiler (linux only).  Overrides Makefile default.
      -ccsm              Building CLM from within CCSM scripts
-     -oas3_cos          Building with OASIS3 libraries and cosmo rcv and snd subroutines
-     -oas3_icon         Building with OASIS3 libraries and icon rcv and snd subroutines
+     -oas3_icon         Building with OASIS3-MCT libraries and icon rcv and snd subroutines
      -oas3_pfl          Building with OASIS3 libraries and parflow rcv and snd subroutines
      -cps_catch         Building with explicit topographic index input in FMAX
      -cflags <string>   A string of user specified C compiler options.  Appended to
@@ -143,7 +142,6 @@ GetOptions(
     "cc=s"                      => \$opts{'cc'},
     "ccsm"                      => \$opts{'ccsm'},
     "oas3"                      => \$opts{'oas3'},
-    "oas3_cos"                  => \$opts{'oas3_cos'},
     "oas3_icon"                 => \$opts{'oas3_icon'},
     "oas3_pfl"                  => \$opts{'oas3_pfl'},
     "cps_catch=s"               => \$opts{'cps_catch'},
@@ -265,9 +263,6 @@ my $clm_build = $cfg{'ccsm'} ? 0 : 1;
 # Building with oas3 libraries
 $cfg{'oas3'} = (defined $opts{'oas3'}) ? 1 : 0;
 my $oas3 = $cfg{'oas3'} ? 0 : 1;
-
-$cfg{'oas3_cos'} = (defined $opts{'oas3_cos'}) ? 1 : 0;
-my $oas3 = $cfg{'oas3_cos'} ? 0 : 1;
 
 $cfg{'oas3_icon'} = (defined $opts{'oas3_icon'}) ? 1 : 0;
 my $oas3 = $cfg{'oas3_icon'} ? 0 : 1;
@@ -677,13 +672,10 @@ if ($cfg{'ccsm'}) {
 } else {
     $cfg .= " -DOFFLINE";
 }
-if ($cfg{'oas3_cos'}) {
-    $cfg .= " -DCOUP_OAS_COS";
-}
-if ($cfg{'oas3_icon'}) {
+if ($cfg{'oas3_icon'} || $cfg{'oas3_icon'}) {
     $cfg .= " -DCOUP_OAS_ICON";
 }
-if ($cfg{'oas3_pfl'}) {
+if ($cfg{'oas3_pfl'} || $cfg{'oas3_pfl'}) {
     $cfg .= " -DCOUP_OAS_PFL";
 }
 if ($cfg{'cps_catch'} eq 'on') {
@@ -1247,9 +1239,6 @@ sub write_filepath
     print $fh "$srcdir/riverroute\n";
 
 # OASIS coupler
-    if ($cfg{'oas3_cos'}) {
-    print $fh "$srcdir/oas3\n";
-    }
     if ($cfg{'oas3_icon'}) {
     print $fh "$srcdir/oas3\n";
     }

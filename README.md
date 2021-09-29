@@ -16,11 +16,16 @@
     6. [Step 6: Setup and configuration of the respective usage and test case](#ref_step6)
     7. [Step 7: Run the test case](#ref_step7)
     8. [Step 8: Simulation results](#ref_step8)
-3. [Heterogeneous Job using TSMP](#hetero_job)
-4. [NRW Test case](#nrw_test)
-5. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
-6. [To come](#To-come)
-7. [Documentation](#ref_doc)
+3. [For ICON Users (HPSC-TerrSys users)](#foricon)	
+4. [Heterogeneous Job using TSMP](#hetero_job)
+5. [NRW Test case](#nrw_test)
+6. [IdealRTD (Idealized) Test case](#idealrtd_test)
+7. [Patching the orginal source code](#patching)
+8. [Long time climate simulation](#climate_sim)
+9. [Restart functionality for EURO-CORDEX test case](#restart)
+10. [Automatic Porting of TSMP on x86 machines](#TSMP_x86)
+11. [To come](#To-come)
+12. [Documentation](#ref_doc)
 
 # Introduction <a name="introduction"></a>
 
@@ -95,7 +100,7 @@ For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA
 * curl
 * make
 * python
-* OpenMPI 
+* OpenMPI
 * netCDF
 * HDF5
 * GRIBAPI
@@ -106,6 +111,10 @@ For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA
 
 A short guide on how the TSMP built system can be expanded to account for your local situation (software modules, compiler, MPI wrapper) will be provided shortly. The best starting point is to use the generic GNU compiler built. A hint on how to proceed is given in [step 5 below](#ref_step5).
 The following libraries are required to run the EURO-CORDEX experiment:
+
+#### <a name="ref_step11"></a> Porting TSMP on GENERIC_X86 Linux platform
+
+The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries as mentioned in [step 1 above](#ref_step1) automatically in TSMP root directory. Please run the script "lib_install.sh" located in `bldsva` directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
 
 ### Step 2: Get the TSMP interface <a name="ref_step2"></a>
 
@@ -173,6 +182,10 @@ Alternatively:
 ##### ParFlow v3.7
 As indicated in [TSMP version history](#ver_his), this version is automatically cloned  and configured via TSMP interface. It is available from https://github.com/hokkanen/parflow.git under branch oas-gpu. 
 
+For TSMP to update automatically, you should rename the ParFlow directory as follows:
+```shell
+   mv parflow3_2 parflow3_7
+```
 
 ##### OASIS3-MCT v2.0
 
@@ -224,8 +237,17 @@ A note to external users:
 The path to the modules, compiler and MPI wrapper can be set in:  
 `$TSMP_DIR/bldsva/machines/<your_machine_name>/build_interface_<your_machine_name>.ksh`
 
-An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JURECA.ksh` \
+An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JUWELS.ksh` \
 and an example to load the environment modules or the needed software compatible with Intel compiler version 2020 is in `$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel`.
+
+#### Build TSMP on GENERIC_X86 Linux platform
+
+After successful installation of all the necessary libraries as mentioned in [step 1 above](#ref_step1), TSMP can be built using: 
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m GENERIC_X86 -O Gnu
+```
 
 ### Step 6: Setup and configuration of the respective usage and test case <a name="ref_step6"></a>
 
@@ -247,6 +269,15 @@ For configuring TSMP for a heterogeneous job:
 In this heterogeneous job ParFlow 3.7 will run on GPU while Cosmo and CLM on CPU.
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
+
+#### Setup and configuration of the test case on GENERIC_X86 Linux platform
+
+Now that the all the necessary libraries are installed as mentioned in [step 1 above](#ref_step1) and TSMP is also build ([step 5 above](#ref_step4)), we can configure TSMP on GENERIC_X86 Linux for the the [EURO-CORDEX test case experiment](#ref_exp) as follows: 
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m GENERIC_X86 -I _cordex -O Gnu
+```
 
 ### Step 7: Run the test case <a name="ref_step7"></a>
 
@@ -287,6 +318,128 @@ After a successful model run you will have model outputs form ParFlow, CLM and C
    ls -l clmoas*.nc
    ls -l cosmo_out/*.nc
 ```
+# For ICON Users (HPSC-TerrSys users) <a name="foricon"></a>
+
+### Step 0: JUDAC Storage Managment
+
+Please inform yourself about the storage managment. If you are new to the Jülich supercomputers, it is recomannded to visit "Introduction to the usage and programming of supercomputer resources in Jülich" course. The next date of this ocurse can be found here: https://www.fz-juelich.de/ias/jsc/EN/Expertise/Workshops/Courses/courses_node.html . Please, make yourself familiar with the different partitions of the JUDAC system as well:  
+> https://www.fz-juelich.de/ias/jsc/EN/Expertise/Datamanagement/JUDAC/FAQ/judac-FAQ_node.html
+
+It is recomannded to store no data at $HOME, your model data at $PROJECT and your experiment data at $SCRATCH.
+
+### Step 1: Dependencies
+See [step 1 above](#ref_step1)
+
+### Step 2: Get the TSMP interface
+
+Go to your preferred root directory (e.g., your $PROJECT directory) for the TSMP installation and get the `TSMP_iconcoup` branch from `gitlab` and set the environment variable `TSMP_DIR` to TSMP installation directory; for bash:
+
+```shell
+   git clone https://icg4geo.icg.kfa-juelich.de/spoll/tsmp.git
+   cd tsmp
+   export TSMP_DIR=$(pwd)
+   git checkout TSMP_iconcoup
+```
+
+### Step 3: Get the component models for this experiment
+
+Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of "fresh", also "legacy" repositories with specific code modifications may be retrieved). Choose the model components needed from your experiment, in case of any coupled model one need the external coupler "oasis3-mct".
+
+```shell
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
+```
+Rename the component model directories:
+
+```shell
+   mv icon2.1_legacy icon2-1
+   mv clm3.5_fresh clm3_5
+   mv parflow3.2_fresh parflow3_2
+```
+
+### Step 4: Build TSMP, interface and component models
+
+Before building TerrSysMP, first check what build options are there
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -a
+```
+
+Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the ICON NWP and regional climate model (icon); this is a built on the JUWELS HPC system of Jülich Supercomputing Centre using Intel compilers and ParaStation MPI:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 4.1.0MCT -c clm-icon-pfl -m JUWELS -O Intel
+```
+
+For ICON standalone version use:
+```shell
+   cd $TSMP_DIR/bldsva
+   ./build_tsmp.ksh -v 4.1.0MCT -c icon -m JUWELS -O Intel
+```
+
+### Step 5: Setup and configuration of the respective usage and test case
+
+It is recommended to store your model data at scratch (please notice that data will be automatically deleted if there are not touched for a while). Please, edit *YOUR_PROJECT* and *YOUR_DIRECTORY* correspondingly.
+
+```shell
+   export EXP=/p/scratch/YOUR_PROJECT/YOUR_DIRECTORY
+```
+To configure TSMP for the Germany test case for ICON stand-alone on JUWELS machine:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 4.1.0MCT -V germany -m JUWELS -c icon -r $EXP/JUWELS_icon_4.1.0MCT_germany -I _experiment -O Intel
+```
+
+This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
+
+### Step 6: Run the test case
+
+Change into the run directory:
+
+```shell
+   cd $EXP/JUWELS_icon_4.1.0MCT_germany_experiment
+```
+
+Edit the scheduler settings (`#SBATCH` lines) accordingly to *YOUR_PROJECT* and run time of your experiment. Please do not change *nodes*, *ntasks* and *ntasks-per-node*:
+
+```shell
+   vi tsmp_slm_run.bsh
+```
+
+Proof if all necessary files are in your experiment directory:
+
+```shell
+   ls -lrth
+```
+
+Submit the job:
+
+```shell
+   sbatch tsmp_slm_run.bsh
+```
+
+Monitor your ICON simulation by
+
+```shell
+    tail -f mpiMPMD-err.*
+```
+
+### Step 7: Create own case (optional)
+
+> This step is for advanced users.
+
+In case you want create your own setup you can create your own direcory (*YOUR_CASE*) in the `TSMP_DIR`/setups and add the name of your case in the `setupsAvail` of your maschine (e.g. JUWELS) in the `supported_versions.ksh` file.
+
+```shell
+    mkdir $TSMP_DIR/bldsva/setups/YOUR_CASE
+    vi $TSMP_DIR/bldsva/supported_versions.ksh
+```
+Each setup needs a setup ksh-script with the naming convention *'YOUR_CASE'_'YOUR_MACHINE'_setup.ksh* (e.g. `germany_JUWELS_setup.ksh` for the germany test case on the JUWELS machine). Please, adjust the setup carefully, you can use the setups scripts from various test cases as blueprint. You can add the namelist of your component models in the direcotry of your case (e.g. icon_master.namelist and NAMELIST_icon for ICON).  
 
 # Heterogeneous Job using TSMP <a name="hetero_job"></a>
 
@@ -319,10 +472,95 @@ To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change
  ./setup_tsmp.ksh -v 3.1.0MCT -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
 ```
 
+# IdealRTD (Idealized) Test case <a name="idealrtd_test"></a>
+We will use a horizontally homogeneous domain (Figure 1) to simulate the diurnal
+cycle of the atmospheric boundary layer with radiative forcing. A periodic boundary
+condition will be used in X and Y direction for COSMO, while the X- and Y-slopes are
+set to zero for ParFlow, so there is no lateral flow. The domain setup is summarized in the Table below.
+
+
+|        |  NX    |  NY  | NZ | dt(s) |
+| -----  | :----- | ----:|----:|----:|
+| cosmo  | 60    | 30  | 50 | 18 |
+| CLM    | 54    | 24  | 10 | 18 |
+| ParFlow| 54    | 24  | 30 | 18 |
+
+NX_clm = NX_pfl =NX_cos -2 *nboundlines
+
+The initial soil moisture content for the different soil textures (e.g., sandy loam, clay
+loam) is varied based on the ($\psi - \theta_vol$) van Genuchten relationship, to
+simulate the physical processes from water stressed environment to an atmospheric
+controlled environment. The groundwater table is specified at a depth of 5 m below
+the surface, with a spatially homogeneous and constant unsaturated zone above. The atmosphere is initialized with a semi-idealized sounding data obtained from
+Stuttgart (observations) at 00Z 07 Aug 2015. Ground and vegetation temperature are
+initialized horizontally homogeneous with a value of 287 K. The simulation will be
+integrated for 24 hours starting at midnight with an hourly output frequency.
+
+## Preprocessing of Input Data <a name="Preprocessing_idealrtd"></a>
+Here the user can generate the case-specific input data for ParFlow
+and CLM. Note that the COSMO model uses the same setup for all the ensemble
+members, that is, no need for ad-hoc editing. 
+Please download the Input data and preproccesing sript using:
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./download_data_for_test_cases.ksh idealrtd
+```
+
+then 
+
+```shell
+   cd $TSMP_DIR/tsmp_idealrtd/pre-processing
+   source loadenvs.Gnu_2020
+   cd ../external
+   chmod 755 compile
+   ./compile
+   cd ../pre-processing-tools
+   ncl sva_surfdata_clm.ncl
+   ncl sva_iniPress_pfl.ncl
+   mv *.nc  ../input/clm
+   mv *.pfb ../input/parflow
+```
+
+Note that you have the possibilty to generate different Input data for CLM and parFlow by in the scripts `sva_iniPress_pfl.ncl` and `sva_surfdata_clm.ncl`.
+To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
+
+```shell
+   cd $TSMP_DIR/bldsva
+   ./setup_tsmp.ksh -v 3.1.0MCT -V idealRTD -m JUWELS -O Intel
+ ```
+
+
+# Patching the orginal source code  <a name="patching "></a>
+
+In order to prepare the original Cosmo5_1 source code for coupling, the Cosmo source code is patched using the diff files which are located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/pfile`.
+The diff files are generated using the script `fpatch.sh` which is located in the same directory. Note that the patching is done only for cosmo5_1 source code.
+If the user aims to modify the coupling source files, should modify the files located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/tsmp` and run again the script `fpatch.sh` in order to generate the the new diff files accordingly.
+The necessary changes for making the ParFlow3.7 ready for coupling are already included in the official ParFlow3.7 release.
+The changed source files for CLM3.5 are located in  `$TSMP_DIR/bldsva/intf_oas3/clm3_5/tsmp` and will be copied by TSMP scripts to the user's source code directory of CLM3.5 '(`bld/usr.src`)
+
+# Long time climate simulation  <a name="climate_sim"></a>
+
+## Implementation of non-const CO2 in TSMP <a name="CO2_Implementation"></a>
+
+CO2 is different for different RCP scenarios, and it can impact largely the results of TSMP simulations. In order to change CO2 value in CLM according to the RCP scenario you need to change the value of the variable `co2_s` which is sent from COSMO to CLM and is hard-coded in `$TSMP_DIR/ bldsva/intf_oas3/cosmo5_1/oas3/send_fld_2clm.F90`.
+Therefor the variable `co2_s` should be changed in order to vary CO2 in CLM depending on RCP scenarios. This means that if you want to do simulation for different RCP scenarios, you need to recompile the TSMP for each of them. Note that in order to change the CO2 value in COSMO according to RCP scenarios you need to change the COSMO namelist parameter `ico2_rad` in `INPUT_PHY`. For more
+
+# Restart functionality for EURO-CORDEX test case  <a name="restart"></a>
+
+TSMP generates automatically a script which does the simulation in two cycles.If interested please submit the job using the following:
+
+```shell
+   sbatch tsmp_restart.sh
+```
+This script can be a hint for you when you want to do long time climate simulation. For more info please contact "Niklas Wagner; n.wagner@fz-juelich.de"
+
+
 # Automatic Porting of TSMP on x86 machines  <a name="TSMP_x86 "></a>
 
-For automatic porting of TSMP on x86  machines please use the branch `TSMP_x86_64`. \
 The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script "lib_install.sh" located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
+
+The instruction on how to build and how to configure TSMP for the cordex test case ([EURO-CORDEX test case experiment](#ref_exp)) are given in [step 5 ](#ref_step4) and [step 6 ](#ref_step5), respectively.
 
 # To come <a name="To-come"></a>
 
