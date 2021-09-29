@@ -302,22 +302,24 @@ route "${cyellow}>>> c_substitutions_cos${cnormal}"
 
       rm -rf $cosdir/src/*1.f90
       rm -rf $cosdir/src/*1.incf
+
+    # copy the changed file to $rootdir/bldsva/cosmo5_1/tsmp
+    comment "    copy the cosmo changed file for coupling to $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp "
+      cp $cosdir/src/src_slow_tendencies_rk.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_runge_kutta.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_gridpoints.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_allocation.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/organize_physics.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/environment.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_twomom_sb.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_setup_vartab.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_artifdata.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/lmorg.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/data_fields.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+      cp $cosdir/src/src_radiation.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
+    check
   fi
-  # copy the changed file to $rootdir/bldsva/cosmo5_1/tsmp
-  comment "    copy the cosmo changed file for coupling to $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp "
-   cp $cosdir/src/src_slow_tendencies_rk.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_runge_kutta.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_gridpoints.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_allocation.f90  $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/organize_physics.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/environment.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_twomom_sb.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_setup_vartab.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_artifdata.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/lmorg.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/data_fields.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-   cp $cosdir/src/src_radiation.f90 $rootdir/bldsva/intf_oas3/cosmo5_1/tsmp
-  check
+
   #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
@@ -485,7 +487,7 @@ route "${cyellow}>>> c_substitutions_oas${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
      comment "    cp PDAF fix to ${oasdir}/lib/psmile/src"
-       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/mod_oasis*"  ${oasdir}/lib/psmile/src
+       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[0]}/mod_oasis*"  ${oasdir}/lib/psmile/src
      check
   fi
 route "${cyellow}<<< c_substitutions_oas${cnormal}"
@@ -718,7 +720,7 @@ route "${cyellow}>>> c_substitutions_clm${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
   comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/clmtype.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtype.F90 $clmdir/bld/usr.src
   check
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
