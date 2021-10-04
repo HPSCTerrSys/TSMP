@@ -433,6 +433,7 @@ check
 
 if [[ $withPDAF == "true" ]] ; then
   cp $rundir/INPUT_IO $rundir/INPUT_IO_$(printf "%05d" $(($instance-$startInst)))     
+  cp $rundir/INPUT_ORG $rundir/INPUT_ORG_$(printf "%05d" $(($instance-$startInst)))
 fi
 
 route "${cyellow}<<< c_setup_cos${cnormal}"
