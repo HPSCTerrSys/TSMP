@@ -134,21 +134,22 @@ Go to your preferred root directory (e.g., on a scratch file system) for the TSM
 
 #### HPSC-TerrSys users <a name="HPSC-TerrSys-users"></a>
 
-Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of "fresh", also "legacy" repositories with specific code modifications may be retrieved):
+Authenticate with your GitLab web GUI user name and password and clone
+the repositories (instead of "fresh", also "legacy" repositories with
+specific code modifications may be retrieved):
 
 ```shell
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git parflow3_2
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
-It should be noted that ParFlow 3.7 is cloned automatically via TSMP v1.3.3 from the GitHub repository https://github.com/hokkanen/parflow.git. \
-Rename the component model directories:
+
+For using ParFlow 3.7, clone from https://github.com/parflow/parflow
+using the following command
 
 ```shell
-   mv cosmo5.01_fresh cosmo5_1
-   mv clm3.5_fresh clm3_5
-   mv parflow3.2_fresh parflow3_2
+   git clone -b v3.7.0 https://github.com/parflow/parflow.git parflow3_7
 ```
 
 #### External users <a name="External-users"></a>
