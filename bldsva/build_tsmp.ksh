@@ -763,15 +763,15 @@ getGitInfo(){
     git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
-#  if [[ $withPFL == "true" ]] ; then
-#    echo "Git (${mList[3]}):" >> $log_file
-#    comment "  Log Git information (${mList[3]})"
-#      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
-#    check
-#    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-#    git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
-#    echo "" >> $log_file
-#  fi
+ if [[ $withPFL == "true" ]] ; then
+   echo "Git (${mList[3]}):" >> $log_file
+   comment "  Log Git information (${mList[3]})"
+     git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
+   check
+   git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
+   git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
+   echo "" >> $log_file
+ fi
   if [[ $withPDAF == "true" ]] ; then
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
