@@ -776,7 +776,7 @@ getGitInfo(){
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
       echo ${rootdir}/${mList[4]} >> $log_file
-      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      cat ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
     check
     echo "" >> $log_file
   fi
