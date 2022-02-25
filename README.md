@@ -140,16 +140,9 @@ specific code modifications may be retrieved):
 
 ```shell
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git parflow3_2
+   git clone https://github.com/parflow/parflow.git                                        parflow3_7
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
-```
-
-For using ParFlow 3.7, clone from https://github.com/parflow/parflow
-using the following command
-
-```shell
-   git clone -b v3.7.0 https://github.com/parflow/parflow.git parflow3_7
 ```
 
 #### External users <a name="External-users"></a>
