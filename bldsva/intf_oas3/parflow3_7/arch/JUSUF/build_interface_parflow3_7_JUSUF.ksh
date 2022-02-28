@@ -32,7 +32,7 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-    comment "    add parflow3_8 paths $PARFLOW_INS, $PARFLOW_BLD "
+    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
     check
