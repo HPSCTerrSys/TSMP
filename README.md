@@ -140,7 +140,7 @@ specific code modifications may be retrieved):
 
 ```shell
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
-   git clone https://github.com/parflow/parflow.git                                        parflow3_9
+   git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow3_9
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
