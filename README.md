@@ -175,9 +175,7 @@ Alternatively:
    mv parflow parflow3_2
 ```
 ##### ParFlow v3.9
-ParFlow 3.9 is available from https://github.com/hokkanen/parflow.git under branch `oas-gpu`.  (possibly outdated)
-
-Now it is available with
+ParFlow 3.9  is available from
 ```shell
 git clone -b v3.9.0 https://github.com/parflow/parflow.git
 ```
