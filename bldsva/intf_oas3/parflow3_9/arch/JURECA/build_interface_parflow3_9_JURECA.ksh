@@ -27,7 +27,6 @@ route "${cblue}>> configure_pfl${cnormal}"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
     flagsSim+=" -DNETCDF_DIR=$ncdfPath"
-    flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
     flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
@@ -37,28 +36,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-    if [ -d ${rootdir}/${mList[3]} ] ; then
-     comment "   remove ${mList[3]}"
-     rm -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
-     check
-    fi
-    comment "    git clone parflow3_7 "
-     cd $rootdir
-#     git clone https://github.com/hokkanen/parflow.git >> $log_file 2>> $err_file
-     git clone https://github.com/parflow/parflow.git >> $log_file 2>> $err_file
-   check
-     mv parflow parflow3_7
-     cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
+    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
-     cd $pfldir
     check
-#    comment "    git checkout to $PFV \n"
-#     git checkout ${PFV} >> $log_file 2>> $err_file
-#    check
+
     comment " parflow is configured for $processor "
     check
     if [[ $processor == "GPU" ]]; then
+       cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
         module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
        check

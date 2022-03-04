@@ -9,16 +9,12 @@ configure_pfl(){
 route "${cblue}>> configure_pfl${cnormal}"
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
-#    export PFV="oas-gpu"
+    # export PFV="oas-gpu"
     export RMM_ROOT=$pfldir/rmm
 #
     C_FLAGS="-fopenmp -Wall -Werror"
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
-    if [[ $withOAS == "true" ]]; then
-        flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
-    else
-        flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
-    fi
+    flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
     flagsSim+=" -DHYPRE_ROOT=$EBROOTHYPRE"
@@ -36,28 +32,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-    if [ -d ${rootdir}/${mList[3]} ] ; then
-     comment "   remove ${mList[3]}"
-     rm -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
-     check
-    fi
-    comment "    git clone parflow3_7 "
-     cd $rootdir
-#     git clone https://github.com/hokkanen/parflow.git >> $log_file 2>> $err_file
-     git clone https://github.com/parflow/parflow.git >> $log_file 2>> $err_file
-    check
-     mv parflow parflow3_7
-     cp -rf ${rootdir}/${mList[3]} $pfldir >> $log_file 2>> $err_file
+    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
-     cd $pfldir
     check
-#    comment "    git checkout to $PFV \n"
-#     git checkout ${PFV} >> $log_file 2>> $err_file
-#    check
+
     comment " parflow is configured for $processor "
     check
     if [[ $processor == "GPU" ]]; then
+       cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
         module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
        check
@@ -67,22 +50,14 @@ route "${cblue}>> configure_pfl${cnormal}"
         flagsSim+=" -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared"
        check
        comment "    git clone  RAPIDS Memory Manager "
-       if [ -d $RMM_ROOT ] ; then 
-        comment "  remove $RMM_ROOT "
-        rm -rf $RMM_ROOT >> $log_file 2>> $err_file
-        check
-       fi
-       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+        [[ -d $RMM_ROOT ]] && echo "clean $RMM_ROOT \n" && rm -rf $RMM_ROOT
+        git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
        check
+       comment "    install RMM: RAPIDS Memory Manager "
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
-       comment "    configure RMM: RAPIDS Memory Manager "
-        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
-       check
-       comment "    make RMM "
-        make -j  >> $log_file 2>> $err_file
-       check
-       comment "    make install RMM "
+        cmake .. -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+        make -j6  >> $log_file 2>> $err_file
         make install >> $log_file 2>> $err_file
        check
     fi
