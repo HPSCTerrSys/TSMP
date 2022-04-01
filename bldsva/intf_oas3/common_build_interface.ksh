@@ -803,7 +803,7 @@ c_configure_pfl(){
 
 route "${cyellow}>>> c_configure_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_7 ]] ; then
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
 
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
@@ -886,7 +886,7 @@ route "${cyellow}<<< c_configure_pfl${cnormal}"
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_7 ]] ; then
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
