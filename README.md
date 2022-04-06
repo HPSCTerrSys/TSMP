@@ -81,12 +81,13 @@ To get a man-page for the usage of this scripts, do:
    ./setup_tsmp.ksh --man
 ```
 ## TSMP version history <a name="ver_his"></a> 
-The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.7 for version v1.3.3. TSMP supports ParFlow 3.7 from version v1.3.3 onward.
-Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf-stable`. Note that **ParFlow 3.7 is cloned automatically via TSMP from the official ParFlow GitHub repository** https://github.com/parflow/parflow.git while ParFlow 3.2 needs to be provided by user.
+The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.9 for version v1.3.3. TSMP supports ParFlow 3.9 from version v1.3.3 onward.
+
+Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf`.
 
 # The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP <a name="ref_exp"></a>
 
-This test case uses the current TSMP release version v1.2.1 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2 (ParFlow 3.7 from TSMP version v1.3.3 onward).  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
+This test case uses the current TSMP release version v1.2.1 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2 (ParFlow 3.9 from TSMP version v1.3.3 onward).  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies <a name="ref_step1"></a>
 For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA, all necessary software modules are loaded automatically through a "loadenv" file located in directory JUWELS or JURECA in machines directory. The users of other HPC systems should provide an appropriate "loadenv" files for loading the modules and locate it in `machines/<machine_name>`, similar to JURECA and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a "loadenv" file in the directory `machines/GENERIC_X86`. For more information on using this script please see the README in branch **TSMP_x86_64**.
@@ -134,21 +135,15 @@ Go to your preferred root directory (e.g., on a scratch file system) for the TSM
 
 #### HPSC-TerrSys users <a name="HPSC-TerrSys-users"></a>
 
-Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of "fresh", also "legacy" repositories with specific code modifications may be retrieved):
+Authenticate with your GitLab web GUI user name and password and clone
+the repositories (instead of "fresh", also "legacy" repositories with
+specific code modifications may be retrieved):
 
 ```shell
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
-```
-It should be noted that ParFlow 3.7 is cloned automatically via TSMP v1.3.3 from the GitHub repository https://github.com/hokkanen/parflow.git. \
-Rename the component model directories:
-
-```shell
-   mv cosmo5.01_fresh cosmo5_1
-   mv clm3.5_fresh clm3_5
-   mv parflow3.2_fresh parflow3_2
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
+   git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow3_9
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
 
 #### External users <a name="External-users"></a>
@@ -179,12 +174,10 @@ Alternatively:
    git clone --branch v3.2.0 https://github.com/parflow/parflow.git
    mv parflow parflow3_2
 ```
-##### ParFlow v3.7
-As indicated in [TSMP version history](#ver_his), this version is automatically cloned  and configured via TSMP interface. It is available from https://github.com/hokkanen/parflow.git under branch oas-gpu. 
-
-For TSMP to update automatically, you should rename the ParFlow directory as follows:
+##### ParFlow v3.9
+ParFlow 3.9  is available from
 ```shell
-   mv parflow3_2 parflow3_7
+git clone -b v3.9.0 https://github.com/parflow/parflow.git
 ```
 
 ##### OASIS3-MCT v2.0
@@ -224,7 +217,7 @@ Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (cl
    cd $TSMP_DIR/bldsva
    ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel
 ```
-For building ParFlow 3.7 on GPU:
+For building ParFlow 3.9 on GPU:
 
 ```shell
    cd $TSMP_DIR/bldsva
@@ -266,7 +259,7 @@ For configuring TSMP for a heterogeneous job:
    cd $TSMP_DIR/bldsva
    ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
 ```
-In this heterogeneous job ParFlow 3.7 will run on GPU while Cosmo and CLM on CPU.
+In this heterogeneous job ParFlow 3.9 will run on GPU while Cosmo and CLM on CPU.
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
 
@@ -346,17 +339,10 @@ Go to your preferred root directory (e.g., your $PROJECT directory) for the TSMP
 Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of "fresh", also "legacy" repositories with specific code modifications may be retrieved). Choose the model components needed from your experiment, in case of any coupled model one need the external coupler "oasis3-mct".
 
 ```shell
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git
-   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git
-```
-Rename the component model directories:
-
-```shell
-   mv icon2.1_legacy icon2-1
-   mv clm3.5_fresh clm3_5
-   mv parflow3.2_fresh parflow3_2
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git   icon2-1
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git parflow3_2
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
+   git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
 
 ### Step 4: Build TSMP, interface and component models
@@ -443,7 +429,7 @@ Each setup needs a setup ksh-script with the naming convention *'YOUR_CASE'_'YOU
 
 # Heterogeneous Job using TSMP <a name="hetero_job"></a>
 
-TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.7  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
+TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.9  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
 After locating the model components in the TSMP root as mentioned in [Step 3](#ref_step3), the following command should be executed in order to build TSMP and to create the run directory for the [EURO-CORDEX test case experiment](#ref_exp) on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 Building TSMP for HPSC-TerrSys users:
@@ -459,7 +445,7 @@ Creating run directory for HPSC-TerrSys users:
    ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
 ```
 
-Not that heterogeneous job will be possible only for TSMP with ParFlow3.7 which is available from version v1.3.3.
+Not that heterogeneous job will be possible only for TSMP with ParFlow3.9 which is available from version v1.3.3.
 
 # NRW Test case <a name="nrw_test"></a>
 NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
@@ -536,7 +522,7 @@ To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just c
 In order to prepare the original Cosmo5_1 source code for coupling, the Cosmo source code is patched using the diff files which are located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/pfile`.
 The diff files are generated using the script `fpatch.sh` which is located in the same directory. Note that the patching is done only for cosmo5_1 source code.
 If the user aims to modify the coupling source files, should modify the files located in `$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/tsmp` and run again the script `fpatch.sh` in order to generate the the new diff files accordingly.
-The necessary changes for making the ParFlow3.7 ready for coupling are already included in the official ParFlow3.7 release.
+The necessary changes for making the ParFlow3.9 ready for coupling are already included in the official ParFlow3.9 release.
 The changed source files for CLM3.5 are located in  `$TSMP_DIR/bldsva/intf_oas3/clm3_5/tsmp` and will be copied by TSMP scripts to the user's source code directory of CLM3.5 '(`bld/usr.src`)
 
 # Long time climate simulation  <a name="climate_sim"></a>

@@ -763,20 +763,26 @@ getGitInfo(){
     git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
-#  if [[ $withPFL == "true" ]] ; then
-#    echo "Git (${mList[3]}):" >> $log_file
-#    comment "  Log Git information (${mList[3]})"
-#      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
-#    check
-#    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-#    git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
-#    echo "" >> $log_file
-#  fi
+ if [[ $withPFL == "true" ]] ; then
+   echo "Git (${mList[3]}):" >> $log_file
+   comment "  Log Git information (${mList[3]})"
+     git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
+   check
+   git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
+   git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
+   echo "" >> $log_file
+ fi
   if [[ $withPDAF == "true" ]] ; then
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
       echo ${rootdir}/${mList[4]} >> $log_file
-      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version >= v2.0
+      if [[ -f ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 ]] ; then
+	cat ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version v1.*
+      else
+	cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      fi
     check
     echo "" >> $log_file
   fi
