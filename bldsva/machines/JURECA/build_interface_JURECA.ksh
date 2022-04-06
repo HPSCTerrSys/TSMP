@@ -34,7 +34,13 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+  elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+  else
+      defaultOptC="-O2" # Default
+  fi
 
   profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
@@ -76,14 +82,14 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
 #SBATCH -N 2 --ntasks-per-node=128 -p dc-cpu-devel
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=128 -p dc-cpu-devel
-#SBATCH packjob
+#SBATCH hetjob
 #SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
 
 cd $rundir
 source $rundir/loadenvs
-export LD_LIBRARY_PATH="/p/scratch/cslts/ghasemi1/TSMP_github/TSMP/parflow3_7_JUWELS_3.1.0MCT_clm-cos-pfl/rmm/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*
@@ -99,7 +105,7 @@ else
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
@@ -108,7 +114,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=slts
+#SBATCH --account=slts 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
@@ -129,6 +135,7 @@ fi
 
 
 
+
 counter=0
 #for mapfile
 start_oas=$counter
@@ -145,7 +152,6 @@ end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
 start_clm=$((($numInst*($nproc_cos+$nproc_icon))+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
-
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}
