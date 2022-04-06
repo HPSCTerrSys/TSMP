@@ -25,9 +25,9 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF \
+        ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT 3.1.0MCTPDAF 1.1.0MCTPDAF \
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT "
-        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
+        ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT  3.1.0MCTPDAF 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 1.5.0MCT 1.6.0MCT 3.0.0MCTPDAF 4.1.0MCT "
         ["DEEP"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
@@ -87,7 +87,7 @@ modelVersion+=(
         ["3.0.1MCTPDAF"]="oasis3-mct clm3_5 cosmo5_1 parflow3_2 pdaf1_1"
         ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_9"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
-        ["3.1.0MCTPDAF"]="oasis3 clm3_5 cosmo5_1 parflow3_7 pdaf1_1"
+        ["3.1.0MCTPDAF"]="oasis3 clm3_5 cosmo5_1 parflow3_9 pdaf1_1"
         ["1.4.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow"
         ["1.4.1MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
 	["1.5.0MCT"]="oasis3-mct clm3_5-icon icon2-622 parflow3_2"
