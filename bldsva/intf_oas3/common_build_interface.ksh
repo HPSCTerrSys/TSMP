@@ -899,7 +899,13 @@ check
 
 comment "    cp binary to $bindir"
  cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
-check
+ check
+
+ if [[ $withPDAF == "true" ]]; then
+    comment "    cp libs to $bindir/libs"
+      cp $pfldir/pfsimulator/lib/* $bindir/libs >> $log_file 2>> $err_file
+    check
+ fi
   fi
 
   if [[ ${mList[3]} == parflow3_2 ]] ; then
@@ -945,6 +951,22 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
+
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    if [[ $withPDAF == "true" ]]; then
+
+      comment "    sed DA amps into CMakeLists.txt"
+        sed "s/PARFLOW_AMPS_LAYER PROPERTY STRINGS seq/PARFLOW_AMPS_LAYER PROPERTY STRINGS da seq/g" -i $pfldir/CMakeLists.txt >> $log_file 2>> $err_file
+      check
+      comment "    copy fix for PDAF into $pfldir"
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
+      check
+    fi
+  fi
 
   if [[ ${mList[3]} == parflow3_2 ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
