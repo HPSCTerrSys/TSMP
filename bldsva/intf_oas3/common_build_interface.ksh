@@ -903,7 +903,7 @@ comment "    cp binary to $bindir"
 
  if [[ $withPDAF == "true" ]]; then
     comment "    cp libs to $bindir/libs"
-      cp $pfldir/pfsimulator/lib/* $bindir/libs >> $log_file 2>> $err_file
+      cp $pfldir/bin/lib/* $bindir/libs >> $log_file 2>> $err_file
     check
  fi
   fi
