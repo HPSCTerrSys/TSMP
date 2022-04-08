@@ -14,7 +14,15 @@ route "${cblue}>> configure_pfl${cnormal}"
 #
     C_FLAGS="-fopenmp -Wall -Werror"
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
-    flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
+    if [[ $withOAS == "true" ]]; then
+      flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
+    else
+      if [[ $withPDAF == "true" ]] ; then
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=da"
+      else
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
+      fi
+    fi
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
     flagsSim+=" -DHYPRE_ROOT=$EBROOTHYPRE"
