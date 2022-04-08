@@ -67,14 +67,22 @@ route "${cblue}>> configure_pfl${cnormal}"
         flagsSim+=" -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared"
        check
        comment "    git clone  RAPIDS Memory Manager "
-        [[ -d $RMM_ROOT ]] && echo "clean $RMM_ROOT \n" && rm -rf $RMM_ROOT
-        git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+       if [ -d $RMM_ROOT ] ; then 
+        comment "  remove $RMM_ROOT "
+        rm -rf $RMM_ROOT >> $log_file 2>> $err_file
+        check
+       fi
+       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
        check
-       comment "    install RMM: RAPIDS Memory Manager "
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
-        cmake .. -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+       comment "    configure RMM: RAPIDS Memory Manager "
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+       check
+       comment "    make RMM "
         make -j6  >> $log_file 2>> $err_file
+       check
+       comment "    make install RMM "
         make install >> $log_file 2>> $err_file
        check
     fi
