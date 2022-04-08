@@ -30,7 +30,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
-    flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
+    if [[ $withPDAF == "true" ]] ; then
+      # PDAF:
+      # Turn off SLURM for PDAF due to error
+      # Only used for finishing job close to SLURM time limit
+      # Could be added in future effort
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=FALSE"
+    else
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
+    fi
 #
     pcc="$mpiPath/bin/mpicc"
     pfc="$mpiPath/bin/mpif90"
