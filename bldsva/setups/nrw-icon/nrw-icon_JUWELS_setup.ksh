@@ -148,7 +148,7 @@ EOF
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
 
     if [[ $withOASMCT == "true" ]] then
@@ -200,5 +200,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
     check
   fi 
 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

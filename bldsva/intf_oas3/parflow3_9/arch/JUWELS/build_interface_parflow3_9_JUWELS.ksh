@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_pfl(){
-route "${cblue}>> always_pfl${cnormal}"
-route "${cblue}<< always_pfl${cnormal}"
+route "${cyellow}>> always_pfl${cnormal}"
+route "${cyellow}<< always_pfl${cnormal}"
 }
 
 configure_pfl(){
-route "${cblue}>> configure_pfl${cnormal}"
+route "${cyellow}>> configure_pfl${cnormal}"
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
 #    export PFV="oas-gpu"
@@ -34,7 +34,15 @@ route "${cblue}>> configure_pfl${cnormal}"
     flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
-    flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
+    if [[ $withPDAF == "true" ]] ; then
+      # PDAF:
+      # Turn off SLURM for PDAF due to error
+      # Only used for finishing job close to SLURM time limit
+      # Could be added in future effort
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=FALSE"
+    else
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
+    fi
 #
     pcc="$mpiPath/bin/mpicc"
     pfc="$mpiPath/bin/mpif90"
@@ -81,28 +89,30 @@ route "${cblue}>> configure_pfl${cnormal}"
 
     c_configure_pfl
 
-route "${cblue}<< configure_pfl${cnormal}"
+route "${cyellow}<< configure_pfl${cnormal}"
 }
 
 make_pfl(){
-route "${cblue}>> make_pfl${cnormal}"
+route "${cyellow}>> make_pfl${cnormal}"
   c_make_pfl
-route "${cblue}<< make_pfl${cnormal}"
+route "${cyellow}<< make_pfl${cnormal}"
 }
 
 
 substitutions_pfl(){
-route "${cblue}>> substitutions_pfl${cnormal}"
+route "${cyellow}>> substitutions_pfl${cnormal}"
 
-route "${cblue}<< substitutions_pfl${cnormal}"
+  c_substitutions_pfl
+
+route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
 setup_pfl(){
-route "${cblue}>> setup_pfl${cnormal}"
+route "${cyellow}>> setup_pfl${cnormal}"
   c_setup_pfl
 
-route "${cblue}<< setup_pfl${cnormal}"
+route "${cyellow}<< setup_pfl${cnormal}"
 }
 
 
