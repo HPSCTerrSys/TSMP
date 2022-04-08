@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_pfl(){
-route "${cblue}>> always_pfl${cnormal}"
-route "${cblue}<< always_pfl${cnormal}"
+route "${cyellow}>> always_pfl${cnormal}"
+route "${cyellow}<< always_pfl${cnormal}"
 }
 
 configure_pfl(){
-route "${cblue}>> configure_pfl${cnormal}"
+route "${cyellow}>> configure_pfl${cnormal}"
     export PARFLOW_INS="$pfldir/bin"
     export PARFLOW_BLD="$pfldir/build"
 #    export PFV="oas-gpu"
@@ -85,30 +85,30 @@ route "${cblue}>> configure_pfl${cnormal}"
 
     c_configure_pfl
 
-route "${cblue}<< configure_pfl${cnormal}"
+route "${cyellow}<< configure_pfl${cnormal}"
 }
 
 make_pfl(){
-route "${cblue}>> make_pfl${cnormal}"
+route "${cyellow}>> make_pfl${cnormal}"
   c_make_pfl
-route "${cblue}<< make_pfl${cnormal}"
+route "${cyellow}<< make_pfl${cnormal}"
 }
 
 
 substitutions_pfl(){
-route "${cblue}>> substitutions_pfl${cnormal}"
+route "${cyellow}>> substitutions_pfl${cnormal}"
 
   c_substitutions_pfl
 
-route "${cblue}<< substitutions_pfl${cnormal}"
+route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
 setup_pfl(){
-route "${cblue}>> setup_pfl${cnormal}"
+route "${cyellow}>> setup_pfl${cnormal}"
   c_setup_pfl
 
-route "${cblue}<< setup_pfl${cnormal}"
+route "${cyellow}<< setup_pfl${cnormal}"
 }
 
 
