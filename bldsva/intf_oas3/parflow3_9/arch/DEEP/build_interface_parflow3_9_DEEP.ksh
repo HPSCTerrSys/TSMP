@@ -102,6 +102,8 @@ route "${cblue}<< make_pfl${cnormal}"
 substitutions_pfl(){
 route "${cblue}>> substitutions_pfl${cnormal}"
 
+  c_substitutions_pfl
+
 route "${cblue}<< substitutions_pfl${cnormal}"
 }
 
