@@ -816,7 +816,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -908,7 +908,7 @@ comment "    cp binary to $bindir"
  fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -968,7 +968,7 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
     fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
