@@ -905,6 +905,11 @@ comment "    cp binary to $bindir"
     comment "    cp libs to $bindir/libs"
       cp $pfldir/bin/lib/* $bindir/libs >> $log_file 2>> $err_file
     check
+    if [[ $processor == "GPU" ]]; then
+      comment "    GPU: cp rmm libs to $bindir/libs"
+        cp $pfldir/rmm/lib/* $bindir/libs >> $log_file 2>> $err_file
+      check
+    fi
  fi
   fi
 
