@@ -816,7 +816,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -899,10 +899,21 @@ check
 
 comment "    cp binary to $bindir"
  cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
-check
+ check
+
+ if [[ $withPDAF == "true" ]]; then
+    comment "    cp libs to $bindir/libs"
+      cp $pfldir/bin/lib/* $bindir/libs >> $log_file 2>> $err_file
+    check
+    if [[ $processor == "GPU" ]]; then
+      comment "    GPU: cp rmm libs to $bindir/libs"
+        cp $pfldir/rmm/lib/* $bindir/libs >> $log_file 2>> $err_file
+      check
+    fi
+ fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -946,7 +957,23 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    if [[ $withPDAF == "true" ]]; then
+
+      comment "    sed DA amps into CMakeLists.txt"
+        sed "s/PARFLOW_AMPS_LAYER PROPERTY STRINGS seq/PARFLOW_AMPS_LAYER PROPERTY STRINGS da seq/g" -i $pfldir/CMakeLists.txt >> $log_file 2>> $err_file
+      check
+      comment "    copy fix for PDAF into $pfldir"
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
+      check
+    fi
+  fi
+
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
