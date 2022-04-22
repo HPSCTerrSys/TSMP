@@ -139,7 +139,7 @@ setups+=(
         ["rur"]="Reanalysis over Rur"
         ["bonnRadar"]="two moment microphysics"
         ["bonn"]="flood area of interest"
-	["icon-ccs"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
+        ["icon-ccs"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
 )
 
 # list of setups that are available on a machine. (first is default)
