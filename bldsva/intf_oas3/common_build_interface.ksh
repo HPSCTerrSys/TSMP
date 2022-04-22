@@ -819,7 +819,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -902,10 +902,21 @@ check
 
 comment "    cp binary to $bindir"
  cp $pfldir/bin/bin/parflow $bindir >> $log_file 2>> $err_file
-check
+ check
+
+ if [[ $withPDAF == "true" ]]; then
+    comment "    cp libs to $bindir/libs"
+      cp $pfldir/bin/lib/* $bindir/libs >> $log_file 2>> $err_file
+    check
+    if [[ $processor == "GPU" ]]; then
+      comment "    GPU: cp rmm libs to $bindir/libs"
+        cp $pfldir/rmm/lib/* $bindir/libs >> $log_file 2>> $err_file
+      check
+    fi
+ fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -949,7 +960,23 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_2 ]] ; then
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    if [[ $withPDAF == "true" ]]; then
+
+      comment "    sed DA amps into CMakeLists.txt"
+        sed "s/PARFLOW_AMPS_LAYER PROPERTY STRINGS seq/PARFLOW_AMPS_LAYER PROPERTY STRINGS da seq/g" -i $pfldir/CMakeLists.txt >> $log_file 2>> $err_file
+      check
+      comment "    copy fix for PDAF into $pfldir"
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
+      check
+    fi
+  fi
+
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
@@ -1084,8 +1111,97 @@ route "${cyellow}<<< c_setup_pfl${cnormal}"
 ############################
 
 
+c_substitutions_pdaf(){
+route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
+
+  comment "   mkdir  $dadir/interface"
+    mkdir -p $dadir/interface  >> $log_file 2>> $err_file
+  check
+
+  comment "   cp pdaf interface model to $dadir/interface"
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/model $dadir/interface
+  check
+
+  comment "   cp pdaf interface framework to $dadir/interface"
+    patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface
+  check
+
+  comment "   mkdir $dadir/lib"
+    mkdir -p $dadir/lib >> $log_file 2>> $err_file
+  check
+
+route "${cyellow}<<< c_substitutions_pdaf${cnormal}"
+}
+
+c_configure_pdaf_arch(){
+route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
+
+#PDAF arch part
+  file=$dadir/make.arch/${PDAF_ARCH}.h
+
+  comment "   cp pdaf config to $dadir"
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
+  check
+
+  comment "   sed comFC dir to $file"
+  sed -i "s@__comFC__@${comFC}@" $file >> $log_file 2>> $err_file
+  check
+
+  comment "   sed comCC dir to $file"
+  sed -i "s@__comCC__@${comCC}@" $file >> $log_file 2>> $err_file
+  check
+
+  comment "   sed MPI dir to $file"
+    sed -i "s@__MPI_INC__@-I${mpiPath}/include@" $file >> $log_file 2>> $err_file
+  check
+
+  comment "   sed LIBS to $file"
+    sed -i "s@__LIBS__@${libs_src}@" $file >> $log_file 2>> $err_file
+  check
+
+  comment "   sed optimizations to $file"
+    sed -i "s@__OPT__@${optComp}@" $file >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/src"
+    cd $dadir/src >> $log_file 2>> $err_file
+  check
+  comment "   make clean pdaf"
+    make clean >> $log_file 2>> $err_file
+  check
+
+route "${cyellow}<<< c_configure_pdaf_arch${cnormal}"
+}
+
+c_make_pdaf(){
+route "${cyellow}>>> c_make_pdaf${cnormal}"
+
+  comment "   cd to $dadir/src"
+    cd $dadir/src >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf"
+    make >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/interface/model"
+    cd $dadir/interface/model >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf model"
+    make >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/interface/framework"
+    cd $dadir/interface/framework >> $log_file 2>> $err_file
+  check
+  comment "   make pdaf framework"
+    make >> $log_file 2>> $err_file
+  check
+
+route "${cyellow}<<< c_make_pdaf${cnormal}"
+}
+
 c_setup_pdaf(){
-route "${cyellow}>>> c_setup_da${cnormal}"
+route "${cyellow}>>> c_setup_pdaf${cnormal}"
   comment "   copy pdaf namelist to rundir."
     cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
@@ -1114,7 +1230,7 @@ route "${cyellow}>>> c_setup_da${cnormal}"
     sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
-route "${cyellow}<<< c_setup_da${cnormal}"
+route "${cyellow}<<< c_setup_pdaf${cnormal}"
 }
 
 c_setup_rst(){
