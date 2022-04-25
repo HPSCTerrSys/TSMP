@@ -300,6 +300,7 @@ cat > INPUT_IO  << end_input_io
   ! Nummer des WMO-Centers, an dem die Berechnung stattfindet :-) 
   ! sollte 78 (=DWD) sein, damit die vom LM erzeutgen grib-files auch gelesen werden koennen.
   ncenter=78,
+  yform_read='apix',
   ! Number of gribout namelists:
   ngribout=1,
   ydir_restart_out='$RESTAR',
