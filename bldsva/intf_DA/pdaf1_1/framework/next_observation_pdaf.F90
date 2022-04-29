@@ -52,7 +52,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 !
 ! !USES:
   USE mod_assimilation, &
-       ONLY: delt_obs, toffset, screen
+       ONLY: delt_obs
   USE mod_parallel_model, &
        ONLY: mype_world, total_steps
   USE mod_assimilation, &
@@ -84,26 +84,20 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   !kuw end
 
   !kuw: check, for observation file with at least 1 observation
-!  counter = stepnow 
-  counter = stepnow 
+  counter = stepnow
   !nsteps  = 0
-  if (mype_world==0 .and. screen > 2) then
-      write(*,*) 'TSMP-PDAF (in next_observation_pdaf.F90) total_steps: ',total_steps
-  end if
+  write(*,*) 'total_steps (in next_observation_pdaf): ',total_steps
   do
     !nsteps  = nsteps  + delt_obs 
     counter = counter + delt_obs
-    !if(counter>total_steps) exit
-    if(counter>(total_steps+toffset)) exit
+    if(counter>total_steps) exit
     write(fn, '(a, i5.5)') trim(obs_filename)//'.', counter
     call check_n_observationfile(fn,no_obs)
     if(no_obs>0) exit
   end do
   nsteps = counter - stepnow
-  if (mype_world==0 .and. screen > 2) then
-      write(*,*)'TSMP-PDAF (next_observation_pdaf.F90) stepnow: ',stepnow
-      write(*,*)'TSMP-PDAF (next_observation_pdaf.F90) no_obs, nsteps, counter: ',no_obs,nsteps,counter
-  end if
+  write(*,*)'stepnow (in next_observation_pdaf):',stepnow
+  write(*,*)'no_obs, nsteps, counter (in next_observation_pdaf): ',no_obs,nsteps,counter
   !kuw end
 
 
@@ -138,29 +132,16 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
 END SUBROUTINE next_observation_pdaf
 
-!> @author Wolfgang Kurtz, Guowei He
-!> @date 21.03.2022
-!> @brief Return number of observations from file
-!> @param fn Filename of the observation file
-!> @return nn number of observations in `fn`
-!> @details
-!>     Reads the content of the variable name `no_obs` from NetCDF
-!>     file `fn` using subroutines from the NetCDF module.
 subroutine check_n_observationfile(fn,nn)
-  use netcdf, only: nf90_max_name, nf90_open, nf90_nowrite, &
-      nf90_inq_varid, nf90_get_var, nf90_close
-  use mod_read_obs, only: check
-
+  use netcdf
   implicit none
-
   character(len=*),intent(in) :: fn
   integer, intent(out)        :: nn
 
   integer :: ncid, varid, status !,dimid
-  character (len = *), parameter :: varname = "no_obs"
-
   !character (len = *), parameter :: dim_name = "dim_obs"
-  !character(len = nf90_max_name) :: recorddimname
+  character (len = *), parameter :: varname = "no_obs"
+  character(len = nf90_max_name) :: recorddimname
 
   call check(nf90_open(fn, nf90_nowrite, ncid))
   !call check(nf90_inq_dimid(ncid, dim_name, dimid))

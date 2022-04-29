@@ -72,8 +72,7 @@ MODULES =  	mod_parallel_model.o \
 # Moduls used for PDAF
 MOD_ASSIM = 	mod_parallel_pdaf.o \
 		mod_assimilation.o \
-		parser_mpi.o \
-		mod_read_obs.o
+		parser_mpi.o
 
 # Model routines used with PDAF
 OBJ_MODEL_PDAF =pdaf_terrsysmp.o\
@@ -94,6 +93,7 @@ OBJ_USER_GEN  = init_ens.o \
 		distribute_state_pdaf.o \
 		collect_state_pdaf.o \
 		init_obs_pdaf.o \
+		mod_read_obs.o \
 		init_dim_obs_pdaf.o \
 		obs_op_pdaf.o
 

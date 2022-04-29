@@ -58,8 +58,6 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
         ONLY: mype_filter, task_id
     use mod_tsmp, &
         only: tag_model_parflow, pf_statevecsize, pf_statevec, pf_statevec_fortran
-    use mod_assimilation, &
-        only: screen
 
     IMPLICIT NONE
 
@@ -86,7 +84,7 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
     ! **********************
 
     ! *** Generate full ensemble on filter-PE 0 ***
-    IF (mype_filter==0 .and. screen > 0) THEN
+    IF (mype_filter==0) THEN
         WRITE (*, '(/9x, a)') 'Initialize state ensemble'
         WRITE (*, '(9x, a)') '--- read ensemble from files'
         WRITE (*, '(9x, a, i5)') '--- Ensemble size:  ', dim_ens
@@ -103,13 +101,8 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
     !    convert pf_statevec to fortran pointer
 
     if (model == tag_model_parflow) then
-
-
-        if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": Parflow component: initialize ensemble array ens_p"
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": my dim_p is", dim_p
-        end if
-
+        !print *, "Parflow component: initialize ensemble array ens_p"
+        !print *, "my dim_p is", dim_p
         do i = 1, dim_ens
             ens_p(:, i) = 10 + mype_model + i
         end do
@@ -117,11 +110,8 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
         do i = 1, dim_ens
             ens_p(:, i) = 1.1
         end do
-
-        if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, " CLM component: initialize ensemble array ens_p"
-            print *, "TSMP-PDAF mype(w)=", mype_world, " my dim_p is", dim_p
-        end if
+        !print *, "CLM component: initialize ensemble array ens_p"
+        !print *, "my dim_p is", dim_p
 
     end if
 ! ****************

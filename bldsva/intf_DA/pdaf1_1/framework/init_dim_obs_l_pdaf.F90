@@ -64,6 +64,9 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
 #if defined CLMSA
   ONLY: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
        tag_model_clm, point_obs
+#elif defined CLMFIVE
+  ONLY: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
+       tag_model_clm, point_obs
 #else
   ONLY: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
        tag_model_clm, nx_glob, ny_glob, nz_glob, xcoord_fortran, ycoord_fortran, &
@@ -165,8 +168,70 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
         end if
      end do
   end if
-#else
-#ifdef PARFLOW_STAND_ALONE
+#elif defined CLMFIVE
+  obsind    = 0
+  obsdist   = 0.0
+  dim_obs_l = 0
+  if(point_obs.eq.0) then
+     max_var_id = MAXVAL(var_id_obs_nc(:,:))
+     allocate(log_var_id(max_var_id))
+     log_var_id(:) = .TRUE.
+
+     do m = 1, dim_nx
+        do k = 1, dim_ny
+           i = (m-1)* dim_ny + k
+           do j = 1, max_var_id
+              if(log_var_id(j) .and. var_id_obs_nc(k,m) == j) then
+                 dx = abs(longxy_obs(i) - longxy(domain_p))
+                 dy = abs(latixy_obs(i) - latixy(domain_p))
+                 dist = sqrt(real(dx)**2 + real(dy)**2)
+                 !obsdist(i) = dist
+                 if(dist == 0) then
+                    dim_obs_l = dim_obs_l + 1
+                    obsind(i) = 1
+                    log_var_id(j) = .FALSE.
+                    obsdist(i) = dist
+                    EXIT
+                 end if
+              end if
+           end do
+        enddo
+     enddo
+
+     do m = 1, dim_nx
+        do k = 1, dim_ny
+           i = (m-1)* dim_ny + k
+           do j = 1, max_var_id
+              if(log_var_id(j) .and. var_id_obs_nc(k,m) == j) then
+                 dx = abs(longxy_obs(i) - longxy(domain_p))
+                 dy = abs(latixy_obs(i) - latixy(domain_p))
+                 dist = sqrt(real(dx)**2 + real(dy)**2)
+                 !obsdist(i) = dist
+                 if (dist <= real(local_range)) then
+                    dim_obs_l = dim_obs_l + 1
+                    obsind(i) = 1
+                    log_var_id(j) = .FALSE.
+                    dx = abs(lon_var_id(j) - longxy(domain_p))
+                    dy = abs(lat_var_id(j) - latixy(domain_p))
+                    obsdist(i) = sqrt(real(dx)**2 + real(dy)**2)
+                 end if
+              end if
+           end do
+        enddo
+     enddo
+  else
+     do i = 1,dim_obs
+        dx = abs(longxy_obs(i) - longxy(domain_p))
+        dy = abs(latixy_obs(i) - latixy(domain_p))
+        dist = sqrt(real(dx)**2 + real(dy)**2)
+        obsdist(i) = dist
+        if (dist <= real(local_range)) then
+           dim_obs_l = dim_obs_l + 1
+           obsind(i) = 1
+        end if
+     end do
+  end if
+#elif defined PARFLOW_STAND_ALONE
   obsind    = 0
   obsdist   = 0.0
   dim_obs_l = 0
@@ -324,7 +389,6 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
      end if 
   endif
 #endif
-#endif  
   
   ! kuw: allocate and determine local observation index and distance
   !#ifndef CLMSA

@@ -95,6 +95,8 @@ SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
     do i=1,dim_obs_p
 #if defined CLMSA
       C_p(i,i) = C_p(i,i) + clm_obserr(obs_nc2pdaf(i))*clm_obserr(obs_nc2pdaf(i))
+#elif defined CLMFIVE
+      C_p(i,i) = C_p(i,i) + clm_obserr(obs_nc2pdaf(i))*clm_obserr(obs_nc2pdaf(i))
 #else
       C_p(i,i) = C_p(i,i) + pressure_obserr(obs_nc2pdaf(i))*pressure_obserr(obs_nc2pdaf(i))
 #endif
