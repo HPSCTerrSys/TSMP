@@ -8,83 +8,36 @@ route "${cyellow}<< always_da${cnormal}"
 
 substitutions_da(){
 route "${cyellow}>> substitutions_da${cnormal}"
-if [[ ${mList[1]} == clm5_0  ]] ; then
-  comment "   mkdir  $dadir/interface"
-    mkdir -p $dadir/interface  >> $log_file 2>> $err_file
-  check
-
-  comment "   cp pdaf interface model to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/model $dadir/interface
-  check
-
-  comment "   cp pdaf interface framework to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface
-  check
-
-# CLM not 5.0
-else
-  comment "   mkdir  $dadir/interface"
-    mkdir -p $dadir/interface  >> $log_file 2>> $err_file
-  check
-
-  comment "   cp pdaf interface model to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/model $dadir/interface 
-  check
-
-  comment "   cp pdaf interface framework to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
-  check
-fi
+  c_substitutions_pdaf
 route "${cyellow}<< substitutions_da${cnormal}"
 }
 
 configure_da(){
 route "${cyellow}>> configure_da${cnormal}"
-if [[ ${mList[1]} == clm5_0  ]] ; then
+
+#PDAF part configuration variables
   export PDAF_DIR=$dadir
-  export PDAF_ARCH=linux_ifort_jureca
+  if [[ $compiler == "Gnu" ]]; then
+    export PDAF_ARCH=linux_gfortran_openmpi_jureca
+  else
+    export PDAF_ARCH=linux_ifort_jureca
+  fi
 
-#PDAF part
-  file=$dadir/make.arch/linux_ifort_jureca.h
+  if [[ $profiling == "scalasca" ]]; then
+    comFC="scorep-mpif90"
+    comCC="scorep-mpicc"
+  else
+    comFC="${mpiPath}/bin/mpif90"
+    comCC="${mpiPath}/bin/mpicc"
+  fi
 
-  comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/linux_ifort_jureca.h $file >> $log_file 2>> $err_file
-  check
+  if [[ $compiler == "Gnu" ]]; then
+    libs_src=" -ldl $lapackPath/mkl/lib/intel64/libmkl_gf_lp64.a $lapackPath/mkl/lib/intel64/libmkl_gnu_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
+  else
+    libs_src=" $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
+  fi
 
-  comment "   sed comFC dir to $file"
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comFC__@scorep-mpif90@" $file >> $log_file 2>> $err_file
-    else
-      sed -i "s@__comFC__@${mpiPath}/bin/mpif90@" $file >> $log_file 2>> $err_file
-    fi
-  check
-
-  comment "   sed comCC dir to $file"
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comCC__@scorep-mpicc@" $file >> $log_file 2>> $err_file
-    else
-      sed -i "s@__comCC__@${mpiPath}/bin/mpicc@" $file >> $log_file 2>> $err_file
-    fi
-  check
-
-  comment "   sed MPI dir to $file"
-    sed -i "s@__MPI_INC__@-I${mpiPath}/include@" $file >> $log_file 2>> $err_file
-  check
-
-  comment "   sed LIBS to $file"
-    sed -i "s@__LIBS__@ $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  check
-
-  comment "   sed optimizations to $file"
-    sed -i "s@__OPT__@${optComp}@" $file >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/src"
-    cd $dadir/src >> $log_file 2>> $err_file
-  check
-  comment "   make clean pdaf"
-    make clean >> $log_file 2>> $err_file
-  check
+  c_configure_pdaf_arch
 
 #PDAF interface part
   file1=$dadir/interface/model/Makefile
@@ -96,16 +49,115 @@ if [[ ${mList[1]} == clm5_0  ]] ; then
   check
 
   importFlags=" "
+  importFlagsOAS=" "
+  importFlagsPFL=" "
+  importFlagsCLM=" "
+  importFlagsCOS=" "
+  importFlagsDA=" "
   cppdefs=" "
   obj=' '
   libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf "
+  libsOAS=" "
+  libsPFL=" "
+  libsCLM=" "
+  libsCOS=" "
   pf=""
 
+  # Oasis include dirs
+  importFlagsOAS+="-I$oasdir/$platform/build/lib/psmile.MPI1 "
+  importFlagsOAS+="-I$oasdir/$platform/build/lib/scrip "
+
+  # CLM include dirs
+  importFlagsCLM+="-I$clmdir/build/ "
+
+  # COSMO include dirs
+  importFlagsCOS+="-I$cosdir/obj "
+
+  # ParFlow include dirs
+  importFlagsPFL+="-I$pfldir/pfsimulator/parflow_lib "
+  importFlagsPFL+="-I$pfldir/pfsimulator/amps/oas3 "
+  importFlagsPFL+="-I$pfldir/pfsimulator/amps/common "
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    importFlagsPFL+="-I$pfldir/build/include "
+    if [[ $processor == "GPU" ]]; then
+      importFlagsPFL+="-I$pfldir/rmm/include/rmm "
+    fi
+  else
+    importFlagsPFL+="-I$pfldir/pfsimulator/include "
+  fi
+
+  # DA include dirs
+  importFlagsDA+="-I$dadir/interface/model/common "
+  if [[ $withPFL == "true" ]] ; then
+    importFlagsDA+="-I$dadir/interface/model/${mList[3]} "
+  fi
+
+  # Oasis libraries
+  libsOAS+="-lpsmile.MPI1 "
+  libsOAS+="-lmct "
+  libsOAS+="-lmpeu "
+  libsOAS+="-lscrip "
+
+  # CLM libraries
+  libsCLM+="-lclm "
+
+  # COSMO libraries
+  libsCOS+="-lcosmo "
+  if [[ ${mList[2]} == "cosmo5_1" ]] ; then
+    libsCOS+="-L$gribPath/lib/ "
+    libsCOS+="-leccodes_f90 "
+    libsCOS+="-leccodes "
+  else
+    libsCOS+="$grib1Path/libgrib1.a "
+  fi
+
+  # ParFlow library paths and libraries
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    libsPFL+="-lpfsimulator "
+  else
+    libsPFL+="-lparflow "
+  fi
+  libsPFL+="-lamps "
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+    libsPFL+="-lamps_common "
+    libsPFL+="-lamps "
+    libsPFL+="-lamps_common "
+  fi
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    libsPFL+="-lpfkinsol "
+  else
+    libsPFL+="-lkinsol "
+  fi
+  libsPFL+="-lgfortran "
+  if [[ ${mList[3]} == parflow3_9 ]] ; then
+    libsPFL+="-lcjson "
+    if [[ $processor == "GPU" ]]; then
+      libsPFL+="-lstdc++ "
+      libsPFL+="-lcudart "
+      libsPFL+="-lrmm "
+      libsPFL+="-lnvToolsExt "
+    fi
+  fi
+  libsPFL+="-L$hyprePath/lib -lHYPRE "
+  libsPFL+="-L$siloPath/lib -lsilo "
+
   if [[ $withOAS == "false" && $withPFL == "true" ]] ; then
-     comment "Not yet implemented combination of pdaf and models"
+     importFlags+=$importFlagsPFL
+     importFlags+=$importFlagsDA
+     cppdefs+=" ${pf}-DPARFLOW_STAND_ALONE "
+     libs+=$libsPFL
+     obj+=' $(OBJPF) '
   fi
 
   if [[ $withOAS == "false" && $withCLM == "true" ]] ; then
+    if [[ ${mList[1]} == clm3_5 ]] ; then
+     importFlags+=$importFlagsCLM
+     importFlags+=$importFlagsDA
+     cppdefs+=" ${pf}-DCLMSA "
+     libs+=$libsCLM
+     obj+=' $(OBJCLM) print_update_clm.o'
+    fi
+    if [[ ${mList[1]} == clm5_0 ]] ; then
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/include "
@@ -129,157 +181,68 @@ if [[ ${mList[1]} == clm5_0  ]] ; then
      libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/lib -lpio -lgptl -lmct -lmpeu  "
      libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      obj+=' $(OBJCLM5)'
+    fi
   fi
 
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" ]] ; then
-     comment "Not yet implemented combination of pdaf and models"
-  fi
 
-  if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
-     comment "Not yet implemented combination of pdaf and models"
-  fi
-  
-  if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "true" ]] ; then
-     comment "Not yet implemented combination of pdaf and models"
-  fi
-  
-  comment "   sed bindir to Makefiles"
-    sed -i "s,__bindir__,$bindir," $file1 $file2 >> $log_file 2>> $err_file
-  check
-  comment "   sed comp flags to Makefiles"
-    sed -i "s,__fflags__,-cpp -I$dadir/interface/model -I$ncdfPath/include $importFlags," $file1 $file2 >> $log_file 2>> $err_file
-  check
-    sed -i "s,__ccflags__,-I$dadir/interface/model -I$ncdfPath/include $importFlags," $file1 $file2 >> $log_file 2>> $err_file
-  check
-  comment "   sed preproc flags to Makefiles"
-    sed -i "s,__cpp_defs__,$cppdefs," $file1 $file2 >> $log_file 2>> $err_file
-  check
-    sed -i "s,__fcpp_defs__,$cppdefs," $file1 $file2 >> $log_file 2>> $err_file
-  check
-  comment "   sed libs to Makefiles"
-    sed -i "s,__libs__,$libs," $file2 >> $log_file 2>> $err_file
-  check
-  comment "   sed obj to Makefiles"
-    sed -i "s,__obj__,$obj," $file1 >> $log_file 2>> $err_file
-  check
-  comment "   sed -D prefix to Makefiles"
-    sed -i "s,__pf__,$pf," $file1 $file2 >> $log_file 2>> $err_file
-  check
-
-
-  comment "   cd to $dadir/interface/model"
-    cd $dadir/interface/model >> $log_file 2>> $err_file
-  check
-  comment "   make clean model"
-    make clean >> $log_file 2>> $err_file
-  check
-  comment "   cd to $dadir/src/interface/framework"
-    cd $dadir/interface/framework >> $log_file 2>> $err_file
-  check
-  comment "   make clean framework"
-    make clean >> $log_file 2>> $err_file
-  check
-
-# CLM not 5.0
-else
-  export PDAF_DIR=$dadir
-  export PDAF_ARCH=linux_ifort_jureca
-
-#PDAF part
-  file=$dadir/make.arch/linux_ifort_jureca.h
-  
-  comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/linux_ifort_jureca.h $file >> $log_file 2>> $err_file
-  check
-
-  comment "   sed comFC dir to $file" 
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comFC__@scorep-mpif90@" $file >> $log_file 2>> $err_file  
-    else
-      sed -i "s@__comFC__@${mpiPath}/bin/mpif90@" $file >> $log_file 2>> $err_file  
+    if [[ ${mList[1]} == clm5_0 ]] ; then
+      comment "Not yet implemented combination of pdaf and models (clm5_0)"
+      exit 1
     fi
-  check
 
-  comment "   sed comCC dir to $file" 
-    if [[ $profiling == "scalasca" ]]; then
-      sed -i "s@__comCC__@scorep-mpicc@" $file >> $log_file 2>> $err_file  
-    else
-      sed -i "s@__comCC__@${mpiPath}/bin/mpicc@" $file >> $log_file 2>> $err_file  
-    fi
-  check
-
-  comment "   sed MPI dir to $file" 
-    sed -i "s@__MPI_INC__@-I${mpiPath}/include@" $file >> $log_file 2>> $err_file  
-  check
-
-  comment "   sed LIBS to $file"
-    sed -i "s@__LIBS__@ $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64@" $file >> $log_file 2>> $err_file
-  check
-
-  comment "   sed optimizations to $file"
-    sed -i "s@__OPT__@${optComp}@" $file >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/src"
-    cd $dadir/src >> $log_file 2>> $err_file
-  check
-  comment "   make clean pdaf"
-    make clean >> $log_file 2>> $err_file
-  check
-
-#PDAF interface part
-  file1=$dadir/interface/model/Makefile
-  file2=$dadir/interface/framework/Makefile
-  comment "   cp pdaf interface Makefiles to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/model/Makefile  $file1 >> $log_file 2>> $err_file
-  check
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/framework/Makefile  $file2 >> $log_file 2>> $err_file
-  check
-
-  importFlags=" "
-  cppdefs=" "
-  obj=' ' 
-  libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf " 
-  pf=""
- 
-  if [[ $withOAS == "false" && $withPFL == "true" ]] ; then
-     importFlags+="-I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include "
-     cppdefs+=" ${pf}-DPARFLOW_STAND_ALONE "
-     libs+=" -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
-     obj+=' $(OBJPF) '
-  fi
-
-  if [[ $withOAS == "false" && $withCLM == "true" ]] ; then
-     importFlags+=" -I$clmdir/build/ "
-     cppdefs+=" ${pf}-DCLMSA "
-     libs+=" -lclm "
-     obj+=' $(OBJCLM) print_update_clm.o'
-  fi
-
-  if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" ]] ; then
-     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$cosdir/obj "
+     importFlags+=$importFlagsCLM
+     importFlags+=$importFlagsOAS
+     importFlags+=$importFlagsCOS
+     importFlags+=$importFlagsDA
      cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 "
      if [[ $cplscheme == "true" ]] ; then ; cppdefs+=" ${pf}-DCPL_SCHEME_F " ; fi
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
-     libs+=" -lclm -lcosmo -lpsmile.MPI1 -lmct -lmpeu -lscrip $grib1Path/libgrib1.a "
+     libs+=$libsCLM
+     libs+=$libsCOS
+     libs+=$libsOAS
      obj+=' $(OBJCLM) $(OBJCOSMO) '
-  fi 
+  fi
 
   if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
-     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include "
+    
+    if [[ ${mList[1]} == clm5_0 ]] ; then
+      comment "Not yet implemented combination of pdaf and models (clm5_0)"
+      exit 1
+    fi
+
+     importFlags+=$importFlagsCLM
+     importFlags+=$importFlagsOAS
+     importFlags+=$importFlagsPFL
+     importFlags+=$importFlagsDA
      cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo "
+     libs+=$libsCLM
+     libs+=$libsOAS
+     libs+=$libsPFL
      obj+=' $(OBJCLM) $(OBJPF) '
   fi
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "true" ]] ; then
-     importFlags+=" -I$clmdir/build/ -I$oasdir/$platform/build/lib/psmile.MPI1 -I$oasdir/$platform/build/lib/scrip -I$pfldir/pfsimulator/parflow_lib -I$pfldir/pfsimulator/amps/oas3 -I$pfldir/pfsimulator/amps/common -I$pfldir/pfsimulator/include -I$cosdir/obj "
+
+    if [[ ${mList[1]} == clm5_0 ]] ; then
+      comment "Not yet implemented combination of pdaf and models (clm5_0)"
+      exit 1
+    fi
+
+     importFlags+=$importFlagsCLM
+     importFlags+=$importFlagsOAS
+     importFlags+=$importFlagsPFL
+     importFlags+=$importFlagsCOS
+     importFlags+=$importFlagsDA
      cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 ${pf}-DCOUP_OAS_PFL "
      if [[ $cplscheme == "true" ]] ; then ; cppdefs+=" ${pf}-DCPL_SCHEME_F " ; fi
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=" -lclm -lpsmile.MPI1 -lmct -lmpeu -lscrip $grib1Path/libgrib1.a -L$hyprePath -L$siloPath -lparflow -lamps -lamps_common -lamps -lamps_common -lkinsol -lgfortran -lHYPRE -lsilo -lcosmo $grib1Path/libgrib1.a"
+     libs+=$libsCLM
+     libs+=$libsOAS
+     libs+=$libsCOS
+     libs+=$libsPFL
      obj+=' $(OBJCLM) $(OBJCOSMO) $(OBJPF) '
   fi
 
@@ -305,6 +268,15 @@ else
   comment "   sed -D prefix to Makefiles"
     sed -i "s,__pf__,$pf," $file1 $file2 >> $log_file 2>> $err_file
   check
+  comment "   sed clm directory to Makefiles"
+    sed -i "s,__clmdir__,${mList[1]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed cosmo directory to Makefiles"
+    sed -i "s,__cosdir__,${mList[2]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed parflow directory to Makefiles"
+    sed -i "s,__pfldir__,${mList[3]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
 
 
   comment "   cd to $dadir/interface/model"
@@ -320,71 +292,18 @@ else
     make clean >> $log_file 2>> $err_file
   check
 
-fi
+
 route "${cyellow}<< configure_da${cnormal}"
 }
 
 make_da(){
 route "${cyellow}>> make_da${cnormal}"
-if [[ ${mList[1]} == clm5_0  ]] ; then
-  export PDAF_DIR=$dadir
-  export PDAF_ARCH=linux_ifort_jureca
-
-  comment "   cd to $dadir/src"
-    cd $dadir/src >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf"
-    make >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/interface/model"
-    cd $dadir/interface/model >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf model"
-    make >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/interface/framework"
-    cd $dadir/interface/framework >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf framework"
-    make >> $log_file 2>> $err_file
-  check
-
-# CLM not 5.0
-else
-  export PDAF_DIR=$dadir
-  export PDAF_ARCH=linux_ifort_jureca
-
-  comment "   cd to $dadir/src"
-    cd $dadir/src >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf"
-    make >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/interface/model"
-    cd $dadir/interface/model >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf model"
-    make >> $log_file 2>> $err_file
-  check
-
-  comment "   cd to $dadir/interface/framework"
-    cd $dadir/interface/framework >> $log_file 2>> $err_file
-  check
-  comment "   make pdaf framework"
-    make >> $log_file 2>> $err_file
-  check
-
-fi
+  c_make_pdaf
 route "${cyellow}<< make_da${cnormal}"
 }
-
 
 setup_da(){
 route "${cyellow}>> setup_da${cnormal}"
   c_setup_pdaf
 route "${cyellow}<< setup_da${cnormal}"
 }
-
