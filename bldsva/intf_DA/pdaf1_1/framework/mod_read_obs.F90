@@ -333,7 +333,12 @@ contains
     haserr = nf90_inq_varid(ncid, presserr_name, presserr_varid) 
     if(haserr == nf90_noerr) then
       multierr = 1
-      if(.not.allocated(pressure_obserr)) allocate(pressure_obserr(dim_obs))
+!      if(.not.allocated(pressure_obserr)) allocate(pressure_obserr(dim_obs))
+      !hcp pressure_obserr must be reallocated because dim_obs is not necessary
+      !the same for every obs file.
+      if(allocated(pressure_obserr)) deallocate(pressure_obserr)
+      allocate(pressure_obserr(dim_obs))
+      !hcp fin
       call check(nf90_get_var(ncid, presserr_varid, pressure_obserr))
     endif
 
@@ -749,9 +754,9 @@ subroutine read_obs_nc_multiscalar_files(current_observation_filename)
   end subroutine read_obs_nc_multiscalar_files
 
   subroutine get_obsindex_currentobsfile(no_obs) bind(c,name='get_obsindex_currentobsfile')
+    use mod_parallel_model, only: tcycle
     USE mod_assimilation, only: obs_filename
     use netcdf
-    use mod_parallel_model, only:tcycle
 
     implicit none
     integer, intent(out) :: no_obs
@@ -767,7 +772,7 @@ subroutine read_obs_nc_multiscalar_files(current_observation_filename)
     integer :: dimid, status
     integer :: haserr
 
-    !write(filename, '(a, i5.5)') trim(obs_filename)//'.', tcycle
+    write(filename, '(a, i5.5)') trim(obs_filename)//'.', tcycle
 
     if(allocated(idx_obs_pf))   deallocate(idx_obs_pf)
     if(allocated(x_idx_obs_pf)) deallocate(x_idx_obs_pf)
