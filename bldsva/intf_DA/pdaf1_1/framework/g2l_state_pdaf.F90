@@ -54,8 +54,7 @@ SUBROUTINE g2l_state_pdaf(step, domain_p, dim_p, state_p, dim_l, state_l)
        ONLY: nx_local, ny_local
 #if defined CLMSA
   USE decompMod, ONLY: get_proc_bounds_atm
-#endif
-#if defined CLMFIVE
+#elif defined CLMFIVE
   USE decompMod, ONLY: get_proc_bounds
 #endif
 
@@ -85,13 +84,10 @@ SUBROUTINE g2l_state_pdaf(step, domain_p, dim_p, state_p, dim_l, state_l)
 #if defined CLMSA
   ! beg and end gridcell for atm
   call get_proc_bounds_atm(begg, endg)
-  n_domain = endg - begg + 1
-  DO i = 0, dim_l-1
-     nshift_p = domain_p + i * n_domain
-     state_l(i+1) = state_p(nshift_p)
-  ENDDO
 #elif defined CLMFIVE
   call get_proc_bounds(begg, endg)
+#endif
+#if (defined CLMSA || defined CLMFIVE)
   n_domain = endg - begg + 1
   DO i = 0, dim_l-1
      nshift_p = domain_p + i * n_domain

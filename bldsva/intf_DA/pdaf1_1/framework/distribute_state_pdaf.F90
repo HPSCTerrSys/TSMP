@@ -60,24 +60,21 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 #if defined CLMSA
     !kuw: get access to clm variables
     USE clmtype      , only : clm3
+#elif defined CLMFIVE
+    use GridcellType, only : gridcell_type
+#endif
+#if (defined CLMSA || defined CLMFIVE)
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     use enkf_clm_mod, only: clm_statevec
     !kuw end
-#elif defined CLMFIVE
-    use GridcellType, only : gridcell_type
-    use clm_varpar, only : nlevsoi
-    use shr_kind_mod, only: r8 => shr_kind_r8
-    use enkf_clm_mod, only: clm_statevec
 #endif
     IMPLICIT NONE
   
     ! !ARGUMENTS:
     INTEGER, INTENT(in) :: dim_p           ! PE-local state dimension
     REAL, INTENT(inout) :: state_p(dim_p)  ! PE-local state vector
-#if defined CLMSA
-    real(r8), pointer :: sw_c(:,:)
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
     real(r8), pointer :: sw_c(:,:)
 #endif
     ! !CALLING SEQUENCE:
@@ -96,19 +93,16 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
         pf_statevec_fortran = state_p
     end if
 
-#if defined CLMSA
+#if (defined CLMSA || defined CLMFIVE)
     !kuw: distribute state vector to clm
     if (model == tag_model_clm) then
+        ! !comment only clm3_5:
         !sw_c  => clm3%g%l%c%cws%h2osoi_vol
         !sw_c = reshape(state_p,shape(sw_c))
         clm_statevec = state_p
 
     end if
     !kuw end
-#elif defined CLMFIVE
-    if (model == tag_model_clm) then
-        clm_statevec = state_p
-    end if
 #endif
 
 END SUBROUTINE distribute_state_pdaf
