@@ -1,0 +1,27 @@
+[DA]
+nreal = 2
+outdir = "./"
+stat_dumpinterval = 48
+da_interval       = 48
+stat_dumpoffset   = 0
+
+[PF]
+problemname = "None"
+nprocs      = 0
+starttime   = 0.0
+dt          = 1.0
+endtime     = 2440.0
+updateflag  = 1
+paramupdate = 0
+aniso_perm_y  = 1.0
+aniso_perm_z  = 1.0
+printensemble = 0
+printstat     = 0
+
+[CLM]
+problemname = "clmin"
+nprocs      =    48
+update_swc  =    1
+update_texture = 0
+print_swc   =    0
+
