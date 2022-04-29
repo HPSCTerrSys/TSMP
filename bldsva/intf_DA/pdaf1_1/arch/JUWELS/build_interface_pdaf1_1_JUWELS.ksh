@@ -2,12 +2,12 @@
 #
 
 always_da(){
-route "${cblue}>> always_da${cnormal}"
-route "${cblue}<< always_da${cnormal}"
+route "${cyellow}>> always_da${cnormal}"
+route "${cyellow}<< always_da${cnormal}"
 }
 
 substitutions_da(){
-route "${cblue}>> substitutions_da${cnormal}"
+route "${cyellow}>> substitutions_da${cnormal}"
 if [[ ${mList[1]} == clm5_0  ]] ; then
   comment "   mkdir  $dadir/interface"
     mkdir -p $dadir/interface  >> $log_file 2>> $err_file
@@ -35,11 +35,11 @@ else
     patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface 
   check
 fi
-route "${cblue}<< substitutions_da${cnormal}"
+route "${cyellow}<< substitutions_da${cnormal}"
 }
 
 configure_da(){
-route "${cblue}>> configure_da${cnormal}"
+route "${cyellow}>> configure_da${cnormal}"
 if [[ ${mList[1]} == clm5_0  ]] ; then
   export PDAF_DIR=$dadir
   export PDAF_ARCH=linux_ifort_juwels
@@ -324,11 +324,11 @@ else
   check
 
 fi
-route "${cblue}<< configure_da${cnormal}"
+route "${cyellow}<< configure_da${cnormal}"
 }
 
 make_da(){
-route "${cblue}>> make_da${cnormal}"
+route "${cyellow}>> make_da${cnormal}"
 if [[ ${mList[1]} == clm5_0  ]] ; then
   export PDAF_DIR=$dadir
   export PDAF_ARCH=linux_ifort_juwels
@@ -381,13 +381,13 @@ else
   check
 
 fi
-route "${cblue}<< make_da${cnormal}"
+route "${cyellow}<< make_da${cnormal}"
 }
 
 
 setup_da(){
-route "${cblue}>> setup_da${cnormal}"
+route "${cyellow}>> setup_da${cnormal}"
   c_setup_pdaf
-route "${cblue}<< setup_da${cnormal}"
+route "${cyellow}<< setup_da${cnormal}"
 }
 

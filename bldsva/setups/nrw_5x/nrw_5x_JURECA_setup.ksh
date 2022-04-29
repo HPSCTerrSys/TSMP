@@ -70,7 +70,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
 
 if [[ $withPDAF == "true" ]]; then
 
@@ -150,5 +150,5 @@ check
 mkdir $rundir/logs
 
 fi
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

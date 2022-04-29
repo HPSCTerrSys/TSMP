@@ -1,12 +1,12 @@
 #! /bin/ksh
 
 always_clm(){
-route "${cblue}>> always_clm${cnormal}"
-route "${cblue}<< always_clm${cnormal}"
+route "${cyellow}>> always_clm${cnormal}"
+route "${cyellow}<< always_clm${cnormal}"
 }
 
 configure_clm(){
-route "${cblue}>> configure_clm${cnormal}"
+route "${cyellow}>> configure_clm${cnormal}"
 
   comment " source software and cesm input paths"
     source $rootdir/bldsva/intf_oas3/clm5_0/arch/JUWELS/config/softwarepaths.ksh
@@ -133,11 +133,11 @@ route "${cblue}>> configure_clm${cnormal}"
     ./preview_namelists >> $log_file 2>> $err_file
   check
 
-route "${cblue}<< configure_clm${cnormal}"
+route "${cyellow}<< configure_clm${cnormal}"
 }
 
 make_clm(){
-route "${cblue}>> make_clm${cnormal}"
+route "${cyellow}>> make_clm${cnormal}"
   comment "   cd to $clmdir/clmoas"
     cd $clmdir/clmoas >> $log_file 2>> $err_file
   check
@@ -154,12 +154,12 @@ route "${cblue}>> make_clm${cnormal}"
   comment "   copy clm exe to $bindir"
     cp $clmdir/build/cesm.exe $bindir/clm >> $log_file 2>> $err_file
   check
-route "${cblue}<< make_clm${cnormal}"
+route "${cyellow}<< make_clm${cnormal}"
 }
 
 
 substitutions_clm(){
-route "${cblue}>> substitutions_clm${cnormal}"
+route "${cyellow}>> substitutions_clm${cnormal}"
 
   comment "   cp clm config_ XMLs to $clmdir"
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/tsmp/cime/config/cesm/machines/*.xml $clmdir/cime/config/cesm/machines/
@@ -227,12 +227,12 @@ route "${cblue}>> substitutions_clm${cnormal}"
 #  check
 
 
-route "${cblue}<< substitutions_clm${cnormal}"
+route "${cyellow}<< substitutions_clm${cnormal}"
 }
 
 
 setup_clm(){
-route "${cblue}>> setupClm${cnormal}"
+route "${cyellow}>> setupClm${cnormal}"
 
 #  withCESM="true"
   seconds_clm=$(($hh*3600))
@@ -251,5 +251,5 @@ check
 
   c_setup_clm
 
-route "${cblue}<< setupClm${cnormal}"
+route "${cyellow}<< setupClm${cnormal}"
 }
