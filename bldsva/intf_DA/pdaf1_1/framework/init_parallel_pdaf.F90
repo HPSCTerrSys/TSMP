@@ -315,7 +315,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   da_comm = comm_model
 #endif
 
-#if (defined CLMSA)
+#if (defined CLMSA || defined CLMFIVE)
     da_comm_clm = comm_model
 #endif
 
@@ -328,7 +328,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 
 
 ! hand over comm_couple to clm
-#if (defined CLMSA || defined COUP_OAS_PFL)
+#if (defined CLMSA || defined COUP_OAS_PFL || defined CLMFIVE)
 if (model .eq. tag_model_clm) then
     !call clm_statcomm
     !write(*,*) 'initialize statcomm (CLM) with COMM_couple'

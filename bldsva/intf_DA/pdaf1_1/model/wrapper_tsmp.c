@@ -203,7 +203,7 @@ void print_update_pfb(){
 
 void update_tsmp(){
 
-#if defined CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   if((model == tag_model_clm) && (clmupdate_swc != 0)){
     update_clm();
     print_update_clm(&tcycle, &total_steps);
