@@ -14,7 +14,6 @@ OBJ =  dictionary.o\
 	   iniparser.o\
 	   read_enkfpar.o\
 	   wrapper_tsmp.o\
-       #print_memusage.o\
 
 ## clm object files
 OBJCLM = enkf_clm_mod.o\
@@ -31,6 +30,7 @@ OBJPF = enkf_parflow.o\
 		enkf_ensemblestatistics.o\
 		problem_saturationtopressure.o\
 
+## cosmo object files
 OBJCOSMO = enkf_cosmo_mod.o\
 		   enkf_cosmo.o\
 
@@ -47,38 +47,20 @@ libmodel.a: $(OBJ)
 	mv $@ __bindir__/libs
 	@echo "library compilation suceeded"
 
-.c.o:
+wrapper_tsmp.o:
+	$(PREP_C) $(CC) $(CCFLAGS) $(CPP_FLAGS) $(CINCS) -c wrapper_tsmp.c
+
+%.o: common/%.c
 	$(PREP_C) $(CC) $(CCFLAGS) $(CPP_FLAGS) $(CINCS) -c $<  -o $@
 
-enkf_clm_mod.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_clm_mod.F90
+%.o: __pfldir__/%.c
+	$(PREP_C) $(CC) $(CCFLAGS) $(CPP_FLAGS) $(CINCS) -c $<  -o $@
 
-enkf_clm.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_clm.F90
+%.o: __clmdir__/%.F90
+	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c $< -o $@
 
-mod_clm_statistics.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c mod_clm_statistics.F90
-
-print_update_clm.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c print_update_clm.F90
-
-enkf_clm_mod_5.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_clm_mod_5.F90
-
-enkf_clm_5.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_clm_5.F90
-
-mod_clm_statistics_5.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c mod_clm_statistics_5.F90
-
-print_update_clm_5.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c print_update_clm_5.F90
-
-enkf_cosmo_mod.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_cosmo_mod.F90
-
-enkf_cosmo.o:
-	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c enkf_cosmo.F90
+%.o: __cosdir__/%.F90
+	$(PREP_C) $(FC) $(FCPP_FLAGS) $(FFLAGS) $(FINCS) -c $< -o $@
 
 clean:
 	rm -f *.o *.mod $(PROG) libmodel.a 
