@@ -62,9 +62,7 @@ USE mod_parallel_pdaf, &
     ONLY: COMM_filter, MPIerr, MPI_REAL8, MPI_SUM, npes_filter 
 USE mod_parallel_model, ONLY: model
 USE mod_tsmp, &
-#if defined CLMSA
-       ONLY: tag_model_clm
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
        ONLY: tag_model_clm
 #else
        ONLY: tag_model_parflow
@@ -102,7 +100,7 @@ USE mod_tsmp, &
   ! Due to domain decomposition in our case the mean variance is computed
   ! for the full domain using the function MPI_Allreduce
 
-#if defined CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   if(model .eq. tag_model_clm) then
      meanvar_p = 0
      sum_p = 0
@@ -119,26 +117,6 @@ USE mod_tsmp, &
      call MPI_Allreduce(meanvar_p, meanvar, 1, MPI_REAL8, MPI_SUM, COMM_filter, MPIerr)
      ! to get the mean dividing the mean observation error by size of processors
      meanvar = meanvar/npes_filter    
-  end if
-#elif defined CLMFIVE
-  if(model .eq. tag_model_clm) then
-     meanvar_p = 0
-     sum_p = 0
-     counter = 0
-     do i = 1, dim_obs_p
-        if(clm_obserr_p(i) /= 0) then
-           sum_p = sum_p + clm_obserr_p(i)
-           counter = counter + 1
-        endif
-     enddo
-     ! averaging the sum of observation errors with total no of non-zero
-     ! observations
-     meanvar_p = sum_p/counter
-     ! summing the average of observation errors and communicating it back to
-     ! each rank
-     call MPI_Allreduce(meanvar_p, meanvar, 1, MPI_REAL8, MPI_SUM, COMM_filter, MPIerr)
-     ! to get the mean dividing the mean observation error by size of processors
-     meanvar = meanvar/npes_filter
   end if
 #else
   if (model .eq. tag_model_parflow) then

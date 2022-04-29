@@ -50,13 +50,9 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
        tag_model_clm
   USE mod_tsmp, &
        ONLY: init_parf_l_size
-#ifdef CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   USE enkf_clm_mod, &
        ONLY: init_clm_l_size
-#endif
-
-#ifdef CLMFIVE
-  USE enkf_clm_mod, ONLY: init_clm_l_size
 #endif
 
   IMPLICIT NONE
@@ -82,11 +78,9 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
   end if
 #endif  
 
-#if defined CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   ! Set the size of the local analysis domain  
   ! for clm stand alone mode only
-  call init_clm_l_size(dim_l)
-#elif defined CLMFIVE
   call init_clm_l_size(dim_l)
 #else
   if (model.eq.tag_model_clm) then

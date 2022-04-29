@@ -114,9 +114,7 @@ SUBROUTINE init_obscovar_pdaf(step, dim_obs, dim_obs_p, covar, m_state_p, &
  
   if(multierr.eq.1) then
     do i=1,dim_obs
-#if defined CLMSA
-      covar(i,i) = clm_obserr(obs_nc2pdaf(i))*clm_obserr(obs_nc2pdaf(i))
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
       covar(i,i) = clm_obserr(obs_nc2pdaf(i))*clm_obserr(obs_nc2pdaf(i))
 #else
       covar(i,i) = pressure_obserr(obs_nc2pdaf(i))*pressure_obserr(obs_nc2pdaf(i))
@@ -156,13 +154,13 @@ SUBROUTINE init_obscovar_pdaf(step, dim_obs, dim_obs_p, covar, m_state_p, &
 
 END SUBROUTINE init_obscovar_pdaf
 
-subroutine check(status)
+! subroutine check(status)
 
-  use netcdf
-  integer, intent ( in) :: status
+!   use netcdf
+!   integer, intent ( in) :: status
 
-  if(status /= nf90_noerr) then
-     print *, trim(nf90_strerror(status))
-     stop "Stopped"
-  end if
-end subroutine check
+!   if(status /= nf90_noerr) then
+!      print *, trim(nf90_strerror(status))
+!      stop "Stopped"
+!   end if
+! end subroutine check

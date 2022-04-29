@@ -72,10 +72,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        read_obs_nc_clm, read_obs_nc_multiscalar_clm, read_obs_nc_clm_pfl, read_obs_nc_multiscalar_clm_pfl, &
        read_obs_nc_multi_clm_pfl, read_obs_nc_multiscalar_clm_pfl_files
   use mod_tsmp, &
-#ifdef CLMSA
-  only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-       tag_model_clm, point_obs
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
   only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
        tag_model_clm, point_obs
 #else
@@ -125,12 +122,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   !real    :: deltaxy, y1 , x1, z1, x2, y2, z2, R, dist
 #endif
 
-#ifdef CLMSA
-if(model == tag_model_clm) then
-  call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
-  call get_proc_global(numg, numl, numc, nump)
-end if
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
 if(model == tag_model_clm) then
   call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
   call get_proc_global(numg, numl, numc, nump)
@@ -145,13 +137,7 @@ end if
   if (is_multi_observation_files) then
      write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.', step
      if (mype_filter .eq. 0) then
-#ifdef CLMSA
-        if(point_obs.eq.1)  then
-           call read_obs_nc_multi_clm(current_observation_filename)
-        else if(point_obs.eq.0)  then
-           call read_obs_nc_multiscalar_clm_files(current_observation_filename)
-        end if
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
         if(point_obs.eq.1)  then
            call read_obs_nc_multi_clm(current_observation_filename)
         else if(point_obs.eq.0)  then
@@ -175,14 +161,7 @@ end if
      endif  
   else
      if (mype_filter .eq. 0) then
-#ifdef CLMSA
-       ! Read clm observation files for local ensemble filter  
-        if(point_obs.eq.1)  then
-           call read_obs_nc_clm()
-        else if(point_obs.eq.0)  then
-           call read_obs_nc_multiscalar_clm()
-        end if
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
        ! Read clm observation files for local ensemble filter  
         if(point_obs.eq.1)  then
            call read_obs_nc_clm()
@@ -219,7 +198,7 @@ end if
 
   ! allocate for non-root procs
   if (mype_filter .ne. 0) then ! for all non-master proc
-#ifdef CLMSA
+#if (defined CLMSA || defined CLMFIVE)
 !     if(model == tag_model_clm) then
         if(allocated(clm_obs)) deallocate(clm_obs)
         allocate(clm_obs(dim_obs))
@@ -240,25 +219,6 @@ end if
             allocate(clm_obserr(dim_obs))
         endif
 !     end if
-#elif defined CLMFIVE
-        if(allocated(clm_obs)) deallocate(clm_obs)
-        allocate(clm_obs(dim_obs))
-        if(allocated(clmobs_lon)) deallocate(clmobs_lon)
-        allocate(clmobs_lon(dim_obs))
-        if(allocated(clmobs_lat)) deallocate(clmobs_lat)
-        allocate(clmobs_lat(dim_obs))
-        if(allocated(clmobs_dr)) deallocate(clmobs_dr)
-        allocate(clmobs_dr(2))
-        if(allocated(clmobs_layer)) deallocate(clmobs_layer)
-        allocate(clmobs_layer(dim_obs))
-        if(point_obs.eq.0) then
-            if(allocated(var_id_obs_nc)) deallocate(var_id_obs_nc)
-            allocate(var_id_obs_nc(dim_ny, dim_nx))
-        endif
-        if(multierr.eq.1) then
-            if(allocated(clm_obserr)) deallocate(clm_obserr)
-            allocate(clm_obserr(dim_obs))
-        endif
 #elif defined PARFLOW_STAND_ALONE 
 !     if(model == tag_model_parflow) then
         if(allocated(idx_obs_nc)) deallocate(idx_obs_nc)
@@ -319,7 +279,7 @@ end if
 #endif
   end if
 
-#ifdef CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   !if(model == tag_model_clm) then
      call mpi_bcast(clm_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      call mpi_bcast(clmobs_lon, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
@@ -330,15 +290,6 @@ end if
      if(point_obs.eq.0) call mpi_bcast(var_id_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      if(multierr.eq.1) call mpi_bcast(clm_obserr, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
   !end if
-#elif defined CLMFIVE
-     call mpi_bcast(clm_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     call mpi_bcast(clmobs_lon, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     call mpi_bcast(clmobs_lat, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     call mpi_bcast(clmobs_dr,  dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     !call mpi_bcast(clmobs_dr,  2, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     call mpi_bcast(clmobs_layer, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
-     if(point_obs.eq.0) call mpi_bcast(var_id_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
-     if(multierr.eq.1) call mpi_bcast(clm_obserr, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
 #elif defined PARFLOW_STAND_ALONE 
   ! boardcast the idx and pressure for all non-master proc
   !if(model == tag_model_parflow) then 
@@ -379,25 +330,7 @@ end if
   ! select the obs in my domain
   dim_obs_p = 0
 
-#ifdef CLMSA
-  call domain_def_clm(clmobs_lon, clmobs_lat, dim_obs, longxy, latixy, longxy_obs, latixy_obs)
-  if(allocated(obs_id_p)) deallocate(obs_id_p)
-  allocate(obs_id_p(endg-begg+1))
-  obs_id_p(:) = 0
-     do i = 1, dim_obs
-        count = 1
-        do j = begg, endg
-           if((longxy_obs(i) == longxy(count)) .and. (latixy_obs(i) == latixy(count))) then
-              dim_obs_p = dim_obs_p + 1
-              obs_id_p(count) = i
-              EXIT
-           endif
-           count = count + 1
-        end do
-     end do
-     ! Set dimension of full observation vector
-     dim_obs_f = dim_obs
-#elif defined CLMFIVE
+#if (defined CLMSA || defined CLMFIVE)
   call domain_def_clm(clmobs_lon, clmobs_lat, dim_obs, longxy, latixy, longxy_obs, latixy_obs)
   if(allocated(obs_id_p)) deallocate(obs_id_p)
   allocate(obs_id_p(endg-begg+1))
@@ -485,7 +418,7 @@ end if
   ALLOCATE(obs_p(dim_obs_p))
   IF(point_obs.eq.0) ALLOCATE(var_id_obs(dim_obs_p))
 
-#ifdef CLMSA
+#if (defined CLMSA || defined CLMFIVE)
   if(point_obs.eq.0) then
      max_var_id = MAXVAL(var_id_obs_nc(:,:))
      if(allocated(lon_var_id)) deallocate(lon_var_id)
@@ -559,88 +492,6 @@ end if
         do j = begg,endg
            if((longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k))) then
               obs_index_p(count) = k 
-              obs_p(count) = clm_obs(i)
-              if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)
-              count = count + 1
-           endif
-           k = k + 1
-        end do
-     end do
-  end if
-#elif defined CLMFIVE
-  if(point_obs.eq.0) then
-     max_var_id = MAXVAL(var_id_obs_nc(:,:))
-     if(allocated(lon_var_id)) deallocate(lon_var_id)
-     allocate(lon_var_id(max_var_id))
-     if(allocated(lat_var_id)) deallocate(lat_var_id)
-     allocate(lat_var_id(max_var_id))
-     if(allocated(maxlon)) deallocate(maxlon)
-     allocate(maxlon(max_var_id))
-     if(allocated(minlon)) deallocate(minlon)
-     allocate(minlon(max_var_id))
-     if(allocated(maxlat)) deallocate(maxlat)
-     allocate(maxlat(max_var_id))
-     if(allocated(minlat)) deallocate(minlat)
-     allocate(minlat(max_var_id))
-
-     lon_var_id(:) = 0
-     lat_var_id(:) = 0
-     maxlon = -999
-     minlon = 9999999
-     maxlat = -999
-     minlat = 9999999
-     do j = 1, max_var_id
-        do m = 1, dim_nx
-           do k = 1, dim_ny
-              i = (m-1)* dim_ny + k
-              if (var_id_obs_nc(k,m) == j) then
-                 maxlon(j) = MAX(longxy_obs(i),maxlon(j))
-                 minlon(j) = MIN(longxy_obs(i),minlon(j))
-                 maxlat(j) = MAX(latixy_obs(i),maxlat(j))
-                 minlat(j) = MIN(latixy_obs(i),minlat(j))
-              end if
-           end do
-           lon_var_id(j) = (maxlon(j) + minlon(j))/2.0
-           lat_var_id(j) = (maxlat(j) + minlat(j))/2.0
-           !print *, 'j  lon_var_id  lat_var_id ', j, lon_var_id(j),
-           !lat_var_id(j)
-        enddo  ! allocate clm_obserr_p observation error for clm run at PE-local domain
-     enddo
-     if(multierr.eq.1) then
-        if(allocated(clm_obserr_p)) deallocate(clm_obserr_p)
-        allocate(clm_obserr_p(dim_obs_p))
-     endif
-     count = 1
-     do m = 1, dim_nx
-        do l = 1, dim_ny
-           i = (m-1)* dim_ny + l
-           obs(i) = clm_obs(i)
-           k = 1
-           do j = begg,endg
-              if((longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k))) then
-                 obs_index_p(count) = k
-                 obs_p(count) = clm_obs(i)
-                 var_id_obs(count) = var_id_obs_nc(l,m)
-                 if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)
-                 count = count + 1
-              endif
-              k = k + 1
-           end do
-        end do
-     end do
-  else if(point_obs.eq.1) then
-     ! allocate clm_obserr_p observation error for clm run at PE-local domain 
-     if(multierr.eq.1) then
-        if(allocated(clm_obserr_p)) deallocate(clm_obserr_p)
-        allocate(clm_obserr_p(dim_obs_p))
-     endif
-     count = 1
-     do i = 1, dim_obs
-        obs(i) = clm_obs(i)
-        k = 1
-        do j = begg,endg
-           if((longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k))) then
-              obs_index_p(count) = k
               obs_p(count) = clm_obs(i)
               if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)
               count = count + 1
@@ -893,8 +744,7 @@ end if
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
-#ifndef CLMSA
-#ifndef CLMFIVE
+#if (!defined CLMSA &&  !defined CLMFIVE)
 !!#if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
   IF (model == tag_model_parflow) THEN
      !print *, "Parflow: converting xcoord to fortran"
@@ -902,7 +752,6 @@ end if
      call C_F_POINTER(ycoord, ycoord_fortran, [enkf_subvecsize])
      call C_F_POINTER(zcoord, zcoord_fortran, [enkf_subvecsize])
   ENDIF
-#endif
 #endif
 
   !  clean up the temp data from nc file
