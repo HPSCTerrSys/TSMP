@@ -309,6 +309,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
         end do
      endif
 
+#ifndef OBS_ONLY_PARFLOW     
      if(model == tag_model_clm) THEN
      do i = 1,dim_obs
         dx = abs(longxy_obs(i) - longxy(domain_p))
@@ -321,6 +322,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
         end if
         end do
      end if 
+#endif
   endif
 #endif
   
