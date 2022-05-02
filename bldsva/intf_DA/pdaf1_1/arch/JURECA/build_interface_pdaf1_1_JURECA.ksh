@@ -158,6 +158,7 @@ route "${cyellow}>> configure_da${cnormal}"
      obj+=' $(OBJCLM) print_update_clm.o'
     fi
     if [[ ${mList[1]} == clm5_0 ]] ; then
+     importFlags+=$importFlagsDA
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/include "

@@ -623,7 +623,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
   ! Setup and initialize the communications and logging.
   !--------------------------------------------------------------------------
   beg_count = shr_sys_irtc(irtc_rate)
-  call cime_pre_init1(esmf_logfile_option, da_comm, &
+  call cime_pre_init1(esmf_logfile_option, da_comm_clm, &
                       pdaf_id=pdaf_id, pdaf_max=pdaf_max)
 
   end_count = shr_sys_irtc(irtc_rate)

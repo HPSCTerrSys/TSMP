@@ -22,7 +22,9 @@
 !print_update_clm_5.F90: Module for printing updated CLM5 ensemble
 !-------------------------------------------------------------------------------------------
 
-subroutine print_update_clm(ts,ttot)
+subroutine print_update_clm(ts,ttot) bind(C,name="print_update_clm")
+    
+    use iso_c_binding   
     use shr_kind_mod , only : r8 => shr_kind_r8
     use subgridavemod, only : p2g, c2g
     use domainMod    , only : ldomain 
@@ -38,7 +40,7 @@ subroutine print_update_clm(ts,ttot)
 
     implicit none
 
-    integer, intent(in) :: ts,ttot
+    integer(c_int), intent(in) :: ts,ttot
 
     ! *** local variables ***
     integer :: numg           ! total number of gridcells across all processors

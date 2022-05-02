@@ -23,9 +23,10 @@
 !-------------------------------------------------------------------------------------------
 
 module mod_clm_statistics
+  use iso_c_binding
 
 contains
-  subroutine write_clm_statistics(ts,ttot)
+  subroutine write_clm_statistics(ts,ttot) bind(C,name="write_clm_statistics")
     integer, intent(in) :: ts,ttot
 
     write(*,*) "dummy sub"

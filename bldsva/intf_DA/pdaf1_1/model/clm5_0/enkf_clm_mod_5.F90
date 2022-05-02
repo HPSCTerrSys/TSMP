@@ -29,7 +29,7 @@ module enkf_clm_mod
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
 #if (defined CLMFIVE)
-  integer :: da_comm
+  integer :: da_comm_clm
   integer :: clm_statevecsize
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
@@ -152,7 +152,7 @@ module enkf_clm_mod
 
   end subroutine 
 
-  subroutine update_clm()
+  subroutine update_clm() bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
