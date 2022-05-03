@@ -2,8 +2,8 @@
 #
 
 always_da(){
-route "${cblue}>> always_da${cnormal}"
-route "${cblue}<< always_da${cnormal}"
+route "${cyellow}>> always_da${cnormal}"
+route "${cyellow}<< always_da${cnormal}"
 }
 
 substitutions_da(){
@@ -236,7 +236,7 @@ route "${cyellow}>> configure_da${cnormal}"
   check
 
 
-route "${cblue}<< configure_da${cnormal}"
+route "${cyellow}<< configure_da${cnormal}"
 }
 
 make_da(){
@@ -246,7 +246,7 @@ route "${cyellow}<< make_da${cnormal}"
 }
 
 setup_da(){
-route "${cblue}>> setup_da${cnormal}"
+route "${cyellow}>> setup_da${cnormal}"
   c_setup_pdaf
-route "${cblue}<< setup_da${cnormal}"
+route "${cyellow}<< setup_da${cnormal}"
 }
