@@ -98,8 +98,8 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   do
     !nsteps  = nsteps  + delt_obs 
     counter = counter + delt_obs
+    !if(counter>total_steps) exit
     if(counter>(total_steps+toffset)) exit
-!    if(counter>total_steps) exit
     write(fn, '(a, i5.5)') trim(obs_filename)//'.', counter
     call check_n_observationfile(fn,no_obs)
     if(no_obs>0) exit

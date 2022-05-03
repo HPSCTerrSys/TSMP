@@ -81,6 +81,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        tag_model_clm, point_obs, nx_glob, ny_glob, nz_glob
 #endif
 
+
 #if defined CLMSA
   !kuw
   use shr_kind_mod, only: r8 => shr_kind_r8
