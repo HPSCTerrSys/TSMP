@@ -17,7 +17,11 @@ route "${cyellow}>> configure_da${cnormal}"
 
 #PDAF part configuration variables
   export PDAF_DIR=$dadir
-  export PDAF_ARCH=linux_ifort_jureca
+  if [[ $compiler == "Gnu" ]]; then
+    export PDAF_ARCH=linux_gfortran_openmpi_jureca
+  else
+    export PDAF_ARCH=linux_ifort_jureca
+  fi
 
   if [[ $profiling == "scalasca" ]]; then
     comFC="scorep-mpif90"
