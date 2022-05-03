@@ -668,7 +668,7 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
   comment "    cd to clm build"
     cd $clmdir/build >> $log_file 2>> $err_file
   check
-  cppdef=""
+  cppdef=""			# add "-DWATSAT3D" for input of "watsat3d" in "iniTimeConst.F90"
   if [ $cplscheme == "true" ] && [ $withICON == "false" ] ; then ; cppdef+=" -DCPL_SCHEME_F " ; fi
   comment "    configure clm"
   comment "    $clmdir/bld/configure -fc $cfc -cc $ccc $flags -fflags $cplInc -ldflags $cplLib -fopt $optComp -cppdefs $cppdef"
