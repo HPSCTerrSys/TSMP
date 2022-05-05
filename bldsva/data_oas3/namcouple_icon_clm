@@ -1,3 +1,13 @@
+# $SEQMODE
+#             2
+# $END
+# #
+# $CHANNEL
+#  MPI1 NOBSEND
+#   nproc_exe1 ncpl_exe1
+#   nproc_exe2 ncpl_exe2
+# $END
+#
  $NFIELDS
   19 
  $END
@@ -7,7 +17,7 @@
  $END
 #
  $INIDATE
-  20080508
+  yyyymmdd
  $END
 #
  $NLOGPRT

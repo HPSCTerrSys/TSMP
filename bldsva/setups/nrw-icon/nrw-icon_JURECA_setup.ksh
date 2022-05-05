@@ -5,7 +5,7 @@ initSetup(){
   defaultFDOAS="/work/slts/slts00/tsmp/TestCases/nrw/oasis3"
   #defaultFDPFL="/work/slts/slts00/tsmp/TestCases/nrw/parflow"
 
-  defaultNLICON="$rootdir/bldsva/setups/nrw-icon/icon_master.namelist $rootdir/bldsva/setups/nrw-icon/NAMELIST_nrw"
+  defaultNLICON="$rootdir/bldsva/setups/nrw-icon/icon_master.namelist $rootdir/bldsva/setups/nrw-icon/NAMELIST_icon"
   defaultNLCLM=$rootdir/bldsva/setups/nrw/lnd.stdin 
   #defaultNLPFL=$rootdir/bldsva/setups/nrw/coup_oas.tcl
 

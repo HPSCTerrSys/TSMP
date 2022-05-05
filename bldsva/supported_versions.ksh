@@ -17,6 +17,7 @@ platforms+=(
         ["GENERIC_X86"]="Generic Linux x86 machine"
         ["JURECA"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUWELS"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
+        ["DEEP"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUSUF"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["MISTRAL"]="DKRZ (Hamburg ) - general purpose Linux Cluster"
 )
@@ -25,9 +26,11 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF \
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT 5.0.0 5.0.0MCT "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
+                     1.4.0MCT 1.4.1MCT 1.5.0MCT 1.6.0MCT 3.0.0MCTPDAF 4.1.0MCT 5.0.0 5.0.0MCT "
+        ["DEEP"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
         ["JUSUF"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 5.0.0 5.0.0MCT "
         ["MISTRAL"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 4.0.0MCT 4.1.0MCT 3.0.0MCTPDAF "
@@ -48,14 +51,17 @@ versions+=(
         ["2.1.0MCT"]="2.1.0 (Cosmo5.1 & CESM) with Oasis3-MCT"
         ["2.0.5"]="2.0.5 (Cosmo4.21 & CESM) without modifications"
         ["2.0.5MCT"]="2.0.5 (Cosmo4.21 & CESM) with Oasis3-MCT"
-        ["3.0.0"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2"
-        ["3.0.0MCT"]="3.0.0 old models (clm3_4 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT"
+        ["3.0.0"]="3.0.0 old models (clm3_5 and cosmo4_32) but new Parflow3_2"
+        ["3.0.0MCT"]="3.0.0 old models (clm3_5 and cosmo4_32) but new Parflow3_2 and with Oasis3-MCT"
         ["3.0.0MCTPDAF"]="3.0.0 with Oasis3-MCT and PDAF Data Assimilation"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
-        ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_7 and with Oasis3-MCT"
-	["1.4.0MCT"]="4.0.0 old clm3_5 and Parflow but new icon-lem with Oasis3-MCT"
-	["1.4.1MCT"]="4.0.0 old clm3_5 but new icon-lem and Parflow3_2 with Oasis3-MCT"
-        ["5.0.0"]="eCLM without modifications"
+        ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_9 and with Oasis3-MCT"
+	["1.4.0MCT"]="1.4.0 old clm3_5 and Parflow but new icon-lem with Oasis3-MCT"
+	["1.4.1MCT"]="1.4.1 old clm3_5 but new icon-lem and Parflow3_2 with Oasis3-MCT"
+	["1.5.0MCT"]="1.5.0 old clm3_5 but new icon version 2.622 and Parflow3_2 with Oasis3-MCT"
+	["1.6.0MCT"]="1.6.0 old clm3_5 but new icon version 2.622 and Parflow3_2 with Oasis3-MCT v4.0"
+        ["4.1.0MCT"]="4.1.0 clm3_5-icon icon-lem Parflow3_2 Oasis3-MCT"
+        ["5.0.0"]="Standalone eCLM"
         ["5.0.0MCT"]="eCLM with Oasis3-MCT"
 )
 
@@ -76,10 +82,13 @@ modelVersion+=(
         ["3.0.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow3_2"
         ["3.0.0MCTPDAF"]="oasis3-mct clm3_5 cosmo4_21 parflow3_2 pdaf1_1"
         ["3.0.0"]="oasis3 clm3_5 cosmo4_21 parflow3_2"
-        ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_7"
+        ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow3_9"
         ["3.1.0"]="oasis3 clm3_5 cosmo5_1 parflow3_2"
-	["1.4.0MCT"]="oasis3-mct clm3_5-icon icon-lem parflow"
-	["1.4.1MCT"]="oasis3-mct clm3_5-icon icon-lem parflow3_2"
+        ["1.4.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow"
+        ["1.4.1MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
+	["1.5.0MCT"]="oasis3-mct clm3_5-icon icon2-622 parflow3_2"
+	["1.6.0MCT"]="oasis3-mct4 clm3_5-icon icon2-622 parflow3_2"
+        ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
         ["5.0.0"]="mct eclm"
         ["5.0.0MCT"]="oasis3-mct eclm"
 )
@@ -105,6 +114,9 @@ combinations+=(
         ["3.1.0"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
 	["1.4.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 	["1.4.1MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+	["1.5.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+	["1.6.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+        ["4.1.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
         ["5.0.0"]=" clm "
         ["5.0.0MCT"]=" clm "
 )
@@ -131,10 +143,11 @@ setups+=(
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy wtb1pt "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy icon-ccs icon-cbl-nwp nrw-icon germany wtb1pt "
         ["JUSUF"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse "
         ["MISTRAL"]=" nrw cordex idealRTD  "
+        ["DEEP"]=" nrw cordex idealRTD  "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "
