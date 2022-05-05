@@ -789,6 +789,68 @@ fi
 route "${cyellow}<<< c_setup_clm${cnormal}"
 }
 
+############################ 
+# eCLM interface methods
+############################
+
+
+c_configure_eclm(){
+route "${cyellow}>>> c_configure_eclm${cnormal}"
+  comment "    Using land component model eCLM (experimental) \n"
+  comment "    Checking if eCLM repo is valid"
+  cd ${clmdir}
+  git status >> $log_file 2>> $err_file
+  check
+
+  if [[ -z $ECLM_CC || "$ECLM_CC" == " " ]]; then
+    ECLM_CC=mpicc
+  fi
+  if [[ -z $ECLM_FC || "$ECLM_FC" == " " ]]; then
+    ECLM_FC=mpifort
+  fi
+
+  if [[ $withOASMCT == "true" ]]; then
+    ECLM_CMAKE_VARS+=" -DCMAKE_PREFIX_PATH="$oasdir/$platform""
+  fi
+
+  comment "    Running CMake configure step..."
+  ECLM_BUILD_DIR="$clmdir/build"
+  cmake -S src -B "$ECLM_BUILD_DIR" \
+    -DCMAKE_INSTALL_PREFIX="$bindir" \
+    -DCMAKE_C_COMPILER=$ECLM_CC \
+    -DCMAKE_Fortran_COMPILER=$ECLM_FC \
+     $ECLM_CMAKE_VARS >> $log_file 2>> $err_file
+  check
+
+route "${cyellow}<<< c_configure_eclm${cnormal}"
+}
+
+c_make_eclm(){
+route "${cyellow}>>> c_make_eclm${cnormal}"
+  comment "    Building eCLM (this will take approximately 30 mins)..."
+  timer_start=$(date +%s)
+  cmake --build "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
+  check
+  timer_end=$(date +%s)
+  comment "    Build duration: $(date -u -d "0 $timer_end sec - $timer_start sec" +"%H:%M:%S")\n"
+  comment "    Installing eCLM"
+  cmake --install "$ECLM_BUILD_DIR" >> $log_file 2>> $err_file
+  check
+  comment "    Installing clm5nl-gen"
+  pip3 install --user $clmdir/namelist_generator >> $log_file 2>> $err_file
+  check
+route "${cyellow}<<< c_make_eclm${cnormal}"
+}
+
+c_substitutions_clm(){
+route "${cyellow}>>> c_substitutions_eclm${cnormal}"
+route "${cyellow}<<< c_substitutions_eclm${cnormal}"
+}
+
+c_setup_eclm(){
+  route "${cyellow}>>> c_setup_eclm${cnormal}"
+  route "${cyellow}<<< c_setup_eclm${cnormal}"
+}
 
 ############################ 
 #Parflow interface methods

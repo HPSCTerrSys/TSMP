@@ -206,7 +206,6 @@ setCombination(){
   fi
 #DA
   case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
-
 }
 
 
