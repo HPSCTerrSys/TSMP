@@ -204,15 +204,6 @@ setCombination(){
     withOAS="true"
     case "$version" in *MCT*) withOASMCT="true" ;; esac
   fi
-
-  # workaround to enable OASIS3-MCT build for eCLM without checking
-  # for COSMO/ICON/Parflow. MCT is a hard dependency of eCLM.
-  if [[ $withCLM == "true" && $mList[1] == "eclm" ]] ; then
-    case "$version" in *MCT*)
-      withOAS="true"
-      withOASMCT="true" ;;
-    esac
-  fi
 #DA
   case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
 }
@@ -226,22 +217,15 @@ route "${cyellow}> c_compileClm${cnormal}"
   check
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
-    if [[ ${options["clm"]} == "fresh" ]] ; then
-      if [[ ${mList[1]} == "eclm" ]] ; then
-        rm -rf $clmdir >> $log_file 2>> $err_file
-        comment "   Cloning eCLM from https://github.com/HPSCTerrSys/eCLM.git"
-        git clone https://github.com/HPSCTerrSys/eCLM.git $clmdir >> $log_file 2>> $err_file
-        check
-      else
-        comment "  backup clm dir to: $clmdir"
-        rm -rf $clmdir >> $log_file 2>> $err_file
-        check
-        # remove '-icon' from the mList[1] name
-        clmicon="${mList[1]}"
-        clmicon=${clmicon%'-icon'}
-        cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
-        check
-      fi
+    if [[ ${options["clm"]} == "fresh" ]] ; then 
+  comment "  backup clm dir to: $clmdir"
+      rm -rf $clmdir >> $log_file 2>> $err_file
+  check
+    # remove '-icon' from the mList[1] name
+    clmicon="${mList[1]}"
+    clmicon=${clmicon%'-icon'}
+    cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
+  check
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
       substitutions_clm

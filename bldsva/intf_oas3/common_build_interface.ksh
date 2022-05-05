@@ -786,8 +786,6 @@ route "${cyellow}>>> c_configure_eclm${cnormal}"
   fi
 
   if [[ $withOASMCT == "true" ]]; then
-    comment "    MCT build flags will be enabled.\n"
-    ECLM_CMAKE_VARS+=" -DBUILD_MCT=TRUE"
     ECLM_CMAKE_VARS+=" -DCMAKE_PREFIX_PATH="$oasdir/$platform""
   fi
 
