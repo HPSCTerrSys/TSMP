@@ -157,6 +157,7 @@ route "${cyellow}>> configure_da${cnormal}"
      libs+=$libsCLM
      obj+=' $(OBJCLM) print_update_clm.o'
     fi
+    
     if [[ ${mList[1]} == clm5_0 ]] ; then
      importFlags+=$importFlagsDA
      importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
@@ -183,12 +184,42 @@ route "${cyellow}>> configure_da${cnormal}"
      libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      obj+=' $(OBJCLM5)'
     fi
+    if [[ ${mList[1]} == eclm ]] ; then
+     # importFlags+=$importFlagsDA
+     # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
+     # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
+     # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/include "
+     # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/clm/obj "
+     # importFlags+=" -I$clmdir/build/atm/obj "
+     # importFlags+=" -I$clmdir/build/ice/obj "
+     # importFlags+=" -I$clmdir/build/ocn/obj "
+     # importFlags+=" -I$clmdir/build/glc/obj "
+     # importFlags+=" -I$clmdir/build/rof/obj "
+     # importFlags+=" -I$clmdir/build/wav/obj "
+     # importFlags+=" -I$clmdir/build/esp/obj "
+     # importFlags+=" -I$clmdir/build/cpl/obj "
+     # importFlags+=" -I$clmdir/build/lib/include "
+     # importFlags+=" -I$clmdir/build/ "
+     # cppdefs+=" ${pf} -DCLMFIVE"
+     # libs+=" -L$clmdir/build/lib/ -lcpl "
+     # libs+=" -L$clmdir/build/lib/ -latm -lice "
+     # libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/lib/ -lclm "
+     # libs+=" -L$clmdir/build/lib/ -locn -lrof -lglc -lwav -lesp "
+     # libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/lib -lcsm_share "
+     # libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/lib -lpio -lgptl -lmct -lmpeu  "
+     # libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
+     # obj+=' $(OBJCLM5)'
+    fi
   fi
 
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" ]] ; then
 
     if [[ ${mList[1]} == clm5_0 ]] ; then
       comment "Not yet implemented combination of pdaf and models (clm5_0)"
+      exit 1
+    fi
+    if [[ ${mList[1]} == eclm ]] ; then
+      comment "Not yet implemented combination of pdaf and models (eclm)"
       exit 1
     fi
 
@@ -211,6 +242,10 @@ route "${cyellow}>> configure_da${cnormal}"
       comment "Not yet implemented combination of pdaf and models (clm5_0)"
       exit 1
     fi
+    if [[ ${mList[1]} == eclm ]] ; then
+      comment "Not yet implemented combination of pdaf and models (eclm)"
+      exit 1
+    fi
 
      importFlags+=$importFlagsCLM
      importFlags+=$importFlagsOAS
@@ -229,6 +264,10 @@ route "${cyellow}>> configure_da${cnormal}"
 
     if [[ ${mList[1]} == clm5_0 ]] ; then
       comment "Not yet implemented combination of pdaf and models (clm5_0)"
+      exit 1
+    fi
+    if [[ ${mList[1]} == eclm ]] ; then
+      comment "Not yet implemented combination of pdaf and models (eclm)"
       exit 1
     fi
 
