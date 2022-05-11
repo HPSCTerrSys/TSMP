@@ -840,7 +840,7 @@ route "${cyellow}>>> c_make_eclm${cnormal}"
 route "${cyellow}<<< c_make_eclm${cnormal}"
 }
 
-c_substitutions_clm(){
+c_substitutions_eclm(){
 route "${cyellow}>>> c_substitutions_eclm${cnormal}"
 route "${cyellow}<<< c_substitutions_eclm${cnormal}"
 }
