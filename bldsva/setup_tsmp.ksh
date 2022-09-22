@@ -68,9 +68,9 @@ getDefaults(){
 setDefaults(){
   platform=$def_platform
   compiler=$def_compiler
-  if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
   version=$def_version
-  if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
+  if [[ $version == "" ]] then ; version="3.1.0MCT" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
   exp_id=$def_exp_id
