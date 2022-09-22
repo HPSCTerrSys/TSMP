@@ -23,6 +23,7 @@ module load Szip/.2.1.1
 module load Python/3.8.5
 module load NCO/4.9.5
 module load CMake/3.18.0
+module load Scalasca
 #module load CDO/1.9.8 yet not available with intel. only available with Gcc9.3
 #
 #export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8"
