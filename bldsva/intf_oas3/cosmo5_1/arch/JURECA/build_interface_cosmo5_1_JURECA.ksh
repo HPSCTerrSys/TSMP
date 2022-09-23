@@ -25,21 +25,33 @@ check
 
   if [[ $compiler == "Gnu" ]]; then
      comment "   sed comF90 based on Gnu to cos Makefile"
-     sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90 -cpp -c -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
+       if [[ $profiling == "scalasca" ]]; then
+         sed -i "s@__comF90__@scorep-mpif90 -cpp -c -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
+       else
+         sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90 -cpp -c -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
+       fi
      check
      comment "   sed comflg to cos Makefile"
-     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+       sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
      check
   else
      comment "   sed comF90 based on Intel compiler to cos Makefile"
-     sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90  -fpp -O2 -fp-model source@" $file >> $log_file 2>> $err_file
+       if [[ $profiling == "scalasca" ]]; then
+         sed -i "s@__comF90__@scorep-mpif90  -fpp -O2 -fp-model source@" $file >> $log_file 2>> $err_file
+       else
+         sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90  -fpp -O2 -fp-model source@" $file >> $log_file 2>> $err_file
+       fi
      check
      comment "   sed comflg to cos Makefile"
-     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -fpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+       sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -fpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
      check
   fi
 comment "   sed ld to cos Makefile"
-  sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  if [[ $profiling == "scalasca" ]]; then
+    sed -i "s@__ld__@scorep-mpif90@" $file >> $log_file 2>> $err_file
+  else
+    sed -i "s@__ld__@$profComp $mpiPath/bin/mpif90@" $file >> $log_file 2>> $err_file
+  fi
 check
 comment "   sed libs to cos Makefile"
   sed -i "s@__lib__@-L$gribPath/lib/ $cplLib -L$ncdfPath/lib/ -leccodes_f90 -leccodes -lnetcdff@" $file >> $log_file 2>> $err_file
