@@ -57,8 +57,7 @@ getDefaults(){
   def_profiling="no"
   def_cplscheme=""
   def_mode=""
-  #CPS added compiler flag
-  def_compiler="Gnu" 
+  def_compiler="Intel" # set default Intel
 }
 
 #####################################################
