@@ -15,9 +15,13 @@ route "${cyellow}>> configure_pfl${cnormal}"
     C_FLAGS="-fopenmp -Wall -Werror"
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
     if [[ $withOAS == "true" ]]; then
-        flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
+      flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
     else
+      if [[ $withPDAF == "true" ]] ; then
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=da"
+      else
         flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
+      fi
     fi
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
@@ -27,7 +31,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
     flagsSim+=" -DNETCDF_DIR=$ncdfPath"
-    flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
+    # flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
     if [[ $withPDAF == "true" ]] ; then
@@ -45,7 +49,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
     pf77="$mpiPath/bin/mpif77"
     pcxx="$mpiPath/bin/mpic++"
 #
-    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
+    comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
     check
@@ -76,7 +80,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
         cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
        check
        comment "    make RMM "
-        make -j  >> $log_file 2>> $err_file
+        make -j6  >> $log_file 2>> $err_file
        check
        comment "    make install RMM "
         make install >> $log_file 2>> $err_file

@@ -15,13 +15,9 @@ route "${cyellow}>> configure_pfl${cnormal}"
     C_FLAGS="-fopenmp -Wall -Werror"
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
     if [[ $withOAS == "true" ]]; then
-      flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
     else
-      if [[ $withPDAF == "true" ]] ; then
-        flagsSim+=" -DPARFLOW_AMPS_LAYER=da"
-      else
         flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
-      fi
     fi
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
@@ -43,13 +39,22 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
-#
-    pcc="$mpiPath/bin/mpicc"
-    pfc="$mpiPath/bin/mpif90"
-    pf77="$mpiPath/bin/mpif77"
-    pcxx="$mpiPath/bin/mpic++"
-#
-    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
+    
+    # Define compilers
+    if [[ $profiling == "scalasca" ]]; then
+      pcc="scorep-mpicc"
+      pfc="scorep-mpif90"
+      pf77="scorep-mpif77"
+      pcxx="scorep-mpicxx"
+      flagsTools+="CC=scorep-mpicc FC=scorep-mpif90 F77=scorep-mpif77 "
+    else
+     pcc="$mpiPath/bin/mpicc"
+     pfc="$mpiPath/bin/mpif90"
+     pf77="$mpiPath/bin/mpif77"
+     pcxx="$mpiPath/bin/mpicxx"
+    fi
+
+    comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
     check
@@ -80,7 +85,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
         cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
        check
        comment "    make RMM "
-        make -j6  >> $log_file 2>> $err_file
+        make -j  >> $log_file 2>> $err_file
        check
        comment "    make install RMM "
         make install >> $log_file 2>> $err_file

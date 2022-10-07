@@ -81,7 +81,7 @@ To get a man-page for the usage of this scripts, do:
    ./setup_tsmp.ksh --man
 ```
 ## TSMP version history <a name="ver_his"></a> 
-The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.9 for version v1.3.3. TSMP supports ParFlow 3.9 from version v1.3.3 onward.
+The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.9 for version v1.3.3. TSMP supports ParFlow 3.7 onwards from version v1.3.3 onward.
 
 Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf`.
 
@@ -141,7 +141,7 @@ specific code modifications may be retrieved):
 
 ```shell
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
-   git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow3_9
+   git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
    git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
@@ -163,16 +163,7 @@ Available from http://www.cgd.ucar.edu/tss/clm/distribution/clm3.5/.
 Available from https://github.com/parflow/.
 
 ```shell
-   git clone https://github.com/parflow/parflow.git
-   mv parflow parflow3_2
-   cd parflow
-   git checkout v3.2.0
-```
-Alternatively:
-
-```shell
-   git clone --branch v3.2.0 https://github.com/parflow/parflow.git
-   mv parflow parflow3_2
+   git clone --branch v3.2.0 https://github.com/parflow/parflow.git parflow3_2
 ```
 ##### ParFlow v3.9
 ParFlow 3.9  is available from

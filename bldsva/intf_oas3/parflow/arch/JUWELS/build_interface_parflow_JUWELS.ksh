@@ -27,7 +27,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
     flagsSim+=" -DNETCDF_DIR=$ncdfPath"
-    # flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
+    flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
     flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
     flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
     if [[ $withPDAF == "true" ]] ; then
@@ -39,22 +39,13 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
-    
-    # Define compilers
-    if [[ $profiling == "scalasca" ]]; then
-      pcc="scorep-mpicc"
-      pfc="scorep-mpif90"
-      pf77="scorep-mpif77"
-      pcxx="scorep-mpicxx"
-      flagsTools+="CC=scorep-mpicc FC=scorep-mpif90 F77=scorep-mpif77 "
-    else
-     pcc="$mpiPath/bin/mpicc"
-     pfc="$mpiPath/bin/mpif90"
-     pf77="$mpiPath/bin/mpif77"
-     pcxx="$mpiPath/bin/mpicxx"
-    fi
-
-    comment "    add parflow3_9 paths $PARFLOW_INS, $PARFLOW_BLD "
+#
+    pcc="$mpiPath/bin/mpicc"
+    pfc="$mpiPath/bin/mpif90"
+    pf77="$mpiPath/bin/mpif77"
+    pcxx="$mpiPath/bin/mpic++"
+#
+    comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
     check
