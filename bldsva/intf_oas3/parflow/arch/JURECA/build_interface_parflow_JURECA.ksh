@@ -7,53 +7,92 @@ route "${cyellow}<< always_pfl${cnormal}"
 
 configure_pfl(){
 route "${cyellow}>> configure_pfl${cnormal}"
-  comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
-  check
-
+    export PARFLOW_INS="$pfldir/bin"
+    export PARFLOW_BLD="$pfldir/build"
+#    export PFV="oas-gpu"
+    export RMM_ROOT=$pfldir/rmm
+#
+    C_FLAGS="-fopenmp -Wall -Werror"
+    flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
     if [[ $withOAS == "true" ]]; then
-      cplLib="$liboas $libpsmile"
-      cplInc="$incpsmile"
-    fi  
-
-    if [[ $readCLM == "true" ]] ; then ; cplInc+=" -DREADCLM " ; fi
-
-    flagsSim=" "
-    pcc="${profComp} $mpiPath/bin/mpicc"
-    pfc="${profComp} $mpiPath/bin/mpif90"
-    pf77="${profComp} $mpiPath/bin/mpif77"
-    pcxx="${profComp} $mpiPath/bin/mpic++"
-    flagsTools+="CC=$mpiPath/bin/mpicc FC=$mpiPath/bin/mpif90 F77=$mpiPath/bin/mpif77 "
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
+    else
+        flagsSim+=" -DPARFLOW_AMPS_LAYER=mpi1"
+    fi
+    flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
+    flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
+    flagsSim+=" -DHYPRE_ROOT=$EBROOTHYPRE"
+    flagsSim+=" -DCMAKE_C_FLAGS=$C_FLAGS"
+    flagsSim+=" -DCMAKE_BUILD_TYPE=Release"
+    flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
+    flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
+    flagsSim+=" -DNETCDF_DIR=$ncdfPath"
+    # flagsSim+=" -DNETCDF_Fortran_ROOT=$ncdfPath"
+    flagsSim+=" -DTCL_TCLSH=$tclPath/bin/tclsh8.6"
+    flagsSim+=" -DPARFLOW_AMPS_SEQUENTIAL_IO=on"
+    if [[ $withPDAF == "true" ]] ; then
+      # PDAF:
+      # Turn off SLURM for PDAF due to error
+      # Only used for finishing job close to SLURM time limit
+      # Could be added in future effort
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=FALSE"
+    else
+      flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
+    fi
+    
+    # Define compilers
     if [[ $profiling == "scalasca" ]]; then
       pcc="scorep-mpicc"
       pfc="scorep-mpif90"
       pf77="scorep-mpif77"
-      pcxx="scorep-mpic++"
+      pcxx="scorep-mpicxx"
       flagsTools+="CC=scorep-mpicc FC=scorep-mpif90 F77=scorep-mpif77 "
+    else
+     pcc="$mpiPath/bin/mpicc"
+     pfc="$mpiPath/bin/mpif90"
+     pf77="$mpiPath/bin/mpif77"
+     pcxx="$mpiPath/bin/mpicxx"
     fi
-    libsSim="$cplLib -L$ncdfPath/lib -lnetcdff"
-    fcflagsSim="$cplInc -Duse_libMPI -Duse_netCDF -Duse_comm_MPI1 -DVERBOSE -DDEBUG -DTREAT_OVERLAY -I$ncdfPath/include "
-    if [[ $compiler == "Gnu" ]] ; then  
-      cflagsSim=" -fopenmp "  
-    elif [[ $compiler == "Intel" ]] ; then 
-      cflagsSim=" -qopenmp "  
+
+    comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
+     mkdir -p $PARFLOW_INS
+     mkdir -p $PARFLOW_BLD
+    check
+
+    comment " parflow is configured for $processor "
+    check
+    if [[ $processor == "GPU" ]]; then
+       cd $pfldir
+       comment "module load CUDA  mpi-settings/CUDA "
+        module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
+       check
+       comment "    additional configuration options for GPU are set "
+        flagsSim+=" -DPARFLOW_ACCELERATOR_BACKEND=cuda"
+        flagsSim+=" -DRMM_ROOT=$RMM_ROOT"
+        flagsSim+=" -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared"
+       check
+       comment "    git clone  RAPIDS Memory Manager "
+       if [ -d $RMM_ROOT ] ; then 
+        comment "  remove $RMM_ROOT "
+        rm -rf $RMM_ROOT >> $log_file 2>> $err_file
+        check
+       fi
+       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+       check
+        mkdir -p $RMM_ROOT/build
+        cd $RMM_ROOT/build
+       comment "    configure RMM: RAPIDS Memory Manager "
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+       check
+       comment "    make RMM "
+        make -j  >> $log_file 2>> $err_file
+       check
+       comment "    make install RMM "
+        make install >> $log_file 2>> $err_file
+       check
     fi
-    if [[ $freeDrain == "true" ]] ; then ; cflagsSim+="-DFREEDRAINAGE" ; fi
 
     c_configure_pfl
-
-  comment "   sed correct linker command in pfsimulator"
-    sed -i 's@\"@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@-l -l@@g' $pfldir/pfsimulator/config/Makefile.config >> $log_file 2>> $err_file
-  check
-  comment "   sed correct linker command in pftools"
-    sed -i 's@\"@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@ gfortran m@-lgfortran -lm@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-    sed -i 's@-l -l@@g' $pfldir/pftools/config/Makefile.config >> $log_file 2>> $err_file
-check
-
-
 
 route "${cyellow}<< configure_pfl${cnormal}"
 }
@@ -67,36 +106,8 @@ route "${cyellow}<< make_pfl${cnormal}"
 
 substitutions_pfl(){
 route "${cyellow}>> substitutions_pfl${cnormal}"
-  comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
-  check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
-  check
- 
+
   c_substitutions_pfl
-
-#  comment "   sed hypre Boxcreate fix into /parflow_lib/pf_pfmg_octree.c"
-#    sed -i "s/hypre_BoxCreate()/hypre_BoxCreate(ndim)/" $pfldir/pfsimulator/parflow_lib/pf_pfmg_octree.c >> $log_file 2>> $err_file
-#  check
-
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
-    patch $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c 
-  check 
-  comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
-  check
-
-    if [[ $withOASMCT == "true" ]] ; then 
-      comment "   sed replace old mod_prism includes from pfl oas files"
-        sed -i "s/mod_prism_proto/mod_prism/" $pfldir/pfsimulator/amps/oas3/oas_pfl_vardef.F90 >> $log_file 2>> $err_file
-      check
-        sed -i "s/USE mod_prism.*//" $pfldir/pfsimulator/amps/oas3/oas_pfl_define.F90 >> $log_file 2>> $err_file
-      check
-        sed -i "s/USE mod_prism.*//" $pfldir/pfsimulator/amps/oas3/oas_pfl_snd.F90 >> $log_file 2>> $err_file
-      check
-        sed -i "s/USE mod_prism.*//" $pfldir/pfsimulator/amps/oas3/oas_pfl_rcv.F90 >> $log_file 2>> $err_file
-      check
-    fi
 
 route "${cyellow}<< substitutions_pfl${cnormal}"
 }

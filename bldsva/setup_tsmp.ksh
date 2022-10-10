@@ -57,8 +57,7 @@ getDefaults(){
   def_profiling="no"
   def_cplscheme=""
   def_mode=""
-  #CPS added compiler flag
-  def_compiler="Gnu" 
+  def_compiler="Intel" # set default Intel
 }
 
 #####################################################
@@ -68,9 +67,9 @@ getDefaults(){
 setDefaults(){
   platform=$def_platform
   compiler=$def_compiler
-  if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
   version=$def_version
-  if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
+  if [[ $version == "" ]] then ; version="3.1.0MCT" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
   exp_id=$def_exp_id
@@ -897,7 +896,11 @@ check
     comment "  source clm build interface for $platform"
       . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
     check
-    if [[ $withPDAF == "false" ]] ; then
+    if [[ ${mList[1]} == "eclm" ]] ; then
+        comment "   Creating symlink to eclm.exe"
+        ln -s $bindir/bin/eclm.exe $rundir/eclm.exe >> $log_file 2>> $err_file
+        check
+    elif [[ $withPDAF == "false" ]] ; then
       comment "  cp clm exe to $rundir" 
         cp $bindir/clm $rundir >> $log_file 2>> $err_file
       check
