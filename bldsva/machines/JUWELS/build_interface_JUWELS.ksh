@@ -6,7 +6,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
   . /p/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JUWELS: loadenvs.$compiler"
+  comment "   source and load Modules on JUWELS ($compiler)"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
