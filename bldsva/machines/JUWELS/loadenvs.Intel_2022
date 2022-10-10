@@ -17,9 +17,12 @@ module load Silo/4.11
 module load git/2.33.1-nodocs
 module load Tcl/8.6.11 # this version is not compatible with ParFlow3.2
 module load CMake/3.21.1
-module load Hypre/2.23.0
-export LDFLAGS="-lcudart -lcusparse -lcurand"
-#
+module load Hypre/2.25.0-cpu
+# ---------------------------------------------
+# TODO: Load this Hypre version for ParFlow GPU 
+# module load Hypre/2.23.0
+# export LDFLAGS="-lcudart -lcusparse -lcurand"
+# ---------------------------------------------
 module load ecCodes/2.22.1
 module load HDF5/1.12.1
 module load netCDF/4.8.1
