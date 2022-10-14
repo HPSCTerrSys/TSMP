@@ -7,7 +7,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA ($compiler)"
-  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler $processor >> $log_file 2>> $err_file
   check
 
 
@@ -78,7 +78,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
 
 cd $rundir
-source $rundir/loadenvs
+source $rundir/loadenvs GPU
 export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt

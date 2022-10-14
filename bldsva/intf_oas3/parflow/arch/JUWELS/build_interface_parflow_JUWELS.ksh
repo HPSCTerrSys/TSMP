@@ -54,9 +54,6 @@ route "${cyellow}>> configure_pfl${cnormal}"
     check
     if [[ $processor == "GPU" ]]; then
        cd $pfldir
-       comment "module load CUDA  mpi-settings/CUDA "
-        module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
-       check
        comment "    additional configuration options for GPU are set "
         flagsSim+=" -DPARFLOW_ACCELERATOR_BACKEND=cuda"
         flagsSim+=" -DRMM_ROOT=$RMM_ROOT"
