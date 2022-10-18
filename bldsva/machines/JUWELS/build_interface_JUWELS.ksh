@@ -47,6 +47,12 @@ route "${cyellow}>> finalizeMachine${cnormal}"
 route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
+# computes nodes based on number of processors and resources
+computeNodes(){
+processes=$1
+resources=$2
+echo $((processes%resources?processes/resources+1:processes/resources))
+}
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
@@ -63,7 +69,23 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+
+## Heterogeneous and modular jobs
+
 if [[ $processor == "GPU" ]]; then
+nnode_cos=$((($nproc_cos)/$nppn)) 
+nnode_clm=$((($nproc_clm)/$nppn)) 
+nnode_pfl=$((($nproc_pfl)/$ngpn)) 
+
+nnode_cos=$(computeNodes $nproc_cos $nppn) 
+nnode_clm=$(computeNodes $nproc_clm $nppn) 
+nnode_pfl=$(computeNodes $nproc_pfl $ngpn) 
+
+route "${cyellow}<< setting up heterogeneous/modular job${cnormal}"
+comment "  nppn=$nppn\t\t ngpn=$ngpn"
+comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl"
+comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl"
+
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -71,11 +93,11 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
-#SBATCH -N 4 --ntasks-per-node=48 -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=48 -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develgpus
 
 cd $rundir
 source $rundir/loadenvs
