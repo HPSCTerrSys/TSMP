@@ -623,7 +623,7 @@ printState(){
   print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
   print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
   print "${cred}(43)${cnormal} Dump interval for icon.  (default=$def_dump_icon): ${cgreen}$dump_icon ${cnormal}"
-  print "${cred}(44)${cnormal} Processor CPU or GPU.  (default=$def_processor): ${cgreen}$processor ${cnormal}"
+  print "${cred}(44)${cnormal} Architecture type: CPU, GPU, MSA.  (default=$def_processor): ${cgreen}$processor ${cnormal}"
 }
 
 
@@ -766,7 +766,7 @@ getRoot(){
   USAGE+="[J:dumpclm? Dump interval for CLM (in hours).]:[dumpclm:='$def_dump_clm']"
   USAGE+="[K:dumpcos? Dump interval for Cosmo (in hours).]:[dumpcos:='$def_dump_cos']"
   USAGE+="[E:dumpicon? Dump interval for Cosmo (in hours).]:[dumpicon:='$def_dump_icon']"
-  USAGE+="[A:processor? Processore type CPU or GPU.]:[processor:='$def_processor']" 
+  USAGE+="[A:processor? Processor architecture: CPU, GPU, MSA.]:[processor:='$def_processor']" 
   USAGE+="[L:dumppfl? Dump interval for ParFlow (in hours).]:[dumppfl:='$def_dump_pfl']"
 
 

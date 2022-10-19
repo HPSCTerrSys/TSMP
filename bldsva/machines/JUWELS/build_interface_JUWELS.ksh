@@ -72,7 +72,7 @@ fi
 
 ## Heterogeneous and modular jobs
 
-if [[ $processor == "GPU" ]]; then
+if [[ $processor == "GPU" || $processor == "MSA" ]]; then
 nnode_cos=$((($nproc_cos)/$nppn)) 
 nnode_clm=$((($nproc_clm)/$nppn)) 
 nnode_pfl=$((($nproc_pfl)/$ngpn)) 
@@ -82,9 +82,9 @@ nnode_clm=$(computeNodes $nproc_clm $nppn)
 nnode_pfl=$(computeNodes $nproc_pfl $ngpn) 
 
 route "${cyellow}<< setting up heterogeneous/modular job${cnormal}"
-comment "  nppn=$nppn\t\t ngpn=$ngpn"
-comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl"
-comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl"
+comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
+comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
+comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
@@ -105,8 +105,21 @@ export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combinatio
 date
 echo "started" > started.txt
 rm -rf YU*
+EOF
 
+if [[ $processor == "GPU" ]];then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
 srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+EOF
+fi
+
+if [[ $processor == "MSA" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+##### complete here with MSA srun mapping
+EOF
+fi
+
+cat << EOF >> $rundir/tsmp_slm_run.bsh
 date
 echo "ready" > ready.txt
 exit 0
