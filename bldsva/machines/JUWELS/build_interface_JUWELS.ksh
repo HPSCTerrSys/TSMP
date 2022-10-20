@@ -4,7 +4,7 @@
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /p/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/${SYSTEMNAME}/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JUWELS: loadenvs.$compiler"
   . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
@@ -86,6 +86,7 @@ comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
 comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
 comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
 
+if [[ $processor == "GPU" ]];then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -105,17 +106,58 @@ export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combinatio
 date
 echo "started" > started.txt
 rm -rf YU*
-EOF
 
-if [[ $processor == "GPU" ]];then
-cat << EOF >> $rundir/tsmp_slm_run.bsh
 srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
 EOF
 fi
 
 if [[ $processor == "MSA" ]]; then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
-##### complete here with MSA srun mapping
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
+#SBATCH hetjob
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
+#SBATCH hetjob
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develbooster
+
+cd $rundir
+source $rundir/loadenvs
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2020 \\
+                         -L Intel/2020.2.254-GCC-9.3.0 \\
+                         -L ParaStationMPI/5.4.7-1 \\
+                         -L netCDF/4.7.4 \\
+                         -L netCDF-Fortran/4.5.3 \\
+                         -L ecCodes/2.18.0 \\
+                         ./lmparbin_pur : \\
+     --pack-group=1 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2020 \\
+                         -L Intel/2020.2.254-GCC-9.3.0 \\
+                         -L ParaStationMPI/5.4.7-1 \\
+                         -L netCDF/4.7.4 \\
+                         -L netCDF-Fortran/4.5.3  \\
+                         ./clm : \\
+     --pack-group=2 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2020 \\
+                         -L Intel/2020.2.254-GCC-9.3.0 \\
+                         -L ParaStationMPI/5.4.7-1 \\
+                         -L netCDF/4.7.4 \\
+                         -L netCDF-Fortran/4.5.3 \\
+                         -L Silo/4.10.2 \\
+                         LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
+                         ./parflow cordex0.11
 EOF
 fi
 
