@@ -107,7 +107,7 @@ date
 echo "started" > started.txt
 rm -rf YU*
 
-srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow $pflrunname
 EOF
 fi
 
@@ -157,7 +157,7 @@ srun --pack-group=0 xenv -P \\
                          -L netCDF-Fortran/4.5.3 \\
                          -L Silo/4.10.2 \\
                          LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
-                         ./parflow cordex0.11
+                         ./parflow $pflrunname
 EOF
 fi
 
