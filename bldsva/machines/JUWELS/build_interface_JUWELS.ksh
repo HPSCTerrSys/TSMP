@@ -98,7 +98,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develgpus
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p gpus
 
 cd $rundir
 source $rundir/loadenvs
@@ -123,7 +123,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develbooster
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p booster
 
 cd $rundir
 source $rundir/loadenvs

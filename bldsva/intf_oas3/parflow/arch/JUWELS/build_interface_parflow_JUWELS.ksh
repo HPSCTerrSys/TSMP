@@ -52,7 +52,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
 
     comment " parflow is configured for $processor "
     check
-    if [[ $processor == "GPU" ]]; then
+    if [[ $processor == "GPU" || $processor == "MSA" ]]; then
        cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
         module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
