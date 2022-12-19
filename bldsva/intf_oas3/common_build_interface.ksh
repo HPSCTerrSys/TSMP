@@ -862,7 +862,7 @@ c_configure_pfl(){
 
 route "${cyellow}>>> c_configure_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
 
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
@@ -879,7 +879,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -946,7 +946,7 @@ route "${cyellow}<<< c_configure_pfl${cnormal}"
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
@@ -991,7 +991,7 @@ comment "    cp binary to $bindir"
  fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -1035,7 +1035,7 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
     if [[ $withPDAF == "true" ]]; then
 
       comment "    sed DA amps into CMakeLists.txt"
@@ -1051,7 +1051,7 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
     fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
