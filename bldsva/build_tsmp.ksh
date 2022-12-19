@@ -38,7 +38,7 @@ getDefaults(){
   def_optComp=""   # will be set to platform defaults if empty
 
   #compiler options, CPS remove hardwiring of compilers
-  def_compiler="Gnu"  # will be set to Gnu if empty
+  def_compiler="Intel" # set Intel default if not explicitly set
   def_processor="CPU"
 
   #profiling

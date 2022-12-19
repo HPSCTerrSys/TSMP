@@ -873,6 +873,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export CXX=$pcxx
 
   comment "    configure pfsimulator and pftools"
+  export SCOREP_WRAPPER=off
   cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
 
@@ -949,9 +950,24 @@ route "${cyellow}>>> c_make_pfl${cnormal}"
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
-comment "    make pfsimulator and pftools"
-  make  >> $log_file 2>> $err_file
-check
+if [[ $profiling == "scalasca" ]]; then
+  comment "    fix link.txt files for scalasca"
+    export cpp_compiler=$(echo `which mpicc` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicc/g" {} \;
+    export cpp_compiler=$(echo `which mpic++` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicxx/g" {} \;
+    export cpp_compiler=$(echo `which g++` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicxx/g" {} \;
+  check
+  comment "    make pfsimulator and pftools"
+    SCOREP_WRAPPER=off make pftools >> $log_file 2>> $err_file
+    SCOREP_WRAPPER=on make -j8 >> $log_file 2>> $err_file
+  check
+else
+  comment "    make pfsimulator and pftools"
+    make -j8 >> $log_file 2>> $err_file
+  check
+fi
 comment "    make install pfsimulator and pftools"
   make install >> $log_file 2>> $err_file
 check

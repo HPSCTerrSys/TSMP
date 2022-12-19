@@ -1,9 +1,9 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="/p/scratch/cslts/slts00/tsmp/TestCases/ideal600300/clm"
+  defaultFDCLM="$rootdir/tsmp_idealscal/input_600300/clm"
   defaultFDCOS=""
-  defaultFDOAS="/p/scratch/cslts/slts00/tsmp/TestCases/ideal600300/oasis3"
+  defaultFDOAS="$rootdir/tsmp_idealscal/input_600300/oasis3"
   defaultFDPFL=""
 
 
@@ -78,13 +78,6 @@ route "${cyellow}>> finalizeSetup${cnormal}"
     comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check
-    if [[ $withOASMCT == "true" ]] then
-      for x in $rundir/*BILINEA* ;do 
-        comment "   rename oasis3 remapping files" 
-          mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
-        check 
-      done
-    fi  
   fi  
 
 route "${cyellow}<< finalizeSetup${cnormal}"
