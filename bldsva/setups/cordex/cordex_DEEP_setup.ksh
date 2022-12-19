@@ -24,18 +24,15 @@ initSetup(){
     defaultPFLProcX=9
     defaultPFLProcY=8
   fi
-  defaultStartDate="2016-05-01 12"
-  defaultInitDate="2016-05-01 12"
+
+  defaultStartDate="2021-06-24 12"
+  defaultInitDate="2021-06-24 12"
   
   defaultDumpCLM=1
   defaultDumpCOS=1
   defaultDumpPFL=1
   
   defaultRunhours=3
-
-  defaultDumpCLM=1
-  defaultDumpCOS=1
-  defaultDumpPFL=1 
 
   gx_clm=436
   gy_clm=424
