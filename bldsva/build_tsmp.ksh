@@ -727,7 +727,7 @@ getGitInfo(){
   comment "  Log Git information (TSMP)"
     git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
   check
-  git -C ${rootdir} remote get-url origin
+  git -C ${rootdir} remote get-url origin >> $logfile
   git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
   git -C ${rootdir} describe  --tags --dirty --always >> $log_file
   echo "" >> $log_file
@@ -737,7 +737,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[0]})"
       git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
     check
-    git -C ${rootdir}/${mList[0]} remote get-url origin
+    git -C ${rootdir}/${mList[0]} remote get-url origin >> $logfile
     git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir}/${mList[0]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
@@ -747,7 +747,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[1]})"
       git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
     check
-    git -C ${rootdir}/${mList[1]} remote get-url origin
+    git -C ${rootdir}/${mList[1]} remote get-url origin >> $logfile
     git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir}/${mList[1]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
@@ -757,7 +757,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[2]})"
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
     check
-    git -C ${rootdir}/${mList[2]} remote get-url origin
+    git -C ${rootdir}/${mList[2]} remote get-url origin >> $logfile
     git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
@@ -767,7 +767,7 @@ getGitInfo(){
     comment "  Log Git information (${mList[2]})"
       git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
     check
-    git -C ${rootdir}/${mList[2]} remote get-url origin
+    git -C ${rootdir}/${mList[2]} remote get-url origin >> $logfile
     git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
     git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
@@ -777,7 +777,7 @@ getGitInfo(){
    comment "  Log Git information (${mList[3]})"
      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
    check
-   git -C ${rootdir}/${mList[3]} remote get-url origin
+   git -C ${rootdir}/${mList[3]} remote get-url origin >> $logfile
    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
    git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
    echo "" >> $log_file
