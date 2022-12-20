@@ -8,7 +8,7 @@ route "${cyellow}<< always_pfl${cnormal}"
 configure_pfl(){
 route "${cyellow}>> configure_pfl${cnormal}"
   comment "   cp new Makefile.in to /pfsimulator/parflow_exe/"
-    cp $rootdir/bldsva/intf_oas3/parflow/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/config/Makefile.in $pfldir/pfsimulator/parflow_exe/ >> $log_file 2>> $err_file
   check
 
     if [[ $withOAS == "true" ]]; then
@@ -66,9 +66,9 @@ substitutions_pfl(){
 route "${cyellow}>> substitutions_pfl${cnormal}"
   c_substitutions_pfl
     comment "   cp amps_init.c and oas3_external.h to amps/oas3 folder"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/amps_init.c $pfldir/pfsimulator/amps/oas3
   check
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/oas3_external.h $pfldir/pfsimulator/amps/oas3
   check
  
 
@@ -76,11 +76,11 @@ route "${cyellow}>> substitutions_pfl${cnormal}"
 #    sed -i "s/hypre_BoxCreate()/hypre_BoxCreate(ndim)/" $pfldir/pfsimulator/parflow_lib/pf_pfmg_octree.c >> $log_file 2>> $err_file
 #  check
 
-  comment "    copy nl_function_eval.c with free drainage feature to parflow/pfsimulator/parflow_lib "
+  comment "    copy nl_function_eval.c with free drainage feature to ${mList[3]}/pfsimulator/parflow_lib "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/tsmp/nl_function_eval.c $pfldir/pfsimulator/parflow_lib/nl_function_eval.c 
   check 
   comment "   cp new pf_pfmg_octree.c to /parflow_lib/"
-    patch $rootdir/bldsva/intf_oas3/parflow/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
+    patch $rootdir/bldsva/intf_oas3/${mList[3]}/arch/$platform/src/pf_pfmg_octree.c  $pfldir/pfsimulator/parflow_lib/ 
   check
 
     if [[ $withOASMCT == "true" ]] ; then 
