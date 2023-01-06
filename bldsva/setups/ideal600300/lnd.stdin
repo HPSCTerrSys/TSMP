@@ -17,13 +17,13 @@ cat << EOF > __rundir__/lnd.stdin
  fatmgrid       = '__forcingdir__/griddata___gridsize__.nc'
  fatmlndfrc     = '__forcingdir__/fracdata___gridsize__.nc'
  fatmtopo       = ''
- fpftcon        = '__forcingdir__/inputdata/lnd/clm2/pftdata/pft-physiology.c070207'
+ fpftcon        = '__forcingdir__/pft-physiology.c070207'
  offline_atmdir = '__forcingdir__/atm_forcing/'
  frivinp_rtm    = '__forcingdir__/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
 
  hist_dov2xy    = .true.
  hist_avgflag_pertape = 'A'
- hist_nhtfrq    =  -__dump_clm_interval__ 
+ hist_nhtfrq    =  -__dump_clm_interval__
  hist_mfilt     =  1
  hist_crtinic   = 'NONE'
  mss_irt        =  0 
@@ -34,7 +34,7 @@ cat << EOF > __rundir__/lnd.stdin
  irad           =  1
  wrtdia         = .true.
  archive_dir    = ''
- rest_flag      = .false. 
+ rest_flag      = .false.
 /
  &prof_inparm
  /

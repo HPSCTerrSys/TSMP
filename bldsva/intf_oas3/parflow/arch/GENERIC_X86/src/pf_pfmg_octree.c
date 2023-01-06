@@ -34,7 +34,17 @@
 
 #ifdef HAVE_HYPRE
 #include "hypre_dependences.h"
-#define ndim 3
+
+/*
+ * Versions of Hypre > 2.10.x require dimension argument for
+ * BoxCreate.  Previous versions don't require argument.
+ */
+#if PARFLOW_HYPRE_VERSION_MAJOR > 2 || \
+   ( PARFLOW_HYPRE_VERSION_MAJOR >= 2 &&  PARFLOW_HYPRE_VERSION_MINOR >= 10 )
+#define PARFLOW_HYPRE_DIM 3
+#else
+#define PARFLOW_HYPRE_DIM
+#endif
 
 typedef struct
 {
@@ -151,7 +161,8 @@ int          zero)
       ihi[1] = ilo[1] + ny_v - 1;
       ihi[2] = ilo[2] + nz_v - 1;
 
-      value_box = hypre_BoxCreate(ndim);
+      value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
+      
       hypre_BoxSetExtents(value_box, ilo, ihi); 
 
       GrGeomInBoxLoop(i, j, k, 
@@ -166,7 +177,7 @@ int          zero)
 			 ihi[1] = ilo[1] + num_j - 1;
 			 ihi[2] = ilo[2] + num_k - 1;
 			 
-			 set_box = hypre_BoxCreate(ndim);
+			 set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			 hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			 hypre_StructVectorSetBoxValues ( hypre_b,
@@ -260,7 +271,7 @@ int          zero)
       ihi[1] = ilo[1] + ny_v - 1;
       ihi[2] = ilo[2] + nz_v - 1;
 
-      value_box = hypre_BoxCreate(ndim);
+      value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
       hypre_BoxSetExtents(value_box, ilo, ihi); 
 
       GrGeomInBoxLoop(i, j, k, 
@@ -275,7 +286,7 @@ int          zero)
 			 ihi[1] = ilo[1] + num_j - 1;
 			 ihi[2] = ilo[2] + num_k - 1;
 			 
-			 set_box = hypre_BoxCreate(ndim);
+			 set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			 hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			 hypre_StructVectorSetBoxValues ( hypre_x,
@@ -379,12 +390,8 @@ double       *temp_data)
       }
 
       /* Set the HYPRE grid */
-//CPS fix
-#ifdef HAVE_OAS3
       HYPRE_StructGridCreate(amps_CommWorld, 3, &(instance_xtra->hypre_grid) );
-#else
-      HYPRE_StructGridCreate(MPI_COMM_WORLD, 3, &(instance_xtra->hypre_grid) );
-#endif      
+
 
       grid         = instance_xtra -> grid;
       
@@ -457,15 +464,9 @@ double       *temp_data)
       symmetric = MatrixSymmetric(pf_Bmat);
       if ( !(instance_xtra->hypre_mat) )
       {
-#ifdef HAVE_OAS3
          HYPRE_StructMatrixCreate(amps_CommWorld, instance_xtra->hypre_grid, 
 			       instance_xtra->hypre_stencil,
 			       &(instance_xtra->hypre_mat) );
-#else
-         HYPRE_StructMatrixCreate(MPI_COMM_WORLD, instance_xtra->hypre_grid,
-                               instance_xtra->hypre_stencil,
-                               &(instance_xtra->hypre_mat) );
-#endif
 	 HYPRE_StructMatrixSetNumGhost(instance_xtra->hypre_mat, full_ghosts);
          HYPRE_StructMatrixSetSymmetric(instance_xtra->hypre_mat, symmetric);
          HYPRE_StructMatrixInitialize(instance_xtra->hypre_mat);
@@ -474,15 +475,9 @@ double       *temp_data)
       /* Set up new right-hand-side vector */
       if ( !(instance_xtra->hypre_b) )
       {
-#ifdef HAVE_OAS3
          HYPRE_StructVectorCreate(amps_CommWorld, 
 			       instance_xtra->hypre_grid, 
 			       &(instance_xtra->hypre_b) );
-#else
-         HYPRE_StructVectorCreate(MPI_COMM_WORLD,
-                               instance_xtra->hypre_grid,
-                               &(instance_xtra->hypre_b) );
-#endif
 	 HYPRE_StructVectorSetNumGhost(instance_xtra->hypre_b, no_ghosts);
 	 HYPRE_StructVectorInitialize(instance_xtra->hypre_b);
       }
@@ -490,16 +485,9 @@ double       *temp_data)
       /* Set up new solution vector */
       if ( !(instance_xtra->hypre_x) )
       {
-
-#ifdef HAVE_OAS3
          HYPRE_StructVectorCreate(amps_CommWorld, 
 			       instance_xtra->hypre_grid, 
 			       &(instance_xtra->hypre_x) );
-#else
-         HYPRE_StructVectorCreate(MPI_COMM_WORLD,
-                               instance_xtra->hypre_grid,
-                               &(instance_xtra->hypre_x) );
-#endif
 	 HYPRE_StructVectorSetNumGhost(instance_xtra->hypre_x, full_ghosts);
 	 HYPRE_StructVectorInitialize(instance_xtra->hypre_x);
       }
@@ -569,7 +557,7 @@ double       *temp_data)
 			ihi[1] = ilo[1] + ny_m - 1;
 	    		ihi[2] = ilo[2] + nz_m - 1;
 
-	    		value_box = hypre_BoxCreate(ndim);
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -585,7 +573,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 			       
-			       set_box = hypre_BoxCreate(ndim);
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 			       
                                /* IMF: commented print statement
@@ -640,7 +628,7 @@ double       *temp_data)
 	    		ihi[1] = ilo[1] + ny - 1;
 	    		ihi[2] = ilo[2] + nz - 1;
 
-	    		value_box = hypre_BoxCreate(ndim);
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -655,7 +643,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 
-			       set_box = hypre_BoxCreate(ndim);
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			       /*
@@ -771,7 +759,7 @@ double       *temp_data)
 			ihi[1] = ilo[1] + ny_m - 1;
 	    		ihi[2] = ilo[2] + nz_m - 1;
 
-	    		value_box = hypre_BoxCreate(ndim);
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -787,7 +775,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 			       
-			       set_box = hypre_BoxCreate(ndim);
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 			       
                                /* IMF: commented print statement
@@ -878,7 +866,7 @@ double       *temp_data)
 	    		ihi[1] = ilo[1] + ny - 1;
 	    		ihi[2] = ilo[2] + nz - 1;
 
-	    		value_box = hypre_BoxCreate(ndim);
+	    		value_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 	    		hypre_BoxSetExtents(value_box, ilo, ihi); 
 
 	    		GrGeomInBoxLoop(i, j, k, 
@@ -893,7 +881,7 @@ double       *temp_data)
 			       ihi[1] = ilo[1] + num_j - 1;
 			       ihi[2] = ilo[2] + num_k - 1;
 
-			       set_box = hypre_BoxCreate(ndim);
+			       set_box = hypre_BoxCreate(PARFLOW_HYPRE_DIM);
 			       hypre_BoxSetExtents(set_box, ilo, ihi); 
 
 			       /*
@@ -975,13 +963,9 @@ double       *temp_data)
       EndTiming(public_xtra->time_index_copy_hypre);
 
       /* Set up the PFMG preconditioner */
-#ifdef HAVE_OAS3
       HYPRE_StructPFMGCreate(amps_CommWorld,
 				&(instance_xtra->hypre_pfmg_data) );
-#else
-      HYPRE_StructPFMGCreate(MPI_COMM_WORLD,
-                                &(instance_xtra->hypre_pfmg_data) );
-#endif
+
       HYPRE_StructPFMGSetTol(instance_xtra->hypre_pfmg_data, 1.0e-30);
       /* Set user parameters for PFMG */
       HYPRE_StructPFMGSetMaxIter(instance_xtra->hypre_pfmg_data, max_iter);
@@ -1124,28 +1108,23 @@ int  PFMGOctreeSizeOfTempData()
  Hyper is not available.   
 */
 
-void         PFMGOctree(soln, rhs, tol, zero)
-Vector      *soln;
-Vector      *rhs;
-double       tol;
-int          zero;
+void         PFMGOctree(
+   Vector      *soln,
+   Vector      *rhs,
+   double       tol,
+   int          zero)
 {
    amps_Printf("Error: Parflow not compiled with hypre, can't use pfmg\n");   
    exit(1);
 }
 
-//CPS PFModule  *PFMGOctreeInitInstanceXtra(problem, grid, problem_data,  
-//				      pf_Bmat, pf_Cmat, pf_Emat, pf_Fmat, temp_data)
-PFModule  *PFMGOctreeInitInstanceXtra(problem, grid, problem_data,   
-                                      pf_Bmat, pf_Cmat, temp_data)
-Problem      *problem;
-Grid         *grid;
-ProblemData  *problem_data;
-Matrix       *pf_Bmat;
-Matrix	     *pf_Cmat;
-/*CPS Matrix	     *pf_Emat,
-Matrix	     *pf_Fmat,*/
-double       *temp_data;
+PFModule  *PFMGOctreeInitInstanceXtra(
+   Problem      *problem,
+   Grid         *grid,
+   ProblemData  *problem_data,
+   Matrix       *pf_Bmat,
+   Matrix	*pf_Cmat,
+   double       *temp_data)
 {
    amps_Printf("Error: Parflow not compiled with hypre, can't use pfmg\n");   
    exit(1);
