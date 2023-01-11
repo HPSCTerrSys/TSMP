@@ -86,7 +86,7 @@ comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
 comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
 comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
 
-if [[ $processor == "GPU" ]];then
+if [[ $processor == "GPU" || $processor == "MSA" ]];then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -107,11 +107,15 @@ date
 echo "started" > started.txt
 rm -rf YU*
 
-srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+srun --het-group=0 ./lmparbin_pur :\\
+     --pack-group=1 ./clm :\\
+     --pack-group=2 ./parflow $pflrunname
+date
+echo "ready" > ready.txt
+exit 0
 EOF
-fi
 
-if [[ $processor == "MSA" ]]; then
+elif [[ $processor == "MSA" ]]; then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -158,10 +162,6 @@ srun --pack-group=0 xenv -P \\
                          -L Silo/4.10.2 \\
                          LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
                          ./parflow cordex0.11
-EOF
-fi
-
-cat << EOF >> $rundir/tsmp_slm_run.bsh
 date
 echo "ready" > ready.txt
 exit 0
@@ -197,9 +197,8 @@ echo "ready" > ready.txt
 exit 0
 
 EOF
-
 fi
-
+fi
 
 
 
