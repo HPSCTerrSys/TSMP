@@ -80,7 +80,6 @@ comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
 comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
 comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
 
-if [[ $processor == "GPU" || $processor == "MSA" ]]; then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -108,6 +107,7 @@ date
 echo "ready" > ready.txt
 exit 0
 EOF
+fi
 
 else
 
@@ -139,7 +139,6 @@ echo "ready" > ready.txt
 exit 0
 
 EOF
-fi
 fi
 
 

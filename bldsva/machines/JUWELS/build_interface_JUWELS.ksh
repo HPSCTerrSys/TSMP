@@ -166,6 +166,7 @@ date
 echo "ready" > ready.txt
 exit 0
 EOF
+fi
 
 else
 
@@ -197,7 +198,7 @@ echo "ready" > ready.txt
 exit 0
 
 EOF
-fi
+
 fi
 
 
