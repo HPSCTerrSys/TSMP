@@ -161,7 +161,7 @@ srun --pack-group=0 xenv -P \\
                          -L netCDF-Fortran/4.5.3 \\
                          -L Silo/4.10.2 \\
                          LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
-                         ./parflow cordex0.11
+                         ./parflow $pflrunname
 date
 echo "ready" > ready.txt
 exit 0
