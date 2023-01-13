@@ -98,7 +98,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develgpus
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p gpus
 
 cd $rundir
 source $rundir/loadenvs
@@ -113,6 +113,7 @@ srun --het-group=0 ./lmparbin_pur :\\
 date
 echo "ready" > ready.txt
 exit 0
+
 EOF
 
 elif [[ $processor == "MSA" ]]; then
@@ -127,7 +128,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p develbooster
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p booster
 
 cd $rundir
 source $rundir/loadenvs
