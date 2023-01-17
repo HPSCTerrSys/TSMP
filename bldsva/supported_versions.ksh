@@ -57,7 +57,7 @@ versions+=(
         ["3.0.1MCT"]="3.0.1 old clm3_5 but new cosmo5_1 and Parflow3_2 and with Oasis3-MCT"
         ["3.0.1MCTPDAF"]="3.0.1 with Oasis3-MCT and PDAF Data Assimilation"
  	["3.1.0"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow3_2"
-        ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow >=3.7 and with Oasis3-MCT"
+        ["3.1.0MCT"]="3.1.0 old clm3_5 but new cosmo5_1 and Parflow >=3.10 and with Oasis3-MCT"
         ["3.1.0MCTPDAF"]="3.1.0 with Oasis3-MCT and PDAF Data Assimilation"
 	["1.4.0MCT"]="1.4.0 old clm3_5 and Parflow but new icon-lem with Oasis3-MCT"
 	["1.4.1MCT"]="1.4.1 old clm3_5 but new icon-lem and Parflow3_2 with Oasis3-MCT"
