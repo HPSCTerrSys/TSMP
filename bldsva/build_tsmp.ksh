@@ -725,63 +725,88 @@ getGitInfo(){
 
   echo "Git (TSMP):" >> $log_file
   comment "  Log Git information (TSMP)"
-    git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
+  echo "root dir: $(git -C ${rootdir} rev-parse --absolute-git-dir)" >> $log_file
+  echo "remote url: $(git -C ${rootdir} remote get-url origin || echo "Remote origin not set for TSMP")" >> $log_file
+  echo "commit: $(git -C ${rootdir} log --pretty=format:'%H' -n 1)" >> $log_file
+  echo "tag: $(git -C ${rootdir} describe  --tags --dirty --always)" >> $log_file
   check
-  git -C ${rootdir} remote get-url origin || echo "Remote origin not set for TSMP" >> $logfile
-  git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
-  git -C ${rootdir} describe  --tags --dirty --always >> $log_file
   echo "" >> $log_file
 
   if [[ $withOAS == "true" ]] ; then
     echo "Git (${mList[0]}):" >> $log_file
     comment "  Log Git information (${mList[0]})"
-      git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[0]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[0]} remote get-url origin || echo "Remote origin not set for ${mList[0]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[0]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[0]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[0]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[0]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[0]} remote get-url origin || echo "Remote origin not set for ${mList[0]}" >> $logfile
-    git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[0]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCLM == "true" ]] ; then
     echo "Git (${mList[1]}):" >> $log_file
     comment "  Log Git information (${mList[1]})"
-      git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[1]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[1]} remote get-url origin || echo "Remote origin not set for ${mList[1]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[1]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[1]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[1]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[1]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[1]} remote get-url origin || echo "Remote origin not set for ${mList[1]}" >> $logfile
-    git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[1]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCOS == "true" ]] ; then
     echo "Git (${mList[2]}):" >> $log_file
     comment "  Log Git information (${mList[2]})"
-      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[2]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[2]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[2]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[2]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}" >> $logfile
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withICON == "true" ]] ; then
     echo "Git (${mList[2]}):" >> $log_file
     comment "  Log Git information (${mList[2]})"
-      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[2]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[2]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[2]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[2]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}" >> $logfile
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
- if [[ $withPFL == "true" ]] ; then
-   echo "Git (${mList[3]}):" >> $log_file
-   comment "  Log Git information (${mList[3]})"
-     git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
-   check
-   git -C ${rootdir}/${mList[3]} remote get-url origin || echo "Remote origin not set for ${mList[3]}" >> $logfile
-   git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-   git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
-   echo "" >> $log_file
- fi
+  if [[ $withPFL == "true" ]] ; then
+    echo "Git (${mList[3]}):" >> $log_file
+    comment "  Log Git information (${mList[3]})"
+    if [ -d "${rootdir}/${mList[3]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[3]} remote get-url origin || echo "Remote origin not set for ${mList[3]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[3]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[3]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[3]}" >> $log_file
+    fi
+    check
+    echo "" >> $log_file
+  fi
   if [[ $withPDAF == "true" ]] ; then
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
