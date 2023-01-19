@@ -38,7 +38,7 @@ getDefaults(){
   def_optComp=""   # will be set to platform defaults if empty
 
   #compiler options, CPS remove hardwiring of compilers
-  def_compiler="Gnu"  # will be set to Gnu if empty
+  def_compiler="Intel" # set Intel default if not explicitly set
   def_processor="CPU"
 
   #profiling
@@ -218,17 +218,14 @@ route "${cyellow}> c_compileClm${cnormal}"
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
-  comment "  backup clm dir to: $clmdir"
+  comment "  clear clm dir: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
-    if [[ $withICON == "true" ]]; then
-      # remove '-icon' from the mList[1] name
-      clmicon="${mList[1]}"
-      clmicon=${clmicon%'-icon'}
-      cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
-    else
-      cp -rf ${rootdir}/${mList[1]} $clmdir >> $log_file 2>> $err_file
-    fi
+  comment "  backup clm dir to: $clmdir"
+    # remove '-icon' from the mList[1] name
+    clmicon="${mList[1]}"
+    clmicon=${clmicon%'-icon'}
+    cp -rf ${rootdir}/${clmicon} $clmdir >> $log_file 2>> $err_file
   check
     fi
     if [[ ${options["clm"]} == "build" || ${options["clm"]} == "fresh" ]] ; then
@@ -252,9 +249,10 @@ route "${cyellow}> c_compileIcon${cnormal}"
     always_icon
     if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
     if [[ ${options["icon"]} == "fresh" ]] ; then 
-  comment "  backup icon dir to: $icondir"
+  comment "  clear icon dir: $icondir"
       rm -rf $icondir >> $log_file 2>> $err_file
   check
+  comment "  backup icon dir to: $icondir"
       cp -rf ${rootdir}/${mList[2]} $icondir >> $log_file 2>> $err_file
   check
     fi
@@ -279,9 +277,10 @@ route "${cyellow}> c_compileCosmo${cnormal}"
     always_cos
     if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
-  comment "  backup cos dir to: $cosdir"
+  comment "  clear cos dir: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
   check
+  comment "  backup cos dir to: $cosdir"
       cp -rf ${rootdir}/${mList[2]} $cosdir >> $log_file 2>> $err_file
   check
     fi
@@ -306,9 +305,10 @@ route "${cyellow}> c_compileOasis${cnormal}"
     always_oas
     if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
-  comment "  backup oas dir to: $oasdir"
+  comment "  clear oas dir: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
   check
+  comment "  backup oas dir to: $oasdir"
       cp -rf ${rootdir}/${mList[0]} $oasdir >> $log_file 2>> $err_file
   check
     fi
@@ -333,7 +333,7 @@ route "${cyellow}> c_compileParflow${cnormal}"
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
-     comment "  backup pfl dir to: $pfldir"
+     comment "  clear pfl dir: $pfldir"
        if [ -d $pfldir ] ; then ; rm -rf $pfldir >> $log_file 2>> $err_file ;fi
      check
      comment "  copy ${rootdir}/${mList[3]} to $pfldir"
@@ -363,9 +363,10 @@ route "${cyellow}> c_compileDA${cnormal}"
     always_da
     if [[ ${options["da"]} == "skip" ]] ; then ; route "${cyellow}< c_compileDA${cnormal}" ;return  ;fi 
     if [[ ${options["da"]} == "fresh" ]] ; then 
-  comment "  backup da dir to: $dadir"
+  comment "  clear da dir: $dadir"
       rm -rf $dadir >> $log_file 2>> $err_file
   check
+  comment "  backup ${rootdir}/${mList[4]} to $dadir"
       cp -rf ${rootdir}/${mList[4]} $dadir >> $log_file 2>> $err_file
   check
     fi  
