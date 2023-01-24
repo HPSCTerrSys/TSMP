@@ -59,6 +59,12 @@ route "${cyellow}>> finalizeMachine${cnormal}"
 route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
+# computes nodes based on number of processors and resources
+computeNodes(){
+processes=$1
+resources=$2
+echo $((processes%resources?processes/resources+1:processes/resources))
+}
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
