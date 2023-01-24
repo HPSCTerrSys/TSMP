@@ -17,7 +17,7 @@ initSetup(){
   defaultCLMProcY=8
   defaultCOSProcX=12
   defaultCOSProcY=16
-  if [[ $processor == "GPU" ]]; then
+  if [[ $processor == "GPU" || $processor == "MSA" ]]; then
     defaultPFLProcX=1
     defaultPFLProcY=4
   else
