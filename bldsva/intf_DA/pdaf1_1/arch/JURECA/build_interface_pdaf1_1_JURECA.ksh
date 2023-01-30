@@ -176,7 +176,7 @@ route "${cyellow}>> configure_da${cnormal}"
      libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      obj+=' $(OBJCLM5)'
     fi
-    if [[ ${mList[1]} == eclm ]] ; then
+    # if [[ ${mList[1]} == eclm ]] ; then
      # importFlags+=$importFlagsDA
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
@@ -201,7 +201,7 @@ route "${cyellow}>> configure_da${cnormal}"
      # libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/lib -lpio -lgptl -lmct -lmpeu  "
      # libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      # obj+=' $(OBJCLM5)'
-    fi
+    # fi
   fi
 
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" ]] ; then
