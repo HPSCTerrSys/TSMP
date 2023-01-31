@@ -138,29 +138,29 @@ rm -rf YU*
 
 srun --pack-group=0 xenv -P \\
                          -U $OTHERSTAGES \\
-                         -L Stages/2020 \\
-                         -L Intel/2020.2.254-GCC-9.3.0 \\
-                         -L ParaStationMPI/5.4.7-1 \\
-                         -L netCDF/4.7.4 \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
                          -L netCDF-Fortran/4.5.3 \\
-                         -L ecCodes/2.18.0 \\
+                         -L ecCodes/2.22.1 \\
                          ./lmparbin_pur : \\
      --pack-group=1 xenv -P \\
                          -U $OTHERSTAGES \\
-                         -L Stages/2020 \\
-                         -L Intel/2020.2.254-GCC-9.3.0 \\
-                         -L ParaStationMPI/5.4.7-1 \\
-                         -L netCDF/4.7.4 \\
-                         -L netCDF-Fortran/4.5.3  \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
+                         -L netCDF-Fortran/4.5.3 \\
                          ./clm : \\
      --pack-group=2 xenv -P \\
                          -U $OTHERSTAGES \\
-                         -L Stages/2020 \\
-                         -L Intel/2020.2.254-GCC-9.3.0 \\
-                         -L ParaStationMPI/5.4.7-1 \\
-                         -L netCDF/4.7.4 \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
                          -L netCDF-Fortran/4.5.3 \\
-                         -L Silo/4.10.2 \\
+                         -L Silo/4.11 \\
                          LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
                          ./parflow $pflrunname
 date
