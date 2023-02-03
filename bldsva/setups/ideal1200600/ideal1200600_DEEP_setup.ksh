@@ -12,7 +12,7 @@ initSetup(){
   defaultNLPFL=$rootdir/bldsva/setups/ideal1200600/coup_oas.tcl 
 
 
-  defaultNppn=128
+  defaultNppn=24
   defaultCLMProcX=4
   defaultCLMProcY=2
   defaultCOSProcX=8
