@@ -185,7 +185,8 @@ route "${cyellow}>> configure_da${cnormal}"
      obj+=' $(OBJCLM5)'
     fi
     if [[ ${mList[1]} == eclm ]] ; then
-     # importFlags+=$importFlagsDA
+     comment "Needs to be updated with eCLM coupling configuration, but have to have something here otherwise compilation complains about the if / fi construct "
+     #importFlags+=$importFlagsDA
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/include "
