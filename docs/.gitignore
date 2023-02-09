@@ -1,2 +1,0 @@
-# Ignore build files as GitHub actions should render the doc
-_build/**
