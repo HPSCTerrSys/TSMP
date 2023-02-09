@@ -1,0 +1,25 @@
+name: RenderSphinxDocumentation
+on: [push, pull_request, workflow_dispatch]
+jobs:
+  makeDoc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: 'master'
+      - uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          pip install --upgrade myst-parser
+          pip install sphinx sphinx_rtd_theme
+      - name: Sphinx build
+        run: |
+          sphinx-build doc _build
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true
+        
