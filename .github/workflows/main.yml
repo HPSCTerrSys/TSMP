@@ -1,5 +1,5 @@
 name: RenderSphinxDocumentation
-on: [push, pull_request, workflow_dispatch]
+on: [pull_request, workflow_dispatch]
 jobs:
   makeDoc:
     runs-on: ubuntu-latest
