@@ -13,8 +13,10 @@
 
 # User defined data paths
 # Path to the root directory for all CESM / CLM input files
-# TODO (change to shared with other users)
- export CESMDATAROOT=$SCRATCH/cesm
+ # TODO (change to shared with other users)
+ if [ "$CESMDATAROOT" == ""]; then
+   export CESMDATAROOT=$SCRATCH/cesm
+ fi
 # # Path to the CSM specific input files (usually subfolder of CESMDATAROOT)
  export CSMDATA=$CESMDATAROOT/inputdata
 #
