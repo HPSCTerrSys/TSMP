@@ -7,9 +7,9 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
   comment "   source and load Modules on JURECA"
- if [[ ( ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ) && ${mList[3]} != clm5_0 ]] ; then
-    . $rootdir/bldsva/machines/$platform/loadenvs_tcl8_6_8.$compiler >> $log_file 2>> $err_file
-  else
+ if [[ ( ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ) && ${mList[1]} != clm5_0 ]] ; then
+   . $rootdir/bldsva/machines/$platform/loadenvs_tcl8_6_8.$compiler >> $log_file 2>> $err_file
+ else
     . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
  fi
   check

@@ -181,8 +181,9 @@ route "${cyellow}>> configure_da${cnormal}"
      libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      obj+=' $(OBJCLM5)'
     fi
-    # if [[ ${mList[1]} == eclm ]] ; then
-     # importFlags+=$importFlagsDA
+    if [[ ${mList[1]} == eclm ]] ; then
+     comment "Needs to be updated with eCLM coupling configuration, but have to have something here otherwise compilation complains about the if / fi construct "
+     #importFlags+=$importFlagsDA
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/include "
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/c1a1l1i1o1r1g1w1e1/include "
      # importFlags+=" -I$clmdir/build/intel/mpi/nodebug/nothreads/mct/noesmf/include "
@@ -206,7 +207,7 @@ route "${cyellow}>> configure_da${cnormal}"
      # libs+=" -L$clmdir/build/intel/mpi/nodebug/nothreads/lib -lpio -lgptl -lmct -lmpeu  "
      # libs+=" -lpnetcdf  -mkl -lnetcdff -lnetcdf "
      # obj+=' $(OBJCLM5)'
-    # fi
+    fi
   fi
 
   if [[ $withCLM == "true" && $withCOS == "true" && $withPFL == "false" ]] ; then
