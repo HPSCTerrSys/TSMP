@@ -6,7 +6,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          ref: 'master'
+          ref: 'TestGitHubPages'
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
