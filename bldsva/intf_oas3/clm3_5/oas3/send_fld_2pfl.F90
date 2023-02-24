@@ -164,7 +164,10 @@ ALLOCATE ( fsnd(ndlon,ndlat,nlevsoi), stat=nerror)
 
 ! zero on unmasked points
    fsnd = 0._r8
-   fsnd = -999999._r8
+   ! START NWR 2022-06-21
+   ! I want zeros at 'not coupled pixels' as it seems to be intended originally
+   !fsnd = -999999._r8
+   ! END NWR 2022-06-21
 
    DO jn = 1, vsnd
    DO g1 = 1, numg

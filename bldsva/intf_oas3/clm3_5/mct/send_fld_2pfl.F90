@@ -112,7 +112,11 @@ ALLOCATE ( fsnd(begg:endg), stat=nerror)
    isec = dtime * ( get_nstep() -1 )
 
    DO jn = 1, vsnd
-     fsnd = -999999._r8
+     ! START NWR 2022-06-21
+     ! Set zeros values at 'not coupled pixels' as it seems to be intended originally
+     !fsnd = -999999._r8
+     fsnd = 0._r8
+     ! END NWR 2022-06-21
      DO g1 = begg, endg
         fsnd(g1) = pfl_flx_total_gcell(g1,jn)*3.6_r8/dz(g1,jn)
      END DO
