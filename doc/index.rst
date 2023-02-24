@@ -6,13 +6,19 @@
 Welcome to TSMP documentation!
 ==============================
 
-Irgendein toller text hier zum willkommen heißen...
+Irgendein toller Text hier zum hallo sagen...
 
-und natürlich auf alles wichtige direkt verlinken!
+und natürlich auf alles wichtige direkt verlinken...!
 
 .. toctree::
    :maxdepth: 2
    :caption: Getting Started:
    
    Getting Started <content/gettingstarted>
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contributing:
+   
+   Documentation <content/contributing/documentation>
 
