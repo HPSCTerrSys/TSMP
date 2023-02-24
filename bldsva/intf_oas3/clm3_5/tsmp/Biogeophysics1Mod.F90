@@ -183,12 +183,22 @@ contains
     real(r8) :: psit    !negative potential of soil
     real(r8) :: hr      !relative humidity
     real(r8) :: wx      !partial volume of ice and water of surface layer
+!NWa
+!NOTE: Arrays can start from arbitrary index... 
+!      So in CLM the distributed arraies (over diff. CPUs) does take the index
+!      from the original array.
+!      original_array(0:10) --> array1(0:5) and array(6:10)
+!      The Uper and lower index bound is stored in `lbg`, `ubg`, etc.
+    real(r8) :: tmp_displacement_max(lbg:ubg)  !helper var 
+    real(r8) :: tmp_displacement               !helper var 
+!NWa
 !------------------------------------------------------------------------------
 
    ! Assign local pointers to derived type members (gridcell-level)
 
     forc_hgt_t    => clm_a2l%forc_hgt_t
     forc_pbot     => clm_a2l%forc_pbot
+
     forc_q        => clm_a2l%forc_q
     forc_t        => clm_a2l%forc_t
     forc_th       => clm_a2l%forc_th
@@ -398,31 +408,65 @@ contains
 
     end do
 
-!CPS change forc_hgt = forc_hgt + z0m + displa at PFT level, works for 1 pft max
-!    if (max_pft_per_col .eq. 1) then
-    if (maxpatch_pft .eq. 1) then
+! NWa change forc_hgt = forc_hgt + z0m + displa at PFT level
+! forc_hgt is send from COSMO to CLM via fix value. In fully coupled mode, this
+! fix value can conflict with the actual canopy height, showing up as CLM error
+! with the message:
+! > [...] forc height is below canopy height [...]
+! To workaround this, forc_hgt is adjusted (increased) according to pft types 
+! present within each gridcell.
+! As multiple pfts could be present in one gridcell, first the displacement is 
+! calculated for each pft present, and second the maximum displacement is taken 
+! to correct the forc_hgt. This way we do not run into above error. 
+! However, keep in mind that this correction is still a workaround.
+! NWa Do not forget to allocate below variables
+tmp_displacement = 0._r8 ! scalar
+tmp_displacement_max = 0._r8 ! same shape as forc_hgt
+!
+! First calculate max displacement for all columns and pfts on grid lvl
+    ! max_pft_per_col = im code festgelegte max moeglicher pft (17)
     do pi = 1,max_pft_per_col
+      ! num_nolakec: number of column non-lake points in column filter
       do fc = 1,num_nolakec
         c = filter_nolakec(fc)
         l = clandunit(c)
         g = cgridcell(c)
         if (pi <= npfts(c)) then
           p = pfti(c) + pi - 1
-          
+
           if (frac_sno(c) > 0._r8 ) then
-            forc_hgt_u(p) = forc_hgt_u(g) + z0mg(c) + displa(p)
-            forc_hgt_t(g) = forc_hgt_t(g) + z0mg(c) + displa(p)
-            forc_hgt_q(g) = forc_hgt_q(g) + z0mg(c) + displa(p)
+            ! Calculate displacement for related pft on related column
+            ! If this displacement is higher than displacement_max overwrite
+            ! displacement_max 
+            tmp_displacement = z0mg(c) + displa(p)
+            if (tmp_displacement > tmp_displacement_max(g)) then
+              tmp_displacement_max(g) = tmp_displacement
+            end if
           else
-            forc_hgt_u(g) = forc_hgt_u(g) + z0m(p) + displa(p)
-            forc_hgt_t(g) = forc_hgt_t(g) + z0m(p) + displa(p)
-            forc_hgt_q(g) = forc_hgt_q(g) + z0m(p) + displa(p)
+            ! Calculate displacement for related pft on related column
+            ! If this displacement is higher than displacement_max overwrite
+            ! displacement_max 
+            tmp_displacement = z0m(p) + displa(p)
+            if (tmp_displacement > tmp_displacement_max(g)) then
+              tmp_displacement_max(g) = tmp_displacement
+            end if
           end if
         end if
       end do
     end do
-    end if
-!CPS
+! Second increase forc_hgt on grid lvl with max displacement
+    ! num_nolakec: number of column non-lake points in column filter
+    do fc = 1,num_nolakec
+      c = filter_nolakec(fc)
+      g = cgridcell(c)
+      
+      ! Update forc_hgt on grid lvl
+      forc_hgt_u(g) = forc_hgt_u(g) + tmp_displacement_max(g)
+      !write(6,*)'DEBUG: forc_hgt_u(g)', forc_hgt_u(g)
+      forc_hgt_t(g) = forc_hgt_t(g) + tmp_displacement_max(g)
+      forc_hgt_q(g) = forc_hgt_q(g) + tmp_displacement_max(g)
+    end do
+!! NWR
 
   end subroutine Biogeophysics1
 
