@@ -53,33 +53,30 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        only: mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
        mype_world
   USE mod_assimilation, &
-#ifdef CLMSA
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, dim_state_p, &
-       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, depth_obs_p, screen, &
+       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, depth_obs_p, &
+#ifdef CLMSA
 !hcp 
 !CLMSA needs the physical  coordinates of the elements of state vector 
 !and observation array.        
-       longxy, latixy, longxy_obs, latixy_obs
+       longxy, latixy, longxy_obs, latixy_obs, &
 !hcp end
 #else
-       ONLY: obs_p, obs_index_p, dim_obs, obs_filename, dim_state_p, &
-       pressure_obserr_p, clm_obserr_p, obs_nc2pdaf, depth_obs_p, sc_p, &
-       idx_obs_nc_p, screen
+       sc_p, idx_obs_nc_p, &
 #endif
+       screen
   Use mod_read_obs, &
        only: idx_obs_nc, pressure_obs, pressure_obserr, multierr, &
        read_obs_nc, clean_obs_nc, x_idx_obs_nc, y_idx_obs_nc, &
-       z_idx_obs_nc, read_obs_nc_multi, read_obs_nc_multi_clm, clm_obs, &
-       clmobs_lon, clmobs_lat,clmobs_layer, clmobs_dr, clm_obserr, & 
+       z_idx_obs_nc, clm_obs, &
+       clmobs_lon, clmobs_lat,clmobs_layer, clmobs_dr, clm_obserr, &
        crns_flag, depth_obs
   use mod_tsmp, &
-#if defined CLMSA
        only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-       tag_model_clm, point_obs
-#else
-       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-       tag_model_clm, point_obs, nx_glob, ny_glob, nz_glob
+#ifndef CLMSA
+       nx_glob, ny_glob, nz_glob, &
 #endif
+       tag_model_clm, point_obs
 
 
 #if defined CLMSA
@@ -129,9 +126,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   integer :: numc         ! total number of columns across all processors
   integer :: nump         ! total number of pfts across all processors
   real    :: deltax, deltay !, deltaxy, y1 , x1, z1, x2, y2, z2, R, deltaxy_max
-#endif
 
-#if defined CLMSA
   lon   => clm3%g%londeg
   lat   => clm3%g%latdeg
   call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
@@ -145,38 +140,20 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !  if I'm root in filter, read the nc file
   is_multi_observation_files = .true.
   if (is_multi_observation_files) then
-     write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.', step
-     if (mype_filter==0 .and. screen > 2) then
-         print *, "TSMP-PDAF mype(w)=", mype_world, ": current_observation_filename: ", current_observation_filename
-     end if
-#if defined CLMSA
-     if (mype_filter .eq. 0) then
-         if (screen > 2) then
-             print *, "TSMP-PDAF mype(w)=", mype_world, ": read_obs_nc, CLMSA"
-             print *, "TSMP-PDAF mype(w)=", mype_world, ": model=", model
-         end if
-        if(model == tag_model_parflow) then
-           call read_obs_nc_multi(current_observation_filename)
-        end if
-        if(model == tag_model_clm)  then
-           call read_obs_nc_multi_clm(current_observation_filename)
-        end if
-     end if
-#else
-     !hcp: This need to be changed later in LST DA with clm-pfl
-     if (mype_filter==0 .and. screen > 2) then
-         print *, "TSMP-PDAF mype(w)=", mype_world, ": read_obs_nc, coupled"
-         print *, "TSMP-PDAF mype(w)=", mype_world, ": model=", model
-     end if
-     if (mype_filter.eq.0) call read_obs_nc_multi(current_observation_filename)
-#endif
+      ! Set name of current NetCDF observation file
+      write(current_observation_filename, '(a, i5.5)') trim(obs_filename)//'.', step
   else
-     if (mype_filter.eq.0) call read_obs_nc()
+      ! Single NetCDF observation file (currently NOT used)
+      write(current_observation_filename, '(a, i5.5)') trim(obs_filename)
+  end if
+
+  if (mype_filter .eq. 0) then
+      ! Read current NetCDF observation file
+      call read_obs_nc(current_observation_filename)
   end if
 
   if (mype_filter==0 .and. screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": broadcast obs vars"
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": dim_obs=", dim_obs
   end if
   ! broadcast dim_obs
   call mpi_bcast(dim_obs, 1, MPI_INTEGER, 0, comm_filter, ierror)
@@ -187,7 +164,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
 
   if (mype_filter==0 .and. screen > 2) then
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": allocate for non-root procs"
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": allocate observation arrays for non-root procs"
   end if
   ! allocate for non-root procs
   if (mype_filter .ne. 0) then ! for all non-master proc
@@ -306,7 +283,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   end if
 #endif
 
-  if (mype_filter==0 .and. screen > 2) then
+  if (screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dim_obs_p=", dim_obs_p
   end if
 
