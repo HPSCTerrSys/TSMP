@@ -6,19 +6,57 @@
 Welcome to TSMP documentation!
 ==============================
 
-Irgendein toller Text hier zum hallo sagen...
+.. toctree::
+   :maxdepth: 3
+   :caption: Introduction:
 
-und natürlich auf alles wichtige direkt verlinken...!
+   content/introduction.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
    :caption: Getting Started:
    
-   Getting Started <content/gettingstarted>
+   content/gettingstarted.md
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 3
+   :caption: Installation:
+
+   content/installation.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Building and Running:
+
+   content/build_examples.md
+   content/running.md
+   content/setup_examples.md
+
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Developing:
+
+   content/development.md
+   content/best_practices.md
+   content/structure.md
+   content/intf_da.md
+   content/pdaf.md
+   content/debugging.md
+
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Misc:
+
+   content/remotes.md
+   content/branches.md
+   content/misc.md
+   content/jsc.md
+
+.. toctree::
+   :maxdepth: 3
    :caption: Contributing:
    
-   Documentation <content/contributing/documentation>
+   content/contributing/documentation.md
 
