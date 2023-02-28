@@ -25,7 +25,7 @@ Building the documentation is done by moving to `doc/` and running the command
 Simply browse to this directory and open `index.html' which should show you the 
 locally rendered documentation in your default web browser.
 
-# Below part may be moved 
+## Below part may be moved 
 
 The automatic rendering of the documentation on GitHub is achived by [GitHub 
 actions](https://github.com/features/actions). On GitHub you can find it in the 

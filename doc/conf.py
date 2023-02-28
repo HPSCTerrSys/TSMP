@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'TSMP-Documentation'
-copyright = '2023, Niklas WAGNER'
-author = 'Niklas WAGNER'
+copyright = '2023'
+author = '- Prabhakar SHRESTHA, Wolfgang KURTZ, Fabian GASPER, Mukund PONDKULE, Johannes KELLER, Stefan POLL, Niklas WAGNER'
 
 
 # -- General configuration ---------------------------------------------------
@@ -28,6 +28,12 @@ author = 'Niklas WAGNER'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+        'sphinx.ext.autodoc',
+        'sphinx.ext.viewcode',
+        'sphinx_rtd_theme',
+        'sphinx.ext.napoleon',
+        'sphinx.ext.mathjax',
+        'sphinx_copybutton',
         'myst_parser'
 ]
 
