@@ -1,21 +1,33 @@
-name: RenderSphinxDocumentation
+# Name of the action
+name: RenderCleanMasterSphinxDocumentation
+# Events on which this action should trigger
 on: [push, workflow_dispatch]
+# List of jobs to do
 jobs:
+  # Job name
   makeDoc:
+    # Wich OS / docker image to be used
     runs-on: ubuntu-latest
+    # Steps of the job
     steps:
+      # Checkout the master branch
       - uses: actions/checkout@v3
         with:
           ref: 'master'
+      # Use python env. and install dependencies
       - uses: actions/setup-python@v3
       - name: Install dependencies
         run: |
           pip install --upgrade myst-parser
           pip install sphinx sphinx_rtd_theme
           pip install sphinx-copybutton
+      # Build documentation with sphinx in _build
       - name: Sphinx build
         run: |
           sphinx-build -a doc _build
+      # Deploy new rendered documentation by pushing to branch gh-pages
+      # The actual GiHub Page is refreshed by GitHub if the branch 
+      # gh-pages is updated automatically.
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         with:
@@ -23,4 +35,3 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: _build/
           force_orphan: true
-        
