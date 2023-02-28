@@ -392,6 +392,7 @@ contains
     !if(allocated(x_idx_obs_nc))deallocate(x_idx_obs_nc)
     !if(allocated(y_idx_obs_nc))deallocate(y_idx_obs_nc)
     !if(allocated(z_idx_obs_nc))deallocate(z_idx_obs_nc)
+    if(allocated(depth_obs))deallocate(depth_obs)
     !kuw: clean clm observations
     if(allocated(clmobs_lon))deallocate(clmobs_lon)
     if(allocated(clmobs_lat))deallocate(clmobs_lat)
