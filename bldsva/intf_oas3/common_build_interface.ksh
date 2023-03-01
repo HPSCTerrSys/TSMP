@@ -864,7 +864,7 @@ c_configure_pfl(){
 
 route "${cyellow}>>> c_configure_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
 
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
@@ -875,12 +875,13 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export CXX=$pcxx
 
   comment "    configure pfsimulator and pftools"
+  export SCOREP_WRAPPER=off
   cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
 
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
     if [[ $withOAS == "true" ]] ; then 
       flagsSim+="--with-amps=oas3 --with-oas3 "  
       flagsTools+="--with-amps=oas3 --with-oas3 "
@@ -947,13 +948,28 @@ route "${cyellow}<<< c_configure_pfl${cnormal}"
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
-comment "    make pfsimulator and pftools"
-  make  >> $log_file 2>> $err_file
-check
+if [[ $profiling == "scalasca" ]]; then
+  comment "    fix link.txt files for scalasca"
+    export cpp_compiler=$(echo `which mpicc` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicc/g" {} \;
+    export cpp_compiler=$(echo `which mpic++` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicxx/g" {} \;
+    export cpp_compiler=$(echo `which g++` | sed 's_/_\\/_g')
+    find ${PARFLOW_BLD} -name 'link.txt' -exec sed -i "s/${cpp_compiler}/scorep-mpicxx/g" {} \;
+  check
+  comment "    make pfsimulator and pftools"
+    SCOREP_WRAPPER=off make pftools >> $log_file 2>> $err_file
+    SCOREP_WRAPPER=on make -j8 >> $log_file 2>> $err_file
+  check
+else
+  comment "    make pfsimulator and pftools"
+    make -j8 >> $log_file 2>> $err_file
+  check
+fi
 comment "    make install pfsimulator and pftools"
   make install >> $log_file 2>> $err_file
 check
@@ -977,7 +993,7 @@ comment "    cp binary to $bindir"
  fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
 comment "    cd to pfsimulator" 
   cd $pfldir/pfsimulator >> $log_file 2>> $err_file
 check
@@ -1021,7 +1037,7 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow3_9 ]] ; then
+  if [[ ${mList[3]} == parflow ]] ; then
     if [[ $withPDAF == "true" ]]; then
 
       comment "    sed DA amps into CMakeLists.txt"
@@ -1037,7 +1053,7 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
     fi
   fi
 
-  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow ]] ; then
+  if [[ ${mList[3]} == parflow3_2 || ${mList[3]} == parflow3_0 ]] ; then
   comment "    copy oas3 interface to parflow/pfsimulator/amps "
     patch $rootdir/bldsva/intf_oas3/${mList[3]}/oas3 $pfldir/pfsimulator/amps 
   check
@@ -1232,6 +1248,67 @@ route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
   check
 
 route "${cyellow}<<< c_configure_pdaf_arch${cnormal}"
+}
+
+c_configure_pdaf(){
+route "${cyellow}>>> c_configure_pdaf${cnormal}"
+
+#PDAF interface part
+  file1=$dadir/interface/model/Makefile
+  file2=$dadir/interface/framework/Makefile
+  comment "   cp pdaf interface Makefiles to $dadir"
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/model/Makefile  $file1 >> $log_file 2>> $err_file
+  check
+    cp $rootdir/bldsva/intf_DA/pdaf1_1/framework/Makefile  $file2 >> $log_file 2>> $err_file
+  check
+
+  comment "   sed bindir to Makefiles"
+    sed -i "s,__bindir__,$bindir," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed comp flags to Makefiles"
+    sed -i "s,__fflags__,-cpp -I$dadir/interface/model -I$ncdfPath/include $importFlags," $file1 $file2 >> $log_file 2>> $err_file
+  check
+    sed -i "s,__ccflags__,-I$dadir/interface/model -I$ncdfPath/include $importFlags," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed preproc flags to Makefiles"
+    sed -i "s,__cpp_defs__,$cppdefs," $file1 $file2 >> $log_file 2>> $err_file
+  check
+    sed -i "s,__fcpp_defs__,$cppdefs," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed libs to Makefiles"
+    sed -i "s,__libs__,$libs," $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed obj to Makefiles"
+    sed -i "s,__obj__,$obj," $file1 >> $log_file 2>> $err_file
+  check
+  comment "   sed -D prefix to Makefiles"
+    sed -i "s,__pf__,$pf," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed clm directory to Makefiles"
+    sed -i "s,__clmdir__,${mList[1]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed cosmo directory to Makefiles"
+    sed -i "s,__cosdir__,${mList[2]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
+  comment "   sed parflow directory to Makefiles"
+    sed -i "s,__pfldir__,${mList[3]}," $file1 $file2 >> $log_file 2>> $err_file
+  check
+
+  comment "   cd to $dadir/interface/model"
+    cd $dadir/interface/model >> $log_file 2>> $err_file
+  check
+  comment "   make clean model"
+    make clean >> $log_file 2>> $err_file
+  check
+  comment "   cd to $dadir/src/interface/framework"
+    cd $dadir/interface/framework >> $log_file 2>> $err_file
+  check
+  comment "   make clean framework"
+    make clean >> $log_file 2>> $err_file
+  check
+
+
+route "${cyellow}<<< c_configure_pdaf${cnormal}"
 }
 
 c_make_pdaf(){

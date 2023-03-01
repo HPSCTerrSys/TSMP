@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval/input/clm"
-  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval/input/cosmo"
-  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval/input/oasis3"
-  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval/input/parflow"
+  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval_v2/input/clm"
+  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval_v2/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval_v2/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval_v2/input/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
@@ -24,18 +24,15 @@ initSetup(){
     defaultPFLProcX=9
     defaultPFLProcY=8
   fi
-  defaultStartDate="2016-05-01 12"
-  defaultInitDate="2016-05-01 12"
+
+  defaultStartDate="2021-06-24 12"
+  defaultInitDate="2021-06-24 12"
   
   defaultDumpCLM=1
   defaultDumpCOS=1
   defaultDumpPFL=1
   
   defaultRunhours=3
-
-  defaultDumpCLM=1
-  defaultDumpCOS=1
-  defaultDumpPFL=1 
 
   gx_clm=436
   gy_clm=424
