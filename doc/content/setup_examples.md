@@ -33,7 +33,7 @@ is given at
 
 The common build for the Testcase FallSchool 2019 is [Compile
 Parflow + CLM with
-PDAF](./build_examples.md#compile-parflow-and-clm-with-pdaf). Choose the
+PDAF](./build_examples_tsmppdaf.md#compile-parflow-and-clm-with-pdaf). Choose the
 correct command for your machine and, if possible, the newest version.
 
 ## CLM5 in TSMP setup: nrw_5x

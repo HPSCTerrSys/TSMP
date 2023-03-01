@@ -1,6 +1,6 @@
 # Debugging TSMP #
 
-See also [Debug Tips](build_examples.md#debug-tips) for building
+See also [Debug Tips](build_examples_tsmppdaf.md#debug-tips) for building
 TSMP!
 
 If an error appears and the source can not be localized by the default
