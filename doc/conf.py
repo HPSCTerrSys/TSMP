@@ -60,4 +60,22 @@ html_theme = 'sphinx_rtd_theme'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = []
+
+
+napoleon_numpy_docstring = True
+napoleon_use_ivar = True
+
+copybutton_prompt_text = (r">>> |\.\.\. |\$ |" +
+                          r"In \[\d*\]: | {2,5}\.\.\.: | {5,8}: ")
+copybutton_prompt_is_regexp = True
+
+html_show_sourcelink = True
+
+# MyST generates link anchors from MarkDown headings
+myst_heading_anchors = 4
+
+myst_enable_extensions = [
+    "amsmath",                  # LaTeX equations
+    "dollarmath",               # Inline LaTex
+]
