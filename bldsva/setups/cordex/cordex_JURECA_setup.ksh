@@ -13,7 +13,7 @@ initSetup(){
   defaultRST=$rootdir/bldsva/setups/restart/tsmp_restart.sh
 
  defaultNppn=128
-  if [[ $processor == "GPU" ]]; then
+  if [[ $processor == "GPU" || $processor == "MSA" ]]; then
     defaultCLMProcX=6
     defaultCLMProcY=8
     defaultCOSProcX=16

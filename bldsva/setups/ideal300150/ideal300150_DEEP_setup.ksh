@@ -1,18 +1,18 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$rootdir/tsmp_idealscal/input_1200600/clm"
+  defaultFDCLM="$rootdir/tsmp_idealscal/input_300150/clm"
   defaultFDCOS=""
-  defaultFDOAS="$rootdir/tsmp_idealscal/input_1200600/oasis3"
+  defaultFDOAS="$rootdir/tsmp_idealscal/input_300150/oasis3"
   defaultFDPFL=""
 
 
-  defaultNLCLM=$rootdir/bldsva/setups/ideal1200600/lnd.stdin 
-  defaultNLCOS=$rootdir/bldsva/setups/ideal1200600/lmrun_uc 
-  defaultNLPFL=$rootdir/bldsva/setups/ideal1200600/coup_oas.tcl 
+  defaultNLCLM=$rootdir/bldsva/setups/ideal300150/lnd.stdin 
+  defaultNLCOS=$rootdir/bldsva/setups/ideal300150/lmrun_uc 
+  defaultNLPFL=$rootdir/bldsva/setups/ideal300150/coup_oas.tcl 
 
 
-  defaultNppn=128
+  defaultNppn=24
   defaultCLMProcX=4
   defaultCLMProcY=2
   defaultCOSProcX=8
@@ -28,18 +28,18 @@ initSetup(){
   defaultDumpCOS=1
   defaultDumpPFL=1
 
-  gx_clm=1200
-  gy_clm=1200
+  gx_clm=300
+  gy_clm=300
   dt_clm=900
-  res="1200x1200"
+  res="0300x0300"
 
-  gx_cos=600
-  gy_cos=600
+  gx_cos=150
+  gy_cos=150
   dt_cos=10
   nbndlines=4
 
-  gx_pfl=1200
-  gy_pfl=1200
+  gx_pfl=300
+  gy_pfl=300
   dt_pfl=0.25
   pflrunname="rurlaf"
   base_pfl=0.0025
@@ -74,6 +74,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
     check
+
     comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check

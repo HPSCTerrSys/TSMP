@@ -9,7 +9,7 @@ module load Stages/2022
 module load Intel/2021.4.0
 module load ParaStationMPI/5.5.0-1
 #
-module load Hypre/2.25.0-cpu 
+module load Hypre/2.25.0-cpu  # 2.20.0 #!!!!! nicht da
 module load Silo/4.11
 module load Tcl/8.6.11 # this version is not compatible with ParFlow3.2
 #
@@ -24,7 +24,9 @@ module load Python/3.9.6
 module load NCO/5.0.3
 module load CMake/3.21.1
 module load git/2.33.1-nodocs  # !!! gleich zu git/2.28.0
-module load Scalasca
+module use /p/usersoftware/cstpa/deep/modules/2022
+module load Score-P/deepsea-intel-parastation
+module load Scalasca/deepsea-intel-parastation
 #module load CDO/1.9.8 yet not available with intel. only available with Gcc9.3
 
 #Tcl compatible with ParFlow3.2

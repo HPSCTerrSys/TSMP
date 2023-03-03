@@ -38,7 +38,20 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultwtime="01:00:00"
   defaultQ="dp-cn"
 
-route "${cyellow}<< getMachineDefaults${cnormal}"
+  # DEEP only (because of problems with the perl path in CLM 3.5)
+  if [[ $platform == "DEEP" ]]; then
+      echo
+      echo "Platform: $platform"
+      echo
+      
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkDepends
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/configure
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkSrcfiles
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/queryDefaultNamelist.pl
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/DEEP/config/configure
+  fi
+  
+  route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
@@ -46,6 +59,12 @@ route "${cyellow}>> finalizeMachine${cnormal}"
 route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
+# computes nodes based on number of processors and resources
+computeNodes(){
+processes=$1
+resources=$2
+echo $((processes%resources?processes/resources+1:processes/resources))
+}
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
@@ -62,19 +81,34 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
-if [[ $processor == "GPU" ]]; then
+## Heterogeneous and modular jobs
+
+if [[ $processor == "GPU" || $processor == "MSA" ]]; then
+nnode_cos=$((($nproc_cos)/$nppn))
+nnode_clm=$((($nproc_clm)/$nppn))
+nnode_pfl=$((($nproc_pfl)/$ngpn))
+
+nnode_cos=$(computeNodes $nproc_cos $nppn)
+nnode_clm=$(computeNodes $nproc_clm $nppn)
+nnode_pfl=$(computeNodes $nproc_pfl $ngpn)
+
+route "${cyellow}<< setting up heterogeneous/modular job${cnormal}"
+comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
+comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
+comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
+
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
-#SBATCH --account=slts
+#SBATCH --account=deepsea
 #SBATCH --job-name="TSMP_Hetero"
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
-#SBATCH --time=00:10:00
-#SBATCH -N 4 --ntasks-per-node=48 -p batch
+#SBATCH --time=01:00:00
+#SBATCH -N $nnode_cos --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=48 -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dp-esb
 
 cd $rundir
 source $rundir/loadenvs
@@ -83,7 +117,12 @@ date
 echo "started" > started.txt
 rm -rf YU*
 
-srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+module unload nvidia-driver/.default
+export CUDA_VISIBLE_DEVICES=0
+
+srun --het-group=0 ./lmparbin_pur :\\
+     --het-group=1 ./clm :\\
+     --het-group=2 ./parflow $pflrunname
 date
 echo "ready" > ready.txt
 exit 0
@@ -119,10 +158,7 @@ echo "ready" > ready.txt
 exit 0
 
 EOF
-
 fi
-
-
 
 
 counter=0

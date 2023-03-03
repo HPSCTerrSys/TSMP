@@ -89,8 +89,8 @@ modelVersion+=(
 	["1.5.0MCT"]="oasis3-mct clm3_5-icon icon2-622 parflow3_2"
 	["1.6.0MCT"]="oasis3-mct4 clm3_5-icon icon2-622 parflow3_2"
         ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
-        ["5.0.0"]="mct eclm"
-        ["5.0.0MCT"]="oasis3-mct eclm"
+        ["5.0.0"]="mct eclm cosmo5_1 parflow"
+        ["5.0.0MCT"]="oasis3-mct eclm cosmo5_1 parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -147,7 +147,7 @@ setupsAvail+=(
         ["JUSUF"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse scalingStudy "
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD multi-scale rur icon-ccs bonnRadar bonn seabreeze smresponse "
         ["MISTRAL"]=" nrw cordex idealRTD  "
-        ["DEEP"]=" nrw cordex idealRTD  "
+        ["DEEP"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD  "
 	["CLUMA2"]=" nrw idealRTD multi-scale idealLES "
 	["AGROCLUSTER"]=" nrw "
         ["CCA2"]=" nrw cordex "

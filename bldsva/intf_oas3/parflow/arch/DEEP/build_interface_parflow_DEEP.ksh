@@ -43,12 +43,21 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
-#
-    pcc="$mpiPath/bin/mpicc"
-    pfc="$mpiPath/bin/mpif90"
-    pf77="$mpiPath/bin/mpif77"
-    pcxx="$mpiPath/bin/mpic++"
-#
+
+    # Define compilers
+    if [[ $profiling == "scalasca" ]]; then
+      pcc="scorep-mpicc"
+      pfc="scorep-mpif90"
+      pf77="scorep-mpif77"
+      pcxx="scorep-mpicxx"
+      flagsTools+="CC=scorep-mpicc FC=scorep-mpif90 F77=scorep-mpif77 "
+    else
+     pcc="$mpiPath/bin/mpicc"
+     pfc="$mpiPath/bin/mpif90"
+     pf77="$mpiPath/bin/mpif77"
+     pcxx="$mpiPath/bin/mpicxx"
+    fi
+
     comment "    add parflow paths $PARFLOW_INS, $PARFLOW_BLD "
      mkdir -p $PARFLOW_INS
      mkdir -p $PARFLOW_BLD
@@ -56,10 +65,10 @@ route "${cyellow}>> configure_pfl${cnormal}"
 
     comment " parflow is configured for $processor "
     check
-    if [[ $processor == "GPU" ]]; then
+    if [[ $processor == "GPU" || $processor == "MSA" ]]; then
        cd $pfldir
-       comment "module load CUDA  mpi-settings/CUDA "
-        module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
+       comment "module load CUDA "
+        module load CUDA >> $log_file 2>> $err_file
        check
        comment "    additional configuration options for GPU are set "
         flagsSim+=" -DPARFLOW_ACCELERATOR_BACKEND=cuda"
@@ -77,7 +86,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
        comment "    configure RMM: RAPIDS Memory Manager "
-        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT -DCMAKE_CUDA_ARCHITECTURES=70 >> $log_file 2>> $err_file
        check
        comment "    make RMM "
         make -j  >> $log_file 2>> $err_file
