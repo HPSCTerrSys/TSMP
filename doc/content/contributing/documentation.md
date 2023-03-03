@@ -20,17 +20,11 @@ The internal structure of the documentation is quite simple. All files related
 to the documentation are located in `doc/`.   
 `conf.py` controls the behaviour of sphinx, `index.rst` is the entry point to 
 the documentation, and `content/` contains all the individual `.md`files.  
-Building the documentation is done by moving to `doc/` and running the command 
-`sphinx-build . _build`. This will create the documentation in `doc/_build/`. 
-Simply browse to this directory and open `index.html' which should show you the 
+Building the documentation is done by moving to `doc/` and running the command: 
+```
+sphinx-build -a . _build
+``` 
+This will create the documentation in `doc/_build/`. 
+Simply browse to this directory and open `index.html` which should show you the 
 locally rendered documentation in your default web browser.
 
-## Below part may be moved 
-
-The automatic rendering of the documentation on GitHub is achived by [GitHub 
-actions](https://github.com/features/actions). On GitHub you can find it in the 
-top navigation bar under `Actions`, and in the repo you can find the 
-corresponding yaml file under `.github/workflows`.  
-I do not want to describe the yaml file in detail here, as it may change during 
-the process of implementing this GitHub Page based documentation with the TSMP 
-repo.
