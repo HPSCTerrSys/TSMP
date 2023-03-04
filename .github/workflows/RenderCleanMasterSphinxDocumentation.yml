@@ -4,7 +4,9 @@ name: RenderCleanMasterSphinxDocumentation
 on: [push, workflow_dispatch]
 # List of jobs to do
 jobs:
-  # Job name
+  # Job name 
+  # run on push event, but if branch is master only
+  if: github.ref == 'refs/heads/master'
   makeDoc:
     # Wich OS / docker image to be used
     runs-on: ubuntu-latest
