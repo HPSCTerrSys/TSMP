@@ -1,7 +1,7 @@
 # Name of the action
 name: RenderPRSphinxDocumentation
 # Events on which this action should trigger
-on: [pull_request, workflow_dispatch]
+on: [pull_request]
 # List of jobs to do
 jobs:
   # Job name
@@ -34,6 +34,9 @@ jobs:
       - name: Sphinx build
         run: |
           sphinx-build -a doc _build/${{ github.head_ref }}
+          echo "DEBUG: pwd $(pwd)"
+          echo "DEBUG: ls -l $(ls -l)"
+          bash doc/MarkDiff.sh $(pwd)/_build/content $(pwd)/_build/${{ github.head_ref }}/content
       # Deploy new rendered documentation by pushing _build/ to branch gh-pages
       # The actual GiHub Page is refreshed by GitHub if the branch 
       # gh-pages is updated automatically.
