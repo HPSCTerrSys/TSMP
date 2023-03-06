@@ -79,11 +79,7 @@ allocate(buffer_array(begg:(begg+total_part_len-1)))
 
 ani = adomain%ni
 anj = adomain%nj
-! START NWR 2022-06-21                                                         
-! Set zeros values at 'not coupled pixels' as it seems to be intended originally
-!buffer_array = -999999._r8                                                    
 buffer_array = 0._r8                                                           
-! END NWR 2022-06-21
 last_owner=-1
 cl=0
 c=0
