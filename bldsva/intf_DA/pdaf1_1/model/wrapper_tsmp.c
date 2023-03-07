@@ -50,6 +50,17 @@ void initialize_tsmp() {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
     /* enkf_clm.F90 */
     clm_init(clminfile);
+#elif defined CLMFIVE
+    int pdaf_id;
+    int pdaf_max;
+    int coupcol;
+
+    coupcol = task_id - 1 + startreal;
+
+    pdaf_id = (int) coupcol;
+    pdaf_max = (int) nreal;
+
+    clm5_init(clminfile, &pdaf_id, &pdaf_max);
 #endif
   }
   if(model == 1) {
@@ -72,7 +83,7 @@ void initialize_tsmp() {
 void finalize_tsmp() {
 
   if(model == 0) {
-#if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
+#if defined COUP_OAS_PFL || defined CLMSA || defined CLMFIVE || defined COUP_OAS_COS
     clm_finalize();
 #endif
   }
@@ -125,7 +136,7 @@ void integrate_tsmp() {
 
   /* CLM */
   if(model == 0){
-#if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
+#if defined COUP_OAS_PFL || defined CLMSA || defined CLMFIVE || defined COUP_OAS_COS
     /* Number of time steps for CLM */
     int tsclm;
     tsclm = (int) ( (double) da_interval / dt );

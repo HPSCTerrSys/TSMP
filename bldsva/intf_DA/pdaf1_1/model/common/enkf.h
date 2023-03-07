@@ -39,6 +39,7 @@ void printstat_param_parflow(double* dat, char* name, int dim);
 void enkf_ensemblestatistics (double* dat, double* mean, double* var, int size, MPI_Comm comm);
 void enkf_printstatistics_pfb (double *dat, char* name, int cycle, char* prefix, int dim);
 extern void clm_init(char *s);
+extern void clm5_init(char *s, int pdaf_id, int pdaf_max);
 extern void clm_advance(int *ntstep);
 extern void update_clm();
 extern void print_update_clm(int *ts, int *ttot);
