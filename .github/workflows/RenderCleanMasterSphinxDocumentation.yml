@@ -1,12 +1,14 @@
 # Name of the action
 name: RenderCleanMasterSphinxDocumentation
 # Events on which this action should trigger
-on: [push, workflow_dispatch]
+on:
+  push:
+    branches:
+      # run on push event, but if branch is master only
+      - master
 # List of jobs to do
 jobs:
   # Job name 
-  # run on push event, but if branch is master only
-  if: github.ref == 'refs/heads/master'
   makeDoc:
     # Wich OS / docker image to be used
     runs-on: ubuntu-latest
