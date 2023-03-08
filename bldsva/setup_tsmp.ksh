@@ -689,6 +689,554 @@ getRoot(){
   
 }
 
+
+############################ 
+# ICON interface methods
+############################
+
+c_setup_icon(){
+route "${cyellow}>>> c_setup_icon${cnormal}"
+
+comment "  cp add_run_routines to rundir"
+  cp $rootdir/bldsva/setups/common/add_run_routines $rundir >> $log_file 2>> $err_file
+check
+
+comment "  cp namelist to rundir"
+  cp ${namelist_icon} $rundir >> $log_file 2>> $err_file
+check
+
+comment "  sed dt to namelist"
+  sed "s,__dt_icon_bldsva__,$dt_icon," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed start time to namelist"
+  dSD=($defaultStartDate)
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__starttime_icon_bldsva__,${dSD[0]}T${dSD[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+comment "  sed end time to namelist"
+  dED=($defaultEndDate)
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/icon_master.namelist >> $log_file 2>> $err_file
+  sed "s,__endtime_icon_bldsva__,${dED[0]}T${dED[1]}:00:00Z," -i $rundir/NAMELIST_icon >> $log_file 2>> $err_file
+check
+
+route "${cyellow}<<< c_setup_icon${cnormal}"
+}
+
+setup_icon(){
+route "${cyellow}>> setupIcon${cnormal}"
+
+  c_setup_icon
+
+route "${cyellow}<< setupIcon${cnormal}" 
+}
+
+############################ 
+#Cosmo interface methods
+############################
+
+c_setup_cos(){
+route "${cyellow}>>> c_setup_cos${cnormal}"
+
+comment "  cp namelist to rundir"
+  cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
+#if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
+
+comment "  sed dt to namelist"
+  sed "s,dt_cos_bldsva,$dt_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+comment "  sed number of procs to namelist"
+  sed "s,nprocx_cos_bldsva,$px_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+  sed "s,nprocy_cos_bldsva,$py_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+comment "  sed gridpoints to namelist"
+  sed "s,ie_tot_bldsva,$gx_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+  sed "s,je_tot_bldsva,$gy_cos," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+comment "  sed gridpoints to namelist"
+  sed "s,nbdl_cos_bldsva,$nbndlines," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+
+comment "  create input dir for cosmo"
+  mkdir -p $rundir/cosmo_in >> $log_file 2>> $err_file
+check
+comment "  fill cosmo input dir with softlinks from cosmo forcing dir"
+  ln -sf $forcingdir_cos/* $rundir/cosmo_in >> $log_file 2>> $err_file
+check
+
+comment "  sed forcingdir to namelist"
+  sed "s,__forcingdir__,$rundir/cosmo_in," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+comment "  sed rundir to namelist"
+  sed "s,__rundir__,$rundir," -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+comment "  sed stop time to namelist"
+  sed "s/nstop_cos_bldsva/$nstop_cos/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+comment "  sed date to namelist"
+  sed "s/init_y_bldsva/$(date '+%Y' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+comment "  sed init_m_bldsva to namelist"  
+  sed "s/init_m_bldsva/$(date '+%m' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+  sed "s/init_d_bldsva/$(date '+%d' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+  sed "s/init_h_bldsva/$(date '+%H' -d "$initDate")/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+
+cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))/3600))
+comment "  sed start hour to namelist"
+sed "s/__hstart__/$cnt/" -i $rundir/lmrun_uc >> $log_file 2>> $err_file
+check
+comment "  sed restart interval to namelist"
+#sed "s/__nhour_restart_start__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+sed "s/__nhour_restart_start__/$cnt/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+sed "s/__nhour_restart_stop__/$(($cnt+$runhours))/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+
+cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos} ))
+comment "  sed output interval to namelist"
+sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+sed "s/__dump_cos_interval__/ $(python -c "print ($dump_cos*(3600/$dt_cos))")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+check
+
+if [[ $restfile_cos != "" ]] then
+comment "  softlink restart file to input dir"
+ln -s $restfile_cos $rundir/cosmo_in  >> $log_file 2>> $err_file
+check
+fi
+
+comment "  cd to rundir"
+  cd $rundir >> $log_file 2>> $err_file
+check
+comment "  run lmrun_uc clean"
+  $rundir/lmrun_uc cleancluma >> $log_file 2>> $err_file
+check
+comment "  run lmrun_uc exe"
+  $rundir/lmrun_uc execluma >> $log_file 2>> $err_file
+check
+
+if [[ $withPDAF == "true" ]] ; then
+  cp $rundir/INPUT_IO $rundir/INPUT_IO_$(printf "%05d" $(($instance-$startInst)))     
+fi
+
+route "${cyellow}<<< c_setup_cos${cnormal}"
+}
+
+setup_cos(){
+route "${cyellow}>> setupCos${cnormal}"
+
+  c_setup_cos
+
+route "${cyellow}<< setupCos${cnormal}" 
+}
+
+############################ 
+#OASIS interface methods
+############################
+
+c_setup_oas(){
+route "${cyellow}>>> c_setup_oas${cnormal}"
+
+  comment "   copy cf_name_table to rundir"
+    cp $rootdir/bldsva/data_oas3/cf_name_table.txt $rundir >> $log_file 2>> $err_file
+  check
+  comment "   copy oas namelist to rundir"
+    cp $namelist_oas $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  comment "   sed procs, gridsize & coupling freq into namcouple"
+
+  ncpl_exe1=$nproc_cos
+  ncpl_exe2=$nproc_pfl
+  ncpl_exe3=1
+  if [[ $withCESM == "true" || $withOASMCT == "true" ]] ; then ; ncpl_exe3=$nproc_clm ; fi
+
+
+  if [[ $withICON == "true" ]]; then
+    sed "s/ngiconx/$gx_icon/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+    sed "s/ngclmx/$(($gx_clm*$gy_clm))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  fi
+
+
+  if [[ $withPFL == "true" && $withCOS == "true" ]] then
+
+    sed "s/nproc_exe1/$nproc_cos/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe1/$ncpl_exe1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/nproc_exe2/$nproc_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe2/$ncpl_exe2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/nproc_exe3/$nproc_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe3/$ncpl_exe3/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq2/$cplfreq2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    
+    sed "s/ngpflx/$gx_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngpfly/$gy_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmx/$(($gx_clm*$gy_clm))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngcosx/$(($gx_cos-($nbndlines*2)))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngcosy/$(($gy_cos-($nbndlines*2)))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+  fi  
+if [[ $withPFL == "true" && $withCOS == "false" ]] then
+
+    sed "s/nproc_exe1/$nproc_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe1/$ncpl_exe2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/nproc_exe2/$nproc_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe2/$ncpl_exe3/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq2/$cplfreq2/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+    sed "s/ngpflx/$gx_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngpfly/$gy_pfl/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmx/$gx_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/$gy_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  fi
+  if [[ $withPFL == "false" && $withCOS == "true" ]] then
+    sed "s/nproc_exe1/$nproc_cos/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe1/$ncpl_exe1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/nproc_exe2/$nproc_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ncpl_exe2/$ncpl_exe3/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/cplfreq1/$cplfreq1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+    sed "s/ngcosx/$(($gx_cos-($nbndlines*2)))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngcosy/$(($gy_cos-($nbndlines*2)))/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmx/$gx_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+    sed "s/ngclmy/$gy_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+
+  fi
+  if [[ $withICON == "true" ]]; then
+  rtime=$(( ($runhours*3600 + $cplfreq1/10)*10 ))  # with icon in tenths of second
+  else
+  rtime=$(($runhours*3600 + $cplfreq1))
+  fi
+  if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
+  comment "   sed sim time into namcouple"
+    sed "s/totalruntime/$rtime/" -i $rundir/namcouple >> $log_file 2>> $err_file
+  check
+  comment "   sed startdate into namcouple"
+    sed "s/yyyymmdd/${yyyy}${mm}${dd}/" -i $rundir/namcouple  >> $log_file 2>> $err_file
+  check
+
+
+route "${cyellow}<<< c_setup_oas${cnormal}"
+}
+
+setup_oas(){
+route "${cyellow}>> setupOas${cnormal}"
+
+  c_setup_oas
+
+route "${cyellow}<< setupOas${cnormal}"
+}
+
+############################ 
+#CLM interface methods
+############################
+
+c_setup_clm(){
+route "${cyellow}>>> c_setup_clm${cnormal}"
+
+comment "  sed rundir to namelist"
+  sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+
+comment "  sed starttime to namelist"
+  sed "s,__seconds_clm_bldsva__,$seconds_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed dt to namelist"
+  sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed forcingdir to namelist"
+  sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed gridsize to namelist"
+  sed "s,__gridsize__,$res," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  create rpointer dummy file"
+  touch $rpointer >> $log_file 2>> $err_file
+check
+comment "  sed rpointer path to namelist"
+  sed "s,__rundir_rpointerdir__,$rpointer," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed date to namelist"
+  sed "s,__yyyymmdd_bldsva__,${yyyy}${mm}${dd}," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed dump interval namelist"
+  sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed runtime to namelist"
+  if [[ $withICON == "true" ]]; then
+    runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+  else
+    runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+  fi
+  sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  sed restart file path to namelist"
+    sed "s,__finidat__,${restfile_clm}," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+
+
+comment "  add axe rights to clm namelist"
+    chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+comment "  run clm namelist"
+    $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+
+if [[ $withPDAF == "true" ]] ; then
+  cp $rundir/lnd.stdin $rundir/lnd.stdin_$(printf "%05d" $(($instance-$startInst)))     
+fi
+
+route "${cyellow}<<< c_setup_clm${cnormal}"
+}
+
+setup_clm(){
+route "${cyellow}>> setupClm${cnormal}"
+  seconds_clm=$(($hh*3600))
+#  runstep_clm=$(($runhours*3600/$dt_clm))
+  rpointer=$rundir/lnd.clmoas.rpointer
+
+comment "  cp namelist to rundir"
+  cp $namelist_clm $rundir/lnd.stdin >> $log_file 2>> $err_file
+check
+
+
+  c_setup_clm
+  
+
+############################ 
+# eCLM interface methods
+############################
+
+c_setup_eclm(){
+  route "${cyellow}>>> c_setup_eclm${cnormal}"
+  route "${cyellow}<<< c_setup_eclm${cnormal}"
+}
+
+############################ 
+#Parflow interface methods
+############################
+
+c_setup_pfl(){
+route "${cyellow}>>> c_setup_pfl${cnormal}"
+
+  if [ ! -f "$rundir/coup_oas.tcl" ]; then
+    comment "  $rundir/coup_oas.tcl does not exist, is copied, see c_setup_pfl()"
+    cp $namelist_pfl $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+    check
+  fi
+ 
+  if [[ $withICON == "true" ]]; then
+   comment "  sed ccs_ic_press file to pfl namelist."
+      sed "s,__ccs_ic_press__,$defaultFDPFL/ccs_ic_press.pfb," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+   check
+  fi
+ 
+  comment "   sed nproc x to pfl namelist."
+    sed "s/__nprocx_pfl_bldsva__/$px_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed nproc y to pfl namelist."
+    sed "s/__nprocy_pfl_bldsva__/$py_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed gridpoints x to pfl namelist."
+    sed "s/__ngpflx_bldsva__/$gx_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed gridpoints y to pfl namelist."
+    sed "s/__ngpfly_bldsva__/$gy_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed forcingdir to pfl namelist."
+    sed "s,__forcingdir__,$rundir," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed dt to pfl namelist."
+    sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed end time to pfl namelist."
+#    sed "s/__stop_pfl_bldsva__/$runstep_clm/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+    sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed dump interval to pfl namelist."
+    sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+
+  comment "   sed timing base to pfl namelist."
+    sed "s/__base_pfl__/$base_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+
+  comment "   sed start counter to pfl namelist."
+      cnt=$(( ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}"))))
+      cnt=$(python -c "print ($cnt/($dump_pfl*3600.))")
+      sed "s/__start_cnt_pfl__/$cnt/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+
+
+    if [[ $restfile_pfl == "" ]] then
+  comment "   sed initial condition to pfl namelist."
+      sed "s/__pfl_ICPpressureType__/HydroStaticPatch/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
+  check
+      sed "s/__pfl_ICPpressureValue__/-5.0/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # delete this during restart run
+  check
+  comment "   sed delete restart file name from pfl namelist."
+      sed '/__pfl_ICPpressureFileName__/d' -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file
+  check
+    else
+  comment "   sed delete IC_Pressure value  from pfl namelist." 
+      sed '/__pfl_ICPpressureValue__/d' -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  comment "   sed initial condition to pfl namelist."
+      sed "s/__pfl_ICPpressureType__/PFBFile/" -i $rundir/coup_oas.tcl   >> $log_file 2>> $err_file      # HydrostaticPatch > PFBFile
+  check
+      sed "s,__pfl_ICPpressureFileName__,$restfile_pfl," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file
+  check
+    fi
+  
+  export PARFLOW_DIR=$bindir
+  comment "   cd to rundir."
+    cd $rundir >> $log_file 2>> $err_file
+  check
+
+  comment "   create parflow db with tclsh from namelist."
+  check
+  tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+
+
+route "${cyellow}<<< c_setup_pfl${cnormal}"
+}
+
+setup_pfl(){
+route "${cyellow}>> setup_pfl${cnormal}"
+  c_setup_pfl
+
+route "${cyellow}<< setup_pfl${cnormal}"
+}
+
+############################ 
+#PDAF interface methods
+############################
+
+
+c_setup_pdaf(){
+route "${cyellow}>>> c_setup_da${cnormal}"
+  comment "   copy pdaf namelist to rundir."
+    cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+  comment "   sed num instances into pdaf namelist."
+    sed "s/__ninst__/$(($numInst-$startInst))/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed pflname into pdaf namelist."
+    sed "s/__pflname__/$pflrunname/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed pflproc into pdaf namelist."
+    sed "s/__pflproc__/$nproc_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed dt into pdaf namelist."
+    sed "s/__dt__/$dt_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed endtime into pdaf namelist."
+    sed "s/__endtime__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed clmproc into pdaf namelist."
+    sed "s/__clmproc__/$nproc_clm/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check
+  comment "   sed cosproc into pdaf namelist."
+    sed "s/__cosproc__/$nproc_cos/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+  comment "   sed dtmult into pdaf namelist."
+    sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+  check 
+
+route "${cyellow}<<< c_setup_da${cnormal}"
+}
+
+c_setup_rst(){
+
+ comment " copy $restart_script to $rundir"
+   cp $restart_script $rundir >> $log_file 2>> $err_file
+ check
+
+ comment "   sed startDate into restart template."
+    sed 's/__startDate_bldsva__/"'"$startDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed initDate into restart template."
+    sed 's/__initDate_bldsva__/"'"$initDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed dt_clm into restart template."
+    sed "s/__dt_clm_bldsva__/$dt_clm/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed dt_cosmo into restart template."
+    sed "s/__dt_cos_bldsva__/$dt_cos/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+ comment "   sed PARFLOW_DIR into restart template $bindir."
+#    sed "/__PARFLOW_DIR__/ \$bindir" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+    sed -i "s|__PARFLOW_DIR__|$bindir|" $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+#    sed "s/__PARFLOW_DIR__/$bindir/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
+  check
+
+}
+
+setup_da(){
+route "${cyellow}>> setup_da${cnormal}"
+  c_setup_pdaf
+route "${cyellow}<< setup_da${cnormal}"
+}
+
 #######################################
 #               Main
 #######################################
@@ -852,16 +1400,20 @@ check
     set -A array ${setupsAvail[$platform]}
     refSetup=${array[0]}
   fi
+  
+  comment "  source machine build interface for $platform"
+    . ${rootdir}/bldsva/setups/config_${platform}.ksh >> $log_file 2>> $err_file
+  check
 
   comment "  source setup for $refSetup on $platform"
-    . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+	. ${rootdir}/bldsva/setups/$refSetup/$refSetup_ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
+    
   check
 
   setCombination
   initSetup
-  comment "  source machine build interface for $platform"
-    . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
-  check
+
   getMachineDefaults
   setSelection
      	
@@ -882,10 +1434,6 @@ check
   finalizeMachine
   finalizeSelection 
 
-  comment "  source common interface"
-    . ${rootdir}/bldsva/intf_oas3/common_build_interface.ksh >> $log_file 2>> $err_file
-  check
-
 #  start setup
   origrundir=$rundir
   orignamelist_cos=$namelist_cos
@@ -893,9 +1441,6 @@ check
   orignamelist_clm=$namelist_clm
   orignamelist_pfl=$namelist_pfl
   if [[ $withCLM == "true" ]] ; then 
-    comment "  source clm build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     if [[ ${mList[1]} == "eclm" ]] ; then
         comment "   Creating symlink to eclm.exe"
         ln -s $bindir/bin/eclm.exe $rundir/eclm.exe >> $log_file 2>> $err_file
@@ -907,9 +1452,6 @@ check
     fi
   fi
   if [[ $withCOS == "true" ]] ; then
-    comment "  source cos build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp cos exe to $rundir"
         cp $bindir/lmparbin_pur $rundir  >> $log_file 2>> $err_file
@@ -917,9 +1459,6 @@ check
     fi
   fi
   if [[ $withICON == "true" ]] ; then
-    comment "  source icon build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp icon exe to $rundir"
         cp $bindir/icon $rundir  >> $log_file 2>> $err_file
@@ -927,9 +1466,6 @@ check
     fi
   fi
   if [[ $withPFL == "true" ]] ; then
-    comment "  source pfl build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     if [[ $withPDAF == "false" ]] ; then
       comment "  cp pfl exe to $rundir"
         cp $bindir/parflow $rundir  >> $log_file 2>> $err_file
@@ -937,9 +1473,6 @@ check
     fi
   fi
   if [[ $withOAS == "true" ]] ; then
-    comment "  source oas build interface for $platform"
-      . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     if [[ $withOASMCT == "false" ]] ; then
       comment "  cp oas exe to $rundir"
          cp $bindir/oasis3.MPI1.x $rundir  >> $log_file 2>> $err_file
@@ -949,9 +1482,6 @@ check
 
 #DA
   if [[ $withPDAF == "true" ]] ; then
-    comment "  source PDAF build interface for $platform"
-      . ${rootdir}/bldsva/intf_DA/${mList[4]}/arch/${platform}/build_interface_${mList[4]}_${platform}.ksh  >> $log_file 2>> $err_file
-    check
     comment "  cp da exe to $rundir"
       cp $bindir/tsmp-pdaf $rundir  >> $log_file 2>> $err_file
     check
