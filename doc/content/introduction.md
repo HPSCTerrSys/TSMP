@@ -85,12 +85,13 @@ Papers describing the model physics or the technical implementation of the TSMP-
 | PDAF      | @Nerger2013   | [http://dx.doi.org/10.1016/j.cageo.2012.03.026](http://dx.doi.org/10.1016/j.cageo.2012.03.026)                                             |
 
 
-## Authors ##
+## Contribution to documentation##
 
-These authors contributed signficantly to this documentation before
-contributions were made transparent in the git history.
+The following persons contributed signficantly to this documentation before
+contributions were made transparent in the git history (alphabetic order):
 
-- Wolfgang Kurtz
-- Fabian Gasper
-- Mukund Pondkule
-- Johannes Keller
+Fabian Gasper, Abouzar Ghasemi, Johannes Keller, Wolfgang Kurtz, Stefan Poll, Mukund Pondkule, Prabhakar Shrestha
+
+## Additional remark 
+
+This documentnation will be further populated. It is planned to contain an extensive user guide, which describes the TSMP features, the technical implementation of the coupling, the different configurations, adjustments to different HPC systems as well as various test cases incl. all needed forcing datasets is currently under revision and will be available soon with the model system. See the TSMP website for a list of the individual websites and manuals of the component models. To operate TSMP, the functioning and configuration of the component models has to be understood.
