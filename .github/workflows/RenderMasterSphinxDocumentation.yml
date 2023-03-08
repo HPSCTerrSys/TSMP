@@ -1,7 +1,12 @@
 # Name of the action
 name: RenderMasterSphinxDocumentation
 # Events on which this action should trigger
-on: [workflow_dispatch]
+on:
+  push:
+    branches:
+      # run on push event, but if branch is master only
+      - master
+
 # List of jobs to do
 jobs:
   # Job name
