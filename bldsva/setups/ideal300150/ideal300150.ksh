@@ -33,6 +33,7 @@ freq2OAS=900
 deltaobs=1
 
 indPFL=
+indPFL2=indPFL
 pfsolPFL=
 inipress= *.pfb
 slope= 
