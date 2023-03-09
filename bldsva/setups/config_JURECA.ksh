@@ -225,7 +225,7 @@ chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 route "${cyellow}<< createRunscript${cnormal}"
 }
-$Npp=128
+Npp=128
 
 PFLProcXg=1
 PFLProcYg=4

@@ -1406,7 +1406,7 @@ check
   check
 
   comment "  source setup for $refSetup on $platform"
-	. ${rootdir}/bldsva/setups/$refSetup/$refSetup_ksh >> $log_file 2>> $err_file
+	. ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
     . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
     
   check
