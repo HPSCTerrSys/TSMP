@@ -122,6 +122,8 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	check
           chmod u+w $rundir/slope*.sa  $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
         check
+    comment "   copy initial pressure and script into rundir"
+		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
 	comment "   sed procs into slopescript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
@@ -136,7 +138,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
-          cp $forcingdir_pfl/$indPFL$rundir/pfl_ind.sa >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/$indPFL $rundir/pfl_ind.sa >> $log_file 2>> $err_file
 	check
           chmod u+w $rundir/pfl_ind.sa $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         check
@@ -157,9 +159,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
 
-  comment "   copy restart script to rundir "
-   c_setup_rst
-  check
+
 
 route "${cyellow}<< finalizeSetup${cnormal}"
 }
