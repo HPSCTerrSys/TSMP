@@ -1055,7 +1055,7 @@ check
 
 
   c_setup_clm
-  
+}  
 
 ############################ 
 # eCLM interface methods
