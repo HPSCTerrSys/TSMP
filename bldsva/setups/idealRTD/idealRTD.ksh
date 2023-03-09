@@ -1,6 +1,6 @@
 #! /bin/ksh
 
-static_files=tsmp_nrw
+static_files=tsmp_idealrtd
 
 StartDate="2015-08-07 00"
 InitDate="2015-08-07 00"
