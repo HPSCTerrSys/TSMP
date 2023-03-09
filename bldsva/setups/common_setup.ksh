@@ -87,7 +87,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
-    check
+    
 
     comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
@@ -132,6 +132,8 @@ route "${cyellow}>> finalizeSetup${cnormal}"
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check
 	comment "   create sloap pfb with tclsh"
+	      sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
           tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	check		
 	
@@ -140,7 +142,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	check
           cp $forcingdir_pfl/$indPFL $rundir/$indPFL2 >> $log_file 2>> $err_file
 	check
-          chmod u+w $rundir/$indPFL2 $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/$indPFL2  $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         check
 	comment "   sed procs into soilindscript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
