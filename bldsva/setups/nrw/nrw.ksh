@@ -35,4 +35,5 @@ deltaobs=1
 indPFL=*Soil*
 pfsolPFL=geom_cordex0.11_436x424.pfsol 
 inipress=*.ics.pfb*
+slope=*slope.pfb* 
 
