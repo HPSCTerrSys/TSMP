@@ -35,5 +35,5 @@ deltaobs=1
 indPFL=
 indPFL2=$indPFL
 pfsolPFL=
-inipress= *.pfb
+inipress=*.pfb
 slope=   
