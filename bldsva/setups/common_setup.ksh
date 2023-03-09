@@ -135,7 +135,8 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	      sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
           tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
-	check		
+          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+			
 	
 	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
@@ -153,7 +154,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	check
 	comment "   create soilInd pfb with tclsh"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
           sed "s,__pfl_solidinput_filename__,$defaultFDPFL/$pfsolPFL," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
