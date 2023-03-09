@@ -140,25 +140,25 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 	
 	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
           cp $forcingdir_pfl/$indPFL $rundir/$indPFL2 >> $log_file 2>> $err_file
-	check
+	
           chmod u+w $rundir/$indPFL2  $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-        check
+        
 	comment "   sed procs into soilindscript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
 	comment "   create soilInd pfb with tclsh"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	check
+	
           sed "s,__pfl_solidinput_filename__,$defaultFDPFL/$pfsolPFL," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-	check
+	
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
   fi 
 
