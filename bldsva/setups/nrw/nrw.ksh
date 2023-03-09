@@ -32,7 +32,7 @@ freq2OAS=90
 
 deltaobs=1
 
-indPFL=*Soil*
+indPFL=rurSoil.sa
 pfsolPFL=geom_cordex0.11_436x424.pfsol 
 inipress=*.ics.pfb*
 slope=*slope.pfb* 
