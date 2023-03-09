@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$rootdir/$static_files/input/clm"
-  defaultFDCOS="$rootdir/$static_files/input/cosmo"
-  defaultFDOAS="$rootdir/$static_files/input/oasis3"
-  defaultFDPFL="$rootdir/$static_files/input/parflow"
+  defaultFDCLM="$rootdir/$static_files/clm"
+  defaultFDCOS="$rootdir/$static_files/cosmo"
+  defaultFDOAS="$rootdir/$static_files/oasis3"
+  defaultFDPFL="$rootdir/$static_files/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/$refSetup/lnd.stdin 
