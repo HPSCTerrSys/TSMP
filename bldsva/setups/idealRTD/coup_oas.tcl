@@ -325,4 +325,4 @@ pfset Solver.WriteCLMBinary			        False
 #-----------------------------------------------------------------------------
 # Run and Unload the ParFlow output files
 #-----------------------------------------------------------------------------
-pfwritedb rurlaf 
+pfwritedb idealRTD 
