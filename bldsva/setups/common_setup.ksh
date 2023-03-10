@@ -117,33 +117,35 @@ route "${cyellow}>> finalizeSetup${cnormal}"
 
         comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/ascii2*.tcl $rundir/ >> $log_file 2>> $err_file
-
+		check_pfl
           cp $forcingdir_pfl/$slope $rundir >> $log_file 2>> $err_file
-
+		check_pfl
           chmod u+w $rundir/$slope  $rundir/ascii2*.tcl >> $log_file 2>> $err_file
 
     comment "   copy initial pressure and script into rundir"
 		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
+	check_pfl
 	comment "   sed procs into slopescript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
-	
+          tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
+	check_pfl	
 	comment "   create sloap pfb with tclsh"
 		  sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 	      sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
           sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-          tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
+
           tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
-			
+    check_pfl			
 	
 	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
           cp $forcingdir_pfl/$indPFL $rundir/$indPFL2 >> $log_file 2>> $err_file
-	
+    check_pfl	
           chmod u+w $rundir/$indPFL2  $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
         
 	comment "   sed procs into soilindscript"
@@ -152,7 +154,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	
+	check_pfl
 	comment "   create soilInd pfb with tclsh"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
@@ -161,6 +163,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
           sed "s,__pfl_solidinput_filename__,$defaultFDPFL/$pfsolPFL," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
 	
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
+    check_pfl
   fi 
 
 
