@@ -116,11 +116,11 @@ route "${cyellow}>> finalizeSetup${cnormal}"
         check
 
         comment "   copy slopes and slope script into rundir"
-          cp $forcingdir_pfl/ascii2pfb_slopes.tcl $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
+          cp $forcingdir_pfl/ascii2*.tcl $rundir/ >> $log_file 2>> $err_file
 
           cp $forcingdir_pfl/$slope $rundir >> $log_file 2>> $err_file
 
-          chmod u+w $rundir/$slope  $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
+          chmod u+w $rundir/$slope  $rundir/ascii2*.tcl >> $log_file 2>> $err_file
 
     comment "   copy initial pressure and script into rundir"
 		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
