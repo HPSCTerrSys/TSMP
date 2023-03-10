@@ -4,16 +4,15 @@
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /beegfs/usr_local/software/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JURECA"
-  . $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  comment "   source and load Modules on DEEP: loadenvs.$compiler"
+  . $rootdir/bldsva/machines/loadenvs.$compiler >> $log_file 2>> $err_file
   check
-
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
@@ -22,7 +21,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
-
+#
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-O2" # Gnu
@@ -37,9 +36,22 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="dc-cpu-devel"
+  defaultQ="dp-cn"
 
-route "${cyellow}<< getMachineDefaults${cnormal}"
+  # DEEP only (because of problems with the perl path in CLM 3.5)
+  if [[ $platform == "DEEP" ]]; then
+      echo
+      echo "Platform: $platform"
+      echo
+      
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkDepends
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/configure
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkSrcfiles
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/queryDefaultNamelist.pl
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/DEEP/config/configure
+  fi
+  
+  route "${cyellow}<< getMachineDefaults${cnormal}"
 }
 
 finalizeMachine(){
@@ -47,10 +59,16 @@ route "${cyellow}>> finalizeMachine${cnormal}"
 route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
+# computes nodes based on number of processors and resources
+computeNodes(){
+processes=$1
+resources=$2
+echo $((processes%resources?processes/resources+1:processes/resources))
+}
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
-comment "   copy JURECA module load script into rundirectory"
+comment "   copy JUWELS module load script into rundirectory"
   cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
 
@@ -63,28 +81,45 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
-if [[ $processor == "GPU" ]]; then
+## Heterogeneous and modular jobs
+
+if [[ $processor == "GPU" || $processor == "MSA" ]]; then
+nnode_cos=$((($nproc_cos)/$nppn))
+nnode_clm=$((($nproc_clm)/$nppn))
+nnode_pfl=$((($nproc_pfl)/$ngpn))
+
+nnode_cos=$(computeNodes $nproc_cos $nppn)
+nnode_clm=$(computeNodes $nproc_clm $nppn)
+nnode_pfl=$(computeNodes $nproc_pfl $ngpn)
+
+route "${cyellow}<< setting up heterogeneous/modular job${cnormal}"
+comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
+comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
+comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
+
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
-#SBATCH --account=slts
+#SBATCH --account=deepsea
 #SBATCH --job-name="TSMP_Hetero"
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
-#SBATCH --time=00:10:00
-#SBATCH -N 2 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH --time=01:00:00
+#SBATCH -N $nnode_cos --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
-
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dp-esb
 cd $rundir
 source $rundir/loadenvs
 export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*
-
-srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+module unload nvidia-driver/.default
+export CUDA_VISIBLE_DEVICES=0
+srun --het-group=0 ./lmparbin_pur :\\
+     --het-group=1 ./clm :\\
+     --het-group=2 ./parflow $pflrunname
 date
 echo "ready" > ready.txt
 exit 0
@@ -94,7 +129,6 @@ else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
-
 #SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
@@ -105,9 +139,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
 #SBATCH --account=slts 
-
 export PSP_RENDEZVOUS_OPENIB=-1
-
 cd $rundir
 source $rundir/loadenvs
 date
@@ -118,12 +150,8 @@ $srun
 date
 echo "ready" > ready.txt
 exit 0
-
 EOF
-
 fi
-
-
 
 
 counter=0
@@ -185,7 +213,6 @@ __oas__
 __cos__
 __pfl__
 __clm__
-
 EOF
 else
 cat << EOF >> $rundir/slm_multiprog_mapping.conf
@@ -193,7 +220,6 @@ __oas__
 __icon__
 __pfl__
 __clm__
-
 EOF
 fi
 
@@ -225,4 +251,42 @@ chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 route "${cyellow}<< createRunscript${cnormal}"
 }
+
+Npp=24
+
+PFLProcXg=1
+PFLProcYg=4
+CLMProcXg=3
+CLMProcYg=8
+COSProcXg=12
+COSProcYg=16
+if [[ $refSetup == "cordex" ]] then
+	PFLProcX=9
+	PFLProcY=8
+	CLMProcX=3
+	CLMProcY=8
+	COSProcX=12
+	COSProcY=16
+	elif [[ $refSetup == "nrw" ]] then
+	PFLProcX=3
+	PFLProcY=4
+	CLMProcX=2
+	CLMProcY=2
+	COSProcX=4
+	COSProcY=8
+	elif [[ $refSetup == "idealRTD" ]] then
+	PFLProcX=2
+	PFLProcY=2
+	CLMProcX=2
+	CLMProcY=6
+	COSProcX=6
+	COSProcY=5
+	else 
+	PFLProcX=4
+	PFLProcY=4
+	CLMProcX=4
+	CLMProcY=2
+	COSProcX=8
+	COSProcY=8
+fi
 

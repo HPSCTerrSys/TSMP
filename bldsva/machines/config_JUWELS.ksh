@@ -4,15 +4,16 @@
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /p/software/$platform/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on $platform: loadenvs.$compiler"
-  . $rootdir/bldsva/setups/loadenvs.$compiler >> $log_file 2>> $err_file
+  comment "   source and load Modules on JUWELS: loadenvs.$compiler"
+  . $rootdir/bldsva/machines/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
+  defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
@@ -49,8 +50,8 @@ route "${cyellow}<< finalizeMachine${cnormal}"
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
-comment "   copy $platform module load script into rundirectory"
-  cp $rootdir/bldsva/setups/loadenvs.$compiler $rundir/loadenvs
+comment "   copy JUWELS module load script into rundirectory"
+  cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
 check
 
 mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
@@ -62,7 +63,65 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+if [[ $processor == "GPU" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N 4 --ntasks-per-node=48 -p batch
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=48 -p batch
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
 
+cd $rundir
+source $rundir/loadenvs
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+date
+echo "ready" > ready.txt
+exit 0
+EOF
+
+else
+
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+
+#SBATCH --job-name="TSMP"
+#SBATCH --nodes=$nnodes
+#SBATCH --ntasks=$mpitasks
+#SBATCH --ntasks-per-node=$nppn
+#SBATCH --output=mpiMPMD-out.%j
+#SBATCH --error=mpiMPMD-err.%j
+#SBATCH --time=$wtime
+#SBATCH --partition=$queue
+#SBATCH --mail-type=NONE
+#SBATCH --account=slts 
+
+export PSP_RENDEZVOUS_OPENIB=-1
+
+cd $rundir
+source $rundir/loadenvs
+date
+echo "started" > started.txt
+rm -rf YU*
+export $profVar
+$srun
+date
+echo "ready" > ready.txt
+exit 0
+
+EOF
+
+fi
 
 
 
@@ -166,4 +225,42 @@ chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 route "${cyellow}<< createRunscript${cnormal}"
 }
+
+Npp=48
+
+PFLProcXg=1
+PFLProcYg=4
+CLMProcXg=3
+CLMProcYg=8
+COSProcXg=12
+COSProcYg=16
+if [[ $refSetup == "cordex" ]] then
+	PFLProcX=9
+	PFLProcY=8
+	CLMProcX=3
+	CLMProcY=8
+	COSProcX=12
+	COSProcY=16
+	elif [[ $refSetup == "nrw" ]] then
+	PFLProcX=3
+	PFLProcY=4
+	CLMProcX=2
+	CLMProcY=2
+	COSProcX=4
+	COSProcY=8
+	elif [[ $refSetup == "idealRTD" ]] then
+	PFLProcX=2
+	PFLProcY=2
+	CLMProcX=2
+	CLMProcY=2
+	COSProcX=6
+	COSProcY=5
+	else 
+	PFLProcX=4
+	PFLProcY=4
+	CLMProcX=4
+	CLMProcY=2
+	COSProcX=8
+	COSProcY=8
+fi
 

@@ -1402,7 +1402,7 @@ check
   fi
   
   comment "  source machine build interface for $platform"
-    . ${rootdir}/bldsva/setups/config_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
   check
 
   comment "  source setup for $refSetup on $platform"

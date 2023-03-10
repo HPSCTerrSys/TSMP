@@ -1,18 +1,19 @@
-#! /usr/bin/ksh
+#! /bin/ksh
 
 
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /p/software/jusuf/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/jurecadc/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JUSUF :$rootdir/bldsva/machines/$platform/loadenvs.$compiler"
-  source $rootdir/bldsva/machines/$platform/loadenvs.$compiler >> $log_file 2>> $err_file
+  comment "   source and load Modules on JURECA"
+  . $rootdir/bldsva/machines/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
 
   defaultMpiPath="$EBROOTPSMPI"
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
+  defaultGrib1Path="/p/project/cslts/local/jureca/DWD-libgrib1_20110128_Intel/lib/"
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
@@ -23,14 +24,20 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
 
   # Default Compiler/Linker optimization
-  defaultOptC="-O2"
+  if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+  elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+  else
+      defaultOptC="-O2" # Default
+  fi
 
   profilingImpl=" no scalasca "  
   if [[ $profiling == "scalasca" ]] ; then ; profComp="" ; profRun="scalasca -analyse" ; profVar=""  ;fi
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="batch"
+  defaultQ="dc-cpu-devel"
 
 route "${cyellow}<< getMachineDefaults${cnormal}"
 }
@@ -56,11 +63,39 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
+if [[ $processor == "GPU" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N 2 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=128 -p dc-cpu-devel
+#SBATCH hetjob
+#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p dc-gpu-devel
+
+cd $rundir
+source $rundir/loadenvs
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+date
+echo "ready" > ready.txt
+exit 0
+EOF
+
+else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 
-#SBATCH --job-name="TerrSysMP"
+#SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
 #SBATCH --ntasks-per-node=$nppn
@@ -69,7 +104,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=slts
+#SBATCH --account=slts 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 
@@ -86,6 +121,7 @@ exit 0
 
 EOF
 
+fi
 
 
 
@@ -106,7 +142,6 @@ end_pfl=$(($start_pfl+($numInst*$nproc_pfl)-1))
 
 start_clm=$((($numInst*($nproc_cos+$nproc_icon))+$nproc_oas+($numInst*$nproc_pfl)+$counter))
 end_clm=$(($start_clm+($numInst*$nproc_clm)-1))
-
 
 if [[ $numInst > 1 &&  $withOASMCT == "true" ]] then
  for instance in {$startInst..$(($startInst+$numInst-1))}
@@ -190,4 +225,40 @@ chmod 755 $rundir/slm_multiprog_mapping.conf >> $log_file 2>> $err_file
 check
 route "${cyellow}<< createRunscript${cnormal}"
 }
+Npp=128
 
+PFLProcXg=1
+PFLProcYg=4
+CLMProcXg=6
+CLMProcYg=8
+COSProcXg=16
+COSProcYg=16
+if [[ $refSetup == "cordex" ]] then
+	PFLProcX=9
+	PFLProcY=8
+	CLMProcX=3
+	CLMProcY=8
+	COSProcX=16
+	COSProcY=18
+	elif [[ $refSetup == "nrw" ]] then
+	PFLProcX=5
+	PFLProcY=8
+	CLMProcX=4
+	CLMProcY=4
+	COSProcX=6
+	COSProcY=12
+	elif [[ $refSetup == "idealRTD" ]] then
+	PFLProcX=2
+	PFLProcY=2
+	CLMProcX=2
+	CLMProcY=2
+	COSProcX=6
+	COSProcY=5
+	else 
+	PFLProcX=4
+	PFLProcY=4
+	CLMProcX=4
+	CLMProcY=2
+	COSProcX=8
+	COSProcY=8
+fi
