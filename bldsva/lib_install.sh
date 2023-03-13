@@ -122,12 +122,12 @@ fi
 
 #********* download the source files of the Libs ******************
 
-pwget=`wget https://github.com/open-mpi/ompi/archive/refs/tags/v4.1.0.tar.gz`
+pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.0.tar.gz`
 if [ $? -ne 0 ]; then
     echo "openmpi can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf v4.1.0.tar.gz >> $log_file 2>> $err_file
+tar -xvf openmpi-4.1.0.tar.gz >> $log_file 2>> $err_file
 #****
 pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz`
 if [ $? -ne 0 ]; then
@@ -233,14 +233,14 @@ make install  >> $log_file 2>> $err_file
 export PATH="$dlib/curl/bin:$PATH"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$dlib/curl/lib"
 
-#*************** openmpi-4.0.3 *************************************
+#*************** openmpi *************************************
 echo "installing openmpi ........ "
 
 /usr/bin/env >> $log_file 2>> $err_file
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
 env > $dlib/env.log
 #
-cd $dsrc/ompi-4.1.0
+cd $dsrc/openmpi-*
 ./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
 make all >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
@@ -304,7 +304,7 @@ echo "***********************************************************"
 echo "installing silo in $dlib/silo ..."
 export FCFLAGS="-g -O2 -I$dlib/netcdf/include -I$dlib/hdf5/include -L$dlib/hdf5/lib -lhdf5_fortran -lhdf5"
 #
-cd $dsrc/Silo-4.10.2
+cd $dsrc/Silo-*
 ./configure --prefix=$dlib/silo --with-hdf5=$dlib/hdf5/include,$dlib/hdf5/lib --enable-fortran --enable-shared  >> $log_file 2>> $err_file
 make  >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
