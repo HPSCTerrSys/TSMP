@@ -56,6 +56,8 @@ mkdir -p $dlib/netcdf
 mkdir -p $dlib/hdf5
 mkdir -p $dlib/zlib
 mkdir -p $dlib/curl
+mkdir -p $dlib/eccodes
+mkdir -p $dlib/pnetcdf
 
 log_file=$dlib/lib_install1.out
 err_file=$dlib/lib_install1.err
@@ -120,19 +122,19 @@ fi
 
 #********* download the source files of the Libs ******************
 
-pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
+pwget=`wget https://github.com/open-mpi/ompi/archive/refs/tags/v4.1.0.tar.gz`
 if [ $? -ne 0 ]; then
     echo "openmpi can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
+tar -xvf v4.1.0.tar.gz >> $log_file 2>> $err_file
 #****
-pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.8/hdf5-1.8.20/src/hdf5-1.8.20.tar.gz`
+pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz`
 if [ $? -ne 0 ]; then
     echo "HDF5 can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf hdf5-1.8.20.tar.gz >> $log_file 2>> $err_file
+tar -xvf hdf5-1.10.6.tar.gz >> $log_file 2>> $err_file
 #*****
 pwget=`wget https://github.com/Unidata/netcdf-c/archive/v4.6.1.zip`
 if [ $? -ne 0 ]; then
@@ -141,12 +143,12 @@ if [ $? -ne 0 ]; then
 fi
 unzip v4.6.1.zip >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://github.com/Unidata/netcdf-fortran/archive/4.4.4.zip`
+pwget=`wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.5.3.zip`
 if [ $? -ne 0 ]; then
     echo "Netcdf-fortran can not be downloaded!!!check wget command"
     exit
 fi
-unzip 4.4.4.zip >> $log_file 2>> $err_file
+unzip v4.5.3.zip >> $log_file 2>> $err_file
 #*****
 pwget=`wget https://datapub.fz-juelich.de/slts/tsmp_testcases/TSMP_lib/grib_api-1.25.0-Source.tar.gz%3fapi=v2`
 if [ $? -ne 0 ]; then
@@ -155,40 +157,58 @@ if [ $? -ne 0 ]; then
 fi
 tar -xvf grib_api-1.25.0-Source.tar.gz?api=v2 >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://wci.llnl.gov/content/assets/docs/simulation/computer-codes/silo/silo-4.10.2/silo-4.10.2-bsd-smalltest.tar.gz`
+pwget=`wget https://github.com/LLNL/Silo/archive/refs/tags/4.10.2.tar.gz`
 if [ $? -ne 0 ]; then
     echo "Silo can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf silo-4.10.2-bsd-smalltest.tar.gz >> $log_file 2>> $err_file
+tar -xvf 4.10.2.tar.gz >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://github.com/hypre-space/hypre/archive/v2.14.0.zip`
+pwget=`wget https://github.com/hypre-space/hypre/archive/refs/tags/v2.20.0.zip`
 if [ $? -ne 0 ]; then
     echo "Hypre can not be downloaded!!!check wget command"
     exit
 fi
-unzip v2.14.0.zip >> $log_file 2>> $err_file
+unzip v2.20.0.zip >> $log_file 2>> $err_file
 #****
-pwget=`wget https://prdownloads.sourceforge.net/tcl/tcl8.5.19-src.tar.gz`
+pwget=`wget https://prdownloads.sourceforge.net/tcl/tcl8.6.10-src.tar.gz`
 if [ $? -ne 0 ]; then
     echo "TCL can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf tcl8.5.19-src.tar.gz >> $log_file 2>> $err_file
+tar -xvf tcl8.6.10-src.tar.gz >> $log_file 2>> $err_file
 #****
-pwget=`wget https://www.zlib.net/zlib-1.2.11.tar.gz`
+pwget=`wget https://github.com/madler/zlib/archive/refs/tags/v1.2.11.tar.gz`
 if [ $? -ne 0 ]; then
     echo "zlib can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf zlib-1.2.11.tar.gz >> $log_file 2>> $err_file
+tar -xvf v1.2.11.tar.gz >> $log_file 2>> $err_file
 #****
-pwget=`wget https://curl.haxx.se/download/curl-7.58.0.tar.gz`
+pwget=`wget https://curl.haxx.se/download/curl-7.71.1.tar.gz`
 if [ $? -ne 0 ]; then
     echo "curl can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf curl-7.58.0.tar.gz >> $log_file 2>> $err_file
+tar -xvf curl-7.71.1.tar.gz >> $log_file 2>> $err_file
+echo "****** LIBs are downloaded and extracted in $dsrc *****"
+
+#****
+pwget=`wget https://github.com/ecmwf/eccodes/archive/refs/tags/2.18.0.zip`
+if [ $? -ne 0 ]; then
+    echo "ecCodes can not be downloaded!!!check wget command"
+    exit
+fi
+unzip 2.18.0.zip >> $log_file 2>> $err_file
+echo "****** LIBs are downloaded and extracted in $dsrc *****"
+
+#****
+pwget=`wget https://github.com/Parallel-NetCDF/PnetCDF/archive/refs/tags/checkpoint.1.12.1.zip`
+if [ $? -ne 0 ]; then
+    echo "PnetCDF can not be downloaded!!!check wget command"
+    exit
+fi
+unzip checkpoint.1.12.1.zip >> $log_file 2>> $err_file
 echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #*************** Zlib *************************************
@@ -220,7 +240,7 @@ echo "installing openmpi ........ "
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
 env > $dlib/env.log
 #
-cd $dsrc/openmpi*
+cd $dsrc/ompi-4.1.0
 ./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
 make all >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
@@ -284,7 +304,7 @@ echo "***********************************************************"
 echo "installing silo in $dlib/silo ..."
 export FCFLAGS="-g -O2 -I$dlib/netcdf/include -I$dlib/hdf5/include -L$dlib/hdf5/lib -lhdf5_fortran -lhdf5"
 #
-cd $dsrc/silo*
+cd $dsrc/Silo-4.10.2
 ./configure --prefix=$dlib/silo --with-hdf5=$dlib/hdf5/include,$dlib/hdf5/lib --enable-fortran --enable-shared  >> $log_file 2>> $err_file
 make  >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
@@ -314,8 +334,23 @@ make install  >> $log_file 2>> $err_file
 ln -s $dlib/tcl/bin/tclsh8.5 $dlib/tcl/bin/tclsh  >> $log_file 2>> $err_file
 #
 
+#******************************* ecCodes *******************************
+echo "**************************************************************"
+echo "installing ecCódes in $dlib/eccodes ..."
+cd $dsrc/eccodes*
+cmake  src/
+make
+ctest
+make install
 
-cat > $bldsva/machines/GENERIC_X86/loadenv_x86 << end_loadenv
+#******************************* PnetCDF *******************************
+echo "**************************************************************"
+echo "installing ecCódes in $dlib/eccodes ..."
+cd $dsrc/PnetCDF-checkpoint.1.12.1/
+make
+make install
+
+cat > $bldsva/machines/loadenv_x86 << end_loadenv
 export PATH="$dlib/openmpi/bin:\$PATH"
 export PATH="$dlib/tcl/bin:\$PATH"
 export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/hdf5/lib"
