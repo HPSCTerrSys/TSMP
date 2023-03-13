@@ -115,11 +115,6 @@ route "${cyellow}<< substitutions_pfl${cnormal}"
 }
 
 
-setup_pfl(){
-route "${cyellow}>> setup_pfl${cnormal}"
-  c_setup_pfl
 
-route "${cyellow}<< setup_pfl${cnormal}"
-}
 
 

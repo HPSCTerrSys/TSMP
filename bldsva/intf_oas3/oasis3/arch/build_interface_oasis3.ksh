@@ -19,7 +19,7 @@ configure_oas(){
 route "${cyellow}>> configure_oas${cnormal}"
   file=${oasdir}/util/make_dir/make.oas3
   comment "   cp jureca oasis3 makefile to /util/make_dir/"
-    cp $rootdir/bldsva/intf_oas3/oasis3/arch/$platform/config/make.intel_jureca_oa3 $file >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/oasis3/arch/config/make.intel_jureca_oa3 $file >> $log_file 2>> $err_file
   check
   c_configure_oas
   comment "   sed new psmile includes to Makefile"
@@ -57,11 +57,4 @@ route "${cyellow}<< make_oas${cnormal}"
 }
 
 
-setup_oas(){
-route "${cyellow}>> setupOas${cnormal}"
-
-  c_setup_oas
-
-route "${cyellow}<< setupOas${cnormal}"
-}
 

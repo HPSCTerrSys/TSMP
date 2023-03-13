@@ -26,9 +26,9 @@ else
 fi
   export SCOREP_WRAPPER=on
 comment "   cp Makefile to icon dir"
-   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/config/Makefile $icondir >> $log_file 2>> $err_file
 check
-route "cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir"
+route "cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/config/Makefile $icondir"
 check
 comment "   sed oasisdir to icon Makefile"
   sed -i "s@__oasisdir__@$oasdir@" $icondir/Makefile >> $log_file 2>> $err_file
@@ -103,10 +103,4 @@ route "${cyellow}>> substitutions_icon${cnormal}"
 route "${cyellow}<< substitutions_icon${cnormal}"
 }
 
-setup_icon(){
-route "${cyellow}>> setupIcon${cnormal}"
 
-  c_setup_icon
-
-route "${cyellow}<< setupIcon${cnormal}" 
-}

@@ -30,8 +30,4 @@ route "${cyellow}>> substitutions_clm${cnormal}"
 route "${cyellow}<< substitutions_clm${cnormal}"
 }
 
-setup_clm(){
-route "${cyellow}>> setupClm${cnormal}"
-  c_setup_eclm
-route "${cyellow}<< setupClm${cnormal}"
-}
+

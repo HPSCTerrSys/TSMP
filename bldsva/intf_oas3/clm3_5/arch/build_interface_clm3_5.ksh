@@ -31,9 +31,9 @@ substitutions_clm(){
 route "${cyellow}>> substitutions_clm${cnormal}"
    c_substitutions_clm
    comment "   cp m_FileResolve.F90 and shr_sys_mod.F90 to usr.src folder"
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src.$compiler/m_FileResolv.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$compiler/m_FileResolv.F90 $clmdir/bld/usr.src	
    check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/src.$compiler/shr_sys_mod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$compiler/shr_sys_mod.F90 $clmdir/bld/usr.src
    check
 
   if [[ $withOASMCT == "true" ]] ; then
@@ -51,29 +51,12 @@ route "${cyellow}>> substitutions_clm${cnormal}"
   fi
 
   comment "   cp new clm configure & Makefile.in to clm/bld/"
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/configure $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/config/configure $clmdir/bld 
   check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/Makefile.in $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/config/Makefile.in $clmdir/bld 
   check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/$platform/config/config_clm_defaults.xml $clmdir/bld 
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/config/config_clm_defaults.xml $clmdir/bld 
   check
 route "${cyellow}<< substitutions_clm${cnormal}"
 }
 
-
-setup_clm(){
-route "${cyellow}>> setupClm${cnormal}"
-  seconds_clm=$(($hh*3600))
-#  runstep_clm=$(($runhours*3600/$dt_clm))
-  rpointer=$rundir/lnd.clmoas.rpointer
-
-comment "  cp namelist to rundir"
-  cp $namelist_clm $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-
-
-  c_setup_clm
-
-
-route "${cyellow}<< setupClm${cnormal}"
-}

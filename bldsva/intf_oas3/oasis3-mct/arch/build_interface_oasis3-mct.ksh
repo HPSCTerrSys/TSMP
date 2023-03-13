@@ -94,7 +94,7 @@ configure_oas(){
 route "${cyellow}>> configure_oas${cnormal}"
   file=${oasdir}/util/make_dir/make.oas3
   comment "   cp juwels oasis3-mct makefile to /util/make_dir/"
-    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/$platform/config/make.intel_juwels_oa3 $file >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_oas3/oasis3-mct/arch/config/make.intel_oa3 $file >> $log_file 2>> $err_file
   check
   c_configure_oas
   comment "   sed new psmile includes to Makefile"
@@ -128,7 +128,11 @@ route "${cyellow}>> configure_oas${cnormal}"
     sed -i "s@__lib__@-L$ncdfPath/lib/ -lnetcdff@" $file >> $log_file 2>> $err_file
   check
   comment "   sed precision to oas Makefile"
-    sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
+    if [[ $compiler == "Intel" ]]; then
+      sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
+    fi
   check
 
 route "${cyellow}<< configure_oas${cnormal}"
@@ -140,12 +144,4 @@ route "${cyellow}>> make_oas${cnormal}"
 route "${cyellow}<< make_oas${cnormal}"
 }
 
-
-setup_oas(){
-route "${cyellow}>> setupOas${cnormal}"
-
-  c_setup_oas
-
-route "${cyellow}<< setupOas${cnormal}"
-}
 
