@@ -33,6 +33,18 @@ cd $TSMP_DIR/bldsva
 Not that heterogeneous job will be possible only for TSMP with ParFlow3.9 which is available from version v1.3.3.
 
 ## NRW Test case
+
+### Retrieving the test case input data (NRW)
+
+For `NRW` test case:
+
+```shell
+cd $TSMP_DIR/bldsva
+./download_data_for_test_cases.ksh nrw
+```
+
+### Setup and configuration of the NRW test case
+
 NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
 ParFlow) configuration of TSMP. The atmospheric component uses a constant lateral spatial resolution of about 1 km and a variable vertical discretization into 50 levels gradually coarsening from the bottom (20 m) to the top (22000 m). Initial and lateral boundary conditions for the atmospheric model are obtained from the operational weather forecast model
 COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](./gettingstarted.md/#step-3-get-the-component-models-for-this-experiment) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](./gettingstarted.md/#step-5-build-tsmp-interface-and-component-models). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
