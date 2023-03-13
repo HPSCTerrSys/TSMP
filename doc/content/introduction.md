@@ -1,4 +1,4 @@
-# Introduction to TSMP & TSMP-PDAF #
+# Introduction to TSMP & TSMP-PDAF
 
 ## TSMP 
 
@@ -20,7 +20,7 @@ TSMP development has been driven by groups within the [Center for High-Performan
 
 TSMP-PDAF describes the branches of the TSMP-repositories usable for TSMP simulations coupled with the Parallel Data Assimilation Framework ([PDAF](http://pdaf.awi.de/trac/wiki)).
 
-## Web Resources ##
+## Web Resources
 
 The main remote repository of TSMP is located on Github:
 
@@ -47,7 +47,7 @@ Additional information on TSMP can be found on the TSMP-website:
 
 If you encounter any kind of problem with TSMP or TSMP-PDAF, do not hesitate to open in issue on Github under [https://github.com/HPSCTerrSys/TSMP/issues](https://github.com/HPSCTerrSys/TSMP/issues).
 
-## TSMP: Introduction from Website ##
+## TSMP: Introduction from Website
 
 TSMP implements a physically-based representation of transport processes of water, energy and momentum across scales down to sub-km
 resolution including explicit feedbacks between groundwater, the land surface and atmosphere with a focus on the terrestrial hydrological and energy cycles. TSMP currently comprises three component models:
@@ -67,7 +67,7 @@ For TSMP-PDAF additionally
 * Kurtz, W., He, G., Kollet, S. J., Maxwell, R. M., Vereecken, H., & Hendricks Franssen, H. J. (2016). TerrSysMP–PDAF (version 1.0): a modular high-performance data assimilation framework for an integrated land surface–subsurface model. Geoscientific Model Development, 9(4), 1341-1360. doi: [10.5194/gmd-9-1341-2016](http://dx.doi.org/10.5194/gmd-9-1341-2016) 
    
 
-## Relevant publications ##
+## Relevant publications
 
 Papers describing the model physics or the technical implementation of the TSMP-PDAF components are summarized in the following table:
 
@@ -85,7 +85,7 @@ Papers describing the model physics or the technical implementation of the TSMP-
 | PDAF      | @Nerger2013   | [http://dx.doi.org/10.1016/j.cageo.2012.03.026](http://dx.doi.org/10.1016/j.cageo.2012.03.026)                                             |
 
 
-## Contribution to documentation##
+## Contributors
 
 The following persons contributed signficantly to this documentation before
 contributions were made transparent in the git history (alphabetic order):

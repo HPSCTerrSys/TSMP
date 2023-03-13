@@ -26,15 +26,15 @@ for building `TSMP-PDAF` the following internal versions can be used:
 -   `3.0.0MCTPDAF`
 -   `3.1.0MCTPDAF` (recommended).
 
-```{toctree} 
----
-maxdepth: 3
-caption: Build Examples for TSMP-PDAF
----
-build_examples_tsmp.md
-build_examples_tsmppdaf.md
-build_environment_variables.md
+### Building on GPU
+
+For building ParFlow 3.9 on GPU:
+
+```shell
+cd $TSMP_DIR/bldsva
+./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel -A GPU
 ```
+
 
 ## Patching the orginal source code 
 

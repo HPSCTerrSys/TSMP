@@ -1,6 +1,8 @@
 # Getting Started
 
-This small Getting Started section is mainly for users with access to JSC machines. For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_examples.md#building-tsmp) section.
+**Throughout this quick start guide a destinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
+
+For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_examples.md#building-tsmp) section.
 
 ## General concept
 
@@ -13,8 +15,6 @@ Please note: For licensing and maintenance reasons, we do not provide any source
 During the build and compile step ([step 5 below](#step-5-build-tsmp-interface-and-component-models)) multiple predefined coupled model combinations (of component models and their versions) as well as predefined HPC systems and operating environments can be chosen. Via so-called machinefiles the built and execution environment can be centrally adjusted to the respective HPC systems. A generic machinefile for x86-64 GNU/Linux systems with a GNU Compiler Collection and a standard scientific software stack is also provided. Many predefined built environments are provided for the machines which are available to the HPSC-TerrSys users.
 
 During the setup and configuration step ([step 6 below](#step-6-setup-and-configuration-of-the-respective-usage-and-test-case)), TSMP is configured for different, predefined test cases or numerical experiments, for which we also provide input data via a dedicated data server. Here we document one specific experiment. The [TSMP user guide](https://hpscterrsys.github.io/TSMP/index.html) will contain a complete list.
-
-**Throughout this quick start guide a destinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
 
 The two most important scripts to build and setup TSMP are:
 
@@ -29,7 +29,7 @@ To get a man-page for the usage of this scripts, do:
 
 ## The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP
 
-This test case uses the current TSMP release version v1.2.1 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.2 (ParFlow 3.9 from TSMP version v1.3.3 onward).  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
+This test case uses the current TSMP release version v1.3.3 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.9.  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies
 For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA-DC, all necessary software modules are loaded automatically through a "loadenv" file located in directory JUWELS or JURECA-DC in machines directory. The users of other HPC systems should provide an appropriate "loadenv" files for loading the modules and locate it in `machines/<machine_name>`, similar to JURECA-DC and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a "loadenv" file in the directory `machines/GENERIC_X86`. For more information on using this script please see the README in branch **TSMP_x86_64**.
@@ -99,13 +99,6 @@ Available from http://www.cosmo-model.org. A license agreement is needed.
 
 Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.
 
-##### ParFlow v3.2
-
-Available from https://github.com/parflow/.
-
-```shell
-git clone --branch v3.2.0 https://github.com/parflow/parflow.git parflow3_2
-```
 ##### ParFlow v3.9
 ParFlow 3.9  is available from
 ```shell
@@ -116,7 +109,7 @@ git clone -b v3.9.0 https://github.com/parflow/parflow.git
 
 Available from https://oasis.cerfacs.fr/en/downloads/.
 
-### Step 4: Retrieving the test case input data (NRW and EURO-CORDEX)
+### Step 4: Retrieving the test case input data (EURO-CORDEX)
 
 For each officially documented and supported test case experiment, HPSC-TerrSys provides all required, pre-processed input data (as well as reference simulation results in the future).
 
@@ -125,13 +118,6 @@ The input files which are necessary for running the `EURO-CORDEX evaluation run`
 ```shell
 cd $TSMP_DIR/bldsva
 ./download_data_for_test_cases.ksh cordex
-```
-
-and for `NRW` test case:
-
-```shell
-cd $TSMP_DIR/bldsva
-./download_data_for_test_cases.ksh nrw
 ```
 
 ### Step 5: Build TSMP, interface and component models
@@ -149,13 +135,6 @@ Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (cl
 cd $TSMP_DIR/bldsva
 ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel
 ```
-For building ParFlow 3.9 on GPU:
-
-```shell
-cd $TSMP_DIR/bldsva
-./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel -A GPU
-```
-
 
 A note to external users:
 
@@ -184,14 +163,6 @@ To configure TSMP for the [EURO-CORDEX test case experiment](#the-fully-coupled-
 cd $TSMP_DIR/bldsva
 ./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel
 ```
-
-For configuring TSMP for a heterogeneous job:
-
-```shell
-cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
-```
-In this heterogeneous job ParFlow 3.9 will run on GPU while Cosmo and CLM on CPU.
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
 
