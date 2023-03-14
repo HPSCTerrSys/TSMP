@@ -45,7 +45,7 @@ createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
 
 comment "   copy x86 module load script into rundirectory"
-  cp $rootdir/bldsva/machines/$platform/loadenv_x86 $rundir
+  cp $rootdir/bldsva/machines/loadenv_x86 $rundir
 check
 
 
