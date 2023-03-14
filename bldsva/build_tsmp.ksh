@@ -943,7 +943,7 @@ getGitInfo(){
     esac
   done
 
-cat $platform $profiling $optComp $compiler $version $rootdir $bindir $combination $readCLM build_info_${date}.txt
+printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$combination\n$readCLM" > build_info_${date}.txt
 
 
 comment "  source list with supported machines and configurations"
