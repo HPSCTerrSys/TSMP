@@ -69,7 +69,7 @@ echo $((processes%resources?processes/resources+1:processes/resources))
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
 comment "   copy JUWELS module load script into rundirectory"
-  cp $rootdir/bldsva/machines/$platform/loadenvs.$compiler $rundir/loadenvs
+  cp $rootdir/bldsva/machines/loadenvs.$compiler $rundir/loadenvs
 check
 
 mpitasks=$((numInst * ($nproc_icon + $nproc_cos + $nproc_clm + $nproc_pfl + $nproc_oas)))
