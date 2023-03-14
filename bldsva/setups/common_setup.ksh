@@ -87,7 +87,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
-    
+    check_pfl
 
     comment "   copy oasis remappingfiles into rundir"
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file

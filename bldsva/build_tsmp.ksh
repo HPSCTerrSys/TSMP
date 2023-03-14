@@ -943,7 +943,7 @@ getGitInfo(){
     esac
   done
 
-printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$combination\n$readCLM" > build_info_${date}.txt
+
 
 
 comment "  source list with supported machines and configurations"
@@ -971,6 +971,7 @@ check
   getMachineDefaults
   setSelection
 
+printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$combination\n$readCLM" > build_info_${date}.txt
 
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
