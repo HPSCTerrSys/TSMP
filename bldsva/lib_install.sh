@@ -122,12 +122,12 @@ fi
 
 #********* download the source files of the Libs ******************
 
-pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.1/openmpi-4.1.0.tar.gz`
+pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
 if [ $? -ne 0 ]; then
     echo "openmpi can not be downloaded!!!check wget command"
     exit
 fi
-tar -xvf openmpi-4.1.0.tar.gz >> $log_file 2>> $err_file
+tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
 #****
 pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz`
 if [ $? -ne 0 ]; then

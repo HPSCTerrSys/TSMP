@@ -308,7 +308,7 @@ check(){
     print "See $log_file and $err_file" | tee -a $stdout_file
     exit 1
   fi
-
+}
 check_pfl(){
  if [[ $? == 0  ]] then
     print "    ... ${cgreen}OK!${cnormal}"  | tee -a $stdout_file
