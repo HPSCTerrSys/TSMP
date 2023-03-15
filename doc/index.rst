@@ -58,5 +58,6 @@ Welcome to TSMP documentation!
    :maxdepth: 3
    :caption: Contributing:
    
+   content/contributing/general.md
    content/contributing/documentation.md
 
