@@ -48,7 +48,7 @@ rm -rf *
 [ ! -d "$dlib/src" ] && mkdir $dlib/src
 cd $dlib/src
 dsrc=$(pwd)
-mkdir -p $dlib/openmpi
+#mkdir -p $dlib/openmpi
 mkdir -p $dlib/hypre
 mkdir -p $dlib/silo
 mkdir -p $dlib/gribapi
@@ -57,7 +57,7 @@ mkdir -p $dlib/hdf5
 mkdir -p $dlib/zlib
 mkdir -p $dlib/curl
 mkdir -p $dlib/eccodes
-mkdir -p $dlib/pnetcdf
+#mkdir -p $dlib/pnetcdf
 
 log_file=$dlib/lib_install1.out
 err_file=$dlib/lib_install1.err
@@ -122,12 +122,12 @@ fi
 
 #********* download the source files of the Libs ******************
 
-pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
-if [ $? -ne 0 ]; then
-    echo "openmpi can not be downloaded!!!check wget command"
-    exit
-fi
-tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
+#pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
+#if [ $? -ne 0 ]; then
+#    echo "openmpi can not be downloaded!!!check wget command"
+#    exit
+#fi
+#tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
 #****
 pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz`
 if [ $? -ne 0 ]; then
@@ -136,12 +136,12 @@ if [ $? -ne 0 ]; then
 fi
 tar -xvf hdf5-1.10.6.tar.gz >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://github.com/Unidata/netcdf-c/archive/v4.6.1.zip`
+pwget=`wget https://github.com/Unidata/netcdf-c/archive/v4.7.4.zip`
 if [ $? -ne 0 ]; then
     echo "Netcdf-c can not be downloaded!!!check wget command"
     exit
 fi
-unzip v4.6.1.zip >> $log_file 2>> $err_file
+unzip v4.7.4.zip >> $log_file 2>> $err_file
 #*****
 pwget=`wget https://github.com/Unidata/netcdf-fortran/archive/refs/tags/v4.5.3.zip`
 if [ $? -ne 0 ]; then
@@ -194,22 +194,22 @@ tar -xvf curl-7.71.1.tar.gz >> $log_file 2>> $err_file
 echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #****
-pwget=`wget https://github.com/ecmwf/eccodes/archive/refs/tags/2.18.0.zip`
+pwget=`wget https://confluence.ecmwf.int/download/attachments/45757960/eccodes-2.18.0-Source.tar.gz?api=v2`
 if [ $? -ne 0 ]; then
     echo "ecCodes can not be downloaded!!!check wget command"
     exit
 fi
-unzip 2.18.0.zip >> $log_file 2>> $err_file
+tar -xzf eccodes-2.18.0-Source.tar.gz?api=v2 >> $log_file 2>> $err_file
 echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #****
-pwget=`wget https://github.com/Parallel-NetCDF/PnetCDF/archive/refs/tags/checkpoint.1.12.1.zip`
-if [ $? -ne 0 ]; then
-    echo "PnetCDF can not be downloaded!!!check wget command"
-    exit
-fi
-unzip checkpoint.1.12.1.zip >> $log_file 2>> $err_file
-echo "****** LIBs are downloaded and extracted in $dsrc *****"
+#pwget=`wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.12.1.tar.gz`
+#if [ $? -ne 0 ]; then
+#    echo "PnetCDF can not be downloaded!!!check wget command"
+#    exit
+#fi
+#tar -xzf pnetcdf-1.12.1.tar.gz >> $log_file 2>> $err_file
+#echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #*************** Zlib *************************************
 cd $dsrc/zlib* 
@@ -234,30 +234,30 @@ export PATH="$dlib/curl/bin:$PATH"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$dlib/curl/lib"
 
 #*************** openmpi *************************************
-echo "installing openmpi ........ "
+#echo "installing openmpi ........ "
 
-/usr/bin/env >> $log_file 2>> $err_file
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
-env > $dlib/env.log
+#/usr/bin/env >> $log_file 2>> $err_file
+#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
+#env > $dlib/env.log
 #
-cd $dsrc/openmpi-*
-./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
-make all >> $log_file 2>> $err_file
-make install >> $log_file 2>> $err_file
+#cd $dsrc/openmpi-*
+#./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
+#make all >> $log_file 2>> $err_file
+#make install >> $log_file 2>> $err_file
 
 # export opnempi env vairable for installtion of other Apps
 
-export PATH="$dlib/openmpi/bin:$PATH"
-export CC=$dlib/openmpi/bin/mpicc
-export FC=$dlib/openmpi/bin/mpif90
-export F77=$dlib/openmpi/bin/mpif77
+#export PATH="$dlib/openmpi/bin:$PATH"
+#export CC=$dlib/openmpi/bin/mpicc
+#export FC=$dlib/openmpi/bin/mpif90
+#export F77=$dlib/openmpi/bin/mpif77
 
 #***************** HDF5 *****************************************
 echo "***********************************************************"
 echo "installing hdf5 in $dlib/hdf5 ......"
 #
 cd $dsrc/hdf5-*
-./configure --prefix=$dlib/hdf5 --enable-production --enable-hl --enable-fortran  >> $log_file 2>> $err_file
+./configure --prefix=$dlib/hdf5 --enable-build-mode=production --enable-hl --enable-fortran  >> $log_file 2>> $err_file
 make  >> $log_file 2>> $err_file
 make install   >> $log_file 2>> $err_file
 #
@@ -314,7 +314,7 @@ echo "***********************************************************"
 echo "installing hypre in $dlib/hypre ..."
 #
 cd $dsrc/hypre-*/src
-./configure --prefix=$dlib/hypre --with-MPI-lib-dirs=$dlib/openmpi  --enable-fortran --enable-shared >> $log_file 2>> $err_file
+./configure --prefix=$dlib/hypre --with-MPI-lib-dirs=/usr/bin/mpiexec  --enable-fortran --enable-shared >> $log_file 2>> $err_file
 make  >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 
@@ -336,17 +336,19 @@ ln -s $dlib/tcl/bin/tclsh8.5 $dlib/tcl/bin/tclsh  >> $log_file 2>> $err_file
 
 #******************************* ecCodes *******************************
 echo "**************************************************************"
-echo "installing ecCódes in $dlib/eccodes ..."
-cd $dsrc/eccodes*
-cmake  src/
+echo "installing ecCodes in $dlib/eccodes ..."
+mkdir $dsrc/build
+cd $dsrc/build
+cmake  ../eccodes-2.18.0-Source  -DCMAKE_INSTALL_PREFIX=$dlib/eccodes
 make
 ctest
 make install
 
 #******************************* PnetCDF *******************************
 echo "**************************************************************"
-echo "installing ecCódes in $dlib/eccodes ..."
-cd $dsrc/PnetCDF-checkpoint.1.12.1/
+echo "installing PnetCDF in $dlib/pnetcdf ..."
+cd $dsrc/pnetcdf*
+./configure --prefix=$dlib/pnetcdf 
 make
 make install
 
@@ -359,13 +361,15 @@ export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/gribapi/lib"
 export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/hypre/lib"
 export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/silo/lib"
 export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/tcl/lib"
+export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/eccodes/lib"
+#export LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$dlib/pnetcdf/lib"
 
 export GRIB_DEFINITION_PATH=$dlib/gribapi/share/grib_api/definitions/
 export GRIB_SAMPLES_PATH=$dlib/gribapi/share/grib_api/samples/
 
-export CC=$dlib/openmpi/bin/mpicc
-export FC=$dlib/openmpi/bin/mpif90
-export F77=$dlib/openmpi/bin/mpif77
+#export CC=$dlib/openmpi/bin/mpicc
+#export FC=$dlib/openmpi/bin/mpif90
+#export F77=$dlib/openmpi/bin/mpif77
 
 
 end_loadenv

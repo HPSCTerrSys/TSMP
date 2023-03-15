@@ -3,14 +3,16 @@
 
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
-  defaultMpiPath="$rootdir/lib/openmpi"
+  #defaultMpiPath="$rootdir/lib/openmpi"
+  defaultMpiPath=/usr/lib/x86_64-linux-gnu
   defaultNcdfPath="$rootdir/lib/netcdf"
   defaultGribPath="$rootdir/lib/gribapi"
   defaultGribapiPath="$rootdir/lib/gribapi"
   defaultJasperPath=""
 #  defaultTclPath="/usr/lib/x86_64-linux-gnu"
   defaultTclPath="$rootdir/lib/tcl"
-  defaultHyprePath="$rootdir/lib/hypre"
+  #defaultHyprePath="$rootdir/lib/hypre"
+  defaultHyprePath=/usr/lib/x86_64-linux-gnu
   defaultSiloPath="$rootdir/lib/silo"
   hdf5path="$rootdir/lib/hdf5"
   defaultLapackPath=""
