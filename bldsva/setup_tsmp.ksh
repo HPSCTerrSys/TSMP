@@ -17,6 +17,7 @@ getDefaults(){
   def_startInst=""
   # following parameters  will be set to tested platform defaults if empty
   def_nppn=""
+  def_ngpn=""
   def_wtime=""
   ## following parameters  will be set to tested setup defaults if empty
   def_namelist_clm=""
@@ -89,6 +90,7 @@ setDefaults(){
   refSetup=$def_refSetup
   combination=$def_combination
   nppn=$def_nppn
+  ngpn=$def_ngpn
   numInst=$def_numInst
   if [[ $numInst == "" ]] then ; numInst="1" ; fi #We need a hard default here
   startInst=$def_startInst
@@ -180,6 +182,7 @@ clearPathSelection(){
 setSelection(){
 
   if [[ $nppn == "" ]] then ; nppn=$defaultNppn ; fi
+  if [[ $ngpn == "" ]] then ; ngpn=$defaultNgpn ; fi
   if [[ $wtime == "" ]] then ; wtime=$defaultwtime  ; fi
   if [[ $queue == "" ]] then ; queue=$defaultQ ; fi
   if [[ $px_clm == "" ]] then ; px_clm=$defaultCLMProcX ; fi
@@ -558,6 +561,7 @@ interactive(){
                   if [[ $numb == 44 ]] ; then ; read dump_icon ; fi
                   if [[ $numb == 45 ]] ; then ; read compiler ; fi
                   if [[ $numb == 46 ]] ; then ; read processor ; fi
+                  if [[ $numb == 47 ]] ; then ; read ngpn ; fi
                 done
                 interactive
           ;;
@@ -583,6 +587,7 @@ printState(){
   print "${cred}(7)${cnormal} startDate (default=$def_startDate): ${cgreen}$startDate${cnormal}"
   print "${cred}(8)${cnormal} run hours (default=$def_runhours): ${cgreen}$runhours${cnormal}"
   print "${cred}(9)${cnormal} number of processors per node (default=$def_nppn): ${cgreen}$nppn${cnormal}"
+  print "${cred}(47)${cnormal} number of GPUs per node (default=$def_ngpn): ${cgreen}$ngpn${cnormal}"
   print ""
   print "${cred}(10)${cnormal} processors in X for clm (default=$def_px_clm): ${cgreen}$px_clm${cnormal}"
   print "${cred}(11)${cnormal} processors in Y for clm (default=$def_py_clm): ${cgreen}$py_clm${cnormal}"
@@ -624,7 +629,7 @@ printState(){
   print "${cred}(38)${cnormal} Dump interval for clm.  (default=$def_dump_clm): ${cgreen}$dump_clm ${cnormal}"
   print "${cred}(39)${cnormal} Dump interval for cos.  (default=$def_dump_cos): ${cgreen}$dump_cos ${cnormal}"
   print "${cred}(43)${cnormal} Dump interval for icon.  (default=$def_dump_icon): ${cgreen}$dump_icon ${cnormal}"
-  print "${cred}(44)${cnormal} Processor CPU or GPU.  (default=$def_processor): ${cgreen}$processor ${cnormal}"
+  print "${cred}(44)${cnormal} Architecture type: CPU, GPU, MSA.  (default=$def_processor): ${cgreen}$processor ${cnormal}"
 }
 
 
@@ -1280,6 +1285,7 @@ route "${cyellow}<< setup_da${cnormal}"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[O:compiler? Compiler used.]:[compiler:='$def_compiler']"
   USAGE+="[P:nppn? Number of processors per node. If you leave it '' the machine default will be taken.]:[nppn:='$def_nppn']"
+  USAGE+="[H:ngpn? Number of GPUs per node. If you leave it '' the machine default will be taken.]:[ngpn:='$def_ngpn']"
   USAGE+="[N:numinst? Number of instances of TerrSysMP. Currently only works with Oasis3-MCT - ignored otherwise.]:[numinst:='$def_numInst']"
   USAGE+="[n:startinst? Instance counter to start with. Currently only works with Oasis3-MCT - ignored otherwise.]:[startinst:='$def_startInst']"
   USAGE+="[q:queue? Scheduler Queue name. If you leave it '' the machine default will be taken.]:[queue:='$def_queue']"
@@ -1314,7 +1320,7 @@ route "${cyellow}<< setup_da${cnormal}"
   USAGE+="[J:dumpclm? Dump interval for CLM (in hours).]:[dumpclm:='$def_dump_clm']"
   USAGE+="[K:dumpcos? Dump interval for Cosmo (in hours).]:[dumpcos:='$def_dump_cos']"
   USAGE+="[E:dumpicon? Dump interval for Cosmo (in hours).]:[dumpicon:='$def_dump_icon']"
-  USAGE+="[A:processor? Processore type CPU or GPU.]:[processor:='$def_processor']" 
+  USAGE+="[A:processor? Processor architecture: CPU, GPU, MSA.]:[processor:='$def_processor']" 
   USAGE+="[L:dumppfl? Dump interval for ParFlow (in hours).]:[dumppfl:='$def_dump_pfl']"
 
 
@@ -1336,6 +1342,7 @@ route "${cyellow}<< setup_da${cnormal}"
     q)  queue=$OPTARG ; args=1 ;; 
     Q)  wtime=$OPTARG ; args=1 ;;   
     P)  nppn=$OPTARG ; args=1 ;;
+    H)  ngpn=$OPTARG ; args=1 ;;
     n)  startInst=$OPTARG ; args=1 ;;
     N)  numInst=$OPTARG ; args=1 ;;
     s)  startDate=$(echo $OPTARG | sed -e "s/_/ /g"); args=1 ;;

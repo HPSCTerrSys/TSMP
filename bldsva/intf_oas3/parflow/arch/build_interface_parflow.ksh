@@ -64,10 +64,10 @@ route "${cyellow}>> configure_pfl${cnormal}"
 
     comment " parflow is configured for $processor "
     check
-    if [[ $processor == "GPU" ]]; then
+    if [[ $processor == "GPU"|| $processor == "MSA" ]]; then
        cd $pfldir
        comment "module load CUDA  mpi-settings/CUDA "
-        module load CUDA  mpi-settings/CUDA >> $log_file 2>> $err_file
+        module load CUDA  $gpuMpiSettings >> $log_file 2>> $err_file
        check
        comment "    additional configuration options for GPU are set "
         flagsSim+=" -DPARFLOW_ACCELERATOR_BACKEND=cuda"
@@ -85,7 +85,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
        comment "    configure RMM: RAPIDS Memory Manager "
-        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT >> $log_file 2>> $err_file
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT ${cuda_architectures} >> $log_file 2>> $err_file
        check
        comment "    make RMM "
         make -j  >> $log_file 2>> $err_file

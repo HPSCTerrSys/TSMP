@@ -21,6 +21,9 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
+  # Additional option for GPU compilation  
+  gpuMpiSettings=
+  cuda_architectures="-DCMAKE_CUDA_ARCHITECTURES=70"
 #
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
@@ -109,14 +112,17 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dp-esb
+
 cd $rundir
 source $rundir/loadenvs
 export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*
+
 module unload nvidia-driver/.default
 export CUDA_VISIBLE_DEVICES=0
+
 srun --het-group=0 ./lmparbin_pur :\\
      --het-group=1 ./clm :\\
      --het-group=2 ./parflow $pflrunname
@@ -129,6 +135,7 @@ else
 
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
+
 #SBATCH --job-name="TSMP"
 #SBATCH --nodes=$nnodes
 #SBATCH --ntasks=$mpitasks
@@ -139,6 +146,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
 #SBATCH --account=slts 
+
 export PSP_RENDEZVOUS_OPENIB=-1
 cd $rundir
 source $rundir/loadenvs

@@ -22,6 +22,9 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   defaultSiloPath="$EBROOTSILO"
   defaultLapackPath="$EBROOTIMKL"
   defaultPncdfPath="$EBROOTPARALLELMINNETCDF"
+  # Additional option for GPU compilation 
+  gpuMpiSettings="mpi-settings/CUDA"
+  cuda_architectures="" 
 
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
@@ -47,6 +50,12 @@ route "${cyellow}>> finalizeMachine${cnormal}"
 route "${cyellow}<< finalizeMachine${cnormal}"
 }
 
+# computes nodes based on number of processors and resources
+computeNodes(){
+processes=$1
+resources=$2
+echo $((processes%resources?processes/resources+1:processes/resources))
+}
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
@@ -63,7 +72,21 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
-if [[ $processor == "GPU" ]]; then
+if [[ $processor == "GPU" || $processor == "MSA" ] ]]; then
+nnode_cos=$((($nproc_cos)/$nppn)) 
+nnode_clm=$((($nproc_clm)/$nppn)) 
+nnode_pfl=$((($nproc_pfl)/$ngpn)) 
+
+nnode_cos=$(computeNodes $nproc_cos $nppn) 
+nnode_clm=$(computeNodes $nproc_clm $nppn) 
+nnode_pfl=$(computeNodes $nproc_pfl $ngpn)
+
+route "${cyellow}<< setting up heterogeneous/modular job${cnormal}"
+comment "  nppn=$nppn\t\t ngpn=$ngpn\n"
+comment "  Nproc: COSMO=$nproc_cos\tCLM=$nproc_clm\tPFL=$nproc_pfl\n"
+comment "  Nnode: COSMO=$nnode_cos\tCLM=$nnode_clm\tPFL=$nnode_pfl\n"
+ 
+if [[ $processor == "GPU" ]];then
 cat << EOF >> $rundir/tsmp_slm_run.bsh
 #!/bin/bash
 #SBATCH --account=slts
@@ -71,11 +94,11 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
-#SBATCH -N 4 --ntasks-per-node=48 -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=48 -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N 1 --ntasks-per-node=4 --gres=gpu:4 -p develgpus
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p gpus
 
 cd $rundir
 source $rundir/loadenvs
@@ -84,11 +107,67 @@ date
 echo "started" > started.txt
 rm -rf YU*
 
-srun --pack-group=0 ./lmparbin_pur : --pack-group=1 ./clm : --pack-group=2 ./parflow cordex0.11
+srun --het-group=0 ./lmparbin_pur :\\
+     --pack-group=1 ./clm :\\
+     --pack-group=2 ./parflow $pflrunname
+date
+echo "ready" > ready.txt
+exit 0
+
+EOF
+
+elif [[ $processor == "MSA" ]]; then
+cat << EOF >> $rundir/tsmp_slm_run.bsh
+#!/bin/bash
+#SBATCH --account=slts
+#SBATCH --job-name="TSMP_Hetero"
+#SBATCH --output=hetro_job-out.%j
+#SBATCH --error=hetro_job-err.%j
+#SBATCH --time=00:10:00
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
+#SBATCH hetjob
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
+#SBATCH hetjob
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p booster
+
+cd $rundir
+source $rundir/loadenvs
+date
+echo "started" > started.txt
+rm -rf YU*
+
+srun --pack-group=0 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
+                         -L netCDF-Fortran/4.5.3 \\
+                         -L ecCodes/2.22.1 \\
+                         ./lmparbin_pur : \\
+     --pack-group=1 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
+                         -L netCDF-Fortran/4.5.3 \\
+                         ./clm : \\
+     --pack-group=2 xenv -P \\
+                         -U $OTHERSTAGES \\
+                         -L Stages/2022 \\
+                         -L Intel/2021.4.0 \\
+                         -L ParaStationMPI/5.5.0-1 \\
+                         -L netCDF/4.8.1 \\
+                         -L netCDF-Fortran/4.5.3 \\
+                         -L Silo/4.11 \\
+                         LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
+                         ./parflow $pflrunname
 date
 echo "ready" > ready.txt
 exit 0
 EOF
+fi
 
 else
 
