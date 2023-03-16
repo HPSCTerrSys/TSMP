@@ -1,7 +1,5 @@
-####!/bin/tcsh
-#2020-11-26_Agh
 #USAGE="source $0"
-#for bld and setup of TSMP on JUWELS
+#for bld and setup of TSMP 
 #for standard user
 #
 module --force purge
@@ -12,7 +10,7 @@ module load ParaStationMPI/5.4.7-1
 #
 module load Hypre/2.20.0
 module load Silo/4.10.2
-module load Tcl/8.6.10 # this version is not compatible with ParFlow3.2
+module load Tcl/8.6.10 
 #
 module load ecCodes/2.18.0
 module load HDF5/1.10.6
@@ -26,9 +24,5 @@ module load NCO/4.9.5
 module load CMake/3.18.0
 #module load CDO/1.9.8
 
-#Tcl compatible with ParFlow3.2
-#export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8_gcc803"
-#export PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/bin:$PATH"
-#export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8_gcc803/lib:$LD_LIBRARY_PATH"
-#
+
 module li

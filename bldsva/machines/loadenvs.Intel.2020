@@ -1,6 +1,5 @@
-#2020-11-05_Agh
 #USAGE="source $0"
-#for bld and setup of TSMP on JUWELS
+#for bld and setup of TSMP 
 #for standard user
 #
 module --force purge

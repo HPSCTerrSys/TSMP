@@ -72,7 +72,7 @@ if [[ $withPDAF == "true" ]] ; then
 else
   srun="srun --multi-prog slm_multiprog_mapping.conf"
 fi
-if [[ $processor == "GPU" || $processor == "MSA" ] ]]; then
+if [[ $processor == "GPU" || $processor == "MSA" ]]; then
 nnode_cos=$((($nproc_cos)/$nppn)) 
 nnode_clm=$((($nproc_clm)/$nppn)) 
 nnode_pfl=$((($nproc_pfl)/$ngpn)) 
