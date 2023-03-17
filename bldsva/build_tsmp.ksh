@@ -998,7 +998,7 @@ printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$
   runCompilation
 
   echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
-  cat $patchlog_file >> $log_file
+  #cat $patchlog_file >> $log_file
 
   echo "" >> $log_file
   echo "Git:" >> $log_file
