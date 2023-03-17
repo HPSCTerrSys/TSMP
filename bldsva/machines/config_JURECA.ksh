@@ -250,6 +250,7 @@ check
 route "${cyellow}<< createRunscript${cnormal}"
 }
 Npp=128
+Ngp=1
 
 PFLProcXg=1
 PFLProcYg=4

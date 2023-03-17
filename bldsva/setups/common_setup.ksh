@@ -15,6 +15,7 @@ initSetup(){
 
 
   defaultNppn=$Npp
+  defaultNgpn=$Ngp
 
   if [[ $processor == "GPU" || $processor == "MSA" ]]; then
     defaultPFLProcX=$PFLProcXg
