@@ -107,9 +107,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=01:00:00
-#SBATCH -N $nnode_cos --ntasks-per-node=$nppn -p dp-cn
+#SBATCH -N $nnode_cos --ntasks-per-node=$((COSProcX*COSProcY)) -p dp-cn
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p dp-cn
+#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p dp-cn
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dp-esb
 
@@ -261,7 +261,7 @@ route "${cyellow}<< createRunscript${cnormal}"
 }
 
 Npp=24
-Ngp=1
+Ngp=4
 
 PFLProcXg=1
 PFLProcYg=4

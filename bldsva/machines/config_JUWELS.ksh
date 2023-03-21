@@ -94,9 +94,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
-#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) - -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p gpus
 
@@ -124,9 +124,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=00:10:00
-#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX)) -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p booster
 
@@ -306,7 +306,7 @@ route "${cyellow}<< createRunscript${cnormal}"
 }
 
 Npp=48
-Ngp=1
+Ngp=4
 
 PFLProcXg=1
 PFLProcYg=4
