@@ -93,7 +93,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --job-name="TSMP_Hetero"
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
-#SBATCH --time=00:10:00
+#SBATCH --time=$wtime
 #SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) - -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p batch
@@ -123,7 +123,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --job-name="TSMP_Hetero"
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
-#SBATCH --time=00:10:00
+#SBATCH --time=$wtime
 #SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX)) -p batch
