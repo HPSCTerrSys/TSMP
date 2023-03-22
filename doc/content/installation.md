@@ -40,18 +40,6 @@ Agrosphere (IBG-3) at the Forschungszentrum Jülich (registration required, cont
 	git clone git@icg4geo.icg.kfa-juelich.de:ExternalRepos/tsmp-pdaf/tsmp.git TSMP
 ```
 
-
-
-### PDAF
-
-The source code of PDAF is available from the following web page under Content-link `Software download` (registration required):
-<http://pdaf.awi.de/trac/wiki>. If possible, ask a senior institute member for existing versions on JSC systems.
-
-Install instructions are provided in the README files included in the downloadable archives. The installation procedure is currently not described in this user guide. The current version of TSMP-PDAF is build with PDAF version 1.13.2.
-
-The source code of TSMP-PDAF is available form the HPSC-TerrSys web site: [http://www.hpsc-terrsys.de](http://www.hpsc-terrsys.de)\ The
-new GIT-project "TSMP\" does not include the source code of the component models anymore.
-
 ### Component Models
 
 The Github-page of TSMP does not include the source code of component models. This makes TSMP independent of third party code and licenses.
@@ -76,17 +64,66 @@ All the source codes of component models should ideally be placed into one insta
 
 The directory structure of `TSMP` is discussed in more detail in Section [Structuring TSMP-PDAF](./structure.md).
 
-More information about availability of source code for model components can be found in the (outdated) wiki-page of
-<https://git2.meteo.uni-bonn.de/projects/terrsysmp/wiki/wiki>
+#### HPSC-TerrSys users
 
-Updated information about obtaining source code for the component codes
-- this should not double the information on the Wiki or Github-page.
+Authenticate with your GitLab web GUI user name and password and clone
+the repositories (instead of "fresh", also "legacy" repositories with
+specific code modifications may be retrieved):
+
+```shell
+git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
+git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow
+git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
+git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
+```
+
+#### External users
+
+Make sure directories are renamed as shown above. The component models can be downloaded from the respective websites as indicated below. Due to licensing reasons HPSC-TerrSys cannot provide these source codes to external users.
+
+##### COSMO v5.01
+
+Available from http://www.cosmo-model.org. A license agreement is needed.
+
+##### CLM v3.5
+
+Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.
+
+##### ParFlow v3.2
+
+Available from https://github.com/parflow/.
+
+```shell
+git clone --branch v3.2.0 https://github.com/parflow/parflow.git parflow3_2
+```
+##### ParFlow v3.9
+ParFlow 3.9  is available from
+```shell
+git clone -b v3.9.0 https://github.com/parflow/parflow.git
+```
+
+##### OASIS3-MCT v2.0
+
+Available from https://oasis.cerfacs.fr/en/downloads/.
+
+##### depracted?
 
 Include obtaining from original sources and from Gitlab page
 <https://icg4geo.icg.kfa-juelich.de/ModelSystems>.
 
 For information on component models of TSMP-PDAF, see
 [https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/TSMP-PDAF-component-models](https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/TSMP-PDAF-component-models)
+
+
+### PDAF
+
+The source code of PDAF is available from the following web page under Content-link `Software download` (registration required):
+<http://pdaf.awi.de/trac/wiki>. If possible, ask a senior institute member for existing versions on JSC systems.
+
+Install instructions are provided in the README files included in the downloadable archives. The installation procedure is currently not described in this user guide. The current version of TSMP-PDAF is build with PDAF version 1.13.2.
+
+The source code of TSMP-PDAF is available form the HPSC-TerrSys web site: [http://www.hpsc-terrsys.de](http://www.hpsc-terrsys.de)\ The
+new GIT-project "TSMP\" does not include the source code of the component models anymore.
 
 ## Build Examples ##
 
