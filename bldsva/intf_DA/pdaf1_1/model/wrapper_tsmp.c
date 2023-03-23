@@ -131,7 +131,7 @@ void integrate_tsmp() {
     tsclm = (int) ( (double) da_interval / dt );
 
     /* Debug output */
-    if (screen_wrapper > 1 && mype_world==0) {
+    if (screen_wrapper > 1 && task_id==1) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%d: CLM: advancing (%d clm time steps)\n",mype_world, tsclm);
     }
 
@@ -139,7 +139,7 @@ void integrate_tsmp() {
     clm_advance(&tsclm);
 
     /* Debug output */
-    if (screen_wrapper > 1 && mype_world==0) {
+    if (screen_wrapper > 1 && task_id==1) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%d: CLM: advancing finished\n", mype_world);
     }
 
@@ -150,7 +150,7 @@ void integrate_tsmp() {
   if(model == 1){
 #if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
     /* Debug output */
-    if (screen_wrapper > 1 && mype_world==0) {
+    if (screen_wrapper > 1 && task_id==1) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%d: Parflow: advancing (from %lf to %lf)\n",mype_world,t_start,t_start+(double)da_interval);
     }
 
@@ -158,7 +158,7 @@ void integrate_tsmp() {
     enkfparflowadvance(tcycle, t_start,(double)da_interval);
 
     /* Debug output */
-    if (screen_wrapper > 1 && mype_world==0) {
+    if (screen_wrapper > 1 && task_id==1) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%d: Parflow: advancing finished\n", mype_world);
     }
 
@@ -179,7 +179,7 @@ void integrate_tsmp() {
     tscos = tscos * dtmult_cosmo; /* Multiplier read from input */
 
     /* Debug output */
-    if (screen_wrapper > 1 && mype_world==0) {
+    if (screen_wrapper > 1 && task_id==1) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%d: COSMO: tscos is %d",mype_world,tscos);
     }
 
@@ -189,12 +189,13 @@ void integrate_tsmp() {
   }
 
   t_start += (double)da_interval;
+  tstartcycle++;
 }
 
 #if (defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE)
 void print_update_pfb(){
   if(model == 1){
-    enkf_printstatistics_pfb(subvec_p,"update",(int) (t_start/da_interval + stat_dumpoffset),pfoutfile_ens,3);
+    enkf_printstatistics_pfb(subvec_p,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
   }
 }
 #endif
@@ -223,11 +224,11 @@ void update_tsmp(){
     }else{
       dat = pf_statevec;
     }
-    if(pf_printensemble == 1) enkf_printstatistics_pfb(dat,"update",(int) (t_start/da_interval + stat_dumpoffset),pfoutfile_ens,3);
+    if(pf_printensemble == 1) enkf_printstatistics_pfb(dat,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
 
 
     /* check if frequency of parameter update is reached */
-    do_pupd = (int) t_start/da_interval;
+    do_pupd = tstartcycle;
     do_pupd = do_pupd % pf_freq_paramupdate;
     do_pupd = !do_pupd;
 
@@ -247,7 +248,7 @@ void update_tsmp(){
       for(i=0;i<pf_paramvecsize;i++) dat[i] = pow(10,dat[i]);
 
       /* print updated K values */
-      if(pf_paramprintensemble) enkf_printstatistics_pfb(dat,"update.param",(int) (t_start/da_interval + stat_dumpoffset),pfoutfile_ens,3);
+      if(pf_paramprintensemble) enkf_printstatistics_pfb(dat,"update.param",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
     }
 
 
@@ -273,7 +274,7 @@ void update_tsmp(){
         char fsuffix [10];
         //sprintf(fprefix,"%s/%s.%s",outdir,pfinfile,"update.mannings");
         sprintf(fprefix,"%s.%s",pfoutfile_ens,"update.mannings");
-        sprintf(fsuffix,"%05d",(int) (t_start/da_interval + stat_dumpoffset));
+        sprintf(fsuffix,"%05d",tstartcycle + stat_dumpoffset);
         enkf_printmannings(fprefix,fsuffix);
       }
     }
@@ -285,7 +286,7 @@ void update_tsmp(){
     //  char fprefix [200];
     //  char fsuffix [10];
     //  sprintf(fprefix,"%s/%s.%s",outdir,pfinfile,"update.mannings");
-    //  sprintf(fsuffix,"%05d",(int) (t_start/da_interval + stat_dumpoffset));
+    //  sprintf(fsuffix,"%05d",tstartcycle + stat_dumpoffset);
     //  enkf_printmannings(fprefix,fsuffix);
     //}
   }
