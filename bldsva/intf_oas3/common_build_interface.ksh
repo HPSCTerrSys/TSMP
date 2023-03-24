@@ -546,8 +546,6 @@ route "${cyellow}<<< c_substitutions_eclm${cnormal}"
 
 
 c_configure_pfl(){
-
-
 route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   comment "    cd to pfl build directory "
@@ -562,13 +560,11 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export SCOREP_WRAPPER=off
   cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
-
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
-
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
