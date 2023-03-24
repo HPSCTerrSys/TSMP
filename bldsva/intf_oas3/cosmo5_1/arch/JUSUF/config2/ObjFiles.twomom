@@ -1,9 +1,0 @@
-#################################################################################
-# Seifert-Beheng 2-moment scheme package:
-#
-# Include this file immediately AFTER the "normal" ObjFiles in the Makefile.
-#
-#
-#
-SRCOBJ      +=   $(OBJDIR)/src_twomom_sb_interface.o \
-                 $(OBJDIR)/src_twomom_sb.o

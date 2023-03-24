@@ -212,8 +212,8 @@ setCombination(){
 compileClm(){
 route "${cyellow}> c_compileClm${cnormal}"
   comment "  source clm interface script"
-    comment "intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh"
-    . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
+    comment "intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh"
+    . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh >> $log_file 2>> $err_file
   check
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
@@ -244,7 +244,7 @@ route "${cyellow}< c_compileClm${cnormal}"
 compileIcon(){
 route "${cyellow}> c_compileIcon${cnormal}"
   comment "  source icon interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/build_interface_${mList[2]}.ksh >> $log_file 2>> $err_file
   check
     always_icon
     if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
@@ -272,7 +272,7 @@ route "${cyellow}< c_compileIcon${cnormal}"
 compileCosmo(){
 route "${cyellow}> c_compileCosmo${cnormal}"
   comment "  source cos interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/build_interface_${mList[2]}.ksh >> $log_file 2>> $err_file
   check
     always_cos
     if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
@@ -300,7 +300,7 @@ route "${cyellow}< c_compileCosmo${cnormal}"
 compileOasis(){
 route "${cyellow}> c_compileOasis${cnormal}"
   comment "  source oas interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/build_interface_${mList[0]}.ksh >> $log_file 2>> $err_file
   check
     always_oas
     if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
@@ -328,7 +328,7 @@ route "${cyellow}< c_compileOasis${cnormal}"
 compileParflow(){
 route "${cyellow}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/build_interface_${mList[3]}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
@@ -972,11 +972,12 @@ check
 
   setCombination
   comment "  source machine build interface for $platform"
-    . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
   check
   getMachineDefaults
   setSelection
 
+printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$combination\n$readCLM" > build_info_${date}.txt
 
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
@@ -1003,7 +1004,7 @@ check
   runCompilation
 
   echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
-  cat $patchlog_file >> $log_file
+  #cat $patchlog_file >> $log_file
 
   echo "" >> $log_file
   echo "Git:" >> $log_file
