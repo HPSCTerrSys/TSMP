@@ -1,0 +1,49 @@
+# Name of the action
+name: RenderPRSphinxDocumentation
+# Events on which this action should trigger
+on: [pull_request]
+# List of jobs to do
+jobs:
+  # Job name
+  makeDoc:
+    # Wich OS / docker image to be used
+    runs-on: ubuntu-latest
+    # Steps of the job
+    steps:
+      # Checkout the branch of related PR
+      - uses: actions/checkout@v3
+        with:
+          #ref: 'MultiVersionDoc'
+          ref: ${{ github.event.pull_request.head.sha }}
+      # Also check out the gh-pages branch (under _build/).
+      # This is a small workaround to avoid completely overwriting the gh-pages 
+      # branch and thus killing existing documentation. 
+      # Changes will still be rendered, so the documentation will be up to date.
+      - uses: actions/checkout@v3
+        with:
+          ref: gh-pages
+          path: _build/
+      # Use python env. and install dependencies
+      - uses: actions/setup-python@v3
+      - name: Install dependencies
+        run: |
+          pip install --upgrade myst-parser
+          pip install sphinx sphinx_rtd_theme
+          pip install sphinx-copybutton
+      # Build documentation with sphinx in _build/NameOfPRBranch
+      - name: Sphinx build
+        run: |
+          sphinx-build -a doc _build/${{ github.head_ref }}
+          echo "DEBUG: pwd $(pwd)"
+          echo "DEBUG: ls -l $(ls -l)"
+          bash doc/MarkDiff.sh $(pwd)/_build/content $(pwd)/_build/${{ github.head_ref }}/content
+      # Deploy new rendered documentation by pushing _build/ to branch gh-pages
+      # The actual GiHub Page is refreshed by GitHub if the branch 
+      # gh-pages is updated automatically.
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          publish_branch: gh-pages
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: _build/
+          force_orphan: true
