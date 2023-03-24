@@ -550,8 +550,6 @@ c_configure_pfl(){
 
 route "${cyellow}>>> c_configure_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow ]] ; then
-
   comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
   check
@@ -565,16 +563,12 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   cmake ../ $flagsSim >> $log_file 2>> $err_file
   check
 
-  fi
-
-
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
 
 c_make_pfl(){
 route "${cyellow}>>> c_make_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow ]] ; then
 comment "    cd to pfl build directory "
   cd $PARFLOW_BLD >> $log_file 2>> $err_file
 check
@@ -617,7 +611,6 @@ comment "    cp binary to $bindir"
       check
     fi
  fi
-  fi
 
 route "${cyellow}<<< c_make_pfl${cnormal}"
 }
@@ -625,7 +618,6 @@ route "${cyellow}<<< c_make_pfl${cnormal}"
 c_substitutions_pfl(){
 route "${cyellow}>>> c_substitutions_pfl${cnormal}"
 
-  if [[ ${mList[3]} == parflow ]] ; then
     if [[ $withPDAF == "true" ]]; then
 
       comment "    sed DA amps into CMakeLists.txt"
@@ -639,7 +631,6 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
       check
     fi
-  fi
 
 route "${cyellow}<<< c_substitutions_pfl${cnormal}"
 }
