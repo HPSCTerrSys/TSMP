@@ -183,7 +183,6 @@ contains
     real(r8) :: psit    !negative potential of soil
     real(r8) :: hr      !relative humidity
     real(r8) :: wx      !partial volume of ice and water of surface layer
-!NWa
 !NOTE: Arrays can start from arbitrary index... 
 !      So in CLM the distributed arraies (over diff. CPUs) does take the index
 !      from the original array.
@@ -191,7 +190,6 @@ contains
 !      The Uper and lower index bound is stored in `lbg`, `ubg`, etc.
     real(r8) :: tmp_displacement_max(lbg:ubg)  !helper var 
     real(r8) :: tmp_displacement               !helper var 
-!NWa
 !------------------------------------------------------------------------------
 
    ! Assign local pointers to derived type members (gridcell-level)
@@ -408,7 +406,7 @@ contains
 
     end do
 
-! NWa change forc_hgt = forc_hgt + z0m + displa at PFT level
+! Change forc_hgt = forc_hgt + z0m + displa at PFT level
 ! forc_hgt is send from COSMO to CLM via fix value. In fully coupled mode, this
 ! fix value can conflict with the actual canopy height, showing up as CLM error
 ! with the message:
@@ -419,7 +417,6 @@ contains
 ! calculated for each pft present, and second the maximum displacement is taken 
 ! to correct the forc_hgt. This way we do not run into above error. 
 ! However, keep in mind that this correction is still a workaround.
-! NWa Do not forget to allocate below variables
 tmp_displacement = 0._r8 ! scalar
 tmp_displacement_max = 0._r8 ! same shape as forc_hgt
 !
@@ -462,11 +459,9 @@ tmp_displacement_max = 0._r8 ! same shape as forc_hgt
       
       ! Update forc_hgt on grid lvl
       forc_hgt_u(g) = forc_hgt_u(g) + tmp_displacement_max(g)
-      !write(6,*)'DEBUG: forc_hgt_u(g)', forc_hgt_u(g)
       forc_hgt_t(g) = forc_hgt_t(g) + tmp_displacement_max(g)
       forc_hgt_q(g) = forc_hgt_q(g) + tmp_displacement_max(g)
     end do
-!! NWR
 
   end subroutine Biogeophysics1
 
