@@ -335,6 +335,15 @@ assimilation. Set to value 0 for using multiscalar data assimilation
 data). If not specified its default value is set to 1, which is for
 using point observation for data assimilation run.
 
+#### DA:obs_interp_switch
+`DA:obs_interp_switch`: (integer) Switch for using an interpolation of
+simulated measurements from the closest grid cells to the observation
+location.
+
+Default: `0` (no interpolation)
+
+Up to now: Dummy input, no effect on simulation.
+
 ### Parameter Summary
 
  | section   | parameter            | value |
@@ -370,6 +379,7 @@ using point observation for data assimilation run.
  |           | `stat_dumpoffset`    | 0     |
  |           | `screen_wrapper`     | 1     |
  |           | `point_obs`          | 1     |
+ |           | `obs_interp_switch`  | 0     |
 
 Default values for parameter file `enkfpf.par`.
 
