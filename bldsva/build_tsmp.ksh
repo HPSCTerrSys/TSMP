@@ -32,6 +32,7 @@ getDefaults(){
   def_mode="0" #0: let flags decide, 1:batch, 2:interactive
   def_cplscheme="true"
   def_readCLM="false"
+  def_maxpft="1"
   def_freeDrain="false"
 
   #compiler optimization
@@ -94,6 +95,7 @@ setDefaults(){
 
   freeDrain=$def_freeDrain
   readCLM=$def_readCLM
+  maxpft=${def_maxpft}
   cplscheme=$def_cplscheme
   mode=$def_mode
 
@@ -563,9 +565,10 @@ printState(){
   print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
   print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
-  print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
-  print "${cred}(29)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
-  print "${cred}(30)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
+  print "${cred}(28)${cnormal} maxpft: Set maxpft per grid cell for CLM (default=$def_maxpft): ${cgreen}$maxpft ${cnormal}"
+  print "${cred}(29)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
+  print "${cred}(30)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
+  print "${cred}(31)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
 }
 
 check(){
@@ -863,6 +866,7 @@ getGitInfo(){
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
+  USAGE+="[f:maxpft? Flag to control maxpft per grid cell in CLM.]:[maxpft:='$def_maxpft']"
   USAGE+="[d:freedrain? Compiles ParFlow with free drainage feature.]:[freedrain:='$def_freeDrain']"
 
   USAGE+="[W:optoas?Build option for Oasis.]:[optoas:='${def_options["oas"]}']{"
@@ -916,6 +920,7 @@ getGitInfo(){
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
     r)  readCLM="$OPTARG" ; args=1 ;;
+    f)  maxpft="$OPTARG" ; args=1 ;;
     d)  freeDrain="$OPTARG" ; args=1 ;;
 #DA
     T)  options+=(["icon"]="$OPTARG") ; args=1 ;;
@@ -942,8 +947,6 @@ getGitInfo(){
     A)  processor="$OPTARG" ; args=1 ;;
     esac
   done
-
-
 
 
 comment "  source list with supported machines and configurations"
