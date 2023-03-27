@@ -342,7 +342,16 @@ location.
 
 Default: `0` (no interpolation)
 
-Up to now: Dummy input, no effect on simulation.
+Effect:
+- For [CLM-type
+  observations](./input_obs.md#clm-observation-file-variables) the
+  longitude and latitude inputs in the observation file are compared
+  to the four neihboring grid points and the simulated measurements
+  from these grid points are averaged with the distances to the grid
+  points as weights.
+- For [ParFlow-type
+  observations](./input_obs.md#parflow-observation-file-variables): To
+  be implemented.
 
 ### Parameter Summary
 
