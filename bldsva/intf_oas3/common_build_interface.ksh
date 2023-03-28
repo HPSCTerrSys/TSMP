@@ -382,7 +382,6 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/oas_clm_init.F90 $clmdir/src/oas3
 
     spmd="on"       # settings are [on   | off       ] (default is off)
-    maxpft="1"        # settings are 4->17               (default is 4)
     rtm="off"      # settings are [on   | off       ] (default is off) 
     cps_catch="off"       # settings are [on   | off       ] (default is off)
     usr_src="$clmdir/bld/usr.src "
