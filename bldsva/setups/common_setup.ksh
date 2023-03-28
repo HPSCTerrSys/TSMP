@@ -92,7 +92,7 @@ initSetup(){
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm_pfl
   fi
 }
-}
+
 
 finalizeSetup(){
 route "${cyellow}>> finalizeSetup${cnormal}"
