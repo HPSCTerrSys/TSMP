@@ -5,12 +5,13 @@ initSetup(){
   defaultFDCOS="$rootdir/$static_files/cosmo"
   defaultFDOAS="$rootdir/$static_files/oasis3"
   defaultFDPFL="$rootdir/$static_files/parflow"
-
+  defaultFDICON="/p/project/cslts/local/data/terrsysmp/icon-ccs"
 
   defaultNLCLM=$rootdir/bldsva/setups/$refSetup/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/$refSetup/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/$refSetup/coup_oas.tcl
   defaultNLDA=$rootdir/bldsva/setups/refSetup/DA-nl
+  defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/$refSetup/icon-ccs/NAMELIST_icon"
 
 
 
@@ -40,6 +41,7 @@ initSetup(){
   defaultDumpPFL=$DumpPFL
   
   defaultRunhours=$Runhours
+  defaultEndDate="$(date -d "${defaultInitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
 
   gx_clm=$gxCLM
   gy_clm=$gyCLM
@@ -80,11 +82,30 @@ initSetup(){
       defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_cos_clm_pfl
     fi
   fi
-
+  if [[ $withPFL == "false" && $withICON == "true" ]]; then
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm
+  fi
+  if [[ $withPFL == "true" && $withICON == "false" ]]; then
+    defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_pfl_clm
+  fi
+  if [[ $withPFL == "true" && $withICON == "true" ]]; then
+      defaultNLOAS=$rootdir/bldsva/data_oas3/namcouple_icon_clm_pfl
+  fi
+}
 }
 
 finalizeSetup(){
 route "${cyellow}>> finalizeSetup${cnormal}"
+if [[ $withICON == "true" ]]; then
+  comment "  copy icon grid"
+    ln -s $gicon $rundir/ >> $log_file 2>> $err_file
+  check
+
+  comment "  copy remap-files"
+    cp $rmp_folder/rmp* $rundir/ >> $log_file 2>> $err_file
+    rm -r $rmp_folder
+  check
+else
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -166,7 +187,7 @@ route "${cyellow}>> finalizeSetup${cnormal}"
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
     check_pfl
   fi 
-
+fi
 
 
 route "${cyellow}<< finalizeSetup${cnormal}"
