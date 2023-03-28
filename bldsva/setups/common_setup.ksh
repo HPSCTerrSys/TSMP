@@ -11,7 +11,7 @@ initSetup(){
   defaultNLCOS=$rootdir/bldsva/setups/$refSetup/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/$refSetup/coup_oas.tcl
   defaultNLDA=$rootdir/bldsva/setups/refSetup/DA-nl
-  defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/$refSetup/icon-ccs/NAMELIST_icon"
+
 
 
 

@@ -261,10 +261,10 @@ route "${cyellow}<< createRunscript${cnormal}"
 }
 
 Npp=24
-Ngp=4
+Ngp=1
 
 PFLProcXg=1
-PFLProcYg=4
+PFLProcYg=1
 CLMProcXg=3
 CLMProcYg=8
 COSProcXg=12
