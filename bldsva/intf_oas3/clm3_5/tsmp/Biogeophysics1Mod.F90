@@ -418,7 +418,7 @@ contains
 ! to correct the forc_hgt. This way we do not run into above error. 
 ! However, keep in mind that this correction is still a workaround.
 tmp_displacement = 0._r8 ! scalar
-tmp_displacement_max = 0._r8 ! same shape as forc_hgt
+tmp_displacement_max(:) = 0._r8 ! same shape as forc_hgt
 !
 ! First calculate max displacement for all columns and pfts on grid lvl
     ! max_pft_per_col = im code festgelegte max moeglicher pft (17)
