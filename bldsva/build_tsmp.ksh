@@ -32,7 +32,7 @@ getDefaults(){
   def_mode="0" #0: let flags decide, 1:batch, 2:interactive
   def_cplscheme="true"
   def_readCLM="false"
-  def_maxpft="1"
+  def_maxpft="1" # (CLM default is 4)
   def_freeDrain="false"
 
   #compiler optimization
