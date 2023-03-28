@@ -426,7 +426,6 @@ tmp_displacement_max(:) = 0._r8 ! same shape as forc_hgt
       ! num_nolakec: number of column non-lake points in column filter
       do fc = 1,num_nolakec
         c = filter_nolakec(fc)
-        l = clandunit(c)
         g = cgridcell(c)
         if (pi <= npfts(c)) then
           p = pfti(c) + pi - 1
