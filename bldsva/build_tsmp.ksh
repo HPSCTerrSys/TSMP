@@ -176,7 +176,35 @@ check
 }
 
 setCombination(){
-  set -A mList ${modelVersion[$combination]}
+   if echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos4'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   elif "$combination" | grep -q 'pdaf'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   
+   elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
+	mListgen="clm4-cos4-pfl"
+   elif "$combination" | grep -q 'clm4'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   
+   elif echo "$combination" | grep -q 'icon21'; then
+	mListgen="clm3-icon21-pfl"
+   elif echo "$combination" | grep -q 'icon26'; then
+	mListgen="clm3-icon26-pfl"
+	   
+   elif echo "$combination" | grep -q 'eclm'; then
+	mListgen="eclm"
+   elif echo "$combination" | grep -q 'eclm-mct'; then
+	mListgen="eclm-mct"
+
+   else 
+	if echo "$combination" | grep -q 'cos4'; then
+		mListgen="clm3-cos4-pfl"
+	else
+		mListgen="clm3-cos5-pfl"
+	fi
+  fi 
+
+  set -A mList ${modelVersion[$mListgen]}
   if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
   if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${combination} ; fi

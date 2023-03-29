@@ -231,7 +231,35 @@ setSelection(){
   if [[ $bindir == "" ]] then
      bindir="$rootdir/bin/${platform}_${combination}"
   fi
-  set -A mList ${modelVersion[$combination]}
+  
+  if echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos4'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   elif "$combination" | grep -q 'pdaf'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   
+   elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
+	mListgen="clm4-cos4-pfl"
+   elif "$combination" | grep -q 'clm4'; then
+	mListgen="clm3-cos4-pfl-pdaf"
+   
+   elif echo "$combination" | grep -q 'icon21'; then
+	mListgen="clm3-icon21-pfl"
+   elif echo "$combination" | grep -q 'icon26'; then
+	mListgen="clm3-icon26-pfl"
+	   
+   elif echo "$combination" | grep -q 'eclm'; then
+	mListgen="eclm"
+   elif echo "$combination" | grep -q 'eclm-mct'; then
+	mListgen="eclm-mct"
+
+   else 
+	if echo "$combination" | grep -q 'cos4'; then
+		mListgen="clm3-cos4-pfl"
+	else
+		mListgen="clm3-cos5-pfl"
+	fi
+  fi 
+  set -A mList ${modelVersion[$mListgen]}
 
   #Fix for cos /clm namelist because they differ in newer version.
   if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
