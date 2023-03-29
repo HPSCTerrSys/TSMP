@@ -67,7 +67,7 @@ setDefaults(){
   #load the default values
   platform=$def_platform
   if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
-  version=$def_version
+  version=$def_combination
   if [[ $version == "" ]] then ; version="clm3-cos5-pfl" ; fi #We need a hard default here
   rootdir=$def_rootdir
   bindir=$def_bindir
@@ -177,14 +177,14 @@ check
 
 setCombination(){
   set -A mList ${modelVersion[$combination]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
+  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
+  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
 #DA
-  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${version}_${combination} ; fi  
-  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi 
+  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${combination} ; fi  
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${combination} ;  fi 
 
   withOAS="false"
   withCOS="false"
@@ -204,10 +204,10 @@ setCombination(){
   case "$combination" in *pfl*) withPFL="true" ;; esac
   if [[ $withCLM == "true" && ( $withCOS == "true" || $withICON == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
+    withOASMCT="true"
   fi
 #DA
-  case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
+  case "$combination" in *pdaf*) withDA="true" ; withPDAF="true" ;; esac
 }
 
 

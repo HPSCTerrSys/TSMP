@@ -69,7 +69,7 @@ setDefaults(){
   platform=$def_platform
   compiler=$def_compiler
   if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
-  version=$def_version
+  version=$def_combination
   if [[ $version == "" ]] then ; version="clm3-cos5-pfl" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
@@ -223,13 +223,13 @@ setSelection(){
   fi
 
   if [[ $rundir == "" ]] then
-     rundir="$rootdir/run/${platform}_${version}_${combination}_${refSetup}"
+     rundir="$rootdir/run/${platform}_${combination}_${refSetup}"
   fi
   rundir="${rundir}${exp_id}"
 
 
   if [[ $bindir == "" ]] then
-     bindir="$rootdir/bin/${platform}_${version}_${combination}"
+     bindir="$rootdir/bin/${platform}_${combination}"
   fi
   set -A mList ${modelVersion[$combination]}
 
@@ -259,10 +259,10 @@ setCombination(){
   case "$combination" in *pfl*) withPFL="true" ;; esac
   if [[ $withCLM == "true" && ( $withCOS == "true" || $withICON == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
+    withOASMCT="true"
   fi  
 #DA
-  case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
+  case "$version" in *pdaf*) withDA="true" ; withPDAF="true" ;; esac
 }
 
 finalizeSelection(){
