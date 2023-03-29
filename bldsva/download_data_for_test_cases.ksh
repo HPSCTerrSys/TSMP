@@ -19,6 +19,7 @@ if [ -z "$1" ]
     echo "Please cordex for cordex test case"
     echo "Please idealrtd for idealised RTD test case"
     echo "Please idealscal for idealised scaling test case"
+    echo "Please icon-ccs for idealised icon test case"
     exit 1
 fi
 
@@ -40,6 +41,9 @@ then
 elif [ $testcase = idealscal ]
 then
       wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_idealscal/
+elif [ $testcase = icon-ccs ]
+then
+      wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/icon-ccs/
 fi
 
 # Checking if the downloaded input files are corrupted.
@@ -73,6 +77,14 @@ then
        md5sum -c checksums.md5
        cd ../../..
      done
+elif [ $testcase = icon-ccs ]
+then
+     for i in $( find tsmp_icon-ccs/ -mindepth 2 -maxdepth 2 -type d )
+     do
+       cd $i
+       md5sum -c checksums.md5
+       cd ../../..
+     done
 fi
 
 if [ $? -eq 0 ]; then
@@ -99,5 +111,8 @@ then
 elif [ $testcase = idealscal ]
 then
      mv tsmp_idealscal ../
+elif [ $testcase = icon-ccs ]
+then
+     mv tsmp_icon-ccs ../
 fi
 

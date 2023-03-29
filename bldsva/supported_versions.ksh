@@ -21,32 +21,30 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" 1.1.0MCT 1.2.0MCT 2.1.0MCT 2.0.5MCT  3.1.0MCT 3.1.0MCTPDAF 1.1.0MCTPDAF \
-                     1.4.0MCT 1.5.0MCT 4.1.0MCT  5.0.0 5.0.0MCT "
-        ["JUWELS"]=" 1.1.0MCT 1.2.0MCT 2.1.0MCT 2.0.5MCT  3.1.0MCT  3.1.0MCTPDAF 1.1.0MCTPDAF 
-                     1.4.0MCT  1.5.0MCT 1.6.0MCT 4.1.0MCT 5.0.0 5.0.0MCT "
-        ["DEEP"]="   1.1.0MCT 1.2.0 1.2.0MCT 2.1.0MCT 2.0.5MCT  3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT  "
-        ["JUSUF"]="  1.1.0MCT 1.2.0 1.2.0MCT 2.1.0MCT 2.0.5MCT  3.1.0MCT 1.1.0MCTPDAF 
-                     1.4.0MCT  5.0.0 5.0.0MCT "
-        ["GENERIC_X86"]=" 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0MCT 2.0.5MCT  3.1.0MCT 1.1.0MCTPDAF "
+        ["JURECA"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
+                     clm3-icon26-parflow eclm eclm-mct "
+        ["JUWELS"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
+                     clm3-icon26-parflow eclm eclm-mct "
+        ["DEEP"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
+                     clm3-icon26-parflow eclm eclm-mct "
+        ["JUSUF"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
+                     clm3-icon26-parflow eclm eclm-mct "
+        ["GENERIC_X86"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
+                     clm3-icon26-parflow eclm eclm-mct "
 )
 
 # list of versions with descriptions
 versions+=(
-        ["1.1.0MCT"]="1.1.0 with Oasis3-MCT and Parflow >=3.10"
-        ["1.1.0MCTPDAF"]="1.1.0 with Oasis3-MCT and PDAF Data Assimilation"
-        ["1.2.0MCT"]="1.2.0 (Cosmo5.1) and Parflow >=3.10 with Oasis3-MCT"
-        ["2.1.0MCT"]="2.1.0 (Cosmo5.1 & CESM) and Parflow >=3.10 with Oasis3-MCT"
-        ["2.0.5MCT"]="2.0.5 (Cosmo4.21 & CESM) and Parflow >=3.10 with Oasis3-MCT"
-        ["3.1.0MCT"]="3.1.0 clm3_5 cosmo5_1 and Parflow >=3.10 and with Oasis3-MCT"
-        ["3.1.0MCTPDAF"]="3.1.0 with Oasis3-MCT and PDAF Data Assimilation"
-		["1.4.0MCT"]="1.4.0 clm3_5 and Parflow >=3.10 icon2-1 with Oasis3-MCT"
-		["1.5.0MCT"]="1.5.0 clm3_5 new icon version 2.622 and Parflow >=3.10 with Oasis3-MCT"
-		["1.6.0MCT"]="1.6.0 clm3_5 new icon version 2.622 and Parflow >=3.10 with Oasis3-MCT v4.0"
-        ["4.1.0MCT"]="4.1.0 clm3_5-icon icon2-1 and Parflow >=3.10 with Oasis3-MCT"
-        ["5.0.0"]="Standalone eCLM"
-        ["5.0.0MCT"]="eCLM with Oasis3-MCT"
+        ["clm3-cos4-pfl"]=" clm3_5, Cosmo4.21, Oasis3-MCT and Parflow >=3.10"
+        ["clm3-cos4-pfl-pdaf"]="with PDAF Data Assimilation"
+        ["clm3-cos5-pfl"]="Cosmo5.1 and Parflow >=3.10 with Oasis3-MCT"
+        ["clm4-cos4-pfl"]="Cosmo4.21 & CESM and Parflow >=3.10 with Oasis3-MCT"
+        ["clm4-cos5-pfl"]="Cosmo5.1 & CESM and Parflow >=3.10 with Oasis3-MCT"
+        ["clm3-cos5-pfl-pdaf"]="with PDAF Data Assimilation"
+		["clm3-icon21-pfl"]="clm3_5, Parflow >=3.10 and icon2-1 with Oasis3-MCT"
+		["clm3-icon26-pfl"]="clm3_5, Parflow >=3.10 and icon2-622 with Oasis3-MCT"
+        ["eclm"]="Standalone eCLM"
+        ["eclm-mct"]="eCLM with Oasis3-MCT"
 )
 
 
@@ -54,19 +52,16 @@ versions+=(
 # order: Oasis, CLM , COSMO, Parflow !!!
 # Important: this order must be fulfilled. If one of it is not supported, leave a "" at its place.
 modelVersion+=(
-        ["1.1.0MCT"]="oasis3-mct clm3_5 cosmo4_21 parflow"
-        ["1.1.0MCTPDAF"]="oasis3-mct clm3_5 cosmo4_21 parflow pdaf1_1"
-        ["1.2.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow"
-        ["2.0.5MCT"]="oasis3-mct clm4_0 cosmo4_21 parflow"
-        ["2.1.0MCT"]="oasis3-mct clm4_0 cosmo5_1 parflow"
-        ["3.1.0MCT"]="oasis3-mct clm3_5 cosmo5_1 parflow"
-        ["3.1.0MCTPDAF"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf1_1"
-        ["1.4.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow"
-		["1.5.0MCT"]="oasis3-mct clm3_5-icon icon2-622 parflow"
-		["1.6.0MCT"]="oasis3-mct4 clm3_5-icon icon2-622 parflow"
-        ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow"
-        ["5.0.0"]="mct eclm cosmo5_1 parflow"
-        ["5.0.0MCT"]="oasis3-mct eclm cosmo5_1 parflow"
+        ["clm3-cos4-pfl"]="oasis3-mct clm3_5 cosmo4_21 parflow"
+        ["clm3-cos4-pfl-pdaf"]="oasis3-mct clm3_5 cosmo4_21 parflow pdaf1_1"
+        ["clm3-cos5-pfl"]="oasis3-mct clm3_5 cosmo5_1 parflow"
+        ["clm4-cos4-pfl"]="oasis3-mct clm4_0 cosmo4_21 parflow"
+        ["clm4-cos5-pfl"]="oasis3-mct clm4_0 cosmo5_1 parflow"
+        ["clm3-cos5-pfl-pdaf"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf1_1"
+        ["clm3-icon21-pfl"]="oasis3-mct clm3_5-icon icon2-1 parflow"
+		["clm3-icon26-pfl"]="oasis3-mct clm3_5-icon icon2-622 parflow"
+        ["eclm"]="eclm cosmo5_1 parflow"
+        ["eclm-mct"]="oasis3-mct eclm cosmo5_1 parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -74,19 +69,16 @@ modelVersion+=(
 # with that model limitation/combination and make it available only for this platform 
 # IMPORTANT: add a leading and trailing " "(space)
 combinations+=(
-        ["1.2.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["1.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["1.1.0MCTPDAF"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
-        ["2.1.0MCT"]=" clm cos pfl clm-cos "
-        ["2.0.5MCT"]=" clm cos pfl clm-cos "
-        ["3.1.0MCT"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
-        ["3.1.0MCTPDAF"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
-		["1.4.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
-		["1.5.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
-		["1.6.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
-        ["4.1.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
-        ["5.0.0"]=" clm "
-        ["5.0.0MCT"]=" clm "
+        ["clm3-cos4-pfl"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["clm3-cos4-pfl-pdaf"]=" clm-cos-pfl clm cos pfl clm-cos clm-pfl "
+        ["clm3-cos5-pfl"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
+        ["clm4-cos4-pfl"]=" clm cos pfl clm-cos "
+        ["clm4-cos5-pfl"]=" clm cos pfl clm-cos "
+        ["clm3-cos5-pfl-pdaf"]=" clm-cos-pfl clm pfl clm-cos clm-pfl "
+		["clm3-icon21-pfl"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+		["clm3-icon26-pfl"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+        ["eclm"]=" clm "
+        ["eclm-mct"]=" clm "
 )
 
 #list of supported testcases for a certain machine.

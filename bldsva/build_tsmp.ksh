@@ -176,7 +176,7 @@ check
 }
 
 setCombination(){
-  set -A mList ${modelVersion[$version]}
+  set -A mList ${modelVersion[$combination]}
   if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
   if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi

@@ -231,7 +231,7 @@ setSelection(){
   if [[ $bindir == "" ]] then
      bindir="$rootdir/bin/${platform}_${version}_${combination}"
   fi
-  set -A mList ${modelVersion[$version]}
+  set -A mList ${modelVersion[$combination]}
 
   #Fix for cos /clm namelist because they differ in newer version.
   if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
