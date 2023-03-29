@@ -68,9 +68,9 @@ getDefaults(){
 setDefaults(){
   platform=$def_platform
   compiler=$def_compiler
-  if [[ $platform == "" ]] then ; platform="JURECA" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
   version=$def_version
-  if [[ $version == "" ]] then ; version=$(head -n 5 $(ls -t build_info_* | head -1) | tail -1 ) ; fi #We need a hard default here
+  if [[ $version == "" ]] then ; version="clm3-cos5-pfl" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
   exp_id=$def_exp_id

@@ -21,16 +21,16 @@ platforms+=(
 # list of available versions for a platform
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
-        ["JURECA"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
-                     clm3-icon26-parflow eclm eclm-mct "
-        ["JUWELS"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
-                     clm3-icon26-parflow eclm eclm-mct "
-        ["DEEP"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
-                     clm3-icon26-parflow eclm eclm-mct "
-        ["JUSUF"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
-                     clm3-icon26-parflow eclm eclm-mct "
-        ["GENERIC_X86"]=" clm3-cosmo4-parflow clm3-cosmo4-parflow-pdaf clm3-cosmo5-parflow clm4-cosmo4-parflow clm4-cosmo5-parflow clm3-cosmo5-parflow-pdaf clm3-icon21-parflow \
-                     clm3-icon26-parflow eclm eclm-mct "
+        ["JURECA"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct "
+        ["JUWELS"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct "
+        ["DEEP"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct "
+        ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct "
+        ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct "
 )
 
 # list of versions with descriptions
