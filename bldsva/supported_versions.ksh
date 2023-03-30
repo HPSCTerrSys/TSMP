@@ -60,7 +60,7 @@ modelVersion+=(
         ["clm3-cos5-pfl-pdaf"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf1_1"
         ["clm3-icon21-pfl"]="oasis3-mct clm3_5-icon icon2-1 parflow"
 		["clm3-icon26-pfl"]="oasis3-mct clm3_5-icon icon2-622 parflow"
-        ["eclm"]="eclm cosmo5_1 parflow"
+        ["eclm"]=" mct eclm cosmo5_1 parflow"
         ["eclm-mct"]="oasis3-mct eclm cosmo5_1 parflow"
 )
 
