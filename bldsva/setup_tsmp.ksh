@@ -397,7 +397,7 @@ softSanityCheck(){
   if [[ $numInst > 1 && $withOAS == "true" && $withOASMCT == "false" ]]; then ; wmessage="The -N option is only supported with Oasis3-MCT. it will be ignored if you continue." ; warning  ;fi
 
   valid="false"
-  case "${availability[${platform}]}" in *" ${version} "*) valid="true" ;; esac
+  case "${version}" in *"${availability[${platform}]}"*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This version is not supported on this machine" ; warning  ;fi 
 
   valid="false"
