@@ -234,13 +234,13 @@ setSelection(){
   
   if echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos4'; then
 	mListgen="clm3-cos4-pfl-pdaf"
-   elif echo "$combination" | grep -q 'pdaf'; then
-	mListgen="clm3-cos4-pfl-pdaf"
+   elif echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos5'; then
+	mListgen="clm3-cos5-pfl-pdaf"
    
    elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
 	mListgen="clm4-cos4-pfl"
-   elif echo "$combination" | grep -q 'clm4'; then
-	mListgen="clm3-cos4-pfl-pdaf"
+   elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos5'; then
+	mListgen="clm4-cos5-pfl"
    
    elif echo "$combination" | grep -q 'icon21'; then
 	mListgen="clm3-icon21-pfl"

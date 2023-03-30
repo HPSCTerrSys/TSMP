@@ -41,7 +41,6 @@ initSetup(){
   defaultDumpPFL=$DumpPFL
   
   defaultRunhours=$Runhours
-  defaultEndDate="$(date -d "${defaultInitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
 
   gx_clm=$gxCLM
   gy_clm=$gyCLM

@@ -20,14 +20,14 @@ DumpPFL=1
   
 Runhours=1
 
-gxCLM=300
-gyCLM=300
-dtCLM=900
+gxCLM=192
+gyCLM=192
+dtCLM=45
 resCLM="300x300"
 
-gxCOS=15472
+gxCOS=36864
 gyCOS=
-dtCOS=
+dtCOS=0.5
 nboundlinesCOS=
 
 gxPFL=300
