@@ -204,6 +204,7 @@ setCombination(){
 	fi
   fi 
 
+  version=$mListgen
   set -A mList ${modelVersion[$mListgen]}
   if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
   if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
@@ -476,7 +477,6 @@ interactive(){
                         esac
 
                         setCombination
-                        version=$combination
                         setSelection 
 		  fi
 		  if [[ $numb == 2 ]] ; then 
@@ -649,11 +649,6 @@ warning(){
 }
 
 hardSanityCheck(){
-
-  if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '$call --man' for help"
-      terminate
-  fi
 
   if [[ "${platforms[${platform}]}" == ""  ]] then
       print "The selected platform '${platform}' is not available. run '$call --man' for help"
@@ -1003,7 +998,6 @@ check
   fi
 
   setCombination
-  version=$combination
   comment "  source machine build interface for $platform"
     . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
   check

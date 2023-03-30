@@ -258,7 +258,8 @@ setSelection(){
 	else
 		mListgen="clm3-cos5-pfl"
 	fi
-  fi 
+  fi
+  version=$mListgen 
   set -A mList ${modelVersion[$mListgen]}
 
   #Fix for cos /clm namelist because they differ in newer version.
@@ -374,11 +375,6 @@ warning(){
 
 
 hardSanityCheck(){
-  if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '$call --man' for help"
-      terminate
-  fi
-
   if [[ "${platforms[${platform}]}" == ""  ]] then
       print "The selected platform '${platform}' is not available. run '$call --man' for help"
       terminate
@@ -1454,7 +1450,6 @@ check
   check
 
   setCombination
-  version=$combination
   initSetup
 
   getMachineDefaults
