@@ -664,7 +664,7 @@ softSanityCheck(){
 
 
   valid="false"
-  case "${version}" in *"${availability[${platform}]}"*) valid="true" ;; esac
+  case "${availability[${platform}]}" in *" ${version} "*) valid="true" ;; esac
   if [[ $valid != "true" ]] then; wmessage="This version is not supported on this machine" ; warning  ;fi
 
   valid="false"
