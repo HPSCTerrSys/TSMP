@@ -476,6 +476,7 @@ interactive(){
                         esac
 
                         setCombination
+                        version=$combination
                         setSelection 
 		  fi
 		  if [[ $numb == 2 ]] ; then 
@@ -1002,6 +1003,7 @@ check
   fi
 
   setCombination
+  version=$combination
   comment "  source machine build interface for $platform"
     . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
   check

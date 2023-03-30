@@ -1454,6 +1454,7 @@ check
   check
 
   setCombination
+  version=$combination
   initSetup
 
   getMachineDefaults
