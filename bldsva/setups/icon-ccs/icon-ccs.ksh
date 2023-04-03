@@ -18,7 +18,7 @@ StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"
 
 defaultRunhours=1
-defaultEndDate="$(date -d "${defaultInitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
+defaultEndDate="$(date -d "${InitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
   
 DumpCLM=1
 DumpCOS=1
@@ -29,7 +29,7 @@ Runhours=1
 gxCLM=192
 gyCLM=192
 dtCLM=45
-resCLM="192x192"
+resCLM="0192x0192"
 
 gxCOS=36864
 gyCOS=
