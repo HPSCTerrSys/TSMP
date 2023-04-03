@@ -342,7 +342,7 @@ location.
 
 Default: `0` (no interpolation)
 
-Effect:
+Effect of `obs_interp_switch=1`:
 - For [CLM-type
   observations](./input_obs.md#clm-observation-file-variables) the
   longitude and latitude inputs in the observation file are compared
@@ -350,8 +350,11 @@ Effect:
   from these grid points are averaged with the distances to the grid
   points as weights.
 - For [ParFlow-type
-  observations](./input_obs.md#parflow-observation-file-variables): To
-  be implemented.
+  observations](./input_obs.md#parflow-observation-file-variables) the
+  observation files need two more inputs: `ix_interp_d` and
+  `iy_interp_d`. These index distances are used to compute an average
+  of the simulated measurements from the value at the surrounding grid
+  points in the x-y-plane.
 
 ### Parameter Summary
 
