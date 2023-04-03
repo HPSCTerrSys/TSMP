@@ -48,7 +48,7 @@ rm -rf *
 [ ! -d "$dlib/src" ] && mkdir $dlib/src
 cd $dlib/src
 dsrc=$(pwd)
-#mkdir -p $dlib/openmpi
+mkdir -p $dlib/openmpi
 mkdir -p $dlib/hypre
 mkdir -p $dlib/silo
 mkdir -p $dlib/gribapi
@@ -57,7 +57,7 @@ mkdir -p $dlib/hdf5
 mkdir -p $dlib/zlib
 mkdir -p $dlib/curl
 mkdir -p $dlib/eccodes
-#mkdir -p $dlib/pnetcdf
+mkdir -p $dlib/pnetcdf
 
 log_file=$dlib/lib_install1.out
 err_file=$dlib/lib_install1.err
@@ -122,12 +122,12 @@ fi
 
 #********* download the source files of the Libs ******************
 
-#pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
-#if [ $? -ne 0 ]; then
-#    echo "openmpi can not be downloaded!!!check wget command"
-#    exit
-#fi
-#tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
+pwget=`wget https://download.open-mpi.org/release/open-mpi/v4.0/openmpi-4.0.3.tar.gz`
+if [ $? -ne 0 ]; then
+    echo "openmpi can not be downloaded!!!check wget command"
+    exit
+fi
+tar -xvf openmpi-4.0.3.tar.gz >> $log_file 2>> $err_file
 #****
 pwget=`wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz`
 if [ $? -ne 0 ]; then
@@ -203,12 +203,12 @@ tar -xzf eccodes-2.18.0-Source.tar.gz?api=v2 >> $log_file 2>> $err_file
 echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #****
-#pwget=`wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.12.1.tar.gz`
-#if [ $? -ne 0 ]; then
-#    echo "PnetCDF can not be downloaded!!!check wget command"
-#    exit
-#fi
-#tar -xzf pnetcdf-1.12.1.tar.gz >> $log_file 2>> $err_file
+pwget=`wget http://cucis.ece.northwestern.edu/projects/PnetCDF/Release/pnetcdf-1.12.1.tar.gz`
+if [ $? -ne 0 ]; then
+    echo "PnetCDF can not be downloaded!!!check wget command"
+    exit
+fi
+tar -xzf pnetcdf-1.12.1.tar.gz >> $log_file 2>> $err_file
 #echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #*************** Zlib *************************************
@@ -234,23 +234,23 @@ export PATH="$dlib/curl/bin:$PATH"
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$dlib/curl/lib"
 
 #*************** openmpi *************************************
-#echo "installing openmpi ........ "
+echo "installing openmpi ........ "
 
-#/usr/bin/env >> $log_file 2>> $err_file
-#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
-#env > $dlib/env.log
+/usr/bin/env >> $log_file 2>> $err_file
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/lib:/usr/lib/x86_64-linux-gnu"
+env > $dlib/env.log
 #
-#cd $dsrc/openmpi-*
-#./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
-#make all >> $log_file 2>> $err_file
-#make install >> $log_file 2>> $err_file
+cd $dsrc/openmpi-*
+./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
+make all >> $log_file 2>> $err_file
+make install >> $log_file 2>> $err_file
 
-# export opnempi env vairable for installtion of other Apps
+ export opnempi env vairable for installtion of other Apps
 
-#export PATH="$dlib/openmpi/bin:$PATH"
-#export CC=$dlib/openmpi/bin/mpicc
-#export FC=$dlib/openmpi/bin/mpif90
-#export F77=$dlib/openmpi/bin/mpif77
+export PATH="$dlib/openmpi/bin:$PATH"
+export CC=$dlib/openmpi/bin/mpicc
+export FC=$dlib/openmpi/bin/mpif90
+export F77=$dlib/openmpi/bin/mpif77
 
 #***************** HDF5 *****************************************
 echo "***********************************************************"

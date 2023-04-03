@@ -7,9 +7,10 @@
 # Version: V1.3: Adding the script for downloading the input data and pre-processing-tools for IdealRTD test case, 15.06.2021
 # Version: V1.4: Update cordex test case - change of path, 22.09.2022
 # Version: V1.5: Adding the script for download the input data for idealscal test case, 26.09.2022
+# Version: V1.6: Adding the script for download the input data for icon-ccs test case, 03.04.2023
 #--------------------------------------
 # Initial owner: Abouzar Ghasemi, email: a.ghasemi@fz-juelich.de
-# Current owner: Stefan Poll, email: s.poll@fz-juelich.de
+# Current owner: Carl Hartick, email: c.hartick@fz-juelich.de
 #-------------------------------------
 
 if [ -z "$1" ]
@@ -43,7 +44,7 @@ then
       wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_idealscal/
 elif [ $testcase = icon-ccs ]
 then
-      wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/icon-ccs/
+      wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_icon-ccs/
 fi
 
 # Checking if the downloaded input files are corrupted.

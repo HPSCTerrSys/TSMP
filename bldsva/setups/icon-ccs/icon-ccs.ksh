@@ -9,7 +9,7 @@ defaultFDCLM="/p/project/cslts/local/data/terrsysmp/icon-ccs"
 defaultFDPFL="/p/project/cslts/local/data/terrsysmp/icon-ccs"
 defaultFDICON="/p/project/cslts/local/data/terrsysmp/icon-ccs"
 
-static_files=/../../../../../../../../../p/project/cslts/local/data/terrsysmp/icon-ccs
+static_files=tsmp_icon-ccs/input
 
 StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"
@@ -23,15 +23,15 @@ Runhours=1
 gxCLM=192
 gyCLM=192
 dtCLM=45
-resCLM="300x300"
+resCLM="192x192"
 
 gxCOS=36864
 gyCOS=
 dtCOS=0.5
 nboundlinesCOS=
 
-gxPFL=300
-gyPFL=300
+gxPFL=192
+gyPFL=192
 dtPFL=0.25
 runnamePFL="ccs"
 basePFL=0.0025
@@ -41,11 +41,11 @@ freq2OAS=450
 
 deltaobs=1
 
-indPFL=parflow_436x424x15_cosmomask_indicator_FAOonly.sa
-indPFL2=pfl_ind.sa 					#Name change in cordex setup 
-pfsolPFL=geom_cordex0.11_436x424.pfsol
-inipress=
-slope=slope*.sa  
+indPFL=
+indPFL2=				#Name change in cordex setup 
+pfsolPFL=
+inipress=ccs.out.press.00072.pfb
+slope=
 
 gicon=$(find $defaultFDICON -name torus_\*.nc)
 gclm=$(find $defaultFDCLM -name griddata_\*.nc)
