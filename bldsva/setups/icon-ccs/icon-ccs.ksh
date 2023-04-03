@@ -12,6 +12,7 @@ defaultFDPFL="$rootdir/$static_files/parflow"
 defaultFDICON="$rootdir/$static_files/icon"
 
 defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/setups/$refSetup/NAMELIST_icon"
+defaultICONProc=364
 
 StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"

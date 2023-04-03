@@ -349,7 +349,4 @@ pfset Solver.WriteCLMBinary			                   False
 #-----------------------------------------------------------------------------
 # Run and Unload the ParFlow output files
 #-----------------------------------------------------------------------------
-#pfrun default_single
-#pfundist default_single
-pfdist /p/project/cslts/local/data/terrsysmp/icon-ccs/ccs_ic_press.pfb
 pfwritedb ccs
