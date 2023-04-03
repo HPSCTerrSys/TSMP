@@ -3,6 +3,8 @@
 source /p/software/$SYSTEMNAME/lmod/lmod/init/ksh
 module load GCC OpenMPI CDO NCO
 
+static_files=tsmp_icon-ccs/input
+
 defaultFDCLM="$rootdir/$static_files/clm"
 defaultFDCOS="$rootdir/$static_files/cosmo"
 defaultFDOAS="$rootdir/$static_files/oasis3"
@@ -10,8 +12,6 @@ defaultFDPFL="$rootdir/$static_files/parflow"
 defaultFDICON="$rootdir/$static_files/icon"
 
 defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/setups/$refSetup/NAMELIST_icon"
-
-static_files=tsmp_icon-ccs/input
 
 StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"
