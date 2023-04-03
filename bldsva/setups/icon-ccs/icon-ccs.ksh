@@ -3,11 +3,7 @@
 source /p/software/$SYSTEMNAME/lmod/lmod/init/ksh
 module load GCC OpenMPI CDO NCO
 
-defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/$refSetup/icon-ccs/NAMELIST_icon"
-defaultFDOAS="/p/project/cslts/local/data/terrsysmp/icon-ccs"
-defaultFDCLM="/p/project/cslts/local/data/terrsysmp/icon-ccs"
-defaultFDPFL="/p/project/cslts/local/data/terrsysmp/icon-ccs"
-defaultFDICON="/p/project/cslts/local/data/terrsysmp/icon-ccs"
+defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/setups/$refSetup/NAMELIST_icon"
 
 static_files=tsmp_icon-ccs/input
 

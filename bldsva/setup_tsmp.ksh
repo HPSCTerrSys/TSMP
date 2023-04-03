@@ -734,7 +734,7 @@ c_setup_icon(){
 route "${cyellow}>>> c_setup_icon${cnormal}"
 
 comment "  cp add_run_routines to rundir"
-  cp $rootdir/bldsva/setups/icon-ccs/add_run_routines $rundir >> $log_file 2>> $err_file
+  cp $rootdir/bldsva/setups/icon-ccs/common/add_run_routines $rundir >> $log_file 2>> $err_file
 check
 
 comment "  cp namelist to rundir"

@@ -5,7 +5,7 @@ initSetup(){
   defaultFDCOS="$rootdir/$static_files/cosmo"
   defaultFDOAS="$rootdir/$static_files/oasis3"
   defaultFDPFL="$rootdir/$static_files/parflow"
-  defaultFDICON="/p/project/cslts/local/data/terrsysmp/icon-ccs"
+  defaultFDICON="$rootdir/$static_files/icon"
 
   defaultNLCLM=$rootdir/bldsva/setups/$refSetup/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/$refSetup/lmrun_uc 
