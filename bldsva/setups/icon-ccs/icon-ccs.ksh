@@ -16,6 +16,9 @@ defaultICONProc=316
 
 StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"
+
+defaultRunhours=1
+defaultEndDate="$(date -d "${defaultInitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
   
 DumpCLM=1
 DumpCOS=1
