@@ -16,13 +16,14 @@ both repositories are identical. The difference is that the
 Gitlab-remote contains additional branches, where TSMP-PDAF is
 developed.
 
-## Development scheme ##
+## Development scheme
 
 - Github: `TSMP` general development
 - Gitlab: `TSMP` is always kept up-to-date and changes are merged into
   the `TSMP-PDAF`-related branches.  
   
-See also [development best practices](./best_practices)
+Every branch from Github should always have an identical clone on
+Gitlab!
 
 ## Privacy ##
 

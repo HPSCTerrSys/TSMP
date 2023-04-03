@@ -218,12 +218,12 @@ observational input (i.e. ParFlow or CLM observations) at compile time
 as certain parts of the source code are not accessed at all.
 
 CLM observations: Set
-- [CLMSA](./build_environment_variables.md#clmsa)
-- [OBS_ONLY_CLM](./build_environment_variables.md#obs_only_clm)
+- [CLMSA](./../build_tsmp/build_environment_variables.md#clmsa)
+- [OBS_ONLY_CLM](./../build_tsmp/build_environment_variables.md#obs_only_clm)
 
 ParFlow observations: Set
-- [PARFLOW_STAND_ALONE](./build_environment_variables.md#parflow_stand_alone)
-- [OBS_ONLY_PARFLOW](./build_environment_variables.md#obs_only_parflow)
+- [PARFLOW_STAND_ALONE](./../build_tsmp/build_environment_variables.md#parflow_stand_alone)
+- [OBS_ONLY_PARFLOW](./../build_tsmp/build_environment_variables.md#obs_only_parflow)
 
 #### Example for setting environment variables ####
 

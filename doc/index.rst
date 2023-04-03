@@ -1,5 +1,4 @@
-.. TSMP-Documentation documentation master file, created by
-   sphinx-quickstart on Thu Feb  9 09:32:31 2023.
+.. TSMP-Documentation documentation master file
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
@@ -20,44 +19,62 @@ Welcome to TSMP documentation!
 
 .. toctree::
    :maxdepth: 3
-   :caption: Installation:
-
-   content/installation.md
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Building and Running:
-
-   content/build_examples.md
-   content/running.md
-   content/setup_examples.md
-
+   :caption: Technical Note TSMP:
+   
+   content/tech_note/coupling-approaches.md
 
 .. toctree::
    :maxdepth: 3
-   :caption: Developing:
+   :caption: Building TSMP:
 
-   content/development.md
-   content/best_practices.md
-   content/structure.md
-   content/intf_da.md
-   content/pdaf.md
-   content/debugging.md
+   content/build_tsmp/obtain_code.md
+   content/build_tsmp/build_examples.md
+   content/build_tsmp/structure.md
+   content/build_tsmp/intf_da.md
+   content/build_tsmp/pdaf.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Setting up TSMP:
+
+   content/setup_tsmp/setup_examples.md
+   content/setup_tsmp/running.md
+   content/setup_tsmp/development.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Profiling TSMP:
+
+   content/profiling/jube.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Debugging TSMP:
+
+   content/debugging/debug_tips.md
+   content/debugging/debugging_flags.md
+   content/debugging/debugger.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: Feature Branches:
+
+   content/feat_branch/branches.md
+   content/feat_branch/clm5-pdaf_starter.md
+
+.. toctree::
+   :maxdepth: 3
+   :caption: FAQ:
+   
+   content/faq/general.md
+   content/faq/documentation.md
 
 
 .. toctree::
    :maxdepth: 3
    :caption: Misc:
 
-   content/remotes.md
-   content/branches.md
-   content/misc.md
-   content/jsc.md
-
-.. toctree::
-   :maxdepth: 3
-   :caption: Contributing:
-   
-   content/contributing/general.md
-   content/contributing/documentation.md
+   content/misc/remotes.md
+   content/misc/misc.md
+   content/misc/jsc.md
 

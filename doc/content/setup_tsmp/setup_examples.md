@@ -10,12 +10,12 @@ Active setups. Information on Backups by former colleagues
 
 ## Pan-European EURO-CORDEX
 
-Please find the instructions for this case in the [getting started section](./gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp).
+Please find the instructions for this case in the [getting started section](./../gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp).
 
 ## Heterogeneous Job using TSMP
 
 TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.9  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
-After locating the model components in the TSMP root as mentioned in [Step 3](./gettingstarted.md/#step-3-get-the-component-models-for-this-experiment), the following command should be executed in order to build TSMP and to create the run directory for the [EURO-CORDEX test case experiment](./gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp) on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
+After locating the model components in the TSMP root as mentioned in [Step 3](./../gettingstarted.md/#step-3-get-the-component-models-for-this-experiment), the following command should be executed in order to build TSMP and to create the run directory for the [EURO-CORDEX test case experiment](./../gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp) on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 Building TSMP for HPSC-TerrSys users:
 ```shell
@@ -47,7 +47,7 @@ cd $TSMP_DIR/bldsva
 
 NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
 ParFlow) configuration of TSMP. The atmospheric component uses a constant lateral spatial resolution of about 1 km and a variable vertical discretization into 50 levels gradually coarsening from the bottom (20 m) to the top (22000 m). Initial and lateral boundary conditions for the atmospheric model are obtained from the operational weather forecast model
-COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](./gettingstarted.md/#step-3-get-the-component-models-for-this-experiment) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](./gettingstarted.md/#step-5-build-tsmp-interface-and-component-models). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
+COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](./../gettingstarted.md/#step-3-get-the-component-models-for-this-experiment) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](./../gettingstarted.md/#step-5-build-tsmp-interface-and-component-models). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
 To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 ```shell
@@ -165,7 +165,7 @@ Please inform yourself about the storage managment. If you are new to the Jülic
 It is recomannded to store no data at $HOME, your model data at $PROJECT and your experiment data at $SCRATCH.
 
 ### Step 1: Dependencies
-See [step 1 above](./gettingstarted.md/#step-1-dependencies)
+See [step 1 above](./../gettingstarted.md/#step-1-dependencies)
 
 ### Step 2: Get the TSMP interface
 
@@ -297,7 +297,7 @@ is given at
 
 The common build for the Testcase FallSchool 2019 is [Compile
 Parflow + CLM with
-PDAF](./build_examples_tsmppdaf.md#compile-parflow-and-clm-with-pdaf). Choose the
+PDAF](./../build_tsmp/build_examples_tsmppdaf.md#compile-parflow-and-clm-with-pdaf). Choose the
 correct command for your machine and, if possible, the newest version.
 
 
