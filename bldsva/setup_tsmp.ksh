@@ -471,7 +471,8 @@ interactive(){
     			esac
       			setCombination
       			comment "  source setup for $refSetup on $platform"
-        		  . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+        		  . ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
+        		  . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
       			check
       			initSetup
       			setSelection
@@ -496,7 +497,8 @@ interactive(){
 			clearSetupSelection
 			setCombination
 			comment "  source setup for $refSetup on $platform"
-                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
                         check
 			initSetup	
 			setSelection
@@ -512,7 +514,8 @@ interactive(){
                         clearSetupSelection
                         setCombination
                         comment "  source setup for $refSetup on $platform"
-                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
                         check
                         initSetup
                         setSelection
@@ -528,7 +531,8 @@ interactive(){
                         clearSetupSelection
                         setCombination
                         comment "  source setup for $refSetup on $platform"
-                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}_${platform}_setup.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
                         check
                         initSetup
                         setSelection

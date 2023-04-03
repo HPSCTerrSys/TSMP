@@ -12,7 +12,7 @@ defaultFDPFL="$rootdir/$static_files/parflow"
 defaultFDICON="$rootdir/$static_files/icon"
 
 defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/setups/$refSetup/NAMELIST_icon"
-defaultICONProc=364
+defaultICONProc=316
 
 StartDate="2008-05-08 06"
 InitDate="2008-05-08 06"
@@ -100,7 +100,7 @@ EOF
   cdo setgrid,tgrid.txt $gclm clmgrid1.nc >> $log_file 2>> $err_file
   ncks -O -x -v EDGEN,EDGES,EDGEW,EDGEE,NUMLON clmgrid1.nc clmgrid.nc >> $log_file 2>> $err_file
 
-  if [[ $withPFL == "true" && $withCLM == "true" ]]; then
+
   # perform pfl-clm remapping
   ln -s clmgrid.nc pflgrid.nc >> $log_file 2>> $err_file
   comment "  Generating weight file: clm2pfl DISTWGT"
@@ -109,9 +109,9 @@ EOF
   comment "  Generating weight file: pfl2clm DISTWGT"
   cdo -P 8 gendis,pflgrid.nc pflgrid.nc rmp_gpfl_to_gclm_DISTWGT.nc >> $log_file 2>> $err_file
   check
-  fi
 
-  if [[ $withICON == "true" && $withCLM == "true" ]]; then
+
+
   # perform icon-clm remapping
   ncks -O -x -v edge_of_cell,cell_domain_id,adjacent_cell_of_edge,cell_index,cell_no_of_domains,cells_of_vertex,child_cell_id,child_cell_index,child_edge_id,child_edge_index,dual_area_p,edge_cell_distance,edge_index,edge_orientation,edge_parent_type,edge_vert_distance,edge_vertices,edges_of_vertex,end_idx_c,end_idx_e,end_idx_v,index_c_list,index_e_list,index_v_list,meridional_normal_dual_edge,meridional_normal_primal_edge,neighbor_cell_index,orientation_of_normal,parent_cell_index,parent_cell_type,parent_edge_index,parent_vertex_index,refin_c_ctrl,refin_e_ctrl,refin_v_ctrl,start_idx_c,start_idx_e,start_idx_v,vertex_index,vertex_of_cell,vertices_of_vertex,zonal_normal_dual_edge,zonal_normal_primal_edge,cartesian_x_vertices,cartesian_y_vertices,cartesian_z_vertices $gicon icogrid.nc >> $log_file 2>> $err_file
   comment "  Generating weight file: clm2icon DISTWGT"
@@ -120,6 +120,6 @@ EOF
   comment "  Generating weight file: icon2clm DISTWGT"
   cdo -P 8 gendis,icogrid.nc clmgrid.nc rmp_gclm_to_gicon_DISTWGT.nc >> $log_file 2>> $err_file
   check
-  fi
+
 
   cd ..

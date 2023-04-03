@@ -458,7 +458,7 @@ interactive(){
 			print "Please type in your desired value..."
 			read platform
 			comment "  source machine build interface for $platform"
-                          . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
                         check
                         clearMachineSelection
                         getMachineDefaults
