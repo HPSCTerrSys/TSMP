@@ -38,7 +38,7 @@ nboundlinesCOS=
 
 gxPFL=192
 gyPFL=192
-dtPFL=0.25
+dtPFL=0.0125
 runnamePFL="ccs"
 basePFL=0.0025
 
