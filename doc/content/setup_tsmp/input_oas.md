@@ -1,4 +1,4 @@
-## Input files for OASIS-MCT ##
+# Input files for OASIS-MCT #
 
 When the component models of TSMP are coupled via OASIS-MCT, certain
 input files for the coupler need to be provided for a regular TSMP run.
