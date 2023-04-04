@@ -288,7 +288,7 @@ pfset ICPressure.GeomNames               domain
 pfset Geom.domain.ICPressure.Value       __pfl_ICPpressureValue__
 pfset Geom.domain.ICPressure.FileName    "__pfl_ICPpressureFileName__"
 pfset Geom.domain.ICPressure.RefGeom     domain
-pfset Geom.domain.ICPressure.RefPatch    top
+pfset Geom.domain.ICPressure.RefPatch    z-upper
 #
 #pfset ICPressure.Type                    HydroStaticPatch
 #pfset ICPressure.GeomNames               domain

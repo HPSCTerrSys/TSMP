@@ -31,7 +31,7 @@ gyCLM=192
 dtCLM=45
 resCLM="0192x0192"
 
-gxCOS=36864
+gxCOS=73728
 gyCOS=
 dtCOS=0.5
 nboundlinesCOS=
