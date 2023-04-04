@@ -8,7 +8,7 @@ executed:
 `n_modeltasks` (integer) Number of realisations. Must be consistent
 with `[DA] nreal`.
 
-### filterype ###
+### filtertype ###
 
 `filtertype` (integer) Type of filter used for data assimilation. For
 more details see the PDAF documentation. Currently, the following

@@ -124,8 +124,10 @@ negative `var_id` (integer) is assigned to them.
 
 ##### dr #####
 
-`dr`: (real) Snapping distance for the observation. This variable
-should have a length of 1 instead of `dim_obs`
+`dr`: (real) Snapping distance for the observation.
+
+**Attention** This variable should have a length of `2` (one snapping
+distance for longitudes and one for latitudes).
 
 Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
