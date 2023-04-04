@@ -74,7 +74,5 @@ Welcome to TSMP documentation!
    :maxdepth: 3
    :caption: Misc:
 
-   content/misc/remotes.md
    content/misc/misc.md
-   content/misc/jsc.md
 

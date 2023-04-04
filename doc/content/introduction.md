@@ -32,9 +32,6 @@ On Gitlab is a clone with additional branches for TSMP-PDAF.
 - Gitlab
   ([https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp](https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp))
 
-More information on the workflow around the remote repositories: [TSMP
-remote repositories](./misc/remotes.md)
-
 Useful information for users, including a wiki and exercises, can be
 found among the resources for the Fall School HPSC Terrestrial
 Systems:
