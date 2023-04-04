@@ -33,7 +33,7 @@ resCLM="0192x0192"
 
 gxCOS=73728
 gyCOS=
-dtCOS=0.5
+dt_icon=1.0
 nboundlinesCOS=
 
 gxPFL=192
@@ -42,8 +42,8 @@ dtPFL=0.0125
 runnamePFL="ccs"
 basePFL=0.0025
 
-freq1OAS=450
-freq2OAS=450
+freq1OAS=45
+freq2OAS=45
 
 deltaobs=1
 
@@ -97,7 +97,7 @@ EOF
   gicon_lon="$(cdo infov ${gicon} 2>> $err_file | grep lon_cell_centre)"
   gicon_lon=($gicon_lon)
   gx_icon=${gicon_lon[5]}
-  dt_icon=0.5
+
 
   cd $rmp_folder
   cdo setgrid,tgrid.txt $gclm clmgrid1.nc >> $log_file 2>> $err_file
