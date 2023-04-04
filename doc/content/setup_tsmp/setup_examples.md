@@ -5,8 +5,7 @@ This Section need to be revised! Please take a look into the
 setup/configuration](https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys)
 to test your model.
 
-Active setups. Information on Backups by former colleagues
-[here](#backups)
+Active setups.
 
 ## Pan-European EURO-CORDEX
 
