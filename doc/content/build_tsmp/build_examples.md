@@ -43,7 +43,6 @@ maxdepth: 3
 ---
 build_examples_tsmp.md
 build_examples_tsmppdaf.md
-build_environment_variables.md
 ```
 
 ## Patching the orginal source code 

@@ -1,5 +1,12 @@
 # Structure of PDAF inside TSMP
 
+```{toctree}
+---
+maxdepth: 3
+---
+build_environment_variables.md
+```
+
 ## Call Graph for TSMP-PDAF
 
 Here is an exemplary call-graph from TSMP-PDAF's main program
