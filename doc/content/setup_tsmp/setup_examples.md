@@ -338,9 +338,3 @@ flag the actual namelists in this folder must be named like:
 ### Setup NRW spinup with init date (lets say 01.01.2005 00:00) 1 month runtime, 24h wallclock time, restart from arbitrary date (lets say 01.03.2005 00:00) in indexed (3rd) rundir on JURECA ####
 
       ./setup_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCT -V nrw -r "$WORK/tsmp/nrwSpinup/run" -I 3 -Q 24 -T 744 -s 2005-03-01_00 -S 2005-01-01_00 -j "$WORK/tsmp/nrwSpinup/run2/clmoas.clm2.r.2005-02-28-00000.nc" -k "$WORK/tsmp/nrwSpinup/run2/cosmo_out/lfff59000000" -l "$WORK/tsmp/nrwSpinup/run2/rurlaf.out.press.01416.pfb"
-
-
-
-## Backups ##
-
-- Zhenlei Yang: `icg4lts` under `DATAASSIMILATION/Zhenlei\ Yang`
