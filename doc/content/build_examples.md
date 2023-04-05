@@ -35,6 +35,15 @@ cd $TSMP_DIR/bldsva
 ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel -A GPU
 ```
 
+```{toctree} 
+---
+maxdepth: 3
+caption: Build Examples for TSMP-PDAF
+---
+build_examples_tsmp.md
+build_examples_tsmppdaf.md
+build_environment_variables.md
+```
 
 ## Patching the orginal source code 
 
