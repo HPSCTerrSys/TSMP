@@ -387,6 +387,13 @@ hardSanityCheck(){
 
 }
 
+deprecatedVersion(){
+  if [[ "${version}" != ""  ]] then
+      print "The use of the internal version with -v is deprecated. Please provide your desired combination with -c including version numbers (clm3-cos5-pfl). "
+      terminate
+  fi
+}
+
 softSanityCheck(){
 
   #check multi instance functionality (only working with Oasis3-MCT)
@@ -476,32 +483,6 @@ interactive(){
       			check
       			initSetup
       			setSelection
-
-                  fi
-                  if [[ $numb == 2 ]] ; then
-                        print "The following versions are available for $platform:"
-                        for a in ${availability[$platform]} ; do
-                                printf "%-20s #%s\n" "$a" "${versions[$a]} consisting of: "
-                                for b in ${modelVersion[$a]} ; do
-                                   printf "%-20s - %s\n" "" "$b"
-                                done
-                        done
-                        print "Please type in your desired value..."
-                        read version
-                        case "${combinations[$version]}" in  
-                                *" $combination "*);;
-                                *)    
-                                set -A array ${combinations[$version]}
-                                combination=${array[0]} ;;    
-                        esac
-			clearSetupSelection
-			setCombination
-			comment "  source setup for $refSetup on $platform"
-                          . ${rootdir}/bldsva/setups/$refSetup/${refSetup}.ksh >> $log_file 2>> $err_file
-                          . ${rootdir}/bldsva/setups/common_setup.ksh >> $log_file 2>> $err_file
-                        check
-			initSetup	
-			setSelection
 
                   fi
                   if [[ $numb == 3 ]] ; then
@@ -606,7 +587,7 @@ printState(){
   print ""
   print "${cred}(1)${cnormal} platform (default=$def_platform): ${cgreen}$platform${cnormal}"
   print "${cred}(45)${cnormal} compiler (default=$def_compiler): ${cgreen}$compiler ${cnormal}"
-  print "${cred}(2)${cnormal} version (default=$def_version): ${cgreen}$version${cnormal}"
+  print "${cred}(2)${cnormal} Deprecated. Please specify your desired combination with the -c option."
   print "${cred}(3)${cnormal} combination (default=$def_combination): ${cgreen}$combination${cnormal}"
   print "${cred}(4)${cnormal} refSetup (default=$def_refSetup): ${cgreen}$refSetup${cnormal}"
   print ""
@@ -1422,7 +1403,7 @@ route "${cyellow}<< setup_da${cnormal}"
   done
 
 
-
+deprecatedVersion
 
 
 comment "  source list with supported machines and configurations"

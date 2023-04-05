@@ -80,7 +80,7 @@ then
      done
 elif [ $testcase = idiurnal-cycle ]
 then
-     for i in $( find tsmp_icon-ccs/ -mindepth 2 -maxdepth 2 -type d )
+     for i in $( find tsmp_idiurnal-cycle/ -mindepth 2 -maxdepth 2 -type d )
      do
        cd $i
        md5sum -c checksums.md5
@@ -112,7 +112,7 @@ then
 elif [ $testcase = idealscal ]
 then
      mv tsmp_idealscal ../
-elif [ $testcase = icon-ccs ]
+elif [ $testcase = idiurnal-cycle ]
 then
      mv tsmp_idiurnal-cycle ../
 fi

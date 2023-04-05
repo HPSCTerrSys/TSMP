@@ -479,25 +479,6 @@ interactive(){
                         setCombination
                         setSelection 
 		  fi
-		  if [[ $numb == 2 ]] ; then 
-                        print "The following versions are available for $platform:"
-                        for a in ${availability[$platform]} ; do
-                                printf "%-20s #%s\n" "$a" "${versions[$a]} consisting of: "
-				for b in ${modelVersion[$a]} ; do
-				   printf "%-20s - %s\n" "" "$b"
-				done
-                        done		
-			print "Please type in your desired value..."
-			read version
-                        case "${combinations[$version]}" in  
-                                *" $combination "*);;
-                                *)
-                                set -A array ${combinations[$version]}
-                                combination=${array[0]} ;;
-                        esac
-			clearPathSelection
- 			setCombination
-		  fi
 		  if [[ $numb == 3 ]] ; then  
                         print "The following combinations are available for $version:"
                         for a in ${combinations[$version]} ; do
@@ -656,6 +637,14 @@ hardSanityCheck(){
   fi
 
 }
+
+deprecatedVersion(){
+  if [[ "${version}" != ""  ]] then
+      print "The use of the internal version with -v is deprecated. Please provide your desired combination with -c including version numbers (clm3-cos5-pfl). "
+      terminate
+  fi
+}
+
 softSanityCheck(){
 
 
@@ -886,7 +875,7 @@ getGitInfo(){
   USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
   USAGE+="[B:bindir?Absolute path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
    
-  USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
+  USAGE+="[v:version?Deprecated. Please specify your desired combination with the -c option."
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$def_platform']"
 
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
@@ -978,6 +967,7 @@ getGitInfo(){
     esac
   done
 
+deprecatedVersion
 
 comment "  source list with supported machines and configurations"
   . $rootdir/bldsva/supported_versions.ksh
