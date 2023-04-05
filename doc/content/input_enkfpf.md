@@ -31,6 +31,7 @@ simtime            =
 updateflag         =
 gwmasking          =
 paramupdate        =
+paramupdate_frequency =
 aniso_perm_y       =
 aniso_perm_z       =
 printensemble      =
@@ -138,6 +139,15 @@ pressure data (updateflag=1) in ParFlow.
 -   1: Update of saturated hydraulic conductivity
 
 -   2: Update of Mannings coefficient
+
+#### PF:paramupdate_frequency
+`PF:paramupdate_frequency`: (integer) Frequency of parameter
+updates. Default: `1`
+
+For each assimilation cycle it is checked whether `tcylce mod
+paramupdate_frequency == 0`. When this happens, a parameter update is
+applied. For the default of `1`, each assimilation cycle contains a
+parameter update.
 
 #### PF:aniso_perm_y
 `PF:aniso_perm_y`: (real) Anisotropy factor of saturated hydraulic
@@ -358,40 +368,41 @@ Effect of `obs_interp_switch=1`:
 
 ### Parameter Summary
 
- | section   | parameter            | value |
- |:---------:|:--------------------:|:-----:|
- | `[PF]`    |                      |       |
- |           | `problemname`        | \-    |
- |           | `nprocs`             | 0     |
- |           | `starttime`          | 0.0   |
- |           | `endtime`            | 0     |
- |           | `simtime`            | 0     |
- |           | `dt`                 | 0.0   |
- |           | `updateflag`         | 1     |
- |           | `paramupdate`        | 0     |
- |           | `aniso_perm_y`       | 1.0   |
- |           | `aniso_perm_z`       | 1.0   |
- |           | `printensemble`      | 1     |
- |           | `printstat`          | 1     |
- |           | `paramprintensemble` | 1     |
- |           | `paramprintstat`     | 1     |
- |           | `olfmasking`         | 1     |
- | `[CLM]`   |                      |       |
- |           | `problemname`        | \-    |
- |           | `nprocs`             | 0     |
- |           | `update_swc`         | 1     |
- |           | `print_swc`          | 0     |
- | `[COSMO]` |                      |       |
- |           | `nprocs`             | 0     |
- |           | `dtmult`             | 0     |
- | `[DA]`    |                      |       |
- |           | `nreal`              | 0     |
- |           | `outdir`             | \-    |
- |           | `da_interval`        | 1     |
- |           | `stat_dumpoffset`    | 0     |
- |           | `screen_wrapper`     | 1     |
- |           | `point_obs`          | 1     |
- |           | `obs_interp_switch`  | 0     |
+ | section   | parameter               | value |
+ |:---------:|:-----------------------:|:-----:|
+ | `[PF]`    |                         |       |
+ |           | `problemname`           | \-    |
+ |           | `nprocs`                | 0     |
+ |           | `starttime`             | 0.0   |
+ |           | `endtime`               | 0     |
+ |           | `simtime`               | 0     |
+ |           | `dt`                    | 0.0   |
+ |           | `updateflag`            | 1     |
+ |           | `paramupdate`           | 0     |
+ |           | `paramupdate_frequency` | 1     |
+ |           | `aniso_perm_y`          | 1.0   |
+ |           | `aniso_perm_z`          | 1.0   |
+ |           | `printensemble`         | 1     |
+ |           | `printstat`             | 1     |
+ |           | `paramprintensemble`    | 1     |
+ |           | `paramprintstat`        | 1     |
+ |           | `olfmasking`            | 1     |
+ | `[CLM]`   |                         |       |
+ |           | `problemname`           | \-    |
+ |           | `nprocs`                | 0     |
+ |           | `update_swc`            | 1     |
+ |           | `print_swc`             | 0     |
+ | `[COSMO]` |                         |       |
+ |           | `nprocs`                | 0     |
+ |           | `dtmult`                | 0     |
+ | `[DA]`    |                         |       |
+ |           | `nreal`                 | 0     |
+ |           | `outdir`                | \-    |
+ |           | `da_interval`           | 1     |
+ |           | `stat_dumpoffset`       | 0     |
+ |           | `screen_wrapper`        | 1     |
+ |           | `point_obs`             | 1     |
+ |           | `obs_interp_switch`     | 0     |
 
 Default values for parameter file `enkfpf.par`.
 
