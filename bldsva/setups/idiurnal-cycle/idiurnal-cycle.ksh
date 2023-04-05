@@ -26,18 +26,18 @@ DumpPFL=1
   
 Runhours=1
 
-gxCLM=192
-gyCLM=192
+gxCLM=90
+gyCLM=90
 dtCLM=60
-resCLM="0192x0192"
+resCLM="090x090"
 
 gxCOS=9800
 gyCOS=
 dt_icon=10.0
 nboundlinesCOS=
 
-gxPFL=192
-gyPFL=192
+gxPFL=90
+gyPFL=90
 dtPFL=0.8333333
 runnamePFL="idiurnal"
 basePFL=0.0025

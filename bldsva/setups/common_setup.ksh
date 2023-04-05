@@ -96,6 +96,9 @@ if [[ $withICON == "true" ]]; then
   comment "  copy icon grid"
     ln -s $gicon $rundir/ >> $log_file 2>> $err_file
   check
+  comment "   copy clmgrid into rundir"
+      cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
+    check_pfl
 
   comment "  copy remap-files"
     cp $rmp_folder/rmp* $rundir/ >> $log_file 2>> $err_file
