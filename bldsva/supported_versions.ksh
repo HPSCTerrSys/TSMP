@@ -90,15 +90,15 @@ setups+=(
 	["ideal1200600"]="idealized domain with gridsize scaled to 600x600 (atmosphere) 1200x1200 (land)"
 	["ideal24001200"]="idealized domain with gridsize scaled to 1200x1200 (atmosphere) 2400x2400 (land)"
     ["idealRTD"]="idealized domain 20x20 (atmosphere) 16x16 (land) for land-atmosphere-interaction and DA test"
-    ["icon-ccs"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
+    ["idiurnal-cycle"]="icon non-hydrostatic convective boundary layer (Anurag et al. 2015)"
 )
 
 # list of setups that are available on a machine. (first is default)
 # IMPORTANT: add a leading and trailing " "(space)
 setupsAvail+=(
-	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD icon-ccs "
-    ["JUSUF"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD icon-ccs "
-	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD icon-ccs "
+	["JUWELS"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD idiurnal-cycle "
+    ["JUSUF"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD idiurnal-cycle "
+	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD idiurnal-cycle "
     ["DEEP"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["GENERIC_X86"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 )
