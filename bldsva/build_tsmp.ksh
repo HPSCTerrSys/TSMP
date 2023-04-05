@@ -875,7 +875,7 @@ getGitInfo(){
   USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
   USAGE+="[B:bindir?Absolute path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
    
-  USAGE+="[v:version?Deprecated. Please specify your desired combination with the -c option."
+  USAGE+="[v:version?Deprecated. Please specify your desired combination with the -c option.]"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$def_platform']"
 
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"

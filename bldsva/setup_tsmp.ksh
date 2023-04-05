@@ -977,9 +977,6 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
   fi
-  if [[ $withICON == "true" ]]; then
-  rtime=$(( ($runhours*3600 + $cplfreq1/10)*10 ))  # with icon in tenths of second
-  else
   rtime=$(($runhours*3600 + $cplfreq1))
   fi
   if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
