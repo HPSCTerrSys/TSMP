@@ -17,14 +17,12 @@ defaultICONProc=316
 StartDate="2008-07-08 00" 
 InitDate="2008-07-08 00" 
 
-defaultRunhours=72
-defaultEndDate="$(date -d "${InitDate[0]} $defaultRunhours hours" "+%Y-%m-%d %H")"
+Runhours=1=72
+defaultEndDate="$(date -d "${InitDate[0]} $dRunhours hours" "+%Y-%m-%d %H")"
   
 DumpCLM=1
 DumpCOS=1
 DumpPFL=1
-  
-Runhours=1
 
 gxCLM=90
 gyCLM=90

@@ -13,7 +13,7 @@ cat << EOF > __rundir__/lnd.stdin
 
  finidat        = ''
  flndtopo       = '__forcingdir__/topodata___gridsize__.nc'
- fsurdat        = '__forcingdir__/surfdata___gridsize___.nc'
+ fsurdat        = '__forcingdir__/surfdata___gridsize__.nc'
  fatmgrid       = '__forcingdir__/griddata___gridsize__.nc'
  fatmlndfrc     = '__forcingdir__/fracdata___gridsize__.nc'
  fatmtopo       = ''
