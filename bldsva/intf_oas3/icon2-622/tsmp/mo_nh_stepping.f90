@@ -1876,8 +1876,9 @@ MODULE mo_nh_stepping
     !
     nlev = p_patch(1)%nlev
 
-    ! SBr, CHa: coupling counter
-    sim_time_oas = FLOOR(sim_time * 10.)
+    ! coupling counter from tenth of seconds
+!    sim_time_oas = FLOOR(sim_time * 10.)
+    sim_time_oas = NINT(sim_time) ! from seconds
 
     !SPo test timing for restart
     IF(msg_level > 30 ) THEN

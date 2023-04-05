@@ -1655,8 +1655,9 @@ MODULE mo_nh_stepping
     !
     nlev = p_patch(1)%nlev
 
-    ! SBr, CHa: coupling counter
-    sim_time_oas = FLOOR(sim_time * 10.)
+    ! coupling counter from tenth of seconds
+!    sim_time_oas = FLOOR(sim_time * 10.)
+    sim_time_oas = NINT(sim_time) ! from seconds
 
     !CALL diagnose_pres_temp (p_metrics, pt_prog, pt_prog_rcf,   &
     !     &                      pt_diag, pt_patch,                 &
