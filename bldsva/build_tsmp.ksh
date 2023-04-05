@@ -68,7 +68,7 @@ setDefaults(){
   platform=$def_platform
   if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
   version=$def_combination
-  if [[ $version == "" ]] then ; version="clm3-cos5-pfl" ; fi #We need a hard default here
+  if [[ $version == "" ]] then ; version="" ; fi #We need a hard default here
   rootdir=$def_rootdir
   bindir=$def_bindir
   optComp=$def_optComp

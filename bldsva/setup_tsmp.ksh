@@ -70,7 +70,7 @@ setDefaults(){
   compiler=$def_compiler
   if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
   version=$def_combination
-  if [[ $version == "" ]] then ; version="clm3-cos5-pfl" ; fi #We need a hard default here
+  if [[ $version == "" ]] then ; version="" ; fi #We need a hard default here
   bindir=$def_bindir
   rundir=$def_rundir
   exp_id=$def_exp_id
@@ -738,7 +738,7 @@ c_setup_icon(){
 route "${cyellow}>>> c_setup_icon${cnormal}"
 
 comment "  cp add_run_routines to rundir"
-  cp $rootdir/bldsva/setups/icon-ccs/common/add_run_routines $rundir >> $log_file 2>> $err_file
+  cp $rootdir/bldsva/setups/idiurnal-cycle/common/add_run_routines $rundir >> $log_file 2>> $err_file
 check
 
 comment "  cp namelist to rundir"
