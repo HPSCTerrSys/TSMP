@@ -70,7 +70,7 @@ pdata=0.
 allocate(buffer_array(begg:(begg+total_part_len-1)))
 
 
-CALL prism_get_proto( srcv(kid)%nid, kstep*10, buffer_array , kinfo )
+CALL prism_get_proto( srcv(kid)%nid, kstep, buffer_array , kinfo ) !CH:Remove kstep*10
 
 
 ani = adomain%ni

@@ -18,7 +18,7 @@ StartDate="2008-07-08 00"
 InitDate="2008-07-08 00" 
 
 Runhours=72
-defaultEndDate="$(date -d "${InitDate[0]} $dRunhours hours" "+%Y-%m-%d %H")"
+defaultEndDate="$(date -d "${InitDate[0]} $Runhours hours" "+%Y-%m-%d %H")"
   
 DumpCLM=1
 DumpCOS=1
