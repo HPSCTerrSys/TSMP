@@ -1,14 +1,14 @@
-## Command line options ##
+# Command line options #
 
 The following command line options must be specified when TSMP-PDAF is
 executed:
 
-### n_modeltasks ###
+## n_modeltasks ##
 
 `n_modeltasks` (integer) Number of realisations. Must be consistent
 with `[DA] nreal`.
 
-### filtertype ###
+## filtertype ##
 
 `filtertype` (integer) Type of filter used for data assimilation. For
 more details see the PDAF documentation. Currently, the following
@@ -31,26 +31,26 @@ algorithms please refer to PDAF wiki link
 
 <http://pdaf.awi.de/trac/wiki/AvailableOptionsforInitPDAF>
 
-### subtype ###
+## subtype ##
 
 `subtype` (integer) Parameter subtype, different options for each
 filter. See [Command Line Examples](#command-line-examples).
 
-### obs_filename ###
+## obs_filename ##
 
 `obs_filename` (string) Prefix for observation files.
 
-### rms_obs ###
+## rms_obs ##
 
 `rms_obs` (real) Measurement error.
 
-### delt_obs ###
+## delt_obs ##
 
 `delt_obs` (integer) Number of data assimilation intervals (see
 [`[DA]da_interval`](./input_enkfpf.md#dada_interval)) that are forward
 computed, before assimilation is actually performed.
 
-### screen ###
+## screen ##
 
 `screen` (integer) Control verbosity of PDAF
 - 0: no outputs

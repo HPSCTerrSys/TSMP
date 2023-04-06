@@ -1,6 +1,6 @@
-# Developing TSMP #
+# Setting up new cases
 
-## Supporting a new machine ##
+## Supporting a new machine
 
 First of all make sure that the new machine is introduced to the
 `supported_machines.ksh` script.
@@ -19,7 +19,7 @@ modules if necessary.
 For both cases it is easiest to copy a similar machine and change names
 and specifics accordingly.
 
-## Setting up a new experiment ##
+## Setting up a new experiment
 
 First of all make sure that the new setup is introduced to the
 `supported_machines.ksh` script.

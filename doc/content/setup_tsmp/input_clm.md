@@ -1,4 +1,4 @@
-## Input files for CLM ##
+# Input files for CLM #
 
 For executing TSMP-PDAF, the standard CLM input file `lnd.stdin` is
 replaced by separate input files for the individual CLM realisations.
