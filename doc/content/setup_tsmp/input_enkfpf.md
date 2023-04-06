@@ -31,6 +31,7 @@ simtime            =
 updateflag         =
 gwmasking          =
 paramupdate        =
+paramupdate_frequency =
 aniso_perm_y       =
 aniso_perm_z       =
 printensemble      =
@@ -131,11 +132,11 @@ Must match with the specifications in the `*.pfidb` input.
 `PF:gwmasking`: (integer) Groundwater masking for assimilation of
 pressure data (updateflag=1) in ParFlow.
 
--   No groundwater masking.
+-   0: No groundwater masking.
 
--   Groundwater masking using saturated cells only.
+-   1: Groundwater masking using saturated cells only.
 
--   Groundwater masking using mixed state vector.
+-   2: Groundwater masking using mixed state vector.
 
 ### PF:paramupdate ###
 
@@ -146,6 +147,15 @@ pressure data (updateflag=1) in ParFlow.
 -   1: Update of saturated hydraulic conductivity
 
 -   2: Update of Mannings coefficient
+
+### PF:paramupdate_frequency ###
+`PF:paramupdate_frequency`: (integer) Frequency of parameter
+updates. Default: `1`
+
+For each assimilation cycle it is checked whether `tcylce mod
+paramupdate_frequency == 0`. When this happens, a parameter update is
+applied. For the default of `1`, each assimilation cycle contains a
+parameter update.
 
 ### PF:aniso_perm_y ###
 
@@ -372,7 +382,7 @@ location.
 
 Default: `0` (no interpolation)
 
-Effect:
+Effect of `obs_interp_switch=1`:
 - For [CLM-type
   observations](./input_obs.md#clm-observation-file-variables) the
   longitude and latitude inputs in the observation file are compared
@@ -380,45 +390,49 @@ Effect:
   from these grid points are averaged with the distances to the grid
   points as weights.
 - For [ParFlow-type
-  observations](./input_obs.md#parflow-observation-file-variables): To
-  be implemented.
+  observations](./input_obs.md#parflow-observation-file-variables) the
+  observation files need two more inputs: `ix_interp_d` and
+  `iy_interp_d`. These index distances are used to compute an average
+  of the simulated measurements from the value at the surrounding grid
+  points in the x-y-plane.
 
 ## Parameter Summary ##
 
- | section   | parameter            | value |
- |:---------:|:--------------------:|:-----:|
- | `[PF]`    |                      |       |
- |           | `problemname`        | \-    |
- |           | `nprocs`             | 0     |
- |           | `starttime`          | 0.0   |
- |           | `endtime`            | 0     |
- |           | `simtime`            | 0     |
- |           | `dt`                 | 0.0   |
- |           | `updateflag`         | 1     |
- |           | `paramupdate`        | 0     |
- |           | `aniso_perm_y`       | 1.0   |
- |           | `aniso_perm_z`       | 1.0   |
- |           | `printensemble`      | 1     |
- |           | `printstat`          | 1     |
- |           | `paramprintensemble` | 1     |
- |           | `paramprintstat`     | 1     |
- |           | `olfmasking`         | 1     |
- | `[CLM]`   |                      |       |
- |           | `problemname`        | \-    |
- |           | `nprocs`             | 0     |
- |           | `update_swc`         | 1     |
- |           | `print_swc`          | 0     |
- | `[COSMO]` |                      |       |
- |           | `nprocs`             | 0     |
- |           | `dtmult`             | 0     |
- | `[DA]`    |                      |       |
- |           | `nreal`              | 0     |
- |           | `outdir`             | \-    |
- |           | `da_interval`        | 1     |
- |           | `stat_dumpoffset`    | 0     |
- |           | `screen_wrapper`     | 1     |
- |           | `point_obs`          | 1     |
- |           | `obs_interp_switch`  | 0     |
+ | section   | parameter               | value |
+ |:---------:|:-----------------------:|:-----:|
+ | `[PF]`    |                         |       |
+ |           | `problemname`           | \-    |
+ |           | `nprocs`                | 0     |
+ |           | `starttime`             | 0.0   |
+ |           | `endtime`               | 0     |
+ |           | `simtime`               | 0     |
+ |           | `dt`                    | 0.0   |
+ |           | `updateflag`            | 1     |
+ |           | `paramupdate`           | 0     |
+ |           | `paramupdate_frequency` | 1     |
+ |           | `aniso_perm_y`          | 1.0   |
+ |           | `aniso_perm_z`          | 1.0   |
+ |           | `printensemble`         | 1     |
+ |           | `printstat`             | 1     |
+ |           | `paramprintensemble`    | 1     |
+ |           | `paramprintstat`        | 1     |
+ |           | `olfmasking`            | 1     |
+ | `[CLM]`   |                         |       |
+ |           | `problemname`           | \-    |
+ |           | `nprocs`                | 0     |
+ |           | `update_swc`            | 1     |
+ |           | `print_swc`             | 0     |
+ | `[COSMO]` |                         |       |
+ |           | `nprocs`                | 0     |
+ |           | `dtmult`                | 0     |
+ | `[DA]`    |                         |       |
+ |           | `nreal`                 | 0     |
+ |           | `outdir`                | \-    |
+ |           | `da_interval`           | 1     |
+ |           | `stat_dumpoffset`       | 0     |
+ |           | `screen_wrapper`        | 1     |
+ |           | `point_obs`             | 1     |
+ |           | `obs_interp_switch`     | 0     |
 
 Default values for parameter file `enkfpf.par`.
 

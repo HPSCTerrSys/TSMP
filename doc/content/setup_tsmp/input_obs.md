@@ -82,6 +82,36 @@ where `nx` and `ny` are the number of grid cells in x- and y-direction
 respectively and `ix`, `iy` and `iz` are the positions of the
 observation in x-, y- and z-direction.
 
+#### ix_interp_d ####
+
+`ix_interp_d`: (real) Distance from observation location to the grid
+position assigned to the location `ix`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
+`1`.
+
+The observation location should be at
+
+\begin{gather*} x_{obs} =
+x_{grid}(ix) + \mathtt{ix\_interp\_d} \cdot \Delta x
+\end{gather*}
+
+and `0 <= ix_interp_d < 1`.
+
+#### iy_interp_d ####
+
+`iy_interp_d`: (real) Distance from observation location to the grid
+position assigned to the location `iy`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
+`1`.
+
+The observation location should be at
+
+\begin{gather*}
+y_{obs} = y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
+\end{gather*}
+
+and `0 <= iy_interp_d < 1`.
+
 ### CLM observation file variables ###
 
 If TSMP-PDAF is only applied with CLM, different variables have to be
