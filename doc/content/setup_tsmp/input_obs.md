@@ -1,11 +1,11 @@
-## Observation input ##
+# Observation input #
 
 Observation input consists of a number of different inputs:
 - Observation files with correct name and content
 - Command Line Options
 - Environment Variables
 
-### Observation files ###
+## Observation files ##
 
 Observation files for TSMP-PDAF are netCDF files which follow a
 certain naming convention. Each observation file has a fixed prefix
@@ -22,11 +22,11 @@ option](./input_cmd.md#command-line-options) `obs_filename`.
 Example: If the chosen prefix is `myobs`, the observation files are
 named `myobs.00001, myobs.00002, myobs.00003`, etc.
 
-#### General observation file variables ####
+### General observation file variables ###
 
 All observation files contain the following variable:
 
-##### dim_obs #####
+#### dim_obs ####
 
 `dim_obs`: (int) The observation files contain one dimension named
 `dim_obs` which should be set equal to the number of observations for
@@ -34,17 +34,17 @@ the respective assimilation cycle. The observation files for ParFlow
 should contain the following variables which all should have the
 dimension `dim_obs` (except variable `dr` in CLM observations files):
 
-#### ParFlow observation file variables ####
+### ParFlow observation file variables ###
 
 If TSMP-PDAF is only applied with ParFlow, the following variables
 have to be specified in the observation files:
 
-##### obs_pf #####
+#### obs_pf ####
 
 `obs_pf`: (real) Observations for ParFlow (either pressure or soil
 moisture)
 
-##### obserr_pf #####
+#### obserr_pf ####
 
 `obserr_pf`: (real) Observation errors which can be different for
 individual observations (optional). If this variable is not
@@ -52,22 +52,22 @@ present. the command line option `rms_obs` (see [Command line
 options](./input_cmd.md#command-line-options)) will be used to define
 the observation error (equal for all observations).
 
-##### ix #####
+#### ix ####
 
 `ix`: (integer) Position of the observation in the ParFlow grid in
 x-direction.
 
-##### iy #####
+#### iy ####
 
 `iy`: (integer) Position of the observation in the ParFlow grid in
 y-direction.
 
-##### iz #####
+#### iz ####
 
 `iz`: (integer) Position of the observation in the ParFlow grid in
 z-direction.
 
-##### idx #####
+#### idx ####
 
 `idx`: (integer) Index of the observation in the ParFlow grid.
 
@@ -82,16 +82,16 @@ where `nx` and `ny` are the number of grid cells in x- and y-direction
 respectively and `ix`, `iy` and `iz` are the positions of the
 observation in x-, y- and z-direction.
 
-#### CLM observation file variables ####
+### CLM observation file variables ###
 
 If TSMP-PDAF is only applied with CLM, different variables have to be
 specified in the observation files:
 
-##### obs_clm #####
+#### obs_clm ####
 
 `obs_clm`: (real) Observations for CLM (soil moisture)
 
-##### obserr_clm #####
+#### obserr_clm ####
 
 `obserr_clm`: (real) Observation errors which can be different for
 individual observations (optional). If this variable is not
@@ -99,20 +99,20 @@ present. the command line option `rms_obs` (see [Command line
 options](./input_cmd.md#command-line-options)) will be used to define
 the observation error (equal for all observations).
 
-###### lon ######
+##### lon #####
 
 `lon`: (real) Longitude of the observation.
 
-##### lat #####
+#### lat ####
 
 `lat`: (real) Latitude of the observation.
 
-##### layer #####
+#### layer ####
 
 `layer`: (integer) CLM layer where the observation is located (counted
 from uppermost CLM layer).
 
-##### var_id #####
+#### var_id ####
 
 `var_id`: (integer) Only used for multiscalar data assimilation. Size
 of `var_id` is same as `dim_obs`. `var_id` has same values over model
@@ -122,7 +122,7 @@ observation values to other integers (2,3,4,5 etc.) for other similar
 observations. If there are no observations over some grid cells than a
 negative `var_id` (integer) is assigned to them.
 
-##### dr #####
+#### dr ####
 
 `dr`: (real) Snapping distance for the observation.
 
@@ -133,7 +133,7 @@ Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
 should be smaller than the minimum grid cell size.
 
-### Multiscalar Data Assimilation ###
+## Multiscalar Data Assimilation ##
 
 The multiscalar data assimilation has been implemented for Local
 Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). For
@@ -150,7 +150,7 @@ from 1 for similar observation values to other integers (2,3,4,5 etc.)
 for other similar obersvations. If there are no observations over some
 grid cells than a negative `var_id` (integer) is assigned to them.
 
-### Observation time flexibility ###
+## Observation time flexibility ##
 
 Currently, in TSMP-PDAF there are a number input options that
 determine, when observations are read-in and assimilated:
@@ -210,7 +210,7 @@ f.variables["no_obs"].assignValue(0)
 f.close()
 ```
 
-### Specifying type of observation at compile time ###
+## Specifying type of observation at compile time ##
 
 The following environment variables let the user specify the expected
 observational input (i.e. ParFlow or CLM observations) at compile time
@@ -218,14 +218,14 @@ observational input (i.e. ParFlow or CLM observations) at compile time
 as certain parts of the source code are not accessed at all.
 
 CLM observations: Set
-- [CLMSA](./build_environment_variables.md#clmsa)
-- [OBS_ONLY_CLM](./build_environment_variables.md#obs_only_clm)
+- [CLMSA](./../build_tsmp/build_environment_variables.md#clmsa)
+- [OBS_ONLY_CLM](./../build_tsmp/build_environment_variables.md#obs_only_clm)
 
 ParFlow observations: Set
-- [PARFLOW_STAND_ALONE](./build_environment_variables.md#parflow_stand_alone)
-- [OBS_ONLY_PARFLOW](./build_environment_variables.md#obs_only_parflow)
+- [PARFLOW_STAND_ALONE](./../build_tsmp/build_environment_variables.md#parflow_stand_alone)
+- [OBS_ONLY_PARFLOW](./../build_tsmp/build_environment_variables.md#obs_only_parflow)
 
-#### Example for setting environment variables ####
+### Example for setting environment variables ###
 
 The aforementioned environment variables can be set in the PDAF-build
 script

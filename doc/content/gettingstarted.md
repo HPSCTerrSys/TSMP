@@ -2,7 +2,7 @@
 
 **Throughout this quick start guide a destinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
 
-For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_examples.md#building-tsmp) section.
+For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_tsmp/build_examples.md#building-tsmp) section.
 
 ## General concept
 

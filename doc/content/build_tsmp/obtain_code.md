@@ -1,14 +1,11 @@
-# Installing TSMP #
+# Obtaining the code 
 
-## Obtaining the code ##
-
-### TSMP
+## TSMP
 
 The source code of TSMP (Terrestrial System Modeling Platform) can be obtained from a git-repository hosted on Github:
 <https://github.com/HPSCTerrSys/TSMP>. On this website, a README file explains how to run TSMP for the first time on Linux.
 
-This git-repository provides wiki pages on how to download, configure and install TSMP. The latter two points are also explained in this manual in Sections [Build Examples](#build-examples) and [Setup](./setup_examples.md) for 
-convenience. Additionally, a few modifications need to be done for TSMP in order to work within TSMP-PDAF (*this patching is possibly not necessary anymore in the current version*).
+This git-repository provides wiki pages on how to download, configure and install TSMP. The latter two points are also explained in this manual in Sections [Build Examples](./build_examples.md) and [Setup](./../setup_tsmp/setup_examples.md) for convenience. Additionally, a few modifications need to be done for TSMP in order to work within TSMP-PDAF (*this patching is possibly not necessary anymore in the current version*).
 
 Commands for cloning from these repositories (https or ssh):
 
@@ -24,7 +21,7 @@ and from the home page of the Centre for High-Performance Scientific Computing i
 
 There is also a public TSMP Virtual Machine available for download. This is a Ubuntu virtual machine containing TSMP and a tutorial on data assimilation. The webpage for downloading (TSMP Virtual Machine): <https://datapub.fz-juelich.de/slts/>
 
-### TSMP-PDAF
+## TSMP-PDAF
 
 Commands for cloning TSMP-PDAF (https or ssh):
 ```bash
@@ -40,7 +37,7 @@ Agrosphere (IBG-3) at the Forschungszentrum Jülich (registration required, cont
 	git clone git@icg4geo.icg.kfa-juelich.de:ExternalRepos/tsmp-pdaf/tsmp.git TSMP
 ```
 
-### Component Models
+## Component Models
 
 The Github-page of TSMP does not include the source code of component models. This makes TSMP independent of third party code and licenses.
 
@@ -64,7 +61,7 @@ All the source codes of component models should ideally be placed into one insta
 
 The directory structure of `TSMP` is discussed in more detail in Section [Structuring TSMP-PDAF](./structure.md).
 
-#### HPSC-TerrSys users
+### HPSC-TerrSys users
 
 Authenticate with your GitLab web GUI user name and password and clone
 the repositories (instead of "fresh", also "legacy" repositories with
@@ -77,36 +74,36 @@ git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
 
-#### External users
+### External users
 
 Make sure directories are renamed as shown above. The component models can be downloaded from the respective websites as indicated below. Due to licensing reasons HPSC-TerrSys cannot provide these source codes to external users.
 
-##### COSMO v5.01
+#### COSMO v5.01
 
 Available from http://www.cosmo-model.org. A license agreement is needed.
 
-##### CLM v3.5
+#### CLM v3.5
 
 Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.
 
-##### ParFlow v3.2
+#### ParFlow v3.2
 
 Available from https://github.com/parflow/.
 
 ```shell
 git clone --branch v3.2.0 https://github.com/parflow/parflow.git parflow3_2
 ```
-##### ParFlow v3.9
+#### ParFlow v3.9
 ParFlow 3.9  is available from
 ```shell
 git clone -b v3.9.0 https://github.com/parflow/parflow.git
 ```
 
-##### OASIS3-MCT v2.0
+#### OASIS3-MCT v2.0
 
 Available from https://oasis.cerfacs.fr/en/downloads/.
 
-##### depracted?
+#### depracted?
 
 Include obtaining from original sources and from Gitlab page
 <https://icg4geo.icg.kfa-juelich.de/ModelSystems>.
@@ -115,7 +112,7 @@ For information on component models of TSMP-PDAF, see
 [https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/TSMP-PDAF-component-models](https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/TSMP-PDAF-component-models)
 
 
-### PDAF
+#### PDAF
 
 The source code of PDAF is available from the following web page under Content-link `Software download` (registration required):
 <http://pdaf.awi.de/trac/wiki>. If possible, ask a senior institute member for existing versions on JSC systems.
@@ -125,6 +122,3 @@ Install instructions are provided in the README files included in the downloadab
 The source code of TSMP-PDAF is available form the HPSC-TerrSys web site: [http://www.hpsc-terrsys.de](http://www.hpsc-terrsys.de)\ The
 new GIT-project "TSMP\" does not include the source code of the component models anymore.
 
-## Build Examples ##
-
-Example builds of TSMP-PDAF: [Build Examples](./build_examples.md)
