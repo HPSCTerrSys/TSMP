@@ -26,7 +26,7 @@ DumpPFL=1
 
 gxCLM=90
 gyCLM=90
-dtCLM=60
+dtCLM=90
 resCLM="0090x0090"
 
 gxCOS=9800
@@ -36,12 +36,12 @@ nboundlinesCOS=
 
 gxPFL=90
 gyPFL=90
-dtPFL=0.8333333   
+dtPFL=0.025 
 runnamePFL="idiurnal"
 basePFL=0.0025
 
-freq1OAS=300
-freq2OAS=300
+freq1OAS=90
+freq2OAS=90
 
 deltaobs=1
 

@@ -107,13 +107,13 @@ pfset Cell.29.dzScale.Value                   0.02
 #-----------------------------------------------------------------------------
 # Setup timing info
 #-----------------------------------------------------------------------------
-pfset TimingInfo.BaseUnit		     0.0025
-pfset TimingInfo.StartCount		     0.0
-pfset TimingInfo.StartTime		     0.0
-pfset TimingInfo.StopTime		     1.0025 
-pfset TimeStep.Type			         Constant
-pfset TimeStep.Value		     	 0.0125 
-pfset TimingInfo.DumpInterval		 1
+pfset TimingInfo.BaseUnit		 __base_pfl__
+pfset TimingInfo.StartCount		 __start_cnt_pfl__
+pfset TimingInfo.StartTime		 0.0
+pfset TimingInfo.StopTime		 __stop_pfl_bldsva__ 
+pfset TimeStep.Type			 Constant
+pfset TimeStep.Value			 __dt_pfl_bldsva__ 
+pfset TimingInfo.DumpInterval		 __dump_pfl_interval__
 
 # Time Cycles
 #-----------------------------------------------------------------------------

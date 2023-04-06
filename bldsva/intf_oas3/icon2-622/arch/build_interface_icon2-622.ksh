@@ -27,7 +27,7 @@ else
  ./configure --enable-mpi --enable-parallel-netcdf --disable-ocean --disable-jsbach --disable-coupling --enable-grib2 --enable-ecrad >> $log_file 2>> $err_file
 fi
 #comment "   cp Makefile to icon dir ${mList[2]}"
-#   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/$platform/config/Makefile $icondir >> $log_file 2>> $err_file
+   cp $rootdir/bldsva/intf_oas3/${mList[2]}/arch/config/Makefile.Intel $icondir/Makefile >> $log_file 2>> $err_file
 #check
 comment "   sed oasisdir to icon Makefile"
   sed -i "s@__oasisdir__@$oasdir@" $icondir/Makefile >> $log_file 2>> $err_file
