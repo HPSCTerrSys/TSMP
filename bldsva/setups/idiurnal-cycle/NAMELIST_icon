@@ -20,9 +20,9 @@
  ntracer     =  1           ! number of tracers - default 0
  ltimer      = .true.       ! 
  timers_level = 100         !
- msg_level   = 5       ! detailed report during integration
+ msg_level   = 1       ! detailed report during integration
  output      = 'nml','totint'      
- profiling_output = 3
+ profiling_output = 1
 /
 &dynamics_nml
  iequations  = 3       ! 1: hydrost. atmosphere
@@ -31,7 +31,7 @@
  divavg_cntrwgt  = 0.50
 /
 &nh_testcase_nml
- nh_test_name      = 'CBL'  !test case identifier
+ nh_test_name      = 'HS_jw'  !test case identifier
  u_cbl             = 0.1, 0.0  !u_cbl(1)=constant, u_cbl(2)=gradient, default=0
  v_cbl             = 0.0, 0.0  !v_cbl(1)=constant, v_cbl(2)=gradient, default=0
  th_cbl            = 290.0, 0.006  !th_cbl(1)=constant, th_cbl(2)=gradient
