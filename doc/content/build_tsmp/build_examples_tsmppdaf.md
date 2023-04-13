@@ -1,4 +1,4 @@
-## TSMP-PDAF Build Examples ##
+# TSMP-PDAF Build Examples #
 
 A collection of build examples for TSMP-PDAF.
 
@@ -9,7 +9,7 @@ coupling software Oasis3-MCT.
 - [`Compile ParFlow standalone with PDAF`](#compile-parflow-and-clm-with-pdaf)
 - [`Compile ParFlow and CLM with PDAF`](#compile-parflow-standalone-with-pdaf-on-juwels-without-compiler-optimization)
 
-### Compile fully coupled TSMP-PDAF (on JURECA) ###
+## Compile fully coupled TSMP-PDAF (on JURECA) ##
 
 The first example runs the build script of TSMP-PDAF, specifies the
 machine `JURECA`, specifies the component models CLM, COSMO and
@@ -35,9 +35,9 @@ where it is backed up to. If you like to use your own folder structure
 for the models you can again select your own model-path with `-wxyz` and
 avoid making a backup with `-WXYZ` option set to \"`build`\".
 
-### Compile Parflow and CLM with PDAF ###
+## Compile Parflow and CLM with PDAF ##
 
-#### Build commands ####
+### Build commands ###
 
 Build commands for different machines.
 
@@ -46,22 +46,22 @@ Remarks:
 - Parflow-3.9 is supported using version tag `3.1.0MCTPDAF`. For older
   versions, use `3.0.0MCTPDAF` (>=3.2, <3.7), `1.1.0MCTPDAF` (<3.2).
 
-##### JURECA #####
+#### JURECA ####
 
       ./build_tsmp.ksh -m JURECA -c clm-pfl -v 3.1.0MCTPDAF -O Intel
 
-##### JUWELS #####
+#### JUWELS ####
 
       ./build_tsmp.ksh -m JUWELS -c clm-pfl -v 3.1.0MCTPDAF -O Intel
 
-##### Remote build #####
+#### Remote build ####
 
 ``` shell
 	./build_tsmp_remote -m JUWELS -v 3.1.0MCTPDAF -O Intel -c clm-pfl -branch TSMP_pdaf -host juwels &
 	./build_tsmp_remote -m JURECA -v 3.1.0MCTPDAF -O Intel -c clm-pfl -branch TSMP_pdaf -host jureca &
 ```
 
-#### Component Models ####
+### Component Models ###
 
 The build commands were last tested for these component models
 
@@ -100,7 +100,7 @@ Not used:
     `c81de76`
 	- Makefile different to other **cosmo4\_21** versions
 
-### Compile ParFlow standalone with PDAF (on JUWELS without compiler optimization) ###
+## Compile ParFlow standalone with PDAF (on JUWELS without compiler optimization) ##
 
       ./build_tsmp.ksh -m JUWELS -c pfl -v 1.1.0MCTPDAF -o -O0
 
@@ -112,7 +112,7 @@ default inputs.
 
 The `-g` flag, is build to produce debugging information.
 
-### Compile CLM5 with PDAF ###
+## Compile CLM5 with PDAF ##
 
 CLM5-PDAF compilation, currently available only on branch
 `TSMP_pdaf-clm5` (January 2023).
@@ -121,7 +121,7 @@ CLM5-PDAF compilation, currently available only on branch
 	./build_tsmp.ksh -v 4.4.0MCTPDAF -c clm -m JURECA -O Intel
 ```
 
-#### Prerequisite1: CLM5 preparation ####
+### Prerequisite1: CLM5 preparation ###
 
 For obtaining and preparing the component model `clm5_0`, you
 have to run the following commands
@@ -133,7 +133,7 @@ have to run the following commands
 	./manage_externals/checkout_externals
 ```
 
-#### Prerequisite2: Path to cesm ####
+### Prerequisite2: Path to cesm ###
 
 The path `CESMDATAROOT` needs to be changed in
 `TSMP/bldsva/intf_oas3/clm5_0/arch/JURECA/config/softwarepaths.ksh`. (analogous
@@ -144,56 +144,4 @@ Currently you need to have access to compute project `cjicg41` and use the line:
 	export CESMDATAROOT=/p/scratch/cjicg41/<user>/cesm
 ```
 For `<user>`, please contact someone on the inside.
-
-
-### Debug tips ###
-
-#### Debug Tip 1: Skip component models in TSMP-PDAF build ####
-
-``` shell
-./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCTPDAF -W skip -X skip
-```
-
-Oasis and CLM compilation are skipped with the option `skip` for flags
-`-W` and `-X`. Parflow and pdaf are compiled after Cosmo.
-
-All flags can be found using `./build_tsmp.ksh --help`. Here, the
-output for flag of componeent model build options:
-``` shell
-	-W, --optoas=optoas
-                  Build option for Oasis.
-                    fresh        #build from scratch in a new folder
-                    build        #build clean
-                    make         #only (resume) make and make install - no make clean and configure
-                    configure    #only make clean and configure - no make
-                    skip         #no build
-                  The default value is 'fresh'.
-  -E, --opticon=opticon
-                  Build option for ICON. The default value is 'fresh'.
-  -Y, --optcos=optcos
-                  Build option for Cosmo. The default value is 'fresh'.
-  -X, --optclm=optclm
-                  Build option for CLM. The default value is 'fresh'.
-  -Z, --optpfl=optpfl
-                  Build option for Parflow. The default value is 'fresh'.
-  -U, --optda=optda
-                  Build option for Data Assimilation. The default value is 'fresh'.
-```
-
-#### Debug Tip 2: Building TSMP-PDAF after source code changes in component models ####
-
-``` shell
-./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCTPDAF -W skip -X skip -Y make
-```
-
-Oasis and CLM compilation are skipped with the option `skip` for flags
-`-W` and `-X`.
-
-Cosmo compilation is resumed without making clean with option `make`
-for flag `-Y`. The source code change needs to be made in
-`cosmo4_21_JURECA_1.1.0MCTPDAF_clm-cos-pfl`. **But note**: The source
-code change will be lost after the next clean build of cosmo. Thus,
-make sure to incorporate the source code changes in the designated
-replace structures.
-
 	

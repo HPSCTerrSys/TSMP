@@ -1,4 +1,4 @@
-## Input files for COSMO ##
+# Input files for COSMO #
 
 Currently, different COSMO realizations share the same input namelist
 files (`INPUT_`), except the namelist file for input/output

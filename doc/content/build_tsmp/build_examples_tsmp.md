@@ -1,11 +1,11 @@
-## TSMP Build Examples ##
+# TSMP Build Examples #
 
 **Attention**: Not all of this examples were tested and paths are
 mostly made up.
 
-### Builds ###
+## Builds ##
 
-#### Fully coupled TSMP with Oasis3-MCT ####
+### Fully coupled TSMP with Oasis3-MCT ###
 
         ./build_tsmp.ksh -m JUWELS -c clm-cos-pfl -v 3.1.0MCT -O Intel
         ./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 3.1.0MCT -O Intel
@@ -60,21 +60,21 @@ default.
         -   Version 1.15.0 in `/pdaf1_1/src/PDAF-D_print_version.F90`,
             new version
 
-#### Compile ParFlow standalone on CLUMA2 without compiler optimization ####
+### Compile ParFlow standalone on CLUMA2 without compiler optimization ###
 
       ./build_tsmp.ksh -m CLUMA2 -c pfl -v 1.1.0MCT -o "O0"
 
 The `-m` and `-v` flag are optional in this case because they are
 default.
 
-#### Compile new CLM4.0 + Cosmo5.1 on JURECA ####
+### Compile new CLM4.0 + Cosmo5.1 on JURECA ###
 
       ./build_tsmp.ksh -m JURECA -c clm-cos -v 2.1.0MCT -C false
 
 The new models are currently only supported for clm-cos and with
 alternative coupling-scheme.
 
-#### Compile standalone eCLM ####
+### Compile standalone eCLM ###
 
 Branch `master`. Building eCLM. Currently, only standalone.
 

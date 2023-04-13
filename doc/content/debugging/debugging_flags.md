@@ -1,7 +1,4 @@
-# Debugging TSMP #
-
-See also [Debug Tips](build_examples_tsmppdaf.md#debug-tips) for building
-TSMP!
+# Debugging flags
 
 If an error appears and the source can not be localized by the default
 outputs, it might make sense to build TSMP-PDAF again, but with more
@@ -31,18 +28,3 @@ Watch out here, to get the right condition (Intel / Fortran
 compilers)! The examples are for the Intel compiler, gcc-flags are
 slightly different.
 
-## Debugging with TotalView
-
-It is possible to debug TSMP with multiple coupled components with the mean of the TotalView debugger. 
-
-Please contact the SDLTS for support for the initial set up TotalView on JSC machines. 
-
-1) Start interactive session. E.g. on JUWELS machine 
-```sh
-salloc --partition=devel --nodes=5 --account=PROJECT --time=01:30:00
-```
-
-2) Setup and modifiy the submission script of TSMP
-```sh
-totalview -args srun --multi-prog slm_multiprog_mapping.conf
-```

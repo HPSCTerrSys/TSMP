@@ -35,14 +35,14 @@ cd $TSMP_DIR/bldsva
 ./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel -A GPU
 ```
 
+## Build Examples
+
 ```{toctree} 
 ---
 maxdepth: 3
-caption: Build Examples for TSMP-PDAF
 ---
 build_examples_tsmp.md
 build_examples_tsmppdaf.md
-build_environment_variables.md
 ```
 
 ## Patching the orginal source code 
@@ -57,4 +57,4 @@ The changed source files for CLM3.5 are located in  `$TSMP_DIR/bldsva/intf_oas3/
 
 The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script "lib_install.sh" located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.
 
-The instruction on how to build and how to configure TSMP for the cordex test case ([EURO-CORDEX test case experiment](./gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp)) are given in [step 5 ](./gettingstarted.md/#step-5-build-tsmp-interface-and-component-models) and [step 6 ](./gettingstarted.md/#step-6-setup-and-configuration-of-the-respective-usage-and-test-case) in the getting started section, respectively.
+The instruction on how to build and how to configure TSMP for the cordex test case ([EURO-CORDEX test case experiment](./../gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp)) are given in [step 5 ](./../gettingstarted.md/#step-5-build-tsmp-interface-and-component-models) and [step 6 ](./../gettingstarted.md/#step-6-setup-and-configuration-of-the-respective-usage-and-test-case) in the getting started section, respectively.

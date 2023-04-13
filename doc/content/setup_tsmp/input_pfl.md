@@ -1,4 +1,4 @@
-## Input files for ParFlow ##
+# Input files for ParFlow #
 
 Similar to the input for CLM, the used has to create individual
 ParFlow data base files for each model realisation which share the
