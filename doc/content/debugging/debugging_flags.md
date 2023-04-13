@@ -7,10 +7,10 @@ debug-flags enabled.
 For `JUWELS` these flags can be set in
 
 - `bldsva/intf_DA/pdaf1_1/arch/JUWELS/build_interface_pdaf1_1_JUWELS.ksh`
-- `bldsva/machines/JUWELS/build_interface_JUWELS.ksh`
+- `bldsva/machines/config_JUWELS.ksh`
 
 
-In `build_interface_JUWELS.ksh`, there is `defaultOptC`, which can be
+In `config_JUWELS.ksh`, there is `defaultOptC`, which can be
 set, f.e. as
 
 ``` ksh

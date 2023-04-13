@@ -3,7 +3,11 @@
 A collection of build examples for TSMP-PDAF.
 
 All builds involving more than one coupled component model use the
-coupling software Oasis3-MCT.
+coupling software Oasis3-MCT. Builds in the TSMP-PDAF branch follows the syntax
+shown here. Building PDAF in the master branch has a syntax without the internal
+ version number:
+ 			
+ 			./build_tsmp.ksh -m JUWELS -c clm3-cos5-pfl-pdaf -O Intel
 
 - [`Compile fully coupled TSMP-PDAF`](#compile-fully-coupled-tsmp-pdaf-on-jureca)
 - [`Compile ParFlow standalone with PDAF`](#compile-parflow-and-clm-with-pdaf)

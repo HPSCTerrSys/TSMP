@@ -69,7 +69,7 @@ specific code modifications may be retrieved):
 
 ```shell
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
-git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow
+git clone -b v3.12.0 https://github.com/parflow/parflow.git                              parflow
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
@@ -86,17 +86,10 @@ Available from http://www.cosmo-model.org. A license agreement is needed.
 
 Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.
 
-#### ParFlow v3.2
-
-Available from https://github.com/parflow/.
-
+#### ParFlow v3.12
+ParFlow 3.12  is available from
 ```shell
-git clone --branch v3.2.0 https://github.com/parflow/parflow.git parflow3_2
-```
-#### ParFlow v3.9
-ParFlow 3.9  is available from
-```shell
-git clone -b v3.9.0 https://github.com/parflow/parflow.git
+git clone -b v3.12.0 https://github.com/parflow/parflow.git
 ```
 
 #### OASIS3-MCT v2.0

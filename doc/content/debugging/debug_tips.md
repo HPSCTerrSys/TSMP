@@ -3,14 +3,14 @@
 ## Debug Tip 1: Skip component models in TSMP-PDAF build
 
 ``` shell
-./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCTPDAF -W skip -X skip
+./build_tsmp.ksh -m JURECA -c clm3-cos4-pfl -W skip -X skip
 ```
 
 Oasis and CLM compilation are skipped with the option `skip` for flags
 `-W` and `-X`. Parflow and pdaf are compiled after Cosmo.
 
 All flags can be found using `./build_tsmp.ksh --help`. Here, the
-output for flag of componeent model build options:
+output for flag of component model build options:
 ``` shell
 	-W, --optoas=optoas
                   Build option for Oasis.
@@ -35,7 +35,7 @@ output for flag of componeent model build options:
 ## Debug Tip 2: Building TSMP-PDAF after source code changes in component models
 
 ``` shell
-./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCTPDAF -W skip -X skip -Y make
+./build_tsmp.ksh -m JURECA -c clm3-cos4-pfl -W skip -X skip -Y make
 ```
 
 Oasis and CLM compilation are skipped with the option `skip` for flags
@@ -43,7 +43,7 @@ Oasis and CLM compilation are skipped with the option `skip` for flags
 
 Cosmo compilation is resumed without making clean with option `make`
 for flag `-Y`. The source code change needs to be made in
-`cosmo4_21_JURECA_1.1.0MCTPDAF_clm-cos-pfl`. **But note**: The source
+`cosmo4_21_JURECA_clm3-cos4-pfl`. **But note**: The source
 code change will be lost after the next clean build of cosmo. Thus,
 make sure to incorporate the source code changes in the designated
 replace structures.
