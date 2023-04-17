@@ -84,33 +84,79 @@ observation in x-, y- and z-direction.
 
 #### ix_interp_d ####
 
-`ix_interp_d`: (real) Distance from observation location to the grid
-position assigned to the location `ix`. Only used when
-[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
-`1`.
+`ix_interp_d`: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with `ix`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set
+to `1`.
 
-The observation location should be at
+The correct observation location should be located at
 
 \begin{gather*} x_{obs} =
 x_{grid}(ix) + \mathtt{ix\_interp\_d} \cdot \Delta x
 \end{gather*}
 
-and `0 <= ix_interp_d < 1`.
+where 
+- Important: `0 <= ix_interp_d < 1`.
+- $x_{obs}$: x-coordinate of the observation location
+- $x_{grid}(ix)$: x-coordinate of grid cell with index `ix` in the
+ParFlow grid. Note that $x_{grid}(ix) = \max_{ix}\{x(ix) | x(ix) <
+x_{obs}\}$ (closest grid point that is smaller than $x_{obs}$)
+- $\Delta x$: Difference of x-coordinate between grid cells, in
+  particular: $\Delta x = x_{grid}(ix+1) - x_{grid}(ix)$
+
+##### Example #####
+
+Let the grid be simple with the following specifications in
+x-direction:
+- $x_{grid}(ix) = ix \cdot \Delta x$
+- $\Delta x = 0.5$
+
+Let the x-coordinate of the observation location be
+- $x_{obs} = 3.4$
+
+To accurately represent this observation location, one should choose
+`ix = 6` and `ix_interp_d = 0.8`, such that
+- $x_{grid}(6) = 3.0$
+- $x_{obs} = x_{grid}(6) + \mathtt{ix\_interp\_d} \cdot \Delta x = 3.0 + 0.8 \cdot 0.5 = 3.0 + 0.4 = 3.4$
 
 #### iy_interp_d ####
 
-`iy_interp_d`: (real) Distance from observation location to the grid
-position assigned to the location `iy`. Only used when
-[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
-`1`.
+`iy_interp_d`: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with `iy`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set
+to `1`.
 
-The observation location should be at
+The correct observation location should be located at
 
-\begin{gather*}
-y_{obs} = y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
+\begin{gather*} y_{obs} =
+y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
 \end{gather*}
 
-and `0 <= iy_interp_d < 1`.
+where 
+- Important: `0 <= iy_interp_d < 1`.
+- $y_{obs}$: y-coordinate of the observation location
+- $y_{grid}(iy)$: y-coordinate of grid cell with index `iy` in the
+ParFlow grid. Note that $y_{grid}(iy) = \max_{iy}\{y(iy) | y(iy) <
+y_{obs}\}$ (closest grid point that is smaller than $y_{obs}$)
+- $\Delta y$: Difference of y-coordinate between grid cells, in
+  particular: $\Delta y = y_{grid}(iy+1) - y_{grid}(iy)$
+
+##### Example #####
+
+Let the grid be simple with the following specifications in
+y-direction:
+- $y_{grid}(iy) = iy \cdot \Delta y$
+- $\Delta y = 0.5$
+
+Let the y-coordinate of the observation location be
+- $y_{obs} = 3.4$
+
+To accurately represent this observation location, one should choose
+`iy = 6` and `iy_interp_d = 0.8`, such that
+- $y_{grid}(6) = 3.0$
+- $y_{obs} = y_{grid}(6) + \mathtt{iy\_interp\_d} \cdot \Delta y = 3.0 + 0.8 \cdot 0.5 = 3.0 + 0.4 = 3.4$
 
 ### CLM observation file variables ###
 
