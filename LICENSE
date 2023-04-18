@@ -1,9 +1,11 @@
 MIT License
 
-Copyright 2010-2020 Prabhakar SHRESTHA, Mauro SULIS, Stefan KOLLET, 
+Copyright 2010-2023 Prabhakar SHRESTHA, Mauro SULIS, Stefan KOLLET, 
 Fabian GASPER, Wolfgang KURTZ, Jessica KEUNE, Ketan KULKARNI, Slavko BRDAR,
 Niklas WAGNER, Mukund PONDKULE, Lukas STREBEL, Tobias SCHRUFF, Tim HOAR, 
-Cunbo HAN, Markus UEBEL, Guowei HE, Haojin ZHAO, Klaus GOERGEN, Abouzar Ghasemi
+Cunbo HAN, Markus UEBEL, Guowei HE, Haojin ZHAO, Klaus GOERGEN, Abouzar GHASEMI,
+Stefan POLL, Johannes KELLER, Paul RIGOR, Daniel CAVIEDES-VOULLIEME, Ilya ZHUKOV,
+Joerg BENKE, Carl HARTICK
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of 
 this software and associated documentation files (the "Software"), to deal in 

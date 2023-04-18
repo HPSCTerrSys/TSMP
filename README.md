@@ -39,7 +39,7 @@ If you use TSMP in a publication, please cite the these papers that describe the
 * Gasper, F., Goergen, K., Kollet, S., Shrestha, P., Sulis, M., Rihani, J., and Geimer, M. (2014). Implementation and scaling of the fully coupled Terrestrial Systems Modeling Platform (TerrSysMP) in a massively parallel supercomputing environment &ndash; a case study on JUQUEEN (IBM Blue Gene/Q). Geoscientific Model Development, 7(5), 2531-2543. doi:[10.5194/gmd-7-2531-2014](https://dx.doi.org/10.5194/gmd-7-2531-2014).
 
 ## License
-TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE.txt).
+TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE).
 
 ## To come
 

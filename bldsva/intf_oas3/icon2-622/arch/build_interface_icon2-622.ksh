@@ -80,10 +80,3 @@ route "${cyellow}>> substitutions_icon${cnormal}"
 route "${cyellow}<< substitutions_icon${cnormal}"
 }
 
-setup_icon(){
-route "${cyellow}>> setupIcon${cnormal}"
-
-  c_setup_icon
-
-route "${cyellow}<< setupIcon${cnormal}" 
-}
