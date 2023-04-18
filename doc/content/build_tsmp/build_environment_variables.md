@@ -53,3 +53,19 @@ This will remove unnecessary code during observation reading, when
 ParFlow-CLM-PDAF is built, but no ParFlow-type observations are
 included.
 
+## FOR2131 (PDAF / ParFlow build, experimental) ##
+
+The environment variable `FOR2131` can affect
+
+1. TSMP-PDAF (`enkf_parflow.c`), then it has to be set in the
+   PDAF-build script as mentioned above
+2. Patched ParFlow files, then it has to be set in the ParFlow build
+   script
+
+In `enkf_parflow.c`, there are two main effects:
+- behavior of `PF:updateflag == 2` is changed to include pressure in
+  the state vector
+- a check for saturations greater than 1 is included
+
+In `ParFlow` more outputs routines are defined and there is an
+additional saturation update.
