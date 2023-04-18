@@ -39,6 +39,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
+    # flagsSim+=" -DFOR2131"
     
     # Define compilers
     if [[ $profiling == "scalasca" ]]; then

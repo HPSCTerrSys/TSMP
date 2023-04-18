@@ -654,6 +654,8 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
 
+    # cplInc+="-g -traceback -heap-arrays " # Mukund
+
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
@@ -909,6 +911,7 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   comment "    configure pfsimulator"
     export SCOREP_WRAPPER=off
+    # Add -DFOR2131 for using FOR2131 in parflow3_2
     if [[ $withICON == "true" ]]; then
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim -DCOUP_OAS_ICON" CFLAGS="$cflagsSim -DCOUP_OAS_ICON" >> $log_file 2>> $err_file
     else
@@ -1046,6 +1049,10 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
       check
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
       check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
+      check
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
       check
     fi
@@ -1074,6 +1081,10 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
       patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
     check
       patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+    check
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+    check
+      patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
     check
       patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
     check
