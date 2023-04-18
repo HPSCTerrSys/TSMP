@@ -654,7 +654,7 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
     flags+="-clm_exedir $clmdir/build "
     cplInc=""
 
-    cplInc+="-g -traceback -heap-arrays " # Mukund
+    # cplInc+="-g -traceback -heap-arrays " # Mukund
 
       comment "adding OAS libs"
     if [[ $withOAS == "true" ]]; then
@@ -1048,6 +1048,10 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
       check
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+      check
+        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
       check
         patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
       check
