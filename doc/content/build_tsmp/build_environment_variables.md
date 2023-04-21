@@ -58,9 +58,12 @@ included.
 The environment variable `FOR2131` can affect
 
 1. TSMP-PDAF (`enkf_parflow.c`), then it has to be set in the
-   PDAF-build script as mentioned above
+   PDAF-build script
+   `bldsva/intf_DA/pdaf1_1/arch/<machine>/build_interface_pdaf1_1_<machine>.ksh`
+   as mentioned above
 2. Patched ParFlow files, then it has to be set in the ParFlow build
    script
+   `bldsva/intf_oas3/parflow/arch/<machine>/build_interface_parflow_<machine>.ksh`
 
 In `enkf_parflow.c`, there are two main effects:
 - behavior of `PF:updateflag == 2` is changed to include pressure in
