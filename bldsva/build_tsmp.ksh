@@ -176,11 +176,12 @@ check
 }
 
 setCombination(){
-   if echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos4'; then
-	mListgen="clm3-cos4-pfl-pdaf"
-   elif echo "$combination" | grep -q 'pdaf' && echo "$combination" | grep -q 'cos5'; then
-	mListgen="clm3-cos5-pfl-pdaf"
-   
+   if echo "$combination" | grep -q 'pdaf'; then
+	if echo "$combination" | grep -q 'cos4'; then
+	        mListgen="clm3-cos4-pfl-pdaf"
+	else
+                mListgen="clm3-cos5-pfl-pdaf"
+	fi
    elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
 	mListgen="clm4-cos4-pfl"
    elif echo "$combination" | grep -q 'clm4'; then
