@@ -84,33 +84,118 @@ observation in x-, y- and z-direction.
 
 #### ix_interp_d ####
 
-`ix_interp_d`: (real) Distance from observation location to the grid
-position assigned to the location `ix`. Only used when
-[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
-`1`.
+`ix_interp_d`: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with `ix`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set
+to `1`.
 
-The observation location should be at
+The correct observation location should be located at
 
 \begin{gather*} x_{obs} =
 x_{grid}(ix) + \mathtt{ix\_interp\_d} \cdot \Delta x
 \end{gather*}
 
-and `0 <= ix_interp_d < 1`.
+where 
+- Important: `0 <= ix_interp_d < 1`.
+- $x_{obs}$: x-coordinate of the observation location
+- $x_{grid}(ix)$: x-coordinate of grid cell with index `ix` in the
+ParFlow grid. Note that $x_{grid}(ix) = \max_{ix}\{x(ix) | x(ix) <
+x_{obs}\}$ (closest grid point that is smaller than $x_{obs}$)
+- $\Delta x$: Difference of x-coordinate between grid cells
+  neighboring observation location: $\Delta x = x_{grid}(ix+1) -
+  x_{grid}(ix)$
+
+##### Example #####
+
+This example shows how to set `ix_interp_d` from a given (1) grid and
+(2) observation location.
+
+Let the observation location be at longitude $x_{obs} = 6.404$.
+
+Let the grid be simple going from `6.3` to `6.5` in steps of `0.02`.
+Example grid locations:
+-  $x_{grid}(1) = 6.3$
+-  $x_{grid}(6) = 6.4$
+-  $x_{grid}(11) = 6.5$
+
+We find `ix` and `ix_interp_d` as follows:
+
+1. Find the two grid locations with longitudes closest to the
+   observation location: $x_{grid}(6) = 6.4$, $x_{grid}(7) = 6.42$
+2. Choose the index of the grid location smaller than $x_{obs}$ for
+   observation file input `ix`: `ix=6`
+3. Compute `ix_interp_d` from the two closest grid locations as follows
+
+\begin{gather*}
+\mathtt{ix\_interp\_d} = \frac{ x_{obs} -  x_{grid}(ix)}{ \Delta x}
+\end{gather*}
+
+Here this leads to `ix_interp_d=0.2`.
+
+We can check this by computing $x_{obs}$ from `ix`, `ix_interp_d`:
+
+\begin{align*}
+x_{obs} &= x_{grid}(6) + \mathtt{ix\_interp\_d} \cdot \Delta x \\
+   &= 6.4 + 0.2 \cdot 0.02 = 6.4 + 0.004 = 6.404
+\end{align*}
 
 #### iy_interp_d ####
 
-`iy_interp_d`: (real) Distance from observation location to the grid
-position assigned to the location `iy`. Only used when
-[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set to
-`1`.
+`iy_interp_d`: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with `iy`. Only used when
+[`DA:obs_interp_switch`](./input_enkfpf.md#daobs_interp_switch) is set
+to `1`.
 
-The observation location should be at
+The correct observation location should be located at
 
-\begin{gather*}
-y_{obs} = y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
+\begin{gather*} y_{obs} =
+y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
 \end{gather*}
 
-and `0 <= iy_interp_d < 1`.
+where 
+- Important: `0 <= iy_interp_d < 1`.
+- $y_{obs}$: y-coordinate of the observation location
+- $y_{grid}(iy)$: y-coordinate of grid cell with index `iy` in the
+ParFlow grid. Note that $y_{grid}(iy) = \max_{iy}\{y(iy) | y(iy) <
+y_{obs}\}$ (closest grid point that is smaller than $y_{obs}$)
+- $\Delta y$: Difference of y-coordinate grid cells neighboring
+  observation location: $\Delta y = y_{grid}(iy+1) - y_{grid}(iy)$
+
+##### Example #####
+
+This example shows how to set `iy_interp_d` from a given (1) grid and
+(2) observation location.
+
+Let the observation location be at longitude $y_{obs} = 50.910$.
+
+Let the grid be simple going from `50.8` to `51.0` in steps of `0.02`.
+Example grid locations:
+-  $y_{grid}(1) = 50.8$
+-  $y_{grid}(6) = 50.9$
+-  $y_{grid}(11) = 51.0$
+
+We find `iy` and `iy_interp_d` as follows:
+
+1. Find the two grid locations with longitudes closest to the
+   observation location: $y_{grid}(6) = 50.9$, $y_{grid}(7) = 50.92$
+2. Choose the index of the grid location smaller than $y_{obs}$ for
+   observation file input `iy`: `iy=6`
+3. Compute `iy_interp_d` from the two closest grid locations as follows
+
+\begin{gather*}
+\mathtt{iy\_interp\_d} = \frac{ y_{obs} -  y_{grid}(iy)}{ \Delta y }
+\end{gather*}
+
+Here this leads to `iy_interp_d=0.5`.
+
+We can check this by computing $y_{obs}$ from `iy`, `iy_interp_d`:
+
+\begin{align*}
+y_{obs} &= y_{grid}(6) + \mathtt{iy\_interp\_d} \cdot \Delta y \\
+   &= 50.9 + 0.5 \cdot 0.02 = 50.9 + 0.01 = 50.910
+\end{align*}
 
 ### CLM observation file variables ###
 

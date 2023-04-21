@@ -148,11 +148,26 @@ pressure data (updateflag=1) in ParFlow.
 
 -   2: Update of Mannings coefficient
 
+Experimental:
+
+- 3: Update porosity
+
+- 4: Update van Genuchten parameters
+
+- 5: Update hydraulic conductivity and porosity
+
+- 6: Update hydraulic conductivity and van Genuchten parameters
+
+- 7: Update porosity and van Genuchten parameters
+
+- 8 Update hydraulic conductivity, porosity and van Genuchten parameters
+
+
 ### PF:paramupdate_frequency ###
 `PF:paramupdate_frequency`: (integer) Frequency of parameter
 updates. Default: `1`
 
-For each assimilation cycle it is checked whether `tcylce mod
+For each assimilation cycle it is checked whether `tcycle mod
 paramupdate_frequency == 0`. When this happens, a parameter update is
 applied. For the default of `1`, each assimilation cycle contains a
 parameter update.
@@ -201,14 +216,18 @@ case of assimilated soil moisture data `PF:updateflag = 2` or
 
 `PF:paramprintensemble`: (integer) Only used in case of parameter
 update. If set to `1`, the updated parameters are printed to `pfb`
-files (similar to `[PF]printensemble`). Output files include the
-specifier `update.param`.
+files (similar to `[PF]printensemble`). Output files include a
+specifier depending on `PF:paramupdate`, f.e. `update.param.ksat`,
+`update.param.ksat`.
 
 ### PF:paramprintstat ###
 
 `PF:paramprintstat`: (integer) Only used in case of parameter
 update. If set to `1` statistics on the updated parameters are printed
 to `pfb` files (similar to `[PF]printstat`).
+
+The output files include a specifier depending on `PF:paramupdate`,
+f.e.  `param.ksat`, `param.mannings` or `param.poro`.
 
 ### PF:olfmasking ###
 
