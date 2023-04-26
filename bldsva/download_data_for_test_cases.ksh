@@ -7,9 +7,10 @@
 # Version: V1.3: Adding the script for downloading the input data and pre-processing-tools for IdealRTD test case, 15.06.2021
 # Version: V1.4: Update cordex test case - change of path, 22.09.2022
 # Version: V1.5: Adding the script for download the input data for idealscal test case, 26.09.2022
+# Version: V1.6: Adding the script for download the input data for idiurnal-cycle test case, 03.04.2023
 #--------------------------------------
 # Initial owner: Abouzar Ghasemi, email: a.ghasemi@fz-juelich.de
-# Current owner: Stefan Poll, email: s.poll@fz-juelich.de
+# Current owner: Carl Hartick, email: c.hartick@fz-juelich.de
 #-------------------------------------
 
 if [ -z "$1" ]
@@ -19,6 +20,7 @@ if [ -z "$1" ]
     echo "Please cordex for cordex test case"
     echo "Please idealrtd for idealised RTD test case"
     echo "Please idealscal for idealised scaling test case"
+    echo "Please idiurnal-cycle for icon test case"
     exit 1
 fi
 
@@ -40,6 +42,9 @@ then
 elif [ $testcase = idealscal ]
 then
       wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_idealscal/
+elif [ $testcase = idiurnal-cycle ]
+then
+      wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_idiurnal-cycle/
 fi
 
 # Checking if the downloaded input files are corrupted.
@@ -73,6 +78,14 @@ then
        md5sum -c checksums.md5
        cd ../../..
      done
+elif [ $testcase = idiurnal-cycle ]
+then
+     for i in $( find tsmp_idiurnal-cycle/ -mindepth 2 -maxdepth 2 -type d )
+     do
+       cd $i
+       md5sum -c checksums.md5
+       cd ../../..
+     done
 fi
 
 if [ $? -eq 0 ]; then
@@ -99,5 +112,8 @@ then
 elif [ $testcase = idealscal ]
 then
      mv tsmp_idealscal ../
+elif [ $testcase = idiurnal-cycle ]
+then
+     mv tsmp_idiurnal-cycle ../
 fi
 

@@ -1,0 +1,19 @@
+#export PATH="/home/c.hartick/TSMP/lib/openmpi/bin:$PATH"
+export PATH="/home/c.hartick/TSMP/lib/tcl/bin:$PATH"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/hdf5/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/netcdf/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/gribapi/lib"
+#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/hypre/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/silo/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/tcl/lib"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/eccodes/lib"
+#export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/home/c.hartick/TSMP/lib/pnetcdf/lib"
+
+export GRIB_DEFINITION_PATH=/home/c.hartick/TSMP/lib/gribapi/share/grib_api/definitions/
+export GRIB_SAMPLES_PATH=/home/c.hartick/TSMP/lib/gribapi/share/grib_api/samples/
+
+#export CC=/home/c.hartick/TSMP/lib/openmpi/bin/mpicc
+#export FC=/home/c.hartick/TSMP/lib/openmpi/bin/mpif90
+#export F77=/home/c.hartick/TSMP/lib/openmpi/bin/mpif77
+
+

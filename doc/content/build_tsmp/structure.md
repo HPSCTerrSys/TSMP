@@ -17,7 +17,7 @@ TSMP/bldsva
 
 ### TSMP component directory 
 
-The directories are called after the respectivel model component and ends with the version number of the model compoennt. 
+The directories are called after the respective model component and ends with the version number of the model component. 
 
 ``` text
 TSMP/clm3_5
@@ -27,7 +27,6 @@ TSMP/cosmo5_1
 TSMP/icon2_1
 TSMP/icon2_622
 TSMP/parflow
-TSMP/parflow3_0
 ```
 
 The directories `clm3_5`, `clm4_0`, `cosmo4_21`, `cosmo5_1`, `parflow`, and `parflow3_0` contain the model source codes of the respective model components of TSMP.
@@ -36,10 +35,9 @@ The directories `clm3_5`, `clm4_0`, `cosmo4_21`, `cosmo5_1`, `parflow`, and `par
 
 The[ `bldsva`](#directory-bldsva-and-subdirectories) directory includes the scripts for configuring and compiling TSMP.
 
-The directories `oasis3` and `oasis3-mct` contain the source code of the OASIS3 and OASIS3-MCT coupler, resepectivly. `oasis3`  (without MCT) is deprecated and is no longer used in current versions of TSMP. 
+The directory`oasis3-mct` contains the source code of the OASIS3-MCT coupler. `oasis3`  (without MCT) is deprecated and is no longer used in current versions of TSMP. 
 
 ``` text
-TSMP/oasis3
 TSMP/oasis3-mct
 ```
 
@@ -109,10 +107,8 @@ TSMP/bldsva/intf_oas3/clm3_5/pfile  (only clm3_5, possibly deprecated; currently
 TSMP/bldsva/intf_oas3/clm3_5/tsmp
 ```
 
--   `arch`: This folder contains a sub-folder for every machine on which
-    the component model is supported, f.e. `JURECA` and `JUWELS`.
-
-    Each of the machine-folders then contains 2 optional folders:
+-   `arch`: This folder contains build information and contains two optional 
+folders:
 
     1.  `config`, which includes makefiles, configure scripts,
         machine-dependent build files etc, and
@@ -250,19 +246,19 @@ If you add a new machine/model-version and encounter inconsistencies
 between this file and your commands you are responsible to solve it.
 Either by removing the inconsistent commands from the
 `common_build_interface` to the \"real\" interfaces of the form
-`intf_oas3/MODEL/arch/ARCH/build_interface_MODEL_ARCH.ksh` (f.e.
-`intf_oas3/clm3_5/arch/JUWELS/build_interface_clm3_5_JUWELS.ksh`). If a
+`intf_oas3/MODEL/arch/build_interface_MODEL.ksh` (f.e.
+`intf_oas3/clm3_5/arch/build_interface_clm3_5.ksh`). If a
 lot is inconsistent you can simply not make use of the common interface.
 
-### `intf_oas3/MODEL/arch/ARCH/build_interface_MODEL_ARCH.ksh`
+### `intf_oas3/MODEL/arch/build_interface_MODEL.ksh`
 
 This is the \"real\" interface to compile a specific model on a specific
 machine and to handle namelist substitutions.
 
 As you see by the location in the directory tree
-(`intf_oas3/MODEL/arch/ARCH/`), there must be a script for every
-supported model-platform combination (`MODEL` and `ARCH` ). The script
-`build_interface_MODEL_ARCH.ksh` must implement 5 interface routines:
+(`intf_oas3/MODEL/arch/`), there must be a script for every
+supported model (`MODEL`). The script
+`build_interface_MODEL.ksh` must implement 5 interface routines:
 
 -   `always_MOD()`,
 
@@ -340,7 +336,7 @@ Ensemble runs are currently only supported if Oasis3-MCT is used as
 coupler. Ensembles also increase the used processors (as given) by the
 factor of ensemble members.
 
-### `setups/SETUP/SETUP_ARCH_setup.ksh`
+### `setups/SETUP/SETUP_setup.ksh`
 
 This script must implement two interface routines:
 
@@ -391,8 +387,7 @@ the \"real\" data structure/variables.
 
 Some variables need a decision. If they are not hardcoded in the
 previous section and not given as flag/interactively a decision is made
-in this routine (really hard coded). Most importantly `platform=CLUMA`
-and `version=1.1.0MCT`.
+in this routine (really hard coded). Most importantly `platform=JUWELS`.
 
 #### `clearMachineSelection()`
 
@@ -410,7 +405,7 @@ variables needs to be cleared.
 
 If a new machine is chosen (at the beginning or during interactive
 session) machine dependent default variables are getting read from
-`machines/ARCH/build_interface_ARCH.ksh`.
+`machines/config_ARCH.ksh`.
 
 Note: They will only loaded if this values were not set in any other
 selection (like interactive/flag/hardcoded).
@@ -472,6 +467,11 @@ and as debug information for the log.
 
 Helper function to check the `$?` return value of each command.
 
+#### `check_pfl()`
+
+Helper function to check the `$?` return value of each command without 
+exiting. The function was introduced with `common_setup.ksh`.
+
 #### `terminate()`
 
 Clean exit handling.
@@ -501,6 +501,10 @@ Exits if incompatible decisions were made.
 Gives warning if decisions are not supported but could work if it was
 taken care of. For example setups/combinations that are not in the
 `supported_machine.ksh`.
+
+####  `deprecatedVersion()`
+
+Exits if deprecated internal version number is used.
 
 ####  `listAvailabilities()`
 
@@ -574,7 +578,6 @@ output in `stdout_*` is a good starting point for finding the location
 in `TSMP`, where an error occurred during building.
 	
 </details>
-
 
 #### Sanity checks
 

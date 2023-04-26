@@ -32,6 +32,7 @@ getDefaults(){
   def_mode="0" #0: let flags decide, 1:batch, 2:interactive
   def_cplscheme="true"
   def_readCLM="false"
+  def_maxpft="1" # (CLM default is 4)
   def_freeDrain="false"
 
   #compiler optimization
@@ -65,9 +66,9 @@ getDefaults(){
 setDefaults(){
   #load the default values
   platform=$def_platform
-  if [[ $platform == "" ]] then ; platform="CLUMA2" ; fi #We need a hard default here
-  version=$def_version
-  if [[ $version == "" ]] then ; version="1.1.0MCT" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
+  version=$def_combination
+  if [[ $version == "" ]] then ; version="" ; fi #We need a hard default here
   rootdir=$def_rootdir
   bindir=$def_bindir
   optComp=$def_optComp
@@ -94,6 +95,7 @@ setDefaults(){
 
   freeDrain=$def_freeDrain
   readCLM=$def_readCLM
+  maxpft=${def_maxpft}
   cplscheme=$def_cplscheme
   mode=$def_mode
 
@@ -174,15 +176,45 @@ check
 }
 
 setCombination(){
-  set -A mList ${modelVersion[$version]}
-  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${version}_${combination} ; fi
-  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${version}_${combination} ; fi
-  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${version}_${combination} ; fi
-  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${version}_${combination} ; fi
+   if echo "$combination" | grep -q 'pdaf'; then
+	if echo "$combination" | grep -q 'cos4'; then
+	        mListgen="clm3-cos4-pfl-pdaf"
+	else
+                mListgen="clm3-cos5-pfl-pdaf"
+	fi
+   elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
+	mListgen="clm4-cos4-pfl"
+   elif echo "$combination" | grep -q 'clm4'; then
+	mListgen="clm4-cos5-pfl"
+   
+   elif echo "$combination" | grep -q 'icon21'; then
+	mListgen="clm3-icon21-pfl"
+   elif echo "$combination" | grep -q 'icon26'; then
+	mListgen="clm3-icon26-pfl"
+	   
+   elif echo "$combination" | grep -q 'eclm'; then
+	mListgen="eclm"
+   elif echo "$combination" | grep -q 'eclm-mct'; then
+	mListgen="eclm-mct"
+
+   else 
+	if echo "$combination" | grep -q 'cos4'; then
+		mListgen="clm3-cos4-pfl"
+	else
+		mListgen="clm3-cos5-pfl"
+	fi
+  fi 
+
+  version=$mListgen
+  set -A mList ${modelVersion[$mListgen]}
+  if [[ $oasdir == "" ]] then ;  oasdir=$rootdir/${mList[0]}_${platform}_${combination} ; fi
+  if [[ $cosdir == "" ]] then ;  cosdir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
+  if [[ $icondir == "" ]] then ; icondir=$rootdir/${mList[2]}_${platform}_${combination} ; fi
+  if [[ $clmdir == "" ]] then ;  clmdir=$rootdir/${mList[1]}_${platform}_${combination} ; fi
+  if [[ $pfldir == "" ]] then ;  pfldir=$rootdir/${mList[3]}_${platform}_${combination} ; fi
 #DA
-  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${version}_${combination} ; fi  
-  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${version}_${combination} ;  fi 
+  if [[ $dadir == "" ]] then ;  dadir=$rootdir/${mList[4]}_${platform}_${combination} ; fi  
+  if [[ $bindir == "" ]] then ;  bindir=$rootdir/bin/${platform}_${combination} ;  fi 
 
   withOAS="false"
   withCOS="false"
@@ -202,18 +234,18 @@ setCombination(){
   case "$combination" in *pfl*) withPFL="true" ;; esac
   if [[ $withCLM == "true" && ( $withCOS == "true" || $withICON == "true" || $withPFL == "true" )  ]]; then
     withOAS="true"
-    case "$version" in *MCT*) withOASMCT="true" ;; esac
+    withOASMCT="true"
   fi
 #DA
-  case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
+  case "$combination" in *pdaf*) withDA="true" ; withPDAF="true" ;; esac
 }
 
 
 compileClm(){
 route "${cyellow}> c_compileClm${cnormal}"
   comment "  source clm interface script"
-    comment "intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh"
-    . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/${platform}/build_interface_${mList[1]}_${platform}.ksh >> $log_file 2>> $err_file
+    comment "intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh"
+    . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh >> $log_file 2>> $err_file
   check
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
@@ -244,7 +276,7 @@ route "${cyellow}< c_compileClm${cnormal}"
 compileIcon(){
 route "${cyellow}> c_compileIcon${cnormal}"
   comment "  source icon interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/build_interface_${mList[2]}.ksh >> $log_file 2>> $err_file
   check
     always_icon
     if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
@@ -272,7 +304,7 @@ route "${cyellow}< c_compileIcon${cnormal}"
 compileCosmo(){
 route "${cyellow}> c_compileCosmo${cnormal}"
   comment "  source cos interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/${platform}/build_interface_${mList[2]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[2]}/arch/build_interface_${mList[2]}.ksh >> $log_file 2>> $err_file
   check
     always_cos
     if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
@@ -300,7 +332,7 @@ route "${cyellow}< c_compileCosmo${cnormal}"
 compileOasis(){
 route "${cyellow}> c_compileOasis${cnormal}"
   comment "  source oas interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/${platform}/build_interface_${mList[0]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[0]}/arch/build_interface_${mList[0]}.ksh >> $log_file 2>> $err_file
   check
     always_oas
     if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
@@ -328,7 +360,7 @@ route "${cyellow}< c_compileOasis${cnormal}"
 compileParflow(){
 route "${cyellow}> c_compileParflow${cnormal}"
   comment "  source pfl interface script"
-    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/${platform}/build_interface_${mList[3]}_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/intf_oas3/${mList[3]}/arch/build_interface_${mList[3]}.ksh >> $log_file 2>> $err_file
   check
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
@@ -427,7 +459,7 @@ interactive(){
 			print "Please type in your desired value..."
 			read platform
 			comment "  source machine build interface for $platform"
-                          . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+                          . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
                         check
                         clearMachineSelection
                         getMachineDefaults
@@ -447,25 +479,6 @@ interactive(){
 
                         setCombination
                         setSelection 
-		  fi
-		  if [[ $numb == 2 ]] ; then 
-                        print "The following versions are available for $platform:"
-                        for a in ${availability[$platform]} ; do
-                                printf "%-20s #%s\n" "$a" "${versions[$a]} consisting of: "
-				for b in ${modelVersion[$a]} ; do
-				   printf "%-20s - %s\n" "" "$b"
-				done
-                        done		
-			print "Please type in your desired value..."
-			read version
-                        case "${combinations[$version]}" in  
-                                *" $combination "*);;
-                                *)
-                                set -A array ${combinations[$version]}
-                                combination=${array[0]} ;;
-                        esac
-			clearPathSelection
- 			setCombination
 		  fi
 		  if [[ $numb == 3 ]] ; then  
                         print "The following combinations are available for $version:"
@@ -563,9 +576,10 @@ printState(){
   print "${cred}(25)${cnormal} profiling (default=$def_profiling): ${cgreen}$profiling ${cnormal}"
   print "${cred}(26)${cnormal} Couple-Scheme (default=$def_cplscheme): ${cgreen}$cplscheme ${cnormal}"
   print "${cred}(27)${cnormal} readCLM: Consistently read CLM-mask (default=$def_readCLM): ${cgreen}$readCLM ${cnormal}"
-  print "${cred}(28)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
-  print "${cred}(29)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
-  print "${cred}(30)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
+  print "${cred}(28)${cnormal} maxpft: Set maxpft per grid cell for CLM (default=$def_maxpft): ${cgreen}$maxpft ${cnormal}"
+  print "${cred}(29)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
+  print "${cred}(30)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
+  print "${cred}(31)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
 }
 
 check(){
@@ -618,17 +632,20 @@ warning(){
 
 hardSanityCheck(){
 
-  if [[ "${versions[${version}]}" == ""  ]] then
-      print "The selected version '${version}' is not available. run '$call --man' for help"
-      terminate
-  fi
-
   if [[ "${platforms[${platform}]}" == ""  ]] then
       print "The selected platform '${platform}' is not available. run '$call --man' for help"
       terminate
   fi
 
 }
+
+deprecatedVersion(){
+  if [[ "${version}" != ""  ]] then
+      print "The use of the internal version with -v is deprecated. Please provide your desired combination with -c including version numbers (clm3-cos5-pfl). "
+      terminate
+  fi
+}
+
 softSanityCheck(){
 
 
@@ -811,7 +828,13 @@ getGitInfo(){
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
       echo ${rootdir}/${mList[4]} >> $log_file
-      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version >= v2.0
+      if [[ -f ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 ]] ; then
+	cat ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version v1.*
+      else
+	cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      fi
     check
     echo "" >> $log_file
   fi
@@ -853,7 +876,7 @@ getGitInfo(){
   USAGE+="[R:rootdir?Absolute path to TerrSysMP root directory.]:[path:='$def_rootdir']"
   USAGE+="[B:bindir?Absolute path to bin directory for the builded executables. bin/MACHINE_DATE will be taken if ''.]:[path:='$def_bindir']"
    
-  USAGE+="[v:version?Tagged TerrSysMP version. Note that not every version might be implemented on every machine. Run option -a, --avail to get a listing.]:[version:='$version']"
+  USAGE+="[v:version?Deprecated. Please specify your desired combination with the -c option.]"
   USAGE+="[m:machine?Target Platform. Run option -a, --avail to get a listing.]:[machine:='$def_platform']"
 
   USAGE+="[p:profiling?Makes necessary changes to compile with a profiling tool if available.]:[profiling:='$def_profiling']"
@@ -863,6 +886,7 @@ getGitInfo(){
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
+  USAGE+="[f:maxpft? Flag to control maxpft per grid cell in CLM.]:[maxpft:='$def_maxpft']"
   USAGE+="[d:freedrain? Compiles ParFlow with free drainage feature.]:[freedrain:='$def_freeDrain']"
 
   USAGE+="[W:optoas?Build option for Oasis.]:[optoas:='${def_options["oas"]}']{"
@@ -916,6 +940,7 @@ getGitInfo(){
     c)  combination="$OPTARG" ; args=1 ;;
     C)  cplscheme="$OPTARG" ; args=1 ;;
     r)  readCLM="$OPTARG" ; args=1 ;;
+    f)  maxpft="$OPTARG" ; args=1 ;;
     d)  freeDrain="$OPTARG" ; args=1 ;;
 #DA
     T)  options+=(["icon"]="$OPTARG") ; args=1 ;;
@@ -943,8 +968,7 @@ getGitInfo(){
     esac
   done
 
-
-
+deprecatedVersion
 
 comment "  source list with supported machines and configurations"
   . $rootdir/bldsva/supported_versions.ksh
@@ -966,11 +990,12 @@ check
 
   setCombination
   comment "  source machine build interface for $platform"
-    . ${rootdir}/bldsva/machines/${platform}/build_interface_${platform}.ksh >> $log_file 2>> $err_file
+    . ${rootdir}/bldsva/machines/config_${platform}.ksh >> $log_file 2>> $err_file
   check
   getMachineDefaults
   setSelection
 
+printf "$platform\n$profiling\n$optComp\n$compiler\n$version\n$rootdir$bindir\n$combination\n$readCLM" > build_info_${date}.txt
 
   # determine whether or not to run interactive session
   if [[ $mode == 0 ]] then
@@ -997,7 +1022,7 @@ check
   runCompilation
 
   echo "Patched files:  NOTE: sed substitutions are not listed" >> $log_file
-  cat $patchlog_file >> $log_file
+  #cat $patchlog_file >> $log_file
 
   echo "" >> $log_file
   echo "Git:" >> $log_file

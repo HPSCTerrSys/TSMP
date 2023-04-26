@@ -13,23 +13,23 @@ Please find the instructions for this case in the [getting started section](./..
 
 ## Heterogeneous Job using TSMP
 
-TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.9  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
+TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.12  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
 After locating the model components in the TSMP root as mentioned in [Step 3](./../gettingstarted.md/#step-3-get-the-component-models-for-this-experiment), the following command should be executed in order to build TSMP and to create the run directory for the [EURO-CORDEX test case experiment](./../gettingstarted.md/#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp) on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 Building TSMP for HPSC-TerrSys users:
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
+./setup_tsmp.ksh -c clm3-cos5-pfl -V cordex -m JUWELS -I _cordex -O Intel -A GPU
 ```
 
 Creating run directory for HPSC-TerrSys users:
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel -A GPU
+./setup_tsmp.ksh -c clm3-cos5-pfl -V cordex -m JUWELS -I _cordex -O Intel -A GPU
 ```
 
-Not that heterogeneous job will be possible only for TSMP with ParFlow3.9 which is available from version v1.3.3.
+Not that heterogeneous job will be possible only for TSMP with ParFlow3.12 which is available from version v1.3.3.
 
 ## NRW Test case
 
@@ -46,12 +46,12 @@ cd $TSMP_DIR/bldsva
 
 NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
 ParFlow) configuration of TSMP. The atmospheric component uses a constant lateral spatial resolution of about 1 km and a variable vertical discretization into 50 levels gradually coarsening from the bottom (20 m) to the top (22000 m). Initial and lateral boundary conditions for the atmospheric model are obtained from the operational weather forecast model
-COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](./../gettingstarted.md/#step-3-get-the-component-models-for-this-experiment) and for building the TSMP (with -v 3.1.0MCT) refer to [Step 5](./../gettingstarted.md/#step-5-build-tsmp-interface-and-component-models). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
+COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see [Step 3](./../gettingstarted.md/#step-3-get-the-component-models-for-this-experiment) and for building the TSMP (with -c clm3-cos5-pfl) refer to [Step 5](./../gettingstarted.md/#step-5-build-tsmp-interface-and-component-models). For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. \
 To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
+./setup_tsmp.ksh -c clm3-cos5-pfl -V nrw -m JUWELS -I _ClearSkyDay  -s 2008-05-08_00 -S 2008-05-08_00 -T 24 -O Intel
 ```
 
 ## IdealRTD (Idealized) Test case
@@ -82,7 +82,7 @@ integrated for 24 hours starting at midnight with an hourly output frequency.
 Here the user can generate the case-specific input data for ParFlow
 and CLM. Note that the COSMO model uses the same setup for all the ensemble
 members, that is, no need for ad-hoc editing. 
-Please download the Input data and preproccesing sript using:
+Please download the Input data and preproccesing script using:
 
 ```shell
 cd $TSMP_DIR/bldsva
@@ -109,7 +109,7 @@ To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just c
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V idealRTD -m JUWELS -O Intel
+./setup_tsmp.ksh -c clm3-cos5-pfl -V idealRTD -m JUWELS -O Intel
  ```
 
 ## Long time climate simulation
@@ -182,7 +182,7 @@ Authenticate with your GitLab web GUI user name and password and clone the repos
 
 ```shell
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git   icon2-1
-git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/parflow3.2_fresh.git parflow3_2
+git clone -b v3.12.0 https://github.com/parflow/parflow.git 							parflow
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
@@ -200,13 +200,13 @@ Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (cl
 
 ```shell
 cd $TSMP_DIR/bldsva
-./build_tsmp.ksh -v 4.1.0MCT -c clm-icon-pfl -m JUWELS -O Intel
+./build_tsmp.ksh -c clm-icon21-pfl -m JUWELS -O Intel
 ```
 
 For ICON standalone version use:
 ```shell
 cd $TSMP_DIR/bldsva
-./build_tsmp.ksh -v 4.1.0MCT -c icon -m JUWELS -O Intel
+./build_tsmp.ksh -c icon21 -m JUWELS -O Intel
 ```
 
 ### Step 5: Setup and configuration of the respective usage and test case
@@ -220,7 +220,7 @@ To configure TSMP for the Germany test case for ICON stand-alone on JUWELS machi
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 4.1.0MCT -V germany -m JUWELS -c icon -r $EXP/JUWELS_icon_4.1.0MCT_germany -I _experiment -O Intel
+./setup_tsmp.ksh -V germany -m JUWELS -c icon21 -r $EXP/JUWELS_icon_4.1.0MCT_germany -I _experiment -O Intel
 ```
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
@@ -230,7 +230,7 @@ This includes the creation of a run directory, the copying of namelists, the pro
 Change into the run directory:
 
 ```shell
-cd $EXP/JUWELS_icon_4.1.0MCT_germany_experiment
+cd $EXP/JUWELS_icon21_germany_experiment
 ```
 
 Edit the scheduler settings (`#SBATCH` lines) accordingly to *YOUR_PROJECT* and run time of your experiment. Please do not change *nodes*, *ntasks* and *ntasks-per-node*:
@@ -302,33 +302,29 @@ correct command for your machine and, if possible, the newest version.
 
 ## Setups ###
 
-### Setup CORDEX test case for fully coupled TSMP on JUQUEEN with Oasis3-MCT ####
+### Setup CORDEX test case for fully coupled TSMP on JUWELS with Oasis3-MCT ####
 
-      ./setup_tsmp.ksh -m JUQUEEN -c clm-cos-pfl -v 1.1.0MCT -V cordex
+      ./setup_tsmp.ksh -m JUWELS -c clm3-cos4-pfl -V cordex
 
-The `-c` and `-v` flag are optional in this case because they default.
 
-### Setup NRW test case for ParFlow standalone on CLUMA2 ####
+### Setup NRW test case for ParFlow standalone on JURECA ####
 
-      ./setup_tsmp.ksh -m CLUMA2 -c pfl -v 1.1.0MCT -V nrw
-
-The `-m` , `-v` and `-V` flag are optional in this case because they are
-default.
+      ./setup_tsmp.ksh -m JURECA -c pfl -V nrw
 
 ### Setup NRW test case for new CLM4.0 + Cosmo5.1 on JURECA ####
 
-      ./setup_tsmp.ksh -m JURECA -c clm-cos -v 2.1.0MCT -C false
+      ./setup_tsmp.ksh -m JURECA -c clm4-cos5 -C false
 
 The new models are currently only supported for clm-cos and with
-alternative coupling-scheme. 7.2.4) Setup NRW test case with 24h
-runtime, 3h wallclock time, latest(lets say 01.07.2016 00:00) Cosmo
-forcing, ParFlow and CLM restart, fully coupled on JURECA on `$WORK`
+alternative coupling-scheme. 
 
-      ./setup_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCT -V nrw -r "$WORK/tsmp/nrw20160701/run" -Q 3 -T 24 -s 2016-07-01_00 -F "$WORK/tsmp/nrw20160701/cosforcing" -j "$WORK/tsmp/nrw20160630/run/clmoas.clm2.r.2016-06-30-00000.nc" -l "$WORK/tsmp/nrw20160630/run/rurlaf.out.press.00024.pfb"
+### Setup NRW test case with 24h runtime, 3h wallclock time, latest(lets say 01.07.2016 00:00) Cosmo forcing, ParFlow and CLM restart, fully coupled on JURECA on `$WORK`
+
+      ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl -V nrw -r "$WORK/tsmp/nrw20160701/run" -Q 3 -T 24 -s 2016-07-01_00 -F "$WORK/tsmp/nrw20160701/cosforcing" -j "$WORK/tsmp/nrw20160630/run/clmoas.clm2.r.2016-06-30-00000.nc" -l "$WORK/tsmp/nrw20160630/run/rurlaf.out.press.00024.pfb"
 
 ### Setup NRW test case with 20 member ensemble (parflow) on JURECA, but only use members 10-15. perturbed namelists reside in a special folder ####
 
-      ./setup_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCT -V nrw -N 5 -n 10 -g "$HOME/ensemble/namelists/coup\_oas.tcl"
+      ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl  -V nrw -N 5 -n 10 -g "$HOME/ensemble/namelists/coup\_oas.tcl"
 
 Note, that even though you give the base namelist-name for the `-g`
 flag the actual namelists in this folder must be named like:
@@ -336,4 +332,4 @@ flag the actual namelists in this folder must be named like:
 
 ### Setup NRW spinup with init date (lets say 01.01.2005 00:00) 1 month runtime, 24h wallclock time, restart from arbitrary date (lets say 01.03.2005 00:00) in indexed (3rd) rundir on JURECA ####
 
-      ./setup_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCT -V nrw -r "$WORK/tsmp/nrwSpinup/run" -I 3 -Q 24 -T 744 -s 2005-03-01_00 -S 2005-01-01_00 -j "$WORK/tsmp/nrwSpinup/run2/clmoas.clm2.r.2005-02-28-00000.nc" -k "$WORK/tsmp/nrwSpinup/run2/cosmo_out/lfff59000000" -l "$WORK/tsmp/nrwSpinup/run2/rurlaf.out.press.01416.pfb"
+      ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl -V nrw -r "$WORK/tsmp/nrwSpinup/run" -I 3 -Q 24 -T 744 -s 2005-03-01_00 -S 2005-01-01_00 -j "$WORK/tsmp/nrwSpinup/run2/clmoas.clm2.r.2005-02-28-00000.nc" -k "$WORK/tsmp/nrwSpinup/run2/cosmo_out/lfff59000000" -l "$WORK/tsmp/nrwSpinup/run2/rurlaf.out.press.01416.pfb"

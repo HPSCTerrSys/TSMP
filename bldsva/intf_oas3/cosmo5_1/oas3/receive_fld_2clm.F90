@@ -250,7 +250,7 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
 !  CPS new values to remove kinks for startup from midnight
 ! FG the bandaid is still needed to initialize the halo. 
 ! Cells inside the domain are getting overwritten in the first coupling.
-   IF (isec <= cplfreq ) THEN
+   IF (isec == 0 ) THEN
      frcv(:,:,jps_taux) =   -0.00009_wp                     !CPS bandaid
      frcv(:,:,jps_tauy) =   -0.00009_wp                      !CPS bandaid 
      frcv(:,:,jps_lat ) =   4._wp                      !CPS bandaid

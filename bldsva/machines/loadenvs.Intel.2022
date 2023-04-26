@@ -1,0 +1,34 @@
+#2020-11-05_Agh
+#USAGE="source $0"
+#for bld and setup of TSMP on JUWELS
+#for standard user
+#
+module --force purge
+module use $OTHERSTAGES
+module load Stages/2022
+module load Intel/2021.4.0
+module load ParaStationMPI/5.5.0-1
+#
+module load Hypre/2.25.0-cpu 
+module load Silo/4.11
+module load Tcl/8.6.11 # this version is not compatible with ParFlow3.2
+#
+module load ecCodes/2.22.1
+module load HDF5/1.12.1
+module load netCDF/4.8.1
+module load netCDF-Fortran/4.5.3
+module load PnetCDF/1.12.2
+module load cURL/7.78.0
+module load Szip/.2.1.1 # !!! fehlt
+module load Python/3.9.6
+module load NCO/5.0.3
+module load CMake/3.21.1
+module load git/2.33.1-nodocs  # !!! gleich zu git/2.28.0
+#module load CDO/1.9.8 yet not available with intel. only available with Gcc9.3
+
+#Tcl compatible with ParFlow3.2
+#export EBROOTTCL="/p/project/cslts/local/juwels/tcl8.6.8"
+#export PATH="/p/project/cslts/local/juwels/tcl8.6.8/bin:$PATH"
+#export LD_LIBRARY_PATH="/p/project/cslts/local/juwels/tcl8.6.8/lib:$LD_LIBRARY_PATH"
+#
+module li

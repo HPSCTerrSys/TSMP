@@ -12,8 +12,7 @@ supported and implement the interface.
 If necessary add `src/config` folders if machine specific source-code or
 `config/make` files are needed.
 
-Add a folder with the machine name under `/machines`. Also add the
-machine-interface and implement the interface. Also add files to load
+Add a file with the machine name under `/machines`. Also add files to load
 modules if necessary.
 
 For both cases it is easiest to copy a similar machine and change names

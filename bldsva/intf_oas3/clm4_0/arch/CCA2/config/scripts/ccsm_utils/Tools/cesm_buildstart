@@ -1,8 +1,0 @@
-#! /bin/csh -f
-
-./Tools/ccsm_check_lockedfiles || exit -1
-source ./Tools/ccsm_getenv     || exit -2
-
-setenv LID "`date +%y%m%d-%H%M%S`"
-
-

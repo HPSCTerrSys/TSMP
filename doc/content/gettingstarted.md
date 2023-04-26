@@ -1,6 +1,6 @@
 # Getting Started
 
-**Throughout this quick start guide a destinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
+**Throughout this quick start guide a distinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.**
 
 For a general documentation on how to use TSMP, please refer to the more detailed [Building TSMP](./build_tsmp/build_examples.md#building-tsmp) section.
 
@@ -29,7 +29,7 @@ To get a man-page for the usage of this scripts, do:
 
 ## The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP
 
-This test case uses the current TSMP release version v1.3.3 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.9.  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
+This test case uses the current TSMP release version v1.4.0 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.12.  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the [EURO-CORDEX project](https://euro-cordex.net/) experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.
 
 ### Step 1: Dependencies
 For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA-DC, all necessary software modules are loaded automatically through a "loadenv" file located in directory JUWELS or JURECA-DC in machines directory. The users of other HPC systems should provide an appropriate "loadenv" files for loading the modules and locate it in `machines/<machine_name>`, similar to JURECA-DC and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a "loadenv" file in the directory `machines/GENERIC_X86`. For more information on using this script please see the README in branch **TSMP_x86_64**.
@@ -82,7 +82,7 @@ specific code modifications may be retrieved):
 
 ```shell
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git  cosmo5_1
-git clone -b v3.9.0 https://github.com/parflow/parflow.git                              parflow
+git clone -b v3.12.0 https://github.com/parflow/parflow.git                              parflow
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git     clm3_5
 git clone https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git       oasis3-mct
 ```
@@ -99,10 +99,10 @@ Available from http://www.cosmo-model.org. A license agreement is needed.
 
 Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.
 
-##### ParFlow v3.9
-ParFlow 3.9  is available from
+##### ParFlow v3.12
+ParFlow 3.12  is available from
 ```shell
-git clone -b v3.9.0 https://github.com/parflow/parflow.git
+git clone -b v3.12.0 https://github.com/parflow/parflow.git
 ```
 
 ##### OASIS3-MCT v2.0
@@ -133,16 +133,16 @@ Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (cl
 
 ```shell
 cd $TSMP_DIR/bldsva
-./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m JUWELS -O Intel
+./build_tsmp.ksh -c clm3-cos5-pfl -m JUWELS -O Intel
 ```
 
 A note to external users:
 
 The path to the modules, compiler and MPI wrapper can be set in:  
-`$TSMP_DIR/bldsva/machines/<your_machine_name>/build_interface_<your_machine_name>.ksh`
+`$TSMP_DIR/bldsva/machines/config_<your_machine_name>.ksh`
 
-An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/JUWELS/build_interface_JUWELS.ksh` \
-and an example to load the environment modules or the needed software compatible with Intel compiler version 2020 is in `$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel`.
+An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: `$TSMP_DIR/bldsva/machines/config_JUWELS.ksh` \
+and an example to load the environment modules or the needed software compatible with Intel compiler version 2023 is in `$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel`.
 
 #### Build TSMP on GENERIC_X86 Linux platform
 
@@ -150,7 +150,7 @@ After successful installation of all the necessary libraries as mentioned in [st
 
 ```shell
 cd $TSMP_DIR/bldsva
-./build_tsmp.ksh -v 3.1.0MCT -c clm-cos-pfl -m GENERIC_X86 -O Gnu
+./build_tsmp.ksh -c clm3-cos5-pfl -m GENERIC_X86 -O Gnu
 ```
 
 ### Step 6: Setup and configuration of the respective usage and test case
@@ -161,7 +161,7 @@ To configure TSMP for the [EURO-CORDEX test case experiment](#the-fully-coupled-
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m JUWELS -I _cordex -O Intel
+./setup_tsmp.ksh -c clm3-cos5-pfl  -V cordex -m JUWELS -I _cordex -O Intel
 ```
 
 This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.
@@ -172,7 +172,7 @@ Now that the all the necessary libraries are installed as mentioned in [step 1 a
 
 ```shell
 cd $TSMP_DIR/bldsva
-./setup_tsmp.ksh -v 3.1.0MCT -V cordex -m GENERIC_X86 -I _cordex -O Gnu
+./setup_tsmp.ksh -c clm3-cos5-pfl -V cordex -m GENERIC_X86 -I _cordex -O Gnu
 ```
 
 ### Step 7: Run the test case
@@ -182,7 +182,7 @@ For HPSC-TerrSys users:
 Change into the run directory:
 
 ```shell
-cd $TSMP_DIR/run/JUWELS_3.1.0MCT_clm-cos-pfl_cordex_cordex
+cd $TSMP_DIR/run/JUWELS_clm3-cos5-pfl _cordex_cordex
 ```
 
 Edit the scheduler settings (`#SBATCH` lines):
@@ -209,7 +209,7 @@ tail -f cordex0.11.out.kinsol.log
 After a successful model run you will have model outputs form ParFlow, CLM and COSMO in the run directory:
 
 ```shell
-cd $TSMP_DIR/run/JUWELS_3.1.0MCT_clm-cos-pfl_cordex_cordex
+cd $TSMP_DIR/run/JUWELS_clm3-cos5-pfl cordex_cordex
 ls -l *satur*.pfb *press*.pfb
 ls -l clmoas*.nc
 ls -l cosmo_out/*.nc

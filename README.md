@@ -27,7 +27,7 @@ TSMP development has been driven by groups within the [Center for High-Performan
 Please see [getting started section](https://hpscterrsys.github.io/TSMP/content/gettingstarted.html) for guided steps on how the model can be setup and configured for *one* specific experiment, which we use as one of the default test cases. To get an overview on possible TSMP applications refer to the [TSMP website](https://www.terrsysmp.org) and the [TSMP documention](https://hpscterrsys.github.io/TSMP/index.html).
 
 ## TSMP version history
-The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, and ParFlow 3.9 for version v1.3.3. TSMP supports ParFlow 3.7 onwards from version v1.3.3 onward.
+The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, ParFlow 3.9 for version v1.3.3 and ParFlow 3.12 for version v1.4.0. TSMP supports ParFlow 3.7 onwards from version v1.3.3 onward. 
 
 Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf`.
 
@@ -39,7 +39,7 @@ If you use TSMP in a publication, please cite the these papers that describe the
 * Gasper, F., Goergen, K., Kollet, S., Shrestha, P., Sulis, M., Rihani, J., and Geimer, M. (2014). Implementation and scaling of the fully coupled Terrestrial Systems Modeling Platform (TerrSysMP) in a massively parallel supercomputing environment &ndash; a case study on JUQUEEN (IBM Blue Gene/Q). Geoscientific Model Development, 7(5), 2531-2543. doi:[10.5194/gmd-7-2531-2014](https://dx.doi.org/10.5194/gmd-7-2531-2014).
 
 ## License
-TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE.txt).
+TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE).
 
 ## To come
 
