@@ -72,3 +72,11 @@ In `enkf_parflow.c`, there are two main effects:
 
 In `ParFlow` more outputs routines are defined and there is an
 additional saturation update.
+
+## WATSAT3D ##
+
+Environment variable `WATSAT3D` is set in `common_build_interface.ksh`
+in function `c_configure_clm`.
+
+If it is turned on, the possibility of a read-in porosity is
+implemented in CLM's `iniTimeConst.F90`.
