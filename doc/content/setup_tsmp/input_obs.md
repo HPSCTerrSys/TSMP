@@ -344,10 +344,10 @@ ParFlow observations: Set
 
 The aforementioned environment variables can be set in the PDAF-build
 script
-`TSMP/bldsva/intf_DA/pdaf1_1/arch/JURECA/build_interface_pdaf1_1_JURECA.ksh`
+`TSMP/bldsva/intf_DA/pdaf/arch/JURECA/build_interface_pdaf_JURECA.ksh`
 (or replace `JURECA` with other machine).
 
-Source code from script `build_interface_pdaf1_1_JURECA.ksh`:
+Source code from script `build_interface_pdaf_JURECA.ksh`:
 ```bash
   if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
      importFlags+=$importFlagsCLM

@@ -6,7 +6,7 @@ debug-flags enabled.
 
 For `JUWELS` these flags can be set in
 
-- `bldsva/intf_DA/pdaf1_1/arch/JUWELS/build_interface_pdaf1_1_JUWELS.ksh`
+- `bldsva/intf_DA/pdaf/arch/JUWELS/build_interface_pdaf_JUWELS.ksh`
 - `bldsva/machines/config_JUWELS.ksh`
 
 
@@ -17,7 +17,7 @@ set, f.e. as
 defaultOptC="-g -O0 -xHost -traceback" # Intel
 ```
 
-For TSMP-PDAF: In `build_interface_pdaf1_1_JUWELS.ksh`, there is the general
+For TSMP-PDAF: In `build_interface_pdaf_JUWELS.ksh`, there is the general
 `importFlags` that could for example be set as
 
 ```ksh

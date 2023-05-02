@@ -14,7 +14,7 @@ Here is an exemplary call-graph from TSMP-PDAF's main program
 where the enkf update is carried out:
 `PDAF_enkf_analysis_rlm`/`PDAF_enkf_analysis_rsm`.
 
-Inside TSMP, `TSMP/bldsva/intf_DA/pdaf1_1/framework`:
+Inside TSMP, `TSMP/bldsva/intf_DA/pdaf/framework`:
 
 ``` text
 pdaf_terrsysmp.F90: pdaf_terrsysmp
@@ -22,7 +22,7 @@ pdaf_terrsysmp.F90: pdaf_terrsysmp
 -> PDAF_assimilate_enkf
 ```
 
-Inside PDAF, `pdaf1_1/src/`:
+Inside PDAF, `pdaf/src/`:
 
 ``` text
 PDAF-D_assimilate_enkf.F90: PDAF_assimilate_enkf
@@ -72,7 +72,7 @@ since `dim_ens` is set to dummy-zero) `n_modeltasks > dim_ens`
 
 ### `initialize_tsmp()`
 
-File: `./bldsva/intf_DA/pdaf1_1/model/wrapper_tsmp.c`
+File: `./bldsva/intf_DA/pdaf/model/wrapper_tsmp.c`
 
 Subroutines:
 - `clm_init`

@@ -42,12 +42,12 @@ TSMP/oasis3-mct
 ```
 
 After successfully downloading the three parts of TSMP-PDAF (TSMP-repository, PDAF, component models), rename PDAF-source folder
-called `PDAF-D_V1.13.2` to `pdaf1_1`.
+called `PDAF-D_V1.13.2` to `pdaf`.
 
-The directory `pdaf1_1` contains the PDAF source code.
+The directory `pdaf` contains the PDAF source code.
 
 ``` text
-TSMP/pdaf1_1
+TSMP/pdaf
 ```
 
 ### Example

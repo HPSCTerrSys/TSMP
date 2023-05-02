@@ -7,7 +7,7 @@ TSMP-PDAF environemnt variables are set in the machine-specific
 TSMP-PDAF build-scripts of the form:
 
 ```
-bldsva/intf_DA/pdaf1_1/arch/<machine>/build_interface_pdaf1_1_<machine>.ksh
+bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh
 ```
 
 where `<machine>` could be f.e. `JURECA` or `JUWELS`.
@@ -59,7 +59,7 @@ The environment variable `FOR2131` can affect
 
 1. TSMP-PDAF (`enkf_parflow.c`), then it has to be set in the
    PDAF-build script
-   `bldsva/intf_DA/pdaf1_1/arch/<machine>/build_interface_pdaf1_1_<machine>.ksh`
+   `bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh`
    as mentioned above
 2. Patched ParFlow files, then it has to be set in the ParFlow build
    script

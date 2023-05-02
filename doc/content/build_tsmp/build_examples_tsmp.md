@@ -49,9 +49,9 @@ default.
         -   Version v3.12.0 in `VERSION`
 
 
-    -   **NO pdaf1\_1**
+    -   **NO pdaf**
 
-        -   Version 1.15.0 in `/pdaf1_1/src/PDAF-D_print_version.F90`,
+        -   Version 1.15.0 in `/pdaf/src/PDAF-D_print_version.F90`,
             new version
 
 ### Compile ParFlow standalone on JUWELS without compiler optimization ###
