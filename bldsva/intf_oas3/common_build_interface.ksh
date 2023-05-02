@@ -293,13 +293,13 @@ route "${cyellow}>>> c_substitutions_cos${cnormal}"
   #DA
   if [[ $withPDAF == "true" ]]  then
     comment "    sed PDAF fix into cosmo files "  
-	patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/data_parallel.f90 $cosdir/src/ 
+	patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[2]}/data_parallel.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/organize_data.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[2]}/organize_data.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_meanvalues.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[2]}/src_meanvalues.f90 $cosdir/src/ 
     check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[2]}/src_setup.f90 $cosdir/src/ 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[2]}/src_setup.f90 $cosdir/src/ 
     check
   fi
 route "${cyellow}<<< c_substitutions_cos${cnormal}"
@@ -356,7 +356,7 @@ route "${cyellow}>>> c_substitutions_oas${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
      comment "    cp PDAF fix to ${oasdir}/lib/psmile/src"
-       patch "$rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[0]}/mod_oasis*"  ${oasdir}/lib/psmile/src
+       patch "$rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[0]}/mod_oasis*"  ${oasdir}/lib/psmile/src
      check
   fi
 route "${cyellow}<<< c_substitutions_oas${cnormal}"
@@ -468,11 +468,11 @@ route "${cyellow}>>> c_substitutions_clm${cnormal}"
 #DA
   if [[ $withPDAF == "true" ]] ; then
   comment "    copy PDAF fix to ${mList[1]}/bld/usr.src "
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtype.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[1]}/clmtype.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[1]}/clmtypeInitMod.F90 $clmdir/bld/usr.src
   check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
+    patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
   fi	
 route "${cyellow}<<< c_substitutions_clm${cnormal}"
@@ -621,15 +621,15 @@ route "${cyellow}>>> c_substitutions_pfl${cnormal}"
         sed "s/PARFLOW_AMPS_LAYER PROPERTY STRINGS seq/PARFLOW_AMPS_LAYER PROPERTY STRINGS da seq/g" -i $pfldir/CMakeLists.txt >> $log_file 2>> $err_file
       check
       comment "    copy fix for PDAF into $pfldir"
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/parflow_proto.h $pfldir/pfsimulator/parflow_lib 
       check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/solver_richards.c $pfldir/pfsimulator/parflow_lib 
       check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/problem_saturation.c $pfldir/pfsimulator/parflow_lib
       check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/problem_phase_rel_perm.c $pfldir/pfsimulator/parflow_lib
       check
-        patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
+        patch $rootdir/bldsva/intf_DA/pdaf/tsmp/${mList[3]}/da $pfldir/pfsimulator/amps
       check
     fi
 
@@ -650,11 +650,11 @@ route "${cyellow}>>> c_substitutions_pdaf${cnormal}"
   check
 
   comment "   cp pdaf interface model to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/model $dadir/interface
+    patch $rootdir/bldsva/intf_DA/pdaf/model $dadir/interface
   check
 
   comment "   cp pdaf interface framework to $dadir/interface"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/framework $dadir/interface
+    patch $rootdir/bldsva/intf_DA/pdaf/framework $dadir/interface
   check
 
   comment "   mkdir $dadir/lib"
@@ -671,7 +671,7 @@ route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
   file=$dadir/make.arch/${PDAF_ARCH}.h
 
   comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_DA/pdaf/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
   check
 
   comment "   sed comFC dir to $file"
@@ -711,9 +711,9 @@ route "${cyellow}>>> c_configure_pdaf${cnormal}"
   file1=$dadir/interface/model/Makefile
   file2=$dadir/interface/framework/Makefile
   comment "   cp pdaf interface Makefiles to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/model/Makefile  $file1 >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_DA/pdaf/model/Makefile  $file1 >> $log_file 2>> $err_file
   check
-    cp $rootdir/bldsva/intf_DA/pdaf1_1/framework/Makefile  $file2 >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_DA/pdaf/framework/Makefile  $file2 >> $log_file 2>> $err_file
   check
 
   comment "   sed bindir to Makefiles"
