@@ -32,6 +32,7 @@ updateflag         =
 gwmasking          =
 paramupdate        =
 paramupdate_frequency =
+dampingfactor_param =
 aniso_perm_y       =
 aniso_perm_z       =
 printensemble      =
@@ -171,6 +172,25 @@ For each assimilation cycle it is checked whether `tcycle mod
 paramupdate_frequency == 0`. When this happens, a parameter update is
 applied. For the default of `1`, each assimilation cycle contains a
 parameter update.
+
+### PF:dampingfactor_param ###
+`PF:dampingfactor_param`: (real) Damping factor for parameter
+updates. Default `1.0`.
+
+The damping factor should be chosen between `0.0` and `1.0`, where the
+inputs yield the following behavior:
+- `0.0`: No parameter update.
+- `1.0`: Parameter update without damping (default)
+
+General equation for the damped, updated parameter vector
+
+\begin{align*}
+p_{update, damped} &= p + \mathtt{dampingfactor\_param} \cdot ( p_{update} - p )
+\end{align*}
+
+where $p$ is the parameter vector that is part of the state vector
+before assimilation and $p_{update}$ is $p$ after the assimilation.
+
 
 ### PF:aniso_perm_y ###
 
@@ -417,41 +437,42 @@ Effect of `obs_interp_switch=1`:
 
 ## Parameter Summary ##
 
- | section   | parameter               | value |
- |:---------:|:-----------------------:|:-----:|
- | `[PF]`    |                         |       |
- |           | `problemname`           | \-    |
- |           | `nprocs`                | 0     |
- |           | `starttime`             | 0.0   |
- |           | `endtime`               | 0     |
- |           | `simtime`               | 0     |
- |           | `dt`                    | 0.0   |
- |           | `updateflag`            | 1     |
- |           | `paramupdate`           | 0     |
- |           | `paramupdate_frequency` | 1     |
- |           | `aniso_perm_y`          | 1.0   |
- |           | `aniso_perm_z`          | 1.0   |
- |           | `printensemble`         | 1     |
- |           | `printstat`             | 1     |
- |           | `paramprintensemble`    | 1     |
- |           | `paramprintstat`        | 1     |
- |           | `olfmasking`            | 1     |
- | `[CLM]`   |                         |       |
- |           | `problemname`           | \-    |
- |           | `nprocs`                | 0     |
- |           | `update_swc`            | 1     |
- |           | `print_swc`             | 0     |
- | `[COSMO]` |                         |       |
- |           | `nprocs`                | 0     |
- |           | `dtmult`                | 0     |
- | `[DA]`    |                         |       |
- |           | `nreal`                 | 0     |
- |           | `outdir`                | \-    |
- |           | `da_interval`           | 1     |
- |           | `stat_dumpoffset`       | 0     |
- |           | `screen_wrapper`        | 1     |
- |           | `point_obs`             | 1     |
- |           | `obs_interp_switch`     | 0     |
+ | section   | parameter               | default value |
+ |:---------:|:-----------------------:|:-------------:|
+ | `[PF]`    |                         |               |
+ |           | `problemname`           | \-            |
+ |           | `nprocs`                | 0             |
+ |           | `starttime`             | 0.0           |
+ |           | `endtime`               | 0             |
+ |           | `simtime`               | 0             |
+ |           | `dt`                    | 0.0           |
+ |           | `updateflag`            | 1             |
+ |           | `paramupdate`           | 0             |
+ |           | `paramupdate_frequency` | 1             |
+ |           | `dampingfactor_param`   | 1.0           |
+ |           | `aniso_perm_y`          | 1.0           |
+ |           | `aniso_perm_z`          | 1.0           |
+ |           | `printensemble`         | 1             |
+ |           | `printstat`             | 1             |
+ |           | `paramprintensemble`    | 1             |
+ |           | `paramprintstat`        | 1             |
+ |           | `olfmasking`            | 1             |
+ | `[CLM]`   |                         |               |
+ |           | `problemname`           | \-            |
+ |           | `nprocs`                | 0             |
+ |           | `update_swc`            | 1             |
+ |           | `print_swc`             | 0             |
+ | `[COSMO]` |                         |               |
+ |           | `nprocs`                | 0             |
+ |           | `dtmult`                | 0             |
+ | `[DA]`    |                         |               |
+ |           | `nreal`                 | 0             |
+ |           | `outdir`                | \-            |
+ |           | `da_interval`           | 1             |
+ |           | `stat_dumpoffset`       | 0             |
+ |           | `screen_wrapper`        | 1             |
+ |           | `point_obs`             | 1             |
+ |           | `obs_interp_switch`     | 0             |
 
 Default values for parameter file `enkfpf.par`.
 
