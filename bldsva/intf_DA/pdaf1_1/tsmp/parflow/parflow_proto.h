@@ -921,6 +921,12 @@ void PhaseRelPermFreeInstanceXtra(void);
 PFModule *PhaseRelPermNewPublicXtra(void);
 void PhaseRelPermFreePublicXtra(void);
 int PhaseRelPermSizeOfTempData(void);
+//>>TSMP-PDAF addition beginning
+#ifdef FOR2131
+Vector *PhaseRelPermGetAlpha(PFModule *this_module);
+Vector *PhaseRelPermGetN(PFModule *this_module);
+#endif
+//<<TSMP-PDAF addition end
 
 typedef void (*PhaseSourceInvoke) (Vector *phase_source, int phase, Problem *problem, ProblemData *problem_data, double time);
 typedef PFModule *(*PhaseSourceNewPublicXtraInvoke) (int num_phases);
@@ -974,6 +980,12 @@ typedef PFModule *(*SaturationOutputStaticInvoke) (char *file_prefix, ProblemDat
 
 /* problem_saturation.c */
 void Saturation(Vector *phase_saturation, Vector *phase_pressure, Vector *phase_density, double gravity, ProblemData *problem_data, int fcn);
+//>>TSMP-PDAF addition beginning
+#ifdef FOR2131
+PFModule *SaturationGetAlpha(PFModule *this_module);
+PFModule *SaturationGetN(PFModule *this_module);
+#endif
+//<<TSMP-PDAF addition end
 PFModule *SaturationInitInstanceXtra(Grid *grid, double *temp_data);
 void SaturationFreeInstanceXtra(void);
 PFModule *SaturationNewPublicXtra(void);
@@ -1150,6 +1162,12 @@ PFModule *SolverRichardsNewPublicXtra(char *name);
 void SolverRichardsFreePublicXtra(void);
 int SolverRichardsSizeOfTempData(void);
 ProblemData *GetProblemDataRichards(PFModule *this_module);
+//>>TSMP-PDAF addition beginning
+#ifdef FOR2131
+PFModule *GetPhaseRelPerm(PFModule *this_module);
+PFModule *GetSaturation(PFModule *this_module);
+#endif
+//<<TSMP-PDAF addition end
 Problem  *GetProblemRichards(PFModule *this_module);
 PFModule *GetICPhasePressureRichards(PFModule *this_module);
 void AdvanceRichards(PFModule *this_module,
