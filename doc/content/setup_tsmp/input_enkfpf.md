@@ -33,6 +33,7 @@ gwmasking          =
 paramupdate        =
 paramupdate_frequency =
 dampingfactor_param =
+dampingfactor_state =
 aniso_perm_y       =
 aniso_perm_z       =
 printensemble      =
@@ -190,6 +191,26 @@ p_{update, damped} &= p + \mathtt{dampingfactor\_param} \cdot ( p_{update} - p )
 
 where $p$ is the parameter vector that is part of the state vector
 before assimilation and $p_{update}$ is $p$ after the assimilation.
+
+### PF:dampingfactor_state ###
+`PF:dampingfactor_state`: (real) Damping factor for state
+updates. Default `1.0`.
+
+Remark: Currently implemented for `pf_updateflag==1`.
+
+The damping factor should be chosen between `0.0` and `1.0`, where the
+inputs yield the following behavior:
+- `0.0`: No state update.
+- `1.0`: State update without damping (default)
+
+General equation for the damped, updated state vector
+
+\begin{align*}
+x_{update, damped} &= x + \mathtt{dampingfactor\_state} \cdot ( x_{update} - x )
+\end{align*}
+
+where $x$ is the state vector (without parameters) before assimilation
+and $x_{update}$ is the state vector after the assimilation.
 
 
 ### PF:aniso_perm_y ###
@@ -450,6 +471,7 @@ Effect of `obs_interp_switch=1`:
  |           | `paramupdate`           | 0             |
  |           | `paramupdate_frequency` | 1             |
  |           | `dampingfactor_param`   | 1.0           |
+ |           | `dampingfactor_state`   | 1.0           |
  |           | `aniso_perm_y`          | 1.0           |
  |           | `aniso_perm_z`          | 1.0           |
  |           | `printensemble`         | 1             |
