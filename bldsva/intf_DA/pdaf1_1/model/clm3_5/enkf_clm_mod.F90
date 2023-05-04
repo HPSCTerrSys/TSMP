@@ -170,7 +170,7 @@ module enkf_clm_mod
         end do
       end do
     endif
-  end subroutine
+  end subroutine set_clm_statevec
 
 
   subroutine update_clm() bind(C,name="update_clm")
@@ -248,7 +248,7 @@ module enkf_clm_mod
       call clm_correct_texture
       call clm_texture_to_parameters
     endif
-  end subroutine
+  end subroutine update_clm
 
   subroutine clm_correct_texture
     use clmtype
@@ -280,7 +280,7 @@ module enkf_clm_mod
          psand(c,lev) = sand
       end do
     end do
-  end subroutine
+  end subroutine clm_correct_texture
 
   subroutine clm_texture_to_parameters()
     use clmtype
@@ -348,7 +348,7 @@ module enkf_clm_mod
          watopt(c,lev) = watsat(c,lev) * (158490._r8/sucsat(c,lev)) ** (-1._r8/bsw(c,lev))
       end do
     end do
-  end subroutine
+  end subroutine clm_texture_to_parameters
 
   subroutine  average_swc_crp(profdat,profave)
     use clm_varcon  , only : zsoi
@@ -502,7 +502,89 @@ module enkf_clm_mod
     !deallocate(longxy_obs)
     !deallocate(latixy_obs)
 
-  end subroutine
+  end subroutine domain_def_clm
+
+  !> @author  Mukund Pondkule, Johannes Keller
+  !> @date    27.03.2023
+  !> @brief   Set indices of grid cells with lon/lat smaller than observation locations
+  !> @details
+  !>    This routine sets the indices of grid cells with lon/lat
+  !>    smaller than observation locations.
+  subroutine get_interp_idx(lon_clmobs, lat_clmobs, dim_obs, longxy_obs_floor, latixy_obs_floor)
+
+    USE domainMod, ONLY: alatlon
+    ! USE decompMod, ONLY: get_proc_total, get_proc_bounds_atm, adecomp
+    ! USE spmdMod,   ONLY: npes, iam ! number of processors for clm and processor number
+   ! USE mod_read_obs, ONLY: lon_clmobs, lat_clmobs
+    ! USE clmtype,    ONLY : clm3
+   ! USE mod_assimilation, ONLY: dim_obs
+!#endif
+
+    implicit none
+    real, intent(in) :: lon_clmobs(:)
+    real, intent(in) :: lat_clmobs(:)
+    integer, intent(in) :: dim_obs
+    integer, allocatable, intent(inout) :: longxy_obs_floor(:)
+    integer, allocatable, intent(inout) :: latixy_obs_floor(:)
+    integer :: i
+
+    integer :: ni, nj
+    ! integer :: ii, jj, kk, cid
+    integer :: ier
+    ! integer :: ncells, nlunits,ncols, npfts
+    ! integer :: counter
+
+    real :: minlon, minlat, maxlon, maxlat
+    real(r8), pointer :: lon(:)
+    real(r8), pointer :: lat(:)
+    ! integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+
+    lon   => alatlon%lonc
+    lat   => alatlon%latc
+    ni  = alatlon%ni
+    nj  = alatlon%nj
+
+    ! ! get total number of gridcells, landunits,
+    ! ! columns and pfts for any processor
+    ! call get_proc_total(iam, ncells, nlunits, ncols, npfts)
+
+    ! ! beg and end gridcell for atm
+    ! call get_proc_bounds_atm(begg, endg)
+
+    ! set intial values for max/min of lon/lat
+    minlon = 999
+    minlat = 999
+    maxlon = -999
+    maxlat = -999
+
+    ! looping over all cell centers to get min/max longitude and latitude
+    minlon = MINVAL(lon(:) + 180)
+    maxlon = MAXVAL(lon(:) + 180)
+    minlat = MINVAL(lat(:) + 90)
+    maxlat = MAXVAL(lat(:) + 90)
+
+    if(allocated(longxy_obs_floor)) deallocate(longxy_obs_floor)
+    allocate(longxy_obs_floor(dim_obs), stat=ier)
+    if(allocated(latixy_obs_floor)) deallocate(latixy_obs_floor)
+    allocate(latixy_obs_floor(dim_obs), stat=ier)
+    do i = 1, dim_obs
+       if(((lon_clmobs(i) + 180) - minlon) /= 0 .and. ((lat_clmobs(i) + 90) - minlat) /= 0) then
+          longxy_obs_floor(i) = floor(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon)) !+ 1
+          latixy_obs_floor(i) = floor(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat)) !+ 1
+          !print *,'longxy_obs(i) , latixy_obs(i) ', longxy_obs(i) , latixy_obs(i)
+       else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. ((lat_clmobs(i) + 90) - minlat) == 0) then
+          longxy_obs_floor(i) = 1
+          latixy_obs_floor(i) = 1
+       else if(((lon_clmobs(i) + 180) - minlon) == 0) then
+          longxy_obs_floor(i) = 1
+          latixy_obs_floor(i) = floor(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat))
+       else if(((lat_clmobs(i) + 90) - minlat) == 0) then
+          longxy_obs_floor(i) = floor(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon))
+          latixy_obs_floor(i) = 1
+       endif
+    end do
+
+  end subroutine get_interp_idx
 
 #if defined CLMSA
   subroutine init_clm_l_size(dim_l)

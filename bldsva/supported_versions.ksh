@@ -99,8 +99,8 @@ modelVersion+=(
         ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
 	["4.4.0MCT"]="oasis3-mct clm5_0 cosmo4_21 parflow"
         ["4.4.0MCTPDAF"]="oasis3-mct clm5_0 cosmo4_21 parflow pdaf1_1"
-        ["5.0.0"]="mct eclm"
-        ["5.0.0MCT"]="oasis3-mct eclm"
+        ["5.0.0"]="mct eclm cosmo5_1 parflow"
+        ["5.0.0MCT"]="oasis3-mct eclm cosmo5_1 parflow"
 )
 
 # list of model combinations that are available for a version. (first is default) 
