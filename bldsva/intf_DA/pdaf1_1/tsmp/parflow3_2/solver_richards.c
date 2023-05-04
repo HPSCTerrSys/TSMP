@@ -5627,7 +5627,6 @@ ProblemData *GetProblemDataRichards(PFModule *this_module) {
 }
 
 //>>TSMP-PDAF addition beginning
-#ifdef FOR2131
 PFModule *GetPhaseRelPerm(PFModule *this_module){
    InstanceXtra *instance_xtra 	= (InstanceXtra *)PFModuleInstanceXtra(this_module);
    return (instance_xtra -> phase_rel_perm);
@@ -5638,7 +5637,6 @@ PFModule *GetSaturation(PFModule *this_module){
    return (instance_xtra -> problem_saturation);
 }
 
-#endif
 //<<TSMP-PDAF addition end
 Problem *GetProblemRichards(PFModule *this_module) {
    PublicXtra    *public_xtra      = (PublicXtra *)PFModulePublicXtra(this_module);
