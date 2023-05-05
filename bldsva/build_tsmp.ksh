@@ -38,7 +38,7 @@ getDefaults(){
   def_optComp=""   # will be set to platform defaults if empty
 
   #compiler options, CPS remove hardwiring of compilers
-  def_compiler="Gnu"  # will be set to Gnu if empty
+  def_compiler="Intel" # set Intel default if not explicitly set
   def_processor="CPU"
 
   #profiling
@@ -206,7 +206,6 @@ setCombination(){
   fi
 #DA
   case "$version" in *PDAF*) withDA="true" ; withPDAF="true" ;; esac
-
 }
 
 
@@ -219,9 +218,10 @@ route "${cyellow}> c_compileClm${cnormal}"
     always_clm
     if [[ ${options["clm"]} == "skip" ]] ; then ; route "${cyellow}< c_compileClm${cnormal}" ; return  ;fi 
     if [[ ${options["clm"]} == "fresh" ]] ; then 
-  comment "  backup clm dir to: $clmdir"
+  comment "  clear clm dir: $clmdir"
       rm -rf $clmdir >> $log_file 2>> $err_file
   check
+  comment "  backup clm dir to: $clmdir"
     # remove '-icon' from the mList[1] name
     clmicon="${mList[1]}"
     clmicon=${clmicon%'-icon'}
@@ -249,9 +249,10 @@ route "${cyellow}> c_compileIcon${cnormal}"
     always_icon
     if [[ ${options["icon"]} == "skip" ]] ; then ; route "${cyellow}< c_compileIcon${cnormal}" ;  return  ;fi 
     if [[ ${options["icon"]} == "fresh" ]] ; then 
-  comment "  backup icon dir to: $icondir"
+  comment "  clear icon dir: $icondir"
       rm -rf $icondir >> $log_file 2>> $err_file
   check
+  comment "  backup icon dir to: $icondir"
       cp -rf ${rootdir}/${mList[2]} $icondir >> $log_file 2>> $err_file
   check
     fi
@@ -276,9 +277,10 @@ route "${cyellow}> c_compileCosmo${cnormal}"
     always_cos
     if [[ ${options["cos"]} == "skip" ]] ; then ; route "${cyellow}< c_compileCosmo${cnormal}" ;  return  ;fi 
     if [[ ${options["cos"]} == "fresh" ]] ; then 
-  comment "  backup cos dir to: $cosdir"
+  comment "  clear cos dir: $cosdir"
       rm -rf $cosdir >> $log_file 2>> $err_file
   check
+  comment "  backup cos dir to: $cosdir"
       cp -rf ${rootdir}/${mList[2]} $cosdir >> $log_file 2>> $err_file
   check
     fi
@@ -303,9 +305,10 @@ route "${cyellow}> c_compileOasis${cnormal}"
     always_oas
     if [[ ${options["oas"]} == "skip" ]] ; then ; route "${cyellow}< c_compileOasis${cnormal}" ; return  ;fi 
     if [[ ${options["oas"]} == "fresh" ]] ; then 
-  comment "  backup oas dir to: $oasdir"
+  comment "  clear oas dir: $oasdir"
       rm -rf $oasdir >> $log_file 2>> $err_file
   check
+  comment "  backup oas dir to: $oasdir"
       cp -rf ${rootdir}/${mList[0]} $oasdir >> $log_file 2>> $err_file
   check
     fi
@@ -330,7 +333,7 @@ route "${cyellow}> c_compileParflow${cnormal}"
     always_pfl
     if [[ ${options["pfl"]} == "skip" ]] ; then ; route "${cyellow}< c_compileParflow${cnormal}" ;return  ;fi 
     if [[ ${options["pfl"]} == "fresh" ]] ; then 
-     comment "  backup pfl dir to: $pfldir"
+     comment "  clear pfl dir: $pfldir"
        if [ -d $pfldir ] ; then ; rm -rf $pfldir >> $log_file 2>> $err_file ;fi
      check
      comment "  copy ${rootdir}/${mList[3]} to $pfldir"
@@ -360,9 +363,10 @@ route "${cyellow}> c_compileDA${cnormal}"
     always_da
     if [[ ${options["da"]} == "skip" ]] ; then ; route "${cyellow}< c_compileDA${cnormal}" ;return  ;fi 
     if [[ ${options["da"]} == "fresh" ]] ; then 
-  comment "  backup da dir to: $dadir"
+  comment "  clear da dir: $dadir"
       rm -rf $dadir >> $log_file 2>> $err_file
   check
+  comment "  backup ${rootdir}/${mList[4]} to $dadir"
       cp -rf ${rootdir}/${mList[4]} $dadir >> $log_file 2>> $err_file
   check
     fi  
@@ -721,62 +725,99 @@ getGitInfo(){
 
   echo "Git (TSMP):" >> $log_file
   comment "  Log Git information (TSMP)"
-    git -C ${rootdir} rev-parse --absolute-git-dir >> $log_file
+  echo "root dir: $(git -C ${rootdir} rev-parse --absolute-git-dir)" >> $log_file
+  echo "remote url: $(git -C ${rootdir} remote get-url origin || echo "Remote origin not set for TSMP")" >> $log_file
+  echo "commit: $(git -C ${rootdir} log --pretty=format:'%H' -n 1)" >> $log_file
+  echo "tag: $(git -C ${rootdir} describe  --tags --dirty --always)" >> $log_file
   check
-  git -C ${rootdir} rev-parse --abbrev-ref HEAD >> $log_file
-  git -C ${rootdir} describe  --tags --dirty --always >> $log_file
   echo "" >> $log_file
 
   if [[ $withOAS == "true" ]] ; then
     echo "Git (${mList[0]}):" >> $log_file
     comment "  Log Git information (${mList[0]})"
-      git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[0]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[0]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[0]} remote get-url origin || echo "Remote origin not set for ${mList[0]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[0]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[0]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[0]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[0]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[0]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[0]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCLM == "true" ]] ; then
     echo "Git (${mList[1]}):" >> $log_file
     comment "  Log Git information (${mList[1]})"
-      git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[1]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[1]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[1]} remote get-url origin || echo "Remote origin not set for ${mList[1]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[1]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[1]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[1]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[1]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[1]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[1]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withCOS == "true" ]] ; then
     echo "Git (${mList[2]}):" >> $log_file
     comment "  Log Git information (${mList[2]})"
-      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[2]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[2]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[2]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[2]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
   if [[ $withICON == "true" ]] ; then
     echo "Git (${mList[2]}):" >> $log_file
     comment "  Log Git information (${mList[2]})"
-      git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir >> $log_file
+    if [ -d "${rootdir}/${mList[2]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[2]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[2]} remote get-url origin || echo "Remote origin not set for ${mList[2]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[2]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[2]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[2]}" >> $log_file
+    fi
     check
-    git -C ${rootdir}/${mList[2]} rev-parse --abbrev-ref HEAD >> $log_file
-    git -C ${rootdir}/${mList[2]} describe  --tags --dirty --always >> $log_file
     echo "" >> $log_file
   fi
-#  if [[ $withPFL == "true" ]] ; then
-#    echo "Git (${mList[3]}):" >> $log_file
-#    comment "  Log Git information (${mList[3]})"
-#      git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir >> $log_file
-#    check
-#    git -C ${rootdir}/${mList[3]} rev-parse --abbrev-ref HEAD >> $log_file
-#    git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always >> $log_file
-#    echo "" >> $log_file
-#  fi
+  if [[ $withPFL == "true" ]] ; then
+    echo "Git (${mList[3]}):" >> $log_file
+    comment "  Log Git information (${mList[3]})"
+    if [ -d "${rootdir}/${mList[3]}/.git" ]; then
+      echo "root dir: $(git -C ${rootdir}/${mList[3]} rev-parse --absolute-git-dir)" >> $log_file
+      echo "remote url: $(git -C ${rootdir}/${mList[3]} remote get-url origin || echo "Remote origin not set for ${mList[3]}")" >> $log_file
+      echo "commit: $(git -C ${rootdir}/${mList[3]} log --pretty=format:'%H' -n 1)" >> $log_file
+      echo "tag: $(git -C ${rootdir}/${mList[3]} describe  --tags --dirty --always)" >> $log_file
+    else
+      echo "${mList[3]} is NOT a git repo" >> $log_file
+      echo "root dir: ${rootdir}/${mList[3]}" >> $log_file
+    fi
+    check
+    echo "" >> $log_file
+  fi
   if [[ $withPDAF == "true" ]] ; then
     echo "Version (${mList[4]}):" >> $log_file
     comment "  Log version information (${mList[4]})"
       echo ${rootdir}/${mList[4]} >> $log_file
-      cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version >= v2.0
+      if [[ -f ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 ]] ; then
+	cat ${rootdir}/${mList[4]}/src/PDAF_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      # PDAF-version v1.*
+      else
+	cat ${rootdir}/${mList[4]}/src/PDAF-D_print_version.F90 | grep +++ | grep Version | cut -c 50-65 >> $log_file
+      fi
     check
     echo "" >> $log_file
   fi

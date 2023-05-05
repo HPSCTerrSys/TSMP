@@ -1,10 +1,10 @@
 #! /bin/ksh
 
 initSetup(){
-  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval/input/clm"
-  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval/input/cosmo"
-  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval/input/oasis3"
-  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval/input/parflow"
+  defaultFDCLM="$rootdir/tsmp_eur11_eraint_eval_v2/input/clm"
+  defaultFDCOS="$rootdir/tsmp_eur11_eraint_eval_v2/input/cosmo"
+  defaultFDOAS="$rootdir/tsmp_eur11_eraint_eval_v2/input/oasis3"
+  defaultFDPFL="$rootdir/tsmp_eur11_eraint_eval_v2/input/parflow"
 
 
   defaultNLCLM=$rootdir/bldsva/setups/cordex/lnd.stdin 
@@ -76,7 +76,7 @@ initSetup(){
 }
 
 finalizeSetup(){
-route "${cblue}>> finalizeSetup${cnormal}"
+route "${cyellow}>> finalizeSetup${cnormal}"
   if [[ $withOAS == "true" ]] then
     comment "   copy clmgrid into rundir"
       cp $forcingdir_clm/grid* $rundir/clmgrid.nc >> $log_file 2>> $err_file
@@ -144,5 +144,5 @@ route "${cblue}>> finalizeSetup${cnormal}"
         tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check
   fi 
-route "${cblue}<< finalizeSetup${cnormal}"
+route "${cyellow}<< finalizeSetup${cnormal}"
 }

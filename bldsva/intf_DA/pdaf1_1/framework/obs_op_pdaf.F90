@@ -49,18 +49,22 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p, dim_obs,obs_filename,obs_index_p_TB,&
-              ens_TB,member_TB, sc_p, &
-        depth_obs_p !, obs_p
-   USE mod_read_obs, ONLY: crns_flag !clm_obs
-   use mod_parallel_model, &
-        only: model,mype_model,npes_model,mype_world,npes_world,COMM_model
+        ONLY: obs_index_p, &
+        obs_interp_indices_p, &
+        obs_interp_weights_p, &
+        obs_index_p_TB,&
+        ens_TB,member_TB, sc_p, &
+        depth_obs_p
+
+   use mod_read_obs, ONLY: crns_flag !clm_obs
+        
    use mod_tsmp, &
-        only: tag_model_clm,tag_model_parflow, &
-              nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local, & !SPo add lcmem
-              soilay, soilay_fortran, nz_glob 
-   USE, INTRINSIC :: iso_c_binding
-!   USE mod_parallel_model, ONLY: tcycle 
+       only: obs_interp_switch, &
+       nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local, & !SPo add lcmem
+       soilay, soilay_fortran, nz_glob 
+
+   USE, INTRINSIC :: iso_c_binding, &
+       only: C_F_POINTER
 
    ! LSN: module load for the implementation of CMEM model
    USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
@@ -76,21 +80,21 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 
    IMPLICIT NONE
 ! !ARGUMENTS:
-  INTEGER, INTENT(in)   :: step               ! Currrent time step
-  INTEGER, INTENT(in)   :: dim_p              ! PE-local dimension of state
-  INTEGER, INTENT(in)   :: dim_obs_p          ! Dimension of observed state
-  REAL, INTENT(in)      :: state_p(dim_p)     ! PE-local model state
-  REAL, INTENT(out)     :: m_state_p(dim_obs_p) ! PE-local observed state
-
-  character*200         :: inparam_fname 
+  INTEGER, INTENT(in) :: step               ! Currrent time step
+  INTEGER, INTENT(in) :: dim_p              ! PE-local dimension of state
+  INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
+  REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
+  REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
+  integer :: i,j,k,nerror,nproc
+  integer :: icorner
+  logical :: lpointobs       !No specialty, just point observation
+  ! character*200         :: inparam_fname 
   REAL,DIMENSION(1)     :: TB(dim_obs)
   REAL,ALLOCATABLE      :: ens_TB_tmp(:,:)
-  INTEGER               :: i,j,k,nerror,nproc
   CHARACTER (len = 110) :: OBSFILE
   !REAL,ALLOCATABLE      :: ens_TB(:)
   !common /coeff/ ens_TB
- 
-! CALLING SEQUENCE:
+! !CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
 ! Called by: PDAF_enkf_analysis_rlm, PDAF_enkf_analysis_rsm
@@ -114,7 +118,9 @@ integer :: nsc
 ! *** operator H on vector or matrix column ***
 ! *********************************************
  !SPo add switch for cmem 
- IF (lcmem) THEN 
+ IF (lcmem) THEN
+
+   lpointobs = .false.
 
    CALL MPI_Barrier(COMM_filter, nerror)
    ! if (model == tag_model_clm) then
@@ -165,21 +171,13 @@ integer :: nsc
       !LSN: the end of the implementation of CMEM model here
    CALL MPI_Barrier(COMM_filter, nerror)
    ! end if  
- ELSE
-   ! point observations
-   ! LSN: the original observation operator of soil moisture in Parflow
-   DO i = 1, dim_obs_p
-      m_state_p(i) = state_p(obs_index_p(i))
-   END DO
  END IF
 
 #if defined CLMSA
-if (clmupdate_swc.NE.0) then
-  DO i = 1, dim_obs_p
-     m_state_p(i) = state_p(obs_index_p(i))
-  END DO
-endif
 if (clmupdate_T.EQ.1) then
+
+  lpointobs = .false.
+
   DO i = 1, dim_obs_p
      m_state_p(i) &
     = (exp(-0.5*clm_paramarr(obs_index_p(i))) &
@@ -193,8 +191,14 @@ if (clmupdate_T.EQ.1) then
 !  write(*,*) 'TG', state_p(obs_index_p(:))
 !  write(*,*) 'TV', state_p(clm_varsize+obs_index_p(:))
 endif
-#else
- if (crns_flag.EQ.1) then
+#endif
+
+
+#ifndef CLMSA
+if (crns_flag.EQ.1) then
+
+    lpointobs = .false.
+
      call C_F_POINTER(soilay,soilay_fortran,[nz_glob])
      Allocate(soide(0:nz_glob))
      soide(0)=0.d0
@@ -222,11 +226,30 @@ endif
        m_state_p(i)=avesm
      enddo
      deallocate(soide)
- else 
+ endif
+#endif
+
+ if(obs_interp_switch == 1) then
+
+      lpointobs = .false.
+
+      do i = 1, dim_obs_p
+
+          m_state_p(i) = 0
+          do icorner = 1, 4
+              m_state_p(i) = m_state_p(i) + state_p(obs_interp_indices_p(i,icorner)) * obs_interp_weights_p(i,icorner)
+          enddo
+
+      enddo
+
+  end if
+
+  if(lpointobs) then
+
   DO i = 1, dim_obs_p
      m_state_p(i) = state_p(obs_index_p(i))
   END DO
- endif
-#endif
+      
+  end if
 
 END SUBROUTINE obs_op_pdaf
