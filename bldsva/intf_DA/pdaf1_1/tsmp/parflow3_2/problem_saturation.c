@@ -662,7 +662,6 @@ void     Saturation(
   }          /* End switch */
 }
 //>>TSMP-PDAF addition beginning
-#ifdef FOR2131
 
 /*--------------------------------------------------------------------------
  * SaturationGetAlpha
@@ -691,7 +690,6 @@ PFModule *SaturationGetN(PFModule *this_module)
 
     return (dummy1 -> n_values);
 }
-#endif
 //<<TSMP-PDAF addition end
 
 /*--------------------------------------------------------------------------
