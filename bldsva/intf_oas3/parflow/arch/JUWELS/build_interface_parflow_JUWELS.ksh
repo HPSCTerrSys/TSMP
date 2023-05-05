@@ -39,7 +39,6 @@ route "${cyellow}>> configure_pfl${cnormal}"
     else
       flagsSim+=" -DPARFLOW_ENABLE_SLURM=TRUE"
     fi
-    # flagsSim+=" -DFOR2131=TRUE"
 #
     pcc="$mpiPath/bin/mpicc"
     pfc="$mpiPath/bin/mpif90"

@@ -2170,7 +2170,6 @@ int  PhaseRelPermSizeOfTempData()
   return sz;
 }
 //>>TSMP-PDAF addition beginning
-#ifdef FOR2131
 
 /*-----------------------------------------------------------------------
  * PhaseRelPermGetAlpha
@@ -2200,5 +2199,4 @@ Vector *PhaseRelPermGetN(PFModule *this_module)
   return (dummy1 -> n_values);
 }
 
-#endif
 //<<TSMP-PDAF addition end

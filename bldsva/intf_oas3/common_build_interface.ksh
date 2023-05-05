@@ -947,7 +947,6 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
 
   comment "    configure pfsimulator"
     export SCOREP_WRAPPER=off
-    # Add -DFOR2131 for using FOR2131 in parflow3_2
     if [[ $withICON == "true" ]]; then
     $pfldir/pfsimulator/configure CC="$pcc" FC="$pfc" F77="$pf77" CXX="$pcxx" $flagsSim --enable-opt="$optComp" FCFLAGS="$fcflagsSim -DCOUP_OAS_ICON" CFLAGS="$cflagsSim -DCOUP_OAS_ICON" >> $log_file 2>> $err_file
     else
