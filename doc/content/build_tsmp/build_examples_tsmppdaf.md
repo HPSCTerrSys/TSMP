@@ -94,8 +94,8 @@ The build commands were last tested for these component models
 - **parflow** (`3.1.0MCTPDAF`)
   - Version Tag `v3.9.0`, revision `bc80e3ac` from
     <https://github.com/parflow/parflow.git>
-- **pdaf1\_1**
-  - Version 2.0 in `/pdaf1_1/src/PDAF_print_version.F90`, new version
+- **pdaf**
+  - Version 2.0 in `/pdaf/src/PDAF_print_version.F90`, new version
 
 Not used:
 - **cosmo4\_21**

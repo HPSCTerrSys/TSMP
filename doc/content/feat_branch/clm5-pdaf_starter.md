@@ -20,7 +20,7 @@ Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF b
 ### 1.2 PDAF
 Get PDAF from [http://pdaf.awi.de/](http://pdaf.awi.de/) at least
 version 1.13 (suggested version 2.0) and unpack it in the tsmp
-directory and re-name the folder to `pdaf1_1`. 
+directory and re-name the folder to `pdaf`. 
 
 Users with internal IBG-3 access may also look here:
 [https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh](https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh)
@@ -35,7 +35,7 @@ On the JSC machine in the tsmp folder:
 
 ```bash
  tar -xzf PDAF-D_V1.16.tar.gz
- mv PDAF-D_V1.16 pdaf1_1
+ mv PDAF-D_V1.16 pdaf
 ```
 
 ### 1.3 CLM5

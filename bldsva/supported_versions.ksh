@@ -53,11 +53,11 @@ versions+=(
 # Important: this order must be fulfilled. If one of it is not supported, leave a "" at its place.
 modelVersion+=(
         ["clm3-cos4-pfl"]="oasis3-mct clm3_5 cosmo4_21 parflow"
-        ["clm3-cos4-pfl-pdaf"]="oasis3-mct clm3_5 cosmo4_21 parflow pdaf1_1"
+        ["clm3-cos4-pfl-pdaf"]="oasis3-mct clm3_5 cosmo4_21 parflow pdaf"
         ["clm3-cos5-pfl"]="oasis3-mct clm3_5 cosmo5_1 parflow"
         ["clm4-cos4-pfl"]="oasis3-mct clm4_0 cosmo4_21 parflow"
         ["clm4-cos5-pfl"]="oasis3-mct clm4_0 cosmo5_1 parflow"
-        ["clm3-cos5-pfl-pdaf"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf1_1"
+        ["clm3-cos5-pfl-pdaf"]="oasis3-mct clm3_5 cosmo5_1 parflow pdaf"
         ["clm3-icon21-pfl"]="oasis3-mct clm3_5-icon icon2-1 parflow"
 		["clm3-icon26-pfl"]="oasis3-mct clm3_5-icon icon2-622 parflow"
         ["eclm"]=" mct eclm cosmo5_1 parflow"

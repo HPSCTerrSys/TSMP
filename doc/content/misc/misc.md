@@ -29,7 +29,7 @@ repositories
 
 For compiling TSMP-PDAF with PDAF but without data assimilation, you
 can set the flag `PDAF_NO-UPDATE` in Makefiles under
-`./TSMP/bldsva/intf_DA/pdaf1_1/arch/<machine>/config/<compiler>.h.`
+`./TSMP/bldsva/intf_DA/pdaf/arch/<machine>/config/<compiler>.h.`
 and in the line, where `CPP_DEFS` are set. Usually only `-DUSE_PDAF`
 is set, here you can add `-DPDAF_NO_UPDATE`.
 

@@ -7,7 +7,7 @@ TSMP-PDAF environemnt variables are set in the machine-specific
 TSMP-PDAF build-scripts of the form:
 
 ```
-bldsva/intf_DA/pdaf1_1/arch/<machine>/build_interface_pdaf1_1_<machine>.ksh
+bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh
 ```
 
 where `<machine>` could be f.e. `JURECA` or `JUWELS`.
@@ -55,20 +55,28 @@ included.
 
 ## FOR2131 (PDAF / ParFlow build, experimental) ##
 
-The environment variable `FOR2131` can affect
+The environment variable `FOR2131` is set
 
-1. TSMP-PDAF (`enkf_parflow.c`), then it has to be set in the
-   PDAF-build script
-   `bldsva/intf_DA/pdaf1_1/arch/<machine>/build_interface_pdaf1_1_<machine>.ksh`
-   as mentioned above
-2. Patched ParFlow files, then it has to be set in the ParFlow build
-   script
-   `bldsva/intf_oas3/parflow/arch/<machine>/build_interface_parflow_<machine>.ksh`
+1. In the PDAF-build script
+   `bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh`
+2. In `bldsva/intf_DA/pdaf/tsmp/parflow/solver_richards.c`. Right
+   before the line `#ifdef FOR2131`, one should add a line reading
+   `#define FOR2131`.
 
-In `enkf_parflow.c`, there are two main effects:
-- behavior of `PF:updateflag == 2` is changed to include pressure in
-  the state vector
-- a check for saturations greater than 1 is included
+The environment variable `FOR2131` affects
 
-In `ParFlow` more outputs routines are defined and there is an
-additional saturation update.
+1. TSMP-PDAF in `enkf_parflow.c`, there are two main effects:
+   - behavior of `PF:updateflag == 2` is changed to include pressure in
+     the state vector
+   - a check for saturations greater than 1 is included
+
+2. `ParFlow`: There is an additional saturation update in
+   `solver_richards.c`.
+
+## WATSAT3D ##
+
+Environment variable `WATSAT3D` is set in `common_build_interface.ksh`
+in function `c_configure_clm`.
+
+If it is turned on, the possibility of a read-in porosity is
+implemented in CLM's `iniTimeConst.F90`.
