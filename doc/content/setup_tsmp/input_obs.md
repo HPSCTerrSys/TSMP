@@ -229,7 +229,7 @@ from uppermost CLM layer).
 
 #### var_id ####
 
-`var_id`: (integer) Only used for multiscalar data assimilation. Size
+`var_id`: (integer) Only used for multi-scale data assimilation. Size
 of `var_id` is same as `dim_obs`. `var_id` has same values over model
 grid cells, which have range of similar observations values from raw
 data over them.  The values can be grouped starting from 1 for similar
@@ -248,13 +248,13 @@ Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
 should be smaller than the minimum grid cell size.
 
-## Multiscalar Data Assimilation ##
+## Multi-Scale Data Assimilation ##
 
-The multiscalar data assimilation has been implemented for Local
+The multi-scale data assimilation has been implemented for Local
 Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). For
-multiscalar data assimilation, we need to specify in `enkfpf.par` the
+multi-scale data assimilation, we need to specify in `enkfpf.par` the
 entry `point_obs` (in `[DA]`) to value 0 (integer) for using
-multiscalar data assimilation (eg. using SMAP satellite data over a
+multi-scale data assimilation (eg. using SMAP satellite data over a
 large area which is not point data).
 
 Then in the observation files we need to specify variable `var_id`
