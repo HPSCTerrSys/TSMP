@@ -92,11 +92,9 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
       nx_glob, ny_glob, &
 #ifndef CLMSA
-#ifndef CLMFIVE      
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
       zcoord_fortran, &
-#endif
 #endif
 #endif
       tag_model_clm, point_obs, obs_interp_switch
@@ -105,16 +103,13 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #ifndef OBS_ONLY_PARFLOW
   !kuw
   use shr_kind_mod, only: r8 => shr_kind_r8
-  use decompMod , only : get_proc_bounds, get_proc_global
-  !kuw end
-! CLMFIVE here does not mean stand-alone
-! but only that CLM is used with version 5
-! Change, once CLM version 5 is supported coupled to ParFlow
 #ifdef CLMFIVE
   use GridcellType, only: grc
 #else  
   USE clmtype,                  ONLY : clm3
 #endif  
+  use decompMod , only : get_proc_bounds, get_proc_global
+  !kuw end
   !hcp
   !use the subroutine written by Mukund "domain_def_clm" to evaluate longxy,
   !latixy, longxy_obs, latixy_obs
@@ -207,7 +202,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   ! ----------------------------------------------
   if (mype_filter .ne. 0) then ! for all non-master proc
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
       ! if exist ParFlow-type obs
      !if(model == tag_model_parflow) then
@@ -238,7 +232,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      !end if
 #endif
 #endif
-#endif
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -265,13 +258,11 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 !     end if
 #endif
 #endif
-
   end if
 
   ! Broadcast the idx and pressure
   ! ------------------------------
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
   !if(model == tag_model_parflow) then
       ! if exist ParFlow-type obs
@@ -288,7 +279,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
          call mpi_bcast(y_idx_interp_d_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      end if
   !end if
-#endif
 #endif
 #endif
 
@@ -351,7 +341,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   dim_obs_p = 0
 
 #ifndef CLMSA
-#ifndef CLMFIVE  
 #ifndef OBS_ONLY_CLM
   if (model .eq. tag_model_parflow) then
 
@@ -369,7 +358,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      end do
   end if
 #endif
-#endif  
 #endif
 
 #ifndef PARFLOW_STAND_ALONE
@@ -479,7 +467,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   obs_nc2pdaf = 0
 
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
   if (model .eq. tag_model_parflow) then
      ! allocate pressure_obserr_p observation error for parflow run at PE-local domain 
@@ -624,7 +611,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 #endif
 #endif
-#endif  
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW

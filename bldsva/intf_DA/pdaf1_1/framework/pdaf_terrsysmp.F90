@@ -44,7 +44,7 @@ program pdaf_terrsysmp
 #if (defined CLMFIVE)
     use mod_parallel_model, only : mpi_comm_world
 #endif    
-#if (defined CLMSA || defined CLMFIVE)
+#if (defined CLMSA)
     ! use enkf_clm_mod, only: statcomm
     use enkf_clm_mod, only: update_clm, clmupdate_swc, clmprint_et
     use mod_clm_statistics

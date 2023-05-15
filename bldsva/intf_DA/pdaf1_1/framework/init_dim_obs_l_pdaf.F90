@@ -61,7 +61,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
        ONLY: x_idx_obs_nc, y_idx_obs_nc, z_idx_obs_nc, idx_obs_nc, clmobs_lon, &
        clmobs_lat, var_id_obs_nc, dim_nx, dim_ny 
   USE mod_tsmp, &
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
   ONLY: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
        tag_model_clm, point_obs
 #else
@@ -102,7 +102,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
   ! *** Initialize local observation dimension ***
   ! **********************************************
   ! Count observations within local_range
-#if (defined CLMSA || defined CLMFIVE)
+#ifdef CLMSA 
   obsind    = 0
   obsdist   = 0.0
   dim_obs_l = 0
@@ -165,7 +165,8 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
         end if
      end do
   end if
-#elif defined PARFLOW_STAND_ALONE
+#else
+#ifdef PARFLOW_STAND_ALONE
   obsind    = 0
   obsdist   = 0.0
   dim_obs_l = 0
@@ -325,6 +326,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
 #endif
   endif
 #endif
+#endif  
   
   ! kuw: allocate and determine local observation index and distance
   !#ifndef CLMSA
