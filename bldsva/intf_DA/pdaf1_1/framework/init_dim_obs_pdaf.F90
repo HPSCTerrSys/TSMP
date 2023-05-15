@@ -61,7 +61,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        obs, &
        obs_interp_indices_p, &
        obs_interp_weights_p, &
-as       pressure_obserr_p, clm_obserr_p, &
+       pressure_obserr_p, clm_obserr_p, &
        obs_nc2pdaf, &
        local_dims_obs, &
        ! dim_obs_p, &
