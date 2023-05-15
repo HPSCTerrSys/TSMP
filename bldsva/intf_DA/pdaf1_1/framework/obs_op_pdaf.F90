@@ -49,10 +49,18 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 !
 ! !USES:
    USE mod_assimilation, &
-        ONLY: obs_index_p, sc_p, &
-        depth_obs_p !, obs_p
+        ONLY: obs_index_p, &
+        sc_p, &
+        obs_interp_indices_p, &
+        obs_interp_weights_p, &
+        depth_obs_p, & !obs_p
    USE mod_read_obs, ONLY: crns_flag !clm_obs
-   use mod_tsmp, only: soilay, soilay_fortran, nz_glob 
+   use mod_tsmp, &
+       only: obs_interp_switch, &
+       soilay, &
+       soilay_fortran, &
+       nz_glob
+
    USE, INTRINSIC :: iso_c_binding
 !   USE mod_parallel_model, ONLY: tcycle 
 #if defined CLMSA
@@ -68,6 +76,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
   REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
   integer :: i, j, k
+  integer :: icorner
 ! !CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
@@ -141,11 +150,24 @@ endif
        m_state_p(i)=avesm
      enddo
      deallocate(soide)
- else 
+  else if(obs_interp_switch == 1) then
+
+      do i = 1, dim_obs_p
+
+          m_state_p(i) = 0
+          do icorner = 1, 4
+              m_state_p(i) = m_state_p(i) + state_p(obs_interp_indices_p(i,icorner)) * obs_interp_weights_p(i,icorner)
+          enddo
+
+      enddo
+
+  else
+
   DO i = 1, dim_obs_p
      m_state_p(i) = state_p(obs_index_p(i))
   END DO
- endif
+      
+  end if
 #endif
 
 END SUBROUTINE obs_op_pdaf

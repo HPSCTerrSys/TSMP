@@ -71,6 +71,7 @@ void read_enkfpar(char *parname)
   pf_gwmasking          = iniparser_getint(pardict,"PF:gwmasking",0);
   pf_printgwmask        = iniparser_getint(pardict,"PF:printgwmask",0);
   pf_dampfac_param      = iniparser_getdouble(pardict,"PF:dampingfactor_param",1.0);
+  pf_dampfac_state      = iniparser_getdouble(pardict,"PF:dampingfactor_state",1.0);
   pf_freq_paramupdate   = iniparser_getint(pardict,"PF:paramupdate_frequency",1);
   
   /* get settings for CLM */
@@ -92,6 +93,7 @@ void read_enkfpar(char *parname)
   stat_dumpoffset       = iniparser_getint(pardict,"DA:stat_dumpoffset",0);
   screen_wrapper        = iniparser_getint(pardict,"DA:screen_wrapper",1);
   point_obs             = iniparser_getint(pardict,"DA:point_obs",1);
+  obs_interp_switch     = iniparser_getint(pardict,"DA:obs_interp_switch",0);
   len = countDigit(point_obs);
   if (len > 1)
     point_obs=1;
