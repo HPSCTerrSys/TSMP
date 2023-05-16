@@ -50,10 +50,14 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! !USES:
    USE mod_assimilation, &
         ONLY: obs_index_p, &
-        sc_p, &
-        obs_interp_indices_p, &
-        obs_interp_weights_p, &
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
         depth_obs_p, & !obs_p
+        sc_p, &
+#endif
+#endif
+        obs_interp_indices_p, &
+        obs_interp_weights_p
    USE mod_read_obs, ONLY: crns_flag !clm_obs
    use mod_tsmp, &
        only: obs_interp_switch, &

@@ -67,7 +67,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        ! dim_obs_p, &
        dim_obs_f, &
        obs_id_p, &
-       depth_obs_p, &
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
 !hcp 
@@ -80,6 +79,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
+       depth_obs_p, &
        sc_p, idx_obs_nc_p, &
 #endif
 #endif
