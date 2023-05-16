@@ -87,12 +87,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
   !kuw: check, for observation file with at least 1 observation
 !  counter = stepnow 
-!  if (stepnow.EQ.0) then
-!    counter = stepnow + toffset !hcp introduce offset in time
-    counter = stepnow 
-!  else
-!    counter = stepnow 
-!  endif
+  counter = stepnow 
   !nsteps  = 0
   if (mype_world==0 .and. screen > 2) then
       write(*,*) 'TSMP-PDAF (in next_observation_pdaf.F90) total_steps: ',total_steps

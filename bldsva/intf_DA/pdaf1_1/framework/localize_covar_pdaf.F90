@@ -185,6 +185,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
     DO j = 1, dim_obs
       DO k=1,dim_l
         DO i = 1, ncellxy
+         ! Compute distance: obs - gridcell
 !         dx = abs(longxy_obs(j) - longxy(i)-1)
 !         dy = abs(latixy_obs(j) - latixy(i)-1)
          dx = abs(longxy_obs(j) - longxy(i))
@@ -205,7 +206,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
     DO j = 1, dim_obs
        DO i = 1, dim_obs
     
-         ! Compute distance
+         ! Compute distance: obs - obs
          dx = abs(longxy_obs(j) - longxy_obs(i))
          dy = abs(latixy_obs(j) - latixy_obs(i))
 !         dy = abs(y_idx_obs_nc(obs_nc2pdaf(j)) - y_idx_obs_nc(obs_nc2pdaf(i)))

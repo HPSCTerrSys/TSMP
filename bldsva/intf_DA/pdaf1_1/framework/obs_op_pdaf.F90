@@ -77,6 +77,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
   integer :: i, j, k
   integer :: icorner
+  logical :: lpointobs       !If true: no special observation; use point observation
 ! !CALLING SEQUENCE:
 ! Called by: PDAF_seek_analysis   (as U_obs_op)
 ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
@@ -101,13 +102,14 @@ integer :: nsc
 ! *** operator H on vector or matrix column ***
 ! *********************************************
 
+! If no special observation operator is compiled, use point observations
+lpointobs = .true.
+
 #if defined CLMSA
-if (clmupdate_swc.NE.0) then
-  DO i = 1, dim_obs_p
-     m_state_p(i) = state_p(obs_index_p(i))
-  END DO
-endif
 if (clmupdate_T.EQ.1) then
+
+  lpointobs = .false.
+
   DO i = 1, dim_obs_p
      m_state_p(i) &
     = (exp(-0.5*clm_paramarr(obs_index_p(i))) &
@@ -121,8 +123,14 @@ if (clmupdate_T.EQ.1) then
 !  write(*,*) 'TG', state_p(obs_index_p(:))
 !  write(*,*) 'TV', state_p(clm_varsize+obs_index_p(:))
 endif
-#else
- if (crns_flag.EQ.1) then
+#endif
+
+
+#ifndef CLMSA
+if (crns_flag.EQ.1) then
+
+    lpointobs = .false.
+
      call C_F_POINTER(soilay,soilay_fortran,[nz_glob])
      Allocate(soide(0:nz_glob))
      soide(0)=0.d0
@@ -150,7 +158,12 @@ endif
        m_state_p(i)=avesm
      enddo
      deallocate(soide)
-  else if(obs_interp_switch == 1) then
+ end if
+#endif
+
+ if(obs_interp_switch == 1) then
+
+      lpointobs = .false.
 
       do i = 1, dim_obs_p
 
@@ -161,13 +174,14 @@ endif
 
       enddo
 
-  else
+  end if
+
+  if(lpointobs) then
 
   DO i = 1, dim_obs_p
      m_state_p(i) = state_p(obs_index_p(i))
   END DO
       
   end if
-#endif
 
 END SUBROUTINE obs_op_pdaf
