@@ -56,11 +56,11 @@ SUBROUTINE l2g_state_pdaf(step, domain_p, dim_l, state_l, dim_p, state_p)
   USE iso_c_binding, ONLY: c_loc
 
 #if defined CLMSA
-  USE decompMod, ONLY: get_proc_bounds_atm
-#endif
-
 #if defined CLMFIVE
   USE decompMod, ONLY: get_proc_bounds
+#else  
+  USE decompMod, ONLY: get_proc_bounds_atm
+#endif
 #endif
 
   IMPLICIT NONE
@@ -84,19 +84,7 @@ SUBROUTINE l2g_state_pdaf(step, domain_p, dim_l, state_l, dim_p, state_p)
 ! **************************************************
 ! *** Initialize elements of global state vector ***
 ! **************************************************
-#if defined CLMSA
-  ! beg and end gridcell for atm
-  call get_proc_bounds_atm(begg, endg)
-#elif defined CLMFIVE
-  call get_proc_bounds(begg, endg)
-#endif
-#if (defined CLMSA || defined CLMFIVE)
-  n_domain = endg - begg + 1
-  DO i = 0, dim_l-1
-     nshift_p = domain_p + i * n_domain
-     state_p(nshift_p) = state_l(i+1)
-  ENDDO
-#else
+#ifndef CLMSA
   if (model == tag_model_parflow) then
      n_domain = nx_local * ny_local
      DO i = 0, dim_l-1
@@ -106,6 +94,18 @@ SUBROUTINE l2g_state_pdaf(step, domain_p, dim_l, state_l, dim_p, state_p)
   else  if (model == tag_model_clm) then
      state_p(domain_p) = state_l(dim_l) 
   end if   
+#else
+  ! beg and end gridcell for atm
+#if defined CLMFIVE
+  call get_proc_bounds(begg, endg)
+#else  
+  call get_proc_bounds_atm(begg, endg)
+#endif
+  n_domain = endg - begg + 1
+  DO i = 0, dim_l-1
+     nshift_p = domain_p + i * n_domain
+     state_p(nshift_p) = state_l(i+1)
+  ENDDO
 #endif
   
 END SUBROUTINE l2g_state_pdaf

@@ -731,7 +731,7 @@ route "${cyellow}>>> c_substitutions_clm${cnormal}"
   check
     patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/iniTimeConst.F90 $clmdir/bld/usr.src	
   check
-  fi
+  fi	
 route "${cyellow}<<< c_substitutions_clm${cnormal}"
 }
 
@@ -739,38 +739,39 @@ route "${cyellow}<<< c_substitutions_clm${cnormal}"
 c_setup_clm(){
 route "${cyellow}>>> c_setup_clm${cnormal}"
 if [[ ${mList[1]} == "clm5_0" ]]; then
-comment "  CLM5.0 setup"
+ comment "  CLM5.0 setup"
 
-comment "  sed rundir to namelist"
-  sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
+ comment "  sed rundir to namelist"
+   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
 
-comment "  sed dt to namelist"
-  sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
+ comment "  sed dt to namelist"
+   sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
 
-comment "  sed forcingdir to namelist"
-  sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed dump interval namelist"
-  sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  sed runtime to namelist"
-  if [[ $withICON == "true" ]]; then
-    runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
-  else
-    runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
-  fi
-  sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  add axe rights to clm namelist"
-    chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
-comment "  run clm namelist"
-    $rundir/lnd.stdin >> $log_file 2>> $err_file
-check
+ comment "  sed forcingdir to namelist"
+   sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed dump interval namelist"
+   sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed runtime to namelist"
+   if [[ $withICON == "true" ]]; then
+     runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+   else
+     runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+   fi
+   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  add axe rights to clm namelist"
+     chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  run clm namelist"
+     $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
 # Below default clm 3.5 setup
 else
+
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
 check
@@ -1207,14 +1208,15 @@ route "${cyellow}>>> c_setup_pfl${cnormal}"
       sed "s,__pfl_ICPpressureFileName__,$restfile_pfl," -i $rundir/coup_oas.tcl  >> $log_file 2>> $err_file
   check
     fi
-
+  
   export PARFLOW_DIR=$bindir
   comment "   cd to rundir."
     cd $rundir >> $log_file 2>> $err_file
   check
 
   comment "   create parflow db with tclsh from namelist."
-    tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+  check
+  tclsh $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
 
 

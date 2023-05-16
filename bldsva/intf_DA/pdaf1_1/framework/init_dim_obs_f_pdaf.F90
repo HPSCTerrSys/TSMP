@@ -90,11 +90,9 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
       zcoord_fortran, &
-#endif
 #endif
 #endif
       tag_model_clm, point_obs
@@ -194,7 +192,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   ! ----------------------------------------------
   if (mype_filter .ne. 0) then ! for all non-master proc
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
       ! if exist ParFlow-type obs
      !if(model == tag_model_parflow) then
@@ -217,7 +214,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
            allocate(var_id_obs_nc(dim_ny, dim_nx))
         endif
      !end if
-#endif
 #endif
 #endif
 
@@ -245,13 +241,12 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
         end if
 !     end if
 #endif
-#endif        
+#endif
   end if
 
   ! Broadcast the idx and pressure
   ! ------------------------------
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
   !if(model == tag_model_parflow) then
       ! if exist ParFlow-type obs
@@ -265,7 +260,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      if(point_obs.eq.0) call mpi_bcast(var_id_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
   !end if
 #endif
-#endif     
 #endif
 
 #ifndef PARFLOW_STAND_ALONE
@@ -281,7 +275,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      if(point_obs.eq.0) call mpi_bcast(var_id_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
   !end if
 #endif
-#endif     
+#endif
 
   ! CLM grid information
   ! --------------------
@@ -315,7 +309,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   dim_obs_p = 0
 
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
   if (model .eq. tag_model_parflow) then
 
@@ -332,7 +325,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
         end do
      end do
   end if
-#endif
 #endif
 #endif
 
@@ -436,7 +428,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   obs_nc2pdaf = 0
 
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
   if (model .eq. tag_model_parflow) then
      ! allocate pressure_obserr_p observation error for parflow run at PE-local domain 
@@ -524,7 +515,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   end if
   end if
   call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
-#endif
 #endif
 #endif
 
@@ -622,6 +612,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   end if
   call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 #endif
+#endif
 
   if (mype_filter==0 .and. screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: obs_nc2pdaf=", obs_nc2pdaf
@@ -636,7 +627,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        comm_filter, ierror)
 
 #ifndef CLMSA
-#ifndef CLMFIVE  
 #ifndef OBS_ONLY_CLM
 !!#if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
   IF (model == tag_model_parflow) THEN
@@ -645,7 +635,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      call C_F_POINTER(ycoord, ycoord_fortran, [enkf_subvecsize])
      call C_F_POINTER(zcoord, zcoord_fortran, [enkf_subvecsize])
   ENDIF
-#endif
 #endif
 #endif
 

@@ -23,7 +23,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 ! we need to store the coordinates of the state vector 
 ! and obs array in longxy, latixy, and longxy_obs, latixy_obs
 ! respectively
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
     ONLY: local_range, srange, locweight, obs_nc2pdaf, &
           longxy, latixy, longxy_obs, latixy_obs
 !hc  end
@@ -34,7 +34,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 
   USE mod_read_obs,&
   ONLY: x_idx_obs_nc, y_idx_obs_nc, z_idx_obs_nc
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
    USE enkf_clm_mod, ONLY: init_clm_l_size
    USE mod_parallel_pdaf, ONLY: filterpe
 #endif
@@ -43,7 +43,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
     ONLY: model
 
   USE mod_tsmp,&
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
     ONLY:  tag_model_parflow, tag_model_clm, &
            enkf_subvecsize
 #else
@@ -75,7 +75,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 ! dim_l is the number of soil layers
 ! ncellxy is the number of cell in xy (not counted z) plane
 ! for each processor
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
   INTEGER :: dim_l, ncellxy,k
 #endif
 
@@ -114,7 +114,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 
 
 
-#if (!defined CLMSA &&  !defined CLMFIVE)
+#ifndef CLMSA
   IF(model==tag_model_parflow)THEN
 !hcp enkf_subvecsize is the number of grid cells,
 !which is the size of state vector only if soil moisture
@@ -164,7 +164,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
 #endif
 
 !by hcp to computer the localized covariance matrix in CLMSA case
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
    !hcp
    !get the number of soil layer for evalute the arrangement 
    ! of the element in the state vector.

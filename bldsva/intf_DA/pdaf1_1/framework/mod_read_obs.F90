@@ -86,7 +86,6 @@ contains
 
     ! ParFlow
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
     integer :: pres_varid,presserr_varid, &
         idx_varid,  x_idx_varid, y_idx_varid,  z_idx_varid, &
@@ -101,7 +100,6 @@ contains
     character (len = *), parameter :: y_idx_interp_d_name = "iy_interp_d"
     integer :: has_obs_pf
 #endif
-#endif    
 #endif
 
     ! CLM
@@ -163,7 +161,6 @@ contains
     end if
 
 #ifndef CLMSA
-#ifndef CLMFIVE
 #ifndef OBS_ONLY_CLM
     ! ParFlow observations
     ! --------------------
@@ -258,7 +255,6 @@ contains
         end if
 
     end if
-#endif
 #endif
 #endif
 

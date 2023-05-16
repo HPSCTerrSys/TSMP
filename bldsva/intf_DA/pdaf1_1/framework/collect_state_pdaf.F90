@@ -58,11 +58,11 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
         only: model
 #if defined CLMSA
     !kuw: get access to clm variables
-    USE clmtype      , only : clm3
-#elif defined CLMFIVE
+#if defined CLMFIVE
     use GridcellType, only: gridcell_type
-#endif
-#if (defined CLMSA || defined CLMFIVE)
+#else
+    USE clmtype      , only : clm3
+#endif    
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     use enkf_clm_mod, only: clm_statevec
@@ -74,7 +74,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 ! !ARGUMENTS:
   INTEGER, INTENT(in) :: dim_p           ! PE-local state dimension
   REAL, INTENT(inout) :: state_p(dim_p)  ! local state vector
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
   real(r8), pointer :: sw_c(:,:)
 #endif
 ! !CALLING SEQUENCE:
@@ -91,7 +91,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
      state_p = pf_statevec_fortran
  end if
 
-#if (defined CLMSA || defined CLMFIVE)
+#if defined CLMSA
  !kuw: define state vector for clm
  if (model == tag_model_clm) then
      ! !comment only clm3_5:
