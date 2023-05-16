@@ -127,7 +127,8 @@ endif
 
 
 #ifndef CLMSA
-if (crns_flag.EQ.1) then
+#ifndef OBS_ONLY_CLM
+ if (crns_flag.EQ.1) then
 
     lpointobs = .false.
 
@@ -159,6 +160,7 @@ if (crns_flag.EQ.1) then
      enddo
      deallocate(soide)
  end if
+#endif
 #endif
 
  if(obs_interp_switch == 1) then

@@ -76,7 +76,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        longxy, latixy, longxy_obs, latixy_obs, &
        longxy_obs_floor, latixy_obs_floor, &
 !hcp end
-#else
+#endif
+#endif
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
        sc_p, idx_obs_nc_p, &
 #endif
 #endif
