@@ -80,3 +80,15 @@ in function `c_configure_clm`.
 
 If it is turned on, the possibility of a read-in porosity is
 implemented in CLM's `iniTimeConst.F90`.
+
+## CLMFIVE ##
+
+Currently only in feature branch `TSMP_pdaf-clm5`.
+
+If true, CLM5.0 is used.
+
+If false, CLM3.5 is used.
+
+This distinction is important in many parts of the TSMP-PDAF-wrapper
+source code, when, f.e., function calls have changed from version 3 to
+version 5 of CLM.
