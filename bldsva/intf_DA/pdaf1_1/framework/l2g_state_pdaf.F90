@@ -94,6 +94,7 @@ SUBROUTINE l2g_state_pdaf(step, domain_p, dim_l, state_l, dim_p, state_p)
   else  if (model == tag_model_clm) then
      state_p(domain_p) = state_l(dim_l) 
   end if   
+  !call l2g_state(domain_p, c_loc(state_p), dim_l, c_loc(state_l))
 #else
   ! beg and end gridcell for atm
 #if defined CLMFIVE
