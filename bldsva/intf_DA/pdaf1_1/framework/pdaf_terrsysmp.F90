@@ -113,6 +113,7 @@ program pdaf_terrsysmp
 
     ! close mpi
 #ifndef CLMFIVE
+    ! CLMFIVE: finalize_tsmp() -> clm_finalize() -> ESMF_Finalize(), where MPI_finalize is called
     call mpi_finalize(ierror)
 #endif
 
