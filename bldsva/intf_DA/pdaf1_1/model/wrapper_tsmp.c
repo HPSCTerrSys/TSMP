@@ -49,7 +49,20 @@ void initialize_tsmp() {
   if(model == 0) {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
     /* enkf_clm.F90 */
+#if defined CLMFIVE
+    int pdaf_id;
+    int pdaf_max;
+    int coupcol;
+
+    coupcol = task_id - 1 + startreal;
+
+    pdaf_id = (int) coupcol;
+    pdaf_max = (int) nreal;
+
+    clm5_init(clminfile, &pdaf_id, &pdaf_max);
+#else    
     clm_init(clminfile);
+#endif    
 #endif
   }
   if(model == 1) {

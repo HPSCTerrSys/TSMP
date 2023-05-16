@@ -28,4 +28,13 @@ module load CMake/3.18.0
 #
 #module load NCO
 #module load CDO
+
+# modules for CLM5
+module load ESMF/8.0.1
+module load Perl/5.32.0
+module load imkl/.2020.2.254
+module load NCL/6.6.2
+module load CMake/3.18.0
+module load netCDF-C++4/4.3.1
+
 module li
