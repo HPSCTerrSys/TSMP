@@ -157,7 +157,7 @@ if [ $? -ne 0 ]; then
 fi
 tar -xvf grib_api-1.25.0-Source.tar.gz?api=v2 >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://github.com/LLNL/Silo/archive/refs/tags/4.10.2.tar.gz`
+pwget=`wget https://github.com/LLNL/Silo/archive/refs/tags/4.11.tar.gz`
 if [ $? -ne 0 ]; then
     echo "Silo can not be downloaded!!!check wget command"
     exit
