@@ -110,7 +110,11 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #ifndef OBS_ONLY_PARFLOW
   !kuw
   use shr_kind_mod, only: r8 => shr_kind_r8
+#ifdef CLMFIVE
+  use GridcellType, only: grc
+#else  
   USE clmtype,                  ONLY : clm3
+#endif  
   use decompMod , only : get_proc_bounds, get_proc_global
   !kuw end
   !hcp
@@ -333,8 +337,13 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       end if
 
       ! Obtain general CLM index information
+#ifdef CLMFIVE
+      lon   => grc%londeg
+      lat   => grc%latdeg
+#else      
       lon   => clm3%g%londeg
       lat   => clm3%g%latdeg
+#endif
       call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
       call get_proc_global(numg, numl, numc, nump)
   end if

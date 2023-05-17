@@ -631,8 +631,10 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
   comment "    create new build dir"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
+  if [[ ${mList[1]} == clm3_5 ]] ; then
   comment "    copy oas_clm_init.F90 to  $clmdir/src/oas3"
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/oas_clm_init.F90 $clmdir/src/oas3
+  fi
 
     spmd="on"       # settings are [on   | off       ] (default is off)
     maxpft="1"        # settings are 4->17               (default is 4)
@@ -710,6 +712,7 @@ route "${cyellow}<<< c_make_clm${cnormal}"
 
 c_substitutions_clm(){
 route "${cyellow}>>> c_substitutions_clm${cnormal}"
+# CLM 3.5 substitutions
   comment "    create oas3 dir in $clmdir/src"
     mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
   check
@@ -735,6 +738,39 @@ route "${cyellow}<<< c_substitutions_clm${cnormal}"
 
 c_setup_clm(){
 route "${cyellow}>>> c_setup_clm${cnormal}"
+if [[ ${mList[1]} == "clm5_0" ]]; then
+ comment "  CLM5.0 setup"
+
+ comment "  sed rundir to namelist"
+   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+
+ comment "  sed dt to namelist"
+   sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+
+ comment "  sed forcingdir to namelist"
+   sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed dump interval namelist"
+   sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed runtime to namelist"
+   if [[ $withICON == "true" ]]; then
+     runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+   else
+     runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+   fi
+   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  add axe rights to clm namelist"
+     chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  run clm namelist"
+     $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+# Below default clm 3.5 setup
+else
 
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
@@ -788,6 +824,7 @@ if [[ $withPDAF == "true" ]] ; then
   cp $rundir/lnd.stdin $rundir/lnd.stdin_$(printf "%05d" $(($instance-$startInst)))     
 fi
 
+fi 
 route "${cyellow}<<< c_setup_clm${cnormal}"
 }
 
