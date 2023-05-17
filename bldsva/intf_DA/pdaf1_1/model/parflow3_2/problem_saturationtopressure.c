@@ -337,9 +337,12 @@ int type) /* PDAF: user defined type to convert
                                            + s_res;
                            }
                            */
-		           /* if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01; */
+#ifdef HCP_TRUNCATE_SAT		/* hcp */
                            /* hcp truncate sat */
 		           if(psdat[ips] <= (s_res + 0.003)) psdat[ips] = s_res + 0.003;
+#else
+		           if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+#endif
 			   if (psdat[ips] < 1) {
 			   	head = pow(pow((s_sat-s_res) / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
 			   	ppdat[ipp] = -head;
