@@ -328,7 +328,7 @@ contains
         if(haserr == nf90_noerr) then
             call check( nf90_get_var(ncid, clmobs_layer_varid, clmobs_layer) )
         else
-            ! JK: Why is this here? This should be discussed.
+            ! Default layer is 1
             clmobs_layer(:)=1   !hcp for LST DA
         end if
         if (screen > 2) then
