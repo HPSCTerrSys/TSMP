@@ -122,10 +122,9 @@ module enkf_clm_mod
     !end hcp
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
-    
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     if ((clmupdate_swc.NE.0) .OR. (clmupdate_T.NE.0)) allocate(clm_statevec(clm_statevecsize))  !hcp
-    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)
+    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
     if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
   end subroutine
 
@@ -147,9 +146,9 @@ module enkf_clm_mod
     swc   => clm3%g%l%c%cws%h2osoi_vol
     psand => clm3%g%l%c%cps%psand
     pclay => clm3%g%l%c%cps%pclay
-    tvege => clm3%g%l%c%p%pes%t_veg
-    tgrou => clm3%g%l%c%ces%t_grnd
-    ttlai => clm3%g%l%c%p%pps%tlai
+    tvege => clm3%g%l%c%p%pes%t_veg !hcp
+    tgrou => clm3%g%l%c%ces%t_grnd  !hcp
+    ttlai => clm3%g%l%c%p%pps%tlai  !hcp
 
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
@@ -158,15 +157,19 @@ module enkf_clm_mod
 
     ! write swc values to state vector
     if(clmupdate_swc.NE.0) then       !hcp: not go through if swc not updated
-      cc = 1
-      do i=1,nlevsoi
-        do j=clm_begg,clm_endg
-          clm_statevec(cc+offset) = swc(j,i)
-          cc = cc + 1
-        end do
+
+    cc = 1
+    do i=1,nlevsoi
+      do j=clm_begg,clm_endg
+        clm_statevec(cc+offset) = swc(j,i)
+        cc = cc + 1
       end do
-    endif                            
-    if(clmupdate_T.EQ.1) then       !hcp  LAI 
+    end do
+
+    endif                       !hcp
+
+    !hcp  LAI     
+    if(clmupdate_T.EQ.1) then
       cc = 1
         do j=clm_begg,clm_endg
           clm_statevec(cc) = tgrou(j)
@@ -175,7 +178,8 @@ module enkf_clm_mod
           cc = cc + 1
         end do
      write(*,*) 'b4 update, tgrou(beg) tvege(beg) ttlai(beg)=',tgrou(clm_begg), tvege(clm_begg), ttlai(clm_begg)
-    endif                            !hcp  LAI
+    endif
+    !end hcp  LAI
 
     ! write average swc to state vector (CRP assimilation)
     if(clmupdate_swc.eq.2) then
@@ -244,28 +248,32 @@ module enkf_clm_mod
 
     ! write updated swc back to CLM
     if(clmupdate_swc.NE.0) then      !hcp: not go through if swc not updated
-       cc = 1
-       do i=1,nlevsoi
-         do j=clm_begg,clm_endg
-           rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-           rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
-           !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
-           if(clm_statevec(cc+offset).le.0.0) then
-             swc(j,i)   = 0.05
-           else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
-             swc(j,i) = watsat(j,i)
-           else
-             swc(j,i)   = clm_statevec(cc+offset)
-           endif
-           ! update liquid water content
-           h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
-           ! update ice content
-           h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
-           cc = cc + 1
-         end do
-       end do
-    endif            
-    if(clmupdate_T.EQ.1) then      !hcp: TG, TV
+
+    cc = 1
+    do i=1,nlevsoi
+      do j=clm_begg,clm_endg
+        rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+        rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+        !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
+        if(clm_statevec(cc+offset).le.0.0) then
+          swc(j,i)   = 0.05
+        else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
+          swc(j,i) = watsat(j,i)
+        else
+          swc(j,i)   = clm_statevec(cc+offset)
+        endif
+        ! update liquid water content
+        h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
+        ! update ice content
+        h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+        cc = cc + 1
+      end do
+    end do
+      
+    endif                       !hcp
+
+    !hcp: TG, TV    
+    if(clmupdate_T.EQ.1) then
        cc = 1
          do j=clm_begg,clm_endg
            tgrou(j) = clm_statevec(cc) 
@@ -273,7 +281,9 @@ module enkf_clm_mod
            cc = cc + 1
          end do
          write(*,*) 'After update, tgrou(beg) tvege(beg)=',tgrou(clm_begg), tvege(clm_begg)
-    endif            
+    endif
+    ! end hcp TG, TV
+
     !! update liquid water content
     !do j=clm_begg,clm_endg
     !  do i=1,nlevsoi
