@@ -123,7 +123,9 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    if ((clmupdate_swc.NE.0) .OR. (clmupdate_T.NE.0)) allocate(clm_statevec(clm_statevecsize))  !hcp
+    if ((clmupdate_swc.NE.0) .OR. (clmupdate_T.NE.0)) allocate(clm_statevec(clm_statevecsize))  !hcp added condition
+
+    !write(*,*) 'clm_paramsize is ',clm_paramsize
     IF (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
     if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
   end subroutine
