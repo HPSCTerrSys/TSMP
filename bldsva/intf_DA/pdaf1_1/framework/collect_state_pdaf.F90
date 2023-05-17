@@ -84,8 +84,12 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 
 #if defined CLMSA
     !kuw: get access to clm variables
-    USE clmtype     , only : clm3
-    USE clm_varpar  , only : nlevsoi
+#if defined CLMFIVE
+    use GridcellType, only: gridcell_type
+#else
+    USE clmtype      , only : clm3
+#endif    
+    USE clm_varpar   , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     use enkf_clm_mod, only: clm_statevec
     !kuw end
@@ -211,6 +215,7 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 #if defined CLMSA
  !kuw: define state vector for clm
  if (model == tag_model_clm) then
+     ! !comment only clm3_5:
      !sw_c  => clm3%g%l%c%cws%h2osoi_vol
      !state_p = reshape(sw_c,shape(state_p))
 !     print *, "lsn: check here"     

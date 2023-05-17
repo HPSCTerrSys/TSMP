@@ -50,21 +50,31 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 ! !USES:
    USE mod_assimilation, &
         ONLY: obs_index_p, &
-        obs_interp_indices_p, &
-        obs_interp_weights_p, &
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
+        depth_obs_p, & !obs_p
+        sc_p, &
+#endif
+#endif
         obs_index_p_TB,&
-        ens_TB,member_TB, sc_p, &
-        depth_obs_p
-
+        ens_TB,member_TB, &
+        obs_interp_indices_p, &
+        obs_interp_weights_p
    use mod_read_obs, ONLY: crns_flag !clm_obs
-        
    use mod_tsmp, &
        only: obs_interp_switch, &
        nprocpf,nprocclm,lcmem,nx_local,ny_local,nz_local, & !SPo add lcmem
-       soilay, soilay_fortran, nz_glob 
+       soilay, &
+       soilay_fortran, &
+       nz_glob
 
-   USE, INTRINSIC :: iso_c_binding, &
-       only: C_F_POINTER
+   USE, INTRINSIC :: iso_c_binding, only: C_F_POINTER
+!   USE mod_parallel_model, ONLY: tcycle 
+#if defined CLMSA
+   USE enkf_clm_mod, & 
+        ONLY : clm_varsize, clm_paramarr, clmupdate_swc, clmupdate_T
+#endif
+  IMPLICIT NONE
 
    ! LSN: module load for the implementation of CMEM model
    USE mod_parallel_pdaf, &     ! Parallelization variables fro assimilation
@@ -85,9 +95,10 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   INTEGER, INTENT(in) :: dim_obs_p          ! Dimension of observed state
   REAL, INTENT(in)    :: state_p(dim_p)     ! PE-local model state
   REAL, INTENT(out) :: m_state_p(dim_obs_p) ! PE-local observed state
-  integer :: i,j,k,nerror,nproc
+  integer :: nerror, nproc
+  integer :: i, j, k
   integer :: icorner
-  logical :: lpointobs       !No specialty, just point observation
+  logical :: lpointobs       !If true: no special observation; use point observation
   ! character*200         :: inparam_fname 
   REAL,DIMENSION(1)     :: TB(dim_obs)
   REAL,ALLOCATABLE      :: ens_TB_tmp(:,:)
@@ -117,7 +128,11 @@ integer :: nsc
 ! *** Perform application of measurement    ***
 ! *** operator H on vector or matrix column ***
 ! *********************************************
- !SPo add switch for cmem 
+
+! If no special observation operator is compiled, use point observations
+lpointobs = .true.
+
+!SPo add switch for cmem 
  IF (lcmem) THEN
 
    lpointobs = .false.
@@ -195,7 +210,8 @@ endif
 
 
 #ifndef CLMSA
-if (crns_flag.EQ.1) then
+#ifndef OBS_ONLY_CLM
+ if (crns_flag.EQ.1) then
 
     lpointobs = .false.
 
@@ -226,7 +242,8 @@ if (crns_flag.EQ.1) then
        m_state_p(i)=avesm
      enddo
      deallocate(soide)
- endif
+ end if
+#endif
 #endif
 
  if(obs_interp_switch == 1) then

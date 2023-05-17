@@ -77,11 +77,14 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 !hcp end
 #endif
 #endif
-       depth_obs_p, &
-       obs_index_p_TB, &
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
        depth_obs_p, &
        sc_p, &
        idx_obs_nc_p, &
+#endif
+#endif
+       obs_index_p_TB, &
        var_id_obs, maxlon, minlon, maxlat, &
        minlat, maxix, minix, maxiy, miniy, lon_var_id, ix_var_id, lat_var_id, iy_var_id, &
        screen
@@ -96,7 +99,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        crns_flag, depth_obs
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      nx_glob, ny_glob, &
+      nx_glob, ny_glob, nz_glob, &
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
@@ -109,7 +112,11 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #ifndef OBS_ONLY_PARFLOW
   !kuw
   use shr_kind_mod, only: r8 => shr_kind_r8
+#ifdef CLMFIVE
+  use GridcellType, only: grc
+#else  
   USE clmtype,                  ONLY : clm3
+#endif  
   use decompMod , only : get_proc_bounds, get_proc_global
   !kuw end
   !hcp
@@ -217,6 +224,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
              if (allocated(pressure_obserr)) deallocate(pressure_obserr)
              allocate(pressure_obserr(dim_obs))
         endif
+
         if (crns_flag.eq.1) then
              if (allocated(depth_obs)) deallocate(depth_obs)
              allocate(depth_obs(dim_obs))
@@ -332,8 +340,13 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       end if
 
       ! Obtain general CLM index information
+#ifdef CLMFIVE
+      lon   => grc%londeg
+      lat   => grc%latdeg
+#else      
       lon   => clm3%g%londeg
       lat   => clm3%g%latdeg
+#endif
       call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
       call get_proc_global(numg, numl, numc, nump)
   end if
@@ -494,7 +507,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
         allocate(idx_obs_nc_p(dim_obs_p))
      endif
-     !hcp fin 
+     !hcp fin
 
   if (point_obs.eq.0) then
      max_var_id = MAXVAL(var_id_obs_nc(:,:))

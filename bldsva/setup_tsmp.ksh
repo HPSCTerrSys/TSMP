@@ -232,6 +232,7 @@ setSelection(){
 
   #Fix for cos /clm namelist because they differ in newer version.
   if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
+  if [[ ${mList[1]} == clm5_0  ]] ; then ; namelist_clm+=5_0 ; fi
   if [[ ${mList[2]} == cosmo5_1  ]] ; then ; namelist_cos+=5_1 ; fi
 
 

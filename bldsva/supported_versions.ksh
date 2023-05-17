@@ -26,9 +26,9 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT 3.1.0MCTPDAF 1.1.0MCTPDAF \
-                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT  5.0.0 5.0.0MCT "
+                     1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF 4.1.0MCT 4.4.0MCT 4.4.0MCTPDAF 5.0.0 5.0.0MCT "
         ["JUWELS"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT  3.1.0MCTPDAF 1.1.0MCTPDAF 
-                     1.4.0MCT 1.4.1MCT 1.5.0MCT 1.6.0MCT 3.0.0MCTPDAF 4.1.0MCT 5.0.0 5.0.0MCT "
+                     1.4.0MCT 1.4.1MCT 1.5.0MCT 1.6.0MCT 3.0.0MCTPDAF 4.1.0MCT  4.4.0MCT 4.4.0MCTPDAF 5.0.0 5.0.0MCT "
         ["DEEP"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
                      1.4.0MCT 1.4.1MCT 3.0.0MCTPDAF "
         ["JUSUF"]=" 1.1.0 1.1.0MCT 1.2.0 1.2.0MCT 2.1.0 2.1.0MCT 2.0.5 2.0.5MCT 3.0.0 3.0.0MCT 3.0.1MCT 3.0.1MCTPDAF 3.1.0 3.1.0MCT 1.1.0MCTPDAF 
@@ -64,6 +64,8 @@ versions+=(
 	["1.5.0MCT"]="1.5.0 old clm3_5 but new icon version 2.622 and Parflow3_2 with Oasis3-MCT"
 	["1.6.0MCT"]="1.6.0 old clm3_5 but new icon version 2.622 and Parflow3_2 with Oasis3-MCT v4.0"
         ["4.1.0MCT"]="4.1.0 clm3_5-icon icon-lem Parflow3_2 Oasis3-MCT"
+	["4.4.0MCT"]="3.0.0MCT with new clm5_0 (currently only standalone)"
+        ["4.4.0MCTPDAF"]="4.4.0MCT and PDAF Data Assimilation"
         ["5.0.0"]="Standalone eCLM"
         ["5.0.0MCT"]="eCLM with Oasis3-MCT"
 )
@@ -95,6 +97,8 @@ modelVersion+=(
 	["1.5.0MCT"]="oasis3-mct clm3_5-icon icon2-622 parflow3_2"
 	["1.6.0MCT"]="oasis3-mct4 clm3_5-icon icon2-622 parflow3_2"
         ["4.1.0MCT"]="oasis3-mct clm3_5-icon icon2-1 parflow3_2"
+	["4.4.0MCT"]="oasis3-mct clm5_0 cosmo4_21 parflow"
+        ["4.4.0MCTPDAF"]="oasis3-mct clm5_0 cosmo4_21 parflow pdaf1_1"
         ["5.0.0"]="mct eclm cosmo5_1 parflow"
         ["5.0.0MCT"]="oasis3-mct eclm cosmo5_1 parflow"
 )
@@ -126,6 +130,8 @@ combinations+=(
 	["1.5.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
 	["1.6.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
         ["4.1.0MCT"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
+	["4.4.0MCT"]=" clm "
+        ["4.4.0MCTPDAF"]=" clm "
         ["5.0.0"]=" clm "
         ["5.0.0MCT"]=" clm "
 )
