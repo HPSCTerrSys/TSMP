@@ -88,7 +88,6 @@ GLOBAL int clmupdate_swc;
 GLOBAL int clmupdate_T;
 GLOBAL int clmupdate_texture;
 GLOBAL int clmprint_swc;
-GLOBAL int clmprint_T;   // hcp
 GLOBAL int clmprint_et;
 GLOBAL int dtmult_cosmo;
 GLOBAL int pf_olfmasking;
