@@ -85,10 +85,25 @@ implemented in CLM's `iniTimeConst.F90`.
 
 Currently only in feature branch `TSMP_pdaf-clm5`.
 
-If true, CLM5.0 is used.
+If defined, CLM5.0 is used.
 
-If false, CLM3.5 is used.
+If undefined, CLM3.5 is used.
 
 This distinction is important in many parts of the TSMP-PDAF-wrapper
 source code, when, f.e., function calls have changed from version 3 to
 version 5 of CLM.
+
+## HCP_TRUNCATE_SAT ##
+
+If `HCP_TRUNCAT_SAt` is defined, the saturation truncation in
+`problem_saturationtopressure.c` reads
+
+``` c++
+	if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
+```
+
+instead of the default
+
+``` c++
+	if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+```
