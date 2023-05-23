@@ -53,7 +53,9 @@ This will remove unnecessary code during observation reading, when
 ParFlow-CLM-PDAF is built, but no ParFlow-type observations are
 included.
 
-## FOR2131 (PDAF / ParFlow build, experimental) ##
+## FOR2131 ##
+
+Needs to be set twice: in PDAF build script / in ParFlow source!
 
 The environment variable `FOR2131` is set
 
