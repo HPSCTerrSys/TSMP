@@ -233,12 +233,21 @@ setSelection(){
   fi
   
    if echo "$combination" | grep -q 'pdaf'; then
-	if echo "$combination" | grep -q 'cos4'; then
-	        mListgen="clm3-cos4-pfl-pdaf"
-	else
-                mListgen="clm3-cos5-pfl-pdaf"
-	fi
-   
+
+     if echo "$combination" | grep -q 'clm5'; then
+
+       mListgen="clm5-cos5-pfl-pdaf"
+
+     else
+
+       if echo "$combination" | grep -q 'cos4'; then
+	 mListgen="clm3-cos4-pfl-pdaf"
+       else
+         mListgen="clm3-cos5-pfl-pdaf"
+       fi
+
+     fi
+
    elif echo "$combination" | grep -q 'clm4' && echo "$combination" | grep -q 'cos4'; then
 	mListgen="clm4-cos4-pfl"
    elif echo "$combination" | grep -q 'clm4'; then
@@ -266,6 +275,7 @@ setSelection(){
 
   #Fix for cos /clm namelist because they differ in newer version.
   if [[ ${mList[1]} == clm4_0  ]] ; then ; namelist_clm+=4_0 ; fi
+  if [[ ${mList[1]} == clm5_0  ]] ; then ; namelist_clm+=5_0 ; fi
   if [[ ${mList[2]} == cosmo5_1  ]] ; then ; namelist_cos+=5_1 ; fi
 
 
@@ -1006,6 +1016,39 @@ route "${cyellow}<< setupOas${cnormal}"
 
 c_setup_clm(){
 route "${cyellow}>>> c_setup_clm${cnormal}"
+if [[ ${mList[1]} == "clm5_0" ]]; then
+ comment "  CLM5.0 setup"
+
+ comment "  sed rundir to namelist"
+   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+
+ comment "  sed dt to namelist"
+   sed "s,__dt_clm_bldsva__,$dt_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+
+ comment "  sed forcingdir to namelist"
+   sed "s,__forcingdir__,$forcingdir_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed dump interval namelist"
+   sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  sed runtime to namelist"
+   if [[ $withICON == "true" ]]; then
+     runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
+   else
+     runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
+   fi
+   sed "s,__runstep_clm_bldsva__,$runstep_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  add axe rights to clm namelist"
+     chmod 755 $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+ comment "  run clm namelist"
+     $rundir/lnd.stdin >> $log_file 2>> $err_file
+ check
+# Below default clm 3.5 setup
+else
 
 comment "  sed rundir to namelist"
   sed "s,__rundir__,$rundir," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
@@ -1057,6 +1100,7 @@ if [[ $withPDAF == "true" ]] ; then
   cp $rundir/lnd.stdin $rundir/lnd.stdin_$(printf "%05d" $(($instance-$startInst)))     
 fi
 
+fi
 route "${cyellow}<<< c_setup_clm${cnormal}"
 }
 
@@ -1186,7 +1230,7 @@ route "${cyellow}<< setup_pfl${cnormal}"
 
 
 c_setup_pdaf(){
-route "${cyellow}>>> c_setup_da${cnormal}"
+route "${cyellow}>>> c_setup_pdaf${cnormal}"
   comment "   copy pdaf namelist to rundir."
     cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
@@ -1215,7 +1259,7 @@ route "${cyellow}>>> c_setup_da${cnormal}"
     sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
-route "${cyellow}<<< c_setup_da${cnormal}"
+route "${cyellow}<<< c_setup_pdaf${cnormal}"
 }
 
 c_setup_rst(){

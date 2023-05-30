@@ -25,4 +25,12 @@ module load CMake/3.21.1
 # module load CDO/2.0.2 
 # module load NCO/5.0.3 
 
+# Modules for CLM5
+module load ESMF/8.2.0
+module load Perl/5.34.0
+module load imkl/2021.4.0
+# module load NVHPC/22.9
+# module load NCL/6.6.2
+module load netCDF-C++4/4.3.1
+
 module li

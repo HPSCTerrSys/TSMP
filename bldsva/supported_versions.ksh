@@ -22,15 +22,15 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct "
+                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
         ["JUWELS"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct "
+                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
         ["DEEP"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct "
+                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
         ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct "
+                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
         ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct "
+                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
 )
 
 # list of versions with descriptions
@@ -45,6 +45,8 @@ versions+=(
 		["clm3-icon26-pfl"]="clm3_5, Parflow >=3.10 and icon2-622 with Oasis3-MCT"
         ["eclm"]="Standalone eCLM"
         ["eclm-mct"]="eCLM with Oasis3-MCT"
+	["clm5-cos5-pfl"]="clm5_0 (currently only standalone)"
+	["clm5-cos5-pfl-pdaf"]="clm5_0 (currently only standalone) and PDAF Data Assimilation"
 )
 
 
@@ -62,6 +64,8 @@ modelVersion+=(
 		["clm3-icon26-pfl"]="oasis3-mct clm3_5-icon icon2-622 parflow"
         ["eclm"]=" mct eclm cosmo5_1 parflow"
         ["eclm-mct"]="oasis3-mct eclm cosmo5_1 parflow"
+        ["clm5-cos5-pfl"]="clm5_0" # oasis3-mct cosmo5_1 parflow
+        ["clm5-cos5-pfl-pdaf"]="clm5_0 pdaf" # oasis3-mct cosmo5_1 parflow
 )
 
 # list of model combinations that are available for a version. (first is default) 
@@ -79,6 +83,8 @@ combinations+=(
 		["clm3-icon26-pfl"]=" clm-icon-pfl clm icon pfl clm-icon clm-pfl "
         ["eclm"]=" clm "
         ["eclm-mct"]=" clm "
+	["clm5-cos5-pfl"]=" clm "
+        ["clm5-cos5-pfl-pdaf"]=" clm "
 )
 
 #list of supported testcases for a certain machine.

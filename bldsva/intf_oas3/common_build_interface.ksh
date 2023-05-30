@@ -378,8 +378,10 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
   comment "    create new build dir"
     mkdir -p $clmdir/build >> $log_file 2>> $err_file
   check
+  if [[ ${mList[1]} == clm3_5 ]] ; then
   comment "    copy oas_clm_init.F90 to  $clmdir/src/oas3"
     cp $rootdir/bldsva/intf_oas3/${mList[1]}/oas3/oas_clm_init.F90 $clmdir/src/oas3
+  fi
 
     spmd="on"       # settings are [on   | off       ] (default is off)
     rtm="off"      # settings are [on   | off       ] (default is off) 
@@ -456,6 +458,7 @@ route "${cyellow}<<< c_make_clm${cnormal}"
 
 c_substitutions_clm(){
 route "${cyellow}>>> c_substitutions_clm${cnormal}"
+# CLM 3.5 substitutions
   comment "    create oas3 dir in $clmdir/src"
     mkdir -p $clmdir/src/oas3 >> $log_file 2>> $err_file
   check
@@ -477,8 +480,6 @@ route "${cyellow}>>> c_substitutions_clm${cnormal}"
   fi	
 route "${cyellow}<<< c_substitutions_clm${cnormal}"
 }
-
-
 
 
 ############################ 
@@ -792,66 +793,5 @@ route "${cyellow}>>> c_make_pdaf${cnormal}"
 route "${cyellow}<<< c_make_pdaf${cnormal}"
 }
 
-c_setup_pdaf(){
-route "${cyellow}>>> c_setup_pdaf${cnormal}"
-  comment "   copy pdaf namelist to rundir."
-    cp $namelist_da $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check 
-  comment "   sed num instances into pdaf namelist."
-    sed "s/__ninst__/$(($numInst-$startInst))/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed pflname into pdaf namelist."
-    sed "s/__pflname__/$pflrunname/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed pflproc into pdaf namelist."
-    sed "s/__pflproc__/$nproc_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed dt into pdaf namelist."
-    sed "s/__dt__/$dt_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed endtime into pdaf namelist."
-    sed "s/__endtime__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed clmproc into pdaf namelist."
-    sed "s/__clmproc__/$nproc_clm/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check
-  comment "   sed cosproc into pdaf namelist."
-    sed "s/__cosproc__/$nproc_cos/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check 
-  comment "   sed dtmult into pdaf namelist."
-    sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
-  check 
 
-route "${cyellow}<<< c_setup_pdaf${cnormal}"
-}
-
-c_setup_rst(){
-
- comment " copy $restart_script to $rundir"
-   cp $restart_script $rundir >> $log_file 2>> $err_file
- check
-
- comment "   sed startDate into restart template."
-    sed 's/__startDate_bldsva__/"'"$startDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-  check
-
- comment "   sed initDate into restart template."
-    sed 's/__initDate_bldsva__/"'"$initDate"'"/' -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-  check
-
- comment "   sed dt_clm into restart template."
-    sed "s/__dt_clm_bldsva__/$dt_clm/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-  check
-
- comment "   sed dt_cosmo into restart template."
-    sed "s/__dt_cos_bldsva__/$dt_cos/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-  check
-
- comment "   sed PARFLOW_DIR into restart template $bindir."
-#    sed "/__PARFLOW_DIR__/ \$bindir" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-    sed -i "s|__PARFLOW_DIR__|$bindir|" $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-#    sed "s/__PARFLOW_DIR__/$bindir/" -i $rundir/tsmp_restart.sh >> $log_file 2>> $err_file
-  check
-
-}
 
