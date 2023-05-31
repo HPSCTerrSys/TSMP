@@ -9,7 +9,7 @@ configure_clm(){
 route "${cyellow}>> configure_clm${cnormal}"
 
   comment " source software and cesm input paths"
-    source $rootdir/bldsva/intf_oas3/clm5_0/arch/JUWELS/config/softwarepaths.ksh
+    source $rootdir/bldsva/intf_oas3/clm5_0/arch/config/softwarepaths.ksh
   check
 
 #  cplFlag=""
