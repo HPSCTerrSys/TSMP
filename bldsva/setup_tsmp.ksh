@@ -303,7 +303,7 @@ setCombination(){
     withOASMCT="true"
   fi  
 #DA
-  case "$version" in *pdaf*) withDA="true" ; withPDAF="true" ;; esac
+  case "$combination" in *pdaf*) withDA="true" ; withPDAF="true" ;; esac
 }
 
 finalizeSelection(){
