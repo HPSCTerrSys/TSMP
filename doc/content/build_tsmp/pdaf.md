@@ -121,3 +121,11 @@ Variable names for the model communicator:
 -   Coupled with OASIS:
     -   `comm_model` -> `da_comm` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
     -   `comm_model` -> `da_comm` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
+
+
+### CMEM ###
+
+If you want to use the CMEM operator, you have to download the source
+code under https://confluence.ecmwf.int/display/LDAS/CMEM+Download
+(Tested: Version 5.1) and copy it into the `framework` directory of
+TSMP-PDAF.

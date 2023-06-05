@@ -53,7 +53,9 @@ This will remove unnecessary code during observation reading, when
 ParFlow-CLM-PDAF is built, but no ParFlow-type observations are
 included.
 
-## FOR2131 (PDAF / ParFlow build, experimental) ##
+## FOR2131 ##
+
+Needs to be set twice: in PDAF build script / in ParFlow source!
 
 The environment variable `FOR2131` is set
 
@@ -80,3 +82,30 @@ in function `c_configure_clm`.
 
 If it is turned on, the possibility of a read-in porosity is
 implemented in CLM's `iniTimeConst.F90`.
+
+## CLMFIVE ##
+
+Currently only in feature branch `TSMP_pdaf-clm5`.
+
+If defined, CLM5.0 is used.
+
+If undefined, CLM3.5 is used.
+
+This distinction is important in many parts of the TSMP-PDAF-wrapper
+source code, when, f.e., function calls have changed from version 3 to
+version 5 of CLM.
+
+## HCP_TRUNCATE_SAT ##
+
+If `HCP_TRUNCAT_SAt` is defined, the saturation truncation in
+`problem_saturationtopressure.c` reads
+
+``` c++
+	if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
+```
+
+instead of the default
+
+``` c++
+	if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+```
