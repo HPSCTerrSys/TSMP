@@ -31,9 +31,14 @@ substitutions_clm(){
 route "${cyellow}>> substitutions_clm${cnormal}"
    c_substitutions_clm
    comment "   cp m_FileResolve.F90 and shr_sys_mod.F90 to usr.src folder"
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$compiler/m_FileResolv.F90 $clmdir/bld/usr.src	
+   if echo "$compiler" | grep -qE 'Intel'; then
+      maincompiler="Intel"
+   else
+      maincompiler="Gnu"
+   fi
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$maincompiler/m_FileResolv.F90 $clmdir/bld/usr.src	
    check
-    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$compiler/shr_sys_mod.F90 $clmdir/bld/usr.src
+    patch $rootdir/bldsva/intf_oas3/clm3_5/arch/src.$maincompiler/shr_sys_mod.F90 $clmdir/bld/usr.src
    check
 
   if [[ $withOASMCT == "true" ]] ; then
