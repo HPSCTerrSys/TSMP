@@ -157,7 +157,7 @@ if [ $? -ne 0 ]; then
 fi
 tar -xvf grib_api-1.25.0-Source.tar.gz?api=v2 >> $log_file 2>> $err_file
 #*****
-pwget=`wget https://github.com/LLNL/Silo/archive/refs/tags/4.10.2.tar.gz`
+pwget=`wget https://github.com/LLNL/Silo/archive/refs/tags/4.11.tar.gz`
 if [ $? -ne 0 ]; then
     echo "Silo can not be downloaded!!!check wget command"
     exit
@@ -212,9 +212,9 @@ tar -xzf pnetcdf-1.12.1.tar.gz >> $log_file 2>> $err_file
 #echo "****** LIBs are downloaded and extracted in $dsrc *****"
 
 #*************** Zlib *************************************
-cd $dsrc/zlib* 
+cd $dsrc/zlib*
 ./configure --prefix=$dlib/zlib >> $log_file 2>> $err_file
-make >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
 
 #
@@ -227,7 +227,7 @@ echo "installing curl in $dlib/curl ......"
 #
 cd $dsrc/curl*
 ./configure --prefix="$dlib/curl" --with-zlib=$dlib/zlib  >> $log_file 2>> $err_file
-make  >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 #
 export PATH="$dlib/curl/bin:$PATH"
@@ -242,7 +242,7 @@ env > $dlib/env.log
 #
 cd $dsrc/openmpi-*
 ./configure  --prefix="$dlib/openmpi" --with-pmix=internal >> $log_file 2>> $err_file
-make all >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
 
  export opnempi env vairable for installtion of other Apps
@@ -258,7 +258,7 @@ echo "installing hdf5 in $dlib/hdf5 ......"
 #
 cd $dsrc/hdf5-*
 ./configure --prefix=$dlib/hdf5 --enable-build-mode=production --enable-hl --enable-fortran  >> $log_file 2>> $err_file
-make  >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install   >> $log_file 2>> $err_file
 #
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$dlib/hdf5/lib"
@@ -273,7 +273,7 @@ export LIBS="-lhdf5 -lhdf5_hl -lcurl -lz"
 #
 cd $dsrc/netcdf-c*
 ./configure --prefix=$dlib/netcdf  >> $log_file 2>> $err_file
-make >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
 #
 export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$dlib/netcdf/lib"
@@ -288,7 +288,7 @@ echo "installing netcdf-fortran in $dlib/netcdf ..."
 #
 cd $dsrc/netcdf-f*
 ./configure --prefix=$dlib/netcdf  >> $log_file 2>> $err_file
-make >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
 #****************************** grib-api **************************
 echo "*************************************************************"
@@ -296,7 +296,7 @@ echo "installing gribapi in $dlib/gribapi ..."
 #
 cd $dsrc/grib*
 ./configure --prefix=$dlib/gribapi --disable-jpeg >> $log_file 2>> $err_file
-make >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install >> $log_file 2>> $err_file
 
 #******************************* Silo ***************************
@@ -306,7 +306,7 @@ export FCFLAGS="-g -O2 -I$dlib/netcdf/include -I$dlib/hdf5/include -L$dlib/hdf5/
 #
 cd $dsrc/Silo-*
 ./configure --prefix=$dlib/silo --with-hdf5=$dlib/hdf5/include,$dlib/hdf5/lib --enable-fortran --enable-shared  >> $log_file 2>> $err_file
-make  >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 
 # *************************** Hypre ****************************
@@ -315,7 +315,7 @@ echo "installing hypre in $dlib/hypre ..."
 #
 cd $dsrc/hypre-*/src
 ./configure --prefix=$dlib/hypre --with-MPI-lib-dirs=/usr/bin/mpiexec  --enable-fortran --enable-shared >> $log_file 2>> $err_file
-make  >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 
 #******************************* TCL *******************************
@@ -329,7 +329,7 @@ export CPPFLAGS=""
 #
 cd $dsrc/tcl*/unix
 ./configure --prefix=$dlib/tcl --enable-shared >> $log_file 2>> $err_file
-make  >> $log_file 2>> $err_file
+make -j 4 >> $log_file 2>> $err_file
 make install  >> $log_file 2>> $err_file
 ln -s $dlib/tcl/bin/tclsh8.5 $dlib/tcl/bin/tclsh  >> $log_file 2>> $err_file
 #
@@ -340,7 +340,7 @@ echo "installing ecCodes in $dlib/eccodes ..."
 mkdir $dsrc/build
 cd $dsrc/build
 cmake  ../eccodes-2.18.0-Source  -DCMAKE_INSTALL_PREFIX=$dlib/eccodes
-make
+make -j 4
 ctest
 make install
 
@@ -349,7 +349,7 @@ echo "**************************************************************"
 echo "installing PnetCDF in $dlib/pnetcdf ..."
 cd $dsrc/pnetcdf*
 ./configure --prefix=$dlib/pnetcdf 
-make
+make -j 4
 make install
 
 cat > $bldsva/machines/loadenv_x86 << end_loadenv
