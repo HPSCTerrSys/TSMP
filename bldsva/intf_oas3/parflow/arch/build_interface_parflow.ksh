@@ -24,8 +24,8 @@ route "${cyellow}>> configure_pfl${cnormal}"
       fi
     fi
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
-    flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
-    flagsSim+=" -DHYPRE_ROOT=$EBROOTHYPRE"
+    flagsSim+=" -DSILO_ROOT=$siloPath"
+    flagsSim+=" -DHYPRE_ROOT=$hyprePath"
     flagsSim+=" -DCMAKE_C_FLAGS=$C_FLAGS"
     flagsSim+=" -DCMAKE_BUILD_TYPE=Release"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
