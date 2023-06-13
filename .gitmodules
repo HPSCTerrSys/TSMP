@@ -1,0 +1,18 @@
+[submodule "bldsva/eTSMP"]
+	path = bldsva/eTSMP
+	url = https://github.com/HPSCTerrSys/eTSMP
+[submodule "parflow"]
+	path = parflow
+	url = https://github.com/parflow/parflow.git
+[submodule "eCLM"]
+	path = eCLM
+	url = https://github.com/HPSCTerrSys/eCLM.git
+[submodule "icon2.6.4_oascoup"]
+	path = icon2.6.4_oascoup
+	url = https://icg4geo.icg.kfa-juelich.de/spoll/icon2.6.4_oascoup.git
+[submodule "CLM3.5"]
+	path = CLM3.5
+	url = https://github.com/HPSCTerrSys/CLM3.5.git
+[submodule "cosmo5.01_fresh"]
+	path = cosmo5.01_fresh
+	url = https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git
