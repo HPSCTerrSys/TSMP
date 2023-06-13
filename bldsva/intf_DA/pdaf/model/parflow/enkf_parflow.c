@@ -62,8 +62,11 @@ void init_idx_map_subvec2state(Vector *pf_vector) {
    // of the parameter (K_sat) in the x/ycoord if
    // it is included in the state vector for
    // localization purposes.
-	if( pf_paramupdate == 1 )
-	   num *= 2;
+	/* pf_paramupdate == 2 could need updates, see line 447 */
+	if( pf_paramupdate == 1 || pf_paramupdate == 2 || pf_paramupdate == 3 ) num *= 2;
+	if( pf_paramupdate == 4 || pf_paramupdate == 5 ) num *= 3;
+	if( pf_paramupdate == 6 || pf_paramupdate == 7 ) num *= 4;
+	if( pf_paramupdate == 8 ) num *= 5;
 
 	xcoord = (double *) malloc(num * sizeof(double));
 	ycoord = (double *) malloc(num * sizeof(double));
@@ -139,12 +142,55 @@ void init_idx_map_subvec2state(Vector *pf_vector) {
       //  here we indicate the physical coordinates of the
       //  parameters according to their addresses in the
       //  state vector.
-      if( pf_paramupdate == 1 )
+      /* pf_paramupdate == 2 could need updates, see line 447 */
+      if( pf_paramupdate == 1 || pf_paramupdate == 2 || pf_paramupdate == 3 )
       {
          for( i = 0; i < enkf_subvecsize; i++ ) {
             xcoord[enkf_subvecsize + i] = xcoord[i];
             ycoord[enkf_subvecsize + i] = ycoord[i];
             zcoord[enkf_subvecsize + i] = zcoord[i];
+         };
+      }
+      if( pf_paramupdate == 4 || pf_paramupdate == 5 )
+      {
+         for( i = 0; i < enkf_subvecsize; i++ ) {
+            xcoord[enkf_subvecsize + i] = xcoord[i];
+            ycoord[enkf_subvecsize + i] = ycoord[i];
+            zcoord[enkf_subvecsize + i] = zcoord[i];
+            xcoord[2*enkf_subvecsize + i] = xcoord[i];
+            ycoord[2*enkf_subvecsize + i] = ycoord[i];
+            zcoord[2*enkf_subvecsize + i] = zcoord[i];
+         };
+      }
+      if( pf_paramupdate == 6 || pf_paramupdate == 7 )
+      {
+         for( i = 0; i < enkf_subvecsize; i++ ) {
+            xcoord[enkf_subvecsize + i] = xcoord[i];
+            ycoord[enkf_subvecsize + i] = ycoord[i];
+            zcoord[enkf_subvecsize + i] = zcoord[i];
+            xcoord[2*enkf_subvecsize + i] = xcoord[i];
+            ycoord[2*enkf_subvecsize + i] = ycoord[i];
+            zcoord[2*enkf_subvecsize + i] = zcoord[i];
+            xcoord[3*enkf_subvecsize + i] = xcoord[i];
+            ycoord[3*enkf_subvecsize + i] = ycoord[i];
+            zcoord[3*enkf_subvecsize + i] = zcoord[i];
+         };
+      }
+      if( pf_paramupdate == 8 )
+      {
+         for( i = 0; i < enkf_subvecsize; i++ ) {
+            xcoord[enkf_subvecsize + i] = xcoord[i];
+            ycoord[enkf_subvecsize + i] = ycoord[i];
+            zcoord[enkf_subvecsize + i] = zcoord[i];
+            xcoord[2*enkf_subvecsize + i] = xcoord[i];
+            ycoord[2*enkf_subvecsize + i] = ycoord[i];
+            zcoord[2*enkf_subvecsize + i] = zcoord[i];
+            xcoord[3*enkf_subvecsize + i] = xcoord[i];
+            ycoord[3*enkf_subvecsize + i] = ycoord[i];
+            zcoord[3*enkf_subvecsize + i] = zcoord[i];
+            xcoord[4*enkf_subvecsize + i] = xcoord[i];
+            ycoord[4*enkf_subvecsize + i] = ycoord[i];
+            zcoord[4*enkf_subvecsize + i] = zcoord[i];
          };
       }
 
