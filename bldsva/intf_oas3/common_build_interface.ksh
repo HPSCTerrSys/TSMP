@@ -672,7 +672,7 @@ route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
   file=$dadir/make.arch/${PDAF_ARCH}.h
 
   comment "   cp pdaf config to $dadir"
-    cp $rootdir/bldsva/intf_DA/pdaf/arch/$platform/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
+    cp $rootdir/bldsva/intf_DA/pdaf/arch/config/${PDAF_ARCH}.h $file >> $log_file 2>> $err_file
   check
 
   comment "   sed comFC dir to $file"

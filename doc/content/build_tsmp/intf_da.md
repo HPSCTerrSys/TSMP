@@ -19,7 +19,7 @@ TSMP/bldsva/intf_DA/pdaf/tsmp
 
 -   [`arch`](#arch) contains the configuration and build scripts for
     different computers/clusters.
-	- Most important file(s): `build_interface_pdaf_MACHINE.ksh`
+	- Most important file(s): `build_interface_pdaf.ksh`
 
 -   [`framework`](#framework) contains the interface to PDAF. 
 	- Most important file: `pdaf_terrsysmp.F90`.
@@ -38,35 +38,28 @@ TSMP/bldsva/intf_DA/pdaf/tsmp
 
 ## `arch` ##
 
-`arch` currently consists configuration and build scripts for the
-following five computers:
+`arch` currently contains the PDAF build scripts tested for the
+following two computers:
 
 ``` text
-├── AGROCLUSTER
-├── GENERIC_X86
-├── JUQUEEN
 ├── JURECA
 └── JUWELS
-
-5 directories, 0 files
 ```
 
-The most tested versions are `JURECA` and `JUWELS`.
-
-Each computer-directory looks as follows (example `JURECA`):
+The directory looks as follows:
 
 ``` text
-├── build_interface_pdaf_JURECA.ksh
+├── build_interface_pdaf.ksh
 └── config
-    ├── linux_gfortran_openmpi_jureca.h
-    └── linux_ifort_jureca.h
+    ├── linux_gfortran_openmpi.h
+    └── linux_ifort.h
 
 1 directory, 3 files
 ```
 
-The build-script `build_interface_pdaf_JURECA.ksh` contains the
-following functions. The script is source and the functions are called
-in `/TSMP/bldsva/build_tsmp.ksh` in the function `compileDA()`.
+The build-script `build_interface_pdaf.ksh` contains the following
+functions. The script is source and the functions are called in
+`/TSMP/bldsva/build_tsmp.ksh` in the function `compileDA()`.
 
 - `always_da()`: 
   - always executed, when DA is used (`$withDA=="true"`) ()
