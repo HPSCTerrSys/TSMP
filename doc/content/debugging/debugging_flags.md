@@ -4,9 +4,9 @@ If an error appears and the source can not be localized by the default
 outputs, it might make sense to build TSMP-PDAF again, but with more
 debug-flags enabled.
 
-For `JUWELS` these flags can be set in
+These flags can be set in
 
-- `bldsva/intf_DA/pdaf/arch/JUWELS/build_interface_pdaf_JUWELS.ksh`
+- `bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
 - `bldsva/machines/config_JUWELS.ksh`
 
 
@@ -17,7 +17,7 @@ set, f.e. as
 defaultOptC="-g -O0 -xHost -traceback" # Intel
 ```
 
-For TSMP-PDAF: In `build_interface_pdaf_JUWELS.ksh`, there is the general
+For TSMP-PDAF: In `build_interface_pdaf.ksh`, there is the general
 `importFlags` that could for example be set as
 
 ```ksh

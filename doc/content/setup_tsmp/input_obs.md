@@ -344,7 +344,7 @@ ParFlow observations: Set
 
 The aforementioned environment variables can be set in the PDAF-build
 script
-`TSMP/bldsva/intf_DA/pdaf/arch/JURECA/build_interface_pdaf_JURECA.ksh`
+`TSMP/bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
 (or replace `JURECA` with other machine).
 
 Source code from script `build_interface_pdaf_JURECA.ksh`:

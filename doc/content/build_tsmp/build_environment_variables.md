@@ -4,13 +4,11 @@ A number of environment variables are set during the build process of
 TSMP-PDAF in order to make the code behave in specific ways.
 
 TSMP-PDAF environemnt variables are set in the machine-specific
-TSMP-PDAF build-scripts of the form:
+TSMP-PDAF build-script:
 
 ```
-bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh
+bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh
 ```
-
-where `<machine>` could be f.e. `JURECA` or `JUWELS`.
 
 ## CLMSA ##
 
@@ -60,7 +58,7 @@ Needs to be set twice: in PDAF build script / in ParFlow source!
 The environment variable `FOR2131` is set
 
 1. In the PDAF-build script
-   `bldsva/intf_DA/pdaf/arch/<machine>/build_interface_pdaf_<machine>.ksh`
+   `bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
 2. In `bldsva/intf_DA/pdaf/tsmp/parflow/solver_richards.c`. Right
    before the line `#ifdef FOR2131`, one should add a line reading
    `#define FOR2131`.

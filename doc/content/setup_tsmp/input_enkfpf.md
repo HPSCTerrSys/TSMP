@@ -36,6 +36,7 @@ dampingfactor_param =
 dampingfactor_state =
 aniso_perm_y       =
 aniso_perm_z       =
+aniso_use_parflow  =
 printensemble      =
 printstat          =
 paramprintensemble =
@@ -234,6 +235,13 @@ factor with the corresponding anisotropy factor from
 ParFlow-input. Currently, we believe that the ParFlow-factor is used
 in the beginning of the simulation, while the factor set here, is used
 after each parameter update.
+
+### PF:aniso_use_parflow ###
+
+`PF:aniso_use_parflow`: (integer) If 1, Anisotropy factors from
+ParFlow should be used to compute y and z direction permeability from
+the x direction permeability that has been updated during EnKF.  If 0,
+`PF:aniso_perm_y` and `PF:aniso_perm_z` are used.
 
 ### PF:printensemble ###
 
@@ -475,6 +483,8 @@ Effect of `obs_interp_switch=1`:
  |           | `dampingfactor_state`   | 1.0           |
  |           | `aniso_perm_y`          | 1.0           |
  |           | `aniso_perm_z`          | 1.0           |
+ |           | `aniso_use_parflow`     | 0             |
+ |           |                         |               |
  |           | `printensemble`         | 1             |
  |           | `printstat`             | 1             |
  |           | `paramprintensemble`    | 1             |
