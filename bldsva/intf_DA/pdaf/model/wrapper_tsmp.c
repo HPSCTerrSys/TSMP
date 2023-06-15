@@ -102,10 +102,10 @@ void finalize_tsmp() {
     free(subvec_param_sd);
     free(pf_statevec);
 
-    free(subvec_permy)
-    free(subvec_permz)
-    free(arr_aniso_perm_yy)
-    free(arr_aniso_perm_zz)
+    free(subvec_permy);
+    free(subvec_permz);
+    free(arr_aniso_perm_yy);
+    free(arr_aniso_perm_zz);
 
     enkfparflowfinalize();
 #endif
