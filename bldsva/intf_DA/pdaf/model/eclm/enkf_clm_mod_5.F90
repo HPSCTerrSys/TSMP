@@ -39,6 +39,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
+  integer(c_int),bind(C,name="do_pupd")       :: do_pupd
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)

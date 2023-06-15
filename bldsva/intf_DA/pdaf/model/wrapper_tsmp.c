@@ -223,6 +223,13 @@ void print_update_pfb(){
 
 void update_tsmp(){
 
+    do_pupd=0;
+
+    /* check if frequency of parameter update is reached */
+    do_pupd = tstartcycle;
+    do_pupd = do_pupd % pf_freq_paramupdate;
+    do_pupd = !do_pupd;
+
 #if defined CLMSA
   if((model == tag_model_clm) && ((clmupdate_swc != 0) || (clmupdate_T != 0))){
     update_clm();
@@ -235,7 +242,6 @@ void update_tsmp(){
   if(model == 1){
     int i;
     double *dat;
-    int do_pupd=0;
 
     /* print updated ensemble */
     if(pf_updateflag == 3){
@@ -273,10 +279,6 @@ void update_tsmp(){
     if(pf_printensemble == 1) enkf_printstatistics_pfb(dat,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
 
 
-    /* check if frequency of parameter update is reached */
-    do_pupd = tstartcycle;
-    do_pupd = do_pupd % pf_freq_paramupdate;
-    do_pupd = !do_pupd;
 
     /* update Ksat */
     if(pf_paramupdate == 1 && do_pupd){
