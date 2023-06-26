@@ -489,7 +489,7 @@ Effect of `obs_interp_switch=1`:
  |           | `printstat`             | 1             |
  |           | `paramprintensemble`    | 1             |
  |           | `paramprintstat`        | 1             |
- |           | `olfmasking`            | 1             |
+ |           | `olfmasking`            | 0             |
  | `[CLM]`   |                         |               |
  |           | `problemname`           | \-            |
  |           | `nprocs`                | 0             |
