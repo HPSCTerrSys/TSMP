@@ -10,7 +10,7 @@ initSetup(){
   defaultNLCLM=$rootdir/bldsva/setups/$refSetup/lnd.stdin 
   defaultNLCOS=$rootdir/bldsva/setups/$refSetup/lmrun_uc 
   defaultNLPFL=$rootdir/bldsva/setups/$refSetup/coup_oas.tcl
-  defaultNLDA=$rootdir/bldsva/setups/refSetup/DA-nl
+  defaultNLDA=$rootdir/bldsva/setups/$refSetup/DA-nl
 
 
 
