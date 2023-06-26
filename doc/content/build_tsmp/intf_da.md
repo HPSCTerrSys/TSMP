@@ -84,7 +84,6 @@ functions. The script is source and the functions are called in
 	- PDAF source `src`
     - PDAF `interface/model`
     - PDAF `interface/framework`
-- `setup_da()`
 
 
 ## `framework` ##
