@@ -1,6 +1,6 @@
 #! /bin/ksh
 
-static_files=tsmp_idealscal/input_24001200
+static_files=$rootdir/tsmp_idealscal/input_24001200
 
 StartDate="2008-05-08 00"
 InitDate="2008-05-08 00"

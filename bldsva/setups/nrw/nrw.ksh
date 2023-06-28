@@ -1,6 +1,6 @@
 #! /bin/ksh
 
-static_files=tsmp_nrw/input
+static_files=$rootdir/tsmp_nrw/input
 
 StartDate="2008-05-08 00"
 InitDate="2008-05-08 00"
