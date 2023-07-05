@@ -68,3 +68,19 @@ This will create the documentation in `doc/_build/`.
 Simply browse to this directory and open `index.html` which should show you the 
 locally rendered documentation in your default web browser.
 
+### MYST
+
+For referencing we use the extention [myst_parser](https://myst-parser.readthedocs.io/en/latest/).   
+To refere to internal pages, you can use the default linking syntax `[label](link)` with relative paths to the internal document. Refering to a specific headline within an internal document you have to use the correct myst ancor. Showing a list of available ancors for a specific document can be dones with:
+```
+myst-anchors -l auxiliaryscripts.md
+>> <h1 id="auxiliary-scripts"></h1>
+>> <h2 id="aux_migratefromscratchsh"></h2>
+>> <h2 id="aux_untarmanytarssh"></h2>
+>> <h2 id="aux_restagetapesh"></h2>
+>> <h2 id="aux_gzipsh-and-aux_gunzipsh"></h2>
+>> <h2 id="aux_sha512sumsh"></h2>
+```
+Than use the following link syntax:
+```
+[aux_UnTarManyTars.sh](REL/PATH/TO/auxiliaryscripts.md#aux_untarmanytarssh)
