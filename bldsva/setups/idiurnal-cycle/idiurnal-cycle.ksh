@@ -3,7 +3,7 @@
 source /p/software/$SYSTEMNAME/lmod/lmod/init/ksh
 module load GCC OpenMPI CDO NCO
 
-static_files=tsmp_idiurnal-cycle/input
+static_files=$rootdir/tsmp_idiurnal-cycle/input
 
 defaultFDCLM="$rootdir/$static_files/clm"
 defaultFDCOS="$rootdir/$static_files/cosmo"

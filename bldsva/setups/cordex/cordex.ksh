@@ -1,6 +1,6 @@
 #! /bin/ksh
 
-static_files=tsmp_eur11_eraint_eval_v2/input
+static_files=$rootdir/tsmp_eur11_eraint_eval_v2/input
 
 StartDate="2021-06-24 12"
 InitDate="2021-06-24 12"
