@@ -465,8 +465,8 @@ void parflow_oasis_init(double current_time, double dt) {
      ParFlow arrays */
   subvec_permy           = (double*) calloc(pf_paramvecsize,sizeof(double));
   subvec_permz           = (double*) calloc(pf_paramvecsize,sizeof(double));
-  arr_aniso_perm_yy           = (double*) calloc(pf_paramvecsize,sizeof(double));
-  arr_aniso_perm_zz           = (double*) calloc(pf_paramvecsize,sizeof(double));
+  arr_aniso_perm_yy           = (double*) calloc(enkf_subvecsize,sizeof(double));
+  arr_aniso_perm_zz           = (double*) calloc(enkf_subvecsize,sizeof(double));
 
   if(pf_gwmasking > 0){
     subvec_gwind           = (double*) calloc(enkf_subvecsize,sizeof(double));
@@ -734,6 +734,26 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
                         pf_statevec[i] = subvec_param[j];
                     }
             }
+
+	   if(pf_aniso_use_parflow == 1){
+
+	     /* Get permabilities in y and z direction from Parflow */
+	     Vector      *perm_yy = ProblemDataPermeabilityY(problem_data);
+	     Vector      *perm_zz = ProblemDataPermeabilityZ(problem_data);
+
+	     /* Turn ParFlow-Vectors into arrays of subvector-size */
+	     PF2ENKF(perm_yy,subvec_permy);
+	     PF2ENKF(perm_zz,subvec_permz);
+
+	     /* Array loop */
+	     /* Set arr_aniso_perm_yy / arr_aniso_perm_zz */
+	     /* TODO: Compute only for first update */
+	     for(i=0,j=0;i<enkf_subvecsize;i++,j=j+2){
+	       arr_aniso_perm_yy[i] = subvec_permy[i] / subvec_param[j];
+	       arr_aniso_perm_zz[i] = subvec_permz[i] / subvec_param[j];
+	     }
+	   }
+
         }
 
         /* append hydraulic conductivity and van Genuchten parameters to state vector */
@@ -755,6 +775,26 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
                     pf_statevec[i+1] = log(subvec_param[j+1]);
                     pf_statevec[i+2] = subvec_param[j+2];
             }
+
+	   if(pf_aniso_use_parflow == 1){
+
+	     /* Get permabilities in y and z direction from Parflow */
+	     Vector      *perm_yy = ProblemDataPermeabilityY(problem_data);
+	     Vector      *perm_zz = ProblemDataPermeabilityZ(problem_data);
+
+	     /* Turn ParFlow-Vectors into arrays of subvector-size */
+	     PF2ENKF(perm_yy,subvec_permy);
+	     PF2ENKF(perm_zz,subvec_permz);
+
+	     /* Array loop */
+	     /* Set arr_aniso_perm_yy / arr_aniso_perm_zz */
+	     /* TODO: Compute only for first update */
+	     for(i=0,j=0;i<enkf_subvecsize;i++,j=j+3){
+	       arr_aniso_perm_yy[i] = subvec_permy[i] / subvec_param[j];
+	       arr_aniso_perm_zz[i] = subvec_permz[i] / subvec_param[j];
+	     }
+	   }
+
         }
 
         /* append porosity and van Genuchten parameters to state vector */
@@ -801,6 +841,26 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
                     pf_statevec[i+2] = log(subvec_param[j+2]);
                     pf_statevec[i+3] = subvec_param[j+3];
             }
+
+	   if(pf_aniso_use_parflow == 1){
+
+	     /* Get permabilities in y and z direction from Parflow */
+	     Vector      *perm_yy = ProblemDataPermeabilityY(problem_data);
+	     Vector      *perm_zz = ProblemDataPermeabilityZ(problem_data);
+
+	     /* Turn ParFlow-Vectors into arrays of subvector-size */
+	     PF2ENKF(perm_yy,subvec_permy);
+	     PF2ENKF(perm_zz,subvec_permz);
+
+	     /* Array loop */
+	     /* Set arr_aniso_perm_yy / arr_aniso_perm_zz */
+	     /* TODO: Compute only for first update */
+	     for(i=0,j=0;i<enkf_subvecsize;i++,j=j+4){
+	       arr_aniso_perm_yy[i] = subvec_permy[i] / subvec_param[j];
+	       arr_aniso_perm_zz[i] = subvec_permz[i] / subvec_param[j];
+	     }
+	   }
+
         }
 
 }
@@ -1284,7 +1344,7 @@ void enkf_printmannings(char *pre, char *suff){
 
 
 void update_parflow (int do_pupd) {
-  int i,j;
+  int i,j,k;
   VectorUpdateCommHandle *handle;
 
   if(pf_paramupdate == 3 && do_pupd){
@@ -1337,11 +1397,14 @@ void update_parflow (int do_pupd) {
     FinalizeVectorUpdate(handle);
 
     /* update perm_yy and perm_zz */
-    for(i=nshift,j=0;i<(nshift+pf_paramvecsize);i++,j++){
-        if((j%2)==0){
-            subvec_param[j] = pf_statevec[i] * pf_aniso_perm_y;
-            subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_z;
-        }
+    for(i=nshift,j=0,k=0;i<(nshift+pf_paramvecsize);i=i+2,j=j+2,k++){
+      if(pf_aniso_use_parflow == 1){
+	subvec_param[j] = pf_statevec[i] * arr_aniso_perm_yy[k];
+	subvec_param[j+1] = pf_statevec[i] * arr_aniso_perm_zz[k];
+      }else{
+	subvec_param[j] = pf_statevec[i] * pf_aniso_perm_y;
+	subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_z;
+      }
     }
 
     ENKF2PF_2P(perm_yy,perm_zz,subvec_param);
@@ -1442,10 +1505,15 @@ void update_parflow (int do_pupd) {
     FinalizeVectorUpdate(handle);
 
     /* update perm_yy and perm_zz*/
-    for(i=nshift,j=0;i<(nshift+pf_paramvecsize);i=i+4,j=j+4){
+    for(i=nshift,j=0,k=0;i<(nshift+pf_paramvecsize);i=i+4,j=j+4,k++){
         subvec_param[j] = pf_statevec[i];
-        subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_y;
-        subvec_param[j+2] = pf_statevec[i] * pf_aniso_perm_z;
+	  if(pf_aniso_use_parflow == 1){
+	    subvec_param[j+1] = pf_statevec[i] * arr_aniso_perm_yy[k];
+	    subvec_param[j+2] = pf_statevec[i] * arr_aniso_perm_zz[k];
+	  }else{
+	    subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_y;
+	    subvec_param[j+2] = pf_statevec[i] * pf_aniso_perm_z;
+	  }
         subvec_param[j+3] = pf_statevec[i+1];
     }
 
@@ -1589,10 +1657,10 @@ void update_parflow (int do_pupd) {
     FinalizeVectorUpdate(handle);
 
     /* update perm_yy */
-    for(i=nshift,j=0;i<(nshift+enkf_subvecsize);i++,j++){
+    for(i=nshift,j=0,k=0;i<(nshift+enkf_subvecsize);i++,j++,k++){
 
       if(pf_aniso_use_parflow == 1){
-	subvec_param[j] = pf_statevec[i] * arr_aniso_perm_yy[j];
+	subvec_param[j] = pf_statevec[i] * arr_aniso_perm_yy[k];
       }else{
 	subvec_param[j] = pf_statevec[i] * pf_aniso_perm_y;
       }
@@ -1615,9 +1683,9 @@ void update_parflow (int do_pupd) {
     FinalizeVectorUpdate(handle);
 
     /* update perm_zz */
-    for(i=nshift,j=0;i<(nshift+enkf_subvecsize);i++,j++){
+    for(i=nshift,j=0,k=0;i<(nshift+enkf_subvecsize);i++,j++,k++){
       if(pf_aniso_use_parflow == 1){
-	subvec_param[j] = pf_statevec[i] * arr_aniso_perm_zz[j];
+	subvec_param[j] = pf_statevec[i] * arr_aniso_perm_zz[k];
       }else{
 	subvec_param[j] = pf_statevec[i] * pf_aniso_perm_z;
       }
@@ -1737,12 +1805,17 @@ void update_parflow (int do_pupd) {
     FinalizeVectorUpdate(handle);
 
     /* update perm_yy and perm_zz*/
-    for(i=nshift,j=0;i<(nshift+pf_paramvecsize);i=i+3,j=j+3){
-        if((j%2)==0){
+    for(i=nshift,j=0,k=0;i<(nshift+pf_paramvecsize);i=i+3,j=j+3,k++){
+        /* if((j%2)==0){ */
             subvec_param[j] = pf_statevec[i];
-            subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_y;
-            subvec_param[j+2] = pf_statevec[i] * pf_aniso_perm_z;
-        }
+	    if(pf_aniso_use_parflow == 1){
+	      subvec_param[j+1] = pf_statevec[i] * arr_aniso_perm_yy[k];
+	      subvec_param[j+2] = pf_statevec[i] * arr_aniso_perm_zz[k];
+	    }else{
+	      subvec_param[j+1] = pf_statevec[i] * pf_aniso_perm_y;
+	      subvec_param[j+2] = pf_statevec[i] * pf_aniso_perm_z;
+	    }
+        /* } */
     }
 
     ENKF2PF_3P(perm_xx,perm_yy,perm_zz,subvec_param);
