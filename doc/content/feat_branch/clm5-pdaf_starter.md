@@ -13,7 +13,6 @@ Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF b
 
  cd tsmp
 
- git checkout TSMP_pdaf-clm5
 ```
 
 
