@@ -51,28 +51,6 @@ This will remove unnecessary code during observation reading, when
 ParFlow-CLM-PDAF is built, but no ParFlow-type observations are
 included.
 
-## FOR2131 ##
-
-Needs to be set twice: in PDAF build script / in ParFlow source!
-
-The environment variable `FOR2131` is set
-
-1. In the PDAF-build script
-   `bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
-2. In `bldsva/intf_DA/pdaf/tsmp/parflow/solver_richards.c`. Right
-   before the line `#ifdef FOR2131`, one should add a line reading
-   `#define FOR2131`.
-
-The environment variable `FOR2131` affects
-
-1. TSMP-PDAF in `enkf_parflow.c`, there are two main effects:
-   - behavior of `PF:updateflag == 2` is changed to include pressure in
-     the state vector
-   - a check for saturations greater than 1 is included
-
-2. `ParFlow`: There is an additional saturation update in
-   `solver_richards.c`.
-
 ## WATSAT3D ##
 
 Environment variable `WATSAT3D` is set in `common_build_interface.ksh`

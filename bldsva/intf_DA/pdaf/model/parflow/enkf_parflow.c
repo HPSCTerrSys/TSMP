@@ -442,9 +442,6 @@ void parflow_oasis_init(double current_time, double dt) {
   /* Set statevector-size and allocate ParFlow Subvectors */
   pf_statevecsize = enkf_subvecsize;
   if(pf_updateflag == 3) pf_statevecsize = pf_statevecsize * 2;
-#ifdef FOR2131
-  if(pf_updateflag == 2) pf_statevecsize = pf_statevecsize * 2;
-#endif
   pf_paramvecsize = enkf_subvecsize;
   if(pf_paramupdate == 2) pf_paramvecsize = nx_local*ny_local;
   if(pf_paramupdate == 4 || pf_paramupdate == 5) pf_paramvecsize = 2*enkf_subvecsize;
@@ -610,11 +607,6 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 	  for(i=0;i<enkf_subvecsize;i++) {
             pf_statevec[i] = subvec_sat[i] * subvec_porosity[i];
           }
-#ifdef FOR2131
-          for(i=enkf_subvecsize,j=0;i<(2*enkf_subvecsize);i++,j++){
-               pf_statevec[i] = subvec_p[j];
-           }
-#endif
 	  /* hcp CRNS begins */
 	  double dz_glob=GetDouble("ComputationalGrid.DZ");  //hcp if crns update
 	  int isc;
@@ -1984,11 +1976,10 @@ void update_parflow () {
     Vector * saturation_in = GetSaturationRichards(solver);
     for(i=0;i<enkf_subvecsize;i++){
       pf_statevec[i] = pf_statevec[i] / subvec_porosity[i];
-#ifdef FOR2131
       if(pf_statevec[i] > 1.0){
-         pf_statevec[i] = 1.0;
+        printf("Error: saturation > 1.0\n");
+	exit(1);
       }
-#endif
     }
     int saturation_to_pressure_type = 1;
     ENKF2PF(saturation_in, pf_statevec);
@@ -2027,15 +2018,7 @@ void update_parflow () {
     if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
-#ifdef FOR2131
-      if(pf_updateflag == 2){
-	nshift = 2*enkf_subvecsize;
-      }else{
-#endif
-	nshift = enkf_subvecsize;
-#ifdef FOR2131
-      }
-#endif
+      nshift = enkf_subvecsize;
     }
 
     /* update perm_xx */
@@ -2118,15 +2101,7 @@ void update_parflow () {
     if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
-#ifdef FOR2131
-      if(pf_updateflag == 2){
-	nshift = 2*enkf_subvecsize;
-      }else{
-#endif
-	nshift = enkf_subvecsize;
-#ifdef FOR2131
-      }
-#endif
+      nshift = enkf_subvecsize;
     }
     /* update mannings */
     for(i=nshift,j=0;i<(nshift+pf_paramvecsize);i++,j++)
@@ -2355,13 +2330,8 @@ void init_parf_l_size(int* dim_l)
     nshift = nz_local;
   }
   else if(pf_updateflag == 2) {
-#ifdef FOR2131
-    *dim_l = 2 * nz_local;
-    nshift = 2 * nz_local;
-#else
     *dim_l = nz_local;
     nshift = nz_local;
-#endif
   }
   else if(pf_updateflag == 3) {
     *dim_l = 2 * nz_local;

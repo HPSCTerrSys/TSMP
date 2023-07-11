@@ -151,10 +151,6 @@ pressure data (updateflag=1) in ParFlow.
 
 -   2: Update of Mannings coefficient
 
-Only available, when environment variable
-[FOR2131](../build_tsmp/build_environment_variables.md#for2131) is
-set:
-
 - 3: Update porosity
 
 - 4: Update van Genuchten parameters
