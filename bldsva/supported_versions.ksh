@@ -64,8 +64,8 @@ modelVersion+=(
 		["clm3-icon26-pfl"]="oasis3-mct clm3_5-icon icon2-622 parflow"
         ["eclm"]=" mct eclm cosmo5_1 parflow"
         ["eclm-mct"]="oasis3-mct eclm cosmo5_1 parflow"
-        ["clm5-cos5-pfl"]="clm5_0" # oasis3-mct cosmo5_1 parflow
-        ["clm5-cos5-pfl-pdaf"]="clm5_0 pdaf" # oasis3-mct cosmo5_1 parflow
+        ["clm5-cos5-pfl"]="oasis3-mct clm5_0 cosmo5_1 parflow"
+        ["clm5-cos5-pfl-pdaf"]="oasis3-mct clm5_0 cosmo5_1 parflow pdaf"
 )
 
 # list of model combinations that are available for a version. (first is default) 
