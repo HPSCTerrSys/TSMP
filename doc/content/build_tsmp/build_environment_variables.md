@@ -81,6 +81,8 @@ in function `c_configure_clm`.
 If it is turned on, the possibility of a read-in porosity is
 implemented in CLM's `iniTimeConst.F90`.
 
+Usage: Enforce consistent porosity in ParFlow and CLM.
+
 ## CLMFIVE ##
 
 Currently only in feature branch `TSMP_pdaf-clm5`.
