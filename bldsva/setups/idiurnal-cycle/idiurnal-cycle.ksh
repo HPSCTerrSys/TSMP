@@ -5,11 +5,11 @@ module load GCC OpenMPI CDO NCO
 
 static_files=$rootdir/tsmp_idiurnal-cycle/input
 
-defaultFDCLM="$rootdir/$static_files/clm"
-defaultFDCOS="$rootdir/$static_files/cosmo"
-defaultFDOAS="$rootdir/$static_files/oasis3"
-defaultFDPFL="$rootdir/$static_files/parflow"
-defaultFDICON="$rootdir/$static_files/icon"
+defaultFDCLM="$static_files/clm"
+defaultFDCOS="$static_files/cosmo"
+defaultFDOAS="$static_files/oasis3"
+defaultFDPFL="$static_files/parflow"
+defaultFDICON="$static_files/icon"
 
 defaultNLICON="$rootdir/bldsva/setups/$refSetup/icon_master.namelist $rootdir/bldsva/setups/$refSetup/NAMELIST_icon"
 defaultICONProc=316
