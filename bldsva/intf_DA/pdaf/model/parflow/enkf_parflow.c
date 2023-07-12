@@ -1976,9 +1976,10 @@ void update_parflow () {
     Vector * saturation_in = GetSaturationRichards(solver);
     for(i=0;i<enkf_subvecsize;i++){
       pf_statevec[i] = pf_statevec[i] / subvec_porosity[i];
-      if(pf_statevec[i] > 1.0){
-        printf("Warning (update_parflow): saturation > 1.0\n");
-      }
+      /* if(pf_statevec[i] > 1.0){ */
+      /* 	/\* pf_statevec[i] = 1.0; *\/ */
+      /*   printf("Warning (update_parflow): saturation > 1.0\n"); */
+      /* } */
     }
     int saturation_to_pressure_type = 1;
     ENKF2PF(saturation_in, pf_statevec);
