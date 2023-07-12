@@ -1977,8 +1977,7 @@ void update_parflow () {
     for(i=0;i<enkf_subvecsize;i++){
       pf_statevec[i] = pf_statevec[i] / subvec_porosity[i];
       if(pf_statevec[i] > 1.0){
-        printf("Error: saturation > 1.0\n");
-	exit(1);
+        printf("Warning (update_parflow): saturation > 1.0\n");
       }
     }
     int saturation_to_pressure_type = 1;
