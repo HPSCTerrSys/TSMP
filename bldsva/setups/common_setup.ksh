@@ -154,6 +154,20 @@ else
 	if [ -f $forcingdir_pfl/$inipress ]; then
     comment "   copy initial pressure and script into rundir"
 		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
+		  if [ -f $forcingdir_pfl/ascii2pfb.tcl ]; then
+		  comment "   create sloap pfb with tclsh"
+		  cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+		  check_pfl
+		  chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+		  check_pfl
+		  sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+		  check_pfl
+	      sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+	      check_pfl
+          sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
+          check_pfl
+          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
+          fi
 	check_pfl
 	fi
 	if [ -f $forcingdir_pfl/ascii2pfb_SoilInd.tcl ]; then
