@@ -135,33 +135,28 @@ else
         comment "   cd to rundir"
           cd $rundir >> $log_file 2>> $err_file
         check
-
+		if [ -f $forcingdir_pfl/ascii2pfb_slopes.tcl ]; then
         comment "   copy slopes and slope script into rundir"
           cp $forcingdir_pfl/ascii2*.tcl $rundir/ >> $log_file 2>> $err_file
 		check_pfl
           cp $forcingdir_pfl/$slope $rundir >> $log_file 2>> $err_file
 		check_pfl
           chmod u+w $rundir/$slope  $rundir/ascii2*.tcl >> $log_file 2>> $err_file
-
-    comment "   copy initial pressure and script into rundir"
-		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
-	check_pfl
-	comment "   sed procs into slopescript"
+		comment "   sed procs into slopescript"
           sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocx_pfl__,$px_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
 	
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
           tclsh ./ascii2pfb_slopes.tcl >> $log_file 2>> $err_file
-	check_pfl	
-	comment "   create sloap pfb with tclsh"
-		  sed "s,lappend auto_path.*,lappend auto_path $bindir/bin," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-	      sed "s,pfset Process\.Topology\.P.*,pfset Process\.Topology\.P $px_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-          sed "s,pfset Process\.Topology\.Q.*,pfset Process\.Topology\.Q $py_pfl," -i $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
-
-          tclsh ./ascii2pfb.tcl >> $log_file 2>> $err_file
-    check_pfl			
-	
+		check_pfl
+		fi
+	if [ -f $forcingdir_pfl/$inipress ]; then
+    comment "   copy initial pressure and script into rundir"
+		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
+	check_pfl
+	fi
+	if [ -f $forcingdir_pfl/ascii2pfb_SoilInd.tcl ]; then
 	comment "   copy soilind and soilind script into rundir"
           cp $forcingdir_pfl/ascii2pfb_SoilInd.tcl $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
@@ -182,6 +177,7 @@ else
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	
           sed "s,__pfl_solidinput_filename__,$defaultFDPFL/$pfsolPFL," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+	fi
 	
         tclsh ./coup_oas.tcl >> $log_file 2>> $err_file
     check_pfl
