@@ -151,10 +151,6 @@ pressure data (updateflag=1) in ParFlow.
 
 -   2: Update of Mannings coefficient
 
-Only available, when environment variable
-[FOR2131](../build_tsmp/build_environment_variables.md#for2131) is
-set:
-
 - 3: Update porosity
 
 - 4: Update van Genuchten parameters
@@ -238,10 +234,15 @@ after each parameter update.
 
 ### PF:aniso_use_parflow ###
 
-`PF:aniso_use_parflow`: (integer) If 1, Anisotropy factors from
-ParFlow should be used to compute y and z direction permeability from
-the x direction permeability that has been updated during EnKF.  If 0,
-`PF:aniso_perm_y` and `PF:aniso_perm_z` are used.
+`PF:aniso_use_parflow`: (integer) If 1, heterogeneous anisotropy
+factors (computed from ParFlow permeability arrays before the PDAF
+update) are used to compute the permeability in y and z direction
+based on the permeability in x direction that has been updated by
+PDAF.
+
+If 0, two homogeneous anisotropy factors are used to compute the
+updated permeabilities in y and z direction. These factors are read
+from the input variables `PF:aniso_perm_y` and `PF:aniso_perm_z`.
 
 ### PF:printensemble ###
 
@@ -489,7 +490,7 @@ Effect of `obs_interp_switch=1`:
  |           | `printstat`             | 1             |
  |           | `paramprintensemble`    | 1             |
  |           | `paramprintstat`        | 1             |
- |           | `olfmasking`            | 1             |
+ |           | `olfmasking`            | 0             |
  | `[CLM]`   |                         |               |
  |           | `problemname`           | \-            |
  |           | `nprocs`                | 0             |
