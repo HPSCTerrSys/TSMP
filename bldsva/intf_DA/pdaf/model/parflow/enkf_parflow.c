@@ -1745,7 +1745,7 @@ void update_parflow () {
     ProblemData *problem_data = GetProblemDataRichards(solver);
     Vector      *porosity     = ProblemDataPorosity(problem_data);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
@@ -1769,7 +1769,7 @@ void update_parflow () {
     Vector            *perm_zz = ProblemDataPermeabilityZ(problem_data);
     Vector       *porosity    = ProblemDataPorosity(problem_data);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
@@ -1819,7 +1819,7 @@ void update_parflow () {
     Vector            *alpha_sat = SaturationGetAlpha(sat);
     Vector            *n_sat = SaturationGetN(sat);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
@@ -1864,7 +1864,7 @@ void update_parflow () {
     Vector            *alpha_sat = SaturationGetAlpha(sat);
     Vector            *n_sat = SaturationGetN(sat);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
@@ -2121,7 +2121,7 @@ void update_parflow () {
     Vector            *alpha_sat = SaturationGetAlpha(sat);
     Vector            *n_sat = SaturationGetN(sat);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
@@ -2156,7 +2156,7 @@ void update_parflow () {
     Vector            *alpha_sat = SaturationGetAlpha(sat);
     Vector            *n_sat = SaturationGetN(sat);
     int nshift = 0;
-    if(pf_updateflag == 3 || pf_updateflag == 2){
+    if(pf_updateflag == 3){
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
