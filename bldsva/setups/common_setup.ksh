@@ -155,7 +155,7 @@ else
     comment "   copy initial pressure and script into rundir"
 		  cp $forcingdir_pfl/$inipress $rundir/ >> $log_file 2>> $err_file
 		  if [ -f $forcingdir_pfl/ascii2pfb.tcl ]; then
-		  comment "   create sloap pfb with tclsh"
+		  comment "   distribute initial pressure"
 		  cp $forcingdir_pfl/ascii2pfb.tcl $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
 		  check_pfl
 		  chmod u+w $rundir/rur_ic_press.pfb  $rundir/ascii2pfb.tcl >> $log_file 2>> $err_file
@@ -186,10 +186,7 @@ else
           sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
 	check_pfl
 	comment "   create soilInd pfb with tclsh"
-        tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	
-          sed "s,__nprocy_pfl__,$py_pfl," -i $rundir/ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file
-	
+        tclsh ./ascii2pfb_SoilInd.tcl >> $log_file 2>> $err_file		
           sed "s,__pfl_solidinput_filename__,$defaultFDPFL/$pfsolPFL," -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
 	fi
 	
