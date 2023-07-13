@@ -330,4 +330,4 @@ pfset Solver.WriteCLMBinary			        False
 #-----------------------------------------------------------------------------
 #pfrun default_single
 #pfundist default_single
-pfwritedb rurlaf
+pfwritedb ideal
