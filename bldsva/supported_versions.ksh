@@ -22,15 +22,15 @@ platforms+=(
 # IMPORTANT: add a leading and trailing " "(space)
 availability+=(
         ["JURECA"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
         ["JUWELS"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
         ["DEEP"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
         ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
         ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
-                     clm3-icon26-pfl eclm eclm-mct clm5-pdaf "
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
 )
 
 # list of versions with descriptions
