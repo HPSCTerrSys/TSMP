@@ -211,7 +211,7 @@ module enkf_clm_mod
   end subroutine set_clm_statevec
 
 
-  subroutine update_clm() bind(C,name="update_clm")
+  subroutine update_clm(int do_pupd) bind(C,name="update_clm")
     USE clmtype      , only : clm3
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
@@ -294,7 +294,7 @@ module enkf_clm_mod
     !end do
 
     ! write updated texture back to CLM
-    if(clmupdate_texture.eq.1) then
+    if(clmupdate_texture.eq.1 .and. do_pupd.eq.1) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg

@@ -43,7 +43,7 @@ extern void clm_init(char *s);
 extern void clm5_init(char *s, int pdaf_id, int pdaf_max);
 #endif
 extern void clm_advance(int *ntstep);
-extern void update_clm();
+extern void update_clm(int do_pupd);
 extern void print_update_clm(int *ts, int *ttot);
 extern void write_clm_statistics(int *ts, int *ttot);
 extern void clm_finalize();

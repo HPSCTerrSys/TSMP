@@ -153,7 +153,7 @@ module enkf_clm_mod
 
   end subroutine 
 
-  subroutine update_clm() bind(C,name="update_clm")
+  subroutine update_clm(int do_pupd) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
@@ -208,7 +208,7 @@ module enkf_clm_mod
     end do
 
     ! write updated texture back to CLM
-    if(clmupdate_texture.eq.1) then
+    if(clmupdate_texture.eq.1 .and. do_pupd.eq.1) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
@@ -222,7 +222,7 @@ module enkf_clm_mod
     endif
 
     ! write updated texture incl. organic matter back to CLM
-    if(clmupdate_texture.eq.2) then
+    if(clmupdate_texture.eq.2 .and. do_pupd.eq.1) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
