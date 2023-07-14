@@ -62,5 +62,3 @@ MPI_INC = __MPI_INC__
 # NetCDF (only required for Lorenz96)
 NC_LIB   = 
 NC_INC   = 
-FC += $(OPT)
-CC += $(OPT)
