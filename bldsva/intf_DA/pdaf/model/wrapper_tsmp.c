@@ -232,7 +232,7 @@ void update_tsmp(){
 
 #if defined CLMSA
   if((model == tag_model_clm) && ((clmupdate_swc != 0) || (clmupdate_T != 0))){
-    update_clm(do_pupd);
+    update_clm();
     print_update_clm(&tcycle, &total_steps);
   }
 #endif

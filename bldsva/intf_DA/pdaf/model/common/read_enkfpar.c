@@ -84,6 +84,7 @@ void read_enkfpar(char *parname)
   clmupdate_texture     = iniparser_getint(pardict,"CLM:update_texture",0);
   clmprint_swc          = iniparser_getint(pardict,"CLM:print_swc",0);
   clmprint_et           = iniparser_getint(pardict,"CLM:print_et",0);
+  clm_freq_paramupdate  = iniparser_getint(pardict,"CLM:paramupdate_frequency",0);
  
   /* get settings for data assimilation */
   string                = iniparser_getstring(pardict,"DA:outdir","");

@@ -80,6 +80,8 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
   integer :: statcomm
 
+  integer(c_int),bind(C,name="clm_freq_paramupdate") :: clm_freq_paramupdate
+
   contains
 
 #if defined CLMSA
@@ -211,7 +213,7 @@ module enkf_clm_mod
   end subroutine set_clm_statevec
 
 
-  subroutine update_clm(int do_pupd) bind(C,name="update_clm")
+  subroutine update_clm() bind(C,name="update_clm")
     USE clmtype      , only : clm3
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
@@ -231,6 +233,18 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
 
     integer :: i,j,cc=1,offset=0
+
+    integer :: do_pupd=0
+
+    ! check if frequency of parameter update is reached
+    do_pupd = tstartcycle
+    do_pupd = modulo(do_pupd, clm_freq_paramupdate)
+    if(do_pupd == 0) then
+      do_pupd = 1
+    else if(.not. do_pupd == 0) then
+      do_pupd = 0
+    endif
+
 
     swc   => clm3%g%l%c%cws%h2osoi_vol
     watsat => clm3%g%l%c%cps%watsat

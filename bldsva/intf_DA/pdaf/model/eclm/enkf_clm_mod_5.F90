@@ -39,7 +39,6 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
-  integer(c_int),bind(C,name="do_pupd")       :: do_pupd
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
@@ -57,6 +56,8 @@ module enkf_clm_mod
   logical :: flag
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
   integer :: statcomm
+
+  integer(c_int),bind(C,name="clm_freq_paramupdate") :: clm_freq_paramupdate
 
   contains
 
@@ -153,12 +154,13 @@ module enkf_clm_mod
 
   end subroutine 
 
-  subroutine update_clm(int do_pupd) bind(C,name="update_clm")
+  subroutine update_clm() bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varcon      , only : denh2o, denice, watmin
+    use mod_parallel_model, only : tstartcycle
 
     implicit none
     
@@ -174,6 +176,18 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
 
     integer :: i,j,cc=1,offset=0
+
+    integer :: do_pupd=0
+
+    ! check if frequency of parameter update is reached
+    do_pupd = tstartcycle
+    do_pupd = modulo(do_pupd, clm_freq_paramupdate)
+    if(do_pupd == 0) then
+      do_pupd = 1
+    else if(.not. do_pupd == 0) then
+      do_pupd = 0
+    endif
+
 
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
