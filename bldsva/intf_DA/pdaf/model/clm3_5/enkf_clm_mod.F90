@@ -218,6 +218,7 @@ module enkf_clm_mod
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use clm_varcon   , only : denh2o,denice
+    use mod_parallel_model, only : tstartcycle
 
     implicit none
     real(r8), pointer :: swc(:,:)
