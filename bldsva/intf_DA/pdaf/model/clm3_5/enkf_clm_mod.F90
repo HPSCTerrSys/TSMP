@@ -234,7 +234,7 @@ module enkf_clm_mod
 
     integer :: i,j,cc=1,offset=0
 
-    integer :: do_pupd=0
+    integer :: do_pupd
 
     ! check if frequency of parameter update is reached
     do_pupd = tstartcycle
