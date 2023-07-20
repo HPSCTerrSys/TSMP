@@ -25,17 +25,10 @@ There is also a public TSMP Virtual Machine available for download. This is a Ub
 
 Commands for cloning TSMP-PDAF (https or ssh):
 ```bash
-	git clone -b TSMP-pdaf https://github.com/HPSCTerrSys/TSMP TSMP
-	git clone -b TSMP-pdaf git@github.com:HPSCTerrSys/TSMP.git TSMP
+	git clone https://github.com/HPSCTerrSys/TSMP TSMP
+	git clone git@github.com:HPSCTerrSys/TSMP.git TSMP
 ```
 
-A second git-repository contains internal branches with current developments and is hosted by the Institute of Bio- and Geosciences
-Agrosphere (IBG-3) at the Forschungszentrum Jülich (registration required, contact jo.keller@fz-juelich.de):
-<https://icg4geo.icg.kfa-juelich.de>. 
-```bash
-	git clone https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp.git TSMP
-	git clone git@icg4geo.icg.kfa-juelich.de:ExternalRepos/tsmp-pdaf/tsmp.git TSMP
-```
 
 ## Component Models
 
