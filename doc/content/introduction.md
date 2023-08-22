@@ -18,7 +18,10 @@ TSMP development has been driven by groups within the [Center for High-Performan
 
 ## TSMP-PDAF 
 
-TSMP-PDAF describes the branches of the TSMP-repositories usable for TSMP simulations coupled with the Parallel Data Assimilation Framework ([PDAF](http://pdaf.awi.de/trac/wiki)).
+TSMP-PDAF describes the build commands of TSMP that can introduce
+ ensemble TSMP simulations and TSMP simulations coupled with PDAF, the
+ Parallel Data Assimilation Framework
+ ([PDAF](http://pdaf.awi.de/trac/wiki)).
 
 ## Web Resources
 
