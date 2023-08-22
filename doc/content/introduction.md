@@ -27,11 +27,6 @@ The main remote repository of TSMP is located on Github:
 - Github
   ([https://github.com/HPSCTerrSys/TSMP](https://github.com/HPSCTerrSys/TSMP))
 
-On Gitlab is a clone with additional branches for TSMP-PDAF.
-
-- Gitlab
-  ([https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp](https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp))
-
 Useful information for users, including a wiki and exercises, can be
 found among the resources for the Fall School HPSC Terrestrial
 Systems:
