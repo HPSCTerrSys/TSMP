@@ -17,24 +17,12 @@ Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF b
 
 
 ### 1.2 PDAF
-Get PDAF from [http://pdaf.awi.de/](http://pdaf.awi.de/) at least
-version 1.13 (suggested version 2.0) and unpack it in the tsmp
-directory and re-name the folder to `pdaf`. 
 
-Users with internal IBG-3 access may also look here:
-[https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh](https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh)
-
-Example: On your local machine:
+Get PDAF from <https://github.com/PDAF/PDAF> and clone it in the
+`tsmp` directory as `pdaf`.
 
 ```bash
- scp your_local_download_folder/PDAF-D_V1.16.tar.gz your_username@jureca.fz-juelich.de:/full_path_to_your_tsmp_folder
-```
-
-On the JSC machine in the tsmp folder:
-
-```bash
- tar -xzf PDAF-D_V1.16.tar.gz
- mv PDAF-D_V1.16 pdaf
+ git clone git@github.com:PDAF/PDAF.git tsmp
 ```
 
 ### 1.3 CLM5
@@ -55,6 +43,7 @@ source ../bldsva/machines/JURECA/loadenvs.Intel
   used for build with Intel
 - `./manage_externals/checkout_externals`: Loads dependencies of CLM5,
   mostly a collection of `git clone` commands
+
 ### 1.4 Compile the models together
 
 The TSMP framework works with its own build system. With the models in

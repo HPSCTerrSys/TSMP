@@ -167,9 +167,9 @@ route "${cyellow}>> substitutions_clm${cnormal}"
 
   if [[ $withPDAF == "true" ]] ; then
     comment " substitutions with pdaf"
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/cime_comp_mod.F90 $clmdir/cime/src/drivers/mct/main
+    patch $rootdir/bldsva/intf_DA/${mList[4]}/tsmp/${mList[1]}/cime_comp_mod.F90 $clmdir/cime/src/drivers/mct/main
     check
-    patch $rootdir/bldsva/intf_DA/pdaf1_1/tsmp/${mList[1]}/seq_comm_mct.F90 $clmdir/cime/src/drivers/mct/shr
+    patch $rootdir/bldsva/intf_DA/${mList[4]}/tsmp/${mList[1]}/seq_comm_mct.F90 $clmdir/cime/src/drivers/mct/shr
     check
   fi
   
