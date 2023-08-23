@@ -59,7 +59,6 @@ Welcome to TSMP documentation!
    :maxdepth: 3
    :caption: Feature Branches:
 
-   content/feat_branch/branches.md
    content/feat_branch/clm5-pdaf_starter.md
 
 .. toctree::

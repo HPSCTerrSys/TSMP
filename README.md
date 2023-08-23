@@ -29,8 +29,6 @@ Please see [getting started section](https://hpscterrsys.github.io/TSMP/content/
 ## TSMP version history
 The model components used in TSMP are OASIS3-MCT v2, COSMO v5.01, CLM v3.5, ParFlow 3.2 for TSMP versions v1.2.1, v1.2.2 and v1.2.3, ParFlow 3.9 for version v1.3.3 and ParFlow 3.12 for version v1.4.0. TSMP supports ParFlow 3.7 onwards from version v1.3.3 onward. 
 
-Those who need to work with ParFlow 3.2, should use the branch `TSMP_pdaf`.
-
 ## Citing TSMP
 
 If you use TSMP in a publication, please cite the these papers that describe the model's basic functionalities:
