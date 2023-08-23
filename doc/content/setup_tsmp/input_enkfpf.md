@@ -133,13 +133,20 @@ Must match with the specifications in the `*.pfidb` input.
 ### PF:gwmasking ###
 
 `PF:gwmasking`: (integer) Groundwater masking for assimilation of
-pressure data (updateflag=1) in ParFlow.
+pressure data (`pf_updateflag=1`) in ParFlow.
 
 -   0: No groundwater masking.
 
 -   1: Groundwater masking using saturated cells only.
 
 -   2: Groundwater masking using mixed state vector.
+
+For assimilating SM data (`pf_updateflag=2`), the following masking
+options are included:
+
+-   0: No groundwater masking.
+
+-   1: Groundwater masking using **unsaturated** cells only.
 
 ### PF:paramupdate ###
 
