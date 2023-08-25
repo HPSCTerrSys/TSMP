@@ -5,6 +5,8 @@
 [![Latest release](https://img.shields.io/github/v/tag/HPSCTerrSys/TSMP.svg?color=brightgreen&label=latest%20release&sort=semver)](https://github.com/HPSCTerrSys/TSMP/tags) 
 [![GitHub last commit](https://img.shields.io/github/last-commit/HPSCTerrSys/TSMP)](https://github.com/HPSCTerrSys/TSMP/commits/master)
 [![Twitter Follow](https://img.shields.io/twitter/follow/HPSCTerrSys?style=social)](https://twitter.com/HPSCTerrSys)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8283715.svg)](https://doi.org/10.5281/zenodo.8283715)
+
 
 ## Introduction 
 
