@@ -1843,101 +1843,182 @@ CHARACTER (LEN=14), INTENT(IN)     ::   &
     ENDIF
 
     SELECT CASE (ico2_rad)
-    CASE (0)
-      ! specific CO2 content of the atmosphere (=330 PPM) (default for DWD)
-      zqco2  = 0.5014E-3_wp
+  CASE (0)
+    ! specific CO2 content of the atmosphere (=330 PPM) (default for DWD)
+    zqco2  = 0.5014E-3_wp
 
-    CASE (1)
-      ! time dependent CO2 content (fits of IPCC scenario values, taken from ECHAM5)
-      ! A1B scenario (for 1950 <= zyear <= 2100)
-      !   only CO2
-      zqco2 = (- 2.2915249519766070E+07_wp                &
-        + 45714.032150104744_wp      * zyear       &
-        - 34.178190922262594_wp      * zyear*zyear &
-        + 0.01134997524110402_wp     * zyear**3    &
-        - 1.4124678138498344E-06_wp  * zyear**4) * 1.519E-06_wp
+  CASE (1)
+    ! time dependent CO2 content (fits of IPCC scenario values, taken from ECHAM5)
+    ! A1B scenario (for 1950 <= zyear <= 2100)
+    !   only CO2
+    zqco2 = (- 2.2915249519766070E+07_wp                &
+      + 45714.032150104744_wp      * zyear       &
+      - 34.178190922262594_wp      * zyear*zyear &
+      + 0.01134997524110402_wp     * zyear**3    &
+      - 1.4124678138498344E-06_wp  * zyear**4) * 1.519E-06_wp
 
-    CASE (2)
-      ! A1B scenario (for 1950 <= zyear <= 2100)
-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
-      zqco2 = ( -2.131843263017098E+07_wp                &
-        + 42697.69425574343_wp      * zyear       &
-        - 32.04969808544885_wp      * zyear*zyear &
-        + 0.010685253016710392_wp   * zyear**3    &
-        - 1.3349801856070718E-06_wp * zyear**4) * 1.519E-06_wp
+  CASE (2)
+    ! A1B scenario (for 1950 <= zyear <= 2100)
+    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+    zqco2 = ( -2.131843263017098E+07_wp                &
+      + 42697.69425574343_wp      * zyear       &
+      - 32.04969808544885_wp      * zyear*zyear &
+      + 0.010685253016710392_wp   * zyear**3    &
+      - 1.3349801856070718E-06_wp * zyear**4) * 1.519E-06_wp
 
-    CASE (3)
-      ! B1 scenario (for 1950 <= zyear <= 2100)
-      !   only CO2
-      zqco2 = (- 1.0401357268181011E+07_wp               &
-        + 21152.707545487563_wp     * zyear       &
-        - 16.116691528852456_wp     * zyear*zyear &
-        + 0.005452554505141226_wp   * zyear**3    &
-        - 6.910849734430986E-07_wp  * zyear**4) * 1.519E-06_wp
+  CASE (3)
+    ! B1 scenario (for 1950 <= zyear <= 2100)
+    !   only CO2
+    zqco2 = (- 1.0401357268181011E+07_wp               &
+      + 21152.707545487563_wp     * zyear       &
+      - 16.116691528852456_wp     * zyear*zyear &
+      + 0.005452554505141226_wp   * zyear**3    &
+      - 6.910849734430986E-07_wp  * zyear**4) * 1.519E-06_wp
 
-    CASE (4)
-      ! B1 scenario (for 1950 <= zyear <= 2100)
-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
-      zqco2 = (- 7.716609874947305E+06_wp                &
-        + 15881.335647116388_wp     * zyear       &
-        - 12.239258629216023_wp     * zyear*zyear &
-        + 0.0041862325463834565_wp  * zyear**3    &
-        - 5.361489502050553E-07_wp  * zyear**4) * 1.519E-06_wp
+  CASE (4)
+    ! B1 scenario (for 1950 <= zyear <= 2100)
+    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+    zqco2 = (- 7.716609874947305E+06_wp                &
+      + 15881.335647116388_wp     * zyear       &
+      - 12.239258629216023_wp     * zyear*zyear &
+      + 0.0041862325463834565_wp  * zyear**3    &
+      - 5.361489502050553E-07_wp  * zyear**4) * 1.519E-06_wp
 
-    CASE (5)
-      ! A2 scenario (for 1950 <= zyear <= 2100)
-      !   only CO2
-      zqco2 = (  3.682237592956851E06_wp                 &
-        - 7547.069807360021_wp      * zyear       &
-        + 5.8133367065151145_wp     * zyear*zyear &
-        - 0.001994454601121309_wp   * zyear**3    &
-        + 2.571600007798381E-07_wp  * zyear**4 ) * 1.519E-06_wp
+  CASE (5)
+    ! A2 scenario (for 1950 <= zyear <= 2100)
+    !   only CO2
+    zqco2 = (  3.682237592956851E06_wp                 &
+      - 7547.069807360021_wp      * zyear       &
+      + 5.8133367065151145_wp     * zyear*zyear &
+      - 0.001994454601121309_wp   * zyear**3    &
+      + 2.571600007798381E-07_wp  * zyear**4 ) * 1.519E-06_wp
 
-    CASE (6)
-      ! A2 scenario (for 1950 <= zyear <= 2100)
-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
-      zqco2 = ( - 340960.0590212098_wp                    &
-        + 403.20639583857496_wp     * zyear       &
-        - 0.074859345260926_wp      * zyear*zyear &
-        - 0.00005743139714985962_wp * zyear**3    &
-        + 1.837122734626407E-08_wp  * zyear**4) * 1.519E-06_wp
+  CASE (6)
+    ! A2 scenario (for 1950 <= zyear <= 2100)
+    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+    zqco2 = ( - 340960.0590212098_wp                    &
+      + 403.20639583857496_wp     * zyear       &
+      - 0.074859345260926_wp      * zyear*zyear &
+      - 0.00005743139714985962_wp * zyear**3    &
+      + 1.837122734626407E-08_wp  * zyear**4) * 1.519E-06_wp
 
-    CASE (7)
-      ! RCP2.6 scenario (for 1950 <= zyear <= 2150)
-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
-      zqco2 = ( + 5.8284208232E+08_wp        &
-                - 1.4124858918E+06_wp * zyear       &
-                + 1.3686382349E+03_wp * zyear*zyear &
-                - 6.6279390807E-01_wp * zyear**3    &
-                + 1.6041979084E-04_wp * zyear**4    &
-                - 1.5524630613E-08_wp * zyear**5) * 1.519E-06_wp
+  CASE (7)
+    ! RCP2.6 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = ( + 5.8284208232E+08_wp        &
+              - 1.4124858918E+06_wp * zyear       &
+              + 1.3686382349E+03_wp * zyear*zyear &
+              - 6.6279390807E-01_wp * zyear**3    &
+              + 1.6041979084E-04_wp * zyear**4    &
+              - 1.5524630613E-08_wp * zyear**5) * 1.519E-06_wp
 
-    CASE (8)
-      ! RCP4.5 scenario (for 1950 <= zyear <= 2150)
-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
-      zqco2 = ( + 1.9955662739E+07_wp               &
-                - 3.8768658589E+04_wp * zyear       &
-                + 2.8220059919E+01_wp * zyear*zyear &
-                - 9.1219963074E-03_wp * zyear**3    &
-                + 1.1048642039E-06_wp * zyear**4) * 1.519E-06_wp
+  CASE (8)
+    ! RCP4.5 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = ( + 1.9955662739E+07_wp               &
+              - 3.8768658589E+04_wp * zyear       &
+              + 2.8220059919E+01_wp * zyear*zyear &
+              - 9.1219963074E-03_wp * zyear**3    &
+              + 1.1048642039E-06_wp * zyear**4) * 1.519E-06_wp
 
-    CASE (9)
-      ! RCP6 scenario (for 1950 <= zyear <= 2150)
-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
-      zqco2 = ( - 2.1182177462E+07_wp               &
-                + 4.1828994948E+04_wp * zyear       &
-                - 3.0962236444E+01_wp * zyear*zyear &
-                + 1.0181182525E-02_wp * zyear**3    &
-                - 1.2547431825E-06_wp * zyear**4) * 1.519E-06_wp
+  CASE (9)
+    ! RCP6 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = ( - 2.1182177462E+07_wp               &
+              + 4.1828994948E+04_wp * zyear       &
+              - 3.0962236444E+01_wp * zyear*zyear &
+              + 1.0181182525E-02_wp * zyear**3    &
+              - 1.2547431825E-06_wp * zyear**4) * 1.519E-06_wp
 
-    CASE (10)
-      ! RCP8.5 scenario (for 1950 <= zyear <= 2150)
-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
-      zqco2 = ( - 4.0501145412E+07_wp               &
-                + 7.9386473439E+04_wp * zyear       &
-                - 5.8292720579E+01_wp * zyear*zyear &
-                + 1.9002921793E-02_wp * zyear**3    &
-                - 2.3202412328E-06_wp * zyear**4) * 1.519E-06_wp
+  CASE (10)
+    ! RCP8.5 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = ( - 4.0501145412E+07_wp               &
+              + 7.9386473439E+04_wp * zyear       &
+              - 5.8292720579E+01_wp * zyear*zyear &
+              + 1.9002921793E-02_wp * zyear**3    &
+              - 2.3202412328E-06_wp * zyear**4) * 1.519E-06_wp
+
+  CASE (11)
+    ! SSP1-1.9 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 2.0748946165004087E-12_wp*zyear**4 &
+          - 1.6939543964855837E-08_wp*zyear**3 &
+          + 5.1820015196002167E-05_wp*zyear**2 &
+          - 0.07039884240035876_wp*zyear       &
+          + 35.836451348205635_wp
+
+  CASE (12)
+    ! SSP1-2.6 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 2.36220469073328E-12_wp*zyear**4   &
+          - 1.9364056638131983E-08_wp*zyear**3 &
+          + 5.948388747069098E-05_wp*zyear**2  &
+          - 0.08115347380596108_wp*zyear       &
+          + 41.489363083255235_wp
+
+  CASE (13)
+    ! SSP2-4.5 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 1.105330667597739E-12_wp*zyear**4  &
+          - 9.218122765288166E-09_wp*zyear**3  &
+          + 2.8799097821886327E-05_wp*zyear**2 &
+          - 0.03994501094947662_wp*zyear       &
+          + 20.75410211913647_wp
+
+  CASE (14)
+    ! SSP3-7.0 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = -2.321011780878143E-12_wp*zyear**4  &
+           + 1.8937920858108963E-08_wp*zyear**3 &
+           - 5.7887367445372235E-05_wp*zyear**2 &
+           + 0.07857043494112805_wp*zyear       &
+           - 39.95780232789971_wp
+
+  CASE (15)
+    ! SSP3-7.0-lowNTCF scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = -2.038547351024415E-12_wp*zyear**4  &
+           + 1.6709109097004935E-08_wp*zyear**3 &
+           - 5.130584980649077E-05_wp*zyear**2  &
+           + 0.06995080387620804_wp*zyear       &
+           - 35.73354546490589_wp
+
+  CASE (16)
+    ! SSP4-3.4 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 1.7421843239771104E-12_wp*zyear**4  &
+          - 1.439765173010817E-08_wp*zyear**3   &
+          + 4.457910308162822E-05_wp*zyear**2   &
+          - 0.06129019508273928_wp*zyear        &
+          + 31.57102640207195_wp
+
+  CASE (17)
+    ! SSP4-6.0 scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 1.8028598271129668E-13_wp*zyear**4  &
+          - 1.6835037681644737E-09_wp*zyear**3  &
+          + 5.803080538499406E-06_wp*zyear**2   &
+          - 0.008774898051645498_wp*zyear       &
+          + 4.92170544447321_wp
+
+  CASE (18)
+    ! SSP5-3.4-over scenario (for 1950 <= zyear <= 2150)
+    !   eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = 4.4606470318930345E-12_wp*zyear**4  &
+          - 3.6734298405425755E-08_wp*zyear**3  &
+          + 0.00011336903984577133_wp*zyear**2  &
+          - 0.15539923348149792_wp*zyear        &
+          + 79.82712970008782_wp
+
+  CASE (19)
+    ! SSP5-8.5 scenario (for 1950 <= zyear <= 2150)
+    ! eff. CO2 (all GreeHouseGases (GHG) considered)
+    zqco2 = -5.141900796113377E-12_wp*zyear**4  &
+           + 4.2063085627215193E-08_wp*zyear**3 &
+           - 0.00012892207408445763_wp*zyear**2 &
+           + 0.1754749814333152_wp*zyear        &
+           - 89.49517056944417_wp
 
     END SELECT
 

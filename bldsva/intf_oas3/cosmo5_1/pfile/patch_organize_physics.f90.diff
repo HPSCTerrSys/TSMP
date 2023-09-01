@@ -1,5 +1,5 @@
----  organize_physics.f90	2014-11-28 12:18:36.000000000 +0100
-+++  organize_physics.f90	2019-12-04 12:52:07.095665000 +0100
+--- organize_physics.f90	2023-09-01 12:37:28.199592561 +0200
++++ organize_physics.f90	2023-08-29 14:58:07.600243000 +0200
 @@ -274,6 +274,12 @@
  USE data_io,            ONLY:  ydate_ini, lbdclim, lana_qi, llb_qi, lana_qg, &
                                 llb_qg, lana_qr_qs, llb_qr_qs
@@ -92,3 +92,12 @@
      ENDIF
    ENDIF
  
+@@ -2452,7 +2486,7 @@
+      PRINT *,' WARNING: *** icldm_turb is set to default again *** '
+   END IF
+ 
+-  IF (ico2_rad > 10)  ico2_rad  = ico2_rad_d
++  IF (ico2_rad > 19)  ico2_rad  = ico2_rad_d
+ 
+   ! the prognostic TKE-scheme of Matthias Raschendorfer is not used
+   IF (itype_turb.NE.3) THEN

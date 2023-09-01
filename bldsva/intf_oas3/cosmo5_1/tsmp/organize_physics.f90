@@ -2486,7 +2486,7 @@ IF (my_world_id == 0) THEN
      PRINT *,' WARNING: *** icldm_turb is set to default again *** '
   END IF
 
-  IF (ico2_rad > 10)  ico2_rad  = ico2_rad_d
+  IF (ico2_rad > 19)  ico2_rad  = ico2_rad_d
 
   ! the prognostic TKE-scheme of Matthias Raschendorfer is not used
   IF (itype_turb.NE.3) THEN

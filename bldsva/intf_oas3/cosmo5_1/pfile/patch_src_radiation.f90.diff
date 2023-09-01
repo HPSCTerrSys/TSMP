@@ -1,5 +1,5 @@
---- src_radiation.f90	2014-11-28 12:18:36.000000000 +0100
-+++ src_radiation.f90	2019-12-04 12:52:07.114213000 +0100
+--- src_radiation.f90	2023-09-01 12:37:28.206363719 +0200
++++ src_radiation.f90	2023-08-29 14:58:08.439696000 +0200
 @@ -445,6 +445,11 @@
  
  !------------------------------------------------------------------------------
@@ -40,7 +40,285 @@
    zalso_rn  (:  )          ! Solar surface albedo
  
    REAL (KIND=wp)       , ALLOCATABLE :: &
-@@ -2333,6 +2345,8 @@
+@@ -1831,101 +1843,182 @@
+     ENDIF
+ 
+     SELECT CASE (ico2_rad)
+-    CASE (0)
+-      ! specific CO2 content of the atmosphere (=330 PPM) (default for DWD)
+-      zqco2  = 0.5014E-3_wp
+-
+-    CASE (1)
+-      ! time dependent CO2 content (fits of IPCC scenario values, taken from ECHAM5)
+-      ! A1B scenario (for 1950 <= zyear <= 2100)
+-      !   only CO2
+-      zqco2 = (- 2.2915249519766070E+07_wp                &
+-        + 45714.032150104744_wp      * zyear       &
+-        - 34.178190922262594_wp      * zyear*zyear &
+-        + 0.01134997524110402_wp     * zyear**3    &
+-        - 1.4124678138498344E-06_wp  * zyear**4) * 1.519E-06_wp
+-
+-    CASE (2)
+-      ! A1B scenario (for 1950 <= zyear <= 2100)
+-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+-      zqco2 = ( -2.131843263017098E+07_wp                &
+-        + 42697.69425574343_wp      * zyear       &
+-        - 32.04969808544885_wp      * zyear*zyear &
+-        + 0.010685253016710392_wp   * zyear**3    &
+-        - 1.3349801856070718E-06_wp * zyear**4) * 1.519E-06_wp
+-
+-    CASE (3)
+-      ! B1 scenario (for 1950 <= zyear <= 2100)
+-      !   only CO2
+-      zqco2 = (- 1.0401357268181011E+07_wp               &
+-        + 21152.707545487563_wp     * zyear       &
+-        - 16.116691528852456_wp     * zyear*zyear &
+-        + 0.005452554505141226_wp   * zyear**3    &
+-        - 6.910849734430986E-07_wp  * zyear**4) * 1.519E-06_wp
+-
+-    CASE (4)
+-      ! B1 scenario (for 1950 <= zyear <= 2100)
+-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+-      zqco2 = (- 7.716609874947305E+06_wp                &
+-        + 15881.335647116388_wp     * zyear       &
+-        - 12.239258629216023_wp     * zyear*zyear &
+-        + 0.0041862325463834565_wp  * zyear**3    &
+-        - 5.361489502050553E-07_wp  * zyear**4) * 1.519E-06_wp
+-
+-    CASE (5)
+-      ! A2 scenario (for 1950 <= zyear <= 2100)
+-      !   only CO2
+-      zqco2 = (  3.682237592956851E06_wp                 &
+-        - 7547.069807360021_wp      * zyear       &
+-        + 5.8133367065151145_wp     * zyear*zyear &
+-        - 0.001994454601121309_wp   * zyear**3    &
+-        + 2.571600007798381E-07_wp  * zyear**4 ) * 1.519E-06_wp
+-
+-    CASE (6)
+-      ! A2 scenario (for 1950 <= zyear <= 2100)
+-      !   eff. CO2 (i.e. CO2 & CH4 & N2O)
+-      zqco2 = ( - 340960.0590212098_wp                    &
+-        + 403.20639583857496_wp     * zyear       &
+-        - 0.074859345260926_wp      * zyear*zyear &
+-        - 0.00005743139714985962_wp * zyear**3    &
+-        + 1.837122734626407E-08_wp  * zyear**4) * 1.519E-06_wp
+-
+-    CASE (7)
+-      ! RCP2.6 scenario (for 1950 <= zyear <= 2150)
+-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
+-      zqco2 = ( + 5.8284208232E+08_wp        &
+-                - 1.4124858918E+06_wp * zyear       &
+-                + 1.3686382349E+03_wp * zyear*zyear &
+-                - 6.6279390807E-01_wp * zyear**3    &
+-                + 1.6041979084E-04_wp * zyear**4    &
+-                - 1.5524630613E-08_wp * zyear**5) * 1.519E-06_wp
+-
+-    CASE (8)
+-      ! RCP4.5 scenario (for 1950 <= zyear <= 2150)
+-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
+-      zqco2 = ( + 1.9955662739E+07_wp               &
+-                - 3.8768658589E+04_wp * zyear       &
+-                + 2.8220059919E+01_wp * zyear*zyear &
+-                - 9.1219963074E-03_wp * zyear**3    &
+-                + 1.1048642039E-06_wp * zyear**4) * 1.519E-06_wp
+-
+-    CASE (9)
+-      ! RCP6 scenario (for 1950 <= zyear <= 2150)
+-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
+-      zqco2 = ( - 2.1182177462E+07_wp               &
+-                + 4.1828994948E+04_wp * zyear       &
+-                - 3.0962236444E+01_wp * zyear*zyear &
+-                + 1.0181182525E-02_wp * zyear**3    &
+-                - 1.2547431825E-06_wp * zyear**4) * 1.519E-06_wp
+-
+-    CASE (10)
+-      ! RCP8.5 scenario (for 1950 <= zyear <= 2150)
+-      !   eff. CO2 (all GreeHouseGases (GHG) considered)
+-      zqco2 = ( - 4.0501145412E+07_wp               &
+-                + 7.9386473439E+04_wp * zyear       &
+-                - 5.8292720579E+01_wp * zyear*zyear &
+-                + 1.9002921793E-02_wp * zyear**3    &
+-                - 2.3202412328E-06_wp * zyear**4) * 1.519E-06_wp
++  CASE (0)
++    ! specific CO2 content of the atmosphere (=330 PPM) (default for DWD)
++    zqco2  = 0.5014E-3_wp
++
++  CASE (1)
++    ! time dependent CO2 content (fits of IPCC scenario values, taken from ECHAM5)
++    ! A1B scenario (for 1950 <= zyear <= 2100)
++    !   only CO2
++    zqco2 = (- 2.2915249519766070E+07_wp                &
++      + 45714.032150104744_wp      * zyear       &
++      - 34.178190922262594_wp      * zyear*zyear &
++      + 0.01134997524110402_wp     * zyear**3    &
++      - 1.4124678138498344E-06_wp  * zyear**4) * 1.519E-06_wp
++
++  CASE (2)
++    ! A1B scenario (for 1950 <= zyear <= 2100)
++    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
++    zqco2 = ( -2.131843263017098E+07_wp                &
++      + 42697.69425574343_wp      * zyear       &
++      - 32.04969808544885_wp      * zyear*zyear &
++      + 0.010685253016710392_wp   * zyear**3    &
++      - 1.3349801856070718E-06_wp * zyear**4) * 1.519E-06_wp
++
++  CASE (3)
++    ! B1 scenario (for 1950 <= zyear <= 2100)
++    !   only CO2
++    zqco2 = (- 1.0401357268181011E+07_wp               &
++      + 21152.707545487563_wp     * zyear       &
++      - 16.116691528852456_wp     * zyear*zyear &
++      + 0.005452554505141226_wp   * zyear**3    &
++      - 6.910849734430986E-07_wp  * zyear**4) * 1.519E-06_wp
++
++  CASE (4)
++    ! B1 scenario (for 1950 <= zyear <= 2100)
++    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
++    zqco2 = (- 7.716609874947305E+06_wp                &
++      + 15881.335647116388_wp     * zyear       &
++      - 12.239258629216023_wp     * zyear*zyear &
++      + 0.0041862325463834565_wp  * zyear**3    &
++      - 5.361489502050553E-07_wp  * zyear**4) * 1.519E-06_wp
++
++  CASE (5)
++    ! A2 scenario (for 1950 <= zyear <= 2100)
++    !   only CO2
++    zqco2 = (  3.682237592956851E06_wp                 &
++      - 7547.069807360021_wp      * zyear       &
++      + 5.8133367065151145_wp     * zyear*zyear &
++      - 0.001994454601121309_wp   * zyear**3    &
++      + 2.571600007798381E-07_wp  * zyear**4 ) * 1.519E-06_wp
++
++  CASE (6)
++    ! A2 scenario (for 1950 <= zyear <= 2100)
++    !   eff. CO2 (i.e. CO2 & CH4 & N2O)
++    zqco2 = ( - 340960.0590212098_wp                    &
++      + 403.20639583857496_wp     * zyear       &
++      - 0.074859345260926_wp      * zyear*zyear &
++      - 0.00005743139714985962_wp * zyear**3    &
++      + 1.837122734626407E-08_wp  * zyear**4) * 1.519E-06_wp
++
++  CASE (7)
++    ! RCP2.6 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = ( + 5.8284208232E+08_wp        &
++              - 1.4124858918E+06_wp * zyear       &
++              + 1.3686382349E+03_wp * zyear*zyear &
++              - 6.6279390807E-01_wp * zyear**3    &
++              + 1.6041979084E-04_wp * zyear**4    &
++              - 1.5524630613E-08_wp * zyear**5) * 1.519E-06_wp
++
++  CASE (8)
++    ! RCP4.5 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = ( + 1.9955662739E+07_wp               &
++              - 3.8768658589E+04_wp * zyear       &
++              + 2.8220059919E+01_wp * zyear*zyear &
++              - 9.1219963074E-03_wp * zyear**3    &
++              + 1.1048642039E-06_wp * zyear**4) * 1.519E-06_wp
++
++  CASE (9)
++    ! RCP6 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = ( - 2.1182177462E+07_wp               &
++              + 4.1828994948E+04_wp * zyear       &
++              - 3.0962236444E+01_wp * zyear*zyear &
++              + 1.0181182525E-02_wp * zyear**3    &
++              - 1.2547431825E-06_wp * zyear**4) * 1.519E-06_wp
++
++  CASE (10)
++    ! RCP8.5 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = ( - 4.0501145412E+07_wp               &
++              + 7.9386473439E+04_wp * zyear       &
++              - 5.8292720579E+01_wp * zyear*zyear &
++              + 1.9002921793E-02_wp * zyear**3    &
++              - 2.3202412328E-06_wp * zyear**4) * 1.519E-06_wp
++
++  CASE (11)
++    ! SSP1-1.9 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 2.0748946165004087E-12_wp*zyear**4 &
++          - 1.6939543964855837E-08_wp*zyear**3 &
++          + 5.1820015196002167E-05_wp*zyear**2 &
++          - 0.07039884240035876_wp*zyear       &
++          + 35.836451348205635_wp
++
++  CASE (12)
++    ! SSP1-2.6 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 2.36220469073328E-12_wp*zyear**4   &
++          - 1.9364056638131983E-08_wp*zyear**3 &
++          + 5.948388747069098E-05_wp*zyear**2  &
++          - 0.08115347380596108_wp*zyear       &
++          + 41.489363083255235_wp
++
++  CASE (13)
++    ! SSP2-4.5 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 1.105330667597739E-12_wp*zyear**4  &
++          - 9.218122765288166E-09_wp*zyear**3  &
++          + 2.8799097821886327E-05_wp*zyear**2 &
++          - 0.03994501094947662_wp*zyear       &
++          + 20.75410211913647_wp
++
++  CASE (14)
++    ! SSP3-7.0 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = -2.321011780878143E-12_wp*zyear**4  &
++           + 1.8937920858108963E-08_wp*zyear**3 &
++           - 5.7887367445372235E-05_wp*zyear**2 &
++           + 0.07857043494112805_wp*zyear       &
++           - 39.95780232789971_wp
++
++  CASE (15)
++    ! SSP3-7.0-lowNTCF scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = -2.038547351024415E-12_wp*zyear**4  &
++           + 1.6709109097004935E-08_wp*zyear**3 &
++           - 5.130584980649077E-05_wp*zyear**2  &
++           + 0.06995080387620804_wp*zyear       &
++           - 35.73354546490589_wp
++
++  CASE (16)
++    ! SSP4-3.4 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 1.7421843239771104E-12_wp*zyear**4  &
++          - 1.439765173010817E-08_wp*zyear**3   &
++          + 4.457910308162822E-05_wp*zyear**2   &
++          - 0.06129019508273928_wp*zyear        &
++          + 31.57102640207195_wp
++
++  CASE (17)
++    ! SSP4-6.0 scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 1.8028598271129668E-13_wp*zyear**4  &
++          - 1.6835037681644737E-09_wp*zyear**3  &
++          + 5.803080538499406E-06_wp*zyear**2   &
++          - 0.008774898051645498_wp*zyear       &
++          + 4.92170544447321_wp
++
++  CASE (18)
++    ! SSP5-3.4-over scenario (for 1950 <= zyear <= 2150)
++    !   eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = 4.4606470318930345E-12_wp*zyear**4  &
++          - 3.6734298405425755E-08_wp*zyear**3  &
++          + 0.00011336903984577133_wp*zyear**2  &
++          - 0.15539923348149792_wp*zyear        &
++          + 79.82712970008782_wp
++
++  CASE (19)
++    ! SSP5-8.5 scenario (for 1950 <= zyear <= 2150)
++    ! eff. CO2 (all GreeHouseGases (GHG) considered)
++    zqco2 = -5.141900796113377E-12_wp*zyear**4  &
++           + 4.2063085627215193E-08_wp*zyear**3 &
++           - 0.00012892207408445763_wp*zyear**2 &
++           + 0.1754749814333152_wp*zyear        &
++           - 89.49517056944417_wp
+ 
+     END SELECT
+ 
+@@ -2333,6 +2426,8 @@
        ENDIF
      ENDDO
  
@@ -49,7 +327,7 @@
      IF (lradave) THEN
        DO j = jstartrad, jendparrad      ! jstartpar, jendpar
          DO  i = istartrad, iendparrad
-@@ -2341,6 +2355,27 @@
+@@ -2341,6 +2436,27 @@
        ENDDO
      ENDIF
  
@@ -77,7 +355,7 @@
      !------------------------------------------------------------------------------
      ! Section 3:  Set cloudiness and humidity on input for fesft; 
      !             Store cloud cover on corresponding global arrays
-@@ -2953,6 +2988,9 @@
+@@ -2953,6 +3069,9 @@
      ALLOCATE ( zsmu0_rn  (idim_rad    ) , STAT=izstata )
      ALLOCATE ( zalth_rn  (idim_rad    ) , STAT=izstata )
      ALLOCATE ( zalso_rn  (idim_rad    ) , STAT=izstata )
@@ -87,7 +365,7 @@
      ALLOCATE ( zskyv_rn  (idim_rad    ) , STAT=izstata )
      ALLOCATE ( zscor_rn  (idim_rad    ) , STAT=izstata )
  
-@@ -2989,6 +3027,9 @@
+@@ -2989,6 +3108,9 @@
      zaeq4_rn(:,:)   = 0.0_wp
      zaeq5_rn(:,:)   = 0.0_wp
      zalso_rn(:)     = 0.0_wp
@@ -97,7 +375,7 @@
      zalth_rn(:)     = 0.0_wp
      zapre_rn(:)     = 0.0_wp
      zsmu0_rn(:)     = 0.0_wp
-@@ -3077,6 +3118,18 @@
+@@ -3077,6 +3199,18 @@
            zti_rn    (i,ke1) = zti    (i,js,ke1)
  
            zalso_rn  (i)     = zalso    (i,js)
@@ -116,7 +394,7 @@
            zalth_rn  (i)     = zalth    (i,js)
            zapre_rn  (i)     = zapre    (i,js)
            zsmu0_rn  (i)     = zsmu0    (i,js)
-@@ -3086,6 +3139,20 @@
+@@ -3086,6 +3220,20 @@
        ENDIF
  
        IF (lrady) THEN
@@ -137,7 +415,7 @@
          CALL fesft                                                          &
            (zti_rn,    zdpr_rn,     zclc_rn,     zwv_rn,    zsw_rn,          &
             zclwc_rn,  zciwc_rn,    zduco2f_rn,  zduo3f_rn,                  &
-@@ -3098,6 +3165,7 @@
+@@ -3098,6 +3246,7 @@
             zflt_rn,   zfls_rn,     zflt_s_rn,   zfls_s_rn, zflsdir_rn,      &
             zfltd_rn,  zfltu_rn,    zflsd_rn,    zflsu_rn,  zflsp_rn,        &
             zflpar_rn, zflsu_par_rn, zflsd_par_rn, zflsp_par_rn)
@@ -145,7 +423,7 @@
        ENDIF
  
        IF (lradave) THEN
-@@ -3174,6 +3242,9 @@
+@@ -3174,6 +3323,9 @@
            zaeq4_rn(:,:)   = 0.0_wp
            zaeq5_rn(:,:)   = 0.0_wp
            zalso_rn(:)     = 0.0_wp
@@ -155,7 +433,7 @@
            zalth_rn(:)     = 0.0_wp
            zapre_rn(:)     = 0.0_wp
            zsmu0_rn(:)     = 0.0_wp
-@@ -3248,7 +3319,12 @@
+@@ -3248,7 +3400,12 @@
            zzflsd_par(i,js) = zflsd_par(i)
            zzflsu_par(i,js) = zflsu_par(i)
  
@@ -169,7 +447,7 @@
            
          ENDDO
  
-@@ -3295,6 +3371,9 @@
+@@ -3295,6 +3452,9 @@
      DEALLOCATE ( zsmu0_rn     , STAT=izstatd )
      DEALLOCATE ( zalth_rn     , STAT=izstatd )
      DEALLOCATE ( zalso_rn     , STAT=izstatd )
@@ -179,7 +457,7 @@
      DEALLOCATE ( zflt_rn      , STAT=izstatd )
      DEALLOCATE ( zfls_rn      , STAT=izstatd )
      DEALLOCATE ( zflpar_rn    , STAT=izstatd )
-@@ -3722,7 +3801,11 @@
+@@ -3722,7 +3882,11 @@
        DO i = istartpar,iendpar
          ! such it has been tested in testsuite 3.4
          ! but keep it for the moment to reproduce results with Version 3.22
@@ -191,7 +469,7 @@
          sobs (i,js) = sobs(i,js) * zalbfak
          pabs (i,js) = pabs(i,js) * zalbfak
          ! And this seems to be the better version
-@@ -3987,6 +4070,9 @@
+@@ -3987,6 +4151,9 @@
          i = istartrad + (n-1) * nradcoarse
          zti_rn(n,ke+1) = zti_rn(n,ke+1) + zti  (i,js-1,ke+1) + zti  (i+1,js-1,ke+1) + zti  (i,js,ke+1) + zti  (i+1,js,ke+1)
          zalso_rn(n)    = zalso_rn(n)    + zalso(i,js-1)      + zalso(i+1,js-1)      + zalso(i,js)      + zalso(i+1,js)
@@ -201,7 +479,7 @@
          zalth_rn(n)    = zalth_rn(n)    + zalth(i,js-1)      + zalth(i+1,js-1)      + zalth(i,js)      + zalth(i+1,js)
          zapre_rn(n)    = zapre_rn(n)    + p0hl (i,js-1,ke+1) + p0hl (i+1,js-1,ke+1) + p0hl (i,js,ke+1) + p0hl (i+1,js,ke+1)
          zsmu0_rn(n)    = zsmu0_rn(n)    + zsmu0(i,js-1)      + zsmu0(i+1,js-1)      + zsmu0(i,js)      + zsmu0(i+1,js)
-@@ -3996,6 +4082,9 @@
+@@ -3996,6 +4163,9 @@
          i = istartrad + (n-1) * nradcoarse
          zti_rn  (n,ke+1) = zti_rn  (n,ke+1) + zti  (i,js,ke+1) + zti  (i+1,js,ke+1)
          zalso_rn(n)      = zalso_rn(n)      + zalso(i,js)      + zalso(i+1,js)
@@ -211,7 +489,7 @@
          zalth_rn(n)      = zalth_rn(n)      + zalth(i,js)      + zalth(i+1,js)
          zapre_rn(n)      = zapre_rn(n)      + p0hl (i,js,ke+1) + p0hl (i+1,js,ke+1)
          zsmu0_rn(n)      = zsmu0_rn(n)      + zsmu0(i,js)      + zsmu0(i+1,js)
-@@ -4004,6 +4093,9 @@
+@@ -4004,6 +4174,9 @@
      DO n = 1, izz
        zti_rn  (n,ke+1) = zti_rn  (n,ke+1) * zfactor
        zalso_rn(n)      = zalso_rn(n)      * zfactor
@@ -221,7 +499,7 @@
        zalth_rn(n)      = zalth_rn(n)      * zfactor
        zapre_rn(n)      = zapre_rn(n)      * zfactor
        zsmu0_rn(n)      = zsmu0_rn(n)      * zfactor
-@@ -4016,18 +4108,27 @@
+@@ -4016,18 +4189,27 @@
        IF (nradcoarse_y == 2) THEN
          zti_rn  (izz,ke+1) = zti_rn  (izz,ke+1) + zti  (i,js-1,ke+1) + zti  (i,js,ke+1)
          zalso_rn(izz)      = zalso_rn(izz)      + zalso(i,js-1)      + zalso(i,js)
@@ -249,7 +527,7 @@
        zalth_rn(izz)      = zalth_rn(izz)      * zfactor_b
        zapre_rn(izz)      = zapre_rn(izz)      * zfactor_b
        zsmu0_rn(izz)      = zsmu0_rn(izz)      * zfactor_b
-@@ -4117,6 +4218,9 @@
+@@ -4117,6 +4299,9 @@
        zflt_s   (i+ii)     = zflt_s_rn   (izz)
        zfls_s   (i+ii)     = zfls_s_rn   (izz)
        zalso    (i+ii,js)  = zalso_rn    (izz)
@@ -259,7 +537,7 @@
        tg_rn    (i+ii)     = zti_rn      (izz,ke1)
        zfltu    (i+ii)     = zfltu_rn    (izz)
        zfltd    (i+ii)     = zfltd_rn    (izz)
-@@ -4139,6 +4243,9 @@
+@@ -4139,6 +4324,9 @@
          zflt_s   (i+ii)     = zflt_s_rn   (izz)
          zfls_s   (i+ii)     = zfls_s_rn   (izz)
          zalso    (i+ii,js)  = zalso_rn    (izz)
@@ -269,7 +547,7 @@
          tg_rn    (i+ii)     = zti_rn      (izz,ke1)
          zfltu    (i+ii)     = zfltu_rn    (izz)
          zfltd    (i+ii)     = zfltd_rn    (izz)
-@@ -4169,6 +4276,21 @@
+@@ -4169,6 +4357,21 @@
  !==============================================================================
  !+ Module procedure in "Radiation" 
  !------------------------------------------------------------------------------
@@ -291,7 +569,7 @@
  
  SUBROUTINE fesft_sp(                                                     &
         pti   , pdp  , pclc  , pwv  , psw  , pqlwc, pqiwc, pduco2, pduo3, &
-@@ -4182,7 +4304,7 @@
+@@ -4182,7 +4385,7 @@
         pfltd , pfltu, pflsd , pflsu, pflsp,                              &
         pflpar, pflsu_par, pflsd_par, pflsp_par)
  
@@ -300,7 +578,7 @@
  !------------------------------------------------------------------------------
  !
  ! Description:
-@@ -4250,7 +4372,9 @@
+@@ -4250,7 +4453,9 @@
      psmu0  (ki1sd:ki1ed)                              , & ! (1)
      palth  (ki1sd:ki1ed)                              , & ! (1)
      palso  (ki1sd:ki1ed)                              , & ! (1)
@@ -311,7 +589,7 @@
      ! External data and radiation corrections
      pskyview(ki1sd:ki1ed)                             , & !
      pfcor   (ki1sd:ki1ed)            
-@@ -4322,7 +4446,9 @@
+@@ -4322,7 +4527,9 @@
      psmu0_dp  (ki1sd:ki1ed)                              , & ! (1)
      palth_dp  (ki1sd:ki1ed)                              , & ! (1)
      palso_dp  (ki1sd:ki1ed)                              , & ! (1)
@@ -322,7 +600,7 @@
      ! External data and radiation corrections
      pskyview_dp(ki1sd:ki1ed)                             , & !
      pfcor_dp   (ki1sd:ki1ed)
-@@ -4389,7 +4515,9 @@
+@@ -4389,7 +4596,9 @@
    psmu0_dp   (:)    = 0.0_dp
    palth_dp   (:)    = 0.0_dp
    palso_dp   (:)    = 0.0_dp
@@ -333,7 +611,7 @@
    pskyview_dp(:)    = 0.0_dp
    pfcor_dp   (:)    = 0.0_dp
  
-@@ -4427,20 +4555,23 @@
+@@ -4427,20 +4636,23 @@
    psmu0_dp   (ki1sc:ki1ec)    = REAL(psmu0   (ki1sc:ki1ec),   dp)
    palth_dp   (ki1sc:ki1ec)    = REAL(palth   (ki1sc:ki1ec),   dp)
    palso_dp   (ki1sc:ki1ec)    = REAL(palso   (ki1sc:ki1ec),   dp)
@@ -359,7 +637,7 @@
         ki1sd,       ki1ed,                                 ki3sd,      ki3ed, &
         ki1sc,       ki1ec,                                 ki3sc,      ki3ec, &
         lsolar,      lcrf,        lradtopo,    idebug,      jindex,            &
-@@ -4448,6 +4579,21 @@
+@@ -4448,6 +4660,21 @@
         pfltd_dp,    pfltu_dp,    pflsd_dp,    pflsu_dp,    pflsp_dp,          &
         pflpar_dp,   pflsu_par_dp, pflsd_par_dp, pflsp_par_dp)
  
@@ -381,7 +659,7 @@
  
  ! Transform output variables back to single precision
    pflt     (ki1sc:ki1ec,ki3sc:ki3ec+1)= REAL(pflt_dp     (ki1sc:ki1ec,ki3sc:ki3ec+1), sp)
-@@ -4478,7 +4624,20 @@
+@@ -4478,7 +4705,20 @@
  !==============================================================================
  !+ Module procedure in "Radiation" 
  !------------------------------------------------------------------------------
@@ -403,7 +681,7 @@
  SUBROUTINE fesft_dp(                                                     &
         pti   , pdp  , pclc  , pwv  , psw  , pqlwc, pqiwc, pduco2, pduo3, &
         paeq1 , paeq2, paeq3 , paeq4, paeq5,                              &
-@@ -4490,8 +4649,7 @@
+@@ -4490,8 +4730,7 @@
         pflt  , pfls , pflt_s, pfls_s, pflsdir,                           &
         pfltd , pfltu, pflsd , pflsu, pflsp,                              &
         pflpar, pflsu_par, pflsd_par, pflsp_par)
@@ -413,7 +691,7 @@
  !------------------------------------------------------------------------------
  !
  ! Description:
-@@ -4579,7 +4737,10 @@
+@@ -4579,7 +4818,10 @@
      psmu0  (ki1sd:ki1ed)                              , & ! (1)
      palth  (ki1sd:ki1ed)                              , & ! (1)
      palso  (ki1sd:ki1ed)                              , & ! (1)
@@ -425,7 +703,7 @@
      ! External data and radiation corrections
      pskyview(ki1sd:ki1ed)                             , & !
      pfcor   (ki1sd:ki1ed)                
-@@ -4686,7 +4847,9 @@
+@@ -4686,7 +4928,9 @@
    REAL    (KIND=dp)        ::  &
    pbbr     (ki1sd:ki1ed,            ki3sd:ki3ed+1), & ! (W/m**2) Black body radiation at layer boundaries
    pflpt    (ki1sd:ki1ed)                          , & ! Solar flux at TOA
@@ -435,7 +713,7 @@
    pqsmu0   (ki1sd:ki1ed)                          , & ! Inverse of cosine of zenith angle
    palogt   (ki1sd:ki1ed,            ki3sd:ki3ed)  , & ! ln T
    palogp   (ki1sd:ki1ed,            ki3sd:ki3ed)  , & ! ln p
-@@ -5313,9 +5476,11 @@
+@@ -5313,9 +5557,11 @@
  ! DO j2 = ki2sc, ki2ec
      DO j1 = ki1sc, ki1ec
        pqsmu0(j1   ) = 1.0_dp / psmu0(j1   )
