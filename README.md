@@ -42,7 +42,3 @@ If you use TSMP in a publication, please cite the these papers that describe the
 
 ## License
 TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE).
-
-## To come
-
-HPSC-TerrSys will also stage run control scripts for different usage scenarios such as long climate runs, and a variety of pre- and postprocessing tools we developed specifically for TSMP. Documented test case experiments also encompass convection permitting simulations at 1km for COSMO and 0.5km for CLM and ParFlow, idealized experiments, a data assimilation experiment based on the TSMP-PDAF version. We will also update the generic machinefiles to make an adjustment of the built system more straightforward for external users.
