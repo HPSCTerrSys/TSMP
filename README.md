@@ -5,6 +5,8 @@
 [![Latest release](https://img.shields.io/github/v/tag/HPSCTerrSys/TSMP.svg?color=brightgreen&label=latest%20release&sort=semver)](https://github.com/HPSCTerrSys/TSMP/tags) 
 [![GitHub last commit](https://img.shields.io/github/last-commit/HPSCTerrSys/TSMP)](https://github.com/HPSCTerrSys/TSMP/commits/master)
 [![Twitter Follow](https://img.shields.io/twitter/follow/HPSCTerrSys?style=social)](https://twitter.com/HPSCTerrSys)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.8283715.svg)](https://doi.org/10.5281/zenodo.8283715)
+
 
 ## Introduction 
 
@@ -38,7 +40,3 @@ If you use TSMP in a publication, please cite the these papers that describe the
 
 ## License
 TSMP is open source software and is licensed under the [MIT-License](https://github.com/HPSCTerrSys/TSMP/blob/master/LICENSE).
-
-## To come
-
-HPSC-TerrSys will also stage run control scripts for different usage scenarios such as long climate runs, and a variety of pre- and postprocessing tools we developed specifically for TSMP. Documented test case experiments also encompass convection permitting simulations at 1km for COSMO and 0.5km for CLM and ParFlow, idealized experiments, a data assimilation experiment based on the TSMP-PDAF version. We will also update the generic machinefiles to make an adjustment of the built system more straightforward for external users.
