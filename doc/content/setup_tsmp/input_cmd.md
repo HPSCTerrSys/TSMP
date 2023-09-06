@@ -51,6 +51,10 @@ the Gaussian probability distribution of the measurements.
 [`[DA]da_interval`](./input_enkfpf.md#dada_interval)) that are forward
 computed, before assimilation is actually performed.
 
+In general, `delt_obs` should be as small as possible, in order to
+avoid performance loss. See remark in
+[`[DA]da_interval`](./input_enkfpf.md#dada_interval).
+
 ## screen ##
 
 `screen` (integer) Control verbosity of PDAF

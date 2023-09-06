@@ -425,6 +425,14 @@ assimilation will be applied each 12 hours.
 simulated for 1 24-hour-step between data assimilation times. So an
 assimilation will be applied each 24 hours.
 
+**Remark**: Performance analysis has shown that for an assimilation
+every `n` hours, it is beneficial to specify `da_interval=n`,
+`delt_obs 1`, instead of `da_interval=1`, `delt_obs n`.
+
+The suspected reason is that all tasks in the parallelization are
+stopped and restarted after `da_interval` hours. In general, the
+number of these stops and restarts should be minimized.
+
 ### DA:stat_dumpoffset ###
 
 `DA:stat_dumpoffset`: File number offset for the data assimilation
