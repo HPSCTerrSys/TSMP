@@ -429,9 +429,11 @@ assimilation will be applied each 24 hours.
 every `n` hours, it is beneficial to specify `da_interval=n`,
 `delt_obs 1`, instead of `da_interval=1`, `delt_obs n`.
 
-The suspected reason is that all tasks in the parallelization are
-stopped and restarted after `da_interval` hours. In general, the
-number of these stops and restarts should be minimized.
+In general, it is beneficial to set `da_interval` as large as possible
+for a given setup. One reason is that after a simulation time of
+`da_interval`, the routines `assimilate_pdaf` and `update_tsmp` are
+called, each time assembling the state vectors and calling the PDAF
+library. Minimizing the number of these calls reduces compute time.
 
 ### DA:stat_dumpoffset ###
 
