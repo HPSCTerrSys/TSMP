@@ -430,10 +430,11 @@ every `n` hours, it is beneficial to specify `da_interval=n`,
 `delt_obs 1`, instead of `da_interval=1`, `delt_obs n`.
 
 In general, it is beneficial to set `da_interval` as large as possible
-for a given setup. One reason is that after a simulation time of
+for a given setup. One reason is that after each simulation time of
 `da_interval`, the routines `assimilate_pdaf` and `update_tsmp` are
-called, each time assembling the state vectors and calling the PDAF
-library. Minimizing the number of these calls reduces compute time.
+called, assembling EnKF state vectors and calling the PDAF
+library. Maximizing `da_interal`, minimizes the number of these calls
+and thus reduces compute time.
 
 ### DA:stat_dumpoffset ###
 
