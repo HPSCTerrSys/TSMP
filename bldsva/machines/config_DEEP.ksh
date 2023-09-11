@@ -51,7 +51,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/configure
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkSrcfiles
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/queryDefaultNamelist.pl
-      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/DEEP/config/configure
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/config/configure
   fi
   
   route "${cyellow}<< getMachineDefaults${cnormal}"
