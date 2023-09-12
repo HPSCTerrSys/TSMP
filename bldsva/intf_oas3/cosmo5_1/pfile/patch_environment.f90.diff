@@ -1,0 +1,97 @@
+---  environment.f90	2014-11-28 12:18:36.000000000 +0100
++++  environment.f90	2019-12-04 12:52:07.044773000 +0100
+@@ -465,7 +465,7 @@
+ !
+ !------------------------------------------------------------------------------
+ 
+-#ifdef COUP_OAS
++#ifdef COUP_OAS_COS
+     USE oas_cos_vardef,  only: kl_comm
+ #endif
+ 
+@@ -498,7 +498,8 @@
+ 
+ ! Local variables:
+ 
+-INTEGER (KIND=iintegers)           :: izmplcode
++INTEGER (KIND=iintegers)           :: izmplcode , inst, counter, rank
++character(len=256) :: istr
+ 
+ !------------------------------------------------------------------------------
+ 
+@@ -508,7 +509,7 @@
+   izmplcode  = 0
+   yerrmsg(:) = ' '
+ 
+-#if defined(MESSYMMD) && defined(COUP_OAS)
++#if defined(MESSYMMD) && defined(COUP_OAS_COS)
+   WRITE (*,'(a)') 'ERROR: MESSy-MMD (-DMESSYMMD) and OASIS (-DCOUP_OAS) cannot run at the same time!'
+   ierror = 33
+   yerrmsg = 'ERROR: MESSy-MMD (-DMESSYMMD) and OASIS (-DCOUP_OAS) cannot run at the same time!'
+@@ -517,7 +518,7 @@
+ 
+ ! If the coupler OASIS is active, the COSMO-Model gets its communicator
+ ! from OASIS
+-#ifdef COUP_OAS
++#ifdef COUP_OAS_COS
+   CALL oas_cos_init
+   icomm_world = kl_comm
+ #else
+@@ -538,7 +539,29 @@
+   end if
+   icomm_world = MMD_comm_world ! mz_kk_20081107
+ #else
+-  icomm_world = MPI_COMM_WORLD
++
++  call MPI_COMM_RANK (MPI_COMM_WORLD, rank, ierror)
++
++  inst=0 
++  counter=0
++  !FGa: enables multi instances. reads a non-negative instance number from
++  !instanceMap.txt and splits MPI_COMM_WORLD 
++  open (unit=4711, file='instanceMap.txt',access='sequential', form='formatted',status='old', action='read', iostat=ierror)
++  if(ierror==0) then 
++    do while(counter<=rank)    
++      read(4711, '(A)') istr 
++      if(counter .eq. rank) then 
++        read(istr,'(I8)') inst 
++        call chdir("./tsmp_instance_"//trim(istr))
++        exit
++      else 
++        counter=counter+1  
++      endif    
++    enddo
++    close(4711)
++  endif
++ 
++  call MPI_COMM_SPLIT(MPI_COMM_WORLD,inst,inst,icomm_world,ierror)
+ #endif
+ #endif
+ 
+@@ -666,7 +689,7 @@
+   izmplcode  = 0
+   istat      = 0
+ 
+-#ifdef COUP_OAS
++#ifdef COUP_OAS_COS
+   CALL oas_cos_finalize
+ #else
+   CALL MPI_FINALIZE (izmplcode)
+@@ -778,7 +801,7 @@
+ 
+ ! Parameter list:
+ 
+-#ifdef COUP_OAS
++#ifdef COUP_OAS_COS
+ USE data_parallel, ONLY : icomm_world
+ #endif
+ 
+@@ -883,7 +906,7 @@
+ ! Question: wouldn't it be useful, also in a coupled environment, to abort the
+ !           whole application, if the model fails?
+ 
+-#ifdef COUP_OAS
++#ifdef COUP_OAS_COS
+   CALL MPI_ABORT (icomm_world, ierrorcode, nzerrcode)
+ #else
+   CALL MPI_ABORT (MPI_COMM_WORLD, ierrorcode, nzerrcode)
