@@ -46,7 +46,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="dc-cpu-devel"
+  defaultQ="dc-cpu"
 
 route "${cyellow}<< getMachineDefaults${cnormal}"
 }
@@ -271,6 +271,13 @@ if [[ $refSetup == "cordex" ]] then
 	CLMProcY=8
 	COSProcX=16
 	COSProcY=18
+if [[ $refSetup == "cordex0275" ]] then
+	PFLProcX=24
+	PFLProcY=24
+	CLMProcX=3
+	CLMProcY=8
+	COSProcX=48
+	COSProcY=48
 	elif [[ $refSetup == "nrw" ]] then
 	PFLProcX=5
 	PFLProcY=8
