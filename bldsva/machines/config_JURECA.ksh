@@ -271,7 +271,7 @@ if [[ $refSetup == "cordex" ]] then
 	CLMProcY=8
 	COSProcX=16
 	COSProcY=18
-if [[ $refSetup == "cordex0275" ]] then
+    elif [[ $refSetup == "cordex0275" ]] then
 	PFLProcX=24
 	PFLProcY=24
 	CLMProcX=3
