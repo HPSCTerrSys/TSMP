@@ -107,7 +107,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 
 cd $rundir
 source $rundir/loadenvs
-export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*

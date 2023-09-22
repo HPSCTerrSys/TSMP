@@ -102,7 +102,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 
 cd $rundir
 source $rundir/loadenvs
-export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*
@@ -161,7 +161,7 @@ srun --pack-group=0 xenv -P \\
                          -L netCDF/4.8.1 \\
                          -L netCDF-Fortran/4.5.3 \\
                          -L Silo/4.11 \\
-                         LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib \\
+                         LD_LIBRARY_PATH+=$rootdir/${mList[3]}_${platform}_${combination}/rmm/lib \\
                          ./parflow $pflrunname
 date
 echo "ready" > ready.txt

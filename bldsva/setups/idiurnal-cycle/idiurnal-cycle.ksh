@@ -51,6 +51,8 @@ pfsolPFL=
 inipress=
 slope=
 
+rtimeFactor=1
+
 gicon=$(find $defaultFDICON -name torus_\*.nc)
 gclm=$(find $defaultFDCLM -name griddata_\*.nc)
 
