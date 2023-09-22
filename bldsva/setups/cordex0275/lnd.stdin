@@ -12,12 +12,12 @@ cat << EOF > __rundir__/lnd.stdin
  start_tod      =  __seconds_clm_bldsva__
 
  finidat        = '__finidat__'
- flndtopo       = '__forcingdir__/clm/topodata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
- fsurdat        = '__forcingdir__/clm/surfdata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
- fatmgrid       = '__forcingdir__/clm/griddata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
- fatmlndfrc     = '__forcingdir__/clm/fracdata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
+ flndtopo       = '__forcingdir__/topodata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
+ fsurdat        = '__forcingdir__/surfdata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
+ fatmgrid       = '__forcingdir__/griddata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
+ fatmlndfrc     = '__forcingdir__/fracdata_CLM_EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544.nc'
  fatmtopo       = ''
- fpftcon        = '__forcingdir__/clm/pft-physiology.c110504'
+ fpftcon        = '__forcingdir__/pft-physiology.c110504'
  offline_atmdir = '__forcingdir__/atm_forcing'
  frivinp_rtm    = '__forcingdir__/inputdata/lnd/clm2/rtmdata/rdirc.05.061026'
 
