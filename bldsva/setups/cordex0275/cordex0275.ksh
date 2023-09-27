@@ -3,7 +3,7 @@
 static_files=$rootdir/TSMP_EUR-0275/static
 
 StartDate="2020-01-01 12"
-InitDate="2020-01-01 14"
+InitDate="2020-01-01 12"
   
 DumpCLM=1
 DumpCOS=1
@@ -37,4 +37,6 @@ indPFL2=EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544_INDICATOR_regridded_rescal
 pfsolPFL=PfbMask4SolidFile.pfsol
 inipress=
 slope=EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544_?SLOPE_TPS_HydroRIVER_sea_streams_corr.sa 
+
+rtimeFactor=10
 
