@@ -937,7 +937,7 @@ route "${cyellow}>>> c_setup_oas${cnormal}"
   check
     sed "s/ngclmx/$gx_clm $gy_clm/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
-    sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
+    #sed "s/ngclmy/1/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
     sed "s/ngcosx/$(($gx_cos-($nbndlines*2)))/" -i $rundir/namcouple >> $log_file 2>> $err_file
   check
