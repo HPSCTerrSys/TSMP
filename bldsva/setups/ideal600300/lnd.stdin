@@ -29,7 +29,7 @@ cat << EOF > __rundir__/lnd.stdin
  mss_irt        =  0 
 
  hist_empty_htapes = .true.
- hist_fincl1       = ''
+ hist_fincl1       = 'H2OSOI','FIRA','FSA','FSH_G','FSH_V','FSDS','FLDS','FGR','FGEV','FCTR','FCEV','FSR','TSOI','TSA','Q2M','TV','TAUX','TAUY'
 
  irad           =  1
  wrtdia         = .true.

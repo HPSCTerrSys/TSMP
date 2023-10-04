@@ -36,5 +36,7 @@ indPFL=rurSoil.sa
 indPFL2=$indPFL
 pfsolPFL=geom_cordex0.11_436x424.pfsol 
 inipress=*.ics.pfb*
-slope=*slope.pfb* 
+slope=*slope.pfb*
+
+rtimeFactor=10
 

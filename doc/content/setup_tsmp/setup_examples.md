@@ -112,6 +112,32 @@ cd $TSMP_DIR/bldsva
 ./setup_tsmp.ksh -c clm3-cos5-pfl -V idealRTD -m JUWELS -O Intel
  ```
 
+## IdealScal (Idealized) Test case
+The IdealScal Test case is designed for scaling studies (weak and strong scaling) and uses a horizontally homogeneous domain to simulate the diurnal cycle of the atmospheric boundary layer with radiative forcing. A periodic boundary condition will be used in X and Y direction for COSMO, while the X- and Y-slopes are set to zero for ParFlow, so there is no lateral flow. The domain setup is summarized in the table below.
+
+
+|        |  NX/NY    | NZ | dx/dy (m) | dt(s) |
+| -----  | :----- |----:|----:|----:|
+| COSMO  | [150,300,600,1200]  | 50 | ~1000 | 10 |
+| CLM    | 2x NX/NY_{COSMO}    | 10 | ~500 | 900  |
+| ParFlow| 2x NY/NY_{COSMO}    | 30 | 500 | 900 |
+
+The groundwater table is specified at a depth of 5 m below the surface, with a spatially homogeneous and constant unsaturated zone above. The atmosphere is initialized based on an idealized profile with a well-mixed atmospheric boundary layer (ABL), 50% relative humidity in the ABL and 0.5 m/s background wind in u-direction.
+
+### Running IdealScal Test case
+
+Download the input data for the IdealScal test case:
+```shell
+cd $TSMP_DIR/bldsva
+./download_data_for_test_cases.ksh idealscal
+```
+
+Configure TSMP for the IdealScal test case on JUWELS machine (the `300150` denotes the number of grid points for CLM/ParFlow and COSMO) :
+```shell
+cd $TSMP_DIR/bldsva
+./setup_tsmp.ksh -c clm3-cos5-pfl -V ideal300150 -m JUWELS -O Intel
+```
+
 ## Long time climate simulation
 
 ### Implementation of non-const CO2 in TSMP
