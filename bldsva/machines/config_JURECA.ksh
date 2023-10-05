@@ -46,7 +46,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="dc-cpu"
+  defaultQ="dc-cpu-devel"
 
 route "${cyellow}<< getMachineDefaults${cnormal}"
 }
