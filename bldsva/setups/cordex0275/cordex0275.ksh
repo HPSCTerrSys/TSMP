@@ -9,11 +9,11 @@ DumpCLM=1
 DumpCOS=1
 DumpPFL=1
   
-Runhours=3
+Runhours=1
 
 gxCLM=1592
 gyCLM=1544
-dtCLM=3600
+dtCLM=900
 resCLM="1592x1544"
 
 gxCOS=1600
@@ -23,12 +23,12 @@ nboundlinesCOS=4
 
 gxPFL=1592
 gyPFL=1544
-dtPFL=1.0
+dtPFL=0.25
 runnamePFL="cordex0.0275"
 basePFL=0.0025
 
-freq1OAS=3600
-freq2OAS=3600
+freq1OAS=900
+freq2OAS=900
 
 deltaobs=1
 
@@ -38,5 +38,5 @@ pfsolPFL=PfbMask4SolidFile.pfsol
 inipress=
 slope=EUR-0275_TSMP_FZJ-IBG3_CLMPFLDomain_1592x1544_?SLOPE_TPS_HydroRIVER_sea_streams_corr.sa 
 
-rtimeFactor=10
+rtimeFactor=1
 
