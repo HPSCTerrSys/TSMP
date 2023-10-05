@@ -118,8 +118,9 @@ Must match with the specifications in the `*.pfidb` input.
 `PF:updateflag`: (integer) Type of state vector update in ParFlow.
 
 -   1: Assimilation of pressure data. State vector consists of
-    pressure values and is directly updated with pressure
-    observations.
+    pressure values (groundwater masking or a mixed state vector is
+    introduced through `PF:gwmasking`) and is directly updated with
+    pressure observations.
 
 -   2: Assimilation of soil moisture data. State vector consists of
     soil moisture content values and is updated with soil moisture
@@ -133,7 +134,7 @@ Must match with the specifications in the `*.pfidb` input.
 ### PF:gwmasking ###
 
 `PF:gwmasking`: (integer) Groundwater masking for assimilation of
-pressure data (updateflag=1) in ParFlow.
+pressure data (`updateflag=1`) in ParFlow.
 
 -   0: No groundwater masking.
 

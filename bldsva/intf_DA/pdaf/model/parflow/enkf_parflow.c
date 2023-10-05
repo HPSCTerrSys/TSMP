@@ -565,19 +565,28 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
           if(pf_gwmasking == 2){
             int no_obs,haveobs,tmpidx;
             MPI_Comm comm_couple_c = MPI_Comm_f2c(comm_couple);
+
+	    /* 1. Overwrite pressure with soil water content in
+	       unsaturated part of `pf_statevec` */
+	    /* 2. Set saturation switch `subvec_gwind` */
             PF2ENKF(saturation_out, subvec_sat);
   	    PF2ENKF(porosity_out, subvec_porosity);
             MPI_Allreduce(subvec_sat,subvec_mean,enkf_subvecsize,MPI_DOUBLE,MPI_SUM,comm_couple_c);
-            for(i=0;i<enkf_subvecsize;i++){
-              subvec_gwind[i] = 1.0;
+	    for(i=0;i<enkf_subvecsize;i++){
+              subvec_gwind[i] = 1.0; /* saturated cell */
               if(subvec_mean[i]< (double)nreal){
-                subvec_gwind[i] = 0.0;
+                subvec_gwind[i] = 0.0; /* unsaturated cell */
+		/* SWC = saturation * porosity */
                 pf_statevec[i] = subvec_sat[i] * subvec_porosity[i];
               }
             }
             if(task_id == 1 && pf_printgwmask == 1) enkf_printstatistics_pfb(subvec_gwind,"gwind",tstartcycle + stat_dumpoffset,outdir,3);
+
+	    /* Re-insert pressure for certain state vector cells based
+	       on pressure observations */
             get_obsindex_currentobsfile(&no_obs);
 
+	    /* Check existence of observations in subgrid */
             for(i=0;i<no_obs;i++){
               haveobs=0;
               if((xidx_obs[i]>=origin_local[0]) && (xidx_obs[i]<(origin_local[0]+nx_local))){
@@ -587,15 +596,26 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
                   }
                 }
               }
+
+	      /* If observation exists in subgrid AND observation is
+		 pressure observation, set the column below the
+		 observation to pressure in the state vector */
               if(haveobs && ind_obs[i]==1){
                 for(j=0;j<=(zidx_obs[i]-origin_local[2]);j++){
+		  /* TODO: This code will only set the column INSIDE
+		     the local domain / subgrid. In prinicpal, the
+		     subgrid could be divided in z-direction and a
+		     deeper subgrid could still contain soil water
+		     content values below the pressure measurement. */
                   tmpidx = nx_local*ny_local*j + nx_local*(yidx_obs[i]-origin_local[1]) + (xidx_obs[i]-origin_local[0]);
                   subvec_gwind[tmpidx] = 1.0;
                   pf_statevec[tmpidx] = subvec_p[tmpidx];
                 }
               }
             }
+
             if(task_id == 1 && pf_printgwmask == 1) enkf_printstatistics_pfb(subvec_gwind,"gwind_corrected",tstartcycle + stat_dumpoffset,outdir,3);
+
             clean_obs_pf();
           }
         }
