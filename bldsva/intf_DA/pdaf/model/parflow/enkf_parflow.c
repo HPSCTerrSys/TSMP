@@ -1468,7 +1468,7 @@ void update_parflow () {
     }
 
     /* print updated porosity values */
-    if(pf_paramprintensemble) enkf_printstatistics_pfb(%pf_statevec[ioff], "update.param.poro", tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+    if(pf_paramprintensemble) enkf_printstatistics_pfb(&pf_statevec[ioff], "update.param.poro", tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
 
   }
 
