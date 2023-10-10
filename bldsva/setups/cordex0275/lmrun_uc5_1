@@ -202,7 +202,7 @@ ke_tot=50,
 /
 &RUNCTL
 hstart= __hstart__,
-hstop= $nsteps,
+nstop= $nsteps,
 ydate_ini='$DATUM',
 nprocx= $NPX,
 nprocy= $NPY,
