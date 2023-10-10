@@ -75,8 +75,12 @@ version 5 of CLM.
 
 ## HCP_TRUNCATE_SAT ##
 
-If `HCP_TRUNCAT_SAt` is defined, the saturation truncation in
-`problem_saturationtopressure.c` reads
+Reference for the saturation truncation in Hung et al
+(<https://doi.org/10.1029/2021WR031549>, Equation 11)
+
+If `HCP_TRUNCATE_SAT` is defined, the saturation truncation in
+function `SaturationToPressure` (file
+`problem_saturationtopressure.c`) reads
 
 ``` c++
 	if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
