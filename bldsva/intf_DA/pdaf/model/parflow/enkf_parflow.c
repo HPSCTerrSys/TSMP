@@ -913,29 +913,73 @@ int enkf_getsubvectorsize(Grid *grid) {
 	return (out);
 }
 
+/*-------------------------------------------------------------------------*/
+/**
+  @author   Wolfgang Kurtz, Guowei He, Mukund Pondkule
+  @brief    Populate C-array (part of state vector) from ParFlow type Vector.
+  @param    pf_vector    ParFlow Vector containing data.
+  @param    enkf_subvec   C-array to be populated.
+
+  Remark:
+  -------
+
+  `pf_vector` needs to be extracted from the ParFlow problem.
+
+  Example 1: `pf_vector` extracted as output of `AdvanceRichards` and
+  after `InitVectorUpdate` and `FinalizeVectorUpdate`, as is the case
+  for pressures, saturation and porosity.
+
+  Example 2: `pf_vector` extracted as `ProblemDataPermeabilityX` or
+  similar.
+
+  Workflow:
+  ---------
+  1. Obtain the grid information from ParFlow Vector.
+  2. Iterate over the subgrids of `grid`
+  3. Get SubvectorData corresponding to subgrid
+  4. Populate `enkf_subvec` with SubvectorData
+ */
+/*--------------------------------------------------------------------------*/
 void PF2ENKF(Vector *pf_vector, double *enkf_subvec) {
 
+        /* Obtain grid information from `pf_vector` */
 	Grid *grid = VectorGrid(pf_vector);
 	int sg;
 
+	/* Iterate over subgrids */
 	ForSubgridI(sg, GridSubgrids(grid))
 	{
+                /* Subgrid instance  */
 		Subgrid *subgrid = GridSubgrid(grid, sg);
 
+		/* Bottom-lower-left corner of subgrid */
 		int ix = SubgridIX(subgrid);
 		int iy = SubgridIY(subgrid);
 		int iz = SubgridIZ(subgrid);
 
+		/* Size of subgrid */
 		int nx = SubgridNX(subgrid);
 		int ny = SubgridNY(subgrid);
 		int nz = SubgridNZ(subgrid);
 
+		/* if (screen_wrapper > 2) { */
+		/*   printf("TSMP-PDAF-WRAPPER mype(w)=%d: sg, ix, iy, iz, nx, ny, nz = %d, %d, %d, %d, %d, %d, %d, \n", mype_world, sg, ix, iy, iz, nx, ny, nz); */
+		/* } */
 
+		/* (1) Access the Subvector inside `pf_vector` that
+		   corresponds to grid `sg`, (2) Access data array
+		   from this Subvector instance */
 		Subvector *subvector = VectorSubvector(pf_vector, sg);
 		double *subvector_data = SubvectorData(subvector);
 
+		/* Iterate subgrid's cells */
 		int i, j, k;
 		int counter = 0;
+		/* TODO: `counter` is reset to zero for each
+		   subgrid-iteration. However, for multiple subgrids
+		   in the loop this would overwrite the values in
+		   enkf_subvec. So, this code is possibly only working
+		   for a single subgrid. */
 
 		for (k = iz; k < iz + nz; k++) {
 			for (j = iy; j < iy + ny; j++) {
