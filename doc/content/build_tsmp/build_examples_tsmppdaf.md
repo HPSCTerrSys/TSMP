@@ -46,7 +46,7 @@ avoid making a backup with `-WXYZ` option set to \"`build`\".
 Build commands for different machines.
 
 Remarks:
-- For building TSMP-PDAF with DA, use branch `TSMP_pdaf`
+- For building TSMP-PDAF with DA, use branch `master`
 - Parflow-3.9 is supported using version tag `3.1.0MCTPDAF`. For older
   versions, use `3.0.0MCTPDAF` (>=3.2, <3.7), `1.1.0MCTPDAF` (<3.2).
 
@@ -58,19 +58,12 @@ Remarks:
 
       ./build_tsmp.ksh -m JUWELS -c clm-pfl -v 3.1.0MCTPDAF -O Intel
 
-#### Remote build ####
-
-``` shell
-	./build_tsmp_remote -m JUWELS -v 3.1.0MCTPDAF -O Intel -c clm-pfl -branch TSMP_pdaf -host juwels &
-	./build_tsmp_remote -m JURECA -v 3.1.0MCTPDAF -O Intel -c clm-pfl -branch TSMP_pdaf -host jureca &
-```
-
 ### Component Models ###
 
 The build commands were last tested for these component models
 
 - **TSMP**
-  - current revision of branch `TSMP_pdaf` from
+  - current revision of branch `master` from
     <https://github.com/HPSCTerrSys/TSMP>
 
 - **clm3\_5**

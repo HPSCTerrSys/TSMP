@@ -989,7 +989,7 @@ if [[ $withPFL == "true" && $withCOS == "false" ]] then
   check
 
   fi
-  rtime=$(($runhours*3600 + $cplfreq1))
+  rtime=$((($runhours*3600 + $cplfreq1)*$rtimeFactor))
   if [[ $withCESM == "true" ]] ; then ; rtime=$(($rtime+$cplfreq1)) ; fi
   comment "   sed sim time into namcouple"
     sed "s/totalruntime/$rtime/" -i $rundir/namcouple >> $log_file 2>> $err_file

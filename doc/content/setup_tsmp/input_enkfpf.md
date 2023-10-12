@@ -118,8 +118,9 @@ Must match with the specifications in the `*.pfidb` input.
 `PF:updateflag`: (integer) Type of state vector update in ParFlow.
 
 -   1: Assimilation of pressure data. State vector consists of
-    pressure values and is directly updated with pressure
-    observations.
+    pressure values (groundwater masking or a mixed state vector is
+    introduced through `PF:gwmasking`) and is directly updated with
+    pressure observations.
 
 -   2: Assimilation of soil moisture data. State vector consists of
     soil moisture content values and is updated with soil moisture
@@ -133,7 +134,7 @@ Must match with the specifications in the `*.pfidb` input.
 ### PF:gwmasking ###
 
 `PF:gwmasking`: (integer) Groundwater masking for assimilation of
-pressure data (updateflag=1) in ParFlow.
+pressure data (`updateflag=1`) in ParFlow.
 
 -   0: No groundwater masking.
 
@@ -424,6 +425,17 @@ assimilation will be applied each 12 hours.
 `TimingInfo.BaseUnit=1.0`. In this case, component models will be
 simulated for 1 24-hour-step between data assimilation times. So an
 assimilation will be applied each 24 hours.
+
+**Remark**: Performance analysis has shown that for an assimilation
+every `n` hours, it is beneficial to specify `da_interval=n`,
+`delt_obs 1`, instead of `da_interval=1`, `delt_obs n`.
+
+In general, it is beneficial to set `da_interval` as large as possible
+for a given setup. One reason is that after each simulation time of
+`da_interval`, the routines `assimilate_pdaf` and `update_tsmp` are
+called, assembling EnKF state vectors and calling the PDAF
+library. Maximizing `da_interal`, minimizes the number of these calls
+and thus reduces compute time.
 
 ### DA:stat_dumpoffset ###
 
