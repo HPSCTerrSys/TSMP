@@ -2014,7 +2014,6 @@ void update_parflow () {
       double       gravity  = ProblemGravity(problem);
       Vector *saturation_in = GetSaturationRichards(solver);
       Vector *density       = GetDensityRichards(solver);
-      int saturation_to_pressure_type = 1;
 
       /* first update swc cells from mixed state vector pf_statevec */
       for(i=0;i<enkf_subvecsize;i++){
@@ -2022,7 +2021,8 @@ void update_parflow () {
       }
       ENKF2PF(saturation_in,subvec_sat);
       global_ptr_this_pf_module = problem_saturation;
-      SaturationToPressure(saturation_in,	pressure_in, density, gravity,problem_data, CALCFCN, saturation_to_pressure_type);
+      SaturationToPressure(saturation_in, pressure_in, density, gravity,problem_data, CALCFCN, 1);
+      /* CALCFCN / CALCDER loaded via parflow.h->general.h */
       global_ptr_this_pf_module = solver;
 
       /* second update remaining pressures cells from mixed state vector pf_statevec */
@@ -2045,7 +2045,6 @@ void update_parflow () {
       /*   printf("Warning (update_parflow): saturation > 1.0\n"); */
       /* } */
     }
-    int saturation_to_pressure_type = 1;
     ENKF2PF(saturation_in, pf_statevec);
     Problem * problem = GetProblemRichards(solver);
     double gravity = ProblemGravity(problem);
@@ -2055,7 +2054,8 @@ void update_parflow () {
     PFModule * problem_saturation = ProblemSaturation(problem);
     // convert saturation to pressure
     global_ptr_this_pf_module = problem_saturation;
-    SaturationToPressure(saturation_in,	pressure_in, density, gravity, problem_data, CALCFCN, saturation_to_pressure_type);
+    SaturationToPressure(saturation_in,	pressure_in, density, gravity, problem_data, CALCFCN, 1);
+    /* CALCFCN / CALCDER loaded via parflow.h->general.h */
     global_ptr_this_pf_module = solver;
 
     PF2ENKF(pressure_in,subvec_p);
