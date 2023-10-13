@@ -370,7 +370,7 @@ void SaturationToPressure(
 		if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
 #endif
 		if (psdat[ips] < 1) {
-		  head = pow(pow(s_dif / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
+		  double head = pow(pow(s_dif / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
 		  ppdat[ipp] = -head;
                 }
 //<<TSMP-PDAF addition end
@@ -490,7 +490,7 @@ void SaturationToPressure(
 	      if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
 #endif
 	      if (psdat[ips] < 1) {
-		head = pow(pow((s_sat-s_res) / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
+		double head = pow(pow((s_sat-s_res) / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
 		ppdat[ipp] = -head;
 	      }
 //<<TSMP-PDAF addition end
