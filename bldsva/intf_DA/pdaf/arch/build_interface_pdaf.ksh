@@ -45,7 +45,7 @@ route "${cyellow}>> configure_da${cnormal}"
   c_configure_pdaf_arch
 
 #PDAF interface part configuration variables
-  importFlags=" "
+  importFlags=" -g -traceback "
   importFlagsOAS=" "
   importFlagsPFL=" "
   importFlagsCLM=" "

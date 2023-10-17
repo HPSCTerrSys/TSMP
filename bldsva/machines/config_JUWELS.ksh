@@ -28,11 +28,11 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
-      defaultOptC="-O2" # Gnu
+      defaultOptC="-g -O0 -fbacktrace " # Gnu
   elif [[ $compiler == "Intel" ]] ; then
-      defaultOptC="-O2 -xHost" # Intel
+      defaultOptC="-g -O0 -xHost -traceback " # Intel
   else
-      defaultOptC="-O2" # Default
+      defaultOptC="-O0" # Default
   fi
 
   profilingImpl=" no scalasca "  
