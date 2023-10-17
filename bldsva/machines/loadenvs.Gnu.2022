@@ -8,7 +8,7 @@ module load Stages/2022
 module load GCC/11.2.0
 module load ParaStationMPI/5.5.0-1
 #
-module load Hypre/2.23.0
+#module load Hypre/2.23.0
 module load Silo/4.11
 module load Tcl/8.6.11 
 #
