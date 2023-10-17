@@ -25,9 +25,9 @@ check
   if  echo "$compiler" | grep -qE 'Gnu' ; then
      comment "   sed comF90 based on Gnu to cos Makefile"
           if [[ $profiling == "scalasca" ]]; then
-        sed -i "s@__comF90__@scorep-mpif90 -cpp -c -fallow-invalid-boz -fallow-argument-mismatch -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
+        sed -i "s@__comF90__@scorep-mpif90 -cpp -c -fallow-argument-mismatch -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
      else
-        sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90 -cpp -c -fallow-invalid-boz -fallow-argument-mismatch -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
+        sed -i "s@__comF90__@$profComp $mpiPath/bin/mpif90 -cpp -c -fallow-argument-mismatch -ffree-line-length-0 -fstack-protector-all -finit-real=nan -finit-integer=-2147483648 -finit-character=127 -ffpe-trap=invalid,zero,overflow@" $file >> $log_file 2>> $err_file
      fi
      check
      comment "   sed comflg to cos Makefile"
