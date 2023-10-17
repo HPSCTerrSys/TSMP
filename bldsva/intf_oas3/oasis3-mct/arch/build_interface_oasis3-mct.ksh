@@ -101,7 +101,11 @@ route "${cyellow}>> configure_oas${cnormal}"
     sed -i 's@__inc__@-I$(LIBBUILD)/psmile.$(CHAN) -I$(LIBBUILD)/scrip  -I$(LIBBUILD)/mct'" -I$ncdfPath/include@" $file >> $log_file 2>> $err_file
   check
   comment "   sed ldflg to oas Makefile"
-    sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
+    if echo "$compiler" | grep -qE 'Gnu'; then
+      sed -i "s@__ldflg__@-w -fallow-argument-mismatch -O2@" $file >> $log_file 2>> $err_file
+    else
+      sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
+    fi
   check
   comment "   sed comF90 to oas Makefile"
     if [[ $profiling == "scalasca" ]]; then
@@ -130,8 +134,10 @@ route "${cyellow}>> configure_oas${cnormal}"
   comment "   sed precision to oas Makefile"
     if [[ $compiler == "Intel" ]]; then
       sed -i "s@__precision__@-i4 -r8@" $file >> $log_file 2>> $err_file
+      sed -i "s@__allow__@@" $file >> $log_file 2>> $err_file
     else
       sed -i "s@__precision__@@" $file >> $log_file 2>> $err_file
+      sed -i "s@__allow__@-w -fallow-argument-mismatch -O2@" $file >> $log_file 2>> $err_file
     fi
   check
 

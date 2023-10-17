@@ -256,6 +256,8 @@ setCombination(){
 compileClm(){
 route "${cyellow}> c_compileClm${cnormal}"
   comment "  source clm interface script"
+  export FCFLAGS="-w -fallow-argument-mismatch -O2"
+  export FFLAGS="-w -fallow-argument-mismatch -O2"
     comment "intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh"
     . ${rootdir}/bldsva/intf_oas3/${mList[1]}/arch/build_interface_${mList[1]}.ksh >> $log_file 2>> $err_file
   check
