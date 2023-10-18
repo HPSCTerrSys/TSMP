@@ -1,6 +1,6 @@
 #! /bin/ksh
 
-static_files=$rootdir/TSMP_EUR-0275/static
+static_files=$rootdir/tsmp_eur0275/static
 
 StartDate="2020-01-01 12"
 InitDate="2020-01-01 12"
