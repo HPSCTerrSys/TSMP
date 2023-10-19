@@ -363,11 +363,11 @@ void SaturationToPressure(
 		//TSMP-PDAF: now we do the inverse:
 		//TSMP-PDAF: if saturation < 1, we update the pressure:
 
-#ifdef HCP_TRUNCATE_SAT
+#ifdef OLD_TRUNCATE_SAT
+		if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+#else
 		/* hcp truncate sat */
 		if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
-#else
-		if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
 #endif
 		if (psdat[ips] < 1) {
 		  double head = pow(pow(s_dif / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
@@ -483,11 +483,11 @@ void SaturationToPressure(
 	      */
 //<<TSMP-PDAF comment out end
 //>>TSMP-PDAF addition beginning
-#ifdef HCP_TRUNCATE_SAT		/* hcp */
+#ifdef OLD_TRUNCATE_SAT		/* hcp */
+	      if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
+#else
 	      /* hcp truncate sat */
 	      if(psdat[ips] <= (s_res + 0.003)) psdat[ips] = s_res + 0.003;
-#else
-	      if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
 #endif
 	      if (psdat[ips] < 1) {
 		double head = pow(pow((s_sat-s_res) / (psdat[ips] - s_res), 1.0 / m) - 1, 1.0 / n) / alpha;
