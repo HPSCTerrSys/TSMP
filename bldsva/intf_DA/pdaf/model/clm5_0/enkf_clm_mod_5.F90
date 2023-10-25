@@ -389,7 +389,7 @@ module enkf_clm_mod
     integer, pointer :: snlsno(:)
 
     real(r8) :: dzsno(clm_begc:clm_endc,nlevsno)
-
+    real(r8) :: h2osno_po(clm_begc:clm_endc)
     real(r8) :: snowden, frac_swe, frac_liq, frac_ice
     real(r8) :: gain_h2osno, gain_h2oliq, gain_h2oice, gain_dzsno
     integer :: i,ii,j,jj,g,cc=1,offset=0
@@ -418,9 +418,13 @@ module enkf_clm_mod
         h2osno(jj) = sum(h2oice(jj,:))
       else ! snow (h2osno) present
         if (snlsno(jj).lt.0) then ! snow layers in the column
-
-          do i=1,-snlsno(jj) ! iterate through the snow layers
-            ii = nlevsoi - i + 1
+          ! Formulas below from DART use h2osno_po / h2osno_pr for after / before DA SWE
+          ! Here we have snow_depth after and h2osno before DA snow depth
+          ! Therefore need to have a transform to get h2osno_po
+          h2osno_po(jj) = (snow_depth(jj) * bdsno) ! calculations from Init using constant SBD
+          print *, "DBGSNOW h2osno_po", jj, h2osno_po(jj)
+          do ii=0,-snlsno(jj),-1 ! iterate through the snow layers
+            ! ii = nlevsoi - i + 1            ! DART VERSION: ii = nlevsoi - i + 1
             ! snow density prior for each layer
             if (dzsno(jj,ii).gt.0.0_r8) then
               snowden = (h2oliq(jj,ii) + h2oice(jj,ii) / dzsno(jj,ii))
@@ -431,7 +435,7 @@ module enkf_clm_mod
             if(h2osno(jj).gt.0.0_r8) then
               ! repartition Option 1: Adjust bottom layer only (set weight to 1 for bottom 0 else)
               if(clmupdate_snow_repartitioning.eq.1) then
-                if (ii .eq. nlevsno) then
+                if (ii .eq. 0) then ! DART version indexing check against nlevsno but for us 0
                   frac_swe = 1.0_r8
                 else
                   frac_swe = 0.0_r8
@@ -455,12 +459,8 @@ module enkf_clm_mod
 
             ! SWE adjustment per layer 
             ! assumes identical layer distribution of liq and ice than before DA (frac_*)
-            ! post DA H2OSNO (SWE) is calculated from snow_depth like in main/clm_instMod.F90
-            ! i.e. h2osno(jj) = snow_depth(jj) * bdsno but
-            ! require prior H2OSNO here and update it afterwards
-            ! column level adjustments
-            if (abs((snow_depth(jj) * bdsno) - h2osno(jj)).gt.0.0_r8) then
-              gain_h2osno = ((snow_depth(jj) * bdsno) - h2osno(jj)) * frac_swe
+            if (abs(h2osno_po(jj) - h2osno(jj)).gt.0.0_r8) then
+              gain_h2osno = (h2osno_po(jj) - h2osno(jj)) * frac_swe
               gain_h2oliq = gain_h2osno * frac_liq
               gain_h2oice = gain_h2osno * frac_ice
             else
@@ -477,27 +477,32 @@ module enkf_clm_mod
             h2oliq(jj,ii) = h2oliq(jj,ii) + gain_h2oliq
             h2oice(jj,ii) = h2oice(jj,ii) + gain_h2oice
 
-!            ! Adjust snow layer dimensions so that CLM5 can calculate compaction / aggregation
-!            ! in the DART code dzsno is adjusted directly but in CLM5 dzsno is local and diagnostic
-!            ! i.e. calculated / assigned from frac_sno and dz(:, snow_layer) in SnowHydrologyMod
-!            ! therefore we adjust dz(:, snow_layer) here
-!            if (abs((snow_depth(jj) * bdsno) - h2osno(jj)).gt.0.0_r8) then
-!              col%dz(jj, ii) = col%dz(jj, ii) + gain_dzsno
-!              ! mid point and interface adjustments 
-!              ! i.e. zsno (col%z(:, snow_layers)) and zisno (col%zi(:, snow_layers))
-!              col%zi(jj, ii) = sum(col%dz(jj,ii:nlevsno))*-1.0_r8
-!              if (ii.eq.nlevsno) then
-!                col%z(jj,ii) = col%zi(jj,ii) / 2.0_r8
-!              else
-!                col%z(jj,ii) = sum(col%zi(jj, ii:ii+1)) / 2.0_r8
-!              end if
-!            end if
-!
+            ! Adjust snow layer dimensions so that CLM5 can calculate compaction / aggregation
+            ! in the DART code dzsno is adjusted directly but in CLM5 dzsno is local and diagnostic
+            ! i.e. calculated / assigned from frac_sno and dz(:, snow_layer) in SnowHydrologyMod
+            ! therefore we adjust dz(:, snow_layer) here
+            if (abs(h2osno_po(jj) - h2osno(jj)).gt.0.0_r8) then
+              col%dz(jj, ii) = col%dz(jj, ii) + gain_dzsno
+              ! mid point and interface adjustments 
+              ! i.e. zsno (col%z(:, snow_layers)) and zisno (col%zi(:, snow_layers))
+              ! DART version the sum goes from ilevel:nlevsno to fit with our indexing:
+              col%zi(jj, ii) = sum(col%dz(jj,ii:0))*-1.0_r8
+              ! In DART the check is ilevel == nlevsno but here
+              if (ii.eq.0) then
+                col%z(jj,ii) = col%zi(jj,ii) / 2.0_r8
+              else ! 
+                col%z(jj,ii) = sum(col%zi(jj, ii:ii+1)) / 2.0_r8
+              end if
+            end if
+
           end do ! End iteration of snow layers
         endif ! End of snow layers present check
         ! Finally adjust SWE (h2osno) since the prior value is no longer needed
-        ! both column level variables so we can adjust it outside the layer loop
-        h2osno(jj) = snow_depth(jj) * bdsno
+        ! column level variables so we can adjust it outside the layer loop
+        h2osno(jj) = h2osno_po(jj)
+
+        ! DEBUG
+        print *, "DBGSNOW DEPTHS: dz", col%dz(jj,:), "zi ", col%zi(jj,:), "z ", col%z(jj,:)
       end if ! End of snow present check
     end do ! End of column iteration
 
