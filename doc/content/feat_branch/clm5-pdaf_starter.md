@@ -22,7 +22,7 @@ Get PDAF from <https://github.com/PDAF/PDAF> and clone it in the
 `tsmp` directory as `pdaf`.
 
 ```bash
- git clone git@github.com:PDAF/PDAF.git tsmp
+ git clone https://github.com/PDAF/PDAF.git pdaf
 ```
 
 ### 1.3 CLM5
@@ -74,7 +74,7 @@ export CSMDATA=$CESMDATAROOT/inputdata
 In the `tsmp/bldsva` directory:
 
 ```bash
-./build_tsmp.ksh -v 4.4.0MCTPDAF -c clm -m JURECA -O Intel
+./build_tsmp.ksh -c clm5 -m JURECA -O Intel
 ```
 
 Potential problems that can happen during this step:
@@ -96,7 +96,7 @@ Potential problems that can happen during this step:
     strictly needed.
 
 Once successfully compiled the executable can be found in path
-`tsmp/bin/JURECA_4.4.0MCTPDAF_clm/tsmp-pdaf`.
+`tsmp/bin/JURECA_clm/tsmp-pdaf`.
 
 ## 2. File preparation
 
