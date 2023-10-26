@@ -114,11 +114,15 @@ else
       cp $forcingdir_oas/* $rundir >> $log_file 2>> $err_file
     check
     if [[ $withOASMCT == "true" ]] then
-      for x in $rundir/*BILINEA* ;do 
-        comment "   rename oasis3 remapping files" 
-          mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
-        check 
-      done
+      if [ -f "$rundir"/*BILINEAR* ]; then
+        comment "  no renaming of oasis3 remapping files needed" 
+      else
+        for x in $rundir/*BILINEA* ;do 
+          comment "   rename oasis3 remapping files" 
+            mv $x $(echo $x | sed "s/BILINEA/BILINEAR/") >> $log_file 2>> $err_file
+          check 
+        done
+      fi
     fi  
   fi  
 
