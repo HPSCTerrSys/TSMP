@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 
 <!--
+     TSMP-PDAF: marked changes were applied to commit 688d1a4299a2 of https://github.com/ESMCI/cime
 
 ===============================================================
 COMPILER and COMPILERS
@@ -2338,6 +2339,7 @@ This allows using a different mpirun command to launch unit tests
     </module_system>
   </machine>
 
+<!--TSMP_PDAF addition beginning  -->
   <machine MACH="jureca">
     <DESC>JSC JUELICH platform, os is linux, 24 pes/node, batch system is slurm</DESC>
     <NODENAME_REGEX>.*.jureca</NODENAME_REGEX>
@@ -2403,6 +2405,7 @@ This allows using a different mpirun command to launch unit tests
       <resource name="RLIMIT_STACK">-1</resource>
     </resource_limits>
   </machine>
+<!--TSMP_PDAF addition end  -->
 
 
   <default_run_suffix>
