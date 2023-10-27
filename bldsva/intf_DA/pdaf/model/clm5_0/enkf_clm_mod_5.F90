@@ -413,7 +413,7 @@ module enkf_clm_mod
       if (h2osno(jj).lt.0.0) then ! No snow in column
         print *, "WARNING: negative snow in col: ", jj, h2osno
 !        ! Set existing layers to near zero and let CLM do the layer aggregation
-        do i=0,snlsno(jj),-1
+        do i=0,snlsno(jj)+1,-1
             h2oliq(jj,i) = 0.0_r8
             h2oice(jj,i) = 0.00000001_r8
             dzsno(jj,i)  = 0.00000001_r8
@@ -438,8 +438,7 @@ module enkf_clm_mod
           else
             h2osno_po(jj) = snow_depth(jj) * denice
           end if
-
-          do ii=0,-snlsno(jj),-1 ! iterate through the snow layers
+          do ii=0,snlsno(jj)+1,-1 ! iterate through the snow layers
             ! ii = nlevsoi - i + 1            ! DART VERSION: ii = nlevsoi - i + 1
             ! snow density prior for each layer
             if (dzsno(jj,ii).gt.0.0_r8) then
