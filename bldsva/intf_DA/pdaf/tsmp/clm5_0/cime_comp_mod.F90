@@ -177,7 +177,7 @@ module cime_comp_mod
 
   implicit none
 
-  !private
+  private
 
   public cime_pre_init1, cime_pre_init2, cime_init, cime_run, cime_final
   public timing_dir, mpicom_GLOID
@@ -602,7 +602,6 @@ contains
 
     if (present(pdaf_comm)) then
       global_comm = pdaf_comm
-      !write(*,*) "PDAF_COMM present"
     else
       call mpi_comm_dup(MPI_COMM_WORLD, global_comm, ierr)
       call shr_mpi_chkerr(ierr,subname//' mpi_comm_dup')
@@ -614,9 +613,6 @@ contains
     call cime_cpl_init(global_comm, driver_comm, num_inst_driver, driver_id, &
                        pdaf_id, pdaf_max)
   
-    !write(*,*) "after cime_cpl_init", global_comm, driver_comm, &
-    !                                  pdaf_id, pdaf_max
- 
     call shr_pio_init1(num_inst_total,NLFileName, driver_comm)
     !
     ! If pio_async_interface is true Global_comm is MPI_COMM_NULL on the servernodes
@@ -2152,11 +2148,15 @@ contains
   !*******************************************************************************
   !===============================================================================
 
-  subroutine cime_run()
+  subroutine cime_run(ntsteps)
     use seq_comm_mct,   only: atm_layout, lnd_layout, ice_layout, glc_layout,  &
          rof_layout, ocn_layout, wav_layout, esp_layout
     use shr_string_mod, only: shr_string_listGetIndexF
     use seq_comm_mct, only: num_inst_driver
+
+    ! TSMP specific
+    integer, intent(in), optional :: ntsteps
+    integer :: counter=0
 
     ! gptl timer lookup variables
     integer, parameter :: hashcnt=7
@@ -4030,6 +4030,11 @@ contains
           call t_drvstopf   ('CPL:BARRIERALARM',cplrun=.true.)
        endif
 
+      ! TSMP specific stop condition:
+      counter = counter + 1
+      if (present(ntsteps) .and. counter == ntsteps) then
+        stop_alarm = .true.
+      end if
     enddo   ! driver run loop
 
     !|----------------------------------------------------------
@@ -4226,7 +4231,6 @@ contains
     call shr_mpi_commrank(comm_in, mype  , ' cime_cpl_init')
     call shr_mpi_commsize(comm_in, numpes, ' cime_cpl_init')
 
-    !write(*,*) "start of cime_cpl_init", comm_in, mype, numpes
     num_inst_driver = 1
     id    = 0
     
@@ -4256,7 +4260,6 @@ contains
             ' : Total PE number must be a multiple of coupler instance number')
     end if
 
-    !write(*,*) "just before split", comm_in, pdaf_id, mype, numpes, comm_out
     if (pdaf_max > 1) then
        call mpi_comm_split(comm_in, pdaf_id, 0, comm_out, ierr)
        call shr_mpi_chkerr(ierr,subname//' mpi_comm_split')
