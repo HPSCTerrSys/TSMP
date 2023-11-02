@@ -73,16 +73,21 @@ This distinction is important in many parts of the TSMP-PDAF-wrapper
 source code, when, f.e., function calls have changed from version 3 to
 version 5 of CLM.
 
-## HCP_TRUNCATE_SAT ##
+## OLD_TRUNCATE_SAT ##
 
-If `HCP_TRUNCAT_SAt` is defined, the saturation truncation in
-`problem_saturationtopressure.c` reads
+If `OLD_TRUNCATE_SAT` is defined, the saturation truncation in
+function `SaturationToPressure` (file
+`problem_saturationtopressure.c`) is changed to an outdated default
+(before October 2023).
+
+Reference for the current default saturation truncation in Hung et al
+(<https://doi.org/10.1029/2021WR031549>, Equation 11)
 
 ``` c++
 	if(psdat[ips] <= (s_res + 0.003) ) psdat[ips] = s_res + 0.003;
 ```
 
-instead of the default
+`OLD_TRUNCATE_SAT` will change this to the outdated default:
 
 ``` c++
 	if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;

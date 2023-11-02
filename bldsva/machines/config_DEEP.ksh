@@ -51,7 +51,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/configure
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/mkSrcfiles
       sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/clm3_5/bld/queryDefaultNamelist.pl
-      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/DEEP/config/configure
+      sed -i -e 's+/usr/bin/env perl+/usr/bin/perl+' ${rootdir}/bldsva/intf_oas3/clm3_5/arch/config/configure
   fi
   
   route "${cyellow}<< getMachineDefaults${cnormal}"
@@ -71,7 +71,7 @@ echo $((processes%resources?processes/resources+1:processes/resources))
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
-comment "   copy JUWELS module load script into rundirectory"
+comment "   copy DEEP module load script into rundirectory"
   cp $rootdir/bldsva/machines/loadenvs.$compiler $rundir/loadenvs
 check
 
@@ -107,15 +107,15 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=$wtime
-#SBATCH -N $nnode_cos --ntasks-per-node=$((COSProcX*COSProcY)) -p dp-cn
+#SBATCH -N $nnode_cos --ntasks-per-node=$nppn -p dp-cn
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p dp-cn
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn  -p dp-cn
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dp-esb
 
 cd $rundir
 source $rundir/loadenvs
-export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${version}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="$rootdir/${mList[3]}_${platform}_${combination}/rmm/lib:\$LD_LIBRARY_PATH"
 date
 echo "started" > started.txt
 rm -rf YU*
@@ -145,7 +145,7 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --time=$wtime
 #SBATCH --partition=$queue
 #SBATCH --mail-type=NONE
-#SBATCH --account=slts 
+#SBATCH --account=deepsea 
 
 export PSP_RENDEZVOUS_OPENIB=-1
 cd $rundir
@@ -277,12 +277,12 @@ if [[ $refSetup == "cordex" ]] then
 	COSProcX=12
 	COSProcY=16
 	elif [[ $refSetup == "nrw" ]] then
-	PFLProcX=3
-	PFLProcY=4
-	CLMProcX=2
-	CLMProcY=2
-	COSProcX=4
-	COSProcY=8
+	PFLProcX=4
+	PFLProcY=6
+	CLMProcX=8
+	CLMProcY=3
+	COSProcX=12
+	COSProcY=16
 	elif [[ $refSetup == "idealRTD" ]] then
 	PFLProcX=2
 	PFLProcY=2
