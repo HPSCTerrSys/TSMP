@@ -82,6 +82,19 @@ where `nx` and `ny` are the number of grid cells in x- and y-direction
 respectively and `ix`, `iy` and `iz` are the positions of the
 observation in x-, y- and z-direction.
 
+#### gw_indicator ####
+
+`gw_indicator`: (integer) Indicates if the observation is a pressure
+observation. Values: `0`, `1`.
+
+- `0`: Soil water content observation (i.e. no pressure)
+- `1`: Pressure observation
+
+Used only for `gwmasking=2` (mixed state vector). When pressure
+observations are present, the state vector variable at the observation
+location and below is set to pressure (it may have been set to soil
+water content before).
+
 #### ix_interp_d ####
 
 `ix_interp_d`: (real) Offset of the correct observation locations
