@@ -23,6 +23,7 @@
 !-------------------------------------------------------------------------------------------
 module enkf_clm_5
 
+#include <mpif.h>
 
   contains
 
@@ -164,7 +165,8 @@ end subroutine clm5_init
 ! After cime_run we call set_clm_statevec() to transfer from CLM to PDAF.
 !--------------------------------------------------------------------------
 subroutine clm_advance(ntstep) bind(C,name="clm_advance")
-  use cime_comp_mod, only : cime_run
+  use cime_comp_mod, only : cime_run, mpicom_GLOID
+  use perf_mod,      only : t_startf, t_stopf
   use enkf_clm_mod, only : set_clm_statevec 
   use iso_C_binding
 
@@ -172,6 +174,7 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   !--------------------------------------------------------------------------
   ! PDAF variables
   !--------------------------------------------------------------------------
+  integer  :: ierr                   ! MPI error return
   integer(c_int),intent(in) :: ntstep
 
   ! call modified cime_run that runs for a specificied number of timesteps.
@@ -184,7 +187,6 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   call mpi_barrier(mpicom_GLOID,ierr)
   call t_stopf ('CPL:RUN_LOOP_BSTOP')
 
-  Time_end = mpi_wtime()
 
 end subroutine clm_advance
 !--------------------------------------------------------------------------
