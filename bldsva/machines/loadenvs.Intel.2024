@@ -1,0 +1,28 @@
+module --force purge
+module use $OTHERSTAGES
+module load Stages/2024
+module load Intel/2023.2.1
+module load ParaStationMPI/5.9.2-1
+#
+module load Hypre/2.29.0
+module load Silo/4.11.1
+module load Tcl/8.6.13 
+#
+module load ecCodes/2.31.0 
+module load HDF5/1.14.2 
+module load netCDF/4.9.2
+module load netCDF-Fortran/4.6.1
+module load PnetCDF/1.12.3
+module load cURL/8.0.1
+module load Python/3.11.3 
+module load CMake/3.26.3
+module load git/2.41.0-nodocs  
+
+# Modules for CLM5 not available yet
+module load NCO
+#module load ESMF/8.4.1
+#module load Perl/5.36.1
+#module load imkl/2023.2.0
+#module load netCDF-C++4/4.3.1
+
+module li
