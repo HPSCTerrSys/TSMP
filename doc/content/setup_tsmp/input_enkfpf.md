@@ -95,12 +95,13 @@ deltas. For coupled simulations this factor should adapt CLM/COSMO
 time steps to the ParFlow time step (`TimingInfo.BaseUnit` in
 `*.pfidb` input files).
 
-For CLM-ParFlow, `PF:dt = (dtime / TimingInfo.BaseUnit)`, where
-`dtime` is the time delta specified in the CLM namelist file
-(`lnd.stdin`).
+For CLM-ParFlow, `PF:dt` should be set as
+`PF:dt = (dtime / TimingInfo.BaseUnit)`, where `dtime` is
+the time delta specified in the CLM namelist file (`lnd.stdin`).
 
-For COSMO-ParFlow, `PF:dt = (dt_cos / TimingInfo.BaseUnit) *
-COSMO:dtmult`. TODO: Document COSMO time step setting `dt_cos`.
+For COSMO-ParFlow, `PF:dt` should be set as
+`PF:dt = (dt_cos / TimingInfo.BaseUnit) * COSMO:dtmult`.
+TODO: Document COSMO time step setting `dt_cos`.
 
 It is implicitly assumed that ParFlow and CLM calculate the same
 number of time steps between two PDAF-calls (this number of time steps
