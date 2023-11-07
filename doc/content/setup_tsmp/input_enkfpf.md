@@ -90,12 +90,40 @@ specifications in the `*.pfidb` input (`TimingInfo.StartTime`).
 
 ### PF:dt ###
 
-`PF:dt`: (real) Length of ParFlow time step. Must match with the
-specifications in the `*.pfidb` input. 
+`PF:dt`: (real) Inverse factor multiplied to CLM and COSMO time
+deltas. For coupled simulations this factor should adapt CLM/COSMO
+time steps to the ParFlow time step (`TimingInfo.BaseUnit` in
+`*.pfidb` input files).
+
+For CLM-ParFlow, `PF:dt = (dtime / TimingInfo.BaseUnit)`, where
+`dtime` is the time delta specified in the CLM namelist file
+(`lnd.stdin`).
+
+For COSMO-ParFlow, `PF:dt = (dt_cos / TimingInfo.BaseUnit) *
+COSMO:dtmult`. TODO: Document COSMO time step setting `dt_cos`.
 
 It is implicitly assumed that ParFlow and CLM calculate the same
-amount of time steps (i.e., have the same time step
-length). (Johannes: This may not be true, CLM time steps are computed)
+number of time steps between two PDAF-calls (this number of time steps
+is specified in `PF:da_interval`).
+
+For CLM-standalone simulations `PF:dt` determines the time unit of
+`PF:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
+matching with the ParFlow time step is not an issue.
+
+#### Examples for PF:dt ####
+
+Example 1, CLMSA: `PF:dt==1` means that CLM input `dtime` is the unit of
+`PF:da_interval`. For the default `dtime` of half an hour (1800
+seconds), `PF:da_interval==48` would specify daily observations.
+
+Example 2, CLMSA: For `dtime==1800` and `PF:dt==0.5`, the unit of
+`PF:da_interval` is 1 hour - the standard time unit of
+ParFlow. `PF:da_interval==24` would specify daily observations.
+
+Example 3, CLM-ParFlow: The FallSchoolCase chooses `dtime=3600` and
+`PF:dt==1.0`, which also leads to a unit of 1 hour as given in the
+ParFlow script (`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==24`
+would specify daily observations.
 
 ### PF:endtime (deprecated) ###
 
@@ -387,6 +415,9 @@ will get processors if there are processes left after giving
 
 `COSMO:dtmult`: (integer) Number of COSMO time steps within one
 ParFlow time step.
+
+Remark: This holds for `PF:dt==1`, otherwise `PF:dt` is another factor
+determining how COSMO rebuilds the ParFlow time step.
 
 ## [DA] ##
 
