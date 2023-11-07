@@ -121,10 +121,11 @@ Example 2, CLMSA: For `dtime==1800` and `PF:dt==0.5`, the unit of
 `PF:da_interval` is 1 hour - the standard time unit of
 ParFlow. `PF:da_interval==24` would specify daily observations.
 
-Example 3, CLM-ParFlow: The FallSchoolCase chooses `dtime=3600` and
-`PF:dt==1.0`, which also leads to a unit of 1 hour as given in the
-ParFlow script (`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==24`
-would specify daily observations.
+Example 3, FallSchoolCase, CLM-ParFlow: The FallSchoolCase chooses
+`dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
+hour. This is in agreement with the FallSchool's ParFlow input script
+(`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==1` specifies
+hourly observations.
 
 ### PF:endtime (deprecated) ###
 
