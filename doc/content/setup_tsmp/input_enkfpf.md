@@ -91,9 +91,9 @@ specifications in the `*.pfidb` input (`TimingInfo.StartTime`).
 ### PF:dt ###
 
 `PF:dt`: (real) Inverse factor multiplied to CLM and COSMO time
-deltas. For coupled simulations this factor should adapt CLM/COSMO
-time steps to the ParFlow time step (`TimingInfo.BaseUnit` in
-`*.pfidb` input files).
+steps. For coupled simulations, the quotient of CLM/COSMO time steps
+and this factor should be in agreement with the ParFlow time step
+(`TimingInfo.BaseUnit` in `*.pfidb` input files).
 
 For CLM-ParFlow, `PF:dt` should be set as
 `PF:dt = (dtime / TimingInfo.BaseUnit)`, where `dtime` is
