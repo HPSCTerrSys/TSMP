@@ -16,3 +16,6 @@
 [submodule "cosmo5.01_fresh"]
 	path = cosmo5.01_fresh
 	url = https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git
+[submodule "oasis3-mct"]
+	path = oasis3-mct
+	url = https://icg4geo.icg.kfa-juelich.de/ExternalReposPublic/oasis3-mct
