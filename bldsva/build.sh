@@ -6,18 +6,18 @@ source eTSMP/env/jsc.2023_Intel.sh
 # Models to build
 MODEL_ID="CLM3.5-ParFlow-COSMO"
 
-CLM35_SRC="../CLM3.5"
-PARFLOW_SRC="../parflow"
-COSMO_SRC="../cosmo5.01_fresh"
-ICON_SRC="../icon2.6.4_oascoup"
-eCLM_SRC="../eCLM"
-OASIS_SRC="../oasis3-mct"
+CLM35_SRC=$(realpath ../CLM3.5)
+PARFLOW_SRC=$(realpath ../parflow)
+COSMO_SRC=$(realpath ../cosmo5.01_fresh)
+ICON_SRC=$(realpath ../icon2.6.4_oascoup)
+eCLM_SRC=$(realpath ../eCLM)
+OASIS_SRC=$(realpath ../oasis3-mct)
 string_cmake=""
 
 if echo "$MODEL_ID" | grep -qE '-'; then
 
         git submodule update --init --remote $OASIS_SRC
-	string_cmake="${string_cmake} -DOASIS_SRC=${OASIS_SRC}"
+	string_cmake="-DOASIS_SRC=${OASIS_SRC}"
 
 fi
 
@@ -27,7 +27,7 @@ if echo "$MODEL_ID" | grep -qE 'COSMO'; then
 	cd $COSMO_SRC
 	git switch tsmp-oasis
 	cd ../bldsva/
-        string_cmake="-DCOSMO_SRC=${COSMO_SRC}"
+        string_cmake="${string_cmake} -DCOSMO_SRC=${COSMO_SRC}"
 
 fi
 
@@ -35,7 +35,7 @@ if echo "$MODEL_ID" | grep -qE 'ParFlow'; then
        
 	git submodule update --init --remote $PARFLOW_SRC
 	cd $PARFLOW_SRC
-	git switch v3.12.0
+	git switch --detach v3.12.0
 	cd ../bldsva/
 	string_cmake="${string_cmake} -DPARFLOW_SRC=${PARFLOW_SRC}"
 
@@ -62,17 +62,17 @@ if echo "$MODEL_ID" | grep -qE 'icon'; then
 
 fi
 
-
+echo $string_cmake
 # Where build artifacts and binaries will be saved
 BUILD_DIR="../../bld/${SYSTEMNAME^^}_${MODEL_ID}"
 INSTALL_DIR="../../bin/${SYSTEMNAME^^}_${MODEL_ID}"
 BUILD_LOG="$(dirname ${BUILD_DIR})/${MODEL_ID}_$(date +%Y.%m.%d_%H.%M).log"
-CLM35_SRC="../../CLM3.5"
-PARFLOW_SRC="../../parflow"
-COSMO_SRC="../../cosmo5.01_fresh"
-ICON_SRC="../../icon2.6.4_oascoup"
-eCLM_SRC="../../eCLM"
-OASIS_SRC="../../oasis3-mct"
+CLM35_SRC="/CLM3.5"
+PARFLOW_SRC="/parflow"
+COSMO_SRC="/cosmo5.01_fresh"
+ICON_SRC="/icon2.6.4_oascoup"
+eCLM_SRC="/eCLM"
+OASIS_SRC="/oasis3-mct"
 
 
 
