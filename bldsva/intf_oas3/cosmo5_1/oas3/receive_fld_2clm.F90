@@ -241,7 +241,8 @@ INTEGER :: cplstep, cplstop   !CPS cpl step
    nrcvinfo = OASIS_idle
    ztmp1=0._wp
 
-      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+!      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+   isec = (( ntstep * dt ) - (  hstart * 3600.0 ) ) * 10.0
 
 
 

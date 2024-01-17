@@ -776,7 +776,7 @@ comment "  cp namelist to rundir"
   cp ${namelist_cos} $rundir/lmrun_uc >> $log_file 2>> $err_file
 check
 
-nstop_cos=$((  ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos  ))
+nstop_cos=`echo "scale=0 ; ($runhours*3600 + ($(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) )  /$dt_cos" | bc`
 #if [[ $withCESM == "false" ]] ; then ; nstop_cos=$(($nstop_cos-($cplfreq1/$dt_cos))) ; fi
 
 comment "  sed dt to namelist"
@@ -840,11 +840,12 @@ check
 sed "s/__nhour_restart_incr__/1/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
-cnts=$(( ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos} ))
+cnts=`echo "scale=2 ; ( $(date -u '+%s' -d "${startDate}") - $(date -u '+%s' -d "${initDate}")) / ${dt_cos}" | bc`
 comment "  sed output interval to namelist"
 sed "s/__ncomb_start__/$cnts/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
-sed "s/__dump_cos_interval__/ $(python -c "print ($dump_cos*(3600/$dt_cos))")/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
+cofq=`echo "scale=0; $dump_cos*(3600/$dt_cos)" | bc`
+sed "s/__dump_cos_interval__/$cofq/" -i $rundir/lmrun_uc  >> $log_file 2>> $err_file
 check
 
 if [[ $restfile_cos != "" ]] then
@@ -1034,7 +1035,7 @@ if [[ ${mList[1]} == "clm5_0" ]]; then
    sed "s,__dump_clm_interval__,$dump_clm," -i $rundir/lnd.stdin >> $log_file 2>> $err_file
  check
  comment "  sed runtime to namelist"
-   if [[ $withICON == "true" ]]; then
+   if [[ $withICON == "true" || $withCOS == "true" ]]; then
      runstep_clm=$((($runhours*3600 + $cplfreq1/10)/$dt_clm))
    else
      runstep_clm=$((($runhours*3600 + $cplfreq1)/$dt_clm))
@@ -1165,8 +1166,8 @@ route "${cyellow}>>> c_setup_pfl${cnormal}"
     sed "s/__dt_pfl_bldsva__/$dt_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed end time to pfl namelist."
-#    sed "s/__stop_pfl_bldsva__/$runstep_clm/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
-    sed "s/__stop_pfl_bldsva__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
+    pflet=`echo "scale=5; ${runhours} + ${base_pfl}" | bc`
+    sed "s/__stop_pfl_bldsva__/$pflet/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
   check
   comment "   sed dump interval to pfl namelist."
     sed "s/__dump_pfl_interval__/$dump_pfl/" -i $rundir/coup_oas.tcl >> $log_file 2>> $err_file
@@ -1247,7 +1248,7 @@ route "${cyellow}>>> c_setup_pdaf${cnormal}"
     sed "s/__dt__/$dt_pfl/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check
   comment "   sed endtime into pdaf namelist."
-    sed "s/__endtime__/$(python -c "print (${runhours} + ${base_pfl})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+     sed "s/__endtime__/$(python -c "print ${runhours} + ${base_pfl}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check
   comment "   sed clmproc into pdaf namelist."
     sed "s/__clmproc__/$nproc_clm/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
@@ -1256,7 +1257,7 @@ route "${cyellow}>>> c_setup_pdaf${cnormal}"
     sed "s/__cosproc__/$nproc_cos/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
   comment "   sed dtmult into pdaf namelist."
-    sed "s/__dtmult__/$(python -c "print (${dt_pfl} * 3600 / ${dt_cos})")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
+     sed "s/__dtmult__/$(python -c "print ${dt_pfl} * 3600 / ${dt_cos}")/" -i $rundir/enkfpf.par >> $log_file 2>> $err_file
   check 
 
 route "${cyellow}<<< c_setup_pdaf${cnormal}"

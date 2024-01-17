@@ -115,7 +115,8 @@ CALL MPI_Barrier(kl_comm, ier)
  ! Call OASIS at each time step but field sent to other model only at coupling time step
  ! (accumulation otherwise, if asked in the SMIOC configuration file)
  !
- CALL prism_put_proto( ssnd(kid)%nid, kstep, buffer_array, kinfo )
+!SPo CALL prism_put_proto( ssnd(kid)%nid, kstep, buffer_array, kinfo )
+ CALL prism_put_proto( ssnd(kid)%nid, kstep*10, buffer_array, kinfo )
 
 deallocate(buffer_array)
 

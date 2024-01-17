@@ -285,9 +285,11 @@ CHARACTER (LEN=25)         :: yzroutine
 
 !FG   isec = ntstep * dt
    IF ( hstart > 0 ) THEN    
-      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+!      isec = ( ntstep * dt ) - (  hstart * 3600.0 ) 
+      isec = ( ( ntstep * dt ) - (  hstart * 3600.0 ) ) * 10.0
    ELSE    
-      isec = ntstep * dt    
+!      isec = ntstep * dt    
+      isec = ntstep * dt * 10.0
    ENDIF
 
 
