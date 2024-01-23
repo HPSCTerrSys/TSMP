@@ -45,6 +45,9 @@ then
 elif [ $testcase = idiurnal-cycle ]
 then
       wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_idiurnal-cycle/
+elif [ $testcase = cordex0275 ]
+then
+      wget -x -l 8 -nH --cut-dirs=3 -e robots=off --recursive  --no-parent --reject="index.html*" https://datapub.fz-juelich.de/slts/tsmp_testcases/data/tsmp_eur0275/static/
 fi
 
 # Checking if the downloaded input files are corrupted.
@@ -115,5 +118,8 @@ then
 elif [ $testcase = idiurnal-cycle ]
 then
      mv tsmp_idiurnal-cycle ../
+elif [ $testcase = cordex0275 ]
+then
+     mv tsmp_eur0275 ../
 fi
 

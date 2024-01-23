@@ -271,6 +271,13 @@ if [[ $refSetup == "cordex" ]] then
 	CLMProcY=8
 	COSProcX=16
 	COSProcY=18
+    elif [[ $refSetup == "cordex0275" ]] then
+	PFLProcX=32
+	PFLProcY=16
+	CLMProcX=64
+	CLMProcY=2
+	COSProcX=48
+	COSProcY=48
 	elif [[ $refSetup == "nrw" ]] then
 	PFLProcX=5
 	PFLProcY=8

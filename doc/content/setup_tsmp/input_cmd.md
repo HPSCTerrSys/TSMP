@@ -51,6 +51,10 @@ the Gaussian probability distribution of the measurements.
 [`[DA]da_interval`](./input_enkfpf.md#dada_interval)) that are forward
 computed, before assimilation is actually performed.
 
+In general, `delt_obs` should be as small as possible, in order to
+avoid performance loss. See remark in
+[`[DA]da_interval`](./input_enkfpf.md#dada_interval).
+
 ## screen ##
 
 `screen` (integer) Control verbosity of PDAF
@@ -184,14 +188,21 @@ will be performed every assimilation cycle with an observation error of
 
 ### Command Line Example: LENKF ###
 
-`local_range` (real) set localization radius (cut-off-radius)
+`local_range` (real) set localization radius (Cut-off-radius)
 - 0.0 by default
 - any positive value should work.
 
-`srange` (integer): the support radius of the localization
-- the localization weight radius; support range for 5th-order
-  polynomial
-- by default set to `local_range`
+`srange` (integer): the support radius of the localization, default:
+equal to `local_range`. Usage in `PDAF_local_weight.F90`
+- `locweight == 0`: `srange` is not used
+- `locweight == 1`: `srange` is distance with weight `1/e`, for
+  avoiding sharp cut-off, `local_range` should be significantly larger
+  than `srange`
+- `locweight == 2`: `srange` is the support range for 5th-order
+  polynomial, can safely be chosen the same as `local_range`,
+  parametrization change of the 5th-order polynomial is at `srange/2`,
+  see
+  <https://github.com/PDAF/PDAF/blob/ed631034956dece8e91e8b588c4cf3aaa7916f49/src/PDAF_local_weight.F90#L147-L176>.
 
 `locweight` (integer): set weight function for localization,
 - default=0

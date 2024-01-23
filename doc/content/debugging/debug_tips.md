@@ -49,3 +49,8 @@ make sure to incorporate the source code changes in the designated
 replace structures.
 
 	
+## Debug Tip 3: Debugging OASIS3-MCT
+
+In `namcouple`, change the input `$NLOGPRT` to get more debug
+output. More information:
+<https://cerfacs.fr/oa4web/oasis3-mct_5.0/oasis3mct_UserGuide/node39.html>

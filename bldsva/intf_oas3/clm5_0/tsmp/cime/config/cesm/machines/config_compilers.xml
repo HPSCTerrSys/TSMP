@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <config_compilers version="2.0">
 <!--
+    TSMP-PDAF: marked changes were applied to commit 688d1a4299a2 of https://github.com/ESMCI/cime
 ========================================================================
 This file defines compiler flags for building CESM.  General flags are listed first
 followed by flags specific to particular operating systems, followed by particular machines.
@@ -1193,6 +1194,7 @@ using a fortran linker.
   </SLIBS>
 </compiler>
 
+<!--TSMP_PDAF addition beginning  -->
 <compiler MACH="jureca" COMPILER="intel">
   <CFLAGS>
     <append DEBUG="FALSE"> -O2 </append>
@@ -1242,6 +1244,7 @@ using a fortran linker.
     <append>-mkl -lnetcdff -lnetcdf </append>
   </LDFLAGS>
 </compiler>
+<!--TSMP_PDAF addition end  -->
 
 <compiler MACH="userdefined">
   <CONFIG_ARGS>
