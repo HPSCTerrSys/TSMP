@@ -55,7 +55,7 @@ SUBROUTINE finalize_pdaf()
   !EOP
 
   ! *** Show allocated memory for PDAF ***
-  IF (mype_world==0) CALL PDAF_print_info(2)
+  IF (mype_world==0) CALL PDAF_print_info(10)
 
   ! *** Print PDAF timings onto screen ***
   IF (mype_world==0) CALL PDAF_print_info(1)
@@ -63,8 +63,8 @@ SUBROUTINE finalize_pdaf()
   if (allocated(local_npes_model)) deallocate(local_npes_model)
   IF (ALLOCATED(obs_index_p)) DEALLOCATE(obs_index_p)
   IF (ALLOCATED(obs_p)) DEALLOCATE(obs_p)
-  deallocate (dim_state_p_count)
-  deallocate(dim_state_p_stride)
+  if (allocated(dim_state_p_count)) deallocate (dim_state_p_count)
+  if (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
   ! M.Pondkule: deallocating variables used in data assimilation
   ! with letkf filter
   IF (ALLOCATED(xcoord_fortran_g)) DEALLOCATE(xcoord_fortran_g)
