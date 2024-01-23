@@ -60,6 +60,10 @@ SUBROUTINE finalize_pdaf()
   ! *** Print PDAF timings onto screen ***
   IF (mype_world==0) CALL PDAF_print_info(1)
 
+  ! *** Deallocate PDAF arrays ***
+  CALL PDAF_deallocate()
+
+  ! *** Deallocate PDAF framework arrays ***
   if (allocated(local_npes_model)) deallocate(local_npes_model)
   IF (ALLOCATED(obs_index_p)) DEALLOCATE(obs_index_p)
   IF (ALLOCATED(obs_p)) DEALLOCATE(obs_p)
