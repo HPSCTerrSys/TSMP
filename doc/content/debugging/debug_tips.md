@@ -57,6 +57,13 @@ output. More information:
 
 ## Debug Tip 4: Debugging PDAF
 
+### PDAF Debugging Information
+
+See the following wiki page for information about turning on PDAF
+debugging output:
+
+https://pdaf.awi.de/trac/wiki/PDAF_debugging#ActivatingDebuggingOutput
+
 ### PDAF's Timing and Memory output
 
 `/intf_DA/pdaf/framework/finalize_pdaf.F90`: The input for the timing
