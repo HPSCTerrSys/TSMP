@@ -44,7 +44,9 @@ extern void clm5_init(char *s, int pdaf_id, int pdaf_max);
 #endif
 extern void clm_advance(int *ntstep);
 extern void update_clm();
+#if defined CLMSA
 extern void print_update_clm(int *ts, int *ttot);
+#endif
 extern void write_clm_statistics(int *ts, int *ttot);
 extern void clm_finalize();
 extern void cosmo_init();
@@ -91,10 +93,15 @@ GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
 GLOBAL int dtmult_cosmo;
 GLOBAL int pf_olfmasking;
+GLOBAL int pf_olfmasking_param;
+GLOBAL int pf_olfmasking_depth;
 GLOBAL int pf_gwmasking;
 GLOBAL int pf_printgwmask;
 GLOBAL int pf_freq_paramupdate;
 GLOBAL int pf_aniso_use_parflow;
+GLOBAL int is_dampfac_state_time_dependent;
+GLOBAL int is_dampfac_param_time_dependent;
+GLOBAL int pf_dampswitch_sm;
 extern int model;
 extern int mype_model;
 extern int npes_model;
@@ -113,3 +120,5 @@ GLOBAL double pf_aniso_perm_y,pf_aniso_perm_z;
 GLOBAL double da_interval;
 GLOBAL double pf_dampfac_param;
 GLOBAL double pf_dampfac_state;
+GLOBAL double dampfac_state_time_dependent;
+GLOBAL double dampfac_param_time_dependent;

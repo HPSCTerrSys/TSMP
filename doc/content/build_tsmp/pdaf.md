@@ -99,7 +99,7 @@ Subroutines:
   TSMP-PDAF
   - defined in `init_pdaf.F90` by `C_F_POINTER` subroutine (Doc from
     Gnu-Compiler:
-    https://gcc.gnu.org/onlinedocs/gfortran/C_005fF_005fPOINTER.html)
+    <https://gcc.gnu.org/onlinedocs/gfortran/C_005fF_005fPOINTER.html>)
   - takes values from `pf_statevec`
 - `subvec_p`: state vector pressure (from `enkf_parflow.c:371`)
   - defined: `enkf_parflow.h`, allocated: `wrapper_tsmp.c`
