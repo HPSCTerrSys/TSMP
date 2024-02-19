@@ -38,8 +38,7 @@ MODULE mod_assimilation
 ! Most variables can be specified as a command line 
 ! argument.
 !
-! Implementation for the 2D online example
-! with parallelization.
+! Implementation for TSMP-PDAF.
 !
 ! !REVISION HISTORY:
 ! 2013-02 - Lars Nerger - Initial code
@@ -50,17 +49,24 @@ MODULE mod_assimilation
   SAVE
 !EOP
 
-! *** Variables specific for online tutorial example ***
+! *** Model- and data specific variables ***
 
   INTEGER :: dim_state           ! Global model state dimension
   INTEGER :: dim_state_p         ! Model state dimension for PE-local domain
+
+  INTEGER :: dim_obs_p                    ! Process-local number of observations
+  REAL, ALLOCATABLE    :: obs_p(:)        ! Vector holding process-local observations
+  INTEGER, ALLOCATABLE :: obs_index_p(:)  ! Vector holding state-vector indices of observations
+  ! REAL, ALLOCATABLE    :: obs_f(:)        ! Vector holding full vector of observations
+  ! REAL, ALLOCATABLE :: coords_obs_f(:,:)  ! Array for full observation coordinates
+
+! *** Variables specific for TSMP-PDAF ***
+
   ! gw
   INTEGER, ALLOCATABLE :: dim_state_p_count(:)
   INTEGER, ALLOCATABLE :: dim_state_p_stride(:)
   ! gw end
   REAL, ALLOCATABLE    :: obs(:)          ! Vector holding all observations for Global domain 
-  REAL, ALLOCATABLE    :: obs_p(:)        ! Vector holding observations for PE-local domain
-  INTEGER, ALLOCATABLE :: obs_index_p(:)  ! Vector holding state-vector indices of observations for PE-local domain
   INTEGER, ALLOCATABLE :: obs_index_l(:)  ! Vector holding local state-vector indices of observations
   INTEGER, ALLOCATABLE :: obs_interp_indices_p(:,:)  ! Vector holding state-vector indices of grid cells surrounding interpolation for PE-local domain
   INTEGER, ALLOCATABLE :: obs_interp_weights_p(:,:)  ! Vector holding weights of grid cells surrounding observation for PE-local domain
@@ -74,6 +80,7 @@ MODULE mod_assimilation
   endtype
   type(scoltype), dimension(:), allocatable :: sc_p 
   real, allocatable    :: idx_obs_nc_p(:)        
+  INTEGER :: toffset      ! offset time step to shift all the assimilation steps
   !end hcp  
   REAL, ALLOCATABLE :: clm_obserr_p(:)    ! Vector holding  observation errors for CLM run at each PE-local domain  
   REAL, ALLOCATABLE :: distance(:)        ! Localization distance
@@ -90,7 +97,6 @@ MODULE mod_assimilation
   INTEGER, ALLOCATABLE :: m_id_f(:)   ! index for mapping mstate to local domain
   !kuw end
 
-  INTEGER :: dim_obs_p     ! Process-local number of observations
   INTEGER, ALLOCATABLE :: maxlon(:), minlon(:), maxlat(:), minlat(:), & ! store the maximum and minimum coordinates limits 
                           maxix(:), minix(:), maxiy(:), miniy(:)        ! for remote sensing data with the same variable identity 
   INTEGER :: dim_nx, dim_ny ! the dimension along the x and y direction
@@ -100,6 +106,7 @@ MODULE mod_assimilation
 
   ! *** User defined observation filename ***
   character (len = 110) :: obs_filename
+
 
 ! *** Below are the generic variables used for configuring PDAF ***
 ! *** Their values are set in init_PDAF                         ***
@@ -113,7 +120,6 @@ MODULE mod_assimilation
   INTEGER :: delt_obs      ! time step interval between assimilation steps
   REAL    :: rms_obs       ! RMS error size for observation generation
   INTEGER :: dim_obs       ! Number of observations
-  INTEGER :: toffset      ! offset time step to shift all the assimilation steps
 
 ! ! General control of PDAF - available as command line options
   INTEGER :: screen       ! Control verbosity of PDAF
@@ -122,7 +128,9 @@ MODULE mod_assimilation
   INTEGER :: dim_ens      ! Size of ensemble for SEIK/LSEIK/EnKF/ETKF
                           ! Number of EOFs to be used for SEEK
   INTEGER :: filtertype   ! Select filter algorithm:
-                          ! SEEK (0), SEIK (1), EnKF (2), LSEIK (3), ETKF (4), LETKF (5)
+                          !   SEEK (0), SEIK (1), EnKF (2), LSEIK (3), ETKF (4), LETKF (5)
+                          !   ESTKF (6), LESTKF (7), LEnKF (8)
+                          !   NETF (9), LNETF (10), LKNETF(11), PF (12), 3DVAR (200)
   INTEGER :: subtype      ! Subtype of filter algorithm
                           !   SEEK: 
                           !     (0) evolve normalized modes
@@ -149,16 +157,50 @@ MODULE mod_assimilation
                           !       There are no fixed basis/covariance cases, as
                           !       these are equivalent to SEIK subtypes 2/3
                           !   LETKF:
-                          !     (0) ETKF using T-matrix like SEIK
+                          !     (0) LETKF using T-matrix like SEIK
                           !     (1) LETKF following Hunt et al. (2007)
                           !       There are no fixed basis/covariance cases, as
                           !       these are equivalent to LSEIK subtypes 2/3
+                          !   ESTKF:
+                          !     (0) standard ESTKF 
+                          !       There are no fixed basis/covariance cases, as
+                          !       these are equivalent to SEIK subtypes 2/3
+                          !   LESTKF:
+                          !     (0) standard LESTKF 
+                          !       There are no fixed basis/covariance cases, as
+                          !       these are equivalent to LSEIK subtypes 2/3
+                          !   LEnKF:
+                          !     (0) Standard form of EnKF with covariance localization
+                          !   NETF:
+                          !     (0) standard NETF 
+                          !   LNETF:
+                          !     (0) standard LNETF 
+                          !   LKNETF:
+                          !     (0) HNK: 2-step LKNETF with NETF before LETKF
+                          !     (1) HKN: 2-step LKNETF with LETKF before NETF
+                          !     (4) HSync: LKNETF synchronous
+                          !     (5) Offline mode - HNK: 2-step LKNETF with NETF before LETKF
+                          !   PF:
+                          !     (0) standard PF 
+                          !   3D-Var:
+                          !     (0) parameterized 3D-Var
+                          !     (1) 3D Ensemble Var using LESTKF for ensemble update
+                          !     (4) 3D Ensemble Var using ESTKF for ensemble update
+                          !     (6) hybrid 3D-Var using LESTKF for ensemble update
+                          !     (7) hybrid 3D-Var using ESTKF for ensemble update
   INTEGER :: incremental  ! Perform incremental updating in LSEIK
   INTEGER :: dim_lag      ! Number of time instances for smoother
 
 ! ! Filter settings - available as command line options
 !    ! General
   INTEGER :: type_forget  ! Type of forgetting factor
+                          !  SEIK/LSEIK/ETKF/LETKF/ESTKF/LESTKF
+                          !   (0) fixed
+                          !   (1) global adaptive
+                          !   (2) local adaptive for LSEIK/LETKF/LESTKF
+                          !  NETF/LNETF/PF
+                          !   (0) apply inflation on forecast ensemble
+                          !   (2) apply inflation on analysis ensemble
   REAL    :: forget       ! Forgetting factor for filter analysis
   INTEGER :: dim_bias     ! dimension of bias vector
 !    ! SEEK
@@ -166,7 +208,7 @@ MODULE mod_assimilation
   REAL    :: epsilon      ! Epsilon for gradient approx. in SEEK forecast
 !    ! ENKF
   INTEGER :: rank_analysis_enkf  ! Rank to be considered for inversion of HPH
-!    ! SEIK/ETKF/LSEIK/ETKFS
+!    ! SEIK/ETKF/ESTKF/LSEIK/LETKF/LESTKF/NETF/LNETF/LKNETF
   INTEGER :: type_trans    ! Type of ensemble transformation
                            ! SEIK/LSEIK:
                            ! (0) use deterministic omega
@@ -177,7 +219,18 @@ MODULE mod_assimilation
                            ! (0) use deterministic symmetric transformation
                            ! (2) use product of (0) with random orthonormal matrix with
                            !     eigenvector (1,...,1)^T
-!    ! LSEIK/LETKF
+                           ! ESTKF/LESTKF:
+                           ! (0) use deterministic omega
+                           ! (1) use random orthonormal omega orthogonal to (1,...,1)^T
+                           ! (2) use product of (0) with random orthonormal matrix with
+                           !     eigenvector (1,...,1)^T
+                           ! NETF/LNETF:
+                           ! (0) use random orthonormal transformation orthogonal to (1,...,1)^T
+                           ! (1) use identity transformation
+                           ! LKNETF:
+                           ! (0) use random orthonormal transformation orthogonal to (1,...,1)^T
+                           ! (1) use identity transformation
+!    ! LSEIK/LETKF/LESTKF
   REAL    :: local_range   ! Range for local observation domain
   INTEGER :: locweight     ! Type of localizing weighting of observations
                     !   (0) constant weight of 1
