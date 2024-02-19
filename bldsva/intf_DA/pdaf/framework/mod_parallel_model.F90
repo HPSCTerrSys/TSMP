@@ -24,7 +24,7 @@
 
 module mod_parallel_model
     use iso_c_binding
-    include 'mpif.h'
+    use mpi
 save
     ! mpi related
     integer :: npes_parflow
@@ -54,6 +54,21 @@ save
         end subroutine read_enkfpar
     end interface
 contains
-    subroutine abort_parallel
-    end subroutine abort_parallel
+!-------------------------------------------------------------------------------
+!BOP
+!
+! !ROUTINE: abort_parallel - Abort MPI
+!
+! !INTERFACE:
+  SUBROUTINE abort_parallel()
+
+! !DESCRIPTION:
+! Routine to abort MPI program
+!EOP
+
+    IMPLICIT NONE
+    
+    CALL  MPI_Abort(MPI_COMM_WORLD, 1, MPIerr)
+
+  END SUBROUTINE abort_parallel
 end module mod_parallel_model
