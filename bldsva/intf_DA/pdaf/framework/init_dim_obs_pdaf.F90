@@ -55,7 +55,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        ONLY: mype_filter, comm_filter, npes_filter
   use mod_parallel_model, &
        only: mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
-       mype_world
+       mype_world, abort_parallel
   USE mod_assimilation, &
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
        obs, &
@@ -65,7 +65,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        obs_nc2pdaf, &
        local_dims_obs, &
        ! dim_obs_p, &
-       dim_obs_f, &
        obs_id_p, &
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -143,7 +142,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   ! *** Local variables
   integer :: ierror
   INTEGER :: max_var_id
-  INTEGER :: tmp_dim_obs_f
+  INTEGER :: sum_dim_obs_p
   INTEGER :: i,j,k,count  ! Counters
   INTEGER :: count_interp ! Counter for interpolation grid cells
   INTEGER :: m,l          ! Counters
@@ -478,15 +477,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   end if
 
   ! add and broadcast size of local observation dimensions using mpi_allreduce 
-  call mpi_allreduce(dim_obs_p, tmp_dim_obs_f, 1, MPI_INTEGER, MPI_SUM, &
+  call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
        comm_filter, ierror) 
-  ! Set dimension of full observation vector
-  dim_obs_f = tmp_dim_obs_f
 
-  if (screen > 2) then
-      if (mype_filter==0) then
-          print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_f_pdaf: dim_obs_f=", dim_obs_f
-      end if
+  ! Check sum of dimensions of PE-local observation vectors against
+  ! dimension of full observation vector
+  if (.not. sum_dim_obs_p == dim_obs) then
+    print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Sum of local observation dimensions"
+    print *, "sum_dim_obs_p=", sum_dim_obs_p
+    print *, "dim_obs=", dim_obs
+    call abort_parallel()
   end if
 
   allocate(local_dis(npes_filter))
