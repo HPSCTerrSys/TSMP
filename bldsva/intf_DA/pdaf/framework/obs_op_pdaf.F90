@@ -33,7 +33,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 
 ! !DESCRIPTION:
 ! User-supplied routine for PDAF.
-! Used in the filters: SEEK/SEIK/EnKF/ETKF/ESTKF
+! Used in the filters: SEIK/EnKF/ETKF/ESTKF
 !
 ! The routine is called during the analysis step.
 ! It has to perform the operation of the
@@ -83,8 +83,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
   integer :: icorner
   logical :: lpointobs       !If true: no special observation; use point observation
 ! !CALLING SEQUENCE:
-! Called by: PDAF_seek_analysis   (as U_obs_op)
-! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
+! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT   (as U_obs_op)
 ! Called by: PDAF_enkf_analysis_rlm, PDAF_enkf_analysis_rsm
 !EOP
 

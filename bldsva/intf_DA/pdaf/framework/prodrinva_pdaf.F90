@@ -33,13 +33,12 @@ SUBROUTINE prodRinvA_pdaf(step, dim_obs_p, rank_dim_ens, obs_p, A_p, C_p)
 
 ! !DESCRIPTION:
 ! User-supplied routine for PDAF.
-! Used in the filters: SEEK/SEIK/ETKF/ESTKF
+! Used in the filters: SEIK/ETKF/ESTKF
 !
 ! The routine is called during the analysis step.
 ! It has to compute the product of the inverse of 
 ! the observation error covariance matrix with
-! the matrix of observed EOF modes (SEEK) or 
-! observed ensemble perturbations (SEIK/ETKF/ESTKF).
+! the observed ensemble perturbations (SEIK/ETKF/ESTKF).
 !
 ! !REVISION HISTORY:
 ! 2013-02 - Lars Nerger - Initial code
@@ -57,15 +56,14 @@ SUBROUTINE prodRinvA_pdaf(step, dim_obs_p, rank_dim_ens, obs_p, A_p, C_p)
   INTEGER, INTENT(in) :: step                ! Current time step
   INTEGER, INTENT(in) :: dim_obs_p           ! PE-local dimension of obs. vector
   INTEGER, INTENT(in) :: rank_dim_ens        ! Ensemble size in case of ETKF filter else 
-                                             ! rank of initial covariance matrix for ESTKF,SEIK and SEEK filter
+                                             ! rank of initial covariance matrix for ESTKF and SEIK filter
   REAL, INTENT(in)    :: obs_p(dim_obs_p)    ! PE-local vector of observations
   ! The second dimension of input and ouput matrix is dim_ens for ETKF, 
-  ! while it is rank for the ESTKF,SEIK and SEEK filter
-  REAL, INTENT(in)    :: A_p(dim_obs_p,rank_dim_ens) ! Input matrix from SEEK_ANALYSIS
+  ! while it is rank for the ESTKF and SEIK filter
+  REAL, INTENT(in)    :: A_p(dim_obs_p,rank_dim_ens) ! Input matrix from SEIK_ANALYSIS
   REAL, INTENT(out)   :: C_p(dim_obs_p,rank_dim_ens) ! Output matrix
 
 ! !CALLING SEQUENCE:
-! Called by: PDAF_seek_analysis        (as U_prodRinvA)
 ! Called by: PDAF_seik_analysis        (as U_prodRinvA)
 ! Called by: PDAF_seik_analysis_newT   (as U_prodRinvA)
 ! Called by: PDAF_etkf_analysis        (as U_prodRinvA)
