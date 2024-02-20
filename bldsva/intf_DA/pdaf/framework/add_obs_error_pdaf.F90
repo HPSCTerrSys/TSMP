@@ -41,15 +41,17 @@ SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
 ! matrix to the provided matrix C_p for the 
 ! PE-local domain .
 ! 
+! Implementation for TSMP-PDAF.
+!
 ! !REVISION HISTORY:
 ! 2013-02 - Lars Nerger - Initial code
 ! Later revisions - see svn log
 !
 ! !USES:
-   USE mod_assimilation, &
-        ONLY: rms_obs, obs_nc2pdaf
+  USE mod_assimilation, &
+       ONLY: rms_obs, obs_nc2pdaf
 
-   use mod_read_obs, only: multierr,clm_obserr, pressure_obserr
+  USE mod_read_obs, ONLY: multierr,clm_obserr, pressure_obserr
 
   IMPLICIT NONE
 
@@ -100,6 +102,5 @@ SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
 #endif
     enddo
   endif
-
 
 END SUBROUTINE add_obs_error_pdaf
