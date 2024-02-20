@@ -192,16 +192,17 @@ will be performed every assimilation cycle with an observation error of
 - 0.0 by default
 - any positive value should work.
 
-`srange` (integer): the support radius of the localization, default:
-equal to `cradius`. Usage in `PDAF_local_weight.F90`
+`sradius` (deprecated `srange`) (real): the support radius of the
+localization, default: equal to `cradius`. Usage in
+`PDAF_local_weight.F90`
 (<https://pdaf.awi.de/trac/wiki/PDAF_local_weight>)
-- `locweight == 0`: `srange` is not used
-- `locweight == 1`: `srange` is distance with weight `1/e`, for
+- `locweight == 0`: `sradius` is not used
+- `locweight == 1`: `sradius` is distance with weight `1/e`, for
   avoiding sharp cut-off, `cradius` should be significantly larger
-  than `srange`
-- `locweight == 2`: `srange` is the support range for 5th-order
+  than `sradius`
+- `locweight == 2`: `sradius` is the support radius for 5th-order
   polynomial, can safely be chosen the same as `cradius`,
-  parametrization change of the 5th-order polynomial is at `srange/2`,
+  parametrization change of the 5th-order polynomial is at `sradius/2`,
   see
   <https://github.com/PDAF/PDAF/blob/ed631034956dece8e91e8b588c4cf3aaa7916f49/src/PDAF_local_weight.F90#L147-L176>.
 

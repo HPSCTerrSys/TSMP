@@ -61,7 +61,7 @@ SUBROUTINE init_pdaf()
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&
         dim_ens, rms_obs, model_error, model_err_amp, incremental, &
         covartype, type_forget, forget, dim_bias, rank_analysis_enkf, &
-        locweight, cradius, srange, int_rediag, filename, &
+        locweight, cradius, sradius, int_rediag, filename, &
         type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
         dim_lag
 #if defined CLMSA
@@ -186,12 +186,12 @@ SUBROUTINE init_pdaf()
     !    re-diagonalization in SEEK
     locweight = 0     ! Type of localizating weighting
     !   (0) constant weight of 1
-    !   (1) exponentially decreasing with SRANGE
+    !   (1) exponentially decreasing with SRADIUS
     !   (2) use 5th-order polynomial
     !   (3) regulated localization of R with mean error variance
     !   (4) regulated localization of R with single-point error variance
     cradius = 0  ! Cut-off radius for observation domain in local filters
-    srange = cradius  ! Support range for 5th-order polynomial
+    sradius = cradius  ! Support radius for 5th-order polynomial
     ! or range for 1/e for exponential weighting
 
     ! *** File names

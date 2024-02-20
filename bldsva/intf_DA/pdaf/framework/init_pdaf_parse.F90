@@ -51,7 +51,7 @@ SUBROUTINE init_pdaf_parse()
        ONLY: screen, filtertype, subtype, dim_ens, delt_obs, toffset, &
        rms_obs, model_error, model_err_amp, incremental, type_forget, &
        forget, epsilon, rank_analysis_enkf, locweight, cradius, &
-       srange, int_rediag, filename, type_trans, dim_obs, &
+       sradius, int_rediag, filename, type_trans, dim_obs, &
        type_sqrt, obs_filename, dim_lag
 
   IMPLICIT NONE
@@ -114,16 +114,18 @@ SUBROUTINE init_pdaf_parse()
   CALL parse(handle, type_sqrt)
 
   ! Settings for localization in LSEIK/LETKF
-  handle = 'local_range'             ! Set range in grid points for observation domain
+  handle = 'local_range'             ! For backward compatibility
   CALL parse(handle, cradius)
-  handle = 'cradius'             ! Set cut-off radius in grid points for observation domain
+  handle = 'cradius'                 ! Set cut-off radius in grid points for observation domain
   CALL parse(handle, cradius)
   handle = 'locweight'               ! Set type of localizating weighting
   CALL parse(handle, locweight)
-  srange = cradius               ! By default use cradius as support range
-  handle = 'srange'                  ! Set support range in grid points
-             ! for 5th-order polynomial or range for 1/e in exponential weighting
-  CALL parse(handle, srange)
+  sradius = cradius                  ! By default use cradius as support radius
+  handle = 'srange'                  ! For backward compatibility
+  CALL parse(handle, sradius)
+  handle = 'sradius'                 ! Set support radius in grid points
+             ! for 5th-order polynomial or radius for 1/e in exponential weighting
+  CALL parse(handle, sradius)
 
   ! Setting for file output
   handle = 'filename'                ! Set name of output file

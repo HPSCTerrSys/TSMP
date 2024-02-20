@@ -234,12 +234,12 @@ MODULE mod_assimilation
   REAL    :: cradius   ! Range for local observation domain
   INTEGER :: locweight     ! Type of localizing weighting of observations
                     !   (0) constant weight of 1
-                    !   (1) exponentially decreasing with SRANGE
+                    !   (1) exponentially decreasing with SRADIUS
                     !   (2) use 5th-order polynomial
                     !   (3) regulated localization of R with mean error variance
                     !   (4) regulated localization of R with single-point error variance
-  REAL    :: srange        ! Support range for 5th order polynomial
-                           !   or radius for 1/e for exponential weighting
+  REAL    :: sradius        ! Support radius for 5th order polynomial
+                            !   or radius for 1/e for exponential weighting
 !    ! SEIK-subtype4/LSEIK-subtype4/ESTKF/LESTKF
   INTEGER :: type_sqrt     ! Type of the transform matrix square-root 
                     !   (0) symmetric square root, (1) Cholesky decomposition
