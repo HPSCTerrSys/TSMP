@@ -60,7 +60,7 @@ SUBROUTINE init_pdaf()
     USE mod_assimilation, &      ! Variables for assimilation
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&
         dim_ens, rms_obs, model_error, model_err_amp, incremental, &
-        covartype, type_forget, forget, dim_bias, rank_analysis_enkf, &
+        type_forget, forget, dim_bias, rank_analysis_enkf, &
         locweight, cradius, sradius, int_rediag, filename, &
         type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
         dim_lag
@@ -176,10 +176,6 @@ SUBROUTINE init_pdaf()
     type_sqrt = 0     ! Type of transform matrix square-root
     !   (0) symmetric square root, (1) Cholesky decomposition
     incremental = 0   ! (1) to perform incremental updating (only in SEIK/LSEIK!)
-    covartype = 1     ! Definition of factor in covar. matrix used in SEIK
-    !   (0) for dim_ens^-1 (old SEIK)
-    !   (1) for (dim_ens-1)^-1 (real ensemble covariance matrix)
-    !   This parameter has also to be set internally in PDAF_init.
     rank_analysis_enkf = 0   ! rank to be considered for inversion of HPH
     ! in analysis of EnKF; (0) for analysis w/o eigendecomposition
     int_rediag = 1    ! Interval of analysis steps to perform
