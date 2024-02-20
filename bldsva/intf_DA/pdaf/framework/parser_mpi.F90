@@ -81,10 +81,9 @@ MODULE parser
 ! Later revisions - see svn log
 !
 ! !USES:
+  USE mpi
   IMPLICIT NONE
   SAVE
-  
-  INCLUDE 'mpif.h'
 
 ! !PUBLIC MEMBER FUNCTIONS:
   PUBLIC :: parse
@@ -237,7 +236,7 @@ CONTAINS
           CALL get_command_argument(i+1, str2)
 #endif
           IF (str1 == TRIM(string)) THEN
-             READ(str2,'(A)') parsed_string
+             READ(str2, *) parsed_string
              modified = .TRUE.
           END IF
        ENDDO
@@ -294,7 +293,7 @@ CONTAINS
 ! *** Finalize ***
     IF (modified) THEN
        logvalue = parsed_log
-       IF (mype == 0) WRITE (*, '(2x, a, a, a, l)') &
+       IF (mype == 0) WRITE (*, '(2x, a, a, a, l1)') &
             'PARSER: ', TRIM(handle), '=', parsed_log
     END IF
   END SUBROUTINE parse_logical
