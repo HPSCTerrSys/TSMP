@@ -61,7 +61,7 @@ SUBROUTINE init_pdaf()
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&
         dim_ens, rms_obs, model_error, model_err_amp, incremental, &
         covartype, type_forget, forget, dim_bias, rank_analysis_enkf, &
-        locweight, local_range, srange, int_rediag, filename, &
+        locweight, cradius, srange, int_rediag, filename, &
         type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
         dim_lag
 #if defined CLMSA
@@ -190,8 +190,8 @@ SUBROUTINE init_pdaf()
     !   (2) use 5th-order polynomial
     !   (3) regulated localization of R with mean error variance
     !   (4) regulated localization of R with single-point error variance
-    local_range = 0  ! Range in grid points for observation domain in local filters
-    srange = local_range  ! Support range for 5th-order polynomial
+    cradius = 0  ! Cut-off radius for observation domain in local filters
+    srange = cradius  ! Support range for 5th-order polynomial
     ! or range for 1/e for exponential weighting
 
     ! *** File names

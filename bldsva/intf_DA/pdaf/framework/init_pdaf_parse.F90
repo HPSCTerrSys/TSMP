@@ -50,7 +50,7 @@ SUBROUTINE init_pdaf_parse()
   USE mod_assimilation, & ! Variables for assimilation
        ONLY: screen, filtertype, subtype, dim_ens, delt_obs, toffset, &
        rms_obs, model_error, model_err_amp, incremental, type_forget, &
-       forget, epsilon, rank_analysis_enkf, locweight, local_range, &
+       forget, epsilon, rank_analysis_enkf, locweight, cradius, &
        srange, int_rediag, filename, type_trans, dim_obs, &
        type_sqrt, obs_filename, dim_lag
 
@@ -115,10 +115,12 @@ SUBROUTINE init_pdaf_parse()
 
   ! Settings for localization in LSEIK/LETKF
   handle = 'local_range'             ! Set range in grid points for observation domain
-  CALL parse(handle, local_range)
+  CALL parse(handle, cradius)
+  handle = 'cradius'             ! Set cut-off radius in grid points for observation domain
+  CALL parse(handle, cradius)
   handle = 'locweight'               ! Set type of localizating weighting
   CALL parse(handle, locweight)
-  srange = local_range               ! By default use local_range as support range
+  srange = cradius               ! By default use cradius as support range
   handle = 'srange'                  ! Set support range in grid points
              ! for 5th-order polynomial or range for 1/e in exponential weighting
   CALL parse(handle, srange)
