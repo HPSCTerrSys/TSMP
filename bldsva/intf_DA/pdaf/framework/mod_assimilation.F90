@@ -203,9 +203,6 @@ MODULE mod_assimilation
                           !   (2) apply inflation on analysis ensemble
   REAL    :: forget       ! Forgetting factor for filter analysis
   INTEGER :: dim_bias     ! dimension of bias vector
-!    ! SEEK
-  INTEGER :: int_rediag   ! Interval to perform re-diagonalization in SEEK
-  REAL    :: epsilon      ! Epsilon for gradient approx. in SEEK forecast
 !    ! ENKF
   INTEGER :: rank_analysis_enkf  ! Rank to be considered for inversion of HPH
 !    ! SEIK/ETKF/ESTKF/LSEIK/LETKF/LESTKF/NETF/LNETF/LKNETF

@@ -61,7 +61,7 @@ SUBROUTINE init_pdaf()
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&
         dim_ens, rms_obs, model_error, model_err_amp, incremental, &
         type_forget, forget, dim_bias, rank_analysis_enkf, &
-        locweight, cradius, sradius, int_rediag, filename, &
+        locweight, cradius, sradius, filename, &
         type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
         dim_lag
 #if defined CLMSA
@@ -178,8 +178,6 @@ SUBROUTINE init_pdaf()
     incremental = 0   ! (1) to perform incremental updating (only in SEIK/LSEIK!)
     rank_analysis_enkf = 0   ! rank to be considered for inversion of HPH
     ! in analysis of EnKF; (0) for analysis w/o eigendecomposition
-    int_rediag = 1    ! Interval of analysis steps to perform
-    !    re-diagonalization in SEEK
     locweight = 0     ! Type of localizating weighting
     !   (0) constant weight of 1
     !   (1) exponentially decreasing with SRADIUS
