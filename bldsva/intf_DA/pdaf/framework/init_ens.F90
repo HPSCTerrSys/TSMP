@@ -32,50 +32,49 @@
 SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
     ens_p, flag)
 
-    ! !DESCRIPTION:
-    ! User-supplied routine for PDAF.
-    ! Used in the filters: SEIK/LSEIK/ETKF/LETKF/ESTKF/LESTKF
-    !
-    ! The routine is called when the filter is
-    ! initialized in PDAF\_filter\_init.  It has
-    ! to initialize an ensemble of dim\_ens states.
-    ! Typically, the ensemble will be directly read from files.
-    !
-    ! The routine is called by all filter processes and
-    ! initializes the ensemble for the PE-local domain.
-    !
-    ! !REVISION HISTORY:
-    ! 2013-02 - Lars Nerger - Initial code
-    ! Later revisions - see svn log
-    !
-    ! !USES:
-    !   USE mod_model, &
-    !        ONLY: nx, ny, nx_p
-    USE mod_parallel_model, &
-        ONLY: mype_model, model, &
-        mype_world
-    USE mod_parallel_pdaf, &
-        ONLY: mype_filter, task_id
-    use mod_tsmp, &
-        only: tag_model_parflow, pf_statevecsize, pf_statevec, pf_statevec_fortran
-    use mod_assimilation, &
-        only: screen
+! !DESCRIPTION:
+! User-supplied routine for PDAF.
+! Used in the filters: SEIK/EnKF/LSEIK/ETKF/LETKF/ESTKF/LESTKF
+!
+! The routine is called when the filter is
+! initialized in PDAF\_filter\_init.  It has
+! to initialize an ensemble of dim\_ens states.
+! Typically, the ensemble will be directly read from files.
+!
+! The routine is called by all filter processes and
+! initializes the ensemble for the PE-local domain.
+!
+! !REVISION HISTORY:
+! 2013-02 - Lars Nerger - Initial code
+! Later revisions - see svn log
+!
+! !USES:
+!   USE mod_model, &
+!        ONLY: nx, ny, nx_p
+  USE mod_parallel_model, &
+    ONLY: mype_model, model, &
+    mype_world
+  USE mod_parallel_pdaf, &
+    ONLY: mype_filter, task_id
+  use mod_tsmp, &
+    only: tag_model_parflow, pf_statevecsize, pf_statevec, pf_statevec_fortran
+  use mod_assimilation, &
+    only: screen
 
-    IMPLICIT NONE
+  IMPLICIT NONE
 
-    ! !ARGUMENTS:
-    INTEGER, INTENT(in) :: filtertype              ! Type of filter to initialize
-    INTEGER, INTENT(in) :: dim_p                   ! PE-local state dimension
-    INTEGER, INTENT(in) :: dim_ens                 ! Size of ensemble
-    REAL, INTENT(inout) :: state_p(dim_p)          ! PE-local model state
-    ! It is not necessary to initialize the array 'state_p' for SEIK.
-    ! It is available here only for convenience and can be used freely.
-    REAL, INTENT(inout) :: Uinv(dim_ens-1,dim_ens-1) ! Array not referenced for SEIK
-    REAL, INTENT(out)   :: ens_p(dim_p, dim_ens)   ! PE-local state ensemble
-    INTEGER, INTENT(inout) :: flag                 ! PDAF status flag
-    ! !CALLING SEQUENCE:
-    ! Called by: PDAF_filter_init    (as U_ens_init)
-    !EOP
+! !ARGUMENTS:
+  INTEGER, INTENT(in) :: filtertype              ! Type of filter to initialize
+  INTEGER, INTENT(in) :: dim_p                   ! PE-local state dimension
+  INTEGER, INTENT(in) :: dim_ens                 ! Size of ensemble
+  REAL, INTENT(inout) :: state_p(dim_p)          ! PE-local model state
+  REAL, INTENT(inout) :: Uinv(dim_ens-1,dim_ens-1) ! Array not referenced for SEIK
+  REAL, INTENT(out)   :: ens_p(dim_p, dim_ens)   ! PE-local state ensemble
+  INTEGER, INTENT(inout) :: flag                 ! PDAF status flag
+
+! !CALLING SEQUENCE:
+! Called by: PDAF_init       (as U_init_ens)
+!EOP
 
     ! *** local variables ***
     INTEGER :: i, j, member  ! Counters
