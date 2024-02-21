@@ -104,7 +104,7 @@ MODULE mod_assimilation
   REAL, ALLOCATABLE :: lon_var_id(:), ix_var_id(:)
   REAL, ALLOCATABLE :: lat_var_id(:), iy_var_id(:)
 
-  ! *** User defined observation filename ***
+! *** User defined observation filename ***
   character (len = 110) :: obs_filename
 
 
