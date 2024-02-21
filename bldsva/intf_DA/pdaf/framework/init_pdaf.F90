@@ -231,19 +231,19 @@ SUBROUTINE init_pdaf()
   !EnKF
   rank_analysis_enkf = 0  ! EnKF: rank to be considered for inversion of HPH in analysis step
 
-  ! ! NETF/LNETF/PF
-  ! type_winf = 0      ! NETF/LNETF/PF: Type of weights inflation
-  ! limit_winf = 0.0   ! NETF/LNETF/PF: Limit for weights inflation
+  ! NETF/LNETF/PF
+  type_winf = 0      ! NETF/LNETF/PF: Type of weights inflation
+  limit_winf = 0.0   ! NETF/LNETF/PF: Limit for weights inflation
 
-  ! ! LKNETF
-  ! type_hyb = 0       ! LKNETF: Type of hybrid weight
-  ! hyb_gamma =  1.0   ! LKNETF: Hybrid filter weight for state (1.0: LETKF, 0.0: LNETF)
-  ! hyb_kappa = 30.0   ! LKNETF: Hybrid norm for using skewness and kurtosis (type_hyb 3 or 4)
+  ! LKNETF
+  type_hyb = 0       ! LKNETF: Type of hybrid weight
+  hyb_gamma =  1.0   ! LKNETF: Hybrid filter weight for state (1.0: LETKF, 0.0: LNETF)
+  hyb_kappa = 30.0   ! LKNETF: Hybrid norm for using skewness and kurtosis (type_hyb 3 or 4)
 
-  ! ! PF
-  ! pf_res_type = 1    ! PF: Resampling type for particle filter
-  ! pf_noise_type = 0  ! PF: Type of pertubing noise
-  ! pf_noise_amp = 0.0 ! PF: Noise amplitude for particle filter
+  ! PF
+  pf_res_type = 1    ! PF: Resampling type for particle filter
+  pf_noise_type = 0  ! PF: Type of pertubing noise
+  pf_noise_amp = 0.0 ! PF: Noise amplitude for particle filter
 
 
 ! *********************************************************************
