@@ -28,27 +28,25 @@
 !> @details
 !> Main TSMP-PDAF program.
 program pdaf_terrsysmp
-    use iso_c_binding, only: c_int
-    ! use mod_parallel_pdaf, only : COMM_couple
+
     use mod_parallel_pdaf, &
-        only : mype_world, &
-        !total_steps, npes_parflow, comm_model, &
-        total_steps, &
-        ! npes_parflow, comm_model, &
-        !mpi_comm_world, mpi_success, model,
-        tcycle, model
-    use mod_tsmp, only: initialize_tsmp, integrate_tsmp, update_tsmp,&
-        & finalize_tsmp, tag_model_clm
-    use mod_assimilation, only: screen
+        only : mype_world, total_steps, tcycle
+    !,MPI_COMM_WORLD, MPI_SUCCESS
+
+    use mod_tsmp, &
+      only: initialize_tsmp, integrate_tsmp, update_tsmp, &
+      finalize_tsmp, tag_model_clm
+
+    use mod_assimilation, &
+      only: screen
 
 #if (defined CLMSA)
-    ! use enkf_clm_mod, only: statcomm
-    use enkf_clm_mod, only: update_clm, clmupdate_swc, clmprint_et
+    use enkf_clm_mod, &
+      only: update_clm, clmupdate_swc, clmprint_et
     use mod_clm_statistics
 #elif (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-!#else
-    ! use enkf_clm_mod,only: statcomm,
-    use enkf_clm_mod, only: clmprint_et
+    use enkf_clm_mod, &
+      only: clmprint_et
     use mod_clm_statistics
 #endif
 
@@ -112,7 +110,6 @@ program pdaf_terrsysmp
     !print *, "model: finalized, rank ", mype_world
 
     ! close mpi
-    ! CLMFIVE: finalize_tsmp() -> clm_finalize() -> ESMF_Finalize(), where MPI_finalize is called
     call mpi_finalize(ierror)
 
 end program pdaf_terrsysmp
