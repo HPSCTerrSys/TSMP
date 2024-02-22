@@ -47,7 +47,7 @@ MODULE mod_parallel_pdaf
 ! !USES:
   USE mpi
 
-  USE iso_c_binding, ONLY: c_int
+  USE iso_c_binding, ONLY: c_int, c_double
 
   IMPLICIT NONE
   SAVE 
