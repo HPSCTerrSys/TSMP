@@ -61,7 +61,10 @@ SUBROUTINE init_pdaf()
         type_forget, forget, dim_bias, rank_analysis_enkf, &
         locweight, cradius, sradius, filename, &
         type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
-        dim_lag
+        dim_lag, &
+        type_winf, limit_winf, &
+        type_hyb, hyb_gamma, hyb_kappa, &
+        pf_res_type, pf_noise_type, pf_noise_amp
   USE mod_tsmp, &
         ONLY: pf_statevecsize, nprocpf, tag_model_parflow, tag_model_clm, nprocclm, pf_statevec, pf_statevec_fortran, &
         idx_map_subvec2state, idx_map_subvec2state_fortran
