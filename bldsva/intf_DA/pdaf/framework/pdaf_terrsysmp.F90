@@ -30,7 +30,7 @@
 program pdaf_terrsysmp
     use iso_c_binding, only: c_int
     ! use mod_parallel_pdaf, only : COMM_couple
-    use mod_parallel_model, &
+    use mod_parallel_pdaf, &
         only : mype_world, &
         !total_steps, npes_parflow, comm_model, &
         total_steps, &

@@ -51,9 +51,8 @@ SUBROUTINE init_pdaf()
   
   USE mod_parallel_pdaf, &     ! Parallelization variables for assimilation
         ONLY: n_modeltasks, task_id, COMM_filter, COMM_couple, filterpe, &
-        abort_parallel
-  USE mod_parallel_model, &    ! Parallelization variables for model
-        ONLY: mype_world, COMM_model,  model, npes_model, &
+        abort_parallel, &
+        mype_world, COMM_model,  model, npes_model, &
         mpi_success, mpi_comm_world, mpi_integer, mype_model
   USE mod_assimilation, &      ! Variables for assimilation
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&

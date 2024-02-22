@@ -53,7 +53,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 ! !USES:
   USE mod_assimilation, &
        ONLY: delt_obs, toffset, screen
-  USE mod_parallel_model, &
+  USE mod_parallel_pdaf, &
        ONLY: mype_world, total_steps
   USE mod_assimilation, &
        ONLY: obs_filename

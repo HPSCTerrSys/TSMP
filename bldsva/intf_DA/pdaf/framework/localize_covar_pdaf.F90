@@ -39,7 +39,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
    USE mod_parallel_pdaf, ONLY: filterpe
 #endif
 !fin hcp
-  USE mod_parallel_model, &
+  USE mod_parallel_pdaf, &
     ONLY: model
 
   USE mod_tsmp,&

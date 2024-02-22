@@ -66,8 +66,7 @@ LIBS += -L$(MODELDIR) __libs__
 .SUFFIXES: .c .F90 .o 
 
 # Modules used for the model part
-MODULES =  	mod_parallel_model.o \
-		mod_tsmp.o
+MODULES =  	mod_tsmp.o
 
 # Moduls used for PDAF
 MOD_ASSIM = 	mod_parallel_pdaf.o \

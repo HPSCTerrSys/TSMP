@@ -67,7 +67,7 @@ contains
     USE mod_assimilation, &
         ! ONLY: obs_p, obs_index_p, dim_obs, obs_filename, screen
         ONLY: dim_obs, screen
-    use mod_parallel_model, &
+    use mod_parallel_pdaf, &
          only: mype_world !, mpi_info_null
     ! use mod_parallel_pdaf, &
     !      only: comm_filter
@@ -426,7 +426,7 @@ contains
   !> - `zidx_obs`
   !> - `ind_obs`
   subroutine get_obsindex_currentobsfile(no_obs) bind(c,name='get_obsindex_currentobsfile')
-    use mod_parallel_model, only: tcycle
+    use mod_parallel_pdaf, only: tcycle
     USE mod_assimilation, only: obs_filename
     use netcdf
 

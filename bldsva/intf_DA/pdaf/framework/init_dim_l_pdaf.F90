@@ -45,7 +45,7 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
 ! Later revisions - see svn log
 !
 ! !USES:
-  USE mod_parallel_model, ONLY: model
+  USE mod_parallel_pdaf, ONLY: model
   USE mod_tsmp, ONLY: tag_model_parflow, &
        tag_model_clm
   USE mod_tsmp, &

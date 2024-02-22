@@ -66,7 +66,7 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
        nz_glob
 
    USE, INTRINSIC :: iso_c_binding
-!   USE mod_parallel_model, ONLY: tcycle 
+!   USE mod_parallel_pdaf, ONLY: tcycle 
 #if defined CLMSA
    USE enkf_clm_mod, & 
         ONLY : clm_varsize, clm_paramarr, clmupdate_swc, clmupdate_T

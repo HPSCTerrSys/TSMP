@@ -49,9 +49,8 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
   !        ONLY: nx, ny, local_dims, &
   !        cradius, coords_obs, coords_l, obs_index_p, obs_index_l
   USE mod_parallel_pdaf, &
-       ONLY: mype_filter, npes_filter, comm_filter
-  USE mod_parallel_model, &
-       only: MPI_COMM_WORLD, model, mpi_integer
+       ONLY: mype_filter, npes_filter, comm_filter, &
+       model
   USE mod_assimilation, &
        ONLY: cradius, obs_index_l, dim_obs, obs_p, distance, obs_index_p, &
        dim_state, xcoord_fortran_g, ycoord_fortran_g, zcoord_fortran_g, dim_obs_p, &

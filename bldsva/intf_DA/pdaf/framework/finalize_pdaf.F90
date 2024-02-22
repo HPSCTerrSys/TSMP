@@ -39,14 +39,12 @@ SUBROUTINE finalize_pdaf()
 ! Later revisions - see svn log
 !
 ! !USES:
-  USE mod_parallel_model, &
-       ONLY: mype_world
   USE mod_assimilation, &      ! Variables for assimilation
        ONLY: dim_state_p_count, dim_state_p_stride, obs_p, &
              obs_index_p, xcoord_fortran_g, ycoord_fortran_g, &
              zcoord_fortran_g, obs_index_l, global_to_local
   USE mod_parallel_pdaf, &
-       ONLY: local_npes_model
+       ONLY: local_npes_model, mype_world
 
   IMPLICIT NONE    
   

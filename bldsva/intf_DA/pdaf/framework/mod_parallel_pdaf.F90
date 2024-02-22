@@ -69,9 +69,38 @@ MODULE mod_parallel_pdaf
 !  TODO: for statistics
   BIND(c) :: COMM_couple
   BIND(c) :: task_id
+
+  ! mpi related
+  INTEGER :: npes_parflow
+  INTEGER :: coupcol
+#if defined PARFLOW_STAND_ALONE
+! Parflow stand alone directly uses binded communicator
+  INTEGER(c_int),bind(c,name='comm_model_pdaf') :: comm_model
+#else
+! CLM stand alone uses comm_model directly, while TerrSysMP use this and da_comm(_clm)
+  INTEGER :: comm_model
+#endif
+  INTEGER(c_int), BIND(c) :: mype_model
+  INTEGER(c_int), BIND(c) :: npes_model
+  INTEGER(c_int), BIND(c) :: mype_world
+  INTEGER(c_int), BIND(c) :: npes_world
+  ! model input parameters
+  REAL(c_double), BIND(c) :: t_start
+  INTEGER(c_int), BIND(c) ::  model
+  INTEGER(c_int), BIND(c) :: tcycle
+  INTEGER(c_int), BIND(c) :: tstartcycle
+  INTEGER(c_int), BIND(c) :: total_steps
 !EOP
 
-contains
+  INTERFACE
+    SUBROUTINE read_enkfpar(parname) BIND(C, name='read_enkfpar')
+      USE iso_c_binding
+      IMPLICIT NONE
+      CHARACTER, DIMENSION(*), INTENT(in) :: parname
+    END SUBROUTINE read_enkfpar
+  END INTERFACE
+  
+CONTAINS
 !-------------------------------------------------------------------------------
 !BOP
 !

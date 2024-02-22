@@ -85,14 +85,11 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 ! Later revisions - see svn log
 !
 ! !USES:
-! TEMPLATE: The include from mod_parallel_model has to be adapted to a particular model
- ! gh, universal pe world
-   USE mod_parallel_model, &
-        ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, &
-            mype_world, npes_world
   USE mod_parallel_pdaf, &
        ONLY: mype_filter, npes_filter, COMM_filter, filterpe, n_modeltasks, &
-       local_npes_model, task_id, COMM_couple, MPIerr
+       local_npes_model, task_id, COMM_couple, MPIerr, &
+       MPI_COMM_WORLD, mype_model, npes_model, COMM_model, &
+       mype_world, npes_world, model
   ! Un-comment the following 2 lines in case a serial model is used
 !   USE mod_parallel_pdaf, &
 !        ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, npes_world, mype_world
@@ -108,7 +105,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   use enkf_clm_mod, only: da_comm_clm
 #endif
 #if (defined CLMSA || defined COUP_OAS_PFL)
-  use mod_parallel_model, only: model
+  use mod_parallel_pdaf, only: model
   use mod_tsmp, only: tag_model_clm
   use enkf_clm_mod, only: statcomm
 #endif

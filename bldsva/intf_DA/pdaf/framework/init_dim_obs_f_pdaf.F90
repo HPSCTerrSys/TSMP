@@ -56,9 +56,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   !        ONLY: mype_filter, npes_filter, COMM_filter, MPI_INTEGER, &
   !        MPIerr, MPIstatus
   USE mod_parallel_pdaf, &
-       ONLY: mype_filter, comm_filter, npes_filter, abort_parallel
-  use mod_parallel_model, &
-       only: mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
+       ONLY: mype_filter, comm_filter, npes_filter, abort_parallel, &
+       mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
        mype_world
   USE mod_assimilation, &
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
