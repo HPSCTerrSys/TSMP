@@ -89,32 +89,29 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 ! !USES:
   USE mpi
   USE mod_parallel_pdaf, &
-       ONLY: mype_filter, npes_filter, COMM_filter, filterpe, n_modeltasks, &
-       local_npes_model, task_id, COMM_couple, MPIerr, &
-       MPI_COMM_WORLD, mype_model, npes_model, COMM_model, &
-       mype_world, npes_world
-  ! Un-comment the following 2 lines in case a serial model is used
-!   USE mod_parallel_pdaf, &
-!        ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, npes_world, mype_world
-!   then remove local declaration of npes_world and mype_world
+       ONLY: mype_world, npes_world, mype_model, npes_model, &
+       COMM_model, mype_filter, npes_filter, COMM_filter, filterpe, &
+       n_modeltasks, local_npes_model, task_id, COMM_couple, MPIerr
+       
   USE parser, &
        ONLY: parse
+
 #if defined use_comm_da
   USE mod_oasis_data, &
-       only: da_comm
+       ONLY: da_comm
 #endif
 
 #if (defined CLMSA)
-  use enkf_clm_mod, only: da_comm_clm
+  USE enkf_clm_mod, ONLY: da_comm_clm
 #endif
 #if (defined CLMSA || defined COUP_OAS_PFL)
-  use mod_tsmp, only: tag_model_clm, model
-  use enkf_clm_mod, only: statcomm
+  USE mod_tsmp, ONLY: tag_model_clm, model
+  USE enkf_clm_mod, ONLY: statcomm
 #endif
 #if (defined COUP_OAS_COS)
-  use mod_parallel_pdaf, only : task_id
-  use mod_tsmp, only: nprocpf, nprocclm, model
-  use data_parallel, only: cosmo_input_suffix
+  USE mod_parallel_pdaf, ONLY : task_id
+  USE mod_tsmp, ONLY: nprocpf, nprocclm, model
+  USE data_parallel, ONLY: cosmo_input_suffix
 #endif
 
   IMPLICIT NONE    
@@ -143,8 +140,6 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   INTEGER :: my_color, color_couple ! Variables for communicator-splitting 
   LOGICAL :: iniflag            ! Flag whether MPI is initialized
   CHARACTER(len=32) :: handle   ! handle for command line parser
-  ! gh, universal pe world
-  !INTEGER :: npes_world, mype_world   ! Rank and size on MPI_COMM_WORLD
 
 
   ! *** Initialize MPI if not yet initialized ***
