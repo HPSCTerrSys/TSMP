@@ -59,16 +59,13 @@ MODULE mod_parallel_pdaf
   INTEGER :: COMM_filter ! MPI communicator for filter PEs 
   INTEGER(c_int), BIND(c) :: mype_filter ! PE rank in COMM_filter
   INTEGER(c_int), BIND(c) :: npes_filter ! # PEs in COMM_filter
-  INTEGER :: COMM_couple ! MPI communicator for coupling filter and model
+  INTEGER, BIND(c) :: COMM_couple ! MPI communicator for coupling filter and model
   LOGICAL :: modelpe     ! Whether we are on a PE in a COMM_model
   LOGICAL :: filterpe    ! Whether we are on a PE in a COMM_filter
-  INTEGER :: task_id     ! Index of my model task (1,...,n_modeltasks)
+  INTEGER, BIND(c) :: task_id     ! Index of my model task (1,...,n_modeltasks)
   INTEGER :: MPIerr      ! Error flag for MPI
   INTEGER :: MPIstatus(MPI_STATUS_SIZE)       ! Status array for MPI
   INTEGER, ALLOCATABLE :: local_npes_model(:) ! # PEs per ensemble
-!  TODO: for statistics
-  BIND(c) :: COMM_couple
-  BIND(c) :: task_id
 
   ! mpi related
   INTEGER :: npes_parflow
