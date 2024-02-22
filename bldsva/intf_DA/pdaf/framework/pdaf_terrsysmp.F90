@@ -40,16 +40,6 @@ program pdaf_terrsysmp
     use mod_assimilation, &
       only: screen
 
-#if (defined CLMSA)
-    use enkf_clm_mod, &
-      only: update_clm, clmupdate_swc, clmprint_et
-    use mod_clm_statistics
-#elif (defined COUP_OAS_PFL || defined COUP_OAS_COS)
-    use enkf_clm_mod, &
-      only: clmprint_et
-    use mod_clm_statistics
-#endif
-
     implicit none
 
     integer :: ierror
