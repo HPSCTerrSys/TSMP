@@ -29,24 +29,23 @@
 !> Main TSMP-PDAF program.
 program pdaf_terrsysmp
 
+    use mpi, &
+      only: MPI_INIT, MPI_FINALIZE
+    !, MPI_BARRIER, MPI_COMM_WORLD, MPI_SUCCESS
+  
     use mod_parallel_pdaf, &
-        only : mype_world, total_steps, tcycle
-    !,MPI_COMM_WORLD, MPI_SUCCESS
+        only : mype_world, total_steps, tcycle, MPIerr
 
     use mod_tsmp, &
-      only: initialize_tsmp, integrate_tsmp, update_tsmp, &
-      finalize_tsmp, tag_model_clm
+      only: initialize_tsmp, integrate_tsmp, update_tsmp, finalize_tsmp
 
     use mod_assimilation, &
       only: screen
 
     implicit none
 
-    integer :: ierror
-    integer :: size
-
     ! initialize mpi
-    call mpi_init(ierror)
+    call MPI_INIT(MPIerr)
 
     ! intitialize parallel pdaf (communicators et al.)
     call init_parallel_pdaf(0, 1)
@@ -59,8 +58,8 @@ program pdaf_terrsysmp
     call init_pdaf()
 
     ! barrier before model integration starts
-    ! call MPI_BARRIER(MPI_COMM_WORLD, IERROR)
-    ! if (ierror .ne. MPI_SUCCESS) then
+    ! call MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
+    ! if (MPIerr .ne. MPI_SUCCESS) then
     !     print *, "barrier failed"
     ! end if
 
@@ -76,18 +75,18 @@ program pdaf_terrsysmp
         ! assimilation step
         call assimilate_pdaf()
 
-        !call MPI_BARRIER(MPI_COMM_WORLD, IERROR)
+        !call MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
         !print *,"Finished assimilation", tcycle
 
         !call print_update_pfb()
         call update_tsmp()
 
-        !call MPI_BARRIER(MPI_COMM_WORLD, IERROR)
+        !call MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
         !print *,"Finished complete assimilation cycle", tcycle
     enddo
 
     ! barrier after model integrations
-    !call MPI_BARRIER(MPI_COMM_WORLD, IERROR)
+    !call MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
     !print *, "pdaf: advancing finished, rank ", mype_world
 
     ! close pdaf
@@ -96,10 +95,10 @@ program pdaf_terrsysmp
 
     ! close model instances
     call finalize_tsmp()
-    !call MPI_BARRIER(MPI_COMM_WORLD, IERROR)
+    !call MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
     !print *, "model: finalized, rank ", mype_world
 
     ! close mpi
-    call mpi_finalize(ierror)
+    call MPI_FINALIZE(MPIerr)
 
 end program pdaf_terrsysmp
