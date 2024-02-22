@@ -28,7 +28,7 @@ module enkf_clm_mod
 
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
-#if (defined CLMFIVE)
+#if (defined CLMSA)
   integer :: da_comm_clm
   integer :: clm_statevecsize
   integer :: clm_varsize
@@ -61,7 +61,7 @@ module enkf_clm_mod
 
   contains
 
-#if defined CLMFIVE 
+#if defined CLMSA
   subroutine define_clm_statevec()
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
@@ -605,7 +605,7 @@ module enkf_clm_mod
 
   end subroutine get_interp_idx
 
-#if defined CLMFIVE
+#if defined CLMSA
   subroutine init_clm_l_size(dim_l)
     use clm_varpar   , only : nlevsoi
 

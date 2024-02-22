@@ -612,7 +612,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
 
 !#if (defined COUP_OAS_COS || defined COUP_OAS_PFL)
 !  write(6,*) 'Not yet supported model combination.'
-!#elif (defined CLMFIVE)
+!#elif (defined CLMSA)
 !  !call spmd_init(da_comm)
 !  !call mct_world_init(1,da_comm,mpicom,comp_id)
 !#else
