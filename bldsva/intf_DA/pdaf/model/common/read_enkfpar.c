@@ -139,6 +139,17 @@ void read_enkfpar(char *parname)
     /* printf("DBG: mype_model, npes_model = %d, %d\n",mype_model,npes_model); */
   }
 
+  /* MPI-consistency check for nproc inputs */
+  /* Check: `npes_model = nprocpf + nprocclm + npproccosmo */
+  if (nprocpf + nprocclm + nproccosmo != npes_model){
+    printf("nprocpf=%f\n", nprocpf);
+    printf("nprocclm=%f\n", nprocclm);
+    printf("nproccosmo=%f\n", nproccosmo);
+    printf("npes_model=%f\n", npes_model);
+    printf("Error:  nprocpf + nprocclm + npproccosmo must be equal to npes_model.\n");
+    exit(1);
+  }
+
   /* CLM, ParFlow, COSMO */
   /* assign model number (0=clm, 1=parflow, 2=cosmo) */
   if (mype_model < nprocclm) {
