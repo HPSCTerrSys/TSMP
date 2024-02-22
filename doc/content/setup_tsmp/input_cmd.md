@@ -5,8 +5,16 @@ executed:
 
 ## n_modeltasks ##
 
-`n_modeltasks` (integer) Number of realisations. Must be consistent
-with `[DA] nreal`.
+`n_modeltasks` (integer) Number of realisations. Must be equal to
+[`[DA] nreal`](./input_enkfpf.md#danreal).
+
+Note that both `n_modeltasks` (or `nreal`) and the total number of MPI
+tasks specified, f.e. with `srun -n` or `mpiexec -np` (internally:
+`npes_world`) have to match with the total number of processes
+specified for the component models:
+[`PF:nprocs`](./input_enkfpf.md#pfnprocs),
+[`CLM:nprocs`](./input_enkfpf.md#clmnprocs),
+[`COSMO:nprocs`](./input_enkfpf.md#cosmonprocs).
 
 ## filtertype ##
 

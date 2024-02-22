@@ -81,9 +81,8 @@ In the following the individual entries of `enkfpf.par` are described:
 match with the specifications in the `*.pfidb` input.
 
 This number of processors specifies a subset of the processors
-available in a single `COMM_model`. Each `COMM_model` contains - if
-there are no remainders - the following number of processes:
-`npes_world / nreal`.
+available in a single `COMM_model`. Each `COMM_model` contains
+`npes_world / nreal` processes.
 
 ### PF:starttime ###
 
@@ -381,9 +380,8 @@ surface) to mask in overland flow river masking. Default: 1.
 `CLM:nprocs`: (integer) Number of processors for each CLM instance.
 
 This number of processors specifies a subset of the processors
-available in a single `COMM_model`. Each `COMM_model` contains - if
-there are no remainders - the following number of processes:
-`npes_world / nreal`.
+available in a single `COMM_model`. Each `COMM_model` contains
+`npes_world / nreal` processes.
 
 ### CLM:update_swc ###
 
@@ -442,8 +440,8 @@ further information, see source code.
 instance.
 
 Currently, `COSMO:nprocs` is NOT USED by TSMP-PDAF. Instead, COSMO
-will get processors if there are processes left after giving
-`PF:nprocs + CLM:nprocs` processes to ParFlow and CLM.
+will get processors if there are processes left by ParFlow and CLM:
+`(npes_world / nreal) - (PF:nprocs + CLM:nprocs)`.
 
 ### COSMO:dtmult ###
 
