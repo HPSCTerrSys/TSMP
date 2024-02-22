@@ -22,35 +22,39 @@
 !mod_parallel_model.F90: Module for control of parallel models of TerrSysMP
 !-------------------------------------------------------------------------------------------
 
-module mod_parallel_model
-    use iso_c_binding
-    use mpi
-save
+MODULE mod_parallel_model
+
+    USE mpi
+    USE iso_c_binding, ONLY: c_int, c_double
+
+    SAVE
+
     ! mpi related
-    integer :: npes_parflow
-    integer :: coupcol
+    INTEGER :: npes_parflow
+    INTEGER :: coupcol
 #if defined PARFLOW_STAND_ALONE
 ! Parflow stand alone directly uses binded communicator
-    integer(c_int),bind(c,name='comm_model_pdaf') :: comm_model
+    INTEGER(c_int),bind(c,name='comm_model_pdaf') :: comm_model
 #else
 ! CLM stand alone uses comm_model directly, while TerrSysMP use this and da_comm(_clm)
-    integer :: comm_model
+    INTEGER :: comm_model
 #endif
-    integer(c_int), bind(c) :: mype_model
-    integer(c_int), bind(c) :: npes_model
-    integer(c_int), bind(c) :: mype_world
-    integer(c_int), bind(c) :: npes_world
+    INTEGER(c_int), BIND(c) :: mype_model
+    INTEGER(c_int), BIND(c) :: npes_model
+    INTEGER(c_int), BIND(c) :: mype_world
+    INTEGER(c_int), BIND(c) :: npes_world
     ! model input parameters
-    real(c_double), bind(c) :: t_start
-    integer(c_int), bind(c) ::  model
-    integer(c_int), bind(c, name = 'tcycle') :: tcycle
-    integer(c_int), bind(c, name = 'tstartcycle') :: tstartcycle
-    integer(c_int), bind(c, name = 'total_steps') :: total_steps
-    interface
-        subroutine read_enkfpar(parname) BIND(C, name='read_enkfpar')
-            use iso_c_binding
-            implicit none
-            character, dimension(*), intent(in) :: parname
-        end subroutine read_enkfpar
-    end interface
-end module mod_parallel_model
+    REAL(c_double), BIND(c) :: t_start
+    INTEGER(c_int), BIND(c) ::  model
+    INTEGER(c_int), BIND(c) :: tcycle
+    INTEGER(c_int), BIND(c) :: tstartcycle
+    INTEGER(c_int), BIND(c) :: total_steps
+
+    INTERFACE
+        SUBROUTINE read_enkfpar(parname) BIND(C, name='read_enkfpar')
+            USE iso_c_binding
+            IMPLICIT NONE
+            CHARACTER, DIMENSION(*), INTENT(in) :: parname
+        END SUBROUTINE read_enkfpar
+    END INTERFACE
+END MODULE mod_parallel_model
