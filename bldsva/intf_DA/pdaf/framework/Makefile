@@ -37,7 +37,7 @@ CPP_DEFS += $(PF)-Duse_libMPI $(PF)-Duse_netCDF $(PF)-Duse_comm_MPI1 $(PF)-DVERB
 # End of user specifications
 
 ######################################################
-# case dependent settings for TerrSysMP-PDAF
+# case dependent settings for TSMP-PDAF
 ######################################################
 ## template
 #ifeq ($(COUPLE_TYPE), parflow_stand_alone)

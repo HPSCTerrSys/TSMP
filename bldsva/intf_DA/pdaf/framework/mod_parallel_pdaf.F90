@@ -1,25 +1,25 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
 !-------------------------------------------------------------------------------------------
-!mod_parallel_pdaf.F90: TerrSysMP-PDAF implementation of routine
+!mod_parallel_pdaf.F90: TSMP-PDAF implementation of routine
 !                       'mod_parallel_pdaf' (PDAF online coupling)
 !-------------------------------------------------------------------------------------------
 
@@ -74,7 +74,7 @@ MODULE mod_parallel_pdaf
 ! Parflow stand alone directly uses binded communicator
   INTEGER(c_int),bind(c,name='comm_model_pdaf') :: comm_model
 #else
-! CLM stand alone uses comm_model directly, while TerrSysMP use this and da_comm(_clm)
+! CLM stand alone uses comm_model directly, while TSMP use this and da_comm(_clm)
   INTEGER :: comm_model
 #endif
   INTEGER(c_int), BIND(c) :: mype_model
