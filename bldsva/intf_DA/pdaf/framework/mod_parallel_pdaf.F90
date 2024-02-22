@@ -71,4 +71,23 @@ MODULE mod_parallel_pdaf
   bind(c) :: task_id
 !EOP
 
+contains
+!-------------------------------------------------------------------------------
+!BOP
+!
+! !ROUTINE: abort_parallel - Abort MPI
+!
+! !INTERFACE:
+  SUBROUTINE abort_parallel()
+
+! !DESCRIPTION:
+! Routine to abort MPI program
+!EOP
+
+    IMPLICIT NONE
+    
+    CALL  MPI_Abort(MPI_COMM_WORLD, 1, MPIerr)
+
+  END SUBROUTINE abort_parallel
+
 END MODULE mod_parallel_pdaf

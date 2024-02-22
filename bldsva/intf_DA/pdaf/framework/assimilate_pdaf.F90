@@ -42,7 +42,9 @@ SUBROUTINE assimilate_pdaf()
 !
 ! !USES:
   USE mod_parallel_model, &     ! Parallelization variables
-       ONLY: mype_world, abort_parallel
+       ONLY: mype_world
+  USE mod_parallel_pdaf, &     ! Parallelization variables
+       ONLY: abort_parallel
   USE mod_assimilation, &      ! Variables for assimilation
        ONLY: filtertype
   ! USE PDAF_interfaces_module   ! Check consistency of PDAF calls

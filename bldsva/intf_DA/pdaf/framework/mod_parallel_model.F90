@@ -53,22 +53,4 @@ save
             character, dimension(*), intent(in) :: parname
         end subroutine read_enkfpar
     end interface
-contains
-!-------------------------------------------------------------------------------
-!BOP
-!
-! !ROUTINE: abort_parallel - Abort MPI
-!
-! !INTERFACE:
-  SUBROUTINE abort_parallel()
-
-! !DESCRIPTION:
-! Routine to abort MPI program
-!EOP
-
-    IMPLICIT NONE
-    
-    CALL  MPI_Abort(MPI_COMM_WORLD, 1, MPIerr)
-
-  END SUBROUTINE abort_parallel
 end module mod_parallel_model
