@@ -111,10 +111,10 @@ void read_enkfpar(char *parname)
       printf("TSMP-PDAF-WRAPPER ------------------\n");
       printf("TSMP-PDAF-WRAPPER t_sim = %lf | da_interval = %lf | total_steps = %d\n",t_sim,da_interval,total_steps);
       printf("TSMP-PDAF-WRAPPER nreal = %d | n_modeltasks = %d\n",nreal,n_modeltasks);
-      if (nreal != n_modeltasks) {
-	printf("Error: nreal must be equal to n_modeltasks.\n");
-	exit(1);
-      }
+    }
+    if (nreal != n_modeltasks) {
+      printf("Error: nreal must be equal to n_modeltasks.\n");
+      exit(1);
     }
   }
 
