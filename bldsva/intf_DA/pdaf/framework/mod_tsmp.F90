@@ -44,7 +44,14 @@ module mod_tsmp
     real(c_double), pointer  :: soilay_fortran(:)
     real(c_double),bind(C,name="dampfac_state_time_dependent") :: dampfac_state_time_dependent
     real(c_double),bind(C,name="dampfac_param_time_dependent") :: dampfac_param_time_dependent
- 
+
+    ! model input parameters
+    REAL(c_double), BIND(c) :: t_start
+    INTEGER(c_int), BIND(c) :: model
+    INTEGER(c_int), BIND(c) :: tcycle
+    INTEGER(c_int), BIND(c) :: tstartcycle
+    INTEGER(c_int), BIND(c) :: total_steps
+
     interface
         subroutine initialize_tsmp() bind(c)
             use iso_c_binding

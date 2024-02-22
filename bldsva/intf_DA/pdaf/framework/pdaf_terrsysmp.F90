@@ -34,10 +34,11 @@ program pdaf_terrsysmp
     !, MPI_BARRIER, MPI_COMM_WORLD, MPI_SUCCESS
   
     use mod_parallel_pdaf, &
-        only : mype_world, total_steps, tcycle, MPIerr
+        only : mype_world, MPIerr
 
     use mod_tsmp, &
-      only: initialize_tsmp, integrate_tsmp, update_tsmp, finalize_tsmp
+      only: initialize_tsmp, integrate_tsmp, update_tsmp, finalize_tsmp, &
+      tcycle, total_steps
 
     use mod_assimilation, &
       only: screen

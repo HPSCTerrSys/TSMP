@@ -53,7 +53,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !        MPIerr, MPIstatus
   USE mod_parallel_pdaf, &
        ONLY: mype_filter, comm_filter, npes_filter, abort_parallel, &
-       mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
+       mpi_integer, mpi_double_precision, mpi_in_place, mpi_sum, &
        mype_world
   USE mod_assimilation, &
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
@@ -103,7 +103,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #endif
       tag_model_clm, point_obs, obs_interp_switch, is_dampfac_state_time_dependent, &
-      dampfac_state_time_dependent, is_dampfac_param_time_dependent, dampfac_param_time_dependent
+      dampfac_state_time_dependent, is_dampfac_param_time_dependent, dampfac_param_time_dependent, model
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW

@@ -81,12 +81,6 @@ MODULE mod_parallel_pdaf
   INTEGER(c_int), BIND(c) :: npes_model
   INTEGER(c_int), BIND(c) :: mype_world
   INTEGER(c_int), BIND(c) :: npes_world
-  ! model input parameters
-  REAL(c_double), BIND(c) :: t_start
-  INTEGER(c_int), BIND(c) ::  model
-  INTEGER(c_int), BIND(c) :: tcycle
-  INTEGER(c_int), BIND(c) :: tstartcycle
-  INTEGER(c_int), BIND(c) :: total_steps
 !EOP
 
   INTERFACE

@@ -46,9 +46,8 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
 ! Later revisions - see svn log
 !
 ! !USES:
-  USE mod_parallel_pdaf, ONLY: model
   USE mod_tsmp, ONLY: tag_model_parflow, &
-      tag_model_clm
+      tag_model_clm, model
   USE mod_assimilation, &
       ONLY: dim_state_p
   USE mod_tsmp, &

@@ -47,9 +47,8 @@ SUBROUTINE g2l_state_pdaf(step, domain_p, dim_p, state_p, dim_l, state_l)
 ! Later revisions - see svn log
 !
 ! !USES:
-  USE mod_parallel_pdaf, ONLY: model
   USE mod_tsmp, ONLY: tag_model_parflow, &
-       tag_model_clm
+       tag_model_clm, model
   USE mod_tsmp, &
        ONLY: nx_local, ny_local
 #if defined CLMSA

@@ -89,7 +89,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
        ONLY: mype_filter, npes_filter, COMM_filter, filterpe, n_modeltasks, &
        local_npes_model, task_id, COMM_couple, MPIerr, &
        MPI_COMM_WORLD, mype_model, npes_model, COMM_model, &
-       mype_world, npes_world, model
+       mype_world, npes_world
   ! Un-comment the following 2 lines in case a serial model is used
 !   USE mod_parallel_pdaf, &
 !        ONLY: MPI_COMM_WORLD, mype_model, npes_model, COMM_model, npes_world, mype_world
@@ -105,13 +105,12 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   use enkf_clm_mod, only: da_comm_clm
 #endif
 #if (defined CLMSA || defined COUP_OAS_PFL)
-  use mod_parallel_pdaf, only: model
-  use mod_tsmp, only: tag_model_clm
+  use mod_tsmp, only: tag_model_clm, model
   use enkf_clm_mod, only: statcomm
 #endif
 #if (defined COUP_OAS_COS)
   use mod_parallel_pdaf, only : task_id
-  use mod_tsmp, only: nprocpf, nprocclm
+  use mod_tsmp, only: nprocpf, nprocclm, model
   use data_parallel, only: cosmo_input_suffix
 #endif
 

@@ -59,13 +59,12 @@ SUBROUTINE init_obsvar_pdaf(step, dim_obs_p, obs_p, meanvar)
 USE mod_assimilation, &
     ONLY: rms_obs, pressure_obserr_p, clm_obserr_p
 USE mod_parallel_pdaf, &
-    ONLY: COMM_filter, MPIerr, MPI_REAL8, MPI_SUM, npes_filter, &
-    model
+    ONLY: COMM_filter, MPIerr, MPI_REAL8, MPI_SUM, npes_filter
 USE mod_tsmp, &
 #if defined CLMSA
-       ONLY: tag_model_clm
+       ONLY: tag_model_clm, model
 #else
-       ONLY: tag_model_parflow
+       ONLY: tag_model_parflow, model
 #endif
 
 

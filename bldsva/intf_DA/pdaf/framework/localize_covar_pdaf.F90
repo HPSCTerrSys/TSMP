@@ -39,19 +39,18 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
    USE mod_parallel_pdaf, ONLY: filterpe
 #endif
 !fin hcp
-  USE mod_parallel_pdaf, &
-    ONLY: model
 
   USE mod_tsmp,&
 #if defined CLMSA
     ONLY:  tag_model_parflow, tag_model_clm, &
-           enkf_subvecsize
+           enkf_subvecsize, model
 #else
     ONLY: tag_model_parflow, tag_model_clm, &
           enkf_subvecsize, &
           nx_glob, ny_glob, nz_glob, &
           xcoord, ycoord, zcoord, &
-          xcoord_fortran, ycoord_fortran, zcoord_fortran
+          xcoord_fortran, ycoord_fortran, zcoord_fortran, &
+          model
 #endif
 
   USE, INTRINSIC :: iso_c_binding

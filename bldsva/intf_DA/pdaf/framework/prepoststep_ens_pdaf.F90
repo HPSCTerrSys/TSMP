@@ -66,10 +66,9 @@ SUBROUTINE prepoststep_ens_pdaf(step, dim_p, dim_ens, dim_ens_p, dim_obs_p, &
     USE mod_parallel_pdaf, &
         ONLY: mype_filter, npes_filter, COMM_filter, MPI_DOUBLE_PRECISION, &
         MPIerr, MPIstatus, filterpe, &
-        MPI_COMM_WORLD, MPI_SUCCESS, &
-        model
+        MPI_COMM_WORLD, MPI_SUCCESS
     use mod_tsmp, &
-        only: tag_model_parflow, pf_statevecsize, nprocclm
+        only: tag_model_parflow, pf_statevecsize, nprocclm, model
 
 
     IMPLICIT NONE

@@ -426,7 +426,7 @@ contains
   !> - `zidx_obs`
   !> - `ind_obs`
   subroutine get_obsindex_currentobsfile(no_obs) bind(c,name='get_obsindex_currentobsfile')
-    use mod_parallel_pdaf, only: tcycle
+    USE mod_tsmp, ONLY: tcycle
     USE mod_assimilation, only: obs_filename
     use netcdf
 

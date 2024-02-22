@@ -52,7 +52,7 @@ SUBROUTINE init_pdaf()
   USE mod_parallel_pdaf, &     ! Parallelization variables for assimilation
         ONLY: n_modeltasks, task_id, COMM_filter, COMM_couple, filterpe, &
         abort_parallel, &
-        mype_world, COMM_model,  model, npes_model, &
+        mype_world, COMM_model, npes_model, &
         mpi_success, mpi_comm_world, mpi_integer, mype_model
   USE mod_assimilation, &      ! Variables for assimilation
         ONLY: dim_state_p, dim_state, screen, filtertype, subtype, toffset,&
@@ -66,7 +66,7 @@ SUBROUTINE init_pdaf()
         pf_res_type, pf_noise_type, pf_noise_amp
   USE mod_tsmp, &
         ONLY: pf_statevecsize, nprocpf, tag_model_parflow, tag_model_clm, nprocclm, pf_statevec, pf_statevec_fortran, &
-        idx_map_subvec2state, idx_map_subvec2state_fortran
+        idx_map_subvec2state, idx_map_subvec2state_fortran, model
 #if defined CLMSA
   ! kuw: get access to clm variables
 #ifndef CLMFIVE    

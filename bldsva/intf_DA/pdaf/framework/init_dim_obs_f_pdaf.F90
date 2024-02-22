@@ -57,7 +57,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   !        MPIerr, MPIstatus
   USE mod_parallel_pdaf, &
        ONLY: mype_filter, comm_filter, npes_filter, abort_parallel, &
-       mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
+       mpi_integer, mpi_double_precision, mpi_in_place, mpi_sum, &
        mype_world
   USE mod_assimilation, &
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
@@ -93,7 +93,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
       zcoord_fortran, &
 #endif
 #endif
-      tag_model_clm, point_obs
+      tag_model_clm, point_obs, model
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
