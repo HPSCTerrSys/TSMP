@@ -236,7 +236,9 @@ CONTAINS
           CALL get_command_argument(i+1, str2)
 #endif
           IF (str1 == TRIM(string)) THEN
-             READ(str2, *) parsed_string
+             ! Format specifier is needed for reading paths.  Using
+             ! `*` as format specifier, reading stops at a `/`
+             READ(str2, '(a)') parsed_string
              modified = .TRUE.
           END IF
        ENDDO
