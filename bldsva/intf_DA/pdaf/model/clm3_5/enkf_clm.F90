@@ -38,7 +38,7 @@ subroutine clm_init(finname) bind(C,name="clm_init")
 #if (defined COUP_OAS_COS || defined COUP_OAS_PFL)
       kl_comm, &
 #elif (defined CLMSA)
-      da_comm_clm, &
+      COMM_model_clm, &
 #else
       mpi_running, mpicom_glob, ier, &
 #endif
@@ -77,8 +77,8 @@ subroutine clm_init(finname) bind(C,name="clm_init")
   call spmd_init(kl_comm)
   call mct_world_init(1,kl_comm,mpicom,comp_id)
 #elif (defined CLMSA)
-  call spmd_init(da_comm_clm)
-  call mct_world_init(1,da_comm_clm,mpicom,comp_id)
+  call spmd_init(COMM_model_clm)
+  call mct_world_init(1,COMM_model_clm,mpicom,comp_id)
 #else
   call mpi_initialized (mpi_running, ier)
   if (.not. mpi_running) call mpi_init(ier)

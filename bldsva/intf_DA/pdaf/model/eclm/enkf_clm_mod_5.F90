@@ -29,7 +29,7 @@ module enkf_clm_mod
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
 #if (defined CLMSA)
-  integer :: da_comm_clm
+  integer :: COMM_model_clm
   integer :: clm_statevecsize
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
