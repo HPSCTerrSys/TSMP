@@ -96,11 +96,9 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   USE parser, &
        ONLY: parse
 
-#if defined use_comm_da
-  USE mod_oasis_data, &
-       ONLY: COMM_model_oas
+#if (defined COUP_OAS_COS || defined COUP_OAS_PFL)
+  USE mod_oasis_data, ONLY: COMM_model_oas
 #endif
-
 #if (defined PARFLOW_STAND_ALONE)
   USE mod_parallel_pdaf, ONLY: COMM_model_pfl
 #endif
@@ -301,7 +299,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   ! mype_model are different in the numerical model, the 
   ! model-internal variables should be initialized at this point.
 !
-#if defined use_comm_da
+#if (defined COUP_OAS_COS || defined COUP_OAS_PFL)
   COMM_model_oas = COMM_model
 #endif
 
