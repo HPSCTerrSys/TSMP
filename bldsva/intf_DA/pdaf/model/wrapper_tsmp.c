@@ -41,26 +41,27 @@ wrapper_tsmp.c: Wrapper functions for TSMP
 void initialize_tsmp() {
   int argc = 0; char ** argv ;	/* Dummy command line arguments for amps */
 
+  int pdaf_id;
+  int coupcol;
+  int pdaf_max;
 
   /* read parameter file for data assimilation 'enkfpf.par' */
   read_enkfpar("enkfpf.par");
 
+  /* Set pdaf_id / pdaf_max realization-information for usage
+     in component models*/
+  coupcol = task_id - 1 + startreal;
+  pdaf_id = (int) coupcol;
+  pdaf_max = (int) nreal;
+
   /* initialize clm, parflow and cosmo instances */
   if(model == 0) {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
-    /* enkf_clm.F90 */
 #if defined CLMFIVE
-    int pdaf_id;
-    int pdaf_max;
-    int coupcol;
-
-    coupcol = task_id - 1 + startreal;
-
-    pdaf_id = (int) coupcol;
-    pdaf_max = (int) nreal;
-
+    /* enkf_clm.F90 */
     clm5_init(clminfile, &pdaf_id, &pdaf_max);
 #else    
+    /* enkf_clm.F90 */
     clm_init(clminfile);
 #endif    
 #endif
@@ -76,7 +77,7 @@ void initialize_tsmp() {
   if(model == 2){
 #if defined COUP_OAS_COS
     /* enkf_cosmo.F90 */
-    cosmo_init();
+    cosmo_init(&pdaf_id);
 #endif
   }
 }

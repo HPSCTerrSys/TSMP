@@ -49,7 +49,7 @@ extern void print_update_clm(int *ts, int *ttot);
 #endif
 extern void write_clm_statistics(int *ts, int *ttot);
 extern void clm_finalize();
-extern void cosmo_init();
+extern void cosmo_init(int pdaf_id);
 extern void cosmo_advance(int *cos_dt);
 extern void cosmo_finalize();
 

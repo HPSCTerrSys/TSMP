@@ -58,8 +58,7 @@ since `dim_ens` is set to dummy-zero) `n_modeltasks > dim_ens`
   8. `COMM_couple`: For each rank in `COMM_model` (example 4 ranks),
      there is a task in `COMM_couple` with `n_modeltasks` ranks
      (example 48)
-  9. Finally `da_comm` is set to `COMM_model`; and
-     `cosmo_input_suffix` is set
+  9. Finally `da_comm` is set to `COMM_model`
 
 - [`initialize_tsmp()`](#initialize_tsmp)
   1. read parameter file `enkfpf.par`
