@@ -105,7 +105,6 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   USE enkf_clm_mod, ONLY: da_comm_clm
 #endif
 #if (defined CLMSA || defined COUP_OAS_PFL)
-  USE mod_tsmp, ONLY: tag_model_clm, model
   USE enkf_clm_mod, ONLY: COMM_couple_clm
 #endif
 
@@ -304,15 +303,12 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 #endif
 
 #if (defined CLMSA)
-    da_comm_clm = comm_model
+  da_comm_clm = comm_model
 #endif
 
-! hand over comm_couple to clm
+! Define COMM_couple_clm
 #if (defined CLMSA || defined COUP_OAS_PFL)
-if (model .eq. tag_model_clm) then
-    !write(*,*) 'initialize COMM_couple_clm (CLM) with COMM_couple'
-    COMM_couple_clm = COMM_couple
-end if
+  COMM_couple_clm = COMM_couple
 #endif
 
 
