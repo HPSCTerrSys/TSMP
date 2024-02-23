@@ -57,7 +57,8 @@ module enkf_clm_mod
   integer :: ierror, lengths_of_types, i
   logical :: flag
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
-  integer :: statcomm
+  integer :: COMM_couple_clm    ! CLM-version of COMM_couple
+                                ! (currently not used for clm5_0)
 
   contains
 

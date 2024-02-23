@@ -31,7 +31,7 @@ module mod_clm_statistics
   use spmdmod, only: masterproc
   use shr_kind_mod, only: r8 => shr_kind_r8
   use mpi
-  use enkf_clm_mod, only:statcomm
+  use enkf_clm_mod, only: COMM_couple_clm
   use spmdgathscatmod , only : gather_data_to_master
   use subgridAveMod, only : p2g, c2g
 
@@ -93,8 +93,8 @@ contains
       nlat = adecomp%gdc2j(numg)
     end if
 
-    call mpi_comm_rank(statcomm,realrank,ierr)
-    call mpi_comm_size(statcomm,realsize,ierr)
+    call mpi_comm_rank(COMM_couple_clm,realrank,ierr)
+    call mpi_comm_size(COMM_couple_clm,realsize,ierr)
 
     !variable_names(1) = "FCTR"
     !variable_names(2) = "FCEV"
@@ -152,10 +152,10 @@ contains
     mm  = 0.0
     var = 0.0
     sd  = 0.0
-    call mpi_allreduce(clmvar_local_g,mm,nloc,MPI_REAL8,MPI_SUM,statcomm,ierr)
+    call mpi_allreduce(clmvar_local_g,mm,nloc,MPI_REAL8,MPI_SUM,COMM_couple_clm,ierr)
     mm  = mm / realsize
     var = (clmvar_local_g - mm) * (clmvar_local_g - mm)
-    call mpi_reduce(var,sd,nloc,MPI_REAL8,MPI_SUM,0,statcomm,ierr)
+    call mpi_reduce(var,sd,nloc,MPI_REAL8,MPI_SUM,0,COMM_couple_clm,ierr)
     sd = sqrt(sd/(realsize-1))
 
 
@@ -201,10 +201,10 @@ contains
       var = var + clmvar_local_g
     end do
 
-    call mpi_allreduce(var,mm,nloc,MPI_REAL8,MPI_SUM,statcomm,ierr)
+    call mpi_allreduce(var,mm,nloc,MPI_REAL8,MPI_SUM,COMM_couple_clm,ierr)
     mm = mm / realsize
     var = (var - mm) * (var - mm)
-    call mpi_reduce(var,sd,nloc,MPI_REAL8,MPI_SUM,0,statcomm,ierr)
+    call mpi_reduce(var,sd,nloc,MPI_REAL8,MPI_SUM,0,COMM_couple_clm,ierr)
     sd = sqrt(sd/(realsize-1))
 
     if((realrank.eq.0)) then
@@ -246,15 +246,15 @@ contains
     !          p2c_scale_type='unity', c2l_scale_type= 'unity', l2g_scale_type='unity')
 
     !  mm = 0.0
-    !  !call mpi_reduce(clmvar_local_g,mm, nloc, mpi_float, mpi_sum, 0, statcomm, ierr)
-    !  call mpi_allreduce(clmvar_local_g,mm,nloc,MPI_REAL8,MPI_SUM,statcomm,ierr)
+    !  !call mpi_reduce(clmvar_local_g,mm, nloc, mpi_float, mpi_sum, 0, COMM_couple_clm, ierr)
+    !  call mpi_allreduce(clmvar_local_g,mm,nloc,MPI_REAL8,MPI_SUM,COMM_couple_clm,ierr)
     !  mm = mm / realsize
     !  !write(*,*) 'mm[1]=',mm(1),'tmp_local[1]=',clmvar_local_g(1)
     !  !write(*,*) 'mm[2000]=',mm(2000),'tmp_local[2000]=',clmvar_local_g(2000)
 
-    !  !call mpi_bcast(mm, nloc, mpi_double_precision, 0, statcomm, ierr)
-    !  !call mpi_bcast(mm, nloc, mpi_float, 0, statcomm, ierr)
-    !  !call mpi_bcast(mm, nloc, mpi_float, 0, statcomm, ierr)
+    !  !call mpi_bcast(mm, nloc, mpi_double_precision, 0, COMM_couple_clm, ierr)
+    !  !call mpi_bcast(mm, nloc, mpi_float, 0, COMM_couple_clm, ierr)
+    !  !call mpi_bcast(mm, nloc, mpi_float, 0, COMM_couple_clm, ierr)
     !  !write(*,*) 'mm[1] bcast=',mm(1)
 
     !  ptr => mm
