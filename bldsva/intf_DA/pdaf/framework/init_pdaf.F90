@@ -183,7 +183,7 @@ SUBROUTINE init_pdaf()
 
   IF (allocated(dim_state_p_count)) deallocate(dim_state_p_count)
   allocate(dim_state_p_count(npes_model))
-  call MPI_Gather(dim_state_p, 1, MPI_INTEGER, dim_state_p_count, 1, MPI_INTEGER, 0, comm_model, ierror)
+  call MPI_Gather(dim_state_p, 1, MPI_INTEGER, dim_state_p_count, 1, MPI_INTEGER, 0, COMM_model, ierror)
 
   if (mype_model == 0 .and. screen > 2) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_count in modified: ", dim_state_p_count
   IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
@@ -199,7 +199,7 @@ SUBROUTINE init_pdaf()
   if (mype_model == 0) then
     dim_state = sum(dim_state_p_count)
   end if
-  call MPI_BCAST(dim_state, 1, MPI_INTEGER, 0, comm_model, IERROR)
+  call MPI_BCAST(dim_state, 1, MPI_INTEGER, 0, COMM_model, IERROR)
   !print  *, "my local state vector dimension is :" , dim_state_p
   !print  *, "my global state vector dimension is :" , dim_state
   !print *,""

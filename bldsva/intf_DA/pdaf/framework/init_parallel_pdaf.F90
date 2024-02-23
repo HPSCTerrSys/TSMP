@@ -299,11 +299,11 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   ! model-internal variables should be initialized at this point.
 !
 #if defined use_comm_da
-  da_comm = comm_model
+  da_comm = COMM_model
 #endif
 
 #if (defined CLMSA)
-  da_comm_clm = comm_model
+  da_comm_clm = COMM_model
 #endif
 
 ! Define COMM_couple_clm
