@@ -385,7 +385,7 @@ Source code from script `build_interface_pdaf_JURECA.ksh`:
      importFlags+=$importFlagsOAS
      importFlags+=$importFlagsPFL
      importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
+     cppdefs+=" ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
      cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
