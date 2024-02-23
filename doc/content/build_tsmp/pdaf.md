@@ -116,7 +116,7 @@ AMPS directory:
 
 Variable names for the model communicator:
 -   ParFlow standalone:
-    -   `COMM_model` -> C: `COMM_model` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
+    -   `COMM_model` -> C: `COMM_model_pfl` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
 -   Coupled with OASIS:
     -   `COMM_model` -> `da_comm` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
     -   `COMM_model` -> `da_comm` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)

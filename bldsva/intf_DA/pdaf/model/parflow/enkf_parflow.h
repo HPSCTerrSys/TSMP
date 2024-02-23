@@ -67,7 +67,7 @@ extern double pf_aniso_perm_y,pf_aniso_perm_z;
 
 /* global MPI communicator */
 #if defined PARFLOW_STAND_ALONE
-GLOBAL int COMM_model;
+GLOBAL int COMM_model_pfl;
 #endif
 
 /* variables for calculation of statistics */

@@ -70,13 +70,8 @@ MODULE mod_parallel_pdaf
   ! mpi related
   INTEGER :: npes_parflow
   INTEGER :: coupcol
-#if defined PARFLOW_STAND_ALONE
-! Parflow stand alone directly uses binded communicator
-  INTEGER(c_int),bind(c,name='COMM_model') :: COMM_model
-#else
-! CLM stand alone uses COMM_model directly, while TSMP use this and da_comm(_clm)
   INTEGER :: COMM_model
-#endif
+  INTEGER(c_int), BIND(c) :: COMM_model_pfl
   INTEGER(c_int), BIND(c) :: mype_model
   INTEGER(c_int), BIND(c) :: npes_model
   INTEGER(c_int), BIND(c) :: mype_world

@@ -253,7 +253,8 @@ void enkfparflowinit(int ac, char *av[], char *input_file) {
 
 
 #ifdef PARFLOW_STAND_ALONE
-  pfcomm = MPI_Comm_f2c(COMM_model);
+  /* MPI_Comm_f2c: Communicator handle Fortran->C */
+  pfcomm = MPI_Comm_f2c(COMM_model_pfl);
 #endif
 
   /* BEGINNING: wrf_parflow related part */

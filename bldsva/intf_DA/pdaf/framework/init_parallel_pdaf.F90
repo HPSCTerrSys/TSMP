@@ -101,6 +101,9 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
        ONLY: da_comm
 #endif
 
+#if (defined PARFLOW_STAND_ALONE)
+  USE mod_parallel_pdaf, ONLY: COMM_model_pfl
+#endif
 #if (defined CLMSA)
   USE enkf_clm_mod, ONLY: COMM_model_clm
 #endif
@@ -300,6 +303,10 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 !
 #if defined use_comm_da
   da_comm = COMM_model
+#endif
+
+#if (defined PARFLOW_STAND_ALONE)
+  COMM_model_pfl = COMM_model
 #endif
 
 #if (defined CLMSA)
