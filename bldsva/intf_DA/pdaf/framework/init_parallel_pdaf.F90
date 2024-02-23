@@ -98,7 +98,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
 
 #if defined use_comm_da
   USE mod_oasis_data, &
-       ONLY: da_comm
+       ONLY: COMM_model_oas
 #endif
 
 #if (defined PARFLOW_STAND_ALONE)
@@ -302,7 +302,7 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   ! model-internal variables should be initialized at this point.
 !
 #if defined use_comm_da
-  da_comm = COMM_model
+  COMM_model_oas = COMM_model
 #endif
 
 #if (defined PARFLOW_STAND_ALONE)

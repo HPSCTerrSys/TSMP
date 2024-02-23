@@ -58,7 +58,7 @@ since `dim_ens` is set to dummy-zero) `n_modeltasks > dim_ens`
   8. `COMM_couple`: For each rank in `COMM_model` (example 4 ranks),
      there is a task in `COMM_couple` with `n_modeltasks` ranks
      (example 48)
-  9. Finally `da_comm` is set to `COMM_model`
+  9. Finally `COMM_model_oas` is set to `COMM_model`
 
 - [`initialize_tsmp()`](#initialize_tsmp)
   1. read parameter file `enkfpf.par`
@@ -118,8 +118,8 @@ Variable names for the model communicator:
 -   ParFlow standalone:
     -   `COMM_model` -> C: `COMM_model_pfl` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
 -   Coupled with OASIS:
-    -   `COMM_model` -> `da_comm` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
-    -   `COMM_model` -> `da_comm` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
+    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
+    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
 
 
 ### CMEM ###
