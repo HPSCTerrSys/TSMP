@@ -62,7 +62,7 @@ output. More information:
 See the following wiki page for information about turning on PDAF
 debugging output:
 
-https://pdaf.awi.de/trac/wiki/PDAF_debugging#ActivatingDebuggingOutput
+<https://pdaf.awi.de/trac/wiki/PDAF_debugging#ActivatingDebuggingOutput>
 
 ### PDAF's Timing and Memory output
 
