@@ -1,20 +1,20 @@
 /*-----------------------------------------------------------------------------------------
 Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 
-This file is part of TerrSysMP-PDAF
+This file is part of TSMP-PDAF
 
-TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+TSMP-PDAF is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-TerrSysMP-PDAF is distributed in the hope that it will be useful,
+TSMP-PDAF is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU LesserGeneral Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------*/
 
 
@@ -253,7 +253,8 @@ void enkfparflowinit(int ac, char *av[], char *input_file) {
 
 
 #ifdef PARFLOW_STAND_ALONE
-  pfcomm = MPI_Comm_f2c(comm_model_pdaf);
+  /* MPI_Comm_f2c: Communicator handle Fortran->C */
+  pfcomm = MPI_Comm_f2c(COMM_model_pfl);
 #endif
 
   /* BEGINNING: wrf_parflow related part */
@@ -638,6 +639,16 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 	    soilay[isc] *= dz_glob;
 	  }
 	  /* hcp CRNS ends */
+
+          /* masking option using UNsaturated cells only */
+          if(pf_gwmasking == 1){
+	    PF2ENKF(pressure_out, subvec_p);
+            for(i=0;i<enkf_subvecsize;i++){
+              subvec_gwind[i] = 1.0;
+              if(subvec_p[i]> 0.0) subvec_gwind[i] = 0.0;
+            }
+          }
+
 	}
 
 	/* create state vector: joint swc + pressure */
@@ -1405,6 +1416,18 @@ void update_parflow () {
 
   int do_pupd=0;
 
+  /* Update damping factors if set in observation file */
+  double pf_dampfac_state_tmp;
+  double pf_dampfac_param_tmp;
+  if(is_dampfac_state_time_dependent){
+    pf_dampfac_state_tmp = pf_dampfac_state;
+    pf_dampfac_state = dampfac_state_time_dependent;
+  }
+  if(is_dampfac_param_time_dependent){
+    pf_dampfac_param_tmp = pf_dampfac_param;
+    pf_dampfac_param = dampfac_param_time_dependent;
+  }
+
   /* state damping */
   if(pf_updateflag == 1){
     if(pf_gwmasking == 0){
@@ -1418,10 +1441,18 @@ void update_parflow () {
 	/* Use pressures are saturation times porosity depending on mask */
 	for(i=0;i<enkf_subvecsize;i++){
 	  if(subvec_gwind[i] == 1.0){
+	    /* State damping factor always applies for Pressure */
 	    pf_statevec[i] = subvec_p[i] + pf_dampfac_state * (pf_statevec[i] - subvec_p[i]);
 	  }
 	  else if(subvec_gwind[i] == 0.0){
-	    pf_statevec[i] = subvec_sat[i] * subvec_porosity[i] + pf_dampfac_state * (pf_statevec[i] - subvec_sat[i] * subvec_porosity[i]);
+	    if(pf_dampswitch_sm == 1){
+	      /* State damping applied to SM */
+	      pf_statevec[i] = subvec_sat[i] * subvec_porosity[i] + pf_dampfac_state * (pf_statevec[i] - subvec_sat[i] * subvec_porosity[i]);
+	    }
+	    else{
+	      /* No damping factor for SM */
+	      pf_statevec[i] = subvec_sat[i] * subvec_porosity[i] + (pf_statevec[i] - subvec_sat[i] * subvec_porosity[i]);
+	    }
 	  }
 	  else{
 	    printf("ERROR: pf_gwmasking = 2, but subvec_gwind is neither 0.0 nor 1.0\n");
@@ -1795,6 +1826,14 @@ void update_parflow () {
           alpha_counter++;
       }
 
+      /* Reset damping factors to original value */
+      if(is_dampfac_state_time_dependent){
+	pf_dampfac_state = pf_dampfac_state_tmp;
+      }
+      if(is_dampfac_param_time_dependent){
+	pf_dampfac_param = pf_dampfac_param_tmp;
+      }
+
       /* print updated parameter values */
       if(pf_paramprintensemble){
           enkf_printstatistics_pfb(dat_ksat,"update.param.ksat",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
@@ -1986,7 +2025,7 @@ void update_parflow () {
     FinalizeVectorUpdate(handle);
   }
 
-  if(pf_olfmasking == 1) mask_overlandcells();
+  if(pf_olfmasking == 1 || pf_olfmasking == 3) mask_overlandcells();
   if(pf_olfmasking == 2) mask_overlandcells_river();
 
   if(pf_updateflag == 1) {
@@ -2045,13 +2084,21 @@ void update_parflow () {
       /*   printf("Warning (update_parflow): saturation > 1.0\n"); */
       /* } */
     }
-    ENKF2PF(saturation_in, pf_statevec);
+
+    /* Add an option here for masked update */
+    if(pf_gwmasking == 1){
+      ENKF2PF_masked(saturation_in, pf_statevec,subvec_gwind);
+    }else{
+      ENKF2PF(saturation_in, pf_statevec);
+    }
+
     Problem * problem = GetProblemRichards(solver);
     double gravity = ProblemGravity(problem);
     Vector * pressure_in = GetPressureRichards(solver);
     Vector * density = GetDensityRichards(solver);
     ProblemData * problem_data = GetProblemDataRichards(solver);
     PFModule * problem_saturation = ProblemSaturation(problem);
+
     // convert saturation to pressure
     global_ptr_this_pf_module = problem_saturation;
     SaturationToPressure(saturation_in,	pressure_in, density, gravity, problem_data, CALCFCN, 1);
@@ -2083,6 +2130,42 @@ void update_parflow () {
       nshift = 2*enkf_subvecsize;
     }else{
       nshift = enkf_subvecsize;
+    }
+
+    /* River masking for permeability update */
+    if(pf_olfmasking_param == 1 || pf_olfmasking_param == 3){
+
+      int idepth;
+      int izero = 0;
+      /* ishift implements the index shift nshift in pf_statevec */
+      int ishift = nshift;
+
+      /* fast-forward counters to layer numer `pf_olfmasking_depth`
+	 below surface layer */
+      izero += nx_local*ny_local*(nz_local-pf_olfmasking_depth);
+      ishift += nx_local*ny_local*(nz_local-pf_olfmasking_depth);
+
+      /* mask updated parameter values in uppermost model layers */
+      for(idepth=0;idepth<pf_olfmasking_depth;idepth++){
+	for(i=0;i<ny_local;i++){
+	  for(j=0;j<nx_local;j++){
+	    if(pf_olfmasking == 1){
+	      pf_statevec[ishift] = subvec_param[izero];
+	    }
+	    else if(pf_olfmasking == 3){
+	      if(pf_updateflag == 1 || pf_updateflag == 3){
+		if(subvec_p[izero]>0.0) pf_statevec[ishift] = subvec_param[izero];
+	      }else{
+		printf("Error (update_parflow): pf_olfmasking_param = 3 requires pf_updateflag = 1 or 3\n");
+		exit(1);
+	      }
+	    }
+	    ishift++;
+	    izero++;
+	  }
+	}
+      }
+
     }
 
     /* update perm_xx */
@@ -2282,53 +2365,73 @@ void update_parflow () {
 
 void mask_overlandcells()
 {
+  int idepth;
   int i,j,k;
   int counter = 0;
 
-  /* fast-forward counter to uppermost model layer */
-  counter = nx_local*ny_local*(nz_local-1);
+  /* fast-forward counter to uppermost model layer (minus pf_olfmasking_depth) */
+  counter = nx_local*ny_local*(nz_local-pf_olfmasking_depth);
 
-  /* mask updated values in uppermost model layer */
+  /* mask updated values in uppermost model layers */
   if(pf_updateflag == 1){
-    for(i=0;i<ny_local;i++){
-      for(j=0;j<nx_local;j++){
-        //if(subvec_p[counter]>0.0) pf_statevec[counter] = subvec_p[counter];
-        pf_statevec[counter] = subvec_p[counter];
-        counter++;
+    for(idepth=0;idepth<pf_olfmasking_depth;idepth++){
+      for(i=0;i<ny_local;i++){
+	for(j=0;j<nx_local;j++){
+	  if(pf_olfmasking == 1){
+	    pf_statevec[counter] = subvec_p[counter];
+	  }
+	  else if(pf_olfmasking == 3){
+	    if(subvec_p[counter]>0.0) pf_statevec[counter] = subvec_p[counter];
+	  }
+	  counter++;
+	}
       }
     }
     if(pf_gwmasking == 2){   //There are overland cells being unsat (by hcp)
-      counter = nx_local*ny_local*(nz_local-1);
-      for(i=0;i<ny_local;i++){
-        for(j=0;j<nx_local;j++){
-          //if(subvec_p[counter]>0.0) pf_statevec[counter] = subvec_p[counter];
-          if(subvec_gwind[counter] < 0.5){
-             pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
-          }
-          counter++;
-        }
+      counter = nx_local*ny_local*(nz_local-pf_olfmasking_depth);
+      for(idepth=0;idepth<pf_olfmasking_depth;idepth++){
+	for(i=0;i<ny_local;i++){
+	  for(j=0;j<nx_local;j++){
+	    if(subvec_gwind[counter] < 0.5){
+	      if(pf_olfmasking == 1){
+		pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
+	      }
+	      else if(pf_olfmasking == 3){
+		if(subvec_p[counter]>0.0) pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
+	      }
+	    }
+	    counter++;
+	  }
+	}
       }
     }
   }
   if(pf_updateflag == 2){
-    for(i=0;i<ny_local;i++){
-      for(j=0;j<nx_local;j++){
-        //if(subvec_p[counter]>0.0) pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
-        pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
-        counter++;
+    for (idepth=0;idepth<pf_olfmasking_depth;idepth++){
+      for(i=0;i<ny_local;i++){
+	for(j=0;j<nx_local;j++){
+	  pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
+	  //if(condition on saturations) pf_statevec[counter] = subvec_sat[counter]*subvec_porosity[counter];
+	  counter++;
+	}
       }
     }
   }
   if(pf_updateflag == 3){
-    for(i=0;i<ny_local;i++){
-      for(j=0;j<nx_local;j++){
-        //if(subvec_p[counter]>0.0) pf_statevec[counter+enkf_subvecsize] = subvec_p[counter];
-        pf_statevec[counter+enkf_subvecsize] = subvec_p[counter];
-        counter++;
+    for (idepth=0;idepth<pf_olfmasking_depth;idepth++){
+      for(i=0;i<ny_local;i++){
+	for(j=0;j<nx_local;j++){
+	  if(pf_olfmasking == 1){
+	    pf_statevec[counter+enkf_subvecsize] = subvec_p[counter];
+	  }
+	  else if(pf_olfmasking == 3){
+	    if(subvec_p[counter]>0.0) pf_statevec[counter+enkf_subvecsize] = subvec_p[counter];
+	  }
+	  counter++;
+	}
       }
     }
   }
-
 }
 
 

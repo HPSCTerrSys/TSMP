@@ -34,6 +34,7 @@ paramupdate        =
 paramupdate_frequency =
 dampingfactor_param =
 dampingfactor_state =
+damping_switch_sm =
 aniso_perm_y       =
 aniso_perm_z       =
 aniso_use_parflow  =
@@ -42,6 +43,8 @@ printstat          =
 paramprintensemble =
 paramprintstat     =
 olfmasking         =
+olfmasking_param   =
+olfmasking_depth   =
 
 [CLM]
 problemname = ""
@@ -78,9 +81,8 @@ In the following the individual entries of `enkfpf.par` are described:
 match with the specifications in the `*.pfidb` input.
 
 This number of processors specifies a subset of the processors
-available in a single `COMM_model`. Each `COMM_model` contains - if
-there are no remainders - the following number of processes:
-`npes_world / nreal`.
+available in a single `COMM_model`. Each `COMM_model` contains
+`npes_world / nreal` processes.
 
 ### PF:starttime ###
 
@@ -89,12 +91,42 @@ specifications in the `*.pfidb` input (`TimingInfo.StartTime`).
 
 ### PF:dt ###
 
-`PF:dt`: (real) Length of ParFlow time step. Must match with the
-specifications in the `*.pfidb` input. 
+`PF:dt`: (real) Inverse factor multiplied to CLM and COSMO time
+steps. For coupled simulations, the quotient of CLM/COSMO time steps
+and this factor should be in agreement with the ParFlow time step
+(`TimingInfo.BaseUnit` in `*.pfidb` input files).
+
+For CLM-ParFlow, `PF:dt` should be set as
+`PF:dt = (dtime / TimingInfo.BaseUnit)`, where `dtime` is
+the time delta specified in the CLM namelist file (`lnd.stdin`).
+
+For COSMO-ParFlow, `PF:dt` should be set as
+`PF:dt = (dt_cos / TimingInfo.BaseUnit) * COSMO:dtmult`.
+TODO: Document COSMO time step setting `dt_cos`.
 
 It is implicitly assumed that ParFlow and CLM calculate the same
-amount of time steps (i.e., have the same time step
-length). (Johannes: This may not be true, CLM time steps are computed)
+number of time steps between two PDAF-calls (this number of time steps
+is specified in `PF:da_interval`).
+
+For CLM-standalone simulations `PF:dt` determines the time unit of
+`PF:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
+matching with the ParFlow time step is not an issue.
+
+#### Examples for PF:dt ####
+
+Example 1, CLMSA: `PF:dt==1` means that CLM input `dtime` is the unit of
+`PF:da_interval`. For the default `dtime` of half an hour (1800
+seconds), `PF:da_interval==48` would specify daily observations.
+
+Example 2, CLMSA: For `dtime==1800` and `PF:dt==0.5`, the unit of
+`PF:da_interval` is 1 hour - the standard time unit of
+ParFlow. `PF:da_interval==24` would specify daily observations.
+
+Example 3, FallSchoolCase, CLM-ParFlow: The FallSchoolCase chooses
+`dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
+hour. This is in agreement with the FallSchool's ParFlow input script
+(`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==1` specifies
+hourly observations.
 
 ### PF:endtime (deprecated) ###
 
@@ -141,6 +173,13 @@ pressure data (`updateflag=1`) in ParFlow.
 -   1: Groundwater masking using saturated cells only.
 
 -   2: Groundwater masking using mixed state vector.
+
+For assimilating SM data (`updateflag=2`), the following masking
+options are included:
+
+-   0: No groundwater masking.
+
+-   1: Groundwater masking using **unsaturated** cells only.
 
 ### PF:paramupdate ###
 
@@ -196,7 +235,7 @@ before assimilation and $p_{update}$ is $p$ after the assimilation.
 `PF:dampingfactor_state`: (real) Damping factor for state
 updates. Default `1.0`.
 
-Remark: Currently implemented for `pf_updateflag==1`.
+Remark: Currently implemented for `updateflag==1`.
 
 The damping factor should be chosen between `0.0` and `1.0`, where the
 inputs yield the following behavior:
@@ -212,6 +251,16 @@ x_{update, damped} &= x + \mathtt{dampingfactor\_state} \cdot ( x_{update} - x )
 where $x$ is the state vector (without parameters) before assimilation
 and $x_{update}$ is the state vector after the assimilation.
 
+### PF:damping_switch_sm ###
+`PF:damping_switch_sm`: (integer) Switch for applying damping factor
+for state updates to soil moisture. Default `1` (damping factor
+applied). Only applies for `PF:gwmasking==2`.
+
+- `0`: State damping not applied to soil moisture
+- `1`: State damping applied to soil moisture
+
+General state damping is turned on by setting `PF:dampingfactor_state`
+to a positive value smaller than `1.0`.
 
 ### PF:aniso_perm_y ###
 
@@ -286,9 +335,39 @@ f.e.  `param.ksat`, `param.mannings` or `param.poro`.
 
 `PF:olfmasking`: (integer) Only used in case you do not want to update
 the state on certain grid-cells during DA with pdaf. eg. not update
-the cell which is saturated. Option \"1\" means that all saturated
-cells at surface are not used for an update. Option \"2\" reads a pfb
-for masking the stream.
+the cell which is saturated. Masked cells are not used for the state
+update.
+
+- Option \"1\": All cells at surface are masked.
+
+- Option \"2\" reads a pfb of masked cells (use-case:
+  rivers/streams). The full soil column below the masked cells is not
+  updated!
+
+- Option \"3\": All saturated cells at surface are masked. Only
+  implemented, when pressure is in the state vector,
+  i.e. `PF:updateflag` is `1` or `3`.
+
+### PF:olfmasking_param ###
+
+`PF:olfmasking_param`: (integer) Only used in case you do not want to
+update the parameters from the EnKF state vector on certain grid-cells
+during DA with pdaf. eg. not update the cell which is
+saturated. Masked cells are not used for the parameter update.
+
+- Option \"1\" All cells at surface are masked. Only implemented for
+  `PF:paramupdate==1`.
+
+- NOT YET IMPLEMENTED: Option \"2\" reads a pfb for masking the
+  stream.
+
+- Option \"3\": All saturated cells at surface are masked. Only
+  implemented for `PF:paramupdate==1`; `PF:updateflag` `1` or `3`.
+
+### PF:olfmasking_depth ###
+
+`PF:olfmasking_depth`: (integer) Number of layers (counted from
+surface) to mask in overland flow river masking. Default: 1.
 
 ## [CLM] ##
 
@@ -301,9 +380,8 @@ for masking the stream.
 `CLM:nprocs`: (integer) Number of processors for each CLM instance.
 
 This number of processors specifies a subset of the processors
-available in a single `COMM_model`. Each `COMM_model` contains - if
-there are no remainders - the following number of processes:
-`npes_world / nreal`.
+available in a single `COMM_model`. Each `COMM_model` contains
+`npes_world / nreal` processes.
 
 ### CLM:update_swc ###
 
@@ -362,13 +440,16 @@ further information, see source code.
 instance.
 
 Currently, `COSMO:nprocs` is NOT USED by TSMP-PDAF. Instead, COSMO
-will get processors if there are processes left after giving
-`PF:nprocs + CLM:nprocs` processes to ParFlow and CLM.
+will get processors if there are processes left by ParFlow and CLM:
+`(npes_world / nreal) - (PF:nprocs + CLM:nprocs)`.
 
 ### COSMO:dtmult ###
 
 `COSMO:dtmult`: (integer) Number of COSMO time steps within one
 ParFlow time step.
+
+Remark: This holds for `PF:dt==1`, otherwise `PF:dt` is another factor
+determining how COSMO rebuilds the ParFlow time step.
 
 ## [DA] ##
 
@@ -494,6 +575,7 @@ Effect of `obs_interp_switch=1`:
  |           | `paramupdate_frequency` | 1             |
  |           | `dampingfactor_param`   | 1.0           |
  |           | `dampingfactor_state`   | 1.0           |
+ |           | `damping_switch_sm`     | 1             |
  |           | `aniso_perm_y`          | 1.0           |
  |           | `aniso_perm_z`          | 1.0           |
  |           | `aniso_use_parflow`     | 0             |
@@ -503,6 +585,8 @@ Effect of `obs_interp_switch=1`:
  |           | `paramprintensemble`    | 1             |
  |           | `paramprintstat`        | 1             |
  |           | `olfmasking`            | 0             |
+ |           | `olfmasking_param`      | 0             |
+ |           | `olfmasking_depth`      | 0             |
  | `[CLM]`   |                         |               |
  |           | `problemname`           | \-            |
  |           | `nprocs`                | 0             |

@@ -34,6 +34,24 @@ the respective assimilation cycle. The observation files for ParFlow
 should contain the following variables which all should have the
 dimension `dim_obs` (except variable `dr` in CLM observations files):
 
+#### dampfac_state ####
+
+`dampfac_state`: (real) Input of a time dependent state damping
+factor. The damping factor for an update is given in the corresponding
+observation file. This damping factor applies only to updates of
+dynamic states in the DA-state vector and, when existing, replaces the
+general input from
+[PF:dampingfactor_state](./input_enkfpf.md#pfdampingfactor_state).
+
+#### dampfac_param ####
+
+`dampfac_param`: (real) Input of a time dependent state damping
+factor. The state vector for an update is given in the corresponding
+observation file. This damping factor applies only to parameter
+updates in the DA state vector and, when existing, replaces the
+general input from
+[PF:dampingfactor_param](./input_enkfpf.md#pfdampingfactor_param).
+
 ### ParFlow observation file variables ###
 
 If TSMP-PDAF is only applied with ParFlow, the following variables
@@ -367,7 +385,7 @@ Source code from script `build_interface_pdaf_JURECA.ksh`:
      importFlags+=$importFlagsOAS
      importFlags+=$importFlagsPFL
      importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
+     cppdefs+=" ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
      cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi

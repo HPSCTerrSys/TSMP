@@ -58,8 +58,9 @@ since `dim_ens` is set to dummy-zero) `n_modeltasks > dim_ens`
   8. `COMM_couple`: For each rank in `COMM_model` (example 4 ranks),
      there is a task in `COMM_couple` with `n_modeltasks` ranks
      (example 48)
-  9. Finally `da_comm` is set to `COMM_model`; and
-     `cosmo_input_suffix` is set
+  9. Model equivalents of `COMM_model` are set: `COMM_model_oas`,
+     `COMM_model_pfl`, `COMM_model_clm`
+  10. Model equivalent of `COMM_couple` is set: `COMM_model_clm`
 
 - [`initialize_tsmp()`](#initialize_tsmp)
   1. read parameter file `enkfpf.par`
@@ -99,7 +100,7 @@ Subroutines:
   TSMP-PDAF
   - defined in `init_pdaf.F90` by `C_F_POINTER` subroutine (Doc from
     Gnu-Compiler:
-    https://gcc.gnu.org/onlinedocs/gfortran/C_005fF_005fPOINTER.html)
+    <https://gcc.gnu.org/onlinedocs/gfortran/C_005fF_005fPOINTER.html>)
   - takes values from `pf_statevec`
 - `subvec_p`: state vector pressure (from `enkf_parflow.c:371`)
   - defined: `enkf_parflow.h`, allocated: `wrapper_tsmp.c`
@@ -117,10 +118,10 @@ AMPS directory:
 
 Variable names for the model communicator:
 -   ParFlow standalone:
-    -   `comm_model` -> C: `comm_model_pdaf` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
+    -   `COMM_model` -> `COMM_model_pfl` (init_parallel_pdaf) -> C: `COMM_model_pfl` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
 -   Coupled with OASIS:
-    -   `comm_model` -> `da_comm` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
-    -   `comm_model` -> `da_comm` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
+    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
+    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
 
 
 ### CMEM ###

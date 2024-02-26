@@ -57,7 +57,7 @@ MODULE mod_oasis_data
                                                            ! of the root process
 !!>>TSMP-PDAF addition beginning
   ! PDAF: New communicator 
-  integer(c_int),bind(C,name="fsubcomm") :: da_comm 
+  integer(c_int),bind(C,name="fsubcomm") :: COMM_model_oas 
   ! PDAF: OASIS prefix number 
   integer(c_int),bind(C,name="oasprefixno") :: oasprefixno
 !!<<TSMP-PDAF addition end

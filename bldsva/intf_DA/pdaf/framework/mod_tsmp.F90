@@ -1,20 +1,20 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
@@ -27,6 +27,8 @@ module mod_tsmp
 
     integer(c_int) , bind(c) :: enkf_subvecsize, pf_statevecsize, nprocpf, nprocclm, nproccosmo
     integer(c_int) , bind(c,name="point_obs") :: point_obs
+    integer(c_int) , bind(c,name="is_dampfac_state_time_dependent") :: is_dampfac_state_time_dependent
+    integer(c_int) , bind(c,name="is_dampfac_param_time_dependent") :: is_dampfac_param_time_dependent
     integer(c_int) , bind(c,name="obs_interp_switch") :: obs_interp_switch
     integer(c_int) , bind(c) :: nx_local, ny_local, nz_local, nx_glob, ny_glob, nz_glob
     integer(c_int), bind(c)  :: tag_model_clm = 0
@@ -40,7 +42,16 @@ module mod_tsmp
     integer(c_int), pointer  :: idx_map_subvec2state_fortran(:)
     type(c_ptr), bind(c)     :: soilay
     real(c_double), pointer  :: soilay_fortran(:)
- 
+    real(c_double),bind(C,name="dampfac_state_time_dependent") :: dampfac_state_time_dependent
+    real(c_double),bind(C,name="dampfac_param_time_dependent") :: dampfac_param_time_dependent
+
+    ! model input parameters
+    REAL(c_double), BIND(c) :: t_start
+    INTEGER(c_int), BIND(c) :: model
+    INTEGER(c_int), BIND(c) :: tcycle
+    INTEGER(c_int), BIND(c) :: tstartcycle
+    INTEGER(c_int), BIND(c) :: total_steps
+
     interface
         subroutine initialize_tsmp() bind(c)
             use iso_c_binding

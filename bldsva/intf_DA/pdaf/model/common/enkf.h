@@ -1,20 +1,20 @@
 /*-----------------------------------------------------------------------------------------
 Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 
-This file is part of TerrSysMP-PDAF
+This file is part of TSMP-PDAF
 
-TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+TSMP-PDAF is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-TerrSysMP-PDAF is distributed in the hope that it will be useful,
+TSMP-PDAF is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU LesserGeneral Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------*/
 
 
@@ -44,10 +44,12 @@ extern void clm5_init(char *s, int pdaf_id, int pdaf_max);
 #endif
 extern void clm_advance(int *ntstep);
 extern void update_clm();
+#if defined CLMSA
 extern void print_update_clm(int *ts, int *ttot);
+#endif
 extern void write_clm_statistics(int *ts, int *ttot);
 extern void clm_finalize();
-extern void cosmo_init();
+extern void cosmo_init(int pdaf_id);
 extern void cosmo_advance(int *cos_dt);
 extern void cosmo_finalize();
 
@@ -91,10 +93,15 @@ GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
 GLOBAL int dtmult_cosmo;
 GLOBAL int pf_olfmasking;
+GLOBAL int pf_olfmasking_param;
+GLOBAL int pf_olfmasking_depth;
 GLOBAL int pf_gwmasking;
 GLOBAL int pf_printgwmask;
 GLOBAL int pf_freq_paramupdate;
 GLOBAL int pf_aniso_use_parflow;
+GLOBAL int is_dampfac_state_time_dependent;
+GLOBAL int is_dampfac_param_time_dependent;
+GLOBAL int pf_dampswitch_sm;
 extern int model;
 extern int mype_model;
 extern int npes_model;
@@ -113,3 +120,5 @@ GLOBAL double pf_aniso_perm_y,pf_aniso_perm_z;
 GLOBAL double da_interval;
 GLOBAL double pf_dampfac_param;
 GLOBAL double pf_dampfac_state;
+GLOBAL double dampfac_state_time_dependent;
+GLOBAL double dampfac_param_time_dependent;

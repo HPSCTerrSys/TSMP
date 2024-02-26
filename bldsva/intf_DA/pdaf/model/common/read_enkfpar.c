@@ -1,25 +1,25 @@
 /*-----------------------------------------------------------------------------------------
 Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 
-This file is part of TerrSysMP-PDAF
+This file is part of TSMP-PDAF
 
-TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+TSMP-PDAF is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-TerrSysMP-PDAF is distributed in the hope that it will be useful,
+TSMP-PDAF is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU LesserGeneral Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------------------
-read_enkfpar.c: Function for reading controle file of TerrSysMP-PDAF
+read_enkfpar.c: Function for reading controle file of TSMP-PDAF
 -------------------------------------------------------------------------------------------*/
 
 #include "enkf.h"
@@ -69,10 +69,13 @@ void read_enkfpar(char *parname)
   pf_paramprintensemble = iniparser_getint(pardict,"PF:paramprintensemble",1);
   pf_paramprintstat     = iniparser_getint(pardict,"PF:paramprintstat",1);
   pf_olfmasking         = iniparser_getint(pardict,"PF:olfmasking",0);
+  pf_olfmasking_param   = iniparser_getint(pardict,"PF:olfmasking_param",0);
+  pf_olfmasking_depth   = iniparser_getint(pardict,"PF:olfmasking_depth",1);
   pf_gwmasking          = iniparser_getint(pardict,"PF:gwmasking",0);
   pf_printgwmask        = iniparser_getint(pardict,"PF:printgwmask",0);
   pf_dampfac_param      = iniparser_getdouble(pardict,"PF:dampingfactor_param",1.0);
   pf_dampfac_state      = iniparser_getdouble(pardict,"PF:dampingfactor_state",1.0);
+  pf_dampswitch_sm        = iniparser_getdouble(pardict,"PF:damping_switch_sm",0);
   pf_freq_paramupdate   = iniparser_getint(pardict,"PF:paramupdate_frequency",1);
   
   /* get settings for CLM */
@@ -108,10 +111,10 @@ void read_enkfpar(char *parname)
       printf("TSMP-PDAF-WRAPPER ------------------\n");
       printf("TSMP-PDAF-WRAPPER t_sim = %lf | da_interval = %lf | total_steps = %d\n",t_sim,da_interval,total_steps);
       printf("TSMP-PDAF-WRAPPER nreal = %d | n_modeltasks = %d\n",nreal,n_modeltasks);
-      if (nreal != n_modeltasks) {
-	printf("Error: nreal must be equal to n_modeltasks.\n");
-	exit(1);
-      }
+    }
+    if (nreal != n_modeltasks) {
+      printf("Error: nreal must be equal to n_modeltasks.\n");
+      exit(1);
     }
   }
 
@@ -134,6 +137,17 @@ void read_enkfpar(char *parname)
     /* printf("DBG: size, npes_world = %d, %d\n",size,npes_world); */
     /* printf("DBG: rank, mype_world = %d, %d\n",rank,mype_world); */
     /* printf("DBG: mype_model, npes_model = %d, %d\n",mype_model,npes_model); */
+  }
+
+  /* MPI-consistency check for nproc inputs */
+  /* Check: `npes_model = nprocpf + nprocclm + npproccosmo */
+  if (nprocpf + nprocclm + nproccosmo != npes_model){
+    printf("nprocpf=%f\n", nprocpf);
+    printf("nprocclm=%f\n", nprocclm);
+    printf("nproccosmo=%f\n", nproccosmo);
+    printf("npes_model=%f\n", npes_model);
+    printf("Error:  nprocpf + nprocclm + npproccosmo must be equal to npes_model.\n");
+    exit(1);
   }
 
   /* CLM, ParFlow, COSMO */
