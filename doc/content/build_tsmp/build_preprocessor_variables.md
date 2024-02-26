@@ -145,6 +145,7 @@ specific places in the code.
 
 Currently implemented:
 - `init_pdaf`
+- `assimilate_pdaf`
 
 Information on PDAF debugging:
 <https://pdaf.awi.de/trac/wiki/PDAF_debugging>
