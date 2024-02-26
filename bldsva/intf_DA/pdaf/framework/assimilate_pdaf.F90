@@ -103,8 +103,9 @@ SUBROUTINE assimilate_pdaf()
 !        prodRinvA_hyb_l_pdaf            ! Provide product R^-1 A for some matrix A including hybrid weight
 
 ! *** Switch on debug output ***
+! *** for main process        ***
 #ifdef PDAF_DEBUG
-  CALL PDAF_set_debug_flag(1)
+  IF (mype_world == 0) CALL PDAF_set_debug_flag(1)
 #endif
 
 ! *********************************

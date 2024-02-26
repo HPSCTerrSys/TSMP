@@ -299,8 +299,9 @@ SUBROUTINE init_pdaf()
   IF (mype_world == 0) call init_pdaf_info()
 
 ! *** Switch on debug output ***
+! *** for main process        ***
 #ifdef PDAF_DEBUG
-  CALL PDAF_set_debug_flag(1)
+  IF (mype_world == 0) CALL PDAF_set_debug_flag(1)
 #endif
 
 ! *****************************************************
