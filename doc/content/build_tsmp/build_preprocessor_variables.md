@@ -1,6 +1,6 @@
-# TSMP-PDAF Environment variables #
+# TSMP-PDAF Preprocessor variables #
 
-A number of environment variables are set during the build process of
+A number of preprocessor variables are set during the build process of
 TSMP-PDAF in order to make the code behave in specific ways.
 
 TSMP-PDAF environemnt variables are set in the machine-specific
@@ -10,9 +10,54 @@ TSMP-PDAF build-script:
 bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh
 ```
 
+## Example for setting preprocessor variables ##
+
+Before listing the preprocessor variables, we give an example for
+setting them.
+
+Preprocessor variables can be set in the TSMP-PDAF-build script
+`TSMP/bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`.
+
+A preprocessor variable `CPP_VAR` is set by adding a line of the form:
+```bash
+	cppdefs+=" ${pf}-DCPP_VAR "
+```
+
+If this line is added at the beginning of `configure_da()`, the
+preprocessor variable is activated for all combinations of component
+models.
+
+Later in the code, preprocessor variable can be set only for specific combinations of component models. Here is an example source code from script `build_interface_pdaf.ksh`:
+```bash
+  if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
+     importFlags+=$importFlagsCLM
+     importFlags+=$importFlagsOAS
+     importFlags+=$importFlagsPFL
+     importFlags+=$importFlagsDA
+     cppdefs+=" ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
+     cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
+     if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
+     if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
+     libs+=$libsCLM
+     libs+=$libsOAS
+     libs+=$libsPFL
+     obj+=' $(OBJCLM) $(OBJPF) '
+  fi
+```
+
+The if-condition states that component models CLM and ParFlow are
+used. This corresponds to the flag `-c clm-pfl-pdaf` in the
+build-command.
+
+The line `cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for
+observations from both ParFlow + CLM` sets
+`OBS_ONLY_PARFLOW`. Analogously, any other preprocessor variable could
+be set.
+
+
 ## CLMSA ##
 
-Environment variable `CLMSA` is true if CLM-standalone is used in
+Preprocessor variable `CLMSA` is true if CLM-standalone is used in
 TSMP-PDAF, i.e. no coupling to other component models (ParFlow,
 atmospheric model).
 
@@ -27,7 +72,7 @@ specific code is introduced. This includes
 
 ## PARFLOW_STAND_ALONE ##
 
-Environment variable `PARFLOW_STAND_ALONE` is true if
+Preprocessor variable `PARFLOW_STAND_ALONE` is true if
 ParFlow-standalone is used in TSMP-PDAF, i.e. no coupling to other
 component models (CLM, atmospheric model).
 
@@ -36,7 +81,7 @@ where the behavior of ParFlow-CLM-PDAF and ParFlow-PDAF should differ.
 
 ## OBS_ONLY_PARFLOW ##
 
-Environment variable `OBS_ONLY_PARFLOW` is true if observations in
+Preprocessor variable `OBS_ONLY_PARFLOW` is true if observations in
 TSMP-PDAF are of ParFlow-type.
 
 This will remove unnecessary code during observation reading, when
@@ -44,7 +89,7 @@ ParFlow-CLM-PDAF is built, but no CLM-type observations are included.
 
 ## OBS_ONLY_CLM ##
 
-Environment variable `OBS_ONLY_CLM` is true if observations in
+Preprocessor variable `OBS_ONLY_CLM` is true if observations in
 TSMP-PDAF are of CLM-type.
 
 This will remove unnecessary code during observation reading, when
@@ -53,7 +98,7 @@ included.
 
 ## WATSAT3D ##
 
-Environment variable `WATSAT3D` is set in `common_build_interface.ksh`
+Preprocessor variable `WATSAT3D` is set in `common_build_interface.ksh`
 in function `c_configure_clm`.
 
 If it is turned on, the possibility of a read-in porosity is

@@ -61,7 +61,7 @@ output. More information:
 
 For TSMP-PDAF, debug output can be called via the preprocessor
 variable
-[`PDAF_DEBUG`](./../build_tsmp/build_environment_variables.md#pdaf_debug).
+[`PDAF_DEBUG`](./../build_tsmp/build_preprocessor_variables.md#pdaf_debug).
 
 Information about turning on PDAF debugging output by changing the
 source code of TSMP-PDAF:
