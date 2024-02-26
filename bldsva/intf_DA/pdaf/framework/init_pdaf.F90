@@ -94,6 +94,7 @@ SUBROUTINE init_pdaf()
 ! Calls: init_pdaf_info
 ! Calls: PDAF_init
 ! Calls: PDAF_get_state
+! Calls: PDAF_set_debug_flag
 !EOP
 
 ! Local variables
@@ -297,6 +298,10 @@ SUBROUTINE init_pdaf()
 
   IF (mype_world == 0) call init_pdaf_info()
 
+! *** Switch on debug output ***
+#ifdef PDAF_DEBUG
+  CALL PDAF_set_debug_flag(1)
+#endif
 
 ! *****************************************************
 ! *** Call PDAF initialization routine on all PEs.  ***
@@ -359,6 +364,10 @@ SUBROUTINE init_pdaf()
      CALL abort_parallel()
   END IF
 
+! *** Switch off debug output ***
+#ifdef PDAF_DEBUG
+  CALL PDAF_set_debug_flag(0)
+#endif
 
 ! ******************************'***
 ! *** Prepare ensemble forecasts ***

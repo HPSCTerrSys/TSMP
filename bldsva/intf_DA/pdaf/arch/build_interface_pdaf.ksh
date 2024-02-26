@@ -52,6 +52,8 @@ route "${cyellow}>> configure_da${cnormal}"
   importFlagsCOS=" "
   importFlagsDA=" "
   cppdefs=" "
+  # cppdefs+=" ${pf}-DOLD_TRUNCATE_SAT "
+  # cppdefs+=" ${pf}-DPDAF_DEBUG "
   obj=' '
   libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf "
   libsOAS=" "

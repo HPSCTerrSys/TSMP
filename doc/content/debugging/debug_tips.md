@@ -59,10 +59,15 @@ output. More information:
 
 ### PDAF Debugging Information
 
-See the following wiki page for information about turning on PDAF
-debugging output:
+For TSMP-PDAF, debug output can be called via the preprocessor
+variable
+[`PDAF_DEBUG`](./../build_tsmp/build_environment_variables.md#pdaf_debug).
 
-<https://pdaf.awi.de/trac/wiki/PDAF_debugging#ActivatingDebuggingOutput>
+Information about turning on PDAF debugging output by changing the
+source code of TSMP-PDAF:
+
+<https://pdaf.awi.de/trac/wiki/PDAF_debugging>
+
 
 ### PDAF's Timing and Memory output
 

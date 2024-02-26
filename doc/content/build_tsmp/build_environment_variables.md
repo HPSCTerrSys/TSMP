@@ -92,3 +92,15 @@ Reference for the current default saturation truncation in Hung et al
 ``` c++
 	if(psdat[ips] <= s_res) psdat[ips] = s_res + 0.01;
 ```
+
+## PDAF_DEBUG ##
+
+If `PDAF_DEBUG` is defined, PDAF's debugging output is turned on at
+specific places in the code.
+
+Currently implemented:
+- `init_pdaf`
+
+Information on PDAF debugging:
+<https://pdaf.awi.de/trac/wiki/PDAF_debugging>
+
