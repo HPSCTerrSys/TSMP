@@ -93,21 +93,6 @@ void finalize_tsmp() {
 
   if(model == 1) {
 #if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
-    free(subvec_p);
-    free(subvec_sat);
-    free(subvec_porosity);
-    free(subvec_param);
-    free(subvec_mean);
-    free(subvec_sd);
-    free(subvec_param_mean);
-    free(subvec_param_sd);
-    free(pf_statevec);
-
-    free(subvec_permy);
-    free(subvec_permz);
-    free(arr_aniso_perm_yy);
-    free(arr_aniso_perm_zz);
-
     enkfparflowfinalize();
 #endif
   }

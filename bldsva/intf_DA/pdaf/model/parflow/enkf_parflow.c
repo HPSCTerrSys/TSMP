@@ -890,6 +890,21 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 
 void enkfparflowfinalize() {
 
+	free(subvec_p);
+	free(subvec_sat);
+	free(subvec_porosity);
+	free(subvec_param);
+	free(subvec_mean);
+	free(subvec_sd);
+	free(subvec_param_mean);
+	free(subvec_param_sd);
+	free(pf_statevec);
+
+	free(subvec_permy);
+	free(subvec_permz);
+	free(arr_aniso_perm_yy);
+	free(arr_aniso_perm_zz);
+
 	// gw: free assimilation data structures
 	free(idx_map_subvec2state);
 	free(xcoord);
