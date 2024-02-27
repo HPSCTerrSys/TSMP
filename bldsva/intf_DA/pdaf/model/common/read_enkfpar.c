@@ -107,27 +107,14 @@ void read_enkfpar(char *parname)
       printf("TSMP-PDAF-WRAPPER t_sim = %lf | da_interval = %lf | total_steps = %d\n",t_sim,da_interval,total_steps);
       printf("TSMP-PDAF-WRAPPER nreal = %d | n_modeltasks = %d\n",nreal,n_modeltasks);
     }
-    if (nreal != n_modeltasks) {
-      printf("Error: nreal must be equal to n_modeltasks.\n");
-      exit(1);
-    }
   }
 
+  /* Check: `nreal` must be equal to n_modeltasks */
+  if (nreal != n_modeltasks) {
+    printf("Error: nreal must be equal to n_modeltasks.\n");
+    exit(1);
+  }
 
-  /* MPI_Comm_size(MPI_COMM_WORLD,&size); */
-  /* MPI_Comm_rank(MPI_COMM_WORLD,&rank); */
-  /* coupcol = task_id - 1; */
-  /* subrank = mype_model; */
-
-  /* MPI: Get size and rank in COMM_WORLD */
-  /* define number of first model realisation (for input/output filenames) */
-  /* startreal: read from input in read_enkfpar */
-  coupcol = task_id - 1 + startreal;
-  if (screen_wrapper > 1) {
-    printf("TSMP-PDAF-WRAPPER mype(w)=%d: coupcol, task_id = %d, %d\n", mype_world, coupcol,task_id);
-    /* printf("DBG: size, npes_world = %d, %d\n",size,npes_world); */
-    /* printf("DBG: rank, mype_world = %d, %d\n",rank,mype_world); */
-    /* printf("DBG: mype_model, npes_model = %d, %d\n",mype_model,npes_model); */
   /* Check: `point_obs` must be equal to either 0 or 1 */
   if (point_obs != 0 && point_obs 1= 1){
     printf("point_obs=%d\n", point_obs);
@@ -165,6 +152,13 @@ void read_enkfpar(char *parname)
   }
   else{
     model = 2;
+  }
+
+  /* MPI: Get size and rank in COMM_WORLD */
+  /* define number of first model realisation (for input/output filenames) */
+  coupcol = task_id - 1 + startreal;
+  if (screen_wrapper > 1) {
+    printf("TSMP-PDAF-WRAPPER mype(w)=%d: coupcol, task_id = %d, %d\n", mype_world, coupcol,task_id);
   }
 
   /* create instance specific input file for ParFLow and CLM*/
