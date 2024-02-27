@@ -267,7 +267,7 @@ void enkfparflowinit(int ac, char *av[], char *input_file) {
   if (amps_Init(&ac, &av))
     {
 #else
-      // Parflow stand alone. No need to guard becasue CLM stand alone should not compile this file.
+      // Parflow stand alone. No need to guard because CLM stand alone should not compile this file.
   if (amps_EmbeddedInitComm(pfcomm))
     {
 #endif
