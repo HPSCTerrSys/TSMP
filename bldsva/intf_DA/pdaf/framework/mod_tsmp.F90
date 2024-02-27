@@ -74,13 +74,6 @@ module mod_tsmp
     end interface
 
     interface
-        subroutine print_update_pfb() bind(c)
-            use iso_c_binding
-            implicit none
-        end subroutine print_update_pfb
-    end interface
-
-    interface
         subroutine update_tsmp() bind(c)
             use iso_c_binding
             implicit none

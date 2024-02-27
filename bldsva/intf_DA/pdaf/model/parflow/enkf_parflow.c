@@ -2527,3 +2527,9 @@ void init_parf_l_size(int* dim_l)
     *dim_l = nshift + 1;
   }
 }
+
+void print_update_pfb(){
+  if(model == 1){
+    enkf_printstatistics_pfb(subvec_p,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+  }
+}

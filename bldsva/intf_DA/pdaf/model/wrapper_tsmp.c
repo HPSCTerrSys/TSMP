@@ -197,16 +197,6 @@ void integrate_tsmp() {
   tstartcycle++;
 }
 
-#if (defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE)
-void print_update_pfb(){
-  if(model == 1){
-    enkf_printstatistics_pfb(subvec_p,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
-  }
-}
-#endif
-
-
-
 void update_tsmp(){
 
 #if defined CLMSA
