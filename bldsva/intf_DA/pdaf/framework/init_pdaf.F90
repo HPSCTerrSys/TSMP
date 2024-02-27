@@ -365,17 +365,17 @@ SUBROUTINE init_pdaf()
      CALL abort_parallel()
   END IF
 
-! *** Switch off debug output ***
-#ifdef PDAF_DEBUG
-  CALL PDAF_set_debug_flag(0)
-#endif
-
 ! ******************************'***
 ! *** Prepare ensemble forecasts ***
 ! ******************************'***
 
   CALL PDAF_get_state(steps, timenow, doexit, next_observation_pdaf, &
        distribute_state_pdaf, prepoststep_ens_pdaf, status_pdaf)
+
+! *** Switch off debug output ***
+#ifdef PDAF_DEBUG
+  CALL PDAF_set_debug_flag(0)
+#endif
 
   if (mype_world == 0 .and. screen > 2) then
     print *, "TSMP-PDAF INITIALIZE PDAF FINISHED"
