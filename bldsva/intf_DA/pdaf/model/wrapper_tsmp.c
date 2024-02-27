@@ -26,10 +26,6 @@ wrapper_tsmp.c: Wrapper functions for TSMP
 
 #include "enkf.h"
 
-#if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
-#include "enkf_parflow.h"
-#endif
-
 #include "wrapper_tsmp.h"
 
 /*-------------------------------------------------------------------------*/
