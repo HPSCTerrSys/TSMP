@@ -922,6 +922,8 @@ void enkfparflowfinalize() {
 	FreeLogging();
 	FreeTiming();
 	FreeGlobals();
+
+	/* AMPS Finalize */
 	amps_Finalize();
 }
 
