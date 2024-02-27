@@ -55,9 +55,6 @@ void read_enkfpar(char *parname)
   nprocpf               = iniparser_getint(pardict,"PF:nprocs",0);
   t_start               = iniparser_getdouble(pardict,"PF:starttime",0);
   t_sim                 = iniparser_getdouble(pardict,"PF:simtime",0);
-  if (t_sim == 0){		/* Backward compatibility for PF:endtime */
-    t_sim                 = iniparser_getdouble(pardict,"PF:endtime",0);
-  }
   dt                    = iniparser_getdouble(pardict,"PF:dt",0);
   pf_updateflag         = iniparser_getint(pardict,"PF:updateflag",1);
   pf_paramupdate        = iniparser_getint(pardict,"PF:paramupdate",0);
@@ -77,17 +74,26 @@ void read_enkfpar(char *parname)
   pf_dampfac_state      = iniparser_getdouble(pardict,"PF:dampingfactor_state",1.0);
   pf_dampswitch_sm        = iniparser_getdouble(pardict,"PF:damping_switch_sm",0);
   pf_freq_paramupdate   = iniparser_getint(pardict,"PF:paramupdate_frequency",1);
+
+  /* Backward compatibility inputs for ParFlow */
+  if (t_sim == 0){
+    t_sim                 = iniparser_getdouble(pardict,"PF:endtime",0);
+  }
   
   /* get settings for CLM */
   string                = iniparser_getstring(pardict,"CLM:problemname", "");
   strcpy(clminfile,string);
   nprocclm              = iniparser_getint(pardict,"CLM:nprocs",0);
   clmupdate_swc         = iniparser_getint(pardict,"CLM:update_swc",1);
-  clmupdate_T         = iniparser_getint(pardict,"CLM:update_T",0);
+  clmupdate_T           = iniparser_getint(pardict,"CLM:update_T",0);
   clmupdate_texture     = iniparser_getint(pardict,"CLM:update_texture",0);
   clmprint_swc          = iniparser_getint(pardict,"CLM:print_swc",0);
   clmprint_et           = iniparser_getint(pardict,"CLM:print_et",0);
  
+  /* get settings for COSMO */
+  nproccosmo      = iniparser_getint(pardict,"COSMO:nprocs",0);
+  dtmult_cosmo    = iniparser_getint(pardict,"COSMO:dtmult",0);
+
   /* get settings for data assimilation */
   string                = iniparser_getstring(pardict,"DA:outdir","");
   strcpy(outdir,string);
@@ -117,10 +123,6 @@ void read_enkfpar(char *parname)
       exit(1);
     }
   }
-
-  /* get settings for COSMO */
-  nproccosmo      = iniparser_getint(pardict,"COSMO:nprocs",0);
-  dtmult_cosmo    = iniparser_getint(pardict,"COSMO:dtmult",0);
 
 
   /* MPI_Comm_size(MPI_COMM_WORLD,&size); */
