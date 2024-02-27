@@ -114,7 +114,7 @@ void read_enkfpar(char *parname)
   }
 
   /* Check: `point_obs` must be equal to either 0 or 1 */
-  if (point_obs != 0 && point_obs 1= 1){
+  if (point_obs != 0 && point_obs != 1){
     printf("point_obs=%d\n", point_obs);
     printf("Error: point_obs must be equal to either 0 or 1.\n");
     exit(1);
