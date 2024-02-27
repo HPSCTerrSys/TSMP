@@ -25,18 +25,10 @@ read_enkfpar.c: Function for reading controle file of TSMP-PDAF
 #include "enkf.h"
 #include "iniparser.h"
 
-int countDigit(int n)
-{
-	if (n == 0)
-		return -1;
-	return 1 + countDigit(n / 10);
-}
-
 void read_enkfpar(char *parname)
 {
   char *string;
   dictionary *pardict;
-  int len;
 
   /* int rank,size; */
   /* int subrank; */
@@ -104,9 +96,6 @@ void read_enkfpar(char *parname)
   screen_wrapper        = iniparser_getint(pardict,"DA:screen_wrapper",1);
   point_obs             = iniparser_getint(pardict,"DA:point_obs",1);
   obs_interp_switch     = iniparser_getint(pardict,"DA:obs_interp_switch",0);
-  len = countDigit(point_obs);
-  if (len > 1)
-    point_obs=1;
   total_steps = (int) (t_sim/da_interval);
   tstartcycle = (int) (t_start/da_interval);
 
@@ -139,6 +128,11 @@ void read_enkfpar(char *parname)
     /* printf("DBG: size, npes_world = %d, %d\n",size,npes_world); */
     /* printf("DBG: rank, mype_world = %d, %d\n",rank,mype_world); */
     /* printf("DBG: mype_model, npes_model = %d, %d\n",mype_model,npes_model); */
+  /* Check: `point_obs` must be equal to either 0 or 1 */
+  if (point_obs != 0 && point_obs 1= 1){
+    printf("point_obs=%d\n", point_obs);
+    printf("Error: point_obs must be equal to either 0 or 1.\n");
+    exit(1);
   }
 
   /* MPI-consistency check for nproc inputs */
