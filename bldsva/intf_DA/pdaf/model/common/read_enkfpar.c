@@ -67,7 +67,7 @@ void read_enkfpar(char *parname)
   pf_dampswitch_sm        = iniparser_getdouble(pardict,"PF:damping_switch_sm",0);
   pf_freq_paramupdate   = iniparser_getint(pardict,"PF:paramupdate_frequency",1);
 
-  /* Backward compatibility inputs for ParFlow */
+  /* backward compatibility settings for ParFlow */
   if (t_sim == 0){
     t_sim                 = iniparser_getdouble(pardict,"PF:endtime",0);
   }
@@ -135,13 +135,12 @@ void read_enkfpar(char *parname)
     exit(1);
   }
 
-  /* MPI-consistency check for nproc inputs */
   /* Check: `npes_model = nprocpf + nprocclm + npproccosmo */
   if (nprocpf + nprocclm + nproccosmo != npes_model){
-    printf("nprocpf=%f\n", nprocpf);
-    printf("nprocclm=%f\n", nprocclm);
-    printf("nproccosmo=%f\n", nproccosmo);
-    printf("npes_model=%f\n", npes_model);
+    printf("nprocpf=%d\n", nprocpf);
+    printf("nprocclm=%d\n", nprocclm);
+    printf("nproccosmo=%d\n", nproccosmo);
+    printf("npes_model=%d\n", npes_model);
     printf("Error:  nprocpf + nprocclm + npproccosmo must be equal to npes_model.\n");
     exit(1);
   }
@@ -196,9 +195,4 @@ void read_enkfpar(char *parname)
     }
   }
 
-  /* Set variables from input */
-
-
-  //printf("ParFlow update flag: %d\n",pf_updateflag);
-  //printf("ParFlow parameter update flag: %d\n",pf_paramupdate);
 }
