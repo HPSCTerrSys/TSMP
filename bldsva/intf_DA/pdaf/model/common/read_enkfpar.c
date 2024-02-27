@@ -30,8 +30,6 @@ void read_enkfpar(char *parname)
   char *string;
   dictionary *pardict;
 
-  /* int rank,size; */
-  /* int subrank; */
   int coupcol;
  
   /* initialize dictionary */
@@ -132,18 +130,8 @@ void read_enkfpar(char *parname)
     exit(1);
   }
 
-  /* CLM, ParFlow, COSMO */
-  /* assign model number (0=clm, 1=parflow, 2=cosmo) */
-  if (mype_model < nprocclm) {
-    model = 0;
-  }
-  else if(mype_model < (nprocclm+nprocpf)){
-    model = 1;
-  }
-  else{
-    model = 2;
-  }
-  /* ParFlow, CLM, COSMO */
+  /* Assign model specifier (0=clm, 1=parflow, 2=cosmo) */
+  /* Order: ParFlow, CLM, COSMO */
   if (mype_model < nprocpf) {
     model = 1;
   }
