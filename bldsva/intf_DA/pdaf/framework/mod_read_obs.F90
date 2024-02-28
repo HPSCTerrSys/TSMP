@@ -23,7 +23,9 @@
 !-------------------------------------------------------------------------------------------
 
 module mod_read_obs
-  use iso_C_binding
+ use mod_parallel_model, only: tcycle
+
+ use iso_C_binding
 
   implicit none
   integer, allocatable :: idx_obs_nc(:), x_idx_obs_nc(:), y_idx_obs_nc(:), z_idx_obs_nc(:), var_id_obs_nc(:,:)
@@ -286,7 +288,7 @@ contains
 
         call check(nf90_get_var(ncid, clmobs_varid, clm_obs))
         if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": clm_obs=", clm_obs
+            print *, "TSMP-PDAF mype(w)=", mype_world, ": clm_obs=", clm_obs, "at time", tcycle 
         end if
 
         !check, if observation errors are present in observation file

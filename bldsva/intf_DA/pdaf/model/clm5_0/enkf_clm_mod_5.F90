@@ -79,7 +79,6 @@ module enkf_clm_mod
 
 
     call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
-    !write(*,*) "----",begg,",",endg,",",begl,",",endl,",",begc,",",endc,",",begp,",",endp," -------"
     clm_begg     = begg
     clm_endg     = endg
     clm_begc     = begc
@@ -109,6 +108,12 @@ module enkf_clm_mod
         clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
         clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
     endif
+    ! Case 2: Assimilation of snow water equivalent same as above
+    if(clmupdate_snow.eq.2) then
+        clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
+        clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
+    endif
+
 
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     allocate(clm_statevec(clm_statevecsize))
@@ -132,6 +137,7 @@ module enkf_clm_mod
     real(r8), pointer :: porgm(:,:)
 
     real(r8), pointer :: snow_depth(:)
+    real(r8), pointer :: h2osno(:)
 
     integer :: i,j,jj,g,cc=1,offset=0
 
@@ -141,6 +147,7 @@ module enkf_clm_mod
     porgm => soilstate_inst%cellorg_col
 
     snow_depth => waterstate_inst%snow_depth_col ! snow height of snow covered area (m) 
+    h2osno     => waterstate_inst%h2osno_col     ! snow water equivalent (mm)
 
     if(clmupdate_swc.ne.0) then
         ! write swc values to state vector
@@ -231,6 +238,25 @@ module enkf_clm_mod
         cc = cc + 1
         end do
     endif
+    ! Case 2: SWE
+    if(clmupdate_snow.eq.2) then
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! Only get the SWE from the first column of each gridcell
+        ! and add it to the clm_statevec at the position of the gridcell (cc)
+        newgridcell = .true.
+        do jj=clm_begc,clm_endc
+          g = col%gridcell(jj)
+          if (g .eq. j) then
+            if (newgridcell) then
+              newgridcell = .false.
+              clm_statevec(cc+offset) = h2osno(jj)
+            endif
+          endif
+        end do
+        cc = cc + 1
+        end do
+    endif
 
   end subroutine 
 
@@ -256,9 +282,12 @@ module enkf_clm_mod
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
-    real(r8)  :: rliq,rice
+
+    real(r8)  :: rliq,rice,incr_h2osno
     real(r8) :: rsnow(clm_statevecsize)
     integer :: i,j,jj,g,cc=1,offset=0
+
+    integer, pointer :: snlsno(:)
 
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
@@ -272,6 +301,8 @@ module enkf_clm_mod
     dz            => col%dz
     h2osoi_liq    => waterstate_inst%h2osoi_liq_col
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
+
+    snlsno     => col%snl                        ! number of snow layers (negative)
 
     call update_DA_nstep()
 
@@ -385,11 +416,17 @@ module enkf_clm_mod
               else
                 rsnow(jj) = h2osno(jj)
                 h2osno(jj)   = clm_statevec(cc+offset)
+                if ( clmupdate_snow_repartitioning.eq.3) then
+                  incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
+                    do i=snlsno(jj)+1,0
+                      h2osoi_ice(jj,i) = h2osoi_ice(jj,i) * incr_h2osno
+                    end do
+                end if
               endif
           end do
         cc = cc + 1
         end do
-        if ( clmupdate_snow_repartitioning.ne.0) then
+        if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
           if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
             call clm_repartition_snow(rsnow(:))
           end if
@@ -417,11 +454,12 @@ module enkf_clm_mod
     real(r8), pointer :: snowdp(:)
     integer, pointer :: snlsno(:)
 
-    real(r8) :: dzsno(clm_begc:clm_endc,nlevsno)
+    real(r8) :: dzsno(clm_begc:clm_endc,-nlevsno+1:0)
     real(r8) :: h2osno_po(clm_begc:clm_endc)
     real(r8) :: h2osno_pr(clm_begc:clm_endc)
     real(r8) :: snowden, frac_swe, frac_liq, frac_ice
-    real(r8) :: gain_h2osno, gain_h2oliq, gain_h2oice, gain_dzsno
+    real(r8) :: gain_h2osno, gain_h2oliq, gain_h2oice
+    real(r8) :: gain_dzsno(-nlevsno+1:0)
     real(r8) :: rho_avg, z_avg
     integer :: i,ii,j,jj,g,cc=1,offset=0
 
@@ -436,7 +474,6 @@ module enkf_clm_mod
     frac_sno   => waterstate_inst%frac_sno_eff_col ! fraction of ground covered by snow 
     ! dz for snow layers is defined like in the history output as col%dz for the snow layers
     dzsno(clm_begc:clm_endc, -nlevsno+1:0) = col%dz(clm_begc:clm_endc,-nlevsno+1:0)
-
     ! Iterate through all columns
     do jj=clm_begc,clm_endc
       if (h2osno(jj).lt.0.0) then ! No snow in column
@@ -476,7 +513,7 @@ module enkf_clm_mod
           end if
 
           do ii=0,snlsno(jj)+1,-1 ! iterate through the snow layers
-            ! ii = nlevsoi - i + 1            ! DART VERSION: ii = nlevsoi - i + 1
+            ! DART VERSION: ii = nlevsoi - i + 1
             ! snow density prior for each layer
             if (dzsno(jj,ii).gt.0.0_r8) then
               snowden = (h2oliq(jj,ii) + h2oice(jj,ii) / dzsno(jj,ii))
@@ -522,9 +559,9 @@ module enkf_clm_mod
             end if
             ! layer level adjustments
             if (snowden.gt.0.0_r8) then
-              gain_dzsno = gain_h2osno / snowden
+              gain_dzsno(ii) = gain_h2osno / snowden
             else
-              gain_dzsno = 0.0_r8
+              gain_dzsno(ii) = 0.0_r8
             end if
             h2oliq(jj,ii) = h2oliq(jj,ii) + gain_h2oliq
             h2oice(jj,ii) = h2oice(jj,ii) + gain_h2oice
@@ -534,7 +571,7 @@ module enkf_clm_mod
             ! i.e. calculated / assigned from frac_sno and dz(:, snow_layer) in SnowHydrologyMod
             ! therefore we adjust dz(:, snow_layer) here
             if (abs(h2osno_po(jj) - h2osno_pr(jj)).gt.0.0_r8) then
-              col%dz(jj, ii) = col%dz(jj, ii) + gain_dzsno
+              col%dz(jj, ii) = col%dz(jj, ii) + gain_dzsno(ii)
               ! mid point and interface adjustments
               ! i.e. zsno (col%z(:, snow_layers)) and zisno (col%zi(:, snow_layers))
               ! DART version the sum goes from ilevel:nlevsno to fit with our indexing:
@@ -558,10 +595,9 @@ module enkf_clm_mod
         else if (clmupdate_snow .eq. 2) then
           ! Update the total snow depth to match udpates to layers for active snow layers
           if (abs(h2osno_po(jj) - h2osno_pr(jj)) .gt. 0.0_r8 .and. snlsno(jj) < 0.0_r8) then
-            snow_depth(jj) = sum(col%dz(jj, snlsno(jj)+1:0))
+            snow_depth(jj) = snow_depth(jj) + sum(gain_dzsno(-nlevsno+1:0))
           end if
         end if
-
       end if ! End of snow present check
     end do ! End of column iteration
 
