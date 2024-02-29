@@ -1,0 +1,12 @@
+--- data_runcontrol.f90	2022-02-25 23:46:29.190612015 +0100
++++ data_runcontrol.f90	2022-02-26 00:14:34.568417742 +0100
+@@ -422,6 +422,9 @@
+                     ! calulations
+     lnonloc,      & ! nonlocal calculation of vertical gradients used
+                     ! for turbulent diffusion (only if itype_turb=3)
++#ifdef tkvfilter
++    ltkvfilter,   & ! vertical filtering of tkvh/tkvm 
++#endif
+     lcpfluc,      & ! consideration of fluctuations of the heat capacity of air
+     lco2_stab,    & ! enable CO2 stabilisation
+     lradtopo        ! if .TRUE., calculate topographic correction of radiation

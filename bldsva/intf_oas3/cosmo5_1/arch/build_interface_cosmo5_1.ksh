@@ -17,7 +17,8 @@ check
     cplFlag="-DCOUP_OAS_COS " 
   fi
   if [[ $cplscheme == "true" ]] ; then ; cplFlag+=" -DCPL_SCHEME_F " ; fi
-  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi 
+  if [[ $readCLM == "true" ]] ; then ; cplFlag+=" -DREADCLM " ; fi
+  addFlag="-Dtkvfilter " 
   file=$cosdir/Fopts 
 comment "   sed ldflg to cos Makefile"
   sed -i "s@__ldflg__@@" $file >> $log_file 2>> $err_file
@@ -31,7 +32,7 @@ check
      fi
      check
      comment "   sed comflg to cos Makefile"
-     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -cpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag $addFlag -DHYMACS@" $file >> $log_file 2>> $err_file
      check
   else
      comment "   sed comF90 based on Intel compiler to cos Makefile"
@@ -42,7 +43,7 @@ check
      fi
      check
      comment "   sed comflg to cos Makefile"
-     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -fpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag -DHYMACS@" $file >> $log_file 2>> $err_file
+     sed -i "s@__comflg__@$optComp -I$ncdfPath/include -I$gribPath/include $cplInc -fpp -DGRIBAPI -DNETCDF -D__COSMO__ $cplFlag $addFlag -DHYMACS@" $file >> $log_file 2>> $err_file
      check
   fi
 comment "   sed ld to cos Makefile"

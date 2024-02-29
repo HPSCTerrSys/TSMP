@@ -269,6 +269,12 @@ route "${cyellow}>>> c_substitutions_cos${cnormal}"
     #    patch -d $cosdir/src -i patch_src_twomom_sb_interface.f90.diff  -o src_twomom_sb_interface1.f90
     #    cp $cosdir/src/src_twomom_sb_interface1.f90 $cosdir/src/src_twomom_sb_interface.f90
     #  check
+     /usr/bin/patch -d $cosdir/src -i patch_turbulence_diff.f90.diff -o turbulence_diff1.f90
+      cp $cosdir/src/turbulence_diff1.f90 $cosdir/src/turbulence_diff.f90
+     check
+     /usr/bin/patch -d $cosdir/src -i patch_data_runcontrol.f90.diff -o data_runcontrol1.f90
+      cp $cosdir/src/data_runcontrol1.f90 $cosdir/src/data_runcontrol.f90
+     check
 
       rm -rf $cosdir/src/*1.f90
       rm -rf $cosdir/src/*1.incf

@@ -1,6 +1,16 @@
----  organize_physics.f90	2014-11-28 12:18:36.000000000 +0100
-+++  organize_physics.f90	2019-12-04 12:52:07.095665000 +0100
-@@ -274,6 +274,12 @@
+--- organize_physics.f90	2021-12-07 10:31:02.863971783 +0100
++++ organize_physics.f90	2022-02-26 00:51:17.151609754 +0100
+@@ -246,6 +246,9 @@
+        imode_tran, imode_turb, icldm_rad, icldm_tran, icldm_turb, nstart,    &
+        ntstep, l2tls, ltime, nold, nnow, nnew, nuspecif,                     &
+        lexpcor, lnonloc, lcpfluc, lconf_avg, lcape, lctke, ltmpcor, lprfcor, &
++#ifdef tkvfilter
++       ltkvfilter,                                                           &
++#endif
+        itype_trvg, itype_evsl, nlgw, nbl_exchg, l3dturb,                     &
+        lprog_tke, lconv_inst, lforest, luse_rttov, ntke, lseaice, llake,     &
+        ico2_rad, ibot_w_so, czbot_w_so, l3dturb_metr, idbg_level,            &
+@@ -274,6 +277,12 @@
  USE data_io,            ONLY:  ydate_ini, lbdclim, lana_qi, llb_qi, lana_qg, &
                                 llb_qg, lana_qr_qs, llb_qr_qs
  
@@ -13,7 +23,7 @@
  USE data_tracer,        ONLY:  T_ADV_OFF , T_ADV_ON  , T_DIFF_OFF, T_DIFF_ON, &
                                 T_TURB_OFF, T_TURB_1D , T_CONV_OFF, T_CONV_ON, &
                                 T_INI_ZERO, T_INI_FILE, T_LBC_ZERO, T_LBC_FILE,&
-@@ -1196,7 +1202,12 @@
+@@ -1196,7 +1205,12 @@
    ! Determine if all the satads should be done
    ! (like for the 1-moment schemes), not just the
    ! satad after the microphysics at the end of the timestep:
@@ -27,7 +37,7 @@
  
    ! However, l2mom_do_extra_satads = .TRUE. can only be used
    ! for itype_gscp = ??[6-9]? (e.g., 2767, but not 2737),
-@@ -1418,6 +1429,10 @@
+@@ -1418,6 +1432,10 @@
    !----------------------------------------------------------------------------
  
    IF (lsoil) THEN
@@ -38,7 +48,7 @@
      IF (lmulti_layer) THEN
        IF (izdebug > 5) THEN
          PRINT *, '      MULTI LAYER SOIL MODEL'
-@@ -1436,6 +1451,7 @@
+@@ -1436,6 +1454,7 @@
        yerrmsg = yzerror
        RETURN
      ENDIF
@@ -46,7 +56,7 @@
  
      IF (lseaice) THEN
        IF (izdebug > 5) THEN
-@@ -1513,6 +1529,9 @@
+@@ -1513,6 +1532,9 @@
    !----------------------------------------------------------------------------
  
    IF (lsoil) THEN
@@ -56,7 +66,7 @@
      IF (.NOT. lmulti_layer) THEN
        IF (izdebug > 5) THEN
          PRINT *, '      TWO LAYER SOIL MODEL; 2nd part'
-@@ -1520,6 +1539,8 @@
+@@ -1520,6 +1542,8 @@
  
        CALL terra2
      ENDIF
@@ -65,7 +75,7 @@
      IF (ltime) CALL get_timings (i_soil_model, ntstep, dt, izerror)
    ENDIF
  
-@@ -1570,6 +1591,18 @@
+@@ -1570,6 +1594,18 @@
            tkvm(:,:,:), tkvh(:,:,:), qrs(:,:,:), t_g(:,:,nx), qv_s(:,:,nx),   &
            tcm(:,:), tch(:,:))
      ELSE
@@ -84,7 +94,7 @@
        kzdims(1:24)=(/ke1,ke1,ke,ke,ke,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0/)
        CALL exchg_boundaries                                                  &
           (nx+10,  sendbuf, isendbuflen, imp_reals, icomm_cart, num_compute,  &
-@@ -1578,6 +1611,7 @@
+@@ -1578,6 +1614,7 @@
            10000+nexch_tag, ldatatypes, ncomm_type, izerror, yerrmsg,         &
            tkvm(:,:,:), tkvh(:,:,:), qrs(:,:,:), ut_conv(:,:,:),              &
            vt_conv(:,:,:), t_g(:,:,nx), qv_s(:,:,nx), tcm(:,:), tch(:,:))
@@ -92,3 +102,74 @@
      ENDIF
    ENDIF
  
+@@ -1973,6 +2010,9 @@
+                     ! the mean value of the lowest layer for surface flux calulations
+     lnonloc_d,    & ! nonlocal calculation of vertical gradients used
+                     ! for turbulent diffusion (only if itype_turb=3)
++#ifdef tkvfilter
++    ltkvfilter_d, & ! vertical filtering of tkvh/tkvm 
++#endif
+     lcpfluc_d,    & ! consideration of fluctuations of the heat capacity of air
+     lconf_avg_d,  & ! average convective forcings in case of massflux closure
+     lradf_avg_d,  & ! average radiative forcings when running on coarser grid
+@@ -1992,6 +2032,9 @@
+   NAMELIST /phyctl/ lrad, ltur, lconv, itype_conv, lgsp, lsuper_coolw,        &
+                     lsoil, lmelt, lmelt_var, lmulti_layer, lexpcor,           &
+                     ltmpcor, lprfcor, lnonloc, lcpfluc,lcape,lctke, lconf_avg,&
++#ifdef tkvfilter
++                    ltkvfilter,                                               &
++#endif
+                     nincrad, hincrad, ninctura, nincconv,                     &
+                     ldiniprec, itype_trvg, itype_evsl,                        &
+                     itype_gscp, itype_wcld, itype_tran, itype_turb,itype_synd,&
+@@ -2053,6 +2096,9 @@
+   ltmpcor_d      = .FALSE.
+   lprfcor_d      = .FALSE.
+   lnonloc_d      = .FALSE.
++#ifdef tkvfilter
++  ltkvfilter_d   = .FALSE.
++#endif
+   lcpfluc_d      = .FALSE.
+   lconf_avg_d    = .TRUE. 
+   lradf_avg_d    = .FALSE.
+@@ -2153,6 +2199,9 @@
+   ltmpcor        = ltmpcor_d
+   lprfcor        = lprfcor_d
+   lnonloc        = lnonloc_d
++#ifdef tkvfilter
++  ltkvfilter     = ltkvfilter_d
++#endif
+   lcpfluc        = lcpfluc_d
+   lconf_avg      = lconf_avg_d
+   lradf_avg      = lradf_avg_d
+@@ -2716,6 +2765,9 @@
+     logbuf (34) = lco2_stab
+     logbuf (35) = l_2mom
+     logbuf (36) = lsuper_coolw
++#ifdef tkvfilter
++    logbuf (37) = ltkvfilter
++#endif
+ 
+     realbuf( 1) = czbot_w_so
+     realbuf( 2) = hincrad
+@@ -2815,6 +2867,9 @@
+     lco2_stab    = logbuf (34)
+     l_2mom       = logbuf (35)
+     lsuper_coolw = logbuf (36)
++#ifdef tkvfilter
++    ltkvfilter   = logbuf (37)
++#endif
+ 
+     czbot_w_so   = realbuf( 1)
+     hincrad      = realbuf( 2)
+@@ -2952,6 +3007,10 @@
+                                            'lprfcor',lprfcor,lprfcor_d,' L '
+   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
+                                            'lnonloc',lnonloc,lnonloc_d,' L '
++#ifdef tkvfilter
++  WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
++                                  'ltkvfilter',ltkvfilter,ltkvfilter_d,' L '
++#endif
+   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
+                                            'lcpfluc',lcpfluc,lcpfluc_d,' L '
+   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &

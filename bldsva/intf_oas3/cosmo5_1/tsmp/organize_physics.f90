@@ -246,6 +246,9 @@ USE data_runcontrol,    ONLY:                                                &
        imode_tran, imode_turb, icldm_rad, icldm_tran, icldm_turb, nstart,    &
        ntstep, l2tls, ltime, nold, nnow, nnew, nuspecif,                     &
        lexpcor, lnonloc, lcpfluc, lconf_avg, lcape, lctke, ltmpcor, lprfcor, &
+#ifdef tkvfilter
+       ltkvfilter,                                                           &
+#endif
        itype_trvg, itype_evsl, nlgw, nbl_exchg, l3dturb,                     &
        lprog_tke, lconv_inst, lforest, luse_rttov, ntke, lseaice, llake,     &
        ico2_rad, ibot_w_so, czbot_w_so, l3dturb_metr, idbg_level,            &
@@ -2007,6 +2010,9 @@ SUBROUTINE input_phyctl (nuspecif, nuin, ierrstat)
                     ! the mean value of the lowest layer for surface flux calulations
     lnonloc_d,    & ! nonlocal calculation of vertical gradients used
                     ! for turbulent diffusion (only if itype_turb=3)
+#ifdef tkvfilter
+    ltkvfilter_d, & ! vertical filtering of tkvh/tkvm 
+#endif
     lcpfluc_d,    & ! consideration of fluctuations of the heat capacity of air
     lconf_avg_d,  & ! average convective forcings in case of massflux closure
     lradf_avg_d,  & ! average radiative forcings when running on coarser grid
@@ -2026,6 +2032,9 @@ SUBROUTINE input_phyctl (nuspecif, nuin, ierrstat)
   NAMELIST /phyctl/ lrad, ltur, lconv, itype_conv, lgsp, lsuper_coolw,        &
                     lsoil, lmelt, lmelt_var, lmulti_layer, lexpcor,           &
                     ltmpcor, lprfcor, lnonloc, lcpfluc,lcape,lctke, lconf_avg,&
+#ifdef tkvfilter
+                    ltkvfilter,                                               &
+#endif
                     nincrad, hincrad, ninctura, nincconv,                     &
                     ldiniprec, itype_trvg, itype_evsl,                        &
                     itype_gscp, itype_wcld, itype_tran, itype_turb,itype_synd,&
@@ -2087,6 +2096,9 @@ IF (my_world_id == 0) THEN
   ltmpcor_d      = .FALSE.
   lprfcor_d      = .FALSE.
   lnonloc_d      = .FALSE.
+#ifdef tkvfilter
+  ltkvfilter_d   = .FALSE.
+#endif
   lcpfluc_d      = .FALSE.
   lconf_avg_d    = .TRUE. 
   lradf_avg_d    = .FALSE.
@@ -2187,6 +2199,9 @@ IF (my_world_id == 0) THEN
   ltmpcor        = ltmpcor_d
   lprfcor        = lprfcor_d
   lnonloc        = lnonloc_d
+#ifdef tkvfilter
+  ltkvfilter     = ltkvfilter_d
+#endif
   lcpfluc        = lcpfluc_d
   lconf_avg      = lconf_avg_d
   lradf_avg      = lradf_avg_d
@@ -2750,6 +2765,9 @@ IF (nproc > 1) THEN
     logbuf (34) = lco2_stab
     logbuf (35) = l_2mom
     logbuf (36) = lsuper_coolw
+#ifdef tkvfilter
+    logbuf (37) = ltkvfilter
+#endif
 
     realbuf( 1) = czbot_w_so
     realbuf( 2) = hincrad
@@ -2849,6 +2867,9 @@ IF (nproc > 1) THEN
     lco2_stab    = logbuf (34)
     l_2mom       = logbuf (35)
     lsuper_coolw = logbuf (36)
+#ifdef tkvfilter
+    ltkvfilter   = logbuf (37)
+#endif
 
     czbot_w_so   = realbuf( 1)
     hincrad      = realbuf( 2)
@@ -2986,6 +3007,10 @@ IF (my_world_id == 0) THEN
                                            'lprfcor',lprfcor,lprfcor_d,' L '
   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
                                            'lnonloc',lnonloc,lnonloc_d,' L '
+#ifdef tkvfilter
+  WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
+                                  'ltkvfilter',ltkvfilter,ltkvfilter_d,' L '
+#endif
   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &
                                            'lcpfluc',lcpfluc,lcpfluc_d,' L '
   WRITE (nuspecif, '(T8,A,T33,L12  ,T52,L12  ,T71,A3)')                      &

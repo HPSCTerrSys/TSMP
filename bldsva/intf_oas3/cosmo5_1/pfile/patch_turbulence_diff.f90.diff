@@ -1,0 +1,56 @@
+--- turbulence_diff.f90	2021-12-07 10:31:02.856971961 +0100
++++ turbulence_diff.f90	2022-03-04 13:14:15.262444512 +0100
+@@ -164,6 +164,9 @@
+     icldm_tran, icldm_turb, itype_turb, imode_turb, itype_tran, itype_wcld,  &
+     itype_sher,                                                              &
+     ltmpcor, lexpcor, lnonloc, lcpfluc, limpltkediff, l3dturb,               &
++#ifdef tkvfilter
++    ltkvfilter,                                                              &
++#endif
+     ! but only for __COSMO__
+     ntstep, lperi_x, lperi_y, l2dim, lscm
+ 
+@@ -728,6 +731,10 @@
+ 
+            hlp (ie,je,ke1), &
+            hlp2(ie,je,ke1), &
++#ifdef tkvfilter
++           tkvm_filter(ie,je,ke1), &
++           tkvh_filter(ie,je,ke1), &
++#endif
+ 
+ !     Flusskonversionsmatrix, um von den turb. Flussdichten der 2
+ !     scalaren Erhaltungsgroessen (bzgl. feuchtadiab. vert. Verrueck.)
+@@ -2434,6 +2441,32 @@
+          
+          END IF 
+ 
++#ifdef tkvfilter
++! SPo: vertical filtering for diffusion coefficients
++         IF (ltkvfilter) THEN
++            DO k=2,ke
++               IF (k==2 .OR. k==ke) THEN
++
++                  tkvh_filter(:,:,k) = 0.5*tkvh(:,:,k) + 0.25*(tkvh(:,:,k-1)+tkvh(:,:,k+1))
++                  tkvm_filter(:,:,k) = 0.5*tkvm(:,:,k) + 0.25*(tkvm(:,:,k-1)+tkvm(:,:,k+1))
++
++               ELSE
++
++                  tkvh_filter(:,:,k) = 0.5*tkvh(:,:,k) + 0.2*(tkvh(:,:,k-1)+tkvh(:,:,k+1)) + 0.05*(tkvh(:,:,k-2)+tkvh(:,:,k+2))
++                  tkvm_filter(:,:,k) = 0.5*tkvm(:,:,k) + 0.2*(tkvm(:,:,k-1)+tkvm(:,:,k+1)) + 0.05*(tkvm(:,:,k-2)+tkvm(:,:,k+2))
++
++               END IF
++            END DO
++
++! no filter of lowermost layer to persits energy/mass conservation
++!             tkvh_filter(:,:,ke1) = 0.9*tkvh(:,:,ke1) + 0.1*tkvh(:,:,ke)
++!             tkvm_filter(:,:,ke1) = 0.9*tkvm(:,:,ke1) + 0.1*tkvm(:,:,ke)
++
++            ! overwrite unfiltered with filtered values
++            tkvh(:,:,2:ke) = tkvh_filter(:,:,2:ke)
++            tkvm(:,:,2:ke) = tkvm_filter(:,:,2:ke)
++         END IF
++#endif
+ 
+ ! 6)  Berechnung der zu TKE-Quellen gehoerigen Temperatur-
+ !     tendenzen ausser der Divergenz des Drucktransportes:
