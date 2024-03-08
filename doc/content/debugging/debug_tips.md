@@ -55,7 +55,18 @@ In `namcouple`, change the input `$NLOGPRT` to get more debug
 output. More information:
 <https://cerfacs.fr/oa4web/oasis3-mct_5.0/oasis3mct_UserGuide/node39.html>
 
-## Debug Tip 4: Debugging PDAF
+## Debug Tip 4: Debugging CLM (3.5)
+
+In `lnd.stdin`, change the input `wrtdia` to `.true.`.
+
+```
+If true, global average 2-m temperature written to standard out (ascii log file of the run) (see ex. 4). 
+```
+
+More information:
+<https://www2.cgd.ucar.edu/tss/clm/distribution/clm3.0/UsersGuide/UsersGuide/node6.html>
+
+## Debug Tip 5: Debugging PDAF
 
 ### PDAF Debugging Information
 
