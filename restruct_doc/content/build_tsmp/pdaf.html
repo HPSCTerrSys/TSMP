@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structure of PDAF inside TSMP &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="TSMP-PDAF Environment variables" href="build_environment_variables.html" />
+    <link rel="prev" title="Structure of DA inside TSMP" href="intf_da.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structure of PDAF inside TSMP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build_environment_variables.html">TSMP-PDAF Environment variables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#call-graph-for-tsmp-pdaf">Call Graph for TSMP-PDAF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#important-functions-of-tsmp-pdaf">Important Functions of TSMP-PDAF</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pdaf-terrsysmp-main-program"><code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp</span></code> (main program)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#initialize-tsmp"><code class="docutils literal notranslate"><span class="pre">initialize_tsmp()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#list-of-interesting-variables-of-tsmp-pdaf">List of interesting variables of TSMP-PDAF</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#model-communicators">Model Communicators</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Structure of PDAF inside TSMP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/content/build_tsmp/pdaf.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="structure-of-pdaf-inside-tsmp">
+<h1>Structure of PDAF inside TSMP<a class="headerlink" href="#structure-of-pdaf-inside-tsmp" title="Permalink to this heading"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build_environment_variables.html">TSMP-PDAF Environment variables</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="build_environment_variables.html#clmsa">CLMSA</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build_environment_variables.html#parflow-stand-alone">PARFLOW_STAND_ALONE</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build_environment_variables.html#obs-only-parflow">OBS_ONLY_PARFLOW</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build_environment_variables.html#obs-only-clm">OBS_ONLY_CLM</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="call-graph-for-tsmp-pdaf">
+<h2>Call Graph for TSMP-PDAF<a class="headerlink" href="#call-graph-for-tsmp-pdaf" title="Permalink to this heading"></a></h2>
+<p>Here is an exemplary call-graph from TSMP-PDAF’s main program
+<code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp()</span></code> inside <code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp.F90</span></code> up to the function,
+where the enkf update is carried out:
+<code class="docutils literal notranslate"><span class="pre">PDAF_enkf_analysis_rlm</span></code>/<code class="docutils literal notranslate"><span class="pre">PDAF_enkf_analysis_rsm</span></code>.</p>
+<p>Inside TSMP, <code class="docutils literal notranslate"><span class="pre">TSMP/bldsva/intf_DA/pdaf1_1/framework</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>pdaf_terrsysmp.F90: pdaf_terrsysmp
+-&gt; assimilate_pdaf.F90: assimilate_pdaf
+-&gt; PDAF_assimilate_enkf
+</pre></div>
+</div>
+<p>Inside PDAF, <code class="docutils literal notranslate"><span class="pre">pdaf1_1/src/</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>PDAF-D_assimilate_enkf.F90: PDAF_assimilate_enkf
+-&gt; PDAF-D_put_state_enkf.F90: PDAF_put_state_enkf
+-&gt; PDAF-D_enkf_update.F90: PDAF_enkf_update
+
+-&gt; PDAF-D_enkf_analysis_rlm.F90: PDAF_enkf_analysis_rlm
+or
+-&gt; PDAF-D_enkf_analysis_rsm.F90: PDAF_enkf_analysis_rsm
+</pre></div>
+</div>
+</section>
+<section id="important-functions-of-tsmp-pdaf">
+<h2>Important Functions of TSMP-PDAF<a class="headerlink" href="#important-functions-of-tsmp-pdaf" title="Permalink to this heading"></a></h2>
+<section id="pdaf-terrsysmp-main-program">
+<h3><code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp</span></code> (main program)<a class="headerlink" href="#pdaf-terrsysmp-main-program" title="Permalink to this heading"></a></h3>
+<p>Subroutines:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">init_parallel_pdaf()</span></code></p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">MPI_Init</span></code> if not yet done (should be done)</p></li>
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">npes_world</span></code>, <code class="docutils literal notranslate"><span class="pre">mype_world</span></code></p></li>
+<li><p>Read command line input: <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code></p></li>
+<li><p>Initialize communicators for ensemble evaluations</p></li>
+</ol>
+<ul class="simple">
+<li><p>consistency checks <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span> <span class="pre">&gt;</span> <span class="pre">npes_world</span></code> and (not used
+since <code class="docutils literal notranslate"><span class="pre">dim_ens</span></code> is set to dummy-zero) <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span> <span class="pre">&gt;</span> <span class="pre">dim_ens</span></code></p></li>
+</ul>
+<ol class="arabic simple" start="5">
+<li><p><code class="docutils literal notranslate"><span class="pre">COMM_ensemble</span></code> (local copy of <code class="docutils literal notranslate"><span class="pre">MPI_COMM_WORLD</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMM_model</span></code>: Generate communicators for model runs</p>
+<ul class="simple">
+<li><p>Set <code class="docutils literal notranslate"><span class="pre">local_npes_model</span></code> depending on complete number
+<code class="docutils literal notranslate"><span class="pre">npes_world</span></code> and <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code></p></li>
+<li><p>Example: <code class="docutils literal notranslate"><span class="pre">mype_world=24</span></code> and 4 PEs per model, then mype_world
+will be model task/color <code class="docutils literal notranslate"><span class="pre">9</span> <span class="pre">=</span> <span class="pre">floor(24/4)+1</span></code> and rank <code class="docutils literal notranslate"><span class="pre">0</span></code>
+(<code class="docutils literal notranslate"><span class="pre">25-&gt;1</span></code>, <code class="docutils literal notranslate"><span class="pre">26-&gt;2</span></code>, <code class="docutils literal notranslate"><span class="pre">27-&gt;3</span></code>).</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMM_filter</span></code>: Same as <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code>, but only first task used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">COMM_couple</span></code>: For each rank in <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code> (example 4 ranks),
+there is a task in <code class="docutils literal notranslate"><span class="pre">COMM_couple</span></code> with <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code> ranks
+(example 48)</p></li>
+<li><p>Finally <code class="docutils literal notranslate"><span class="pre">da_comm</span></code> is set to <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code>; and
+<code class="docutils literal notranslate"><span class="pre">cosmo_input_suffix</span></code> is set</p></li>
+</ol>
+</li>
+<li><p><a class="reference internal" href="#initialize-tsmp"><code class="docutils literal notranslate"><span class="pre">initialize_tsmp()</span></code></a></p>
+<ol class="arabic simple">
+<li><p>read parameter file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></p></li>
+<li><p>Set model number for a process</p></li>
+<li><p>Set input function names</p></li>
+<li><p>Call model-specific input functions</p></li>
+</ol>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clm_init</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enkfparflowinit</span></code> (some more allocations in ParFlow part)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">cosmo_init</span></code></p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="initialize-tsmp">
+<h3><code class="docutils literal notranslate"><span class="pre">initialize_tsmp()</span></code><a class="headerlink" href="#initialize-tsmp" title="Permalink to this heading"></a></h3>
+<p>File: <code class="docutils literal notranslate"><span class="pre">./bldsva/intf_DA/pdaf1_1/model/wrapper_tsmp.c</span></code></p>
+<p>Subroutines:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">clm_init</span></code></p>
+<ol class="arabic simple">
+<li><p>Setting <code class="docutils literal notranslate"><span class="pre">nlfilename</span></code> (essentially the same as <code class="docutils literal notranslate"><span class="pre">finname</span></code>?)</p></li>
+<li><p>Initialize Communicators depending on mode</p></li>
+<li><p>Initialize ESMF (needed for time-manager)</p></li>
+<li><p>Initialize timing library, and set full path to namelist</p></li>
+<li><p>Initialize Orbital parameters (<code class="docutils literal notranslate"><span class="pre">shr_orb_params</span></code>)</p></li>
+<li><p>Initialize land model (<code class="docutils literal notranslate"><span class="pre">clm_init0,</span> <span class="pre">clm_init1,</span> <span class="pre">clm_init2</span></code>)</p></li>
+<li><p>Initialize “external” atmospheric forcing (<code class="docutils literal notranslate"><span class="pre">atmdrv_init</span></code>)</p></li>
+</ol>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">enkfparflowinit</span></code>
+1.</p></li>
+</ul>
+</section>
+</section>
+<section id="list-of-interesting-variables-of-tsmp-pdaf">
+<h2>List of interesting variables of TSMP-PDAF<a class="headerlink" href="#list-of-interesting-variables-of-tsmp-pdaf" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">local_npes_model</span></code>: PEs per ensemble</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code>: Number of parallel model tasks</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">npes_world</span></code>: Number of MPI processes in <code class="docutils literal notranslate"><span class="pre">MPI_COMM_WORLD</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mype_world</span></code>: Rank of calling process in <code class="docutils literal notranslate"><span class="pre">MPI_COMM_WORLD</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_statevec</span></code>: ParFlow-Statevector in C-wrapper</p>
+<ul>
+<li><p>from <code class="docutils literal notranslate"><span class="pre">enkf_parflow.h</span></code> and set in <code class="docutils literal notranslate"><span class="pre">initialize_tsmp</span></code> from the
+<code class="docutils literal notranslate"><span class="pre">wrapper_tsmp.c</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pf_statevec_fortran</span></code>: ParFlow-Statevector in Fortran-part of
+TSMP-PDAF</p>
+<ul>
+<li><p>defined in <code class="docutils literal notranslate"><span class="pre">init_pdaf.F90</span></code> by <code class="docutils literal notranslate"><span class="pre">C_F_POINTER</span></code> subroutine (Doc from
+Gnu-Compiler:
+https://gcc.gnu.org/onlinedocs/gfortran/C_005fF_005fPOINTER.html)</p></li>
+<li><p>takes values from <code class="docutils literal notranslate"><span class="pre">pf_statevec</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">subvec_p</span></code>: state vector pressure (from <code class="docutils literal notranslate"><span class="pre">enkf_parflow.c:371</span></code>)</p>
+<ul>
+<li><p>defined: <code class="docutils literal notranslate"><span class="pre">enkf_parflow.h</span></code>, allocated: <code class="docutils literal notranslate"><span class="pre">wrapper_tsmp.c</span></code></p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag_model_clm</span></code>, (<code class="docutils literal notranslate"><span class="pre">0</span></code>), <code class="docutils literal notranslate"><span class="pre">tag_model_parflow</span></code> (<code class="docutils literal notranslate"><span class="pre">1</span></code>) and
+<code class="docutils literal notranslate"><span class="pre">tag_model_cosmo</span></code> (<code class="docutils literal notranslate"><span class="pre">2</span></code>) identifiers for the component models</p>
+<ul>
+<li><p>defined <code class="docutils literal notranslate"><span class="pre">mod_tsmp.F90</span></code></p></li>
+<li><p>used throughout TSMP-PDAF, for example in
+<code class="docutils literal notranslate"><span class="pre">collect_state_pdaf.F90</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="model-communicators">
+<h3>Model Communicators<a class="headerlink" href="#model-communicators" title="Permalink to this heading"></a></h3>
+<p>AMPS directory:</p>
+<ul class="simple">
+<li><p>ParFlow standalone: amps directory <code class="docutils literal notranslate"><span class="pre">da/</span></code> is used,</p></li>
+<li><p>Coupled ParFlow-CLM component models: amps directory <code class="docutils literal notranslate"><span class="pre">oas3/</span></code> is used.</p></li>
+</ul>
+<p>Variable names for the model communicator:</p>
+<ul class="simple">
+<li><p>ParFlow standalone:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">comm_model</span></code> -&gt; C: <code class="docutils literal notranslate"><span class="pre">comm_model_pdaf</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">pfcomm</span></code> (enkf_parflow/enkfparflowinit) -&gt; <code class="docutils literal notranslate"><span class="pre">amps_CommWorld</span></code> (da/amps_init.c)</p></li>
+</ul>
+</li>
+<li><p>Coupled with OASIS:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">comm_model</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">da_comm</span></code> (init_parallel_pdaf) -&gt; C: <code class="docutils literal notranslate"><span class="pre">fsubcomm</span></code> -&gt; C-version not used</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">comm_model</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">da_comm</span></code> (init_parallel_pdaf) -&gt; <code class="docutils literal notranslate"><span class="pre">mpi_comm_global</span></code> (mod_oasis_method)</p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intf_da.html" class="btn btn-neutral float-left" title="Structure of DA inside TSMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="build_environment_variables.html" class="btn btn-neutral float-right" title="TSMP-PDAF Environment variables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
