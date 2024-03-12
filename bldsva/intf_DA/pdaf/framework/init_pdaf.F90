@@ -134,59 +134,53 @@ SUBROUTINE init_pdaf()
 ! *** Define state dimension ***
   
   if (model == tag_model_parflow) then
-    if (screen > 2) then
-      print *, "Parflow: converting pf_statevec to fortran"
-    end if
-
+    ! Parflow: converting pf_statevec to fortran
     call C_F_POINTER(pf_statevec, pf_statevec_fortran, [pf_statevecsize])
 
-    if (screen > 2) then
-      print *, "Parflow: converting idx_mapping_subvec2state to fortran"
-    end if
-
+    ! Parflow: converting idx_mapping_subvec2state to fortran
     call C_F_POINTER(idx_map_subvec2state, idx_map_subvec2state_fortran, [pf_statevecsize])
-
-    ! if (screen > 2) then
-    !     print *, "Parflow: first several elements of the idx:", idx_map_subvec2state_fortran
-    ! end if
   end if
 
   if (model == tag_model_parflow) then
+    ! Parflow component, setting local state dimension `dim_state_p`
+    ! and later dim_state from `pf_statevecsize` from `initialize_tsmp
+    ! -> parflow_oasis_init`.
     dim_state_p = pf_statevecsize  ! Local state dimension
-
-    if (screen > 2) then
-      print *,""
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": Parflow component, setting correct dim_state_p and dim_state"
-    end if
   else
-    if (screen > 2) then
-      print *,""
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": CLM component, setting dummy dim_state_p and dim_state"
-    end if
-
+    ! CLM/COSMO component, setting dummy dim_state_p and dim_state
     dim_state_p = 1  ! Local state dimension
   end if
 
 #if defined CLMSA
   if (model == tag_model_clm) then
-    ! comment only CLMSA
-    !call get_proc_global(numg,numl,numc,nump)
-    !call get_proc_bounds(begg,endg,begl,endl,begc,endc,begp,endp)
-    !dim_state_p =  (endg-begg+1) * nlevsoi
 
+    ! CLM component: setting local state dimension from
+    ! `clm_statevecsize` from `initialize_tsmp -> clm(5)_init ->
+    ! define_clm_statevec`
     dim_state_p = clm_statevecsize
 
-    if (screen > 2) then
-      print *,"TSMP-PDAF mype(w)=", mype_world, ": CLM: dim_state_p is ",dim_state_p
-    end if
   end if
 #endif
 
+#ifdef PDAF_DEBUG
+  ! Debug output: local state dimension
+  if (model == tag_model_parflow) then
+    print *,"TSMP-PDAF mype(w)=", mype_world, ": ParFlow: dim_state_p is ",dim_state_p
+  end if
+  if (model == tag_model_clm) then
+    print *,"TSMP-PDAF mype(w)=", mype_world, ": CLM: dim_state_p is ",dim_state_p
+  end if
+#endif
+  
   IF (allocated(dim_state_p_count)) deallocate(dim_state_p_count)
   allocate(dim_state_p_count(npes_model))
   call MPI_Gather(dim_state_p, 1, MPI_INTEGER, dim_state_p_count, 1, MPI_INTEGER, 0, COMM_model, ierror)
 
-  if (mype_model == 0 .and. screen > 2) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_count in modified: ", dim_state_p_count
+#ifdef PDAF_DEBUG
+  ! Debug output: local state dimension array
+  if (mype_model == 0) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_count in modified: ", dim_state_p_count
+#endif
+
   IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
   allocate(dim_state_p_stride(npes_model))
   do i = 1, npes_model
@@ -195,15 +189,22 @@ SUBROUTINE init_pdaf()
       dim_state_p_stride(i) = dim_state_p_count(j) + dim_state_p_stride(i)
     end do
   end do
-  if (mype_model == 0 .and. screen > 2) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_stride in modified: ", dim_state_p_stride
+#ifdef PDAF_DEBUG
+  ! Debug output: summed until index local state dimension array
+  if (mype_model == 0 ) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_stride in modified: ", dim_state_p_stride
+#endif
 
   if (mype_model == 0) then
     dim_state = sum(dim_state_p_count)
   end if
   call MPI_BCAST(dim_state, 1, MPI_INTEGER, 0, COMM_model, IERROR)
-  !print  *, "my local state vector dimension is :" , dim_state_p
-  !print  *, "my global state vector dimension is :" , dim_state
-  !print *,""
+
+#ifdef PDAF_DEBUG
+  ! Debug output: global state dimension
+  print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: my local state vector dimension dim_state_p: ", dim_state
+  print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: my global state vector  dimension dim_state: ", dim_state
+#endif
+
   call MPI_Barrier(MPI_COMM_WORLD, ierror)
 
 ! **********************************************************
