@@ -3,7 +3,7 @@
 Observation input consists of a number of different inputs:
 - Observation files with correct name and content
 - Command Line Options
-- Environment Variables
+- Preprocessor Variables
 
 ## Observation files ##
 
@@ -358,45 +358,19 @@ f.close()
 
 ## Specifying type of observation at compile time ##
 
-The following environment variables let the user specify the expected
+The following preprocessor variables let the user specify the expected
 observational input (i.e. ParFlow or CLM observations) at compile time
 (during the build-process). This may save some time during execution
 as certain parts of the source code are not accessed at all.
 
 CLM observations: Set
-- [CLMSA](./../build_tsmp/build_environment_variables.md#clmsa)
-- [OBS_ONLY_CLM](./../build_tsmp/build_environment_variables.md#obs_only_clm)
+- [CLMSA](./../build_tsmp/build_preprocessor_variables.md#clmsa)
+- [OBS_ONLY_CLM](./../build_tsmp/build_preprocessor_variables.md#obs_only_clm)
 
 ParFlow observations: Set
-- [PARFLOW_STAND_ALONE](./../build_tsmp/build_environment_variables.md#parflow_stand_alone)
-- [OBS_ONLY_PARFLOW](./../build_tsmp/build_environment_variables.md#obs_only_parflow)
+- [PARFLOW_STAND_ALONE](./../build_tsmp/build_preprocessor_variables.md#parflow_stand_alone)
+- [OBS_ONLY_PARFLOW](./../build_tsmp/build_preprocessor_variables.md#obs_only_parflow)
 
-### Example for setting environment variables ###
 
-The aforementioned environment variables can be set in the PDAF-build
-script
-`TSMP/bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
-(or replace `JURECA` with other machine).
-
-Source code from script `build_interface_pdaf_JURECA.ksh`:
-```bash
-  if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
-     importFlags+=$importFlagsCLM
-     importFlags+=$importFlagsOAS
-     importFlags+=$importFlagsPFL
-     importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
-     cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
-     if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
-     if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=$libsCLM
-     libs+=$libsOAS
-     libs+=$libsPFL
-     obj+=' $(OBJCLM) $(OBJPF) '
-  fi
-```
-
-Here we see the flags that are set when the compilation flag `-c
-clm-pfl` is used. Interesting is the second line starting with
-`cppdefs+=...`. Here `OBS_ONLY_PARFLOW` is set. In analogous fashion,
-one of the other environment variables mentioned before could be set.
+See also: [Example for setting preprocessor
+variables](./../build_tsmp/build_preprocessor_variables.md#example-for-setting-preprocessor-variables)

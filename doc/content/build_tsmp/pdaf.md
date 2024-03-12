@@ -4,7 +4,7 @@
 ---
 maxdepth: 3
 ---
-build_environment_variables.md
+build_preprocessor_variables.md
 ```
 
 ## Call Graph for TSMP-PDAF
@@ -110,19 +110,79 @@ Subroutines:
     - used throughout TSMP-PDAF, for example in
       `collect_state_pdaf.F90`
 
-### Model Communicators
-
-AMPS directory:
--   ParFlow standalone: amps directory `da/` is used,
--   Coupled ParFlow-CLM component models: amps directory `oas3/` is used.
+### Model Communicator `COMM_model`
 
 Variable names for the model communicator:
--   ParFlow standalone:
-    -   `COMM_model` -> `COMM_model_pfl` (init_parallel_pdaf) -> C: `COMM_model_pfl` -> `pfcomm` (enkf_parflow/enkfparflowinit) -> `amps_CommWorld` (da/amps_init.c)
--   Coupled with OASIS:
-    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> C: `fsubcomm` -> C-version not used
-    -   `COMM_model` -> `COMM_model_oas` (init_parallel_pdaf) -> `mpi_comm_global` (mod_oasis_method)
 
+-   ParFlow standalone:
+    - `COMM_model` (`init_parallel_pdaf.F90`)
+	- `COMM_model_pfl` (`init_parallel_pdaf.F90`)
+	- C: `COMM_model_pfl` (`enkf_parflow.h`)
+	- C: `pfcomm` (`enkfparflowinit` in `enkf_parflow.c`)
+	- C: handed to `amps_EmbeddedInitComm`
+
+-   CLM (3.5) standalone:
+    - `COMM_model` (`init_parallel_pdaf.F90`)
+	- `COMM_model_clm` (`init_parallel_pdaf.F90`)
+	- `COMM_model_clm` (`clm_init` in `enkf_clm.F90`)
+	- handed to `spmd_init` and `mct_world_init`
+
+
+-   Coupled simulation using OASIS:
+    - `COMM_model` (`init_parallel_pdaf.F90`)
+	- `COMM_model_oas` (`init_parallel_pdaf.F90`)
+	- handed over to OASIS to `oasis_init_comp` in
+      `mod_oasis_method.F90`
+
+The two call-sequences of loading `COMM_model_oas` in coupled
+simulations:
+- ParFlow: Sets `amps_CommWorld`
+  - `enkfparflowinit` in `enkf_parflow.c`
+  - `amps_init` in `oas3/amps_init.c` (entering ParFlow)
+  - `oas_pfl_init` in `oas3/oas_pfl_init`
+  - `prism_init_comp_proto` (`mod_prism`) / `oasis_init_comp` in
+    `mod_oasis_method.F90` (entering OASIS)
+- CLM (3.5): Sets `kl_comm`
+  - `clm_init` in `enkf_clm.F90`
+  - `oas_clm_init` in `oas_clm_init.F90` (entering CLM)
+  - `prism_init_comp_proto` (`mod_prism`)/ `oasis_init_comp` in
+    `mod_oasis_method.F90` (entering OASIS)
+
+
+### AMPS used by ParFlow in TSMP-PDAF
+
+Information on AMPS (Another Message Passing System):
+<https://github.com/parflow/parflow/blob/master/pfsimulator/amps/oas3/intro.dxx>
+
+The directory for AMPS used in TSMP-PDAF is set using the
+CMAKE-variable `PARFLOW_AMPS_LAYER` in `build_interface_parflow.ksh`.
+
+AMPS directory / `PARFLOW_AMPS_LAYER` for
+-   ParFlow standalone: `da` (`mpi1`)
+-   Coupled ParFlow: `oas3`
+
+#### AMPS-Layer `da` / `mpi1` ####
+
+`da` is a new AMPS-Layer introduced for ParFlow with TSMP-PDAF.
+
+`da` is based on the existing AMPS-Layer `mpi1`.
+
+The changes between `da` and `mpi1` are small, therefore in
+TSMP2-PDAF, `da` will be removed and replaced by a pre-patched version
+of `mpi1`.
+
+Changes:
+- `dacomm` communicator defined and suspected to be
+  unused. ParFlow-standalone testmodel needed to confirm.
+- commented out `MPI_Finalize`
+
+#### AMPS-Layer `oas3` ####
+
+`oas3` is an existing AMPS-Layer.
+
+`oas3` uses the communicator setup defined in
+`prism_init_comp_proto`/`oasis_init_comp`, where `COMM_model_oas` is
+inserted.
 
 ### CMEM ###
 
