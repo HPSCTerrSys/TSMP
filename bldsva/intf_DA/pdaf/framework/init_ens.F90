@@ -98,14 +98,11 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
 
     !    WRITE (*,*) 'TEMPLATE init_ens.F90: Initialize ensemble array ens_p!'
 
-    !    convert pf_statevec to fortran pointer
-
     if (model == tag_model_parflow) then
 
 
         if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": Parflow component: initialize ensemble array ens_p"
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": my dim_p is", dim_p
+            print *, "TSMP-PDAF mype(w)=", mype_world, ": ParFlow, my dim_p is", dim_p
         end if
 
         do i = 1, dim_ens
@@ -117,8 +114,7 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
         end do
 
         if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, " CLM component: initialize ensemble array ens_p"
-            print *, "TSMP-PDAF mype(w)=", mype_world, " my dim_p is", dim_p
+            print *, "TSMP-PDAF mype(w)=", mype_world, ": CLM/COSMO, my dim_p is", dim_p
         end if
 
     end if
