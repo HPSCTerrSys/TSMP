@@ -41,6 +41,15 @@ SUBROUTINE init_pdaf()
 ! error (rms_obs). Further, with parallelization the local state
 ! dimension dim_state_p is used.
 !
+! !TSMP-PDAF-DESCRIPTION:
+! This routine initializes a pointer to the state vector that is set
+! by component-model-specific routines in `initialize_tsmp`. 
+!
+! This routine sets the local and global state vector dimension.
+!
+! Debug output for this routine is turned on by preprocessor flag
+! `PDAF_DEBUG`.
+!
 ! !REVISION HISTORY:
 ! 2008-10 - Lars Nerger - Initial code
 ! Later revisions - see svn log
@@ -49,7 +58,8 @@ SUBROUTINE init_pdaf()
 !   USE mod_model, &             ! Model variables
 !        ONLY: nx, ny, nx_p
   
-  USE mod_parallel_pdaf, &     ! Parallelization variables for assimilation
+  USE mod_parallel_pdaf, &     ! Parallelization variables for
+    ! assimilation
         ONLY: n_modeltasks, task_id, COMM_filter, COMM_couple, filterpe, &
         abort_parallel, &
         mype_world, COMM_model, npes_model, &
@@ -131,16 +141,18 @@ SUBROUTINE init_pdaf()
      WRITE (*,'(/1x,a)') 'INITIALIZE PDAF - ONLINE MODE'
   END IF
 
-! *** Define state dimension ***
-  
+! *** Pointer initialization for ParFlow-type state vector ***
   if (model == tag_model_parflow) then
-    ! Parflow: converting pf_statevec to fortran
+    ! Parflow: Initialize Fortran-pointer on pf_statevec
     call C_F_POINTER(pf_statevec, pf_statevec_fortran, [pf_statevecsize])
 
-    ! Parflow: converting idx_mapping_subvec2state to fortran
+    ! Parflow: Initialize Fortran-pointer on idx_mapping_subvec2state
     call C_F_POINTER(idx_map_subvec2state, idx_map_subvec2state_fortran, [pf_statevecsize])
   end if
 
+! *** Define state dimension ***
+
+! *** Setting local state vector dimension ***
   if (model == tag_model_parflow) then
     ! Parflow component, setting local state dimension `dim_state_p`
     ! and later dim_state from `pf_statevecsize` from `initialize_tsmp
@@ -171,7 +183,8 @@ SUBROUTINE init_pdaf()
     print *,"TSMP-PDAF mype(w)=", mype_world, ": CLM: dim_state_p is ",dim_state_p
   end if
 #endif
-  
+
+! *** Setting global state vector dimension ***
   IF (allocated(dim_state_p_count)) deallocate(dim_state_p_count)
   allocate(dim_state_p_count(npes_model))
   call MPI_Gather(dim_state_p, 1, MPI_INTEGER, dim_state_p_count, 1, MPI_INTEGER, 0, COMM_model, ierror)
