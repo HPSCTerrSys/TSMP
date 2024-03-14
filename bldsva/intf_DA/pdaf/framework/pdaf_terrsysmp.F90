@@ -62,10 +62,12 @@ PROGRAM pdaf_terrsysmp
 
     ! intitialize parallel pdaf (communicators et al.)
     CALL init_parallel_pdaf(0, 1)
+    CALL MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
 
     ! Read TSMP-PDAF input from "enkfpf.par"
     ! initialize TSMP instances
     CALL initialize_tsmp()
+    CALL MPI_BARRIER(MPI_COMM_WORLD, MPIerr)
 
     ! initialize pdaf variables
     CALL init_pdaf()
