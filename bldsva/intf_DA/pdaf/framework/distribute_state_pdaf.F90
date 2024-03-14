@@ -88,6 +88,11 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 ! *** Each model PE knows his sub-state   ***
 !********************************************
 
+#ifdef PDAF_DEBUG
+  ! Debug output: Distributed state array
+  WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(1:min(dim_p,6)):", state_p(1:min(dim_p,6))
+#endif
+
   !print *, "Distributing state"
   if ((model == tag_model_parflow)) then
     !print *, "Parflow: distrubute_state_pdaf, from state_p to subvec"
