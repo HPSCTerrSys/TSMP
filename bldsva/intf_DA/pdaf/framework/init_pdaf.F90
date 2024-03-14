@@ -181,7 +181,7 @@ SUBROUTINE init_pdaf()
 
 #ifdef PDAF_DEBUG
   ! Debug output: local state dimension array
-  if (mype_model == 0) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_count in modified: ", dim_state_p_count
+  if (mype_model == 0) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_count in modified:", dim_state_p_count
 #endif
 
   IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
@@ -194,7 +194,7 @@ SUBROUTINE init_pdaf()
   end do
 #ifdef PDAF_DEBUG
   ! Debug output: summed until index local state dimension array
-  if (mype_model == 0 ) print *, "TSMP-PDAF mype(w)=", mype_world, ": init_pdaf: dim_state_p_stride in modified: ", dim_state_p_stride
+  if (mype_model == 0 ) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_stride in modified:", dim_state_p_stride
 #endif
 
   if (mype_model == 0) then
@@ -204,8 +204,8 @@ SUBROUTINE init_pdaf()
 
 #ifdef PDAF_DEBUG
   ! Debug output: global state dimension
-  WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF", "mype(w)=", mype_world, "init_pdaf: my local state vector dimension dim_state_p:", dim_state_p
-  WRITE(*, '(a,x,a,i5,x,a,2x,i9)') "TSMP-PDAF", "mype(w)=", mype_world, "init_pdaf: my global state vector dimension dim_state:", dim_state
+  WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: my local state vector dimension dim_state_p:", dim_state_p
+  WRITE(*, '(a,x,a,i5,x,a,2x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: my global state vector dimension dim_state:", dim_state
 #endif
 
   call MPI_Barrier(MPI_COMM_WORLD, ierror)
