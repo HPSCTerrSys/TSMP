@@ -142,6 +142,11 @@ void read_enkfpar(char *parname)
     model = 2;
   }
 
+#ifdef PDAF-DEBUG
+  /* Debug output of component model per processor */
+  printf("TSMP-PDAF-debug mype(w)=%5d: model (0=clm, 1=parflow, 2=cosmo) = %1d\n", mype_world, model);
+#endif
+
   /* MPI: Get size and rank in COMM_WORLD */
   /* define number of first model realisation (for input/output filenames) */
   coupcol = task_id - 1 + startreal;
