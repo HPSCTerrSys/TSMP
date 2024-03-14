@@ -174,16 +174,6 @@ SUBROUTINE init_pdaf()
   end if
 #endif
 
-#ifdef PDAF_DEBUG
-  ! Debug output: local state dimension
-  if (model == tag_model_parflow) then
-    print *,"TSMP-PDAF mype(w)=", mype_world, ": ParFlow: dim_state_p is ",dim_state_p
-  end if
-  if (model == tag_model_clm) then
-    print *,"TSMP-PDAF mype(w)=", mype_world, ": CLM: dim_state_p is ",dim_state_p
-  end if
-#endif
-
 ! *** Setting global state vector dimension ***
   IF (allocated(dim_state_p_count)) deallocate(dim_state_p_count)
   allocate(dim_state_p_count(npes_model))
