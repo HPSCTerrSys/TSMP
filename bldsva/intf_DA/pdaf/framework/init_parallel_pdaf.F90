@@ -147,6 +147,22 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   CALL MPI_Comm_size(MPI_COMM_WORLD, npes_world, MPIerr)
   CALL MPI_Comm_rank(MPI_COMM_WORLD, mype_world, MPIerr)
 
+  ! *** Print TSMP-PDAF information ***
+  IF (mype_world==0) THEN
+     WRITE(*, '(/a)') 'TSMP-PDAF    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++                   TSMP-PDAF                        +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++                                                    +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++                   Please cite                      +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++ Kurtz, W., He, G., Kollet, S. J., Maxwell, R. M.,  +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++ Vereecken, H., & Hendricks Franssen, H. J. (2016). +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++      TerrSysMP–PDAF (version 1.0): a modular       +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++  high-performance data assimilation framework for  +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++     an integrated land surface–subsurface model.   +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++ Geoscientific Model Development, 9(4), 1341-1360.  +++'
+     WRITE(*, '(a)')  'TSMP-PDAF    +++          doi: 10.5194/gmd-9-1341-2016              +++'
+     WRITE(*, '(a/)') 'TSMP-PDAF    ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++'
+  END IF
+
   ! *** Parse number of model tasks ***
   handle = 'n_modeltasks'
   CALL parse(handle, n_modeltasks)
