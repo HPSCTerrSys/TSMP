@@ -100,22 +100,15 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
 
     if (model == tag_model_parflow) then
 
-
-        if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": ParFlow, my dim_p is", dim_p
-        end if
-
         do i = 1, dim_ens
             ens_p(:, i) = 10 + mype_model + i
         end do
+
     else
+
         do i = 1, dim_ens
             ens_p(:, i) = 1.1
         end do
-
-        if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": CLM/COSMO, my dim_p is", dim_p
-        end if
 
     end if
 ! ****************
