@@ -69,7 +69,7 @@ SUBROUTINE init_pdaf()
         dim_ens, rms_obs, model_error, model_err_amp, incremental, &
         type_forget, forget, dim_bias, rank_analysis_enkf, &
         locweight, cradius, sradius, filename, &
-        type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, dim_state_p_stride,&
+        type_trans, type_sqrt, delt_obs, toffset, dim_state_p_count, &
         dim_lag, &
         type_winf, limit_winf, &
         type_hyb, hyb_gamma, hyb_kappa, &
@@ -182,19 +182,6 @@ SUBROUTINE init_pdaf()
 #ifdef PDAF_DEBUG
   ! Debug output: local state dimension array
   if (mype_model == 0) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_count in modified:", dim_state_p_count
-#endif
-
-  IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
-  allocate(dim_state_p_stride(npes_model))
-  do i = 1, npes_model
-    dim_state_p_stride(i) = 0
-    do j = 1, i - 1
-      dim_state_p_stride(i) = dim_state_p_count(j) + dim_state_p_stride(i)
-    end do
-  end do
-#ifdef PDAF_DEBUG
-  ! Debug output: summed until index local state dimension array
-  if (mype_model == 0 ) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_stride in modified:", dim_state_p_stride
 #endif
 
   if (mype_model == 0) then
