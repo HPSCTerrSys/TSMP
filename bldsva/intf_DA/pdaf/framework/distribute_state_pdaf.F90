@@ -82,6 +82,7 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 ! Called by: PDAF_assimilate_X   (as U_dist_state)
 !EOP
 
+  INTEGER :: i
 
 ! *******************************************
 ! *** Initialize model fields from state  ***
@@ -90,15 +91,9 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 
 #ifdef PDAF_DEBUG
   ! Debug output: Distributed state array
-  WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(1:min(dim_p,6)):", state_p(1:min(dim_p,6))
-  if ((model == tag_model_parflow)) then
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(1):", state_p(1)
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(2):", state_p(2)
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(3):", state_p(3)
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(4):", state_p(4)
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(5):", state_p(5)
-    WRITE(*, '(a,x,a,i5,x,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(6):", state_p(6)
-  end if
+  DO i = 1, MIN(dim_p,6)
+    WRITE(*, '(a,x,a,i5,x,a,,i1,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(", i, "):", state_p(i)
+  END DO
 #endif
 
   !print *, "Distributing state"
