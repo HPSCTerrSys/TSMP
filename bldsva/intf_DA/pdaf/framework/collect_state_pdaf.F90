@@ -54,6 +54,8 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 ! !USES:
     use mod_tsmp, &
         only: pf_statevec_fortran, tag_model_parflow, tag_model_clm, model
+    use mod_parallel_pdaf, &
+        only: mype_world
 #if defined CLMSA
     !kuw: get access to clm variables
 #if defined CLMFIVE
