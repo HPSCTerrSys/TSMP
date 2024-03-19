@@ -450,6 +450,11 @@ void parflow_oasis_init(double current_time, double dt) {
   if(pf_paramupdate == 8) pf_paramvecsize = 4*enkf_subvecsize;
   if(pf_paramupdate > 0) pf_statevecsize += pf_paramvecsize;
 
+#ifdef PDAF_DEBUG
+  /* Debug output of parflow statevectorsize */
+  printf("TSMP-PDAF-debug mype(w)=%5d: pf_statevecsize = %d\n", mype_world, pf_statevecsize);
+#endif
+
   subvec_p               = (double*) calloc(enkf_subvecsize,sizeof(double));
   subvec_sat             = (double*) calloc(enkf_subvecsize,sizeof(double));
   subvec_porosity        = (double*) calloc(enkf_subvecsize,sizeof(double));
