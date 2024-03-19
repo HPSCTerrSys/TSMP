@@ -92,7 +92,7 @@ SUBROUTINE distribute_state_pdaf(dim_p, state_p)
 #ifdef PDAF_DEBUG
   ! Debug output: Distributed state array
   DO i = 1, MIN(dim_p,6)
-    WRITE(*, '(a,x,a,i5,x,a,,i1,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(", i, "):", state_p(i)
+    WRITE(*, '(a,x,a,i5,x,a,i1,a,x,f10.5)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "distribute_state_pdaf: state_p(", i, "):", state_p(i)
   END DO
 #endif
 
