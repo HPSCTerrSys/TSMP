@@ -181,7 +181,8 @@ SUBROUTINE init_pdaf()
 
 #ifdef PDAF_DEBUG
   ! Debug output: local state dimension array
-  if (mype_model == 0) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_count in modified:", dim_state_p_count
+  if (mype_model == 0) WRITE(*, '(a,x,a,i5,x,a,x)', advance=no) "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_count in modified:"
+  if (mype_model == 0) WRITE(*, *) dim_state_p_count
 #endif
 
   if (mype_model == 0) then
