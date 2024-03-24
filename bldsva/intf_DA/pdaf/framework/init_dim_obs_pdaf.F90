@@ -575,7 +575,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               if(crns_flag.eq.1) then
                   depth_obs_p(count) = depth_obs(i)
                   idx_obs_nc_p(count)=idx_obs_nc(i)
-                  Allocate(sc_p(count)%scol_obs_in(nz_glob-z_idx_obs_nc(i)+1))       
+                  Allocate(sc_p(count)%scol_obs_in(nz_glob))       
               endif
               obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
               count = count + 1

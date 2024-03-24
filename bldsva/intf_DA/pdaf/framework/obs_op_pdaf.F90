@@ -96,7 +96,8 @@ real(8), dimension(:), allocatable :: soide !soil depth
 ! soide=(/0.d0,  0.02d0,  0.05d0,  0.1d0,  0.17d0, 0.3d0,  0.5d0, &
 !                0.8d0,   1.3d0,   2.d0,  3.d0, 5.d0,  12.d0/) !soil depth
 
-real(8) :: tot, avesm
+real(8) :: tot, avesm, avesm_temp, Dp
+real(8), parameter :: tol=0.01d0
 integer :: nsc
 ! end of hcp 
 
@@ -143,24 +144,40 @@ endif
        soide(i)=soide(i-1)+soilay_fortran(nz_glob-i+1) 
      enddo
      do i = 1, dim_obs_p
-       nsc= size(sc_p(i)%scol_obs_in(:))
+       !nsc= size(sc_p(i)%scol_obs_in(:))
        avesm=0.d0
-       do j=1, nsc-1
-           avesm=avesm+(1.d0-0.5d0*(soide(j)+soide(j-1))/depth_obs_p(i))*(soide(j)-soide(j-1)) &
-                 *state_p(sc_p(i)%scol_obs_in(j))/depth_obs_p(i)
+       do j=1,nz_glob
+            avesm=avesm+(soide(j)-soide(j-1))*state_p(sc_p(i)%scol_obs_in(j))/soide(nz_glob)
        enddo
-       avesm=avesm+(1.d0-0.5d0*(depth_obs_p(i)+soide(nsc-1))/depth_obs_p(i))*(depth_obs_p(i)-soide(nsc-1)) &
-             *state_p(sc_p(i)%scol_obs_in(nsc))/depth_obs_p(i)
-       tot=0.d0
-       do j=1, nsc-1
-           tot=tot+(1.d0-0.5d0*(soide(j)+soide(j-1))/depth_obs_p(i))*(soide(j)-soide(j-1)) &
-               /depth_obs_p(i)
-       enddo
-       tot=tot+(1.d0-0.5d0*(depth_obs_p(i)+soide(nsc-1))/depth_obs_p(i))*(depth_obs_p(i)-soide(nsc-1)) &
-          /depth_obs_p(i)
+       avesm_temp=0.d0
 
-       avesm=avesm/tot
+       do while (abs(avesm-avesm_temp)/avesm .GE. tol)
+          avesm_temp=avesm
+          Dp=0.058d0/(avesm+0.0829d0)
+          avesm=0.d0
+          do j=1,nz_glob
+             if ((soide(j-1).LT.Dp).AND.(Dp.LE.soide(j))) then
+               nsc=j
+             endif
+          enddo
+          do j=1, nsc-1
+              avesm=avesm+(1.d0-0.5d0*(soide(j)+soide(j-1))/Dp)*(soide(j)-soide(j-1)) &
+                    *state_p(sc_p(i)%scol_obs_in(j))/Dp
+          enddo
+          avesm=avesm+(1.d0-0.5d0*(Dp+soide(nsc-1))/Dp)*(Dp-soide(nsc-1)) &
+             *state_p(sc_p(i)%scol_obs_in(nsc))/Dp
+          tot=0.d0
+          do j=1, nsc-1
+              tot =   tot+(1.d0-0.5d0*(soide(j)+soide(j-1))/Dp)*(soide(j)-soide(j-1)) &
+                                                    /Dp
+          enddo
+          tot  =  tot+(1.d0-0.5d0*(Dp+soide(nsc-1))/Dp)*(Dp-soide(nsc-1)) &
+                                               /Dp
+
+          avesm=avesm/tot
+       enddo
        m_state_p(i)=avesm
+       avesm=avesm/tot
      enddo
      deallocate(soide)
  end if
