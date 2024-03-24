@@ -177,7 +177,6 @@ endif
           avesm=avesm/tot
        enddo
        m_state_p(i)=avesm
-       avesm=avesm/tot
      enddo
      deallocate(soide)
  end if
