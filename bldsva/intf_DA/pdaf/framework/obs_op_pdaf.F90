@@ -136,13 +136,14 @@ endif
  if (crns_flag.EQ.1) then
 
     lpointobs = .false.
-
+     write(*,*) 'test crns 1'
      call C_F_POINTER(soilay,soilay_fortran,[nz_glob])
      Allocate(soide(0:nz_glob))
      soide(0)=0.d0
      do i=1,nz_glob
        soide(i)=soide(i-1)+soilay_fortran(nz_glob-i+1) 
      enddo
+     write(*,*) 'test crns 2'
      do i = 1, dim_obs_p
        !nsc= size(sc_p(i)%scol_obs_in(:))
        avesm=0.d0
@@ -151,10 +152,11 @@ endif
        enddo
        avesm_temp=0.d0
 
+     write(*,*) 'test crns 3'
        do while (abs(avesm-avesm_temp)/avesm .GE. tol)
           avesm_temp=avesm
           Dp=0.058d0/(avesm+0.0829d0)
-          avesm=0.d0
+          avesm=0.d0; nsc=nz_glob
           do j=1,nz_glob
              if ((soide(j-1).LT.Dp).AND.(Dp.LE.soide(j))) then
                nsc=j
@@ -176,9 +178,12 @@ endif
 
           avesm=avesm/tot
        enddo
+       write(*,*) 'test crns 4, nsc=', nsc
        m_state_p(i)=avesm
      enddo
+     write(*,*) 'test crns 5, m_state_p', m_state_p(:)
      deallocate(soide)
+     write(*,*) 'test crns 6'
  end if
 #endif
 #endif

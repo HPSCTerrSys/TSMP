@@ -150,7 +150,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
   integer,allocatable :: local_dis(:),local_dim(:)
-  integer :: k_count,nsc !hcp
+  integer :: k_count !,nsc !hcp
   real    :: sum_interp_weights
 
 #ifndef PARFLOW_STAND_ALONE
@@ -584,11 +584,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      end do
      do i = 1, dim_obs_p
       if(crns_flag.eq.1) then 
-        nsc=size(sc_p(i)%scol_obs_in(:))
-        do k = 1, nsc
+        do k = 1, nz_glob
           k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
           do j = 1, enkf_subvecsize
-             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i)%scol_obs_in(nsc-k+1)=j
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i)%scol_obs_in(nz_glob-k+1)=j
           enddo
         enddo
       endif
