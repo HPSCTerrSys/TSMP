@@ -69,10 +69,11 @@ MODULE mod_assimilation
   REAL, ALLOCATABLE :: pressure_obserr_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
   REAL, ALLOCATABLE :: depth_obs_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
   !hcp
-  type :: scoltype
-       integer, dimension(:), allocatable :: scol_obs_in
-  endtype
-  type(scoltype), dimension(:), allocatable :: sc_p 
+  !type :: scoltype
+  !     integer, dimension(:), allocatable :: scol_obs_in
+  !endtype
+  integer, dimension(:,:), allocatable :: sc_p 
+  !type(scoltype), dimension(:), allocatable :: sc_p 
   real, allocatable    :: idx_obs_nc_p(:)        
   !end hcp  
   REAL, ALLOCATABLE :: clm_obserr_p(:)    ! Vector holding  observation errors for CLM run at each PE-local domain  

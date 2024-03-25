@@ -136,23 +136,25 @@ endif
  if (crns_flag.EQ.1) then
 
     lpointobs = .false.
-     write(*,*) 'test crns 1'
+     !write(*,*) 'test crns 1'
      call C_F_POINTER(soilay,soilay_fortran,[nz_glob])
      Allocate(soide(0:nz_glob))
      soide(0)=0.d0
      do i=1,nz_glob
        soide(i)=soide(i-1)+soilay_fortran(nz_glob-i+1) 
      enddo
-     write(*,*) 'test crns 2'
+     !write(*,*) 'test crns 2, dim_obs_p=', dim_obs_p 
+     !write(*,*) 'test crns 2.2, nz_glob, sc_p=', nz_glob, sc_p(:,:)
      do i = 1, dim_obs_p
        !nsc= size(sc_p(i)%scol_obs_in(:))
        avesm=0.d0
        do j=1,nz_glob
-            avesm=avesm+(soide(j)-soide(j-1))*state_p(sc_p(i)%scol_obs_in(j))/soide(nz_glob)
+      !      write(*,*) 'test crns 2.5, state_p(sc_p(i,j))=', state_p(sc_p(i,j))
+            avesm=avesm+(soide(j)-soide(j-1))*state_p(sc_p(i,j))/soide(nz_glob)
        enddo
        avesm_temp=0.d0
 
-     write(*,*) 'test crns 3'
+     !write(*,*) 'test crns 3, avesm=', avesm
        do while (abs(avesm-avesm_temp)/avesm .GE. tol)
           avesm_temp=avesm
           Dp=0.058d0/(avesm+0.0829d0)
@@ -164,10 +166,10 @@ endif
           enddo
           do j=1, nsc-1
               avesm=avesm+(1.d0-0.5d0*(soide(j)+soide(j-1))/Dp)*(soide(j)-soide(j-1)) &
-                    *state_p(sc_p(i)%scol_obs_in(j))/Dp
+                    *state_p(sc_p(i,j))/Dp
           enddo
           avesm=avesm+(1.d0-0.5d0*(Dp+soide(nsc-1))/Dp)*(Dp-soide(nsc-1)) &
-             *state_p(sc_p(i)%scol_obs_in(nsc))/Dp
+             *state_p(sc_p(i,nsc))/Dp
           tot=0.d0
           do j=1, nsc-1
               tot =   tot+(1.d0-0.5d0*(soide(j)+soide(j-1))/Dp)*(soide(j)-soide(j-1)) &
@@ -178,12 +180,12 @@ endif
 
           avesm=avesm/tot
        enddo
-       write(*,*) 'test crns 4, nsc=', nsc
+      ! write(*,*) 'test crns 4, nsc, Dp=', nsc, Dp
        m_state_p(i)=avesm
      enddo
-     write(*,*) 'test crns 5, m_state_p', m_state_p(:)
+     !write(*,*) 'test crns 5, size, m_state_p', size(m_state_p), m_state_p(:)
      deallocate(soide)
-     write(*,*) 'test crns 6'
+     !write(*,*) 'test crns 6'
  end if
 #endif
 #endif

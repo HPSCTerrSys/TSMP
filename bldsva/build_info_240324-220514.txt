@@ -1,8 +1,0 @@
-JURECA
-no
--O2 -xHost
-Intel
-clm3-cos5-pfl-pdaf
-/p/project/cjicg41/jicg4172/projects/TSMP_2024/p/project/cjicg41/jicg4172/projects/TSMP_2024/bin/JURECA_clm3-pfl-pdaf
-clm3-pfl-pdaf
-false

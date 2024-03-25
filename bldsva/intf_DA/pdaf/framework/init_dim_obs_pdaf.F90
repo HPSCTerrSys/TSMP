@@ -498,7 +498,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         if (allocated(depth_obs_p)) deallocate(depth_obs_p)
         allocate(depth_obs_p(dim_obs_p))
         if (allocated(sc_p)) deallocate(sc_p)
-        allocate(sc_p(dim_obs_p))
+        allocate(sc_p(dim_obs_p, nz_glob))
         if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
         allocate(idx_obs_nc_p(dim_obs_p))
      endif
@@ -575,7 +575,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               if(crns_flag.eq.1) then
                   depth_obs_p(count) = depth_obs(i)
                   idx_obs_nc_p(count)=idx_obs_nc(i)
-                  Allocate(sc_p(count)%scol_obs_in(nz_glob))       
+                  !Allocate(sc_p(count)%scol_obs_in(nz_glob))       
               endif
               obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
               count = count + 1
@@ -587,7 +587,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         do k = 1, nz_glob
           k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
           do j = 1, enkf_subvecsize
-             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i)%scol_obs_in(nz_glob-k+1)=j
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i,nz_glob-k+1)=j
           enddo
         enddo
       endif
