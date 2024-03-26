@@ -285,20 +285,20 @@ SUBROUTINE init_parallel_pdaf(dim_ens, screen)
   IF (screen > 0) THEN
      IF (mype_world == 0) THEN
         WRITE (*, '(/18x, a)') 'PE configuration:'
-        WRITE (*, '(2x, a6, a9, a10, a14, a13, /2x, a5, a9, a7, a7, a7, a7, a7, /2x, a)') &
-             'world', 'filter', 'model', 'couple', 'filterPE', &
-             'rank', 'rank', 'task', 'rank', 'task', 'rank', 'T/F', &
-             '----------------------------------------------------------'
+        WRITE (*, '(a, 2x, a6, a9, a10, a14, a13, /a, 2x, a5, a9, a7, a7, a7, a7, a7, /a, 2x, a)') &
+          'Pconf', 'world', 'filter', 'model', 'couple', 'filterPE', &
+          'Pconf', 'rank', 'rank', 'task', 'rank', 'task', 'rank', 'T/F', &
+          'Pconf', '----------------------------------------------------------'
      END IF
      CALL MPI_Barrier(MPI_COMM_WORLD, MPIerr)
      IF (task_id == 1) THEN
-        WRITE (*, '(2x, i4, 4x, i4, 4x, i3, 4x, i3, 4x, i3, 4x, i3, 5x, l3)') &
-             mype_world, mype_filter, task_id, mype_model, color_couple, &
-             mype_couple, filterpe
+        WRITE (*, '(a, 2x, i4, 4x, i4, 4x, i3, 4x, i3, 4x, i3, 4x, i3, 5x, l3)') &
+          'Pconf', mype_world, mype_filter, task_id, mype_model, color_couple, &
+          mype_couple, filterpe
      ENDIF
      IF (task_id > 1) THEN
-        WRITE (*,'(2x, i4, 12x, i3, 4x, i3, 4x, i3, 4x, i3, 5x, l3)') &
-         mype_world, task_id, mype_model, color_couple, mype_couple, filterpe
+        WRITE (*, '(a, 2x, i4, 12x, i3, 4x, i3, 4x, i3, 4x, i3, 5x, l3)') &
+          'Pconf', mype_world, task_id, mype_model, color_couple, mype_couple, filterpe
      END IF
      CALL MPI_Barrier(MPI_COMM_WORLD, MPIerr)
 
