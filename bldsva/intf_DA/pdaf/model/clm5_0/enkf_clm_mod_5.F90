@@ -391,7 +391,9 @@ module enkf_clm_mod
                 print *, "WARNING: snow depth at g,c is negative: ", j, jj, clm_statevec(cc+offset)
               else
                 rsnow(jj) = snow_depth(jj) - clm_statevec(cc+offset)
-                snow_depth(jj)   = clm_statevec(cc+offset)
+                if ( ABS(SUM(rsnow(:))) .gt.0.000001) then
+                  snow_depth(jj)   = clm_statevec(cc+offset)
+                endif
               endif
           end do
         cc = cc + 1
@@ -415,12 +417,14 @@ module enkf_clm_mod
                 print *, "WARNING: SWE at g,c is negative: ", j, jj, clm_statevec(cc+offset)
               else
                 rsnow(jj) = h2osno(jj)
-                h2osno(jj)   = clm_statevec(cc+offset)
-                if ( clmupdate_snow_repartitioning.eq.3) then
-                  incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
-                    do i=snlsno(jj)+1,0
-                      h2osoi_ice(jj,i) = h2osoi_ice(jj,i) * incr_h2osno
-                    end do
+                if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
+                  h2osno(jj)   = clm_statevec(cc+offset)
+                  if ( clmupdate_snow_repartitioning.eq.3) then
+                    incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
+                      do i=snlsno(jj)+1,0
+                        h2osoi_ice(jj,i) = h2osoi_ice(jj,i) * incr_h2osno
+                      end do
+                  end if
                 end if
               endif
           end do
