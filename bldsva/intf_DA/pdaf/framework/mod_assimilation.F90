@@ -67,7 +67,6 @@ MODULE mod_assimilation
   INTEGER, ALLOCATABLE :: local_dims_obs(:) ! Array for process-local observation dimensions
   INTEGER, ALLOCATABLE :: obs_nc2pdaf(:)  ! mapping ordering of obs between netcdf input and internal ordering in pdaf
   REAL, ALLOCATABLE :: pressure_obserr_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
-  REAL, ALLOCATABLE :: depth_obs_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
   !hcp
   !type :: scoltype
   !     integer, dimension(:), allocatable :: scol_obs_in
