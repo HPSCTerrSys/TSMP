@@ -57,12 +57,13 @@ SUBROUTINE obs_op_pdaf(step, dim_p, dim_obs_p, state_p, m_state_p)
 #endif
         obs_interp_indices_p, &
         obs_interp_weights_p
-   USE mod_read_obs, ONLY: crns_flag !clm_obs
+   USE mod_read_obs, ONLY: crns_flag 
    use mod_tsmp, &
        only: obs_interp_switch, &
        soilay, &
        soilay_fortran, &
-       nz_glob
+       nz_glob, &
+       da_crns_depth_tol
 
    USE, INTRINSIC :: iso_c_binding
 !   USE mod_parallel_model, ONLY: tcycle 
@@ -96,7 +97,6 @@ real(8), dimension(:), allocatable :: soide !soil depth
 !                0.8d0,   1.3d0,   2.d0,  3.d0, 5.d0,  12.d0/) !soil depth
 
 real(8) :: tot, avesm, avesm_temp, Dp
-real(8), parameter :: tol=0.01d0
 integer :: nsc
 ! end of hcp 
 
@@ -149,7 +149,7 @@ endif
        enddo
        avesm_temp=0.d0
 
-       do while (abs(avesm-avesm_temp)/avesm .GE. tol)
+       do while (abs(avesm-avesm_temp)/avesm .GE. da_crns_depth_tol)
           avesm_temp=avesm
           Dp=0.058d0/(avesm+0.0829d0)
           avesm=0.d0; nsc=nz_glob

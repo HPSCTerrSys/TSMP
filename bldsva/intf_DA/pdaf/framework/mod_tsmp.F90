@@ -36,6 +36,7 @@ module mod_tsmp
     type(c_ptr), bind(c)     :: xcoord, ycoord, zcoord
     real(c_double), pointer  :: xcoord_fortran(:), ycoord_fortran(:), zcoord_fortran(:)
     real(c_double), pointer  :: pf_statevec_fortran(:)
+    real(c_double), bind(c,name="da_crns_depth_tol") :: da_crns_depth_tol
     type(c_ptr), bind(c)     :: idx_map_subvec2state
     integer(c_int), pointer  :: idx_map_subvec2state_fortran(:)
     type(c_ptr), bind(c)     :: soilay

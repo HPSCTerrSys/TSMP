@@ -113,3 +113,4 @@ GLOBAL double pf_aniso_perm_y,pf_aniso_perm_z;
 GLOBAL double da_interval;
 GLOBAL double pf_dampfac_param;
 GLOBAL double pf_dampfac_state;
+GLOBAL double da_crns_depth_tol;
