@@ -62,6 +62,7 @@ startreal =
 da_interval       =
 stat_dumpoffset   =
 point_obs =
+da_crns_depth_tol =
 ```
 
 In the following the individual entries of `enkfpf.par` are described:
@@ -478,6 +479,12 @@ Effect of `obs_interp_switch=1`:
   of the simulated measurements from the value at the surrounding grid
   points in the x-y-plane.
 
+### DA:da_crns_depth_tol ###
+
+`DA:da_crns_depth_tol`: (double) Relevant to assimilating PF averaged 
+soil moisture data only for the modelled CRNS data in Schroen etal in HESS 2017. This is 
+a convergence criteria (between 0 and 1) for the averaging skin depth.
+
 ## Parameter Summary ##
 
  | section   | parameter               | default value |
@@ -519,6 +526,7 @@ Effect of `obs_interp_switch=1`:
  |           | `screen_wrapper`        | 1             |
  |           | `point_obs`             | 1             |
  |           | `obs_interp_switch`     | 0             |
+ |           | `da_crns_depth_tol`     | 0.01          |
 
 Default values for parameter file `enkfpf.par`.
 
