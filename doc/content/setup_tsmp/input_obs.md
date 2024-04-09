@@ -260,12 +260,22 @@ from uppermost CLM layer).
 
 #### var_id ####
 
-`var_id`: (integer) Only used for multi-scale data assimilation. Size
-of `var_id` is same as `dim_obs`. `var_id` has same values over model
-grid cells, which have range of similar observations values from raw
-data over them.  The values can be grouped starting from 1 for similar
+`var_id`: (integer) ID of cells with similar observations.
+
+Only used for [multi-scale data
+assimilation](#multi-scale-data-assimilation) (turned on using
+[`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
+
+The size of `var_id` is `dim_obs`.
+
+`var_id` has equal values over model grid cells, which have range of
+similar observations values from raw data over them.
+
+The values of `var_id` can be grouped starting from 1 for similar
 observation values to other integers (2,3,4,5 etc.) for other similar
-observations. If there are no observations over some grid cells than a
+observations.
+
+If there are no observations over some grid cells than a
 negative `var_id` (integer) is assigned to them.
 
 #### dr ####
@@ -273,7 +283,8 @@ negative `var_id` (integer) is assigned to them.
 `dr`: (real) Snapping distance for the observation.
 
 **Attention** This variable should have a length of `2` (one snapping
-distance for longitudes and one for latitudes).
+distance in longitude direction and another snapping distance in
+latitude direction).
 
 Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
@@ -282,19 +293,17 @@ should be smaller than the minimum grid cell size.
 ## Multi-Scale Data Assimilation ##
 
 The multi-scale data assimilation has been implemented for Local
-Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). For
-multi-scale data assimilation, we need to specify in `enkfpf.par` the
-entry `point_obs` (in `[DA]`) to value 0 (integer) for using
-multi-scale data assimilation (eg. using SMAP satellite data over a
-large area which is not point data).
+Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). 
 
-Then in the observation files we need to specify variable `var_id`
-values. Size of `var_id` is same as `dim_obs` . `var_id` has same
-values over model grid cells, which have range of similar observations
-values from raw data over them. The values can be grouped starting
-from 1 for similar observation values to other integers (2,3,4,5 etc.)
-for other similar obersvations. If there are no observations over some
-grid cells than a negative `var_id` (integer) is assigned to them.
+Example for multi-scale data assimilation: Using SMAP satellite data
+over a large area which is not point data.
+
+To turn on multi-scale data assimilation, we need to specify in
+`enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
+to value `0` (integer).
+
+Then in the observation files we need to specify variable
+[`var_id`](#var_id) values.
 
 ## Observation time flexibility ##
 

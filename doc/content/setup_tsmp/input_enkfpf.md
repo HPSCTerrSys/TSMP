@@ -531,11 +531,16 @@ output. Analogous to `screen` variable for PDAF. Values: (0) no
 outputs, (1) medium outputs (default), (2) debugging output.
 
 ### DA:point_obs ###
-`DA:point_obs`: (integer) Only used in case of multi-scale data
-assimilation. Set to value 0 for using multi-scale data assimilation
-(eg. using SMAP satellite data over a large area which is not point
-data). If not specified its default value is set to 1, which is for
-using point observation for data assimilation run.
+
+`DA:point_obs`: (integer) Switch to turn off point observations,
+i.e. turn on [multi-scale data
+assimilation](./input_obs.md#multi-scale-data-assimilation).
+
+Default value of `point_obs` is `1`. This means that point
+observations are used for the data assimilation run.
+
+If `point_obs` is set to `0`, multi-scale data assimilation is used.
+Example: using SMAP satellite data over a large area.
 
 ### DA:obs_interp_switch ###
 
