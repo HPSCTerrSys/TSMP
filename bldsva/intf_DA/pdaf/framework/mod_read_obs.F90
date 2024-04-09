@@ -1,20 +1,20 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
@@ -51,6 +51,8 @@ module mod_read_obs
   integer :: multierr=0
   integer :: dim_nx, dim_ny
   integer :: crns_flag=0   !hcp
+  real, allocatable :: dampfac_state_time_dependent_in(:)
+  real, allocatable :: dampfac_param_time_dependent_in(:)
 contains
 
   !> @author Wolfgang Kurtz, Guowei He, Mukund Pondkule
@@ -64,24 +66,31 @@ contains
     USE mod_assimilation, &
         ! ONLY: obs_p, obs_index_p, dim_obs, obs_filename, screen
         ONLY: dim_obs, screen
-    use mod_parallel_model, &
+    use mod_parallel_pdaf, &
          only: mype_world !, mpi_info_null
     ! use mod_parallel_pdaf, &
     !      only: comm_filter
     use mod_tsmp, &
-        only: point_obs, obs_interp_switch
+        only: point_obs, obs_interp_switch, is_dampfac_state_time_dependent, &
+        is_dampfac_param_time_dependent
     use netcdf
     implicit none
     integer :: ncid
     character (len = *), parameter :: dim_name = "dim_obs"
     integer :: var_id_varid !, x, y
+    integer :: damp_state_varid
+    integer :: damp_param_varid
     ! integer :: comm, omode, info
     character (len = *), parameter :: dim_nx_name = "dim_nx"
     character (len = *), parameter :: dim_ny_name = "dim_ny"
     character (len = *), parameter :: var_id_name = "var_id"
+    character (len = *), parameter :: damp_state_name = "dampfac_state"
+    character (len = *), parameter :: damp_param_name = "dampfac_param"
     character(len = nf90_max_name) :: RecordDimName
     integer :: dimid, status
     integer :: haserr
+    integer :: has_damping_state
+    integer :: has_damping_param
     ! This is the name of the data file we will read.
     character (len = *), intent(in) :: current_observation_filename
 
@@ -162,6 +171,42 @@ contains
         if (screen > 2) then
             print *, "TSMP-PDAF mype(w)=", mype_world, ": var_id_obs_nc=", var_id_obs_nc
         end if
+    end if
+
+    ! Damping factors
+    ! ---------------
+    ! Input of flexible damping factors (could be different for each
+    ! update step)
+    has_damping_state = nf90_inq_varid(ncid, damp_state_name, damp_state_varid)
+
+    if(has_damping_state == nf90_noerr) then
+
+      is_dampfac_state_time_dependent = 1
+
+      if(allocated(dampfac_state_time_dependent_in)) deallocate(dampfac_state_time_dependent_in)
+      allocate(dampfac_state_time_dependent_in(1))
+
+      call check(nf90_get_var(ncid, damp_state_varid, dampfac_state_time_dependent_in))
+      if (screen > 2) then
+        print *, "TSMP-PDAF mype(w)=", mype_world, ": dampfac_state_time_dependent_in=", dampfac_state_time_dependent_in(1)
+      end if
+
+    end if
+
+    has_damping_param = nf90_inq_varid(ncid, damp_param_name, damp_param_varid)
+
+    if(has_damping_param == nf90_noerr) then
+
+      is_dampfac_param_time_dependent = 1
+
+      if(allocated(dampfac_param_time_dependent_in)) deallocate(dampfac_param_time_dependent_in)
+      allocate(dampfac_param_time_dependent_in(1))
+
+      call check(nf90_get_var(ncid, damp_param_varid, dampfac_param_time_dependent_in))
+      if (screen > 2) then
+        print *, "TSMP-PDAF mype(w)=", mype_world, ": dampfac_param_time_dependent_in=", dampfac_param_time_dependent_in(1)
+      end if
+
     end if
 
 #ifndef CLMSA
@@ -383,7 +428,7 @@ contains
   !> - `zidx_obs`
   !> - `ind_obs`
   subroutine get_obsindex_currentobsfile(no_obs) bind(c,name='get_obsindex_currentobsfile')
-    use mod_parallel_model, only: tcycle
+    USE mod_tsmp, ONLY: tcycle
     USE mod_assimilation, only: obs_filename
     use netcdf
 

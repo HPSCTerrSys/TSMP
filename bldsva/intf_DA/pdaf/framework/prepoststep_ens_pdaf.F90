@@ -1,25 +1,25 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
 !-------------------------------------------------------------------------------------------
-!prepoststep_ens_pdaf.F90: TerrSysMP-PDAF implementation of routine
+!prepoststep_ens_pdaf.F90: TSMP-PDAF implementation of routine
 !                          'prepoststep_ens_pdaf' (PDAF online coupling)
 !-------------------------------------------------------------------------------------------
 
@@ -62,15 +62,13 @@ SUBROUTINE prepoststep_ens_pdaf(step, dim_p, dim_ens, dim_ens_p, dim_obs_p, &
     !
     ! !USES:
     USE mod_assimilation, &
-        ONLY: dim_state, dim_state_p_count, dim_state_p_stride
+        ONLY: dim_state, dim_state_p_count
     USE mod_parallel_pdaf, &
         ONLY: mype_filter, npes_filter, COMM_filter, MPI_DOUBLE_PRECISION, &
-        MPIerr, MPIstatus, filterpe, &
+        MPIerr, MPIstatus, filterpe, mype_model, npes_model, mype_world, &
         MPI_COMM_WORLD, MPI_SUCCESS
-    use mod_parallel_model, &
-        only: model
     use mod_tsmp, &
-        only: tag_model_parflow, pf_statevecsize, nprocclm
+        only: tag_model_parflow, pf_statevecsize, nprocclm, model
 
 
     IMPLICIT NONE
@@ -110,6 +108,7 @@ SUBROUTINE prepoststep_ens_pdaf(step, dim_p, dim_ens, dim_ens_p, dim_obs_p, &
     CHARACTER(len=3) :: anastr          ! String for call type (initial, forecast, analysis)
     ! Variables for parallelization - global fields
     INTEGER :: offset   ! Row-offset according to domain decomposition
+    INTEGER, ALLOCATABLE :: dim_state_p_stride(:) ! local state vector sizes summation array
     REAL, ALLOCATABLE :: variance(:)    ! local variance
     !REAL, ALLOCATABLE :: ens(:,:)       ! global ensemble
     !REAL, ALLOCATABLE :: state(:)       ! global state vector
@@ -186,6 +185,19 @@ SUBROUTINE prepoststep_ens_pdaf(step, dim_p, dim_ens, dim_ens_p, dim_obs_p, &
         call MPI_Barrier(comm_filter, ierror)
     end if
 
+    IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
+    allocate(dim_state_p_stride(npes_model))
+    do i = 1, npes_model
+      dim_state_p_stride(i) = 0
+      do j = 1, i - 1
+        dim_state_p_stride(i) = dim_state_p_count(j) + dim_state_p_stride(i)
+      end do
+    end do
+#ifdef PDAF_DEBUG
+    ! Debug output: summed until index local state dimension array
+    if (mype_model == 0 ) WRITE(*, '(a,x,a,i5,x,a,x,i9)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "init_pdaf: dim_state_p_stride in modified:", dim_state_p_stride
+#endif
+
     !!!!!!!!!!!!!!!!!!!!!!!! case below contains dummy CLM component  !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     if (filterpe) then
         print *, "prepoststep: gathering variance"
@@ -201,6 +213,7 @@ SUBROUTINE prepoststep_ens_pdaf(step, dim_p, dim_ens, dim_ens_p, dim_obs_p, &
         print *, "prepoststep: gathering variance succeeded"
     end if
     DEALLOCATE(variance_p)
+    IF (allocated(dim_state_p_stride)) deallocate(dim_state_p_stride)
 
 
     ! ************************************************************

@@ -5,8 +5,16 @@ executed:
 
 ## n_modeltasks ##
 
-`n_modeltasks` (integer) Number of realisations. Must be consistent
-with `[DA] nreal`.
+`n_modeltasks` (integer) Number of realisations. Must be equal to
+[`[DA] nreal`](./input_enkfpf.md#danreal).
+
+Note that both `n_modeltasks` (or `nreal`) and the total number of MPI
+tasks specified, f.e. with `srun -n` or `mpiexec -np` (internally:
+`npes_world`) have to match with the total number of processes
+specified for the component models:
+[`PF:nprocs`](./input_enkfpf.md#pfnprocs),
+[`CLM:nprocs`](./input_enkfpf.md#clmnprocs),
+[`COSMO:nprocs`](./input_enkfpf.md#cosmonprocs).
 
 ## filtertype ##
 
@@ -132,8 +140,8 @@ will be performed every assimilation cycle with an observation error of
 
 ### Command Line Example: LETKF ###
 
-`local_range` (real) set localization radius, 0.0 by default, any
-positive value should work.
+`cradius` (deprecated: `local_range`) (real) set cut-off radius, 0.0
+by default, any positive value should work.
 
 `locweight` (integer) set weight function for localization, default=0
 for constant weight of 1; possible are integer values 0 to 4.
@@ -151,7 +159,7 @@ Kalman Filter (Letkf).
 
 Example of the model execution using Letkf analysis:
 
-        mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 5 -local_range 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+        mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 5 -cradius 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
 
 With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 64 realisations (8 processors for each realisation) and Letkf analysis
@@ -160,7 +168,7 @@ will be performed every assimilation cycle with an observation error of
 
 ### Command Line Example: LESTKF ###
 
-`local_range` (real) set localization radius, 0.0 by default, any
+`cradius` (deprecated: `local_range`) (real) set cut-off radius, 0.0 by default, any
 positive value should work.
 
 `locweight` (integer) set weight function for localization, default=0
@@ -179,7 +187,7 @@ Filter (LESTKF).
 
 Example of the model execution using Lestkf analysis:
 
-        mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 7 -local_range 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+        mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 7 -cradius 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
 
 With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 64 realisations (8 processors for each realisation) and Lestkf analysis
@@ -188,19 +196,21 @@ will be performed every assimilation cycle with an observation error of
 
 ### Command Line Example: LENKF ###
 
-`local_range` (real) set localization radius (Cut-off-radius)
+`cradius` (deprecated: `local_range`) (real) set cut-off radius
 - 0.0 by default
 - any positive value should work.
 
-`srange` (integer): the support radius of the localization, default:
-equal to `local_range`. Usage in `PDAF_local_weight.F90`
-- `locweight == 0`: `srange` is not used
-- `locweight == 1`: `srange` is distance with weight `1/e`, for
-  avoiding sharp cut-off, `local_range` should be significantly larger
-  than `srange`
-- `locweight == 2`: `srange` is the support range for 5th-order
-  polynomial, can safely be chosen the same as `local_range`,
-  parametrization change of the 5th-order polynomial is at `srange/2`,
+`sradius` (deprecated `srange`) (real): the support radius of the
+localization, default: equal to `cradius`. Usage in
+`PDAF_local_weight.F90`
+(<https://pdaf.awi.de/trac/wiki/PDAF_local_weight>)
+- `locweight == 0`: `sradius` is not used
+- `locweight == 1`: `sradius` is distance with weight `1/e`, for
+  avoiding sharp cut-off, `cradius` should be significantly larger
+  than `sradius`
+- `locweight == 2`: `sradius` is the support radius for 5th-order
+  polynomial, can safely be chosen the same as `cradius`,
+  parametrization change of the 5th-order polynomial is at `sradius/2`,
   see
   <https://github.com/PDAF/PDAF/blob/ed631034956dece8e91e8b588c4cf3aaa7916f49/src/PDAF_local_weight.F90#L147-L176>.
 
@@ -223,7 +233,7 @@ Filter (Lenkf).
 Example of the model execution using Lenkf analysis:
 
 ``` bash
-mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 8 -local_range 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 8 -cradius 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
 ```
 
 With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run

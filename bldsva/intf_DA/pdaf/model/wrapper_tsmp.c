@@ -1,32 +1,35 @@
 /*-----------------------------------------------------------------------------------------
 Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
 
-This file is part of TerrSysMP-PDAF
+This file is part of TSMP-PDAF
 
-TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+TSMP-PDAF is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-TerrSysMP-PDAF is distributed in the hope that it will be useful,
+TSMP-PDAF is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU LesserGeneral Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------------------
-wrapper_tsmp.c: Wrapper functions for TerrSysMP
+wrapper_tsmp.c: Wrapper functions for TSMP
 -------------------------------------------------------------------------------------------*/
 
 #define GLOBAL
+
 #include "enkf.h"
+
 #if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
 #include "enkf_parflow.h"
 #endif
+
 #include "wrapper_tsmp.h"
 
 /*-------------------------------------------------------------------------*/
@@ -41,26 +44,27 @@ wrapper_tsmp.c: Wrapper functions for TerrSysMP
 void initialize_tsmp() {
   int argc = 0; char ** argv ;	/* Dummy command line arguments for amps */
 
+  int pdaf_id;
+  int coupcol;
+  int pdaf_max;
 
   /* read parameter file for data assimilation 'enkfpf.par' */
   read_enkfpar("enkfpf.par");
 
+  /* Set pdaf_id / pdaf_max realization-information for usage
+     in component models*/
+  coupcol = task_id - 1 + startreal;
+  pdaf_id = (int) coupcol;
+  pdaf_max = (int) nreal;
+
   /* initialize clm, parflow and cosmo instances */
   if(model == 0) {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
-    /* enkf_clm.F90 */
 #if defined CLMFIVE
-    int pdaf_id;
-    int pdaf_max;
-    int coupcol;
-
-    coupcol = task_id - 1 + startreal;
-
-    pdaf_id = (int) coupcol;
-    pdaf_max = (int) nreal;
-
+    /* enkf_clm.F90 */
     clm5_init(clminfile, &pdaf_id, &pdaf_max);
 #else    
+    /* enkf_clm.F90 */
     clm_init(clminfile);
 #endif    
 #endif
@@ -76,7 +80,7 @@ void initialize_tsmp() {
   if(model == 2){
 #if defined COUP_OAS_COS
     /* enkf_cosmo.F90 */
-    cosmo_init();
+    cosmo_init(&pdaf_id);
 #endif
   }
 }
@@ -92,21 +96,6 @@ void finalize_tsmp() {
 
   if(model == 1) {
 #if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
-    free(subvec_p);
-    free(subvec_sat);
-    free(subvec_porosity);
-    free(subvec_param);
-    free(subvec_mean);
-    free(subvec_sd);
-    free(subvec_param_mean);
-    free(subvec_param_sd);
-    free(pf_statevec);
-
-    free(subvec_permy);
-    free(subvec_permz);
-    free(arr_aniso_perm_yy);
-    free(arr_aniso_perm_zz);
-
     enkfparflowfinalize();
 #endif
   }
@@ -151,7 +140,7 @@ void integrate_tsmp() {
 
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {
-      printf("TSMP-PDAF-WRAPPER mype(w)=%d: CLM: advancing (%d clm time steps)\n",mype_world, tsclm);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d: CLM: advancing (%d clm time steps)\n",mype_world, tsclm);
     }
 
     /* Integrate CLM */
@@ -159,7 +148,7 @@ void integrate_tsmp() {
 
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {
-      printf("TSMP-PDAF-WRAPPER mype(w)=%d: CLM: advancing finished\n", mype_world);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d: CLM: advancing finished\n", mype_world);
     }
 
 #endif
@@ -170,7 +159,7 @@ void integrate_tsmp() {
 #if defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {
-      printf("TSMP-PDAF-WRAPPER mype(w)=%d: Parflow: advancing (from %lf to %lf)\n",mype_world,t_start,t_start+(double)da_interval);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d: Parflow: advancing (from %lf to %lf)\n",mype_world,t_start,t_start+(double)da_interval);
     }
 
     /* Integrate ParFlow */
@@ -178,7 +167,7 @@ void integrate_tsmp() {
 
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {
-      printf("TSMP-PDAF-WRAPPER mype(w)=%d: Parflow: advancing finished\n", mype_world);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d: Parflow: advancing finished\n", mype_world);
     }
 
     /* Print ensemble statistics to PFB */
@@ -199,7 +188,7 @@ void integrate_tsmp() {
 
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {
-      printf("TSMP-PDAF-WRAPPER mype(w)=%d: COSMO: tscos is %d",mype_world,tscos);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d: COSMO: tscos is %d",mype_world,tscos);
     }
 
     /* Integrate COSMO */
@@ -210,16 +199,6 @@ void integrate_tsmp() {
   t_start += (double)da_interval;
   tstartcycle++;
 }
-
-#if (defined COUP_OAS_PFL || defined PARFLOW_STAND_ALONE)
-void print_update_pfb(){
-  if(model == 1){
-    enkf_printstatistics_pfb(subvec_p,"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
-  }
-}
-#endif
-
-
 
 void update_tsmp(){
 

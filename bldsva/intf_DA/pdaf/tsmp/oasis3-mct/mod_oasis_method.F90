@@ -124,7 +124,7 @@ CONTAINS
    ! mpi_comm_global = MPI_COMM_WORLD
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   mpi_comm_global = da_comm
+   mpi_comm_global = COMM_model_oas
 !!<<TSMP-PDAF addition end
 #elif defined use_comm_MPI2
    mpi_comm_global = ??
@@ -270,7 +270,7 @@ CONTAINS
    ! mpi_comm_global = MPI_COMM_WORLD
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   mpi_comm_global = da_comm
+   mpi_comm_global = COMM_model_oas
 !!<<TSMP-PDAF addition end
    ikey = compid
    icolor = compid
@@ -278,7 +278,7 @@ CONTAINS
    ! call MPI_COMM_SPLIT(MPI_COMM_WORLD,icolor,ikey,mpi_comm_local,mpi_err)
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   call MPI_COMM_SPLIT(da_comm,icolor,ikey,mpi_comm_local,mpi_err)
+   call MPI_COMM_SPLIT(COMM_model_oas,icolor,ikey,mpi_comm_local,mpi_err)
 !!<<TSMP-PDAF addition end
 
 #elif defined use_comm_MPI2
@@ -288,7 +288,7 @@ CONTAINS
    ! mpi_comm_local = MPI_COMM_WORLD
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   mpi_comm_local = da_comm
+   mpi_comm_local = COMM_model_oas
 !!<<TSMP-PDAF addition end
 
 #endif
@@ -320,7 +320,7 @@ CONTAINS
    !    string=subname//':mpi_root_global',all=.true.)
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   call oasis_mpi_max(tmparr,mpi_root_global,da_comm, &
+   call oasis_mpi_max(tmparr,mpi_root_global,COMM_model_oas, &
       string=subname//':mpi_root_global',all=.true.)
 !!<<TSMP-PDAF addition end
    deallocate(tmparr)
@@ -449,7 +449,7 @@ CONTAINS
       ! write(nulprt,*) subname,' mpi_comm_world = ',MPI_COMM_WORLD
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-      write(nulprt,*) subname,' mpi_comm_world = ',da_comm
+      write(nulprt,*) subname,' mpi_comm_world = ',COMM_model_oas
 !!<<TSMP-PDAF addition end
       write(nulprt,*) subname,' mpi_comm_global= ',mpi_comm_global
       write(nulprt,*) subname,'     size_global= ',mpi_size_global
@@ -723,7 +723,7 @@ CONTAINS
    !                           mpi_root_global(il), tag, new_comm, ierr)
 !!<<TSMP-PDAF comment out end
 !!>>TSMP-PDAF addition beginning
-   CALL mpi_intercomm_create(mpi_comm_local, 0, da_comm, &
+   CALL mpi_intercomm_create(mpi_comm_local, 0, COMM_model_oas, &
                              mpi_root_global(il), tag, new_comm, ierr)
 !!<<TSMP-PDAF addition end
 
