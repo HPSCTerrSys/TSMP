@@ -628,11 +628,53 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 
 	/* create state vector: swc */
 	if(pf_updateflag == 2){
+
+#ifdef PDAF_DEBUG
+	  /* Debug output of parflow statevec */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, subvec_porosity[%1d] = %lf\n", mype_world, i, subvec_porosity[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
+          }
+#endif
+
 	  PF2ENKF(saturation_out, subvec_sat);
 	  PF2ENKF(porosity_out, subvec_porosity);
 	  for(i=0;i<enkf_subvecsize;i++) {
             pf_statevec[i] = subvec_sat[i] * subvec_porosity[i];
           }
+
+
+#ifdef PDAF_DEBUG
+	  /* Debug output of parflow statevec */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, subvec_porosity[%1d] = %lf\n", mype_world, i, subvec_porosity[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
+          }
+#endif
+
+
 	  /* hcp CRNS begins */
 	  double dz_glob=GetDouble("ComputationalGrid.DZ");  //hcp if crns update
 	  int isc;
@@ -2097,6 +2139,29 @@ void update_parflow () {
   }
 
   if(pf_updateflag == 2){
+
+#ifdef PDAF_DEBUG
+	  /* Debug output of parflow statevec */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, saturation_in[%1d] = %lf\n", mype_world, i, saturation_in[i]);
+          }
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]); */
+          /* } */
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]); */
+          /* } */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, subvec_porosity[%1d] = %lf\n", mype_world, i, subvec_porosity[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, subvec_p[%1d] = %lf\n", mype_world, i, subvec_p[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
+          }
+#endif
+
     /* write state vector to saturation in parflow */
     Vector * saturation_in = GetSaturationRichards(solver);
     for(i=0;i<enkf_subvecsize;i++){
@@ -2130,6 +2195,32 @@ void update_parflow () {
     PF2ENKF(pressure_in,subvec_p);
     handle = InitVectorUpdate(pressure_in, VectorUpdateAll);
     FinalizeVectorUpdate(handle);
+
+#ifdef PDAF_DEBUG
+	  /* Debug output of parflow statevec */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 2, saturation_in[%1d] = %lf\n", mype_world, i, saturation_in[i]);
+          }
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 2, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]); */
+          /* } */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, pressure_in[%1d] = %lf\n", mype_world, i, pressure_in[i]);
+          }
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 2, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]); */
+          /* } */
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 2, subvec_porosity[%1d] = %lf\n", mype_world, i, subvec_porosity[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, subvec_p[%1d] = %lf\n", mype_world, i, subvec_p[i]);
+          }
+	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
+	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 2, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
+          }
+#endif
+
   }
 
   if(pf_updateflag == 3){
