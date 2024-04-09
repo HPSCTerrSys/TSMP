@@ -2140,6 +2140,9 @@ void update_parflow () {
 
   if(pf_updateflag == 2){
 
+    /* write state vector to saturation in parflow */
+    Vector * saturation_in = GetSaturationRichards(solver);
+
 #ifdef PDAF_DEBUG
 	  /* Debug output of parflow statevec */
 	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
@@ -2161,9 +2164,6 @@ void update_parflow () {
 	    printf("TSMP-PDAF-debug mype(w)=%5d: update_parflow 1, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
           }
 #endif
-
-    /* write state vector to saturation in parflow */
-    Vector * saturation_in = GetSaturationRichards(solver);
     for(i=0;i<enkf_subvecsize;i++){
       pf_statevec[i] = pf_statevec[i] / subvec_porosity[i];
       /* if(pf_statevec[i] > 1.0){ */
