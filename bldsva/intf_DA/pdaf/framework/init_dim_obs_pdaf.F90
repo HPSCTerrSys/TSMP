@@ -91,10 +91,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        clm_obs, &
        var_id_obs_nc, dim_nx, dim_ny, &
        clmobs_lon, clmobs_lat, clmobs_layer, clmobs_dr, clm_obserr, &
-       crns_flag, dampfac_state_time_dependent_in, dampfac_param_time_dependent_in
+       dampfac_state_time_dependent_in, dampfac_param_time_dependent_in
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      nx_glob, ny_glob, nz_glob, &
+      nx_glob, ny_glob, nz_glob, crns_flag, &
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
@@ -201,8 +201,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_bcast(dim_obs, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! Switch for vector of observation errors
   call mpi_bcast(multierr, 1, MPI_INTEGER, 0, comm_filter, ierror)
-  ! broadcast crns_flag
-  call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
+  !! broadcast crns_flag
+  !call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! broadcast dim_ny and dim_nx
   if(point_obs.eq.0) then
      call mpi_bcast(dim_nx, 1, MPI_INTEGER, 0, comm_filter, ierror)
@@ -547,7 +547,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      endif
      if(crns_flag.eq.1) then 
         if (allocated(sc_p)) deallocate(sc_p)
-        allocate(sc_p(dim_obs_p, nz_glob))
+        allocate(sc_p(nz_glob, dim_obs_p))
         if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
         allocate(idx_obs_nc_p(dim_obs_p))
      endif
@@ -640,7 +640,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         do k = 1, nz_glob
           k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
           do j = 1, enkf_subvecsize
-             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i,nz_glob-k+1)=j
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(nz_glob-k+1,i)=j
           enddo
         enddo
       endif

@@ -50,7 +50,7 @@ module mod_read_obs
   ! Flag: Use vector of observation errors in observation file
   integer :: multierr=0
   integer :: dim_nx, dim_ny
-  integer :: crns_flag=0   !hcp
+!  integer :: crns_flag=0   !hcp
   real, allocatable :: dampfac_state_time_dependent_in(:)
   real, allocatable :: dampfac_param_time_dependent_in(:)
 contains
@@ -72,7 +72,7 @@ contains
     !      only: comm_filter
     use mod_tsmp, &
         only: point_obs, obs_interp_switch, is_dampfac_state_time_dependent, &
-        is_dampfac_param_time_dependent
+        is_dampfac_param_time_dependent, crns_flag
     use netcdf
     implicit none
     integer :: ncid
@@ -251,10 +251,10 @@ contains
             end if
         endif
 
-        has_depth = nf90_inq_varid(ncid, depth_name, depth_varid)
-        if(has_depth == nf90_noerr) then
-            crns_flag = 1
-        end if
+        !has_depth = nf90_inq_varid(ncid, depth_name, depth_varid)
+        !if(has_depth == nf90_noerr) then
+        !    crns_flag = 1
+        !end if
 
         ! Read the surface pressure and idxerature data from the file.
         ! Since we know the contents of the file we know that the data

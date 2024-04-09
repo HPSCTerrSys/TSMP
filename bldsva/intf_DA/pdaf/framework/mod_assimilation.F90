@@ -76,8 +76,7 @@ MODULE mod_assimilation
   !type :: scoltype
   !     integer, dimension(:), allocatable :: scol_obs_in
   !endtype
-  integer, dimension(:,:), allocatable :: sc_p 
-  !type(scoltype), dimension(:), allocatable :: sc_p 
+  integer, dimension(:,:), allocatable :: sc_p  !soild moisture of a soil column distributed over the procs of PE-local (i_z, i_obs)
   real, allocatable    :: idx_obs_nc_p(:)        
   INTEGER :: toffset      ! offset time step to shift all the assimilation steps
   !end hcp  

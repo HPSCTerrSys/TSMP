@@ -34,6 +34,7 @@ module mod_tsmp
     integer(c_int), bind(c)  :: tag_model_clm = 0
     integer(c_int), bind(c)  :: tag_model_parflow = 1
     integer(c_int), bind(c)  :: tag_model_cosmo   = 2
+    integer(c_int), bind(c)  :: crns_flag
     type(c_ptr), bind(c)     :: pf_statevec
     type(c_ptr), bind(c)     :: xcoord, ycoord, zcoord
     real(c_double), pointer  :: xcoord_fortran(:), ycoord_fortran(:), zcoord_fortran(:)
