@@ -44,6 +44,11 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
 ! The routine is called by all filter processes and
 ! initializes the ensemble for the PE-local domain.
 !
+! !TSMP-PDAF-DESCRIPTION:
+! This routine initializes the PE-local state ensemble with
+! dummy values. Initial model values for TSMP-PDAF are read
+! from component-model specific input files.
+!
 ! !REVISION HISTORY:
 ! 2013-02 - Lars Nerger - Initial code
 ! Later revisions - see svn log
