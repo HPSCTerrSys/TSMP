@@ -534,7 +534,7 @@ outputs, (1) medium outputs (default), (2) debugging output.
 
 `DA:point_obs`: (integer) Switch to turn off point observations,
 i.e. turn on [multi-scale data
-assimilation](./input_obs.md#multi-scale-data-assimilation).
+assimilation](./input_obs.md#multi-scale-data-assimilation-observation-variables).
 
 Default value of `point_obs` is `1`. This means that point
 observations are used for the data assimilation run.

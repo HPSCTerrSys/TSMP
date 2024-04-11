@@ -258,13 +258,42 @@ the observation error (equal for all observations).
 `layer`: (integer) CLM layer where the observation is located (counted
 from uppermost CLM layer).
 
+#### dr ####
+
+`dr`: (real) Snapping distance for the observation.
+
+**Attention** This variable should have a length of `2` (one snapping
+distance in longitude direction and another snapping distance in
+latitude direction).
+
+Each of the CLM observations is snapped to the nearest CLM grid cell
+based on the given `lon`, `lat` and the snapping distance `dr` which
+should be smaller than the minimum grid cell size.
+
+### Multi-Scale Data Assimilation observation file variables ###
+
+The multi-scale data assimilation has been implemented for Local
+Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`).
+
+Example for multi-scale data assimilation: Using SMAP satellite data
+over a large area which is not point data.
+
+To turn on multi-scale data assimilation, we need to specify in
+`enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
+to value `0` (integer).
+
+Then in the observation files we need to specify variable
+[`var_id`](#var_id) and the dimension `dim_nx` and `dim_ny`.
+
+![Grids](./figures/multi_scale_da.png)
+
 #### var_id ####
 
 `var_id`: (integer) ID of cells with similar observations.
 
 Only used for [multi-scale data
-assimilation](#multi-scale-data-assimilation) (turned on using
-[`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
+assimilation](#multi-scale-data-assimilation-observation-variables)
+(turned on using [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
 
 The size of `var_id` is `dim_obs`.
 
@@ -278,32 +307,15 @@ observations.
 If there are no observations over some grid cells than a
 negative `var_id` (integer) is assigned to them.
 
-#### dr ####
+#### dim_nx ####
 
-`dr`: (real) Snapping distance for the observation.
+`dim_nx`: (int) This is the x-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
 
-**Attention** This variable should have a length of `2` (one snapping
-distance in longitude direction and another snapping distance in
-latitude direction).
+#### dim_ny ####
 
-Each of the CLM observations is snapped to the nearest CLM grid cell
-based on the given `lon`, `lat` and the snapping distance `dr` which
-should be smaller than the minimum grid cell size.
-
-## Multi-Scale Data Assimilation ##
-
-The multi-scale data assimilation has been implemented for Local
-Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). 
-
-Example for multi-scale data assimilation: Using SMAP satellite data
-over a large area which is not point data.
-
-To turn on multi-scale data assimilation, we need to specify in
-`enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
-to value `0` (integer).
-
-Then in the observation files we need to specify variable
-[`var_id`](#var_id) values.
+`dim_ny`: (int) This is the y-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
 
 ## Observation time flexibility ##
 
