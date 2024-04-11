@@ -569,9 +569,20 @@ in Schroen etal HESS 2017 to model CRNS observation. Default is zero.
 
 ### DA:da_crns_depth_tol ###
 
-`DA:da_crns_depth_tol`: (double) Relevant to assimilating PF averaged 
-soil moisture data only for the modelled CRNS data in Schroen etal in HESS 2017. This is 
-a convergence criteria (between 0 and 1) for the averaging skin depth.
+`DA:da_crns_depth_tol`: (double) Convergence criteria for weighting
+procedure that "generate[s] a weighted average of [soil-moisture]
+point measurements that can be compared with [...] [a] CRNS product"
+(Schrön et al, 2017 http://dx.doi.org/10.5194/hess-21-5009-2017)
+
+Only used if CRNS-observations are turned on by adding parameter
+`depth` in observation input.
+
+Relevant to assimilating PF averaged soil moisture data only for the
+modelled CRNS data in Schroen etal in HESS 2017. 
+
+This is a convergence criteria (between 0 and 1) for the averaging
+skin depth (compare the weighting procedure described in Schrön et al,
+2017, section 2.3).
 
 ## Parameter Summary ##
 

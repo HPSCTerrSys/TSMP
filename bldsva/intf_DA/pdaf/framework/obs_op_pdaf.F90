@@ -142,18 +142,21 @@ endif
        soide(i)=soide(i-1)+soilay_fortran(nz_glob-i+1) 
      enddo
      do i = 1, dim_obs_p
-       !initial average soil moisture for 1st iteration
+
+       !Initial average soil moisture for 1st iteration
        avesm=0.d0
        do j=1,nz_glob
             avesm=avesm+(soide(j)-soide(j-1))*state_p(sc_p(j,i))/soide(nz_glob)
        enddo
        avesm_temp=0.d0
+
        !iteration
        do while (abs(avesm-avesm_temp)/avesm .GE. da_crns_depth_tol)
           !Averaging, conventional profile, Schroen et al HESS 2017 Eq. (3)
           avesm_temp=avesm
           Dp=0.058d0/(avesm+0.0829d0)
-          !Sun weight*soil_moisture
+
+          !Sum weight*soil_moisture
           avesm=0.d0; nsc=nz_glob
           do j=1,nz_glob
              if ((soide(j-1).LT.Dp).AND.(Dp.LE.soide(j))) then
@@ -166,6 +169,7 @@ endif
           enddo
           avesm=avesm+(1.d0-0.5d0*(Dp+soide(nsc-1))/Dp)*(Dp-soide(nsc-1)) &
              *state_p(sc_p(nsc,i))/Dp
+
           !Sum weight
           tot=0.d0
           do j=1, nsc-1
