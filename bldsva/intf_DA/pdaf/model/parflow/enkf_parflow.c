@@ -631,12 +631,12 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 
 #ifdef PDAF_DEBUG
 	  /* Debug output of parflow statevec */
-	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
-	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]);
-          }
-	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
-	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]);
-          }
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]); */
+          /* } */
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]); */
+          /* } */
 	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
 	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 1, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]);
           }
@@ -657,12 +657,12 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 
 #ifdef PDAF_DEBUG
 	  /* Debug output of parflow statevec */
-	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
-	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]);
-          }
-	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
-	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]);
-          }
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, saturation_out[%1d] = %lf\n", mype_world, i, saturation_out[i]); */
+          /* } */
+	  /* for(i=0;i<fmin(6, enkf_subvecsize);i++) { */
+	  /*   printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, porosity_out[%1d] = %lf\n", mype_world, i, porosity_out[i]); */
+          /* } */
 	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
 	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, subvec_sat[%1d] = %lf\n", mype_world, i, subvec_sat[i]);
           }
