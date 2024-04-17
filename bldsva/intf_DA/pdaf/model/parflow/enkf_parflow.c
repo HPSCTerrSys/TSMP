@@ -672,6 +672,9 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 	  for(i=0;i<fmin(6, enkf_subvecsize);i++) {
 	    printf("TSMP-PDAF-debug mype(w)=%5d: enkfparflowadvance 2, pf_statevec[%1d] = %lf\n", mype_world, i, pf_statevec[i]);
           }
+
+	  /* Print statevector before update */
+	  if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"integrate",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
 #endif
 
 
