@@ -31,6 +31,9 @@ route "${cyellow}>> configure_da${cnormal}"
     comCC="${mpiPath}/bin/mpicc"
   fi
 
+  pdaflib_cpp_defs=" "
+  # pdaflib_cpp_defs+=" -DPDAF_DEBUG "
+
 #    libs_src=" -L$lapackPath -L${mpiPath}/lib64"
 #    libs_src=" -L$lapackPath -lopenblas -L${mpiPath}/lib64"
 #    libs_src=" $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
