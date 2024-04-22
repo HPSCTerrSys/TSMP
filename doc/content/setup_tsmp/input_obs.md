@@ -275,8 +275,15 @@ should be smaller than the minimum grid cell size.
 The multi-scale data assimilation has been implemented for Local
 Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`).
 
-Example for multi-scale data assimilation: Using SMAP satellite data
-over a large area which is not point data.
+Definition: Multiscale DA means that the simulation grid and
+measurement grid are at different scales. 
+
+Example for multi-scale data assimilation: Using SMAP satellite soil
+moisture data at 9km resolution and a simulation grid at 1km
+resolution. In this case the measurement gives than an average soil
+moisture for the upper 5cm of the soil for 9 x 9 grid cells = 81 grid
+cells. We do not have measurements for all individual grid cells, but
+just an average value over those 81 grid cells (and the upper 5cm).
 
 To turn on multi-scale data assimilation, we need to specify in
 `enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
