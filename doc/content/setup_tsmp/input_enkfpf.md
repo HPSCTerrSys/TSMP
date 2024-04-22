@@ -65,6 +65,8 @@ startreal =
 da_interval       =
 stat_dumpoffset   =
 point_obs =
+crns_flag =
+da_crns_depth_tol =
 ```
 
 In the following the individual entries of `enkfpf.par` are described:
@@ -559,6 +561,29 @@ Effect of `obs_interp_switch=1`:
   of the simulated measurements from the value at the surrounding grid
   points in the x-y-plane.
 
+### DA:crns_flag ###
+
+`DA:crns_flag`: (int) Set to 1 will read the parflow soil moisture data 
+as averaged soil moisture with the conventional weighting profile proposed 
+in Schroen etal HESS 2017 to model CRNS observation. Default is zero.
+
+### DA:da_crns_depth_tol ###
+
+`DA:da_crns_depth_tol`: (double) Convergence criteria for weighting
+procedure that "generate[s] a weighted average of [soil-moisture]
+point measurements that can be compared with [...] [a] CRNS product"
+(Schrön et al, 2017 http://dx.doi.org/10.5194/hess-21-5009-2017)
+
+Only used if CRNS-observations are turned on by adding parameter
+`depth` in observation input.
+
+Relevant to assimilating PF averaged soil moisture data only for the
+modelled CRNS data in Schroen etal in HESS 2017. 
+
+This is a convergence criteria (between 0 and 1) for the averaging
+skin depth (compare the weighting procedure described in Schrön et al,
+2017, section 2.3).
+
 ## Parameter Summary ##
 
  | section   | parameter               | default value |
@@ -603,6 +628,8 @@ Effect of `obs_interp_switch=1`:
  |           | `screen_wrapper`        | 1             |
  |           | `point_obs`             | 1             |
  |           | `obs_interp_switch`     | 0             |
+ |           | `crns_flag`             | 1             |
+ |           | `da_crns_depth_tol`     | 0.01          |
 
 Default values for parameter file `enkfpf.par`.
 
