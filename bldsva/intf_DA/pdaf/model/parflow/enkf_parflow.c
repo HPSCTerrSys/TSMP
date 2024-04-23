@@ -674,7 +674,12 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
           /* } */
 
 	  /* Debug: Print statevector before update */
-	  if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"integrate",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+	  /* Explanation for `tstartcycle +1`: This is the state
+	     vector after the forward simulation, however one gets
+	     added to `tstartcycle` in the wrapper subroutine directly
+	     after this routine, so the added value fits better than
+	     the current value. */
+	  if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"integrate",tstartcycle + 1 + stat_dumpoffset,pfoutfile_ens,3);
 #endif
 
 
