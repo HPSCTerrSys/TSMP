@@ -679,7 +679,11 @@ void enkfparflowadvance(int tcycle, double current_time, double dt)
 	     added to `tstartcycle` in the wrapper subroutine directly
 	     after this routine, so the added value fits better than
 	     the current value. */
-	  if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"integrate",tstartcycle + 1 + stat_dumpoffset,pfoutfile_ens,3);
+	  if(pf_t_printensemble == tstartcycle + 1 || pf_t_printensemble < 0 ) {
+	    if(pf_printensemble == 1) {
+	      enkf_printstatistics_pfb(&pf_statevec[0],"integrate",tstartcycle + 1 + stat_dumpoffset,pfoutfile_ens,3);
+	    }
+	  }
 #endif
 
 
@@ -1535,10 +1539,12 @@ void update_parflow () {
   }
 
   /* print updated ensemble */
-  if(pf_updateflag == 3){
-    if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[enkf_subvecsize],"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
-  }else{
-    if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+  if(pf_t_printensemble == tstartcycle + 1 || pf_t_printensemble < 0 ) {
+    if(pf_updateflag == 3){
+      if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[enkf_subvecsize],"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+    }else{
+      if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[0],"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+    }
   }
 
 

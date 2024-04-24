@@ -39,6 +39,7 @@ aniso_perm_y       =
 aniso_perm_z       =
 aniso_use_parflow  =
 printensemble      =
+t_printensemble    =
 printstat          =
 paramprintensemble =
 paramprintstat     =
@@ -300,9 +301,25 @@ from the input variables `PF:aniso_perm_y` and `PF:aniso_perm_z`.
 
 `PF:printensemble`: (integer) If set to `1`, the updated state
 variables for all ensemble members is printed out as `pfb` files after
-each assimilation cycle.  Files are printed to `[DA]outdir` and follow
-the file naming convention of ParFlow. They include the specifier
-`update` in the file name.
+each assimilation cycle.
+
+Files are printed to `[DA]outdir` and follow the file naming
+convention of ParFlow. They include the specifier `update` in the file
+name.
+
+For debug runs
+([`PDAF_DEBUG`](./../build_tsmp/build_preprocessor_variables.md#pdaf_debug)),
+the state ensemble is also printed out before the DA update. The
+specifier for the files containing the pre-DA state ensemble is
+`integrate`.
+
+### PF:t_printensemble ###
+
+`PF:t_printensemble`: (integer) The timestep for the state ensemble
+output switched on under `PF:printensemble`.
+
+Default setting is `-1`, which means: Print debug output at every DA
+time step.
 
 ### PF:printstat ###
 
@@ -611,6 +628,7 @@ skin depth (compare the weighting procedure described in Schrön et al,
  |           | `aniso_use_parflow`     | 0             |
  |           |                         |               |
  |           | `printensemble`         | 1             |
+ |           | `t_printensemble`       | -1            |
  |           | `printstat`             | 1             |
  |           | `paramprintensemble`    | 1             |
  |           | `paramprintstat`        | 1             |
