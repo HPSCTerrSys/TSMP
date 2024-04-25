@@ -202,6 +202,27 @@ void init_idx_map_subvec2state(Vector *pf_vector) {
     origin_local[1] = iy+1;
     origin_local[2] = iz+1;
 	}
+
+#ifdef PDAF_DEBUG
+	int idebug;
+	/* Debug output of idx_map_subvec2state, xcoord, ycoord, zcoord */
+	for(idebug=0;idebug<fmin(6, enkf_subvecsize);idebug++) {
+	  printf("TSMP-PDAF-debug mype(w)=%5d: init_idx_map_subvec2state, idx_map_subvec2state[%1d] = %10d\n", mype_world, idebug, idx_map_subvec2state[idebug]);
+	}
+	for(idebug=0;idebug<fmin(6, enkf_subvecsize);idebug++) {
+	  printf("TSMP-PDAF-debug mype(w)=%5d: init_idx_map_subvec2state, xcoord[%1d] = %lf\n", mype_world, idebug, xcoord[idebug]);
+	}
+	for(idebug=0;idebug<fmin(6, enkf_subvecsize);idebug++) {
+	  printf("TSMP-PDAF-debug mype(w)=%5d: init_idx_map_subvec2state, ycoord[%1d] = %lf\n", mype_world, idebug, ycoord[idebug]);
+	}
+	for(idebug=0;idebug<fmin(6, enkf_subvecsize);idebug++) {
+	  printf("TSMP-PDAF-debug mype(w)=%5d: init_idx_map_subvec2state, zcoord[%1d] = %lf\n", mype_world, idebug, zcoord[idebug]);
+	}
+
+	/* Debug: Print index array idx_map_subvec2state */
+	if(pf_printensemble == 1) enkf_printstatistics_pfb(&idx_map_subvec2state[0],"idx_map_subvec2state",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
+#endif
+
     //free(xcoord);
     //free(ycoord);
     //free(zcoord);
