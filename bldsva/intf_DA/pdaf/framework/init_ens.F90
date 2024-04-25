@@ -48,7 +48,7 @@ SUBROUTINE init_ens(filtertype, dim_p, dim_ens, state_p, Uinv, &
 ! This routine initializes the PE-local state ensemble with
 ! dummy values that are not used in the first assimilation.
 ! The inital ensemble for a specific component
-! model of TSMP-PDAF is read from a list of input files.
+! model of TSMP-PDAF is read from a sequence of input files.
 !
 ! !REVISION HISTORY:
 ! 2013-02 - Lars Nerger - Initial code
