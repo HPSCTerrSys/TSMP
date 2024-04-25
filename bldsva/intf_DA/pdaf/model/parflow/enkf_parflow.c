@@ -1560,7 +1560,7 @@ void update_parflow () {
   }
 
   /* print updated ensemble */
-  if(pf_t_printensemble == tstartcycle + 1 || pf_t_printensemble < 0 ) {
+  if(pf_t_printensemble == tstartcycle || pf_t_printensemble < 0 ) {
     if(pf_updateflag == 3){
       if(pf_printensemble == 1) enkf_printstatistics_pfb(&pf_statevec[enkf_subvecsize],"update",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
     }else{
