@@ -154,13 +154,18 @@ SUBROUTINE init_pdaf()
 #ifdef PDAF_DEBUG
   ! Index array only needed for a single modeltask
   IF(filterpe) THEN
-    ! Debug output: index manipulation array subvec->state
-    WRITE(fn, "(a,i5.5,a)") "idx_map_subvec2state_", mype_world, ".txt"
-    OPEN(unit=71, file=fn, action="write")
-    DO i = 1, pf_statevecsize
-      WRITE (71,"(i10)") idx_map_subvec2state_fortran(i)
-    END DO
-    CLOSE(71)
+
+    ! idx_map_subvec2state is only set for ParFlow processes
+    IF(model == tag_model_parflow) THEN
+      ! Debug output: index manipulation array subvec->state
+      WRITE(fn, "(a,i5.5,a)") "idx_map_subvec2state_", mype_world, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, pf_statevecsize
+        WRITE (71,"(i10)") idx_map_subvec2state_fortran(i)
+      END DO
+      CLOSE(71)
+    END IF
+
   END IF
 #endif
 
