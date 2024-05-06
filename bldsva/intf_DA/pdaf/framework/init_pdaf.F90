@@ -158,7 +158,7 @@ SUBROUTINE init_pdaf()
     WRITE(fn, "(a,i5.5,a)") "idx_map_subvec2state_", mype_world, ".txt"
     OPEN(unit=71, file=fn, action="write")
     DO i = 1, pf_statevecsize
-      WRITE (71,"(f12.8)") idx_map_subvec2state_fortran(i)
+      WRITE (71,"(i10)") idx_map_subvec2state_fortran(i)
     END DO
     CLOSE(71)
   END IF
