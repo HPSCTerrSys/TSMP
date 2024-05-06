@@ -218,9 +218,6 @@ void init_idx_map_subvec2state(Vector *pf_vector) {
 	for(idebug=0;idebug<fmin(6, enkf_subvecsize);idebug++) {
 	  printf("TSMP-PDAF-debug mype(w)=%5d: init_idx_map_subvec2state, zcoord[%1d] = %lf\n", mype_world, idebug, zcoord[idebug]);
 	}
-
-	/* Debug: Print index array idx_map_subvec2state */
-	if(pf_printensemble == 1) enkf_printstatistics_pfb(&idx_map_subvec2state[0],"idx_map_subvec2state",tstartcycle + stat_dumpoffset,pfoutfile_ens,3);
 #endif
 
     //free(xcoord);
