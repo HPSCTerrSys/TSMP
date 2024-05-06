@@ -152,13 +152,16 @@ SUBROUTINE init_pdaf()
   end if
 
 #ifdef PDAF_DEBUG
-  ! Debug output: index manipulation array subvec->state
-  WRITE(fn, "(a,i5.5,a)") "idx_map_subvec2state_", mype_world, ".txt"
-  OPEN(unit=71, file=fn, action="write")
-  DO i = 1, pf_statevecsize
-    WRITE (71,"(f12.8)") idx_map_subvec2state_fortran(i)
-  END DO
-  CLOSE(71)
+  ! Index array only needed for a single modeltask
+  IF(filterpe) THEN
+    ! Debug output: index manipulation array subvec->state
+    WRITE(fn, "(a,i5.5,a)") "idx_map_subvec2state_", mype_world, ".txt"
+    OPEN(unit=71, file=fn, action="write")
+    DO i = 1, pf_statevecsize
+      WRITE (71,"(f12.8)") idx_map_subvec2state_fortran(i)
+    END DO
+    CLOSE(71)
+  END IF
 #endif
 
 ! *** Define state dimension ***
