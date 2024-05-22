@@ -28,7 +28,7 @@ CPP = /usr/bin/cpp
 # Define USE_PDAF to include PDAF
 # (if the compiler does not support get_command_argument()
 # from Fortran 2003 you should define F77 here.)
-CPP_DEFS = -DUSE_PDAF
+CPP_DEFS = -DUSE_PDAF __PDAFLIB_CPP_DEFS__
 ##JUWELS?: CPP_DEFS = -DUSE_PDAF -I${MKLROOT}/include
 
 # Optimization specs for compiler

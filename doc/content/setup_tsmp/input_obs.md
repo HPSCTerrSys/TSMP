@@ -258,43 +258,71 @@ the observation error (equal for all observations).
 `layer`: (integer) CLM layer where the observation is located (counted
 from uppermost CLM layer).
 
-#### var_id ####
-
-`var_id`: (integer) Only used for multi-scale data assimilation. Size
-of `var_id` is same as `dim_obs`. `var_id` has same values over model
-grid cells, which have range of similar observations values from raw
-data over them.  The values can be grouped starting from 1 for similar
-observation values to other integers (2,3,4,5 etc.) for other similar
-observations. If there are no observations over some grid cells than a
-negative `var_id` (integer) is assigned to them.
-
 #### dr ####
 
 `dr`: (real) Snapping distance for the observation.
 
 **Attention** This variable should have a length of `2` (one snapping
-distance for longitudes and one for latitudes).
+distance in longitude direction and another snapping distance in
+latitude direction).
 
 Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
 should be smaller than the minimum grid cell size.
 
-## Multi-Scale Data Assimilation ##
+### Multi-Scale Data Assimilation observation file variables ###
 
 The multi-scale data assimilation has been implemented for Local
-Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). For
-multi-scale data assimilation, we need to specify in `enkfpf.par` the
-entry `point_obs` (in `[DA]`) to value 0 (integer) for using
-multi-scale data assimilation (eg. using SMAP satellite data over a
-large area which is not point data).
+Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`).
 
-Then in the observation files we need to specify variable `var_id`
-values. Size of `var_id` is same as `dim_obs` . `var_id` has same
-values over model grid cells, which have range of similar observations
-values from raw data over them. The values can be grouped starting
-from 1 for similar observation values to other integers (2,3,4,5 etc.)
-for other similar obersvations. If there are no observations over some
-grid cells than a negative `var_id` (integer) is assigned to them.
+Definition: Multiscale DA means that the simulation grid and
+measurement grid are at different scales. 
+
+Example for multi-scale data assimilation: Using SMAP satellite soil
+moisture data at 9km resolution and a simulation grid at 1km
+resolution. In this case the measurement gives than an average soil
+moisture for the upper 5cm of the soil for 9 x 9 grid cells = 81 grid
+cells. We do not have measurements for all individual grid cells, but
+just an average value over those 81 grid cells (and the upper 5cm).
+
+To turn on multi-scale data assimilation, we need to specify in
+`enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
+to value `0` (integer).
+
+Then in the observation files we need to specify variable
+[`var_id`](#var_id) and the dimension `dim_nx` and `dim_ny`.
+
+![Grids](./figures/multi_scale_da.png)
+
+#### var_id ####
+
+`var_id`: (integer) ID of cells with similar observations.
+
+Only used for [multi-scale data
+assimilation](#multi-scale-data-assimilation-observation-variables)
+(turned on using [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
+
+The size of `var_id` is `dim_obs`.
+
+`var_id` has equal values over model grid cells, which have range of
+similar observations values from raw data over them.
+
+The values of `var_id` can be grouped starting from 1 for similar
+observation values to other integers (2,3,4,5 etc.) for other similar
+observations.
+
+If there are no observations over some grid cells than a
+negative `var_id` (integer) is assigned to them.
+
+#### dim_nx ####
+
+`dim_nx`: (int) This is the x-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
+
+#### dim_ny ####
+
+`dim_ny`: (int) This is the y-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
 
 ## Observation time flexibility ##
 
