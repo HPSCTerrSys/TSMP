@@ -32,7 +32,7 @@ route "${cyellow}>> configure_da${cnormal}"
   fi
 
   pdaflib_cpp_defs=" "
-  # pdaflib_cpp_defs+=" -DPDAF_DEBUG "
+  pdaflib_cpp_defs+=" -DPDAF_DEBUG "
 
 #    libs_src=" -L$lapackPath -L${mpiPath}/lib64"
 #    libs_src=" -L$lapackPath -lopenblas -L${mpiPath}/lib64"
