@@ -201,7 +201,7 @@ module enkf_clm_mod
 
 #ifdef PDAF_DEBUG
     ! TSMP-PDAF: For debug runs, output the state vector in files
-    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", step, ".txt"
+    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
     OPEN(unit=71, file=fn, action="write")
     DO i = 1, clm_statevecsize
       WRITE (71,"(f12.8)") clm_statevec(i)
