@@ -2375,7 +2375,7 @@ This allows using a different mpirun command to launch unit tests
 
   <machine MACH="juwels">
     <DESC>JSC JUELICH platform, os is linux, 48 pes/node, batch system is slurm</DESC>
-    <NODENAME_REGEX>juwels.*</NODENAME_REGEX>
+    <NODENAME_REGEX>.*.juwels</NODENAME_REGEX>
     <OS>LINUX</OS>
     <COMPILERS>intel</COMPILERS>
     <MPILIBS>mpi</MPILIBS>
