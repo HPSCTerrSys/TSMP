@@ -170,6 +170,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #endif
 
+  character (len = 27) :: fn    !TSMP-PDAF: function name for obs_index_p output
+
   ! ****************************************
   ! *** Initialize observation dimension ***
   ! ****************************************
@@ -865,6 +867,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
          end do
 
      end if
+
+#ifdef PDAF_DEBUG
+     ! TSMP-PDAF: For debug runs, output the state vector in files
+     WRITE(fn, "(a,i5.5,a,i5.5,a)") "obs_index_p_", mype_world, ".", step, ".txt"
+     OPEN(unit=71, file=fn, action="write")
+     DO i = 1, dim_obs_p
+       WRITE (71,"(i10)") obs_index_p(i)
+     END DO
+     CLOSE(71)
+#endif
 
   end if
   end if
