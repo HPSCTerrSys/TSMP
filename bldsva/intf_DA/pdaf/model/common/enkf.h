@@ -42,8 +42,8 @@ extern void clm_init(char *s);
 #ifdef CLMFIVE
 extern void clm5_init(char *s, int *pdaf_id, int *pdaf_max);
 #endif
-extern void clm_advance(int *ntstep);
-extern void update_clm();
+extern void clm_advance(int *ntstep, int *tstartcycle, int *mype);
+extern void update_clm(int *tstartcycle, int *mype);
 #if defined CLMSA
 extern void print_update_clm(int *ts, int *ttot);
 #endif

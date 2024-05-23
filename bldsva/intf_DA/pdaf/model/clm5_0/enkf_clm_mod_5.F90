@@ -108,16 +108,19 @@ module enkf_clm_mod
 
   end subroutine
 
-  subroutine set_clm_statevec()
+  subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
+    integer,intent(in) :: tstartcycle
+    integer,intent(in) :: mype
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
     integer :: i,j,cc=1,offset=0
+    character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
 
     swc   => waterstate_inst%h2osoi_vol_col
     psand => soilstate_inst%cellsand_col
@@ -158,9 +161,19 @@ module enkf_clm_mod
       end do
     endif
 
+#ifdef PDAF_DEBUG
+  ! TSMP-PDAF: For debug runs, output the state vector in files
+  WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+  OPEN(unit=71, file=fn, action="write")
+  DO i = 1, clm_statevecsize
+    WRITE (71,"(f12.8)") clm_statevec(i)
+  END DO
+  CLOSE(71)
+#endif
+
   end subroutine 
 
-  subroutine update_clm() bind(C,name="update_clm")
+  subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
@@ -169,6 +182,9 @@ module enkf_clm_mod
 
     implicit none
     
+    integer,intent(in) :: tstartcycle
+    integer,intent(in) :: mype
+
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: watsat(:,:)
     real(r8), pointer :: psand(:,:)
@@ -181,6 +197,17 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
 
     integer :: i,j,cc=1,offset=0
+    character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
+
+#ifdef PDAF_DEBUG
+    ! TSMP-PDAF: For debug runs, output the state vector in files
+    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", step, ".txt"
+    OPEN(unit=71, file=fn, action="write")
+    DO i = 1, clm_statevecsize
+      WRITE (71,"(f12.8)") clm_statevec(i)
+    END DO
+    CLOSE(71)
+#endif
 
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
