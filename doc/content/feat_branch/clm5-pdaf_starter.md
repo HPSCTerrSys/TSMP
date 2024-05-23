@@ -74,7 +74,7 @@ export CSMDATA=$CESMDATAROOT/inputdata
 In the `tsmp/bldsva` directory:
 
 ```bash
-./build_tsmp.ksh -c clm5 -m JURECA -O Intel
+./build_tsmp.ksh -c clm5-pdaf -m JURECA -O Intel
 ```
 
 Potential problems that can happen during this step:
