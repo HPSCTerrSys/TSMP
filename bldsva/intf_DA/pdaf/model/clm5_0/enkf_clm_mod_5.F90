@@ -166,7 +166,7 @@ module enkf_clm_mod
   WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
   OPEN(unit=71, file=fn, action="write")
   DO i = 1, clm_statevecsize
-    WRITE (71,"(f12.8)") clm_statevec(i)
+    WRITE (71,"(f20.15)") clm_statevec(i)
   END DO
   CLOSE(71)
 #endif
@@ -204,7 +204,7 @@ module enkf_clm_mod
     WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
     OPEN(unit=71, file=fn, action="write")
     DO i = 1, clm_statevecsize
-      WRITE (71,"(f12.8)") clm_statevec(i)
+      WRITE (71,"(f20.15)") clm_statevec(i)
     END DO
     CLOSE(71)
 #endif
