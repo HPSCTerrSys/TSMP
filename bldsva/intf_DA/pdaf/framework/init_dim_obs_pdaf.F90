@@ -1,25 +1,25 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
 !-------------------------------------------------------------------------------------------
-!init_dim_obs_pdaf.F90: TerrSysMP-PDAF implementation of routine
+!init_dim_obs_pdaf.F90: TSMP-PDAF implementation of routine
 !                       'init_dim_obs_pdaf' (PDAF online coupling)
 !-------------------------------------------------------------------------------------------
 
@@ -33,7 +33,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   ! !DESCRIPTION:
   ! User-supplied routine for PDAF.
-  ! Used in the filters: SEEK/SEIK/EnKF/ETKF/ESTKF
+  ! Used in the filters: SEIK/EnKF/ETKF/ESTKF
   !
   ! The routine is called at the beginning of each
   ! analysis step.  It has to initialize the size of
@@ -52,9 +52,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !        ONLY: mype_filter, npes_filter, COMM_filter, MPI_INTEGER, &
   !        MPIerr, MPIstatus
   USE mod_parallel_pdaf, &
-       ONLY: mype_filter, comm_filter, npes_filter
-  use mod_parallel_model, &
-       only: mpi_integer, model, mpi_double_precision, mpi_in_place, mpi_sum, &
+       ONLY: mype_filter, comm_filter, npes_filter, abort_parallel, &
+       mpi_integer, mpi_double_precision, mpi_in_place, mpi_sum, &
        mype_world
   USE mod_assimilation, &
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
@@ -65,7 +64,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        obs_nc2pdaf, &
        local_dims_obs, &
        ! dim_obs_p, &
-       dim_obs_f, &
        obs_id_p, &
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -79,7 +77,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
-       depth_obs_p, &
        sc_p, idx_obs_nc_p, &
 #endif
 #endif
@@ -94,17 +91,18 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        clm_obs, &
        var_id_obs_nc, dim_nx, dim_ny, &
        clmobs_lon, clmobs_lat, clmobs_layer, clmobs_dr, clm_obserr, &
-       crns_flag, depth_obs
+       dampfac_state_time_dependent_in, dampfac_param_time_dependent_in
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      nx_glob, ny_glob, nz_glob, &
+      nx_glob, ny_glob, nz_glob, crns_flag, &
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
       zcoord_fortran, &
 #endif
 #endif
-      tag_model_clm, point_obs, obs_interp_switch
+      tag_model_clm, point_obs, obs_interp_switch, is_dampfac_state_time_dependent, &
+      dampfac_state_time_dependent, is_dampfac_param_time_dependent, dampfac_param_time_dependent, model
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -132,8 +130,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   INTEGER, INTENT(in)  :: step       ! Current time step
   INTEGER, INTENT(out) :: dim_obs_p  ! Dimension of observation vector
   ! !CALLING SEQUENCE:
-  ! Called by: PDAF_seek_analysis    (as U_init_dim_obs)
-  ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT
+  ! Called by: PDAF_seik_analysis, PDAF_seik_analysis_newT    (as U_init_dim_obs)
   ! Called by: PDAF_enkf_analysis_rlm, PDAF_enkf_analysis_rsm
   ! Called by: PDAF_etkf_analysis, PDAF_etkf_analysis_T
   ! Called by: PDAF_estkf_analysis, PDAF_estkf_analysis_fixed
@@ -142,7 +139,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   ! *** Local variables
   integer :: ierror
   INTEGER :: max_var_id
-  INTEGER :: tmp_dim_obs_f
+  INTEGER :: sum_dim_obs_p
   INTEGER :: i,j,k,count  ! Counters
   INTEGER :: count_interp ! Counter for interpolation grid cells
   INTEGER :: m,l          ! Counters
@@ -150,7 +147,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
   integer,allocatable :: local_dis(:),local_dim(:)
-  integer :: k_count,nsc !hcp
+  integer :: k_count !,nsc !hcp
   real    :: sum_interp_weights
 
 #ifndef PARFLOW_STAND_ALONE
@@ -169,6 +166,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   real    :: deltax, deltay
   !real    :: deltaxy, y1 , x1, z1, x2, y2, z2, R, dist, deltaxy_max
   logical :: is_use_dr
+  logical :: obs_snapped     !Switch for checking multiple observation counts
 #endif
 #endif
 
@@ -178,6 +176,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   ! Read observation file
   ! ---------------------
+
+  ! Default: no local damping factors
+  is_dampfac_state_time_dependent = 0
+  is_dampfac_param_time_dependent = 0
 
   !  if I'm root in filter, read the nc file
   is_multi_observation_files = .true.
@@ -200,14 +202,69 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_bcast(dim_obs, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! Switch for vector of observation errors
   call mpi_bcast(multierr, 1, MPI_INTEGER, 0, comm_filter, ierror)
-  ! broadcast crns_flag
-  call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
+  !! broadcast crns_flag
+  !call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! broadcast dim_ny and dim_nx
   if(point_obs.eq.0) then
      call mpi_bcast(dim_nx, 1, MPI_INTEGER, 0, comm_filter, ierror)
      call mpi_bcast(dim_ny, 1, MPI_INTEGER, 0, comm_filter, ierror)
   endif
+  ! broadcast damping factor flags
+  call mpi_bcast(is_dampfac_state_time_dependent, 1, MPI_INTEGER, 0, comm_filter, ierror)
+  call mpi_bcast(is_dampfac_param_time_dependent, 1, MPI_INTEGER, 0, comm_filter, ierror)
 
+  ! broadcast dampfac_state_time_dependent_in
+  if(is_dampfac_state_time_dependent.eq.1) then
+
+     if (mype_filter .ne. 0) then ! for all non-master proc
+       if(allocated(dampfac_state_time_dependent_in)) deallocate(dampfac_state_time_dependent_in)
+       allocate(dampfac_state_time_dependent_in(1))
+     end if
+
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": Before setting dampfac_state_time_dependent"
+     end if
+
+     call mpi_bcast(dampfac_state_time_dependent_in, 1, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_state_time_dependent_in=", dampfac_state_time_dependent_in
+     end if
+
+     ! Set C-version of dampfac_state_time_dependent with value read from obsfile
+     dampfac_state_time_dependent = dampfac_state_time_dependent_in(1)
+
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_state_time_dependent=", dampfac_state_time_dependent
+     end if
+
+  end if
+
+  ! broadcast dampfac_param_time_dependent_in
+  if(is_dampfac_param_time_dependent.eq.1) then
+
+     if (mype_filter .ne. 0) then ! for all non-master proc
+       if(allocated(dampfac_param_time_dependent_in)) deallocate(dampfac_param_time_dependent_in)
+       allocate(dampfac_param_time_dependent_in(1))
+     end if
+
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": Before setting dampfac_param_time_dependent"
+     end if
+
+     call mpi_bcast(dampfac_param_time_dependent_in, 1, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_param_time_dependent_in=", dampfac_param_time_dependent_in
+     end if
+
+     ! Set C-version of dampfac_param_time_dependent with value read from obsfile
+     dampfac_param_time_dependent = dampfac_param_time_dependent_in(1)
+
+     if (screen > 2) then
+       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dampfac_param_time_dependent=", dampfac_param_time_dependent
+     end if
+
+  end if
+  
   ! Allocate observation arrays for non-root procs
   ! ----------------------------------------------
   if (mype_filter .ne. 0) then ! for all non-master proc
@@ -222,11 +279,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
              allocate(pressure_obserr(dim_obs))
         endif
 
-        if (crns_flag.eq.1) then
-             if (allocated(depth_obs)) deallocate(depth_obs)
-             allocate(depth_obs(dim_obs))
-             depth_obs(:)=0.d0
-        endif
         if(allocated(idx_obs_nc)) deallocate(idx_obs_nc)
         allocate(idx_obs_nc(dim_obs))
         if(allocated(x_idx_obs_nc))deallocate(x_idx_obs_nc)
@@ -284,7 +336,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       ! if exist ParFlow-type obs
      call mpi_bcast(pressure_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      if(multierr.eq.1) call mpi_bcast(pressure_obserr, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
-     if(crns_flag.eq.1) call mpi_bcast(depth_obs, dim_obs, MPI_DOUBLE_PRECISION, 0, comm_filter, ierror)
      call mpi_bcast(idx_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
      ! broadcast xyz indices
      call mpi_bcast(x_idx_obs_nc, dim_obs, MPI_INTEGER, 0, comm_filter, ierror)
@@ -392,19 +443,32 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
      do i = 1, dim_obs
         count = 1
+        obs_snapped = .false.
         do j = begg, endg
             if(is_use_dr) then
                 deltax = abs(lon(j)-clmobs_lon(i))
                 deltay = abs(lat(j)-clmobs_lat(i))
             end if
+            ! Assigning observations to grid cells according to
+            ! snapping distance or index arrays
             if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(count)) .and. (latixy_obs(i) == latixy(count)))) then
                 dim_obs_p = dim_obs_p + 1
                 obs_id_p(count) = i
-                ! One observation can be associated with multiple grid
-                ! points If it is clear that each observation is only
-                ! associated to a single grid point, then the
-                ! following line can be uncommented
-                ! exit
+
+                ! Check if observation has already been snapped.
+                ! Comment out if multiple grids per observation are wanted.
+                if (obs_snapped) then
+                  print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Observation snapped at multiple grid cells."
+                  print *, "i=", i
+                  if (is_use_dr) then
+                    print *, "clmobs_lon(i)=", clmobs_lon(i)
+                    print *, "clmobs_lat(i)=", clmobs_lat(i)
+                  end if
+                  call abort_parallel()
+                end if
+
+                ! Set observation as counted
+                obs_snapped = .true.
             end if
             count = count + 1
         end do
@@ -430,15 +494,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
 
   ! add and broadcast size of local observation dimensions using mpi_allreduce 
-  call mpi_allreduce(dim_obs_p, tmp_dim_obs_f, 1, MPI_INTEGER, MPI_SUM, &
+  call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
        comm_filter, ierror) 
-  ! Set dimension of full observation vector
-  dim_obs_f = tmp_dim_obs_f
 
-  if (screen > 2) then
-      if (mype_filter==0) then
-          print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_f_pdaf: dim_obs_f=", dim_obs_f
-      end if
+  ! Check sum of dimensions of PE-local observation vectors against
+  ! dimension of full observation vector
+  if (.not. sum_dim_obs_p == dim_obs) then
+    print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Sum of local observation dimensions"
+    print *, "sum_dim_obs_p=", sum_dim_obs_p
+    print *, "dim_obs=", dim_obs
+    call abort_parallel()
   end if
 
   allocate(local_dis(npes_filter))
@@ -507,10 +572,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         allocate(pressure_obserr_p(dim_obs_p))
      endif
      if(crns_flag.eq.1) then 
-        if (allocated(depth_obs_p)) deallocate(depth_obs_p)
-        allocate(depth_obs_p(dim_obs_p))
         if (allocated(sc_p)) deallocate(sc_p)
-        allocate(sc_p(dim_obs_p))
+        allocate(sc_p(nz_glob, dim_obs_p))
         if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
         allocate(idx_obs_nc_p(dim_obs_p))
      endif
@@ -572,6 +635,11 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      end do
   else if (point_obs.eq.1) then
 
+     !hcp
+     if(crns_flag.eq.1) then
+         idx_obs_nc(:)=nx_glob*(y_idx_obs_nc(:)-1)+x_idx_obs_nc(:)
+     endif
+     !hcp fin
      count = 1
      do i = 1, dim_obs
         obs(i) = pressure_obs(i)  
@@ -585,9 +653,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
               obs_p(count) = pressure_obs(i)
               if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
               if(crns_flag.eq.1) then
-                  depth_obs_p(count) = depth_obs(i)
                   idx_obs_nc_p(count)=idx_obs_nc(i)
-                  Allocate(sc_p(count)%scol_obs_in(nz_glob-z_idx_obs_nc(i)+1))       
+                  !Allocate(sc_p(count)%scol_obs_in(nz_glob))       
               endif
               obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
               count = count + 1
@@ -596,11 +663,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
      end do
      do i = 1, dim_obs_p
       if(crns_flag.eq.1) then 
-        nsc=size(sc_p(i)%scol_obs_in(:))
-        do k = 1, nsc
+        do k = 1, nz_glob
           k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
           do j = 1, enkf_subvecsize
-             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(i)%scol_obs_in(nsc-k+1)=j
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(nz_glob-k+1,i)=j
           enddo
         enddo
       endif

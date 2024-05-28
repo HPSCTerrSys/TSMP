@@ -99,11 +99,11 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=$wtime
-#SBATCH -N $nnode_cos --ntasks-per-node=$((COSProcX*COSProcY)) -p dc-cpu-devel
+#SBATCH -N $nnode_cos --ntasks-per-node=$nppn -p dc-cpu-devel
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p dc-cpu-devel
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn  -p dc-cpu-devel
 #SBATCH hetjob
-#SBATCH -N $nnode_pfl--ntasks-per-node=$Ngp--gres=gpu:$Ngp -p dc-gpu-devel
+#SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p dc-gpu-devel
 
 cd $rundir
 source $rundir/loadenvs
@@ -271,6 +271,13 @@ if [[ $refSetup == "cordex" ]] then
 	CLMProcY=8
 	COSProcX=16
 	COSProcY=18
+    elif [[ $refSetup == "cordex0275" ]] then
+	PFLProcX=32
+	PFLProcY=16
+	CLMProcX=64
+	CLMProcY=2
+	COSProcX=48
+	COSProcY=48
 	elif [[ $refSetup == "nrw" ]] then
 	PFLProcX=5
 	PFLProcY=8

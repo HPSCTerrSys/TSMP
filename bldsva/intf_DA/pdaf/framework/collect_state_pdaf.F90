@@ -1,25 +1,25 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
 !-------------------------------------------------------------------------------------------
-!collect_state_pdaf.F90: TerrSysMP-PDAF implementation of routine
+!collect_state_pdaf.F90: TSMP-PDAF implementation of routine
 !                        'collect_state_pdaf' (PDAF online coupling)
 !-------------------------------------------------------------------------------------------
 
@@ -33,11 +33,11 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 
 ! !DESCRIPTION:
 ! User-supplied routine for PDAF.
-! Used in the filters: SEEK/EnKF/SEIK/LSEIK/ETKF/LETKF/ESTKF/LESTKF
+! Used in the filters: SEIK/EnKF/LSEIK/ETKF/LETKF/ESTKF/LESTKF
 !
 ! This subroutine is called during the forecast 
-! phase from PDAF\_put\_state\_X after the 
-! propagation of each ensemble member. 
+! phase from PDAF\_put\_state\_X or PDAF\_assimilate\_X
+! after the propagation of each ensemble member. 
 ! The supplied state vector has to be initialized
 ! from the model fields (typically via a module). 
 ! With parallelization, MPI communication might be 
@@ -47,15 +47,21 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
 ! The routine is executed by each process that is
 ! participating in the model integrations.
 !
+! !TSMP-PDAF DESCRIPTION:
+! This subroutine sets the state vector by assigning
+! the pointer that was set in the initialization routines.
+! Parallelization is handled in the component model interface
+! routines, f.e. `enkf_parflow.c` and `enkf_clm_mod_5.F90`.
+!
 ! !REVISION HISTORY:
 ! 2004-11 - Lars Nerger - Initial code
 ! Later revisions - see svn log
 !
 ! !USES:
     use mod_tsmp, &
-        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm
-    use mod_parallel_model, &
-        only: model
+        only: pf_statevec_fortran, tag_model_parflow, tag_model_clm, model
+    use mod_parallel_pdaf, &
+        only: mype_world
 #if defined CLMSA
     !kuw: get access to clm variables
 #if defined CLMFIVE
@@ -78,9 +84,11 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
   real(r8), pointer :: sw_c(:,:)
 #endif
 ! !CALLING SEQUENCE:
-! Called by: PDAF_put_state_X   (as U_coll_state)
+! Called by: PDAF_put_state_X    (as U_coll_state)
+! Called by: PDAF_assimilate_X   (as U_coll_state)
 !EOP
-  
+
+  INTEGER :: i
 
 ! *************************************************
 ! *** Initialize state vector from model fields ***
@@ -101,5 +109,13 @@ SUBROUTINE collect_state_pdaf(dim_p, state_p)
  end if
  !kuw end
 #endif
+
+#ifdef PDAF_DEBUG
+  ! Debug output: Collected state array
+ DO i = 1, MIN(dim_p,6)
+   WRITE(*, '(a,x,a,i5,x,a,i1,a,x,f12.8)') "TSMP-PDAF-debug", "mype(w)=", mype_world, "collect_state_pdaf: state_p(", i, "):", state_p(i)
+ END DO
+#endif
+
   
 END SUBROUTINE collect_state_pdaf

@@ -94,9 +94,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=$wtime
-#SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) - -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX))  -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn  -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p gpus
 
@@ -124,9 +124,9 @@ cat << EOF >> $rundir/tsmp_slm_run.bsh
 #SBATCH --output=hetro_job-out.%j
 #SBATCH --error=hetro_job-err.%j
 #SBATCH --time=$wtime
-#SBATCH -N $nnode_cos  --ntasks-per-node=$((COSProcX*COSProcY)) -p batch
+#SBATCH -N $nnode_cos  --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
-#SBATCH -N $nnode_clm --ntasks-per-node=$((CLMProcX*CLMProcX)) -p batch
+#SBATCH -N $nnode_clm --ntasks-per-node=$nppn -p batch
 #SBATCH hetjob
 #SBATCH -N $nnode_pfl --ntasks-per-node=$ngpn --gres=gpu:$ngpn -p booster
 

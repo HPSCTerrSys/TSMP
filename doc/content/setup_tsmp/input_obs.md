@@ -3,7 +3,7 @@
 Observation input consists of a number of different inputs:
 - Observation files with correct name and content
 - Command Line Options
-- Environment Variables
+- Preprocessor Variables
 
 ## Observation files ##
 
@@ -33,6 +33,24 @@ All observation files contain the following variable:
 the respective assimilation cycle. The observation files for ParFlow
 should contain the following variables which all should have the
 dimension `dim_obs` (except variable `dr` in CLM observations files):
+
+#### dampfac_state ####
+
+`dampfac_state`: (real) Input of a time dependent state damping
+factor. The damping factor for an update is given in the corresponding
+observation file. This damping factor applies only to updates of
+dynamic states in the DA-state vector and, when existing, replaces the
+general input from
+[PF:dampingfactor_state](./input_enkfpf.md#pfdampingfactor_state).
+
+#### dampfac_param ####
+
+`dampfac_param`: (real) Input of a time dependent state damping
+factor. The state vector for an update is given in the corresponding
+observation file. This damping factor applies only to parameter
+updates in the DA state vector and, when existing, replaces the
+general input from
+[PF:dampingfactor_param](./input_enkfpf.md#pfdampingfactor_param).
 
 ### ParFlow observation file variables ###
 
@@ -240,43 +258,71 @@ the observation error (equal for all observations).
 `layer`: (integer) CLM layer where the observation is located (counted
 from uppermost CLM layer).
 
-#### var_id ####
-
-`var_id`: (integer) Only used for multi-scale data assimilation. Size
-of `var_id` is same as `dim_obs`. `var_id` has same values over model
-grid cells, which have range of similar observations values from raw
-data over them.  The values can be grouped starting from 1 for similar
-observation values to other integers (2,3,4,5 etc.) for other similar
-observations. If there are no observations over some grid cells than a
-negative `var_id` (integer) is assigned to them.
-
 #### dr ####
 
 `dr`: (real) Snapping distance for the observation.
 
 **Attention** This variable should have a length of `2` (one snapping
-distance for longitudes and one for latitudes).
+distance in longitude direction and another snapping distance in
+latitude direction).
 
 Each of the CLM observations is snapped to the nearest CLM grid cell
 based on the given `lon`, `lat` and the snapping distance `dr` which
 should be smaller than the minimum grid cell size.
 
-## Multi-Scale Data Assimilation ##
+### Multi-Scale Data Assimilation observation file variables ###
 
 The multi-scale data assimilation has been implemented for Local
-Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`). For
-multi-scale data assimilation, we need to specify in `enkfpf.par` the
-entry `point_obs` (in `[DA]`) to value 0 (integer) for using
-multi-scale data assimilation (eg. using SMAP satellite data over a
-large area which is not point data).
+Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`).
 
-Then in the observation files we need to specify variable `var_id`
-values. Size of `var_id` is same as `dim_obs` . `var_id` has same
-values over model grid cells, which have range of similar observations
-values from raw data over them. The values can be grouped starting
-from 1 for similar observation values to other integers (2,3,4,5 etc.)
-for other similar obersvations. If there are no observations over some
-grid cells than a negative `var_id` (integer) is assigned to them.
+Definition: Multiscale DA means that the simulation grid and
+measurement grid are at different scales. 
+
+Example for multi-scale data assimilation: Using SMAP satellite soil
+moisture data at 9km resolution and a simulation grid at 1km
+resolution. In this case the measurement gives than an average soil
+moisture for the upper 5cm of the soil for 9 x 9 grid cells = 81 grid
+cells. We do not have measurements for all individual grid cells, but
+just an average value over those 81 grid cells (and the upper 5cm).
+
+To turn on multi-scale data assimilation, we need to specify in
+`enkfpf.par` the entry [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)
+to value `0` (integer).
+
+Then in the observation files we need to specify variable
+[`var_id`](#var_id) and the dimension `dim_nx` and `dim_ny`.
+
+![Grids](./figures/multi_scale_da.png)
+
+#### var_id ####
+
+`var_id`: (integer) ID of cells with similar observations.
+
+Only used for [multi-scale data
+assimilation](#multi-scale-data-assimilation-observation-variables)
+(turned on using [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
+
+The size of `var_id` is `dim_obs`.
+
+`var_id` has equal values over model grid cells, which have range of
+similar observations values from raw data over them.
+
+The values of `var_id` can be grouped starting from 1 for similar
+observation values to other integers (2,3,4,5 etc.) for other similar
+observations.
+
+If there are no observations over some grid cells than a
+negative `var_id` (integer) is assigned to them.
+
+#### dim_nx ####
+
+`dim_nx`: (int) This is the x-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
+
+#### dim_ny ####
+
+`dim_ny`: (int) This is the y-dimension of the remote sensing
+measurment in multi-scale Data Assimilation.
 
 ## Observation time flexibility ##
 
@@ -340,45 +386,19 @@ f.close()
 
 ## Specifying type of observation at compile time ##
 
-The following environment variables let the user specify the expected
+The following preprocessor variables let the user specify the expected
 observational input (i.e. ParFlow or CLM observations) at compile time
 (during the build-process). This may save some time during execution
 as certain parts of the source code are not accessed at all.
 
 CLM observations: Set
-- [CLMSA](./../build_tsmp/build_environment_variables.md#clmsa)
-- [OBS_ONLY_CLM](./../build_tsmp/build_environment_variables.md#obs_only_clm)
+- [CLMSA](./../build_tsmp/build_preprocessor_variables.md#clmsa)
+- [OBS_ONLY_CLM](./../build_tsmp/build_preprocessor_variables.md#obs_only_clm)
 
 ParFlow observations: Set
-- [PARFLOW_STAND_ALONE](./../build_tsmp/build_environment_variables.md#parflow_stand_alone)
-- [OBS_ONLY_PARFLOW](./../build_tsmp/build_environment_variables.md#obs_only_parflow)
+- [PARFLOW_STAND_ALONE](./../build_tsmp/build_preprocessor_variables.md#parflow_stand_alone)
+- [OBS_ONLY_PARFLOW](./../build_tsmp/build_preprocessor_variables.md#obs_only_parflow)
 
-### Example for setting environment variables ###
 
-The aforementioned environment variables can be set in the PDAF-build
-script
-`TSMP/bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
-(or replace `JURECA` with other machine).
-
-Source code from script `build_interface_pdaf_JURECA.ksh`:
-```bash
-  if [[ $withCLM == "true" && $withCOS == "false" && $withPFL == "true" ]] ; then
-     importFlags+=$importFlagsCLM
-     importFlags+=$importFlagsOAS
-     importFlags+=$importFlagsPFL
-     importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
-     cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
-     if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
-     if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
-     libs+=$libsCLM
-     libs+=$libsOAS
-     libs+=$libsPFL
-     obj+=' $(OBJCLM) $(OBJPF) '
-  fi
-```
-
-Here we see the flags that are set when the compilation flag `-c
-clm-pfl` is used. Interesting is the second line starting with
-`cppdefs+=...`. Here `OBS_ONLY_PARFLOW` is set. In analogous fashion,
-one of the other environment variables mentioned before could be set.
+See also: [Example for setting preprocessor
+variables](./../build_tsmp/build_preprocessor_variables.md#example-for-setting-preprocessor-variables)

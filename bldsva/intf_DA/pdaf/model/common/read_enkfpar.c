@@ -1,45 +1,35 @@
 /*-----------------------------------------------------------------------------------------
 Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 
-This file is part of TerrSysMP-PDAF
+This file is part of TSMP-PDAF
 
-TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+TSMP-PDAF is free software: you can redistribute it and/or modify
 it under the terms of the GNU Lesser General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-TerrSysMP-PDAF is distributed in the hope that it will be useful,
+TSMP-PDAF is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU LesserGeneral Public License for more details.
 
 You should have received a copy of the GNU Lesser General Public License
-along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 -------------------------------------------------------------------------------------------*/
 
 
 /*-----------------------------------------------------------------------------------------
-read_enkfpar.c: Function for reading controle file of TerrSysMP-PDAF
+read_enkfpar.c: Function for reading controle file of TSMP-PDAF
 -------------------------------------------------------------------------------------------*/
 
 #include "enkf.h"
 #include "iniparser.h"
 
-int countDigit(int n)
-{
-	if (n == 0)
-		return -1;
-	return 1 + countDigit(n / 10);
-}
-
 void read_enkfpar(char *parname)
 {
   char *string;
   dictionary *pardict;
-  int len;
 
-  /* int rank,size; */
-  /* int subrank; */
   int coupcol;
  
   /* initialize dictionary */
@@ -55,9 +45,6 @@ void read_enkfpar(char *parname)
   nprocpf               = iniparser_getint(pardict,"PF:nprocs",0);
   t_start               = iniparser_getdouble(pardict,"PF:starttime",0);
   t_sim                 = iniparser_getdouble(pardict,"PF:simtime",0);
-  if (t_sim == 0){		/* Backward compatibility for PF:endtime */
-    t_sim                 = iniparser_getdouble(pardict,"PF:endtime",0);
-  }
   dt                    = iniparser_getdouble(pardict,"PF:dt",0);
   pf_updateflag         = iniparser_getint(pardict,"PF:updateflag",1);
   pf_paramupdate        = iniparser_getint(pardict,"PF:paramupdate",0);
@@ -65,28 +52,41 @@ void read_enkfpar(char *parname)
   pf_aniso_perm_z       = iniparser_getdouble(pardict,"PF:aniso_perm_z",1);
   pf_aniso_use_parflow  = iniparser_getint(pardict,"PF:aniso_use_parflow",0);
   pf_printensemble      = iniparser_getint(pardict,"PF:printensemble",1);
+  pf_t_printensemble    = iniparser_getint(pardict,"PF:t_printensemble",-1);
   pf_printstat          = iniparser_getint(pardict,"PF:printstat",1);
   pf_paramprintensemble = iniparser_getint(pardict,"PF:paramprintensemble",1);
   pf_paramprintstat     = iniparser_getint(pardict,"PF:paramprintstat",1);
   pf_olfmasking         = iniparser_getint(pardict,"PF:olfmasking",0);
+  pf_olfmasking_param   = iniparser_getint(pardict,"PF:olfmasking_param",0);
+  pf_olfmasking_depth   = iniparser_getint(pardict,"PF:olfmasking_depth",1);
   pf_gwmasking          = iniparser_getint(pardict,"PF:gwmasking",0);
   pf_printgwmask        = iniparser_getint(pardict,"PF:printgwmask",0);
   pf_dampfac_param      = iniparser_getdouble(pardict,"PF:dampingfactor_param",1.0);
   pf_dampfac_state      = iniparser_getdouble(pardict,"PF:dampingfactor_state",1.0);
+  pf_dampswitch_sm        = iniparser_getdouble(pardict,"PF:damping_switch_sm",0);
   pf_freq_paramupdate   = iniparser_getint(pardict,"PF:paramupdate_frequency",1);
+
+  /* backward compatibility settings for ParFlow */
+  if (t_sim == 0){
+    t_sim                 = iniparser_getdouble(pardict,"PF:endtime",0);
+  }
   
   /* get settings for CLM */
   string                = iniparser_getstring(pardict,"CLM:problemname", "");
   strcpy(clminfile,string);
   nprocclm              = iniparser_getint(pardict,"CLM:nprocs",0);
   clmupdate_swc         = iniparser_getint(pardict,"CLM:update_swc",1);
-  clmupdate_T         = iniparser_getint(pardict,"CLM:update_T",0);
+  clmupdate_T           = iniparser_getint(pardict,"CLM:update_T",0);
   clmupdate_texture     = iniparser_getint(pardict,"CLM:update_texture",0);
   clmupdate_snow        = iniparser_getint(pardict,"CLM:update_snow",0);
   clmupdate_snow_repartitioning = iniparser_getint(pardict,"CLM:update_snow_repartitioning",1);
   clmprint_swc          = iniparser_getint(pardict,"CLM:print_swc",0);
   clmprint_et           = iniparser_getint(pardict,"CLM:print_et",0);
  
+  /* get settings for COSMO */
+  nproccosmo      = iniparser_getint(pardict,"COSMO:nprocs",0);
+  dtmult_cosmo    = iniparser_getint(pardict,"COSMO:dtmult",0);
+
   /* get settings for data assimilation */
   string                = iniparser_getstring(pardict,"DA:outdir","");
   strcpy(outdir,string);
@@ -97,59 +97,48 @@ void read_enkfpar(char *parname)
   screen_wrapper        = iniparser_getint(pardict,"DA:screen_wrapper",1);
   point_obs             = iniparser_getint(pardict,"DA:point_obs",1);
   obs_interp_switch     = iniparser_getint(pardict,"DA:obs_interp_switch",0);
-  len = countDigit(point_obs);
-  if (len > 1)
-    point_obs=1;
+  crns_flag             = iniparser_getint(pardict,"DA:crns_flag",0);
+  da_crns_depth_tol     = iniparser_getdouble(pardict,"DA:da_crns_depth_tol",0.01);
   total_steps = (int) (t_sim/da_interval);
   tstartcycle = (int) (t_start/da_interval);
 
   /* print inputs / debug output for data assimilation settings */
   if (mype_world == 0) {
     if (screen_wrapper > 0) {
-      printf("TSMP-PDAF-WRAPPER read_enkfpar: [DA]\n");
-      printf("TSMP-PDAF-WRAPPER ------------------\n");
-      printf("TSMP-PDAF-WRAPPER t_sim = %lf | da_interval = %lf | total_steps = %d\n",t_sim,da_interval,total_steps);
-      printf("TSMP-PDAF-WRAPPER nreal = %d | n_modeltasks = %d\n",nreal,n_modeltasks);
-      if (nreal != n_modeltasks) {
-	printf("Error: nreal must be equal to n_modeltasks.\n");
-	exit(1);
-      }
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d read_enkfpar: [DA]\n",mype_world);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d ------------------\n",mype_world);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d t_sim = %lf | da_interval = %lf | total_steps = %d\n",mype_world,t_sim,da_interval,total_steps);
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d nreal = %d | n_modeltasks = %d\n",mype_world,nreal,n_modeltasks);
     }
   }
 
-  /* get settings for COSMO */
-  nproccosmo      = iniparser_getint(pardict,"COSMO:nprocs",0);
-  dtmult_cosmo    = iniparser_getint(pardict,"COSMO:dtmult",0);
-
-
-  /* MPI_Comm_size(MPI_COMM_WORLD,&size); */
-  /* MPI_Comm_rank(MPI_COMM_WORLD,&rank); */
-  /* coupcol = task_id - 1; */
-  /* subrank = mype_model; */
-
-  /* MPI: Get size and rank in COMM_WORLD */
-  /* define number of first model realisation (for input/output filenames) */
-  /* startreal: read from input in read_enkfpar */
-  coupcol = task_id - 1 + startreal;
-  if (screen_wrapper > 1) {
-    printf("TSMP-PDAF-WRAPPER mype(w)=%d: coupcol, task_id = %d, %d\n", mype_world, coupcol,task_id);
-    /* printf("DBG: size, npes_world = %d, %d\n",size,npes_world); */
-    /* printf("DBG: rank, mype_world = %d, %d\n",rank,mype_world); */
-    /* printf("DBG: mype_model, npes_model = %d, %d\n",mype_model,npes_model); */
+  /* Check: `nreal` must be equal to n_modeltasks */
+  if (nreal != n_modeltasks) {
+    printf("Error: nreal must be equal to n_modeltasks.\n");
+    exit(1);
   }
 
-  /* CLM, ParFlow, COSMO */
-  /* assign model number (0=clm, 1=parflow, 2=cosmo) */
-  if (mype_model < nprocclm) {
-    model = 0;
+  /* Check: `point_obs` must be equal to either 0 or 1 */
+  /*        0: multi-scale data asssimilation */
+  /*        1: point observations */
+  if (point_obs != 0 && point_obs != 1){
+    printf("point_obs=%d\n", point_obs);
+    printf("Error: point_obs must be equal to either 0 or 1.\n");
+    exit(1);
   }
-  else if(mype_model < (nprocclm+nprocpf)){
-    model = 1;
+
+  /* Check: `npes_model = nprocpf + nprocclm + npproccosmo */
+  if (nprocpf + nprocclm + nproccosmo != npes_model){
+    printf("nprocpf=%d\n", nprocpf);
+    printf("nprocclm=%d\n", nprocclm);
+    printf("nproccosmo=%d\n", nproccosmo);
+    printf("npes_model=%d\n", npes_model);
+    printf("Error:  nprocpf + nprocclm + npproccosmo must be equal to npes_model.\n");
+    exit(1);
   }
-  else{
-    model = 2;
-  }
-  /* ParFlow, CLM, COSMO */
+
+  /* Assign model specifier (0=clm, 1=parflow, 2=cosmo) */
+  /* Order: ParFlow, CLM, COSMO */
   if (mype_model < nprocpf) {
     model = 1;
   }
@@ -158,6 +147,18 @@ void read_enkfpar(char *parname)
   }
   else{
     model = 2;
+  }
+
+#ifdef PDAF_DEBUG
+  /* Debug output of component model per processor */
+  printf("TSMP-PDAF-debug mype(w)=%5d: model (0=clm, 1=parflow, 2=cosmo) = %1d\n", mype_world, model);
+#endif
+
+  /* MPI: Get size and rank in COMM_WORLD */
+  /* define number of first model realisation (for input/output filenames) */
+  coupcol = task_id - 1 + startreal;
+  if (screen_wrapper > 1) {
+    printf("TSMP-PDAF-WRAPPER mype(w)=%5d: coupcol, task_id = %d, %d\n", mype_world, coupcol,task_id);
   }
 
   /* create instance specific input file for ParFLow and CLM*/
@@ -188,9 +189,4 @@ void read_enkfpar(char *parname)
     }
   }
 
-  /* Set variables from input */
-
-
-  //printf("ParFlow update flag: %d\n",pf_updateflag);
-  //printf("ParFlow parameter update flag: %d\n",pf_paramupdate);
 }
