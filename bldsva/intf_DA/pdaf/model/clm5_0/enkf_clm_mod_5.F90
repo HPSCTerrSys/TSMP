@@ -32,12 +32,14 @@ module enkf_clm_mod
   integer :: COMM_model_clm
   integer :: clm_statevecsize
   integer :: clm_varsize
-  integer :: clm_begg,clm_endg
+  integer :: clm_begg,clm_endg,clm_begc,clm_endc
   real(r8),allocatable :: clm_statevec(:)
   real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
   integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
+  integer(c_int),bind(C,name="clmupdate_snow")    :: clmupdate_snow
+  integer(c_int),bind(C,name="clmupdate_snow_repartitioning") :: clmupdate_snow_repartitioning
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
@@ -60,6 +62,7 @@ module enkf_clm_mod
   integer :: COMM_couple_clm    ! CLM-version of COMM_couple
                                 ! (currently not used for clm5_0)
 
+  logical :: newgridcell
   contains
 
 #if defined CLMSA
@@ -77,13 +80,14 @@ module enkf_clm_mod
 
 
     call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
-    !write(*,*) "----",begg,",",endg,",",begl,",",endl,",",begc,",",endc,",",begp,",",endp," -------"
     clm_begg     = begg
     clm_endg     = endg
+    clm_begc     = begc
+    clm_endc     = endc
 
     if(clmupdate_swc.eq.1) then
-      clm_varsize      =  (endg-begg+1) * nlevsoi
-      clm_statevecsize =  (endg-begg+1) * nlevsoi
+      clm_varsize      =  (clm_endg-clm_begg+1) * nlevsoi
+      clm_statevecsize =  (clm_endg-clm_begg+1) * nlevsoi
     endif
 
     if(clmupdate_swc.eq.2) then
@@ -98,6 +102,20 @@ module enkf_clm_mod
         clm_statevecsize = clm_statevecsize + 3*((endg-begg+1)*nlevsoi)
     endif
 
+    ! Snow assimilation
+    ! Case 1: Assimilation of snow depth : allocated 1 per column in CLM5
+    ! But observations and history file 1 per grid cell and therefore statevecsize 1 per grid cell
+    if(clmupdate_snow.eq.1) then 
+        clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
+        clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
+    endif
+    ! Case 2: Assimilation of snow water equivalent same as above
+    if(clmupdate_snow.eq.2) then
+        clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
+        clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
+    endif
+
+
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     allocate(clm_statevec(clm_statevecsize))
 
@@ -111,6 +129,7 @@ module enkf_clm_mod
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi
+    use ColumnType , only : col
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
     integer,intent(in) :: tstartcycle
@@ -119,7 +138,11 @@ module enkf_clm_mod
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
-    integer :: i,j,cc=1,offset=0
+
+    real(r8), pointer :: snow_depth(:)
+    real(r8), pointer :: h2osno(:)
+
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
 
     swc   => waterstate_inst%h2osoi_vol_col
@@ -127,23 +150,50 @@ module enkf_clm_mod
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
 
-    ! write swc values to state vector
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-        clm_statevec(cc+offset) = swc(j,i)
-        cc = cc + 1
-      end do
-    end do
+    snow_depth => waterstate_inst%snow_depth_col ! snow height of snow covered area (m) 
+    h2osno     => waterstate_inst%h2osno_col     ! snow water equivalent (mm)
+
+    if(clmupdate_swc.ne.0) then
+        ! write swc values to state vector
+        cc = 1
+        do i=1,nlevsoi
+          do j=clm_begg,clm_endg
+            ! Only get the SWC from the first column of each gridcell
+            ! and add it to the clm_statevec at the position of the gridcell (cc)
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  clm_statevec(cc+offset) = swc(jj,i)
+                endif
+              endif 
+            end do
+            cc = cc + 1
+          end do
+        end do
+    endif
 
     ! write texture values to state vector (if desired)
     if(clmupdate_texture.eq.1) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
-          clm_statevec(cc+1*clm_varsize+offset) = psand(j,i)
-          clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
-          cc = cc + 1
+            ! Only get the parameters from the first column of each gridcell
+            ! and add it to the clm_statevec at the position of the gridcell (cc)
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  clm_statevec(cc+1*clm_varsize+offset) = psand(jj,i)
+                  clm_statevec(cc+2*clm_varsize+offset) = pclay(jj,i)
+                endif
+              endif 
+            end do
+            cc = cc + 1
         end do
       end do
     endif
@@ -153,12 +203,63 @@ module enkf_clm_mod
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
-          clm_statevec(cc+1*clm_varsize+offset) = psand(j,i)
-          clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
-          clm_statevec(cc+3*clm_varsize+offset) = porgm(j,i)
-          cc = cc + 1
+            ! Only get the parameters from the first column of each gridcell
+            ! and add it to the clm_statevec at the position of the gridcell (cc)
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  clm_statevec(cc+1*clm_varsize+offset) = psand(jj,i)
+                  clm_statevec(cc+2*clm_varsize+offset) = pclay(jj,i)
+                  clm_statevec(cc+3*clm_varsize+offset) = porgm(jj,i)
+                endif
+              endif 
+            end do
+            cc = cc + 1
         end do
       end do
+    endif
+
+    ! Snow assimilation
+    ! Case 1: Snow depth
+    if(clmupdate_snow.eq.1) then
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! Only get the snow_depth from the first column of each gridcell
+        ! and add it to the clm_statevec at the position of the gridcell (cc)
+        newgridcell = .true.
+        do jj=clm_begc,clm_endc
+          g = col%gridcell(jj)
+          if (g .eq. j) then
+            if (newgridcell) then
+              newgridcell = .false.
+              clm_statevec(cc+offset) = snow_depth(jj)
+            endif
+          endif 
+        end do
+        cc = cc + 1
+        end do
+    endif
+    ! Case 2: SWE
+    if(clmupdate_snow.eq.2) then
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! Only get the SWE from the first column of each gridcell
+        ! and add it to the clm_statevec at the position of the gridcell (cc)
+        newgridcell = .true.
+        do jj=clm_begc,clm_endc
+          g = col%gridcell(jj)
+          if (g .eq. j) then
+            if (newgridcell) then
+              newgridcell = .false.
+              clm_statevec(cc+offset) = h2osno(jj)
+            endif
+          endif
+        end do
+        cc = cc + 1
+        end do
     endif
 
 #ifdef PDAF_DEBUG
@@ -171,10 +272,11 @@ module enkf_clm_mod
   CLOSE(71)
 #endif
 
-  end subroutine 
+  end subroutine set_clm_statevec
 
   subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
+    use clm_time_manager  , only : update_DA_nstep
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
     use clm_instMod, only : soilstate_inst, waterstate_inst
@@ -191,13 +293,19 @@ module enkf_clm_mod
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
 
+    real(r8), pointer :: snow_depth(:)
+    real(r8), pointer :: h2osno(:)
+
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
-    real(r8)  :: rliq,rice
 
-    integer :: i,j,cc=1,offset=0
+    real(r8)  :: rliq,rice,incr_h2osno
+    real(r8) :: rsnow(clm_statevecsize)
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
+
+    integer, pointer :: snlsno(:)
 
 #ifdef PDAF_DEBUG
     ! TSMP-PDAF: For debug runs, output the state vector in files
@@ -208,46 +316,68 @@ module enkf_clm_mod
     END DO
     CLOSE(71)
 #endif
-
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
     psand => soilstate_inst%cellsand_col
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
 
+    snow_depth => waterstate_inst%snow_depth_col ! snow height of snow covered area (m)
+    h2osno     => waterstate_inst%h2osno_col     ! snow water equivalent (mm) 
+
     dz            => col%dz
     h2osoi_liq    => waterstate_inst%h2osoi_liq_col
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
 
-    ! write updated swc back to CLM
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-!        rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-!        rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+    snlsno     => col%snl                        ! number of snow layers (negative)
 
-        if(clm_statevec(cc+offset).le.watmin) then
-          swc(j,i)   = watmin
-        else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
-          swc(j,i) = watsat(j,i)
-        else
-          swc(j,i)   = clm_statevec(cc+offset)
-        endif
-        ! update liquid water content
-!        h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o !*rliq
-        ! update ice content
-!        h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice !*rice
-        cc = cc + 1
-      end do
-    end do
+    call update_DA_nstep()
+
+    ! write updated swc back to CLM
+    if(clmupdate_swc.ne.0) then
+        cc = 1
+        do i=1,nlevsoi
+          do j=clm_begg,clm_endg
+            ! iterate through the columns and copy from the same gridcell
+            ! i.e. statevec position (cc) for each column
+            do jj=clm_begc,clm_endc
+              rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
+              rice = h2osoi_ice(jj,i)/(dz(jj,i)*denice*swc(jj,i))
+     
+              if(clm_statevec(cc+offset).le.watmin) then
+                swc(jj,i)   = watmin
+              else if(clm_statevec(cc+offset).ge.watsat(jj,i)) then
+                swc(jj,i) = watsat(jj,i)
+              else
+                swc(jj,i)   = clm_statevec(cc+offset)
+              endif
+
+              if (isnan(swc(jj,i))) then
+                      swc(jj,i) = watmin
+                      print *, "WARNING: swc at j,i is nan: ", jj, i
+              endif
+
+              ! update liquid water content
+              h2osoi_liq(jj,i) = swc(jj,i) * dz(jj,i)*denh2o*rliq
+              ! update ice content
+              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+            end do
+            cc = cc + 1
+          end do
+        end do
+    endif 
 
     ! write updated texture back to CLM
     if(clmupdate_texture.eq.1) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
-          psand(j,i) = clm_statevec(cc+1*clm_varsize+offset)
-          pclay(j,i) = clm_statevec(cc+2*clm_varsize+offset)
+            ! iterate through the columns and copy from the same gridcell
+            ! i.e. statevec position (cc) for each column
+            do jj=clm_begc,clm_endc
+                psand(jj,i) = clm_statevec(cc+1*clm_varsize+offset)
+                pclay(jj,i) = clm_statevec(cc+2*clm_varsize+offset)
+            end do
           cc = cc + 1
         end do
       end do
@@ -260,9 +390,13 @@ module enkf_clm_mod
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
-          psand(j,i) = clm_statevec(cc+1*clm_varsize+offset)
-          pclay(j,i) = clm_statevec(cc+2*clm_varsize+offset)
-          porgm(j,i) = clm_statevec(cc+3*clm_varsize+offset)
+            ! iterate through the columns and copy from the same gridcell
+            ! i.e. statevec position (cc) for each column
+            do jj=clm_begc,clm_endc
+                psand(jj,i) = clm_statevec(cc+1*clm_varsize+offset)
+                pclay(jj,i) = clm_statevec(cc+2*clm_varsize+offset)
+                porgm(jj,i) = clm_statevec(cc+3*clm_varsize+offset)
+            end do
           cc = cc + 1
         end do
       end do
@@ -270,7 +404,235 @@ module enkf_clm_mod
       call clm_texture_to_parameters
     endif
 
-  end subroutine 
+    ! Snow assimilation:
+    ! Case 1: Snow depth
+    ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
+    if(clmupdate_snow.eq.1) then
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! iterate through the columns and copy from the same gridcell
+        ! i.e. statevec position (cc) for each column
+          do jj=clm_begc,clm_endc
+              ! Catch negative or 0 values from DA
+              if (clm_statevec(cc+offset).lt.0.0) then
+                print *, "WARNING: snow depth at g,c is negative: ", j, jj, clm_statevec(cc+offset)
+              else
+                rsnow(jj) = snow_depth(jj) - clm_statevec(cc+offset)
+                if ( ABS(SUM(rsnow(:))) .gt.0.000001) then
+                  snow_depth(jj)   = clm_statevec(cc+offset)
+                endif
+              endif
+          end do
+        cc = cc + 1
+        end do
+        if ( clmupdate_snow_repartitioning.ne.0) then
+          if ( ABS(SUM(rsnow(:))).gt.0.000001) then
+            call clm_repartition_snow()
+          end if
+        end if
+    endif
+    ! Case 2: Snow water equivalent
+    ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
+    if(clmupdate_snow.eq.2) then
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! iterate through the columns and copy from the same gridcell
+        ! i.e. statevec position (cc) for each column
+          do jj=clm_begc,clm_endc
+              ! Catch negative or 0 values from DA
+              if (clm_statevec(cc+offset).lt.0.0) then
+                print *, "WARNING: SWE at g,c is negative: ", j, jj, clm_statevec(cc+offset)
+              else
+                rsnow(jj) = h2osno(jj)
+                if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
+                  h2osno(jj)   = clm_statevec(cc+offset)
+                  if ( clmupdate_snow_repartitioning.eq.3) then
+                    incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
+                      do i=snlsno(jj)+1,0
+                        h2osoi_ice(jj,i) = h2osoi_ice(jj,i) * incr_h2osno
+                      end do
+                  end if
+                end if
+              endif
+          end do
+        cc = cc + 1
+        end do
+        if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
+          if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
+            call clm_repartition_snow(rsnow(:))
+          end if
+        end if
+    endif
+
+  end subroutine
+
+  subroutine clm_repartition_snow(h2osno_in)
+    use ColumnType,    only : col
+    use clm_instMod,   only : waterstate_inst
+    use clm_varpar,    only : nlevsno, nlevsoi
+    use clm_varcon,    only : bdsno, denice
+    use shr_kind_mod,  only : r8 => shr_kind_r8
+
+    implicit none
+
+    real(r8), intent(in), optional :: h2osno_in(clm_begc:clm_endc)
+
+    real(r8), pointer :: snow_depth(:)
+    real(r8), pointer :: h2osno(:)
+    real(r8), pointer :: h2oliq(:,:)
+    real(r8), pointer :: h2oice(:,:)
+    real(r8), pointer :: frac_sno(:)
+    real(r8), pointer :: snowdp(:)
+    integer, pointer :: snlsno(:)
+
+    real(r8) :: dzsno(clm_begc:clm_endc,-nlevsno+1:0)
+    real(r8) :: h2osno_po(clm_begc:clm_endc)
+    real(r8) :: h2osno_pr(clm_begc:clm_endc)
+    real(r8) :: snowden, frac_swe, frac_liq, frac_ice
+    real(r8) :: gain_h2osno, gain_h2oliq, gain_h2oice
+    real(r8) :: gain_dzsno(-nlevsno+1:0)
+    real(r8) :: rho_avg, z_avg
+    integer :: i,ii,j,jj,g,cc=1,offset=0
+
+    snow_depth => waterstate_inst%snow_depth_col ! snow height of snow covered area (m)
+    snowdp     => waterstate_inst%snowdp_col     ! area-averaged snow height (m) 
+    h2osno     => waterstate_inst%h2osno_col     ! col snow water (mm H2O)
+    h2oliq     => waterstate_inst%h2osoi_liq_col ! col liquid water (kg/m2) (-nlevsno+1:nlevgrnd) 
+    h2oice     => waterstate_inst%h2osoi_ice_col ! col ice lens (kg/m2) (-nlevsno+1:nlevgrnd)
+
+    snlsno     => col%snl                        ! number of snow layers (negative)
+
+    frac_sno   => waterstate_inst%frac_sno_eff_col ! fraction of ground covered by snow 
+    ! dz for snow layers is defined like in the history output as col%dz for the snow layers
+    dzsno(clm_begc:clm_endc, -nlevsno+1:0) = col%dz(clm_begc:clm_endc,-nlevsno+1:0)
+    ! Iterate through all columns
+    do jj=clm_begc,clm_endc
+      if (h2osno(jj).lt.0.0) then ! No snow in column
+        print *, "WARNING: negative snow in col: ", jj, h2osno
+!        ! Set existing layers to near zero and let CLM do the layer aggregation
+        do i=0,snlsno(jj)+1,-1
+            h2oliq(jj,i) = 0.0_r8
+            h2oice(jj,i) = 0.00000001_r8
+            dzsno(jj,i)  = 0.00000001_r8
+        end do
+        snow_depth(jj) = sum(dzsno(jj,:))
+        h2osno(jj) = sum(h2oice(jj,:))
+      else ! snow (h2osno) present
+        if (snlsno(jj).lt.0) then ! snow layers in the column
+          if (clmupdate_snow .eq. 1) then
+            ! Formulas below from DART use h2osno_po / h2osno_pr for after / before DA SWE
+            ! clmupdate_snow == 1 has snow_depth after and h2osno before DA snow depth
+            ! Therefore need to have a transform to get h2osno_po
+            ! v1 init
+            ! h2osno_po(jj) = (snow_depth(jj) * bdsno) ! calculations from Init using constant SBD
+            ! v2 SoilTemperatureMod
+            if (snowdp(jj).gt.0.0_r8) then
+              rho_avg = min(800.0_r8, h2osno(jj)/snowdp(jj))
+            else
+              rho_avg = 200.0_r8
+            end if
+            if (frac_sno(jj).gt.0.0_r8 .and. snlsno(jj).lt.0.0_r8) then
+              h2osno_po(jj) = snow_depth(jj) * (rho_avg*frac_sno(jj))
+            else
+              h2osno_po(jj) = snow_depth(jj) * denice
+            end if
+            h2osno_pr(jj) = h2osno(jj)
+          else if (clmupdate_snow .eq. 2) then
+            ! for clmupdate_snow == 2 we have post H2OSNO as the main H2OSNO already
+            h2osno_po(jj) = h2osno(jj)
+            h2osno_pr(jj) = h2osno_in(jj)
+          end if
+
+          do ii=0,snlsno(jj)+1,-1 ! iterate through the snow layers
+            ! DART VERSION: ii = nlevsoi - i + 1
+            ! snow density prior for each layer
+            if (dzsno(jj,ii).gt.0.0_r8) then
+              snowden = (h2oliq(jj,ii) + h2oice(jj,ii) / dzsno(jj,ii))
+            else
+              snowden = 0.0_r8
+            endif
+            ! fraction of SWE in each active layers
+            if(h2osno_pr(jj).gt.0.0_r8) then
+              ! repartition Option 1: Adjust bottom layer only (set weight to 1 for bottom 0 else)
+              if(clmupdate_snow_repartitioning.eq.1) then
+                if (ii .eq. 0) then ! DART version indexing check against nlevsno but for us 0
+                  frac_swe = 1.0_r8
+                else
+                  frac_swe = 0.0_r8
+                end if
+              ! repartition Option 2: Adjust all active layers
+              else if (clmupdate_snow_repartitioning.eq.2) then
+                frac_swe = (h2oliq(jj,ii) + h2oice(jj,ii)) / h2osno_pr(jj)
+              end if
+            else
+              frac_swe = 0.0_r8 ! no fraction SWE if no snow is present in column
+            end if ! end SWE fraction if
+
+            ! fraction of liquid and ice
+            if ((h2oliq(jj,ii) + h2oice(jj,ii)).gt.0.0_r8) then
+                frac_liq = h2oliq(jj,ii) / (h2oliq(jj,ii) + h2oice(jj,ii))
+                frac_ice = 1.0_r8 - frac_liq
+            else
+                frac_liq = 0.0_r8
+                frac_ice = 0.0_r8
+            end if
+
+            ! SWE adjustment per layer 
+            ! assumes identical layer distribution of liq and ice than before DA (frac_*)
+            if (abs(h2osno_po(jj) - h2osno_pr(jj)).gt.0.0_r8) then
+              gain_h2osno = (h2osno_po(jj) - h2osno_pr(jj)) * frac_swe
+              gain_h2oliq = gain_h2osno * frac_liq
+              gain_h2oice = gain_h2osno * frac_ice
+            else
+              gain_h2osno = 0.0_r8
+              gain_h2oliq = 0.0_r8
+              gain_h2oice = 0.0_r8
+            end if
+            ! layer level adjustments
+            if (snowden.gt.0.0_r8) then
+              gain_dzsno(ii) = gain_h2osno / snowden
+            else
+              gain_dzsno(ii) = 0.0_r8
+            end if
+            h2oliq(jj,ii) = h2oliq(jj,ii) + gain_h2oliq
+            h2oice(jj,ii) = h2oice(jj,ii) + gain_h2oice
+
+            ! Adjust snow layer dimensions so that CLM5 can calculate compaction / aggregation
+            ! in the DART code dzsno is adjusted directly but in CLM5 dzsno is local and diagnostic
+            ! i.e. calculated / assigned from frac_sno and dz(:, snow_layer) in SnowHydrologyMod
+            ! therefore we adjust dz(:, snow_layer) here
+            if (abs(h2osno_po(jj) - h2osno_pr(jj)).gt.0.0_r8) then
+              col%dz(jj, ii) = col%dz(jj, ii) + gain_dzsno(ii)
+              ! mid point and interface adjustments
+              ! i.e. zsno (col%z(:, snow_layers)) and zisno (col%zi(:, snow_layers))
+              ! DART version the sum goes from ilevel:nlevsno to fit with our indexing:
+              col%zi(jj, ii) = sum(col%dz(jj,ii:0))*-1.0_r8
+              ! In DART the check is ilevel == nlevsno but here
+              if (ii.eq.0) then
+                col%z(jj,ii) = col%zi(jj,ii) / 2.0_r8
+              else
+                col%z(jj,ii) = sum(col%zi(jj, ii:ii+1)) / 2.0_r8
+              end if
+            end if
+
+          end do ! End iteration of snow layers
+        endif ! End of snow layers present check
+
+        ! Column level variables
+        if (clmupdate_snow .eq. 1) then
+          ! Finally adjust SWE (h2osno) since the prior value is no longer needed
+          ! column level variables so we can adjust it outside the layer loop
+          h2osno(jj) = h2osno_po(jj) 
+        else if (clmupdate_snow .eq. 2) then
+          ! Update the total snow depth to match udpates to layers for active snow layers
+          if (abs(h2osno_po(jj) - h2osno_pr(jj)) .gt. 0.0_r8 .and. snlsno(jj) < 0.0_r8) then
+            snow_depth(jj) = snow_depth(jj) + sum(gain_dzsno(-nlevsno+1:0))
+          end if
+        end if
+      end if ! End of snow present check
+    end do ! End of column iteration
+
+  end subroutine
 
   subroutine clm_correct_texture()
 

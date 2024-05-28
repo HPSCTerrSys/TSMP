@@ -479,9 +479,21 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #endif
 
+
+  ! DEBUG / TESTING ALL OBSERVATIONS ON TASK 0
+  if (mype_filter == 0) then
+    dim_obs_p = dim_obs
+  else
+    dim_obs_p = 0
+  end if
+
+
+
   if (screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dim_obs_p=", dim_obs_p
   end if
+
+
 
   ! add and broadcast size of local observation dimensions using mpi_allreduce 
   call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
