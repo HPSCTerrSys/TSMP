@@ -265,7 +265,7 @@ module enkf_clm_mod
               ! update liquid water content
               h2osoi_liq(jj,i) = swc(jj,i) * dz(jj,i)*denh2o*rliq
               ! update ice content
-              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+              h2osoi_ice(jj,i) = swc(jj,i) * dz(jj,i)*denice*rice
             end do
             cc = cc + 1
           end do
