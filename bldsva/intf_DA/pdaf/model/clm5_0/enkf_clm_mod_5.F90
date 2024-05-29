@@ -59,6 +59,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
   integer :: COMM_couple_clm    ! CLM-version of COMM_couple
                                 ! (currently not used for clm5_0)
+  logical :: newgridcell
 
   contains
 
@@ -123,7 +124,7 @@ module enkf_clm_mod
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
-    integer :: i,j,cc=1,offset=0
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
 
     swc   => waterstate_inst%h2osoi_vol_col
@@ -213,7 +214,7 @@ module enkf_clm_mod
     real(r8), pointer :: h2osoi_ice(:,:)
     real(r8)  :: rliq,rice
 
-    integer :: i,j,cc=1,offset=0
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
 
 #ifdef PDAF_DEBUG
