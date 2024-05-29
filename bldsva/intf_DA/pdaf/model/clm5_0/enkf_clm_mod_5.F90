@@ -116,6 +116,7 @@ module enkf_clm_mod
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi
+    use ColumnType , only : col
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
     integer,intent(in) :: tstartcycle
