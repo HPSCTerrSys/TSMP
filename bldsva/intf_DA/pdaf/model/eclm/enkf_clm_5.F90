@@ -715,7 +715,7 @@ end subroutine clm5_init
 !end subroutine cime_comp_barriers
 
 
-subroutine clm_advance(ntstep) bind(C,name="clm_advance")
+subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   use seq_comm_mct,   only: atm_layout, lnd_layout, ice_layout, glc_layout,  &
       rof_layout, ocn_layout, wav_layout, esp_layout
   use shr_string_mod, only: shr_string_listGetIndexF
@@ -730,6 +730,8 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   implicit none
 
   integer(c_int),intent(in) :: ntstep
+  integer(c_int),intent(in) :: tstartcycle
+  integer(c_int),intent(in) :: mype
   integer :: counter=0
   integer :: nstep
 
@@ -2641,7 +2643,7 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   !|---------------------------------------------------------
 
   ! Calling PDAF Function to set state vector before assimiliation
-  call set_clm_statevec()
+  call set_clm_statevec(tstartcycle, mype)
 
   call t_startf ('CPL:RUN_LOOP_BSTOP')
   call mpi_barrier(mpicom_GLOID,ierr)
