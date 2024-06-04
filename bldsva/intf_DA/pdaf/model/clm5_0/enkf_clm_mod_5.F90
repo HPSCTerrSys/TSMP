@@ -276,12 +276,17 @@ module enkf_clm_mod
 #endif
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
-        cc = 1
+        ! cc = 1
         do i=1,nlevsoi
-          do j=clm_begg,clm_endg
-            ! iterate through the columns and copy from the same gridcell
-            ! i.e. statevec position (cc) for each column
+          ! do j=clm_begg,clm_endg
+          !   ! iterate through the columns and copy from the same gridcell
+          !   ! i.e. statevec position (cc) for each column
             do jj=clm_begc,clm_endc
+
+              ! Set cc, the state vector index from the grid index
+              ! plus the layer-index * num_gridcells
+              cc = col%gridcell(jj) + (i - 1)*(clm_endg - clm_begg + 1)
+
               rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
               rice = h2osoi_ice(jj,i)/(dz(jj,i)*denice*swc(jj,i))
      
@@ -303,8 +308,8 @@ module enkf_clm_mod
               ! update ice content
               h2osoi_ice(jj,i) = swc(jj,i) * dz(jj,i)*denice*rice
             end do
-            cc = cc + 1
-          end do
+            ! cc = cc + 1
+          ! end do
         end do
 
 #ifdef PDAF_DEBUG
