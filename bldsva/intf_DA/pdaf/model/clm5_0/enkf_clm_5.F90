@@ -694,7 +694,8 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
        callcount=0)
 
 #if defined CLMSA
-  call define_clm_statevec
+  ! Take pdaf_id for mype_world. Check if this is completely ok.
+  call define_clm_statevec(pdaf_id)
 #endif 
 
 

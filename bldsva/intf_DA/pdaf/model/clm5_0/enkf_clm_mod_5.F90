@@ -64,12 +64,14 @@ module enkf_clm_mod
   contains
 
 #if defined CLMSA
-  subroutine define_clm_statevec()
+  subroutine define_clm_statevec(mype)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
     use clm_varpar   , only : nlevsoi
 
     implicit none
+
+    integer,intent(in) :: mype
 
     integer :: begp, endp   ! per-proc beginning and ending pft indices
     integer :: begc, endc   ! per-proc beginning and ending column indices
