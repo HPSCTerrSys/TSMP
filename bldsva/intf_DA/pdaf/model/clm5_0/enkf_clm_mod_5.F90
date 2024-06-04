@@ -262,14 +262,14 @@ module enkf_clm_mod
 
 #ifdef PDAF_DEBUG
         ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle + 1, ".txt"
+        WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn5, action="write")
         WRITE (71,"(f20.15)") h2osoi_liq(:,:)
         CLOSE(71)
 #endif
 #ifdef PDAF_DEBUG
         ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle + 1, ".txt"
+        WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn6, action="write")
         WRITE (71,"(f20.15)") h2osoi_ice(:,:)
         CLOSE(71)
@@ -309,21 +309,21 @@ module enkf_clm_mod
 
 #ifdef PDAF_DEBUG
         ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle + 1, ".txt"
+        WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn3, action="write")
         WRITE (71,"(f20.15)") h2osoi_liq(:,:)
         CLOSE(71)
 #endif
 #ifdef PDAF_DEBUG
         ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle + 1, ".txt"
+        WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn4, action="write")
         WRITE (71,"(f20.15)") h2osoi_ice(:,:)
         CLOSE(71)
 #endif
 #ifdef PDAF_DEBUG
         ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle + 1, ".txt"
+        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn2, action="write")
         WRITE (71,"(f20.15)") swc(:,:)
         CLOSE(71)
