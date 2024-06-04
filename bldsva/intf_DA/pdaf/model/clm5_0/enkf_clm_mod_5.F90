@@ -133,11 +133,20 @@ module enkf_clm_mod
     real(r8), pointer :: porgm(:,:)
     integer :: i,j,jj,g,cc=1,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
+    character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
     swc   => waterstate_inst%h2osoi_vol_col
     psand => soilstate_inst%cellsand_col
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
+
+#ifdef PDAF_DEBUG
+    ! TSMP-PDAF: For debug runs, output the state vector in files
+    WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+    OPEN(unit=71, file=fn2, action="write")
+    WRITE (71,"(f20.15)") swc(:,:)
+    CLOSE(71)
+#endif
 
     if(clmupdate_swc.ne.0) then
         ! write swc values to state vector
@@ -223,6 +232,7 @@ module enkf_clm_mod
 
     integer :: i,j,jj,g,cc=1,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
+    character (len = 31) :: fn2    !TSMP-PDAF: function name for state vector outpu
 
 #ifdef PDAF_DEBUG
     ! TSMP-PDAF: For debug runs, output the state vector in files
@@ -276,6 +286,15 @@ module enkf_clm_mod
             cc = cc + 1
           end do
         end do
+
+#ifdef PDAF_DEBUG
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle + 1, ".txt"
+        OPEN(unit=71, file=fn2, action="write")
+        WRITE (71,"(f20.15)") swc(:,:)
+        CLOSE(71)
+#endif
+
     endif 
 
     ! write updated texture back to CLM
