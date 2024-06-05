@@ -54,6 +54,7 @@ update_swc  =
 update_texture  =
 print_swc   =
 print_et   =
+statevec_allcol =
 
 [COSMO]
 nprocs      =
@@ -449,7 +450,18 @@ and include the specifier `update` in the file name.
 ### CLM:print_et ###
 
 `CLM:print_et`: (integer) Invoke function `write_clm_statistics`. For
-further information, see source code.
+further information, see source code. Default: `0`.
+
+### CLM:statevec_allcol ###
+
+`CLM:statevec_allcol`: (integer) Switch for using all SWC columns of a
+CLM5 gridcell in the state vector.
+
+If `0` (default): Only one SWC value per grid cell is saved in the
+state vector.
+
+If `1`: `#columns` SWC values per grid cell are saved in the state
+vector.
 
 ## [COSMO] ##
 
@@ -640,6 +652,8 @@ skin depth (compare the weighting procedure described in Schrön et al,
  |           | `nprocs`                | 0             |
  |           | `update_swc`            | 1             |
  |           | `print_swc`             | 0             |
+ |           | `print_et`              | 0             |
+ |           | `statevec_allcol`       | 0             |
  | `[COSMO]` |                         |               |
  |           | `nprocs`                | 0             |
  |           | `dtmult`                | 0             |

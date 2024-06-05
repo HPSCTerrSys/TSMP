@@ -41,6 +41,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
+  integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
@@ -95,8 +96,15 @@ module enkf_clm_mod
     clm_endp     = endp
 
     if(clmupdate_swc.eq.1) then
-      clm_varsize      =  (endg-begg+1) * nlevsoi
-      clm_statevecsize =  (endg-begg+1) * nlevsoi
+      if(clmstatevec_allcol.eq.0) then
+        ! One value per grid-cell
+        clm_varsize      =  (endg-begg+1) * nlevsoi
+        clm_statevecsize =  (endg-begg+1) * nlevsoi
+      else
+        ! #cols values per grid-cell
+        clm_varsize      =  (endc-begc+1) * nlevsoi
+        clm_statevecsize =  (endc-begc+1) * nlevsoi
+      end if
     endif
 
     if(clmupdate_swc.eq.2) then
@@ -154,21 +162,36 @@ module enkf_clm_mod
         ! write swc values to state vector
         cc = 1
         do i=1,nlevsoi
-          do j=clm_begg,clm_endg
-            ! Only get the SWC from the first column of each gridcell
-            ! and add it to the clm_statevec at the position of the gridcell (cc)
-            newgridcell = .true.
-            do jj=clm_begc,clm_endc
-              g = col%gridcell(jj)
-              if (g .eq. j) then
-                if (newgridcell) then
-                  newgridcell = .false.
-                  clm_statevec(cc+offset) = swc(jj,i)
+
+          if(clmstatevec_allcol.eq.0) then
+
+            do j=clm_begg,clm_endg
+              ! Only get the SWC from the first column of each gridcell
+              ! and add it to the clm_statevec at the position of the gridcell (cc)
+              newgridcell = .true.
+              do jj=clm_begc,clm_endc
+                g = col%gridcell(jj)
+                if (g .eq. j) then
+                  if (newgridcell) then
+                    newgridcell = .false.
+                    clm_statevec(cc+offset) = swc(jj,i)
+                  endif
                 endif
-              endif 
+              end do
+              cc = cc + 1
             end do
-            cc = cc + 1
-          end do
+
+          else
+
+            do jj=clm_begc,clm_endc
+              ! Add all columns for each gridcell
+
+              clm_statevec(cc+offset) = swc(jj,i)
+              cc = cc + 1
+            end do
+
+          end if
+
         end do
     endif
 
@@ -283,9 +306,14 @@ module enkf_clm_mod
           !   ! i.e. statevec position (cc) for each column
             do jj=clm_begc,clm_endc
 
-              ! Set cc, the state vector index from the grid index
-              ! plus the layer-index * num_gridcells
-              cc = col%gridcell(jj) + (i - 1)*(clm_endg - clm_begg + 1)
+              ! Set cc (the state vector index) from the
+              ! CLM5-grid-index and the `CLM5-layer-index times
+              ! num_gridcells`
+              if(clmstatevec_allcol.eq.0) then
+                cc = col%gridcell(jj) + (i - 1)*(clm_endg - clm_begg + 1)
+              else
+                cc = jj + + (i - 1)*(clm_endc - clm_begc + 1)
+              end if
 
               rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
               rice = h2osoi_ice(jj,i)/(dz(jj,i)*denice*swc(jj,i))
