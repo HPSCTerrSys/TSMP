@@ -310,9 +310,9 @@ module enkf_clm_mod
               ! CLM5-grid-index and the `CLM5-layer-index times
               ! num_gridcells`
               if(clmstatevec_allcol.eq.0) then
-                cc = col%gridcell(jj) + (i - 1)*(clm_endg - clm_begg + 1)
+                cc = (col%gridcell(jj) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
               else
-                cc = jj + (i - 1)*(clm_endc - clm_begc + 1)
+                cc = (jj - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
               end if
 
               rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
