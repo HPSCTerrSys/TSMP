@@ -55,6 +55,7 @@ update_texture  =
 print_swc   =
 print_et   =
 statevec_allcol =
+t_printensemble =
 
 [COSMO]
 nprocs      =
@@ -462,6 +463,14 @@ state vector.
 
 If `1`: `#columns` SWC values per grid cell are saved in the state
 vector.
+
+### CLM:t_printensemble ###
+
+`CLM:t_printensemble`: (integer) The timestep for the state ensemble
+output switched on with the debug flag `PDAF_DEBUG`.
+
+Default setting is `-1`, which means: Print debug output at every DA
+time step.
 
 ## [COSMO] ##
 

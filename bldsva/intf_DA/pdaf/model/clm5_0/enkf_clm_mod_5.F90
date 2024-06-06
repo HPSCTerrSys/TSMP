@@ -42,6 +42,7 @@ module enkf_clm_mod
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
   integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
+  integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
@@ -151,11 +152,13 @@ module enkf_clm_mod
     porgm => soilstate_inst%cellorg_col
 
 #ifdef PDAF_DEBUG
-    ! TSMP-PDAF: For debug runs, output the state vector in files
-    WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
-    OPEN(unit=71, file=fn2, action="write")
-    WRITE (71,"(f20.15)") swc(:,:)
-    CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn2, action="write")
+      WRITE (71,"(f20.15)") swc(:,:)
+      CLOSE(71)
+    END IF
 #endif
 
     if(clmupdate_swc.ne.0) then
@@ -221,13 +224,15 @@ module enkf_clm_mod
     endif
 
 #ifdef PDAF_DEBUG
-  ! TSMP-PDAF: For debug runs, output the state vector in files
-  WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
-  OPEN(unit=71, file=fn, action="write")
-  DO i = 1, clm_statevecsize
-    WRITE (71,"(f20.15)") clm_statevec(i)
-  END DO
-  CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
 #endif
 
   end subroutine 
@@ -264,13 +269,15 @@ module enkf_clm_mod
     character (len = 32) :: fn6    !TSMP-PDAF: function name for state vector outpu
 
 #ifdef PDAF_DEBUG
-    ! TSMP-PDAF: For debug runs, output the state vector in files
-    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
-    OPEN(unit=71, file=fn, action="write")
-    DO i = 1, clm_statevecsize
-      WRITE (71,"(f20.15)") clm_statevec(i)
-    END DO
-    CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
 #endif
 
     swc   => waterstate_inst%h2osoi_vol_col
@@ -284,18 +291,22 @@ module enkf_clm_mod
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
 
 #ifdef PDAF_DEBUG
-        ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle, ".txt"
-        OPEN(unit=71, file=fn5, action="write")
-        WRITE (71,"(f20.15)") h2osoi_liq(:,:)
-        CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn5, action="write")
+      WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+      CLOSE(71)
+    END IF
 #endif
 #ifdef PDAF_DEBUG
-        ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
-        OPEN(unit=71, file=fn6, action="write")
-        WRITE (71,"(f20.15)") h2osoi_ice(:,:)
-        CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn6, action="write")
+      WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+      CLOSE(71)
+    END IF
 #endif
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
@@ -341,25 +352,31 @@ module enkf_clm_mod
         end do
 
 #ifdef PDAF_DEBUG
-        ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
-        OPEN(unit=71, file=fn3, action="write")
-        WRITE (71,"(f20.15)") h2osoi_liq(:,:)
-        CLOSE(71)
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn3, action="write")
+          WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+          CLOSE(71)
+        END IF
 #endif
 #ifdef PDAF_DEBUG
-        ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
-        OPEN(unit=71, file=fn4, action="write")
-        WRITE (71,"(f20.15)") h2osoi_ice(:,:)
-        CLOSE(71)
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn4, action="write")
+          WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+          CLOSE(71)
+        END IF
 #endif
 #ifdef PDAF_DEBUG
-        ! TSMP-PDAF: For debug runs, output the state vector in files
-        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
-        OPEN(unit=71, file=fn2, action="write")
-        WRITE (71,"(f20.15)") swc(:,:)
-        CLOSE(71)
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn2, action="write")
+          WRITE (71,"(f20.15)") swc(:,:)
+          CLOSE(71)
+        END IF
 #endif
 
     endif 
