@@ -573,7 +573,7 @@ module enkf_clm_5
 
   contains
 
-subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
+subroutine clm5_init(finname, pdaf_id, pdaf_max, mype) bind(C,name="clm5_init")
   use cime_comp_mod, only : cime_pre_init1
   use cime_comp_mod, only : cime_pre_init2
   use cime_comp_mod, only : cime_init
@@ -586,6 +586,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
   character(kind=c_char,len=1),dimension(100),intent(in) :: finname 
   integer(c_int), intent(in) :: pdaf_id
   integer(c_int), intent(in) :: pdaf_max
+  integer(c_int), intent(in) :: mype
   integer(c_int) :: counter
 
   !--------------------------------------------------------------------------
@@ -694,8 +695,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
        callcount=0)
 
 #if defined CLMSA
-  ! Take pdaf_id for mype_world. Check if this is completely ok.
-  call define_clm_statevec(pdaf_id)
+  call define_clm_statevec(mype)
 #endif 
 
 
