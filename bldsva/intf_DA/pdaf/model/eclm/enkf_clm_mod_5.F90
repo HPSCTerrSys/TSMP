@@ -41,6 +41,8 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
+  integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
+  integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
@@ -59,16 +61,19 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
   integer :: COMM_couple_clm    ! CLM-version of COMM_couple
                                 ! (currently not used for clm5_0)
+  logical :: newgridcell
 
   contains
 
 #if defined CLMSA
-  subroutine define_clm_statevec()
+  subroutine define_clm_statevec(mype)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
     use clm_varpar   , only : nlevsoi
 
     implicit none
+
+    integer,intent(in) :: mype
 
     integer :: begp, endp   ! per-proc beginning and ending pft indices
     integer :: begc, endc   ! per-proc beginning and ending column indices
@@ -77,7 +82,13 @@ module enkf_clm_mod
 
 
     call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
-    !write(*,*) "----",begg,",",endg,",",begl,",",endl,",",begc,",",endc,",",begp,",",endp," -------"
+
+#ifdef PDAF_DEBUG
+    WRITE(*,"(a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a)") &
+      "TSMP-PDAF mype(w)=", mype, " define_clm_statevec, CLM5-bounds (g,l,c,p)----",&
+      begg,",",endg,",",begl,",",endl,",",begc,",",endc,",",begp,",",endp," -------"
+#endif
+
     clm_begg     = begg
     clm_endg     = endg
     clm_begc     = begc
@@ -86,8 +97,15 @@ module enkf_clm_mod
     clm_endp     = endp
 
     if(clmupdate_swc.eq.1) then
-      clm_varsize      =  (endg-begg+1) * nlevsoi
-      clm_statevecsize =  (endg-begg+1) * nlevsoi
+      if(clmstatevec_allcol.eq.0) then
+        ! One value per grid-cell
+        clm_varsize      =  (endg-begg+1) * nlevsoi
+        clm_statevecsize =  (endg-begg+1) * nlevsoi
+      else
+        ! #cols values per grid-cell
+        clm_varsize      =  (endc-begc+1) * nlevsoi
+        clm_statevecsize =  (endc-begc+1) * nlevsoi
+      end if
     endif
 
     if(clmupdate_swc.eq.2) then
@@ -115,6 +133,7 @@ module enkf_clm_mod
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi
+    use ColumnType , only : col
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
     integer,intent(in) :: tstartcycle
@@ -123,33 +142,59 @@ module enkf_clm_mod
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
-    integer :: i,j,cc=1,offset=0
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
+    character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
     swc   => waterstate_inst%h2osoi_vol_col
     psand => soilstate_inst%cellsand_col
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
 
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn2, action="write")
+      WRITE (71,"(f20.15)") swc(:,:)
+      CLOSE(71)
+    END IF
+#endif
+
     if(clmupdate_swc.ne.0) then
         ! write swc values to state vector
         cc = 1
         do i=1,nlevsoi
-          do j=clm_begg,clm_endg
-            ! Only get the SWC from the first column of each gridcell
-            ! and add it to the clm_statevec at the position of the gridcell (cc)
-            newgridcell = .true.
-            do jj=clm_begc,clm_endc
-              g = col%gridcell(jj)
-              if (g .eq. j) then
-                if (newgridcell) then
-                  newgridcell = .false.
-                  clm_statevec(cc+offset) = swc(jj,i)
+
+          if(clmstatevec_allcol.eq.0) then
+
+            do j=clm_begg,clm_endg
+              ! Only get the SWC from the first column of each gridcell
+              ! and add it to the clm_statevec at the position of the gridcell (cc)
+              newgridcell = .true.
+              do jj=clm_begc,clm_endc
+                g = col%gridcell(jj)
+                if (g .eq. j) then
+                  if (newgridcell) then
+                    newgridcell = .false.
+                    clm_statevec(cc+offset) = swc(jj,i)
+                  endif
                 endif
-              endif 
+              end do
+              cc = cc + 1
             end do
-            cc = cc + 1
-          end do
+
+          else
+
+            do jj=clm_begc,clm_endc
+              ! Add all columns for each gridcell
+
+              clm_statevec(cc+offset) = swc(jj,i)
+              cc = cc + 1
+            end do
+
+          end if
+
         end do
     endif
 
@@ -179,13 +224,15 @@ module enkf_clm_mod
     endif
 
 #ifdef PDAF_DEBUG
-  ! TSMP-PDAF: For debug runs, output the state vector in files
-  WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
-  OPEN(unit=71, file=fn, action="write")
-  DO i = 1, clm_statevecsize
-    WRITE (71,"(f20.15)") clm_statevec(i)
-  END DO
-  CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
 #endif
 
   end subroutine 
@@ -213,17 +260,24 @@ module enkf_clm_mod
     real(r8), pointer :: h2osoi_ice(:,:)
     real(r8)  :: rliq,rice
 
-    integer :: i,j,cc=1,offset=0
+    integer :: i,j,jj,g,cc=1,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
+    character (len = 31) :: fn2    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn3    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn4    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn5    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn6    !TSMP-PDAF: function name for state vector outpu
 
 #ifdef PDAF_DEBUG
-    ! TSMP-PDAF: For debug runs, output the state vector in files
-    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
-    OPEN(unit=71, file=fn, action="write")
-    DO i = 1, clm_statevecsize
-      WRITE (71,"(f20.15)") clm_statevec(i)
-    END DO
-    CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
 #endif
 
     swc   => waterstate_inst%h2osoi_vol_col
@@ -236,14 +290,42 @@ module enkf_clm_mod
     h2osoi_liq    => waterstate_inst%h2osoi_liq_col
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
 
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn5, action="write")
+      WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+      CLOSE(71)
+    END IF
+#endif
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn6, action="write")
+      WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+      CLOSE(71)
+    END IF
+#endif
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
-        cc = 1
+        ! cc = 1
         do i=1,nlevsoi
-          do j=clm_begg,clm_endg
-            ! iterate through the columns and copy from the same gridcell
-            ! i.e. statevec position (cc) for each column
+          ! do j=clm_begg,clm_endg
+          !   ! iterate through the columns and copy from the same gridcell
+          !   ! i.e. statevec position (cc) for each column
             do jj=clm_begc,clm_endc
+
+              ! Set cc (the state vector index) from the
+              ! CLM5-grid-index and the `CLM5-layer-index times
+              ! num_gridcells`
+              if(clmstatevec_allcol.eq.0) then
+                cc = (col%gridcell(jj) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+              else
+                cc = (jj - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+              end if
+
               rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
               rice = h2osoi_ice(jj,i)/(dz(jj,i)*denice*swc(jj,i))
      
@@ -263,11 +345,40 @@ module enkf_clm_mod
               ! update liquid water content
               h2osoi_liq(jj,i) = swc(jj,i) * dz(jj,i)*denh2o*rliq
               ! update ice content
-              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+              h2osoi_ice(jj,i) = swc(jj,i) * dz(jj,i)*denice*rice
             end do
-            cc = cc + 1
-          end do
+            ! cc = cc + 1
+          ! end do
         end do
+
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn3, action="write")
+          WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+          CLOSE(71)
+        END IF
+#endif
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn4, action="write")
+          WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+          CLOSE(71)
+        END IF
+#endif
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn2, action="write")
+          WRITE (71,"(f20.15)") swc(:,:)
+          CLOSE(71)
+        END IF
+#endif
+
     endif 
 
     ! write updated texture back to CLM
