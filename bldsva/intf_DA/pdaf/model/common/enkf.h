@@ -40,10 +40,10 @@ void enkf_ensemblestatistics (double* dat, double* mean, double* var, int size, 
 void enkf_printstatistics_pfb (double *dat, char* name, int cycle, char* prefix, int dim);
 extern void clm_init(char *s);
 #ifdef CLMFIVE
-extern void clm5_init(char *s, int *pdaf_id, int *pdaf_max, int *mype);
-#endif
+extern void clm_init(char *s, int *pdaf_id, int *pdaf_max, int *mype);
 extern void clm_advance(int *ntstep, int *tstartcycle, int *mype);
 extern void update_clm(int *tstartcycle, int *mype);
+#endif
 #if defined CLMSA
 extern void print_update_clm(int *ts, int *ttot);
 #endif

@@ -573,7 +573,7 @@ module enkf_clm_5
 
   contains
 
-subroutine clm5_init(finname, pdaf_id, pdaf_max, mype) bind(C,name="clm5_init")
+subroutine clm_init(finname, pdaf_id, pdaf_max, mype) bind(C,name="clm_init")
   use cime_comp_mod, only : cime_pre_init1
   use cime_comp_mod, only : cime_pre_init2
   use cime_comp_mod, only : cime_init
@@ -699,7 +699,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max, mype) bind(C,name="clm5_init")
 #endif 
 
 
-end subroutine clm5_init
+end subroutine clm_init
 
 !===============================================================================
 
