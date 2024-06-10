@@ -54,6 +54,8 @@ module enkf_clm_mod
   integer :: clm_paramsize !hcp LAI
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
+  integer :: clm_begc,clm_endc
+  integer :: clm_begp,clm_endp
   real(r8),allocatable :: clm_statevec(:)
   real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
@@ -95,9 +97,14 @@ module enkf_clm_mod
     integer :: begl, endl   ! per-proc beginning and ending landunit indices
     integer :: begg, endg   ! per-proc gridcell ending gridcell indices
 
+
     call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
     clm_begg     = begg
     clm_endg     = endg
+    clm_begc     = begc
+    clm_endc     = endc
+    clm_begp     = begp
+    clm_endp     = endp
 
     if(clmupdate_swc.eq.1) then
       clm_varsize      =  (endg-begg+1) * nlevsoi
@@ -670,3 +677,4 @@ module enkf_clm_mod
 #endif
 
 end module enkf_clm_mod
+
