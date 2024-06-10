@@ -26,13 +26,17 @@ module enkf_clm_mod
 
   use iso_c_binding
 
+! !USES:
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
 #if (defined CLMSA)
   integer :: COMM_model_clm
   integer :: clm_statevecsize
+  integer :: clm_paramsize !hcp LAI
   integer :: clm_varsize
-  integer :: clm_begg,clm_endg,clm_begc,clm_endc,clm_begp,clm_endp
+  integer :: clm_begg,clm_endg
+  integer :: clm_begc,clm_endc
+  integer :: clm_begp,clm_endp
   real(r8),allocatable :: clm_statevec(:)
   real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
@@ -52,7 +56,7 @@ module enkf_clm_mod
 
   logical  :: log_print    ! true=> print diagnostics
   real(r8) :: eccf         ! earth orbit eccentricity factor
-  logical  :: mpi_running  ! true => MPI is initialized 
+  logical  :: mpi_running  ! true => MPI is initialized
   integer  :: mpicom_glob  ! MPI communicator
 
   character(len=SHR_KIND_CL) :: nlfilename = " "
