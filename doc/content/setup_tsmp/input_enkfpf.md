@@ -413,13 +413,12 @@ in CLM (standalone only).
 
 -  1: Update of soil moisture content
 
-- (only branch `TSMP_pdaf-crns`) 2: Update and average of soil
-  moisture content for use with Cosmic-Ray data (Hui Pung
-  implementation).
+-  2: (only `clm3_5`) Update and average of soil moisture content for
+   use with Cosmic-Ray data (Hui Pung implementation).
 
-- (only CLM5.0) 3: Update and average of soil moisture content for use
-  with Cosmic-Ray data (Strebel implementation of Schrön2017,
-  <https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor>).
+-  3: (only CLM5.0) Update and average of soil moisture content for
+   use with Cosmic-Ray data (Strebel implementation of Schrön2017,
+   <https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor>).
 
 ### CLM:update_texture ###
 
