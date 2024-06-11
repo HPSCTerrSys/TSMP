@@ -215,7 +215,6 @@ module enkf_clm_mod
         clm_statevec(cc) = swcave
         cc = cc + 1
       end do
-
     endif
 
     ! write texture values to state vector (if desired)
@@ -411,11 +410,13 @@ module enkf_clm_mod
 
   end subroutine update_clm
 
-  subroutine clm_correct_texture
+  subroutine clm_correct_texture()
+
     use clmtype
     use clm_varpar  , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
+
     integer :: c,lev
     real(r8) :: clay,sand,ttot
     real(r8), pointer :: psand(:,:)
@@ -431,6 +432,7 @@ module enkf_clm_mod
 
          if(sand.le.0.0) sand = 1.0
          if(clay.le.0.0) clay = 1.0
+
          ttot = sand + clay
          if(ttot.gt.100) then
              sand = sand/ttot * 100
@@ -439,7 +441,8 @@ module enkf_clm_mod
 
          pclay(c,lev) = clay
          psand(c,lev) = sand
-      end do
+
+       end do
     end do
   end subroutine clm_correct_texture
 
@@ -562,7 +565,8 @@ module enkf_clm_mod
   end subroutine average_swc_crp
 #endif
 
-  subroutine domain_def_clm(lon_clmobs, lat_clmobs, dim_obs, longxy, latixy, longxy_obs, latixy_obs)
+  subroutine domain_def_clm(lon_clmobs, lat_clmobs, dim_obs, &
+                            longxy, latixy, longxy_obs, latixy_obs)
 !#if defined CLMSA
     USE domainMod, ONLY: alatlon
     USE decompMod, ONLY: get_proc_total, get_proc_bounds_atm, adecomp
@@ -580,12 +584,14 @@ module enkf_clm_mod
     integer, allocatable, intent(inout) :: latixy(:)
     integer, allocatable, intent(inout) :: longxy_obs(:)
     integer, allocatable, intent(inout) :: latixy_obs(:)
-    integer :: ni, nj, ii, jj, kk, cid, ier, ncells, nlunits, &
-               ncols, npfts, counter
+    integer :: ni, nj, ii, jj, kk, cid, ier, ncells, nlunits
+    integer :: ncols, counter
+    integer :: npfts
     real :: minlon, minlat, maxlon, maxlat
     real(r8), pointer :: lon(:)
     real(r8), pointer :: lat(:)
     integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+
 
     lon   => alatlon%lonc
     lat   => alatlon%latc
@@ -608,20 +614,23 @@ module enkf_clm_mod
     allocate(longxy(ncells), stat=ier)
     if(allocated(latixy)) deallocate(latixy)
     allocate(latixy(ncells), stat=ier)
+
     ! initialize vector with zero values
     longxy(:) = 0
     latixy(:) = 0
+  
+    ! fill vector with index values
     counter = 1
     do ii = 1, nj
       do jj = 1, ni
-         cid = (ii-1)*ni + jj
-         do kk = begg, endg
-            if(cid == adecomp%gdc2glo(kk)) then
-               latixy(counter) = ii
-               longxy(counter) = jj
-               counter = counter + 1
-            endif
-         enddo
+        cid = (ii-1)*ni + jj
+        do kk = begg, endg
+          if(cid == adecomp%gdc2glo(kk)) then
+            latixy(counter) = ii
+            longxy(counter) = jj
+            counter = counter + 1
+          end if
+        end do
       end do
     end do
 
@@ -641,12 +650,15 @@ module enkf_clm_mod
     allocate(longxy_obs(dim_obs), stat=ier)
     if(allocated(latixy_obs)) deallocate(latixy_obs)
     allocate(latixy_obs(dim_obs), stat=ier)
+
     do i = 1, dim_obs
-       if(((lon_clmobs(i) + 180) - minlon) /= 0 .and. ((lat_clmobs(i) + 90) - minlat) /= 0) then
+       if(((lon_clmobs(i) + 180) - minlon) /= 0 .and. &
+         ((lat_clmobs(i) + 90) - minlat) /= 0) then
           longxy_obs(i) = ceiling(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon)) !+ 1
           latixy_obs(i) = ceiling(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat)) !+ 1
           !print *,'longxy_obs(i) , latixy_obs(i) ', longxy_obs(i) , latixy_obs(i)
-       else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. ((lat_clmobs(i) + 90) - minlat) == 0) then
+        else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. &
+                ((lat_clmobs(i) + 90) - minlat) == 0) then
           longxy_obs(i) = 1
           latixy_obs(i) = 1
        else if(((lon_clmobs(i) + 180) - minlon) == 0) then
@@ -752,6 +764,7 @@ module enkf_clm_mod
     use clm_varpar   , only : nlevsoi
 
     implicit none
+
     integer, intent(out) :: dim_l
     integer              :: nshift
 
