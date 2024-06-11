@@ -608,6 +608,8 @@ module enkf_clm_mod
     use spmdMod,   only : npes, iam
     use domainMod, only : ldomain
     use decompMod, only : get_proc_total, get_proc_bounds, ldecomp
+
+    implicit none
     real, intent(in) :: lon_clmobs(:)
     real, intent(in) :: lat_clmobs(:)
     integer, intent(in) :: dim_obs
