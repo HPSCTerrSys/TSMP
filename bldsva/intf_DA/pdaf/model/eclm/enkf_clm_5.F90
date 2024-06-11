@@ -2643,8 +2643,10 @@ subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   !| End of driver time step loop
   !|---------------------------------------------------------
 
+#if defined CLMSA
   ! Calling PDAF Function to set state vector before assimiliation
   call set_clm_statevec(tstartcycle, mype)
+#endif
 
   call t_startf ('CPL:RUN_LOOP_BSTOP')
   call mpi_barrier(mpicom_GLOID,ierr)
