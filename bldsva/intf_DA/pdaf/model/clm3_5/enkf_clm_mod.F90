@@ -137,11 +137,13 @@ module enkf_clm_mod
     if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
   end subroutine
 
-  subroutine set_clm_statevec()
+  subroutine set_clm_statevec(tstartcycle, mype)
     USE clmtype      , only : clm3
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
+    integer,intent(in) :: tstartcycle
+    integer,intent(in) :: mype
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
@@ -151,6 +153,8 @@ module enkf_clm_mod
     integer :: i,j,cc=1,offset=0
     real(r8) :: swcave
     real(r8) :: swctmp(10)
+    character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
+    character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
     swc   => clm3%g%l%c%cws%h2osoi_vol
     psand => clm3%g%l%c%cps%psand
@@ -158,6 +162,16 @@ module enkf_clm_mod
     tvege => clm3%g%l%c%p%pes%t_veg !hcp
     tgrou => clm3%g%l%c%ces%t_grnd  !hcp
     ttlai => clm3%g%l%c%p%pps%tlai  !hcp
+
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: Debug output of CLM swc
+      WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn2, action="write")
+      WRITE (71,"(f20.15)") swc(:,:)
+      CLOSE(71)
+    END IF
+#endif
 
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
@@ -215,6 +229,19 @@ module enkf_clm_mod
         end do
       end do
     endif
+
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
+#endif
+
   end subroutine set_clm_statevec
 
 

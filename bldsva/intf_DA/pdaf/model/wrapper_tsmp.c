@@ -144,11 +144,7 @@ void integrate_tsmp() {
     }
 
     /* Integrate CLM */
-#if defined CLMFIVE
     clm_advance(&tsclm, &tstartcycle, &mype_world);
-#else
-    clm_advance(&tsclm);
-#endif
 
     /* Debug output */
     if (screen_wrapper > 1 && task_id==1) {

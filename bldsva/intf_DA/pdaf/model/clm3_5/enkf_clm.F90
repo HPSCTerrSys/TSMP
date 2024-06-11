@@ -149,11 +149,13 @@ subroutine clm_init(finname) bind(C,name="clm_init")
 end subroutine clm_init
 
 
-subroutine clm_advance(ntstep) bind(C,name="clm_advance")
+subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   use enkf_clm_mod
   use iso_c_binding
   use mod_clm_statistics
   integer(c_int),intent(in) :: ntstep
+  integer(c_int),intent(in) :: tstartcycle
+  integer(c_int),intent(in) :: mype
   integer :: counter=0
 
    do counter=1,ntstep
@@ -192,7 +194,8 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   end do
 
 #if defined CLMSA
-  call set_clm_statevec()
+  ! Calling PDAF Function to set state vector before assimiliation
+  call set_clm_statevec(tstartcycle, mype)
 #endif
 
 end subroutine clm_advance
