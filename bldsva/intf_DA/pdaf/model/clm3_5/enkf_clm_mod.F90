@@ -435,8 +435,8 @@ module enkf_clm_mod
 
          ttot = sand + clay
          if(ttot.gt.100) then
-             sand = sand/ttot * 100
-             clay = clay/ttot * 100
+             sand = sand/ttot * 100.0
+             clay = clay/ttot * 100.0
          end if
 
          pclay(c,lev) = clay
