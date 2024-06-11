@@ -203,25 +203,16 @@ module enkf_clm_mod
     endif
 
     ! write texture values to state vector (if desired)
-    if(clmupdate_texture.eq.1) then
+    if(clmupdate_texture.ne.0) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
           clm_statevec(cc+1*clm_varsize+offset) = psand(j,i)
           clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
-          cc = cc + 1
-        end do
-      end do
-    endif
-
-    ! write texture incl. organic matter values to state vector (if desired)
-    if(clmupdate_texture.eq.2) then
-      cc = 1
-      do i=1,nlevsoi
-        do j=clm_begg,clm_endg
-          clm_statevec(cc+1*clm_varsize+offset) = psand(j,i)
-          clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
-          clm_statevec(cc+3*clm_varsize+offset) = porgm(j,i)
+          if(clmupdate_texture.eq.2) then
+            !incl. organic matter values
+            clm_statevec(cc+3*clm_varsize+offset) = porgm(j,i)
+          end if
           cc = cc + 1
         end do
       end do
@@ -387,27 +378,16 @@ module enkf_clm_mod
     endif 
 
     ! write updated texture back to CLM
-    if(clmupdate_texture.eq.1) then
+    if(clmupdate_texture.ne.0) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
           psand(j,i) = clm_statevec(cc+1*clm_varsize+offset)
           pclay(j,i) = clm_statevec(cc+2*clm_varsize+offset)
-          cc = cc + 1
-        end do
-      end do
-      call clm_correct_texture
-      call clm_texture_to_parameters
-    endif
-
-    ! write updated texture incl. organic matter back to CLM
-    if(clmupdate_texture.eq.2) then
-      cc = 1
-      do i=1,nlevsoi
-        do j=clm_begg,clm_endg
-          psand(j,i) = clm_statevec(cc+1*clm_varsize+offset)
-          pclay(j,i) = clm_statevec(cc+2*clm_varsize+offset)
-          porgm(j,i) = clm_statevec(cc+3*clm_varsize+offset)
+          if(clmupdate_texture.eq.2) then
+            ! incl. organic matter
+            porgm(j,i) = clm_statevec(cc+3*clm_varsize+offset)
+          end if
           cc = cc + 1
         end do
       end do
