@@ -244,14 +244,17 @@ module enkf_clm_mod
 
   end subroutine set_clm_statevec
 
-
-  subroutine update_clm() bind(C,name="update_clm")
+  subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     USE clmtype      , only : clm3
     USE clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use clm_varcon   , only : denh2o,denice
 
     implicit none
+
+    integer,intent(in) :: tstartcycle
+    integer,intent(in) :: mype
+
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: watsat(:,:)
     real(r8), pointer :: psand(:,:)
@@ -265,6 +268,24 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
 
     integer :: i,j,cc=1,offset=0
+    character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
+    character (len = 31) :: fn2    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn3    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn4    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn5    !TSMP-PDAF: function name for state vector outpu
+    character (len = 32) :: fn6    !TSMP-PDAF: function name for state vector outpu
+
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
+#endif
 
     swc   => clm3%g%l%c%cws%h2osoi_vol
     watsat => clm3%g%l%c%cps%watsat
@@ -276,6 +297,25 @@ module enkf_clm_mod
     dz            => clm3%g%l%c%cps%dz
     h2osoi_liq    => clm3%g%l%c%cws%h2osoi_liq
     h2osoi_ice    => clm3%g%l%c%cws%h2osoi_ice
+
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn5, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn5, action="write")
+      WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+      CLOSE(71)
+    END IF
+#endif
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
+      OPEN(unit=71, file=fn6, action="write")
+      WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+      CLOSE(71)
+    END IF
+#endif
 
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
@@ -306,6 +346,34 @@ module enkf_clm_mod
       end do
     end do
       
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn3, action="write")
+          WRITE (71,"(f20.15)") h2osoi_liq(:,:)
+          CLOSE(71)
+        END IF
+#endif
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn4, action="write")
+          WRITE (71,"(f20.15)") h2osoi_ice(:,:)
+          CLOSE(71)
+        END IF
+#endif
+#ifdef PDAF_DEBUG
+        IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn2, action="write")
+          WRITE (71,"(f20.15)") swc(:,:)
+          CLOSE(71)
+        END IF
+#endif
+
     endif                       !hcp
 
     !hcp: TG, TV    
@@ -340,6 +408,7 @@ module enkf_clm_mod
       call clm_correct_texture
       call clm_texture_to_parameters
     endif
+
   end subroutine update_clm
 
   subroutine clm_correct_texture
