@@ -70,6 +70,7 @@ stat_dumpoffset   =
 point_obs =
 crns_flag =
 da_crns_depth_tol =
+print_obs_index =
 ```
 
 In the following the individual entries of `enkfpf.par` are described:
@@ -626,6 +627,15 @@ This is a convergence criteria (between 0 and 1) for the averaging
 skin depth (compare the weighting procedure described in Schrön et al,
 2017, section 2.3).
 
+### DA:print_obs_index ###
+
+`DA:print_obs_index`: (int) Switch for turning on output of the
+process-local grid-index-array of the obserations, `obs_index_p`.
+
+For this output, debugging has to be turned on by `PDAF_DEBUG`.
+
+Default: 0, output turned off.
+
 ## Parameter Summary ##
 
  | section   | parameter               | default value |
@@ -675,6 +685,7 @@ skin depth (compare the weighting procedure described in Schrön et al,
  |           | `obs_interp_switch`     | 0             |
  |           | `crns_flag`             | 1             |
  |           | `da_crns_depth_tol`     | 0.01          |
+ |           | `print_obs_index`       | 0             |
 
 Default values for parameter file `enkfpf.par`.
 
