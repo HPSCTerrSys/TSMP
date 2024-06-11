@@ -85,12 +85,14 @@ module enkf_clm_mod
   contains
 
 #if defined CLMSA
-  subroutine define_clm_statevec()
+  subroutine define_clm_statevec(mype)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
     use clm_varpar   , only : nlevsoi
 
     implicit none
+
+    integer,intent(in) :: mype
 
     integer :: begp, endp   ! per-proc beginning and ending pft indices
     integer :: begc, endc   ! per-proc beginning and ending column indices
@@ -99,6 +101,13 @@ module enkf_clm_mod
 
 
     call get_proc_bounds(begg, endg, begl, endl, begc, endc, begp, endp)
+
+#ifdef PDAF_DEBUG
+    WRITE(*,"(a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a,i5,a)") &
+      "TSMP-PDAF mype(w)=", mype, " define_clm_statevec, CLM5-bounds (g,l,c,p)----",&
+      begg,",",endg,",",begl,",",endl,",",begc,",",endc,",",begp,",",endp," -------"
+#endif
+
     clm_begg     = begg
     clm_endg     = endg
     clm_begc     = begc
