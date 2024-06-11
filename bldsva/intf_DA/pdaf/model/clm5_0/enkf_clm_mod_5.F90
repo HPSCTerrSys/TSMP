@@ -249,7 +249,7 @@ module enkf_clm_mod
     use clm_varcon      , only : denh2o, denice, watmin
 
     implicit none
-    
+
     integer,intent(in) :: tstartcycle
     integer,intent(in) :: mype
 
@@ -312,6 +312,7 @@ module enkf_clm_mod
       CLOSE(71)
     END IF
 #endif
+
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
         ! cc = 1
@@ -414,7 +415,7 @@ module enkf_clm_mod
       call clm_texture_to_parameters
     endif
 
-  end subroutine 
+  end subroutine update_clm
 
   subroutine clm_correct_texture()
 
@@ -426,7 +427,8 @@ module enkf_clm_mod
     implicit none
 
     integer :: c,lev
-    real(r8) :: clay,sand,orgm,ttot
+    real(r8) :: clay,sand,ttot
+    real(r8) :: orgm
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
@@ -459,9 +461,9 @@ module enkf_clm_mod
            porgm(c,lev) = (orgm / 100.0)* CNParamsShareInst%organic_max
          end if
 
-      end do
+       end do
     end do
-  end subroutine
+  end subroutine clm_correct_texture
 
   subroutine clm_texture_to_parameters()
     use clm_varpar   , only : nlevsoi
@@ -607,9 +609,16 @@ module enkf_clm_mod
 
       end do
     end do
-  end subroutine
- 
+  end subroutine clm_texture_to_parameters
+
   subroutine  average_swc_crp(profdat,profave)
+    use clm_varcon  , only : zsoi
+
+    implicit none
+
+    real(r8),intent(in)  :: profdat(10)
+    real(r8),intent(out) :: profave
+
     error stop "Not implemented average_swc_crp"
   end subroutine average_swc_crp
 #endif
@@ -626,8 +635,9 @@ module enkf_clm_mod
     integer, allocatable, intent(inout) :: latixy(:)
     integer, allocatable, intent(inout) :: longxy_obs(:)
     integer, allocatable, intent(inout) :: latixy_obs(:)
-    integer :: ni, nj, ii, jj, kk, cid, ier, ncells, nlunits, &
-               ncols, npatches, ncohorts, counter
+    integer :: ni, nj, ii, jj, kk, cid, ier, ncells, nlunits
+    integer :: ncols, counter
+    integer :: npatches, ncohorts
     real :: minlon, minlat, maxlon, maxlat
     real(r8), pointer :: lon(:)
     real(r8), pointer :: lat(:)
@@ -647,12 +657,19 @@ module enkf_clm_mod
     ! beg and end gridcell
     call get_proc_bounds(begg=begg, endg=endg)
     
+   !print *,'ni, nj ', ni, nj
+   !print *,'cells per processor ', ncells
+   !print *,'begg, endg ', begg, endg
+
+    ! allocate vector with size of elements in x directions * size of elements in y directions
     allocate(longxy(ncells), stat=ier)
     allocate(latixy(ncells), stat=ier)
 
+    ! initialize vector with zero values
     longxy(:) = 0
     latixy(:) = 0
   
+    ! fill vector with index values
     counter = 1
     do ii = 1, nj
       do jj = 1, ni
@@ -668,6 +685,7 @@ module enkf_clm_mod
     end do
 
     ! cell centers to min/max longitude and latitude
+    ! looping over all cell centers to get min/max longitude and latitude
     minlon = MINVAL(lon(:) + 180)
     maxlon = MAXVAL(lon(:) + 180)
     minlat = MINVAL(lat(:) + 90)
@@ -678,22 +696,29 @@ module enkf_clm_mod
 
     do i = 1, dim_obs
        if(((lon_clmobs(i) + 180) - minlon) /= 0 .and. &
-          ((lat_clmobs(i) + 90) - minlat) /= 0) then
-          longxy_obs(i) = ceiling(((lon_clmobs(i)+180) - minlon) * ni / (maxlon-minlon))
-          latixy_obs(i) = ceiling(((lat_clmobs(i)+90) - minlat) * nj / (maxlat-minlat))
-       else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. &
-               ((lat_clmobs(i) + 90) - minlat) == 0) then
+         ((lat_clmobs(i) + 90) - minlat) /= 0) then
+          longxy_obs(i) = ceiling(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon)) !+ 1
+          latixy_obs(i) = ceiling(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat)) !+ 1
+          !print *,'longxy_obs(i) , latixy_obs(i) ', longxy_obs(i) , latixy_obs(i)
+        else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. &
+                ((lat_clmobs(i) + 90) - minlat) == 0) then
           longxy_obs(i) = 1
           latixy_obs(i) = 1
        else if(((lon_clmobs(i) + 180) - minlon) == 0) then
           longxy_obs(i) = 1
-          latixy_obs(i) = ceiling(((lat_clmobs(i)+90) - minlat) * nj / (maxlat-minlat))
+          latixy_obs(i) = ceiling(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat))
        else if(((lat_clmobs(i) + 90) - minlat) == 0) then
-          longxy_obs(i) = ceiling(((lon_clmobs(i)+180) - minlon) * ni / (maxlon-minlon))
+          longxy_obs(i) = ceiling(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon))
           latixy_obs(i) = 1
        endif
     end do
-  end subroutine  
+    ! deallocate temporary arrays
+    !deallocate(longxy)
+    !deallocate(latixy)
+    !deallocate(longxy_obs)
+    !deallocate(latixy_obs)
+
+  end subroutine domain_def_clm
 
   !> @author  Mukund Pondkule, Johannes Keller
   !> @date    27.03.2023
@@ -805,7 +830,7 @@ module enkf_clm_mod
       dim_l = 3*nlevsoi + nshift
     endif
 
-  end subroutine    
+  end subroutine
 #endif
 
 end module enkf_clm_mod
