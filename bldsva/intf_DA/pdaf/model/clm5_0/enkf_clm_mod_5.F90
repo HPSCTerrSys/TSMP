@@ -157,7 +157,7 @@ module enkf_clm_mod
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
-      ! TSMP-PDAF: For debug runs, output the state vector in files
+      ! TSMP-PDAF: Debug output of CLM swc
       WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
       OPEN(unit=71, file=fn2, action="write")
       WRITE (71,"(f20.15)") swc(:,:)
@@ -239,7 +239,7 @@ module enkf_clm_mod
     END IF
 #endif
 
-  end subroutine 
+  end subroutine set_clm_statevec
 
   subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
