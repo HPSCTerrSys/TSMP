@@ -52,6 +52,7 @@ problemname = ""
 nprocs      =
 update_swc  =
 update_texture  =
+update_T  =
 print_swc   =
 print_et   =
 statevec_allcol =
@@ -438,6 +439,17 @@ CLM (standalone only).
    suction, hydraulic conductivity exponent B (see CLM5.0 technical
    manual
    <https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/index.html>)
+
+### CLM:update_T ###
+
+`CLM:update_T`: (integer) Flag for updating of ground and vegetation
+temperature.
+
+Currently only CLM3.5
+
+-  0: No update of ground and vegetation temperature
+
+-  1: Update of ground and vegetation temperature
 
 ### CLM:print_swc ###
 
