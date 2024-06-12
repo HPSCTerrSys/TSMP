@@ -202,6 +202,17 @@ module enkf_clm_mod
         end do
     endif
 
+    !hcp  LAI
+    if(clmupdate_T.eq.1) then
+      error stop "Not implemented: clmupdate_T.eq.1"
+    endif
+    !end hcp  LAI
+
+    ! write average swc to state vector (CRP assimilation)
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented: clmupdate_swc.eq.2"
+    endif
+
     ! write texture values to state vector (if desired)
     if(clmupdate_texture.ne.0) then
       cc = 1
