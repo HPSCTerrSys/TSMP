@@ -131,6 +131,10 @@ module enkf_clm_mod
         clm_statevecsize = clm_statevecsize + 2*((endg-begg+1)*nlevsoi)
     endif
 
+    if(clmupdate_texture.eq.2) then
+      error stop "Not implemented: clmupdate_texture.eq.2"
+    endif
+
     !hcp LST DA
     if(clmupdate_T.eq.1) then
       clm_varsize      =  endg-begg+1 
@@ -141,12 +145,18 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    if ((clmupdate_swc.NE.0) .OR. (clmupdate_T.NE.0)) allocate(clm_statevec(clm_statevecsize))  !hcp added condition
+    if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
+      !hcp added condition
+      allocate(clm_statevec(clm_statevecsize))
+    end if
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
-    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
-    if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
-  end subroutine
+    if (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
+    if ((clmupdate_T.ne.0)) then  !hcp
+      allocate(clm_paramarr(clm_paramsize))
+    end if
+
+  end subroutine define_clm_statevec
 
   subroutine set_clm_statevec(tstartcycle, mype)
     USE clmtype      , only : clm3

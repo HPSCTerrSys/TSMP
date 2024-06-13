@@ -126,15 +126,26 @@ module enkf_clm_mod
         clm_statevecsize = clm_statevecsize + 3*((endg-begg+1)*nlevsoi)
     endif
 
+    !hcp LST DA
+    if(clmupdate_T.eq.1) then
+      error stop "Not implemented: clmupdate_T.eq.1"
+    endif
+    !end hcp
+
+    !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    allocate(clm_statevec(clm_statevecsize))
+    if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
+      !hcp added condition
+      allocate(clm_statevec(clm_statevecsize))
+    end if
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
-    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
-    ! if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
-    if ((clmupdate_T.NE.0)) error stop "Not implemented clmupdate_T.NE.0"
+    if (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
+    if ((clmupdate_T.ne.0)) then  !hcp
+      error stop "Not implemented clmupdate_T.NE.0"
+    end if
 
-  end subroutine
+  end subroutine define_clm_statevec
 
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
