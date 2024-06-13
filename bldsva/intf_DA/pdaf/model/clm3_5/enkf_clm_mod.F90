@@ -51,13 +51,15 @@ module enkf_clm_mod
 #if (defined CLMSA)
   integer :: COMM_model_clm
   integer :: clm_statevecsize
-  integer :: clm_paramsize !hcp LAI
+  integer :: clm_paramsize !hcp: Size of CLM parameter vector (f.e. LAI)
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
   integer :: clm_begc,clm_endc
   integer :: clm_begp,clm_endp
   real(r8),allocatable :: clm_statevec(:)
-  real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
+  ! clm_paramarr: Contains LAI used in obs_op_pdaf for computing model
+  ! LST in LST assimilation (clmupdate_T)
+  real(r8),allocatable :: clm_paramarr(:)  !hcp CLM parameter vector (f.e. LAI)
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
   integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
