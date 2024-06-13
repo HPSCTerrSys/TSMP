@@ -253,8 +253,8 @@ module enkf_clm_mod
   end subroutine set_clm_statevec
 
   subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
-    USE clmtype      , only : clm3
-    USE clm_varpar   , only : nlevsoi
+    use clmtype      , only : clm3
+    use clm_varpar   , only : nlevsoi
     use shr_kind_mod , only : r8 => shr_kind_r8
     use clm_varcon   , only : denh2o,denice
 
@@ -382,9 +382,9 @@ module enkf_clm_mod
         END IF
 #endif
 
-    endif                       !hcp
+    endif
 
-    !hcp: TG, TV    
+    !hcp: TG, TV
     if(clmupdate_T.EQ.1) then
        cc = 1
          do j=clm_begg,clm_endg
