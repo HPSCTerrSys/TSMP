@@ -142,7 +142,7 @@ choose `PF:dt==1`, which means that `DA:da_interval` specifies
 `tsclm`, the number of time steps that eCLM will compute.
 
 \begin{align*}
-\mathtt{tsclm} &= \frac{\mathtt{DA:da_interval}}{\mathtt{PF:dt}}
+\mathtt{tsclm} &= \frac{\mathtt{DA\:da\_interval}}{\mathtt{PF\:dt}}
 \end{align*}
 
 
@@ -162,7 +162,7 @@ iteration of the main data assimilation loop consists of one forward
 simulation and one data assimilation step.
 
 \begin{align*}
-\mathtt{total_steps} &= \frac{\mathtt{PF:simtime}}{\mathtt{DA:da_interval}}
+\mathtt{total\_steps} &= \frac{\mathtt{PF\:simtime}}{\mathtt{DA\:da\_interval}}
 \end{align*}
 
 For ParFlow simulations, `PF:simtime` must match with the
