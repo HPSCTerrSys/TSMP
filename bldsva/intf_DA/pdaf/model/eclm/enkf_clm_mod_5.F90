@@ -115,7 +115,7 @@ module enkf_clm_mod
     endif
 
     if(clmupdate_swc.eq.2) then
-      error stop "Not implemented swc update 2"
+      error stop "Not implemented: clmupdate_swc.eq.2"
     endif
 
     if(clmupdate_texture.eq.1) then
