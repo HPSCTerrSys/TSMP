@@ -113,44 +113,62 @@ TODO: Document COSMO time step setting `dt_cos`.
 
 It is implicitly assumed that ParFlow and CLM calculate the same
 number of time steps between two PDAF-calls (this number of time steps
-is specified in `PF:da_interval`).
+is specified in `DA:da_interval`).
 
 For CLM-standalone simulations `PF:dt` determines the time unit of
-`PF:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
+`DA:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
 matching with the ParFlow time step is not an issue.
 
 #### Examples for PF:dt ####
 
 Example 1, CLMSA: `PF:dt==1` means that CLM input `dtime` is the unit of
-`PF:da_interval`. For the default `dtime` of half an hour (1800
-seconds), `PF:da_interval==48` would specify daily observations.
+`DA:da_interval`. For the default `dtime` of half an hour (1800
+seconds), `DA:da_interval==48` would specify daily observations.
 
 Example 2, CLMSA: For `dtime==1800` and `PF:dt==0.5`, the unit of
-`PF:da_interval` is 1 hour - the standard time unit of
-ParFlow. `PF:da_interval==24` would specify daily observations.
+`DA:da_interval` is 1 hour - the standard time unit of
+ParFlow. `DA:da_interval==24` would specify daily observations.
 
-Example 3, FallSchoolCase, CLM-ParFlow: The FallSchoolCase chooses
-`dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
+Example 3, FallSchoolCase, CLM-ParFlow-PDAF: The FallSchoolCase
+chooses `dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
 hour. This is in agreement with the FallSchool's ParFlow input script
-(`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==1` specifies
+(`pfset TimingInfo.BaseUnit 1.0`). `DA:da_interval==1` specifies
 hourly observations.
+
+Example 4: eCLM-PDAF, open loop: For an eCLM open loop runs it makes
+sense to choose `DA:da_interval` equal to `PF:simtime`, such that only
+one "assimilation" cycle is computed. Additionally, it makes sense to
+choose `PF:dt==1`, which means that `DA:da_interval` specifies
+`tsclm`, the number of time steps that eCLM will compute.
+
+\begin{align*}
+\mathtt{tsclm} &= \frac{\mathtt{DA:da_interval}}{\mathtt{PF:dt}}
+\end{align*}
+
 
 ### PF:endtime (deprecated) ###
 
-Deprecated. Use `PF:simtime` instead.
-
-`PF:endtime`: (real) Total simulation time (in terms of ParFlow
-timing). Must match with the specifications in the `*.pfidb` input.
+Deprecated. Sets `PF:simtime`.
 
 ### PF:simtime ###
 
 `PF:simtime`: (real) Total simulation time (in terms of ParFlow
 timing). 
 
-Must match with the specifications in the `*.pfidb` input.
+For all simulations (including CLMSA): `PF:simtime` is used in
+conjunction with `DA:da_interval` to determine `total_steps`, the
+total number of iterations of the main data assimilation loop. Each
+iteration of the main data assimilation loop consists of one forward
+simulation and one data assimilation step.
 
-`PF:simtime` must correspond to `TimingInfo.StopTime` MINUS
-`TimingInfo.StartTime`!
+\begin{align*}
+\mathtt{total_steps} &= \frac{\mathtt{PF:simtime}}{\mathtt{DA:da_interval}}
+\end{align*}
+
+For ParFlow simulations, `PF:simtime` must match with the
+specifications in the `*.pfidb` input: `PF:simtime` must correspond to
+`TimingInfo.StopTime` MINUS `TimingInfo.StartTime`!
+
 
 ### PF:updateflag ###
 
@@ -537,6 +555,10 @@ specify the number of steps (loop iterations) that PDAF will iterate
 back to the forward simulation, before performing the actual data
 assimilation.
 
+For CLM simulations, `DA:da_interval` determines the number of
+CLM-time-steps between two assimilations together with `PF:dt`. See
+the section of `PF:dt` for more detail.
+
 One exception is that the observation file is empty at a data
 assimilation step. Then, no data assimilation takes place and the next
 set forward integration steps is executed.
@@ -567,7 +589,7 @@ In general, it is beneficial to set `da_interval` as large as possible
 for a given setup. One reason is that after each simulation time of
 `da_interval`, the routines `assimilate_pdaf` and `update_tsmp` are
 called, assembling EnKF state vectors and calling the PDAF
-library. Maximizing `da_interal`, minimizes the number of these calls
+library. Maximizing `da_interval`, minimizes the number of these calls
 and thus reduces compute time.
 
 ### DA:stat_dumpoffset ###
