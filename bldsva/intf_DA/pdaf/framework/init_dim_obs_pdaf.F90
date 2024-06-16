@@ -94,7 +94,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        dampfac_state_time_dependent_in, dampfac_param_time_dependent_in
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      nx_glob, ny_glob, nz_glob, crns_flag, da_print_obs_index &
+      nx_glob, ny_glob, nz_glob, crns_flag, da_print_obs_index, &
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
       xcoord, ycoord, zcoord, xcoord_fortran, ycoord_fortran, &
