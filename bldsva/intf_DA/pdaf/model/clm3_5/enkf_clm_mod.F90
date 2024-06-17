@@ -205,21 +205,21 @@ module enkf_clm_mod
       offset = clm_endg-clm_begg+1
     endif
 
-    ! write swc values to state vector
-    if(clmupdate_swc.NE.0) then       !hcp: not go through if swc not updated
+    if(clmupdate_swc.ne.0) then
+        ! write swc values to state vector
+        cc = 1
+        do i=1,nlevsoi
 
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-        clm_statevec(cc+offset) = swc(j,i)
-        cc = cc + 1
-      end do
-    end do
+          do j=clm_begg,clm_endg
+            clm_statevec(cc+offset) = swc(j,i)
+            cc = cc + 1
+          end do
 
-    endif                       !hcp
+        end do
+    endif
 
-    !hcp  LAI     
-    if(clmupdate_T.EQ.1) then
+    !hcp  LAI
+    if(clmupdate_T.eq.1) then
       cc = 1
         do j=clm_begg,clm_endg
           clm_statevec(cc) = tgrou(j)
