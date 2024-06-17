@@ -416,6 +416,19 @@ module enkf_clm_mod
 
     endif 
 
+    !hcp: TG, TV
+    if(clmupdate_T.EQ.1) then
+      error stop "Not implemented: clmupdate_T.eq.1"
+    endif
+    ! end hcp TG, TV
+
+    !! update liquid water content
+    !do j=clm_begg,clm_endg
+    !  do i=1,nlevsoi
+    !    h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
+    !  end do
+    !end do
+
     ! write updated texture back to CLM
     if(clmupdate_texture.ne.0) then
       cc = 1
@@ -843,9 +856,9 @@ module enkf_clm_mod
     endif
 
     if(clmupdate_swc.eq.2) then
-      dim_l = nlevsoi + 1
-      nshift = nlevsoi + 1
-      error stop "Not implemented swc update 2"
+      error stop "Not implemented: clmupdate_swc.eq.2"
+      ! dim_l = nlevsoi + 1
+      ! nshift = nlevsoi + 1
     endif
 
     if(clmupdate_texture.eq.1) then
