@@ -245,12 +245,17 @@ module enkf_clm_mod
     endif
 
     ! write texture values to state vector (if desired)
-    if(clmupdate_texture.eq.1) then
+    if(clmupdate_texture.ne.0) then
       cc = 1
       do i=1,nlevsoi
         do j=clm_begg,clm_endg
           clm_statevec(cc+1*clm_varsize+offset) = psand(j,i)
           clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
+          if(clmupdate_texture.eq.2) then
+            error stop "Not implemented: clmupdate_texture.eq.2"
+            ! !incl. organic matter values
+            ! clm_statevec(cc+3*clm_varsize+offset) = porgm(j,i)
+          end if
           cc = cc + 1
         end do
       end do
