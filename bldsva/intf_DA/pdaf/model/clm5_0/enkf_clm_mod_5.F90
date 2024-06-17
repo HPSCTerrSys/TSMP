@@ -29,6 +29,9 @@ module enkf_clm_mod
 ! !USES:
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
+! !ARGUMENTS:
+    implicit none
+
 #if (defined CLMSA)
   integer :: COMM_model_clm
   integer :: clm_statevecsize
