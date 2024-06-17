@@ -174,9 +174,9 @@ module enkf_clm_mod
     real(r8), pointer :: swc(:,:)
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
-    real(r8), pointer :: tvege(:)   !hcp
-    real(r8), pointer :: tgrou(:)   !hcp
-    real(r8), pointer :: ttlai(:)   !hcp
+    real(r8), pointer :: tvege(:)   !hcp: CLM vegetation temperature (Kelvin)
+    real(r8), pointer :: tgrou(:)   !hcp: CLM ground temperature (Kelvin)
+    real(r8), pointer :: ttlai(:)   !hcp: CLM one-sided leaf area index, no burying by snow
     integer :: i,j,cc=1,offset=0
     real(r8) :: swcave
     real(r8) :: swctmp(10)
