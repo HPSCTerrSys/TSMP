@@ -118,7 +118,7 @@ module enkf_clm_mod
     endif
 
     if(clmupdate_swc.eq.2) then
-      error stop "Not implemented swc update 2"
+      error stop "Not implemented: clmupdate_swc.eq.2"
     endif
 
     if(clmupdate_texture.eq.1) then
@@ -180,6 +180,12 @@ module enkf_clm_mod
       CLOSE(71)
     END IF
 #endif
+
+    ! calculate shift when CRP data are assimilated
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented clmupdate_swc.eq.2"
+      ! offset = clm_endg-clm_begg+1
+    endif
 
     if(clmupdate_swc.ne.0) then
         ! write swc values to state vector
@@ -330,6 +336,12 @@ module enkf_clm_mod
       CLOSE(71)
     END IF
 #endif
+
+    ! calculate shift when CRP data are assimilated
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented: clmupdate_swc.eq.2"
+      ! offset = clm_endg-clm_begg+1
+    endif
 
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then

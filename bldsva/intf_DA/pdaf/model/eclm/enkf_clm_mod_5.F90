@@ -181,6 +181,12 @@ module enkf_clm_mod
     END IF
 #endif
 
+    ! calculate shift when CRP data are assimilated
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented clmupdate_swc.eq.2"
+      ! offset = clm_endg-clm_begg+1
+    endif
+
     if(clmupdate_swc.ne.0) then
         ! write swc values to state vector
         cc = 1
@@ -216,6 +222,11 @@ module enkf_clm_mod
           end if
 
         end do
+    endif
+
+    ! write average swc to state vector (CRP assimilation)
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented: clmupdate_swc.eq.2"
     endif
 
     ! write texture values to state vector (if desired)
@@ -319,6 +330,12 @@ module enkf_clm_mod
       CLOSE(71)
     END IF
 #endif
+
+    ! calculate shift when CRP data are assimilated
+    if(clmupdate_swc.eq.2) then
+      error stop "Not implemented: clmupdate_swc.eq.2"
+      ! offset = clm_endg-clm_begg+1
+    endif
 
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
