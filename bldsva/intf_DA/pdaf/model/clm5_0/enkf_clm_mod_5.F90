@@ -184,7 +184,6 @@ module enkf_clm_mod
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
       error stop "Not implemented clmupdate_swc.eq.2"
-      ! offset = clm_endg-clm_begg+1
     endif
 
     if(clmupdate_swc.ne.0) then
@@ -195,8 +194,7 @@ module enkf_clm_mod
           if(clmstatevec_allcol.eq.0) then
 
             do j=clm_begg,clm_endg
-              ! Only get the SWC from the first column of each gridcell
-              ! and add it to the clm_statevec at the position of the gridcell (cc)
+              ! SWC from the first column of each gridcell
               newgridcell = .true.
               do jj=clm_begc,clm_endc
                 g = col%gridcell(jj)
@@ -213,7 +211,7 @@ module enkf_clm_mod
           else
 
             do jj=clm_begc,clm_endc
-              ! Add all columns for each gridcell
+              ! SWC from all columns of each gridcell
 
               clm_statevec(cc+offset) = swc(jj,i)
               cc = cc + 1
@@ -340,7 +338,6 @@ module enkf_clm_mod
     ! calculate shift when CRP data are assimilated
     if(clmupdate_swc.eq.2) then
       error stop "Not implemented: clmupdate_swc.eq.2"
-      ! offset = clm_endg-clm_begg+1
     endif
 
     ! write updated swc back to CLM

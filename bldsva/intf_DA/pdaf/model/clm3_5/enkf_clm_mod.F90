@@ -210,10 +210,19 @@ module enkf_clm_mod
         cc = 1
         do i=1,nlevsoi
 
-          do j=clm_begg,clm_endg
-            clm_statevec(cc+offset) = swc(j,i)
-            cc = cc + 1
-          end do
+          if(clmstatevec_allcol.eq.0) then
+
+            do j=clm_begg,clm_endg
+              ! SWC from the first column of each gridcell
+              clm_statevec(cc+offset) = swc(j,i)
+              cc = cc + 1
+            end do
+
+          else
+
+            error stop "Not implemented: clmstatevec_allcol.ne.0"
+
+          end if
 
         end do
     endif
@@ -253,8 +262,6 @@ module enkf_clm_mod
           clm_statevec(cc+2*clm_varsize+offset) = pclay(j,i)
           if(clmupdate_texture.eq.2) then
             error stop "Not implemented: clmupdate_texture.eq.2"
-            ! !incl. organic matter values
-            ! clm_statevec(cc+3*clm_varsize+offset) = porgm(j,i)
           end if
           cc = cc + 1
         end do
@@ -354,29 +361,32 @@ module enkf_clm_mod
     endif
 
     ! write updated swc back to CLM
-    if(clmupdate_swc.NE.0) then      !hcp: not go through if swc not updated
+    if(clmupdate_swc.ne.0) then
 
-    cc = 1
-    do i=1,nlevsoi
-      do j=clm_begg,clm_endg
-        rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-        rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
-        !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
-        if(clm_statevec(cc+offset).le.0.0) then
-          swc(j,i)   = 0.05
-        else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
-          swc(j,i) = watsat(j,i)
-        else
-          swc(j,i)   = clm_statevec(cc+offset)
-        endif
-        ! update liquid water content
-        h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
-        ! update ice content
-        h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
-        cc = cc + 1
-      end do
-    end do
-      
+        cc = 1
+        do i=1,nlevsoi
+            do j=clm_begg,clm_endg
+
+              rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+              rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+              !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
+
+              if(clm_statevec(cc+offset).le.0.0) then
+                swc(j,i)   =  0.05
+              else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
+                swc(j,i) = watsat(j,i)
+              else
+                swc(j,i)   = clm_statevec(cc+offset)
+              endif
+
+              ! update liquid water content
+              h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
+              ! update ice content
+              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+              cc = cc + 1
+            end do
+        end do
+
 #ifdef PDAF_DEBUG
         IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
           ! TSMP-PDAF: For debug runs, output the state vector in files
