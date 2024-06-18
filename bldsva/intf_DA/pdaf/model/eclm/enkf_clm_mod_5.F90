@@ -352,9 +352,9 @@ module enkf_clm_mod
 
         ! cc = 1
         do i=1,nlevsoi
+          ! CLM3.5: iterate over grid cells
+          ! CLM5.0: iterate over columns
           ! do j=clm_begg,clm_endg
-          !   ! iterate through the columns and copy from the same gridcell
-          !   ! i.e. statevec position (cc) for each column
             do j=clm_begc,clm_endc
 
               ! Set cc (the state vector index) from the
@@ -387,9 +387,9 @@ module enkf_clm_mod
               h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
               ! update ice content
               h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+
+              ! cc = cc + 1
             end do
-            ! cc = cc + 1
-          ! end do
         end do
 
 #ifdef PDAF_DEBUG
@@ -420,7 +420,7 @@ module enkf_clm_mod
         END IF
 #endif
 
-    endif 
+    endif
 
     !hcp: TG, TV
     if(clmupdate_T.EQ.1) then

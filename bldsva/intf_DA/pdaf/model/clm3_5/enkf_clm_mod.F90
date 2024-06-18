@@ -373,7 +373,10 @@ module enkf_clm_mod
 
         cc = 1
         do i=1,nlevsoi
+          ! CLM3.5: iterate over grid cells
+          ! CLM5.0: iterate over columns
             do j=clm_begg,clm_endg
+          ! do j=clm_begc,clm_endc
 
               rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
               rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
