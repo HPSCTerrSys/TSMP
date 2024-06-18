@@ -57,6 +57,7 @@ print_swc   =
 print_et   =
 statevec_allcol =
 t_printensemble =
+watmin_switch =
 
 [COSMO]
 nprocs      =
@@ -502,6 +503,20 @@ output switched on with the debug flag `PDAF_DEBUG`.
 Default setting is `-1`, which means: Print debug output at every DA
 time step.
 
+### CLM:watmin_switch ###
+
+`CLM:watmin_switch`: (integer) Switch for the kind of minimal soil
+moisture checked and set during updating CLM's soil moisture
+`h2osoi_vol`.
+
+Default setting is `0`: Use CLM3.5 / CLM5.0 treatment of minimal soil
+moisture according the version used.
+
+- `3`: Use CLM3.5 treatment: Check if SM in state vector is less than
+  `0.00`. If yes, set SM to `0.05`.
+- `5`: Use CLM5.0 treatment: Check if SM in state vector is less than
+  is CLM's `watmin` (currently `0.01`). If yes, set SM to `watmin`.
+
 ## [COSMO] ##
 
 ### COSMO:nprocs ###
@@ -706,6 +721,8 @@ Default: 0, output turned off.
  |           | `print_swc`             | 0             |
  |           | `print_et`              | 0             |
  |           | `statevec_allcol`       | 0             |
+ |           | `t_printensemble`       | -1            |
+ |           | `watmin_switch`         | 0             |
  | `[COSMO]` |                         |               |
  |           | `nprocs`                | 0             |
  |           | `dtmult`                | 0             |

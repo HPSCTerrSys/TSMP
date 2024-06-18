@@ -68,6 +68,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
   integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
   integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
+  integer(c_int),bind(C,name="clmwatmin_switch")       :: clmwatmin_switch
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
@@ -369,8 +370,19 @@ module enkf_clm_mod
 
         ! Set minimum soil moisture for checking the state vector and
         ! for setting minimum swc for CLM
-        watmin_check = 0.00
-        watmin_set = 0.05
+        if(clmwatmin_switch.eq.3) then
+          ! CLM3.5 type watmin
+          watmin_check = 0.00
+          watmin_set = 0.05
+        else if(clmwatmin_switch.eq.5) then
+          ! CLM5.0 type watmin
+          watmin_check = watmin
+          watmin_set = watmin
+        else
+          ! Default
+          watmin_check = 0.00
+          watmin_set = 0.05
+        end if
 
         ! cc = 1
         do i=1,nlevsoi

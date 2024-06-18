@@ -91,6 +91,7 @@ GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
 GLOBAL int clmstatevec_allcol;
 GLOBAL int clmt_printensemble;
+GLOBAL int clmwatmin_switch;
 GLOBAL int dtmult_cosmo;
 GLOBAL int pf_olfmasking;
 GLOBAL int pf_olfmasking_param;
