@@ -371,12 +371,21 @@ module enkf_clm_mod
         watmin_check = 0.00
         watmin_set = 0.05
 
-        cc = 1
+        ! cc = 1
         do i=1,nlevsoi
           ! CLM3.5: iterate over grid cells
           ! CLM5.0: iterate over columns
             do j=clm_begg,clm_endg
           ! do j=clm_begc,clm_endc
+
+              ! Set cc (the state vector index) from the
+              ! CLM5-grid-index and the `CLM5-layer-index times
+              ! num_gridcells`
+              if(clmstatevec_allcol.eq.0) then
+                cc = (j - clm_begg + 1) + (i - 1) * (clm_endg - clm_begg + 1)
+              else
+                error stop "Not implemented: clmstatevec_allcol.ne.0"
+              end if
 
               rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
               rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
@@ -399,7 +408,8 @@ module enkf_clm_mod
               h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
               ! update ice content
               h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
-              cc = cc + 1
+
+              ! cc = cc + 1
             end do
         end do
 
