@@ -347,37 +347,38 @@ module enkf_clm_mod
           ! do j=clm_begg,clm_endg
           !   ! iterate through the columns and copy from the same gridcell
           !   ! i.e. statevec position (cc) for each column
-            do jj=clm_begc,clm_endc
+            do j=clm_begc,clm_endc
 
               ! Set cc (the state vector index) from the
               ! CLM5-grid-index and the `CLM5-layer-index times
               ! num_gridcells`
               if(clmstatevec_allcol.eq.0) then
-                cc = (col%gridcell(jj) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+                cc = (col%gridcell(j) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
               else
-                cc = (jj - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+                cc = (j - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
               end if
 
-              rliq = h2osoi_liq(jj,i)/(dz(jj,i)*denh2o*swc(jj,i))
-              rice = h2osoi_ice(jj,i)/(dz(jj,i)*denice*swc(jj,i))
-     
+              rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+              rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+              !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
+
               if(clm_statevec(cc+offset).le.watmin) then
-                swc(jj,i)   = watmin
-              else if(clm_statevec(cc+offset).ge.watsat(jj,i)) then
-                swc(jj,i) = watsat(jj,i)
+                swc(j,i) = watmin
+              else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
+                swc(j,i) = watsat(j,i)
               else
-                swc(jj,i)   = clm_statevec(cc+offset)
+                swc(j,i)   = clm_statevec(cc+offset)
               endif
 
-              if (isnan(swc(jj,i))) then
-                      swc(jj,i) = watmin
-                      print *, "WARNING: swc at j,i is nan: ", jj, i
+              if (isnan(swc(j,i))) then
+                      swc(j,i) = watmin
+                      print *, "WARNING: swc at j,i is nan: ", j, i
               endif
 
               ! update liquid water content
-              h2osoi_liq(jj,i) = swc(jj,i) * dz(jj,i)*denh2o*rliq
+              h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
               ! update ice content
-              h2osoi_ice(jj,i) = swc(jj,i) * dz(jj,i)*denice*rice
+              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
             end do
             ! cc = cc + 1
           ! end do
