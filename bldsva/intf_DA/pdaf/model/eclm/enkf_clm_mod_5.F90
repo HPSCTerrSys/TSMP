@@ -285,6 +285,8 @@ module enkf_clm_mod
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
     real(r8)  :: rliq,rice
+    real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
+    real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
 
     integer :: i,j,jj,g,cc=1,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
@@ -342,6 +344,12 @@ module enkf_clm_mod
 
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
+
+        ! Set minimum soil moisture for checking the state vector and
+        ! for setting minimum swc for CLM
+        watmin_check = watmin
+        watmin_set = watmin
+
         ! cc = 1
         do i=1,nlevsoi
           ! do j=clm_begg,clm_endg
@@ -362,8 +370,8 @@ module enkf_clm_mod
               rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
               !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
 
-              if(clm_statevec(cc+offset).le.watmin) then
-                swc(j,i) = watmin
+              if(clm_statevec(cc+offset).le.watmin_check) then
+                swc(j,i) = watmin_set
               else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
                 swc(j,i) = watsat(j,i)
               else
@@ -371,7 +379,7 @@ module enkf_clm_mod
               endif
 
               if (isnan(swc(j,i))) then
-                      swc(j,i) = watmin
+                      swc(j,i) = watmin_set
                       print *, "WARNING: swc at j,i is nan: ", j, i
               endif
 
