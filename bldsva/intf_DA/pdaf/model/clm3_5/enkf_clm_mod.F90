@@ -67,6 +67,7 @@ module enkf_clm_mod
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
   integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
+  integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
 
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
