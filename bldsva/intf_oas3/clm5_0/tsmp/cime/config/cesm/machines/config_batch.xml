@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <config_batch version="2.0">
   <!--
+     TSMP-PDAF: marked changes were applied to commit 688d1a4299a2 of https://github.com/ESMCI/cime
      File:    config_batch.xml
      Purpose: abstract out the parts of run scripts that are different, and use this configuration to
      create cesm run scripts from a single template.
@@ -542,6 +543,7 @@
     </queues>
   </batch_system>
 
+<!--  TSMP_PDAF addition beginning  -->
   <batch_system MACH="jureca" type="slurm">
     <batch_submit>sbatch</batch_submit>
     <submit_args>
@@ -575,6 +577,7 @@
       <queue walltimemin="00:10:00" walltimemax="01:59:00" nodemin="1" nodemax="8">devel</queue>
     </queues>
   </batch_system>
+<!--  TSMP_PDAF addition end  -->
 
   <batch_jobs>
     <!-- order matters, with no-batch jobs will be run in the order listed here -->

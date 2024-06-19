@@ -31,6 +31,9 @@ route "${cyellow}>> configure_da${cnormal}"
     comCC="${mpiPath}/bin/mpicc"
   fi
 
+  pdaflib_cpp_defs=" "
+  # pdaflib_cpp_defs+=" -DPDAF_DEBUG "
+
 #    libs_src=" -L$lapackPath -L${mpiPath}/lib64"
 #    libs_src=" -L$lapackPath -lopenblas -L${mpiPath}/lib64"
 #    libs_src=" $lapackPath/mkl/lib/intel64/libmkl_intel_lp64.a $lapackPath/mkl/lib/intel64/libmkl_intel_thread.a $lapackPath/mkl/lib/intel64/libmkl_core.a -L${mpiPath}/lib64"
@@ -52,6 +55,8 @@ route "${cyellow}>> configure_da${cnormal}"
   importFlagsCOS=" "
   importFlagsDA=" "
   cppdefs=" "
+  # cppdefs+=" ${pf}-DOLD_TRUNCATE_SAT "
+  # cppdefs+=" ${pf}-DPDAF_DEBUG "
   obj=' '
   libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf "
   libsOAS=" "
@@ -210,7 +215,7 @@ route "${cyellow}>> configure_da${cnormal}"
      importFlags+=$importFlagsOAS
      importFlags+=$importFlagsCOS
      importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 "
+     cppdefs+=" ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 "
      if [[ $cplscheme == "true" ]] ; then ; cppdefs+=" ${pf}-DCPL_SCHEME_F " ; fi
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      libs+=$libsCLM
@@ -234,7 +239,7 @@ route "${cyellow}>> configure_da${cnormal}"
      importFlags+=$importFlagsOAS
      importFlags+=$importFlagsPFL
      importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
+     cppdefs+=" ${pf}-DCOUP_OAS_PFL ${pf}-DMAXPATCH_PFT=1 "
      cppdefs+=" ${pf}-DOBS_ONLY_PARFLOW " # Remove for observations from both ParFlow + CLM
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi
@@ -259,7 +264,7 @@ route "${cyellow}>> configure_da${cnormal}"
      importFlags+=$importFlagsPFL
      importFlags+=$importFlagsCOS
      importFlags+=$importFlagsDA
-     cppdefs+=" ${pf}-Duse_comm_da ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 ${pf}-DCOUP_OAS_PFL "
+     cppdefs+=" ${pf}-DCOUP_OAS_COS ${pf}-DGRIBDWD ${pf}-DNETCDF ${pf}-DHYMACS ${pf}-DMAXPATCH_PFT=1 ${pf}-DCOUP_OAS_PFL "
      if [[ $cplscheme == "true" ]] ; then ; cppdefs+=" ${pf}-DCPL_SCHEME_F " ; fi
      if [[ $readCLM == "true" ]] ; then ; cppdefs+=" ${pf}-DREADCLM " ; fi
      if [[ $freeDrain == "true" ]] ; then ; cppdefs+=" ${pf}-DFREEDRAINAGE " ; fi

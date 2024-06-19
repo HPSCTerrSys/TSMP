@@ -1,20 +1,20 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz, Guowei He and Mukund Pondkule (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
@@ -28,13 +28,15 @@ module enkf_clm_mod
 
   use shr_kind_mod    , only : r8 => shr_kind_r8, SHR_KIND_CL
 
-#if (defined CLMFIVE)
-  integer :: da_comm_clm
+#if (defined CLMSA)
+  integer :: COMM_model_clm
   integer :: clm_statevecsize
   integer :: clm_varsize
   integer :: clm_begg,clm_endg
   real(r8),allocatable :: clm_statevec(:)
+  real(r8),allocatable :: clm_paramarr(:)  !hcp LAI
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
+  integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
@@ -55,11 +57,12 @@ module enkf_clm_mod
   integer :: ierror, lengths_of_types, i
   logical :: flag
   integer(c_int),bind(C,name="clmprefixlen") :: clmprefixlen
-  integer :: statcomm
+  integer :: COMM_couple_clm    ! CLM-version of COMM_couple
+                                ! (currently not used for eclm)
 
   contains
 
-#if defined CLMFIVE 
+#if defined CLMSA 
   subroutine define_clm_statevec()
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
@@ -97,6 +100,11 @@ module enkf_clm_mod
 
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     allocate(clm_statevec(clm_statevecsize))
+
+    !write(*,*) 'clm_paramsize is ',clm_paramsize
+    IF (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
+    ! if ((clmupdate_T.NE.0)) allocate(clm_paramarr(clm_paramsize))  !hcp
+    if ((clmupdate_T.NE.0)) error stop "Not implemented clmupdate_T.NE.0"
 
   end subroutine
 
@@ -516,7 +524,89 @@ module enkf_clm_mod
     end do
   end subroutine  
 
-#if defined CLMFIVE
+  !> @author  Mukund Pondkule, Johannes Keller
+  !> @date    27.03.2023
+  !> @brief   Set indices of grid cells with lon/lat smaller than observation locations
+  !> @details
+  !>    This routine sets the indices of grid cells with lon/lat
+  !>    smaller than observation locations.
+  subroutine get_interp_idx(lon_clmobs, lat_clmobs, dim_obs, longxy_obs_floor, latixy_obs_floor)
+
+    USE domainMod, ONLY: ldomain
+    ! USE decompMod, ONLY: get_proc_total, get_proc_bounds_atm, adecomp
+    ! USE spmdMod,   ONLY: npes, iam ! number of processors for clm and processor number
+   ! USE mod_read_obs, ONLY: lon_clmobs, lat_clmobs
+    ! USE clmtype,    ONLY : clm3
+   ! USE mod_assimilation, ONLY: dim_obs
+!#endif
+
+    implicit none
+    real, intent(in) :: lon_clmobs(:)
+    real, intent(in) :: lat_clmobs(:)
+    integer, intent(in) :: dim_obs
+    integer, allocatable, intent(inout) :: longxy_obs_floor(:)
+    integer, allocatable, intent(inout) :: latixy_obs_floor(:)
+    integer :: i
+
+    integer :: ni, nj
+    ! integer :: ii, jj, kk, cid
+    integer :: ier
+    ! integer :: ncells, nlunits,ncols, npfts
+    ! integer :: counter
+
+    real :: minlon, minlat, maxlon, maxlat
+    real(r8), pointer :: lon(:)
+    real(r8), pointer :: lat(:)
+    ! integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+
+    lon => ldomain%lonc
+    lat => ldomain%latc
+    ni = ldomain%ni
+    nj = ldomain%nj
+
+    ! ! get total number of gridcells, landunits,
+    ! ! columns and pfts for any processor
+    ! call get_proc_total(iam, ncells, nlunits, ncols, npfts)
+
+    ! ! beg and end gridcell for atm
+    ! call get_proc_bounds_atm(begg, endg)
+
+    ! set intial values for max/min of lon/lat
+    minlon = 999
+    minlat = 999
+    maxlon = -999
+    maxlat = -999
+
+    ! looping over all cell centers to get min/max longitude and latitude
+    minlon = MINVAL(lon(:) + 180)
+    maxlon = MAXVAL(lon(:) + 180)
+    minlat = MINVAL(lat(:) + 90)
+    maxlat = MAXVAL(lat(:) + 90)
+
+    if(allocated(longxy_obs_floor)) deallocate(longxy_obs_floor)
+    allocate(longxy_obs_floor(dim_obs), stat=ier)
+    if(allocated(latixy_obs_floor)) deallocate(latixy_obs_floor)
+    allocate(latixy_obs_floor(dim_obs), stat=ier)
+    do i = 1, dim_obs
+       if(((lon_clmobs(i) + 180) - minlon) /= 0 .and. ((lat_clmobs(i) + 90) - minlat) /= 0) then
+          longxy_obs_floor(i) = floor(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon)) !+ 1
+          latixy_obs_floor(i) = floor(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat)) !+ 1
+          !print *,'longxy_obs(i) , latixy_obs(i) ', longxy_obs(i) , latixy_obs(i)
+       else if(((lon_clmobs(i) + 180) - minlon) == 0 .and. ((lat_clmobs(i) + 90) - minlat) == 0) then
+          longxy_obs_floor(i) = 1
+          latixy_obs_floor(i) = 1
+       else if(((lon_clmobs(i) + 180) - minlon) == 0) then
+          longxy_obs_floor(i) = 1
+          latixy_obs_floor(i) = floor(((lat_clmobs(i) + 90) - minlat) * nj / (maxlat - minlat))
+       else if(((lat_clmobs(i) + 90) - minlat) == 0) then
+          longxy_obs_floor(i) = floor(((lon_clmobs(i) + 180) - minlon) * ni / (maxlon - minlon))
+          latixy_obs_floor(i) = 1
+       endif
+    end do
+
+  end subroutine get_interp_idx
+
+#if defined CLMSA
   subroutine init_clm_l_size(dim_l)
     use clm_varpar   , only : nlevsoi
 

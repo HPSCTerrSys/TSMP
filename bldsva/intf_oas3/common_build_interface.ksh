@@ -691,6 +691,10 @@ route "${cyellow}>>> c_configure_pdaf_arch${cnormal}"
     sed -i "s@__LIBS__@${libs_src}@" $file >> $log_file 2>> $err_file
   check
 
+  comment "   sed cppdefs to $file"
+    sed -i "s@__PDAFLIB_CPP_DEFS__@${pdaflib_cpp_defs}@" $file >> $log_file 2>> $err_file
+  check
+
   comment "   sed optimizations to $file"
     sed -i "s@__OPT__@${optComp}@" $file >> $log_file 2>> $err_file
   check

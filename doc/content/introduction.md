@@ -18,7 +18,14 @@ TSMP development has been driven by groups within the [Center for High-Performan
 
 ## TSMP-PDAF 
 
-TSMP-PDAF describes the branches of the TSMP-repositories usable for TSMP simulations coupled with the Parallel Data Assimilation Framework ([PDAF](http://pdaf.awi.de/trac/wiki)).
+TSMP-PDAF describes the build commands of TSMP that can introduce data
+ assimilation for an ensemble of TSMP simulations using PDAF, the
+ Parallel Data Assimilation Framework
+ ([PDAF](http://pdaf.awi.de/trac/wiki)).
+
+Note that TSMP-PDAF does not follow the multiple program multiple data
+(MPMD) paradigm that TSMP does. Instead component models are loaded
+into a single executable as libraries (@Kurtz2016).
 
 ## Web Resources
 

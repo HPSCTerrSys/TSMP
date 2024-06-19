@@ -2,7 +2,7 @@ module --force purge
 module use $OTHERSTAGES
 module load Stages/2023
 module load Intel/2022.1.0
-module load ParaStationMPI/5.7.0-1
+module load ParaStationMPI/5.7.1-1
 #
 module load Hypre/2.27.0-cpu
 module load Silo/4.11

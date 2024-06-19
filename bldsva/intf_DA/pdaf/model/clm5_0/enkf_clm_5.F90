@@ -1,20 +1,20 @@
 !-------------------------------------------------------------------------------------------
 !Copyright (c) 2013-2016 by Wolfgang Kurtz and Guowei He (Forschungszentrum Juelich GmbH)
 !
-!This file is part of TerrSysMP-PDAF
+!This file is part of TSMP-PDAF
 !
-!TerrSysMP-PDAF is free software: you can redistribute it and/or modify
+!TSMP-PDAF is free software: you can redistribute it and/or modify
 !it under the terms of the GNU Lesser General Public License as published by
 !the Free Software Foundation, either version 3 of the License, or
 !(at your option) any later version.
 !
-!TerrSysMP-PDAF is distributed in the hope that it will be useful,
+!TSMP-PDAF is distributed in the hope that it will be useful,
 !but WITHOUT ANY WARRANTY; without even the implied warranty of
 !MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 !GNU LesserGeneral Public License for more details.
 !
 !You should have received a copy of the GNU Lesser General Public License
-!along with TerrSysMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
+!along with TSMP-PDAF.  If not, see <http://www.gnu.org/licenses/>.
 !-------------------------------------------------------------------------------------------
 !
 !
@@ -79,7 +79,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
   ! Setup and initialize the communications and logging.
   !--------------------------------------------------------------------------
   beg_count = shr_sys_irtc(irtc_rate)
-  call cime_pre_init1(esmf_logfile_option, da_comm_clm, &
+  call cime_pre_init1(esmf_logfile_option, COMM_model_clm, &
                       pdaf_id=pdaf_id, pdaf_max=pdaf_max)
 
   end_count = shr_sys_irtc(irtc_rate)
@@ -148,8 +148,8 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
        + cime_pre_init2_time
   call t_startstop_valsf('CPL:INIT',  walltime=cime_init_time_adjustment, &
        callcount=0)
-  
-#if defined CLMFIVE
+
+#if defined CLMSA
   call define_clm_statevec
 #endif 
 
@@ -205,7 +205,8 @@ subroutine clm_finalize() bind(C,name="clm_finalize")
   !--------------------------------------------------------------------------
   ! Clean-up
   !--------------------------------------------------------------------------
-  call ESMF_Finalize( )
+  ! call ESMF_Finalize( )
+
 end subroutine clm_finalize
 
 end module enkf_clm_5

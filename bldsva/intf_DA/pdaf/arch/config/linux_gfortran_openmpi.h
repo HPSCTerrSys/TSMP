@@ -30,7 +30,7 @@ CPP = /usr/bin/cpp
 # Define PDAF_NO_UPDATE to deactivate the analysis step of the filter
 # (if the compiler does not support get_command_argument()
 # from Fortran 2003 you should define F77 here.)
-CPP_DEFS = -DUSE_PDAF
+CPP_DEFS = -DUSE_PDAF __PDAFLIB_CPP_DEFS__
 
 # Optimization specs for compiler
 #   (You should explicitly define double precision for floating point
