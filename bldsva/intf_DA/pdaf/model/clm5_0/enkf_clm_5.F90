@@ -35,7 +35,7 @@ module enkf_clm_5
 ! Additionally, cime_pre_init1 is modified to take the pdaf comm and ID
 ! and at the end of the init we call define_clm_statevec to finish the PDAF init.
 !--------------------------------------------------------------------------
-subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
+subroutine clm_init(finname, pdaf_id, pdaf_max, mype) bind(C,name="clm_init")
   !----------------------------------------------------------------------------
   ! share code & libs
   !----------------------------------------------------------------------------
@@ -62,6 +62,7 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
   character(kind=c_char,len=1),dimension(100),intent(in) :: finname 
   integer(c_int), intent(in) :: pdaf_id
   integer(c_int), intent(in) :: pdaf_max
+  integer(c_int), intent(in) :: mype
   integer(c_int) :: counter
   !--------------------------------------------------------------------------
   ! timing variables
@@ -150,11 +151,11 @@ subroutine clm5_init(finname, pdaf_id, pdaf_max) bind(C,name="clm5_init")
        callcount=0)
 
 #if defined CLMSA
-  call define_clm_statevec
+  call define_clm_statevec(mype)
 #endif 
 
 
-end subroutine clm5_init
+end subroutine clm_init
 
 
 !--------------------------------------------------------------------------
@@ -164,7 +165,7 @@ end subroutine clm5_init
 ! clm_advance stops the driver loop between DA steps.
 ! After cime_run we call set_clm_statevec() to transfer from CLM to PDAF.
 !--------------------------------------------------------------------------
-subroutine clm_advance(ntstep) bind(C,name="clm_advance")
+subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   use cime_comp_mod, only : cime_run, mpicom_GLOID
   use perf_mod,      only : t_startf, t_stopf
   use enkf_clm_mod, only : set_clm_statevec 
@@ -176,12 +177,18 @@ subroutine clm_advance(ntstep) bind(C,name="clm_advance")
   !--------------------------------------------------------------------------
   integer  :: ierr                   ! MPI error return
   integer(c_int),intent(in) :: ntstep
+  integer(c_int),intent(in) :: tstartcycle
+  integer(c_int),intent(in) :: mype
+  integer :: counter=0
+  integer :: nstep
 
   ! call modified cime_run that runs for a specificied number of timesteps.
   call cime_run(ntstep)
 
+#if defined CLMSA
   ! Calling PDAF Function to set state vector before assimiliation
-  call set_clm_statevec()
+  call set_clm_statevec(tstartcycle, mype)
+#endif
 
   call t_startf ('CPL:RUN_LOOP_BSTOP')
   call mpi_barrier(mpicom_GLOID,ierr)

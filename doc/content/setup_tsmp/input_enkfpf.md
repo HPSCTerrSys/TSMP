@@ -52,8 +52,12 @@ problemname = ""
 nprocs      =
 update_swc  =
 update_texture  =
+update_T  =
 print_swc   =
 print_et   =
+statevec_allcol =
+t_printensemble =
+watmin_switch =
 
 [COSMO]
 nprocs      =
@@ -68,6 +72,7 @@ stat_dumpoffset   =
 point_obs =
 crns_flag =
 da_crns_depth_tol =
+print_obs_index =
 ```
 
 In the following the individual entries of `enkfpf.par` are described:
@@ -109,44 +114,62 @@ TODO: Document COSMO time step setting `dt_cos`.
 
 It is implicitly assumed that ParFlow and CLM calculate the same
 number of time steps between two PDAF-calls (this number of time steps
-is specified in `PF:da_interval`).
+is specified in `DA:da_interval`).
 
 For CLM-standalone simulations `PF:dt` determines the time unit of
-`PF:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
+`DA:da_interval` for CLM simulations as `(dtime / PF:dt)`. Here,
 matching with the ParFlow time step is not an issue.
 
 #### Examples for PF:dt ####
 
 Example 1, CLMSA: `PF:dt==1` means that CLM input `dtime` is the unit of
-`PF:da_interval`. For the default `dtime` of half an hour (1800
-seconds), `PF:da_interval==48` would specify daily observations.
+`DA:da_interval`. For the default `dtime` of half an hour (1800
+seconds), `DA:da_interval==48` would specify daily observations.
 
 Example 2, CLMSA: For `dtime==1800` and `PF:dt==0.5`, the unit of
-`PF:da_interval` is 1 hour - the standard time unit of
-ParFlow. `PF:da_interval==24` would specify daily observations.
+`DA:da_interval` is 1 hour - the standard time unit of
+ParFlow. `DA:da_interval==24` would specify daily observations.
 
-Example 3, FallSchoolCase, CLM-ParFlow: The FallSchoolCase chooses
-`dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
+Example 3, FallSchoolCase, CLM-ParFlow-PDAF: The FallSchoolCase
+chooses `dtime=3600` and `PF:dt==1.0`, which also leads to a unit of 1
 hour. This is in agreement with the FallSchool's ParFlow input script
-(`pfset TimingInfo.BaseUnit 1.0`). `PF:da_interval==1` specifies
+(`pfset TimingInfo.BaseUnit 1.0`). `DA:da_interval==1` specifies
 hourly observations.
+
+Example 4: eCLM-PDAF, open loop: For an eCLM open loop runs it makes
+sense to choose `DA:da_interval` equal to `PF:simtime`, such that only
+one "assimilation" cycle is computed. Additionally, it makes sense to
+choose `PF:dt==1`, which means that `DA:da_interval` specifies
+`tsclm`, the number of time steps that eCLM will compute.
+
+\begin{align*}
+\mathtt{tsclm} &= \frac{\mathtt{DA:da\_interval}}{\mathtt{PF:dt}}
+\end{align*}
+
 
 ### PF:endtime (deprecated) ###
 
-Deprecated. Use `PF:simtime` instead.
-
-`PF:endtime`: (real) Total simulation time (in terms of ParFlow
-timing). Must match with the specifications in the `*.pfidb` input.
+Deprecated. Sets `PF:simtime`.
 
 ### PF:simtime ###
 
 `PF:simtime`: (real) Total simulation time (in terms of ParFlow
 timing). 
 
-Must match with the specifications in the `*.pfidb` input.
+For all simulations (including CLMSA): `PF:simtime` is used in
+conjunction with `DA:da_interval` to determine `total_steps`, the
+total number of iterations of the main data assimilation loop. Each
+iteration of the main data assimilation loop consists of one forward
+simulation and one data assimilation step.
 
-`PF:simtime` must correspond to `TimingInfo.StopTime` MINUS
-`TimingInfo.StartTime`!
+\begin{align*}
+\mathtt{total\_steps} &= \frac{\mathtt{PF:simtime}}{\mathtt{DA:da\_interval}}
+\end{align*}
+
+For ParFlow simulations, `PF:simtime` must match with the
+specifications in the `*.pfidb` input: `PF:simtime` must correspond to
+`TimingInfo.StopTime` MINUS `TimingInfo.StartTime`!
+
 
 ### PF:updateflag ###
 
@@ -411,13 +434,12 @@ in CLM (standalone only).
 
 -  1: Update of soil moisture content
 
-- (only branch `TSMP_pdaf-crns`) 2: Update and average of soil
-  moisture content for use with Cosmic-Ray data (Hui Pung
-  implementation).
+-  2: (only `clm3_5`) Update and average of soil moisture content for
+   use with Cosmic-Ray data (Hui Pung implementation).
 
-- (only CLM5.0) 3: Update and average of soil moisture content for use
-  with Cosmic-Ray data (Strebel implementation of Schrön2017,
-  <https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor>).
+-  3: (only CLM5.0) Update and average of soil moisture content for
+   use with Cosmic-Ray data (Strebel implementation of Schrön2017,
+   <https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor>).
 
 ### CLM:update_texture ###
 
@@ -437,6 +459,17 @@ CLM (standalone only).
    manual
    <https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/index.html>)
 
+### CLM:update_T ###
+
+`CLM:update_T`: (integer) Flag for updating of ground and vegetation
+temperature.
+
+Currently only CLM3.5
+
+-  0: No update of ground and vegetation temperature
+
+-  1: Update of ground and vegetation temperature
+
 ### CLM:print_swc ###
 
 `CLM:print_swc`: (integer) If set to `1`, the updated soil moisture
@@ -449,7 +482,41 @@ and include the specifier `update` in the file name.
 ### CLM:print_et ###
 
 `CLM:print_et`: (integer) Invoke function `write_clm_statistics`. For
-further information, see source code.
+further information, see source code. Default: `0`.
+
+### CLM:statevec_allcol ###
+
+`CLM:statevec_allcol`: (integer) Switch for using all SWC columns of a
+CLM5 gridcell in the state vector.
+
+If `0` (default): Only one SWC value per grid cell is saved in the
+state vector.
+
+If `1`: `#columns` SWC values per grid cell are saved in the state
+vector.
+
+### CLM:t_printensemble ###
+
+`CLM:t_printensemble`: (integer) The timestep for the state ensemble
+output switched on with the debug flag `PDAF_DEBUG`.
+
+Default setting is `-1`, which means: Print debug output at every DA
+time step.
+
+### CLM:watmin_switch ###
+
+`CLM:watmin_switch`: (integer) Switch for the values of minimal soil
+moisture checked and set during updating CLM's soil moisture
+`h2osoi_vol`.
+
+Default setting is `0`: Use CLM3.5 / CLM5.0 values of minimal soil
+moisture according to the used version.
+
+- `3`: CLM3.5 values: Check if SM in state vector is less than
+  `0.00`. If yes, set SM to `0.05`.
+- `5`: CLM5.0 values: Check if SM in state vector is less than
+  CLM5.0's `watmin` from `clm_varcon.F90` (current value `0.01`). If
+  yes, set SM to `watmin`.
 
 ## [COSMO] ##
 
@@ -504,6 +571,10 @@ specify the number of steps (loop iterations) that PDAF will iterate
 back to the forward simulation, before performing the actual data
 assimilation.
 
+For CLM simulations, `DA:da_interval` determines the number of
+CLM-time-steps between two assimilations together with `PF:dt`. See
+the section of `PF:dt` for more detail.
+
 One exception is that the observation file is empty at a data
 assimilation step. Then, no data assimilation takes place and the next
 set forward integration steps is executed.
@@ -534,7 +605,7 @@ In general, it is beneficial to set `da_interval` as large as possible
 for a given setup. One reason is that after each simulation time of
 `da_interval`, the routines `assimilate_pdaf` and `update_tsmp` are
 called, assembling EnKF state vectors and calling the PDAF
-library. Maximizing `da_interal`, minimizes the number of these calls
+library. Maximizing `da_interval`, minimizes the number of these calls
 and thus reduces compute time.
 
 ### DA:stat_dumpoffset ###
@@ -606,6 +677,15 @@ This is a convergence criteria (between 0 and 1) for the averaging
 skin depth (compare the weighting procedure described in Schrön et al,
 2017, section 2.3).
 
+### DA:print_obs_index ###
+
+`DA:print_obs_index`: (int) Switch for turning on output of the
+process-local grid-index-array of the obserations, `obs_index_p`.
+
+For this output, debugging has to be turned on by `PDAF_DEBUG`.
+
+Default: 0, output turned off.
+
 ## Parameter Summary ##
 
  | section   | parameter               | default value |
@@ -640,6 +720,10 @@ skin depth (compare the weighting procedure described in Schrön et al,
  |           | `nprocs`                | 0             |
  |           | `update_swc`            | 1             |
  |           | `print_swc`             | 0             |
+ |           | `print_et`              | 0             |
+ |           | `statevec_allcol`       | 0             |
+ |           | `t_printensemble`       | -1            |
+ |           | `watmin_switch`         | 0             |
  | `[COSMO]` |                         |               |
  |           | `nprocs`                | 0             |
  |           | `dtmult`                | 0             |
@@ -653,6 +737,7 @@ skin depth (compare the weighting procedure described in Schrön et al,
  |           | `obs_interp_switch`     | 0             |
  |           | `crns_flag`             | 1             |
  |           | `da_crns_depth_tol`     | 0.01          |
+ |           | `print_obs_index`       | 0             |
 
 Default values for parameter file `enkfpf.par`.
 

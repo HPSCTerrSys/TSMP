@@ -151,11 +151,10 @@ By Lukas Strebel
 
 Cloning `TSMP` and `CLM5`
 ``` bash
-	git clone https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp.git TSMP
+	git clone https://github.com/HPSCTerrSys/TSMP
 	cd TSMP
-	git checkout clm5-coupling
 
-	git clone -b release-clm5.0.29 https://github.com/ESCOMP/ctsm.git clm5_0
+	git clone -b release-clm5.0.37 https://github.com/ESCOMP/ctsm.git clm5_0
 	cd clm5_0
 	./manage_externals/checkout_externals
 	cd ..
@@ -164,9 +163,11 @@ Cloning `TSMP` and `CLM5`
 Build and setup commands
 ``` bash
 	cd bldsva
-	./build_tsmp.ksh -v 4.4.0MCT -c clm -m JUWELS -O Intel
-	# wait until build is finished - can take some time
-	./setup_tsmp.ksh -v 4.4.0MCT -c clm -V nrw_5x -m JUWELS -O Intel
+	./build_tsmp.ksh -c clm5 -m JUWELS -O Intel
+	# wait until build is finished - can take some
+
+    # Setup command (needs to be checked)
+	./setup_tsmp.ksh -c clm5 -V nrw_5x -m JUWELS -O Intel
 	cd #Rundir given as last output line
 
 	# Change number of tasks / cores:

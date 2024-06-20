@@ -111,11 +111,10 @@ The `-g` flag, is build to produce debugging information.
 
 ## Compile CLM5 with PDAF ##
 
-CLM5-PDAF compilation, currently available only on branch
-`TSMP_pdaf-clm5` (January 2023).
+CLM5-PDAF compilation.
 
 ``` bash
-	./build_tsmp.ksh -v 4.4.0MCTPDAF -c clm -m JURECA -O Intel
+./build_tsmp.ksh -c clm5-pdaf -m JURECA -O Intel
 ```
 
 ### Prerequisite1: CLM5 preparation ###
