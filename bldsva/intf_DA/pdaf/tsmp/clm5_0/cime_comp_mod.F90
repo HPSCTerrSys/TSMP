@@ -4053,6 +4053,11 @@ contains
       ! TSMP specific stop condition:
       counter = counter + 1
       if (present(ntsteps) .and. counter == ntsteps) then
+        if (iamroot_CPLID) then
+          write(logunit,*) ' '
+          write(logunit,103) subname,' NOTE: Stopping from TSMP-PDAF alarm ntsteps'
+          write(logunit,*) ' '
+        endif
         stop_alarm = .true.
       end if
     enddo   ! driver run loop
