@@ -2208,11 +2208,15 @@ contains
     Time_begin = mpi_wtime()
     Time_bstep = mpi_wtime()
 
+    ! Check for optional input `ntsteps`
     if(.not. present(ntsteps)) then
       write(logunit,*) 'ERROR: ntsteps input not present, but needed for TSMP-PDAF ;'
       call shr_sys_abort(subname// &
         ' missing ntsteps input that is needed for TSMP-PDAF')
     end if
+
+    ! Explicitly set `counter` to zero before loop
+    counter = 0
 
     do while ( .not. stop_alarm)
 
