@@ -540,7 +540,7 @@ contains
        count = count + 1
        CPLCOMPID(n) = count
     enddo
-    
+
     if (mype == 0) then
        !--- validation of inputs ---
        ! rootpes >= 0
@@ -579,11 +579,8 @@ contains
           pelist(3,1) = cstr(n)
        endif
 
-       !write(*,*) "before seq_comm_set_comm bcast", pelist, DRIVER_COMM
        call mpi_bcast(pelist, size(pelist), MPI_INTEGER, 0, DRIVER_COMM, ierr)
        if (present(pdaf_id) .and. present(pdaf_max)) then
-          !write(*,*) "before seq_comm_setcomm", pdaf_id, pdaf_max, mype, n, &
-          !           COMPID(n), pelist, comp_nthreads, name
           call seq_comm_setcomm(COMPID(n),pelist,nthreads=comp_nthreads,iname=name,inst=pdaf_id,tinst=pdaf_max)
        else if (present(drv_comm_id)) then
           call seq_comm_setcomm(COMPID(n),pelist,nthreads=comp_nthreads,iname=name,inst=drv_comm_id)
