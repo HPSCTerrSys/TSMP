@@ -177,7 +177,7 @@ module cime_comp_mod
 
   implicit none
 
-  !private
+  private
 
   public cime_pre_init1, cime_pre_init2, cime_init, cime_run, cime_final
   public timing_dir, mpicom_GLOID
@@ -583,7 +583,6 @@ contains
   subroutine cime_pre_init1(esmf_log_option, pdaf_comm, pdaf_id, pdaf_max)
     use shr_pio_mod, only : shr_pio_init1, shr_pio_init2
     use seq_comm_mct, only: num_inst_driver
-
     !----------------------------------------------------------
     !| Initialize MCT and MPI communicators and IO
     !----------------------------------------------------------
@@ -602,28 +601,23 @@ contains
 
     if (present(pdaf_comm)) then
       global_comm = pdaf_comm
-      !write(*,*) "PDAF_COMM present"
     else
       call mpi_comm_dup(MPI_COMM_WORLD, global_comm, ierr)
       call shr_mpi_chkerr(ierr,subname//' mpi_comm_dup')
     end if
     comp_comm = MPI_COMM_NULL
     time_brun = mpi_wtime()
-  
+
     !--- Initialize multiple driver instances, if requested ---
     call cime_cpl_init(global_comm, driver_comm, num_inst_driver, driver_id, &
                        pdaf_id, pdaf_max)
-  
-    !write(*,*) "after cime_cpl_init", global_comm, driver_comm, &
-    !                                  pdaf_id, pdaf_max
- 
+
     call shr_pio_init1(num_inst_total,NLFileName, driver_comm)
     !
     ! If pio_async_interface is true Global_comm is MPI_COMM_NULL on the servernodes
     ! and server nodes do not return from shr_pio_init2
     !
     !   if (Global_comm /= MPI_COMM_NULL) then
-
 
     if (num_inst_driver > 1) then
        call seq_comm_init(global_comm, driver_comm, NLFileName, drv_comm_ID=driver_id)
@@ -2152,11 +2146,15 @@ contains
   !*******************************************************************************
   !===============================================================================
 
-  subroutine cime_run()
+  subroutine cime_run(ntsteps)
     use seq_comm_mct,   only: atm_layout, lnd_layout, ice_layout, glc_layout,  &
          rof_layout, ocn_layout, wav_layout, esp_layout
     use shr_string_mod, only: shr_string_listGetIndexF
     use seq_comm_mct, only: num_inst_driver
+
+    ! TSMP specific
+    integer, intent(in), optional :: ntsteps
+    integer :: counter=0
 
     ! gptl timer lookup variables
     integer, parameter :: hashcnt=7
@@ -2209,6 +2207,17 @@ contains
     call t_stopf ('CPL:RUN_LOOP_BSTART')
     Time_begin = mpi_wtime()
     Time_bstep = mpi_wtime()
+
+    ! Check for optional input `ntsteps`
+    if(.not. present(ntsteps)) then
+      write(logunit,*) 'ERROR: ntsteps input not present, but needed for TSMP-PDAF ;'
+      call shr_sys_abort(subname// &
+        ' missing ntsteps input that is needed for TSMP-PDAF')
+    end if
+
+    ! Explicitly set `counter` to zero before loop
+    counter = 0
+
     do while ( .not. stop_alarm)
 
        call t_startf('CPL:RUN_LOOP', hashint(1))
@@ -2243,16 +2252,19 @@ contains
        ! Does the driver need to pause?
        drv_pause = pause_alarm .and. seq_timemgr_pause_component_active(drv_index)
 
-       if (glc_prognostic) then
+       if (glc_prognostic .or. do_hist_l2x1yrg) then
           ! Is it time to average fields to pass to glc?
           !
           ! Note that the glcrun_avg_alarm just controls what is passed to glc in terms
           ! of averaged fields - it does NOT control when glc is called currently -
           ! glc will be called on the glcrun_alarm setting - but it might not be passed relevant
           ! info if the time averaging period to accumulate information passed to glc is greater
-          ! than the glcrun interval
+          ! than the glcrun interval.
+          !
+          ! Note also that we need to set glcrun_avg_alarm even if glc_prognostic is
+          ! false, if do_hist_l2x1yrg is set, so that we have valid cpl hist fields
           glcrun_avg_alarm = seq_timemgr_alarmIsOn(EClock_d,seq_timemgr_alarm_glcrun_avg)
-          if (glcrun_avg_alarm .and. .not. glcrun_alarm) then
+          if (glc_prognostic .and. glcrun_avg_alarm .and. .not. glcrun_alarm) then
              write(logunit,*) 'ERROR: glcrun_avg_alarm is true, but glcrun_alarm is false'
              write(logunit,*) 'Make sure that NCPL_BASE_PERIOD, GLC_NCPL and GLC_AVG_PERIOD'
              write(logunit,*) 'are set so that glc averaging only happens at glc coupling times.'
@@ -2983,7 +2995,7 @@ contains
              if (lnd_c2_rof) then
                 call prep_rof_accum(timer='CPL:lndpost_accl2r')
              endif
-             if (lnd_c2_glc) then
+             if (lnd_c2_glc .or. do_hist_l2x1yrg) then
                 call prep_glc_accum(timer='CPL:lndpost_accl2g' )
              endif
 
@@ -3053,6 +3065,27 @@ contains
           endif
 
        endif
+
+       ! ------------------------------------------------------------------------
+       ! Also average lnd2glc fields if needed for requested l2x1yrg auxiliary history
+       ! files, even if running with a stub glc model.
+       ! ------------------------------------------------------------------------
+
+       if (do_hist_l2x1yrg .and. iamin_CPLID .and. glcrun_avg_alarm .and. &
+            .not. lnd2glc_averaged_now) then
+          ! Checking .not. lnd2glc_averaged_now ensures that we don't do this averaging a
+          ! second time if we already did it above (because we're running with a
+          ! prognostic glc model).
+          call cime_comp_barriers(mpicom=mpicom_CPLID, timer='CPL:AVG_L2X1YRG_BARRIER')
+          call t_drvstartf ('CPL:AVG_L2X1YRG',cplrun=.true.,barrier=mpicom_CPLID)
+          if (drv_threading) call seq_comm_setnthreads(nthreads_CPLID)
+
+          call prep_glc_accum_avg(timer='CPL:glcprep_avg')
+          lnd2glc_averaged_now = .true.
+
+          if (drv_threading) call seq_comm_setnthreads(nthreads_GLOID)
+          call t_drvstopf  ('CPL:AVG_L2X1YRG',cplrun=.true.)
+       end if
 
        !----------------------------------------------------------
        !| ROF RECV-POST
@@ -3812,8 +3845,6 @@ contains
              if (t1yr_alarm .and. .not. lnd2glc_averaged_now) then
                 write(logunit,*) 'ERROR: histaux_l2x1yrg requested;'
                 write(logunit,*) 'it is the year boundary, but lnd2glc fields were not averaged this time step.'
-                write(logunit,*) 'One possible reason is that you are running with a stub glc model.'
-                write(logunit,*) '(It only works to request histaux_l2x1yrg if running with a prognostic glc model.)'
                 call shr_sys_abort(subname// &
                      ' do_hist_l2x1yrg and t1yr_alarm are true, but lnd2glc_averaged_now is false')
              end if
@@ -4030,6 +4061,16 @@ contains
           call t_drvstopf   ('CPL:BARRIERALARM',cplrun=.true.)
        endif
 
+      ! TSMP specific stop condition:
+      counter = counter + 1
+      if (present(ntsteps) .and. counter == ntsteps) then
+        if (iamroot_CPLID) then
+          write(logunit,*) ' '
+          write(logunit,103) subname,' NOTE: Stopping from TSMP-PDAF alarm ntsteps'
+          write(logunit,*) ' '
+        endif
+        stop_alarm = .true.
+      end if
     enddo   ! driver run loop
 
     !|----------------------------------------------------------
@@ -4222,14 +4263,12 @@ contains
 
     namelist /cime_driver_inst/ ninst_driver
 
-
     call shr_mpi_commrank(comm_in, mype  , ' cime_cpl_init')
     call shr_mpi_commsize(comm_in, numpes, ' cime_cpl_init')
 
-    !write(*,*) "start of cime_cpl_init", comm_in, mype, numpes
     num_inst_driver = 1
     id    = 0
-    
+
     if (mype == 0) then
        ! Read coupler namelist if it exists
        ninst_driver = 1
@@ -4256,7 +4295,6 @@ contains
             ' : Total PE number must be a multiple of coupler instance number')
     end if
 
-    !write(*,*) "just before split", comm_in, pdaf_id, mype, numpes, comm_out
     if (pdaf_max > 1) then
        call mpi_comm_split(comm_in, pdaf_id, 0, comm_out, ierr)
        call shr_mpi_chkerr(ierr,subname//' mpi_comm_split')
