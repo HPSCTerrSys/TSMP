@@ -363,6 +363,8 @@ module enkf_clm_mod
     character (len = 32) :: fn5    !TSMP-PDAF: function name for state vector outpu
     character (len = 32) :: fn6    !TSMP-PDAF: function name for state vector outpu
 
+    integer, pointer :: snlsno(:)
+
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
       ! TSMP-PDAF: For debug runs, output the state vector in files
@@ -374,8 +376,6 @@ module enkf_clm_mod
       CLOSE(71)
     END IF
 #endif
-
-    integer, pointer :: snlsno(:)
 
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
