@@ -74,8 +74,6 @@ module enkf_clm_mod
   integer :: COMM_couple_clm    ! CLM-version of COMM_couple
                                 ! (currently not used for clm5_0)
   logical :: newgridcell        !only clm5_0
-
-  logical :: newgridcell
   contains
 
 #if defined CLMSA
