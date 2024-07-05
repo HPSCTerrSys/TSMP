@@ -271,30 +271,6 @@ module enkf_clm_mod
       end do
     endif
 
-    ! write texture incl. organic matter values to state vector (if desired)
-    if(clmupdate_texture.eq.2) then
-      cc = 1
-      do i=1,nlevsoi
-        do j=clm_begg,clm_endg
-            ! Only get the parameters from the first column of each gridcell
-            ! and add it to the clm_statevec at the position of the gridcell (cc)
-            newgridcell = .true.
-            do jj=clm_begc,clm_endc
-              g = col%gridcell(jj)
-              if (g .eq. j) then
-                if (newgridcell) then
-                  newgridcell = .false.
-                  clm_statevec(cc+1*clm_varsize+offset) = psand(jj,i)
-                  clm_statevec(cc+2*clm_varsize+offset) = pclay(jj,i)
-                  clm_statevec(cc+3*clm_varsize+offset) = porgm(jj,i)
-                endif
-              endif 
-            end do
-            cc = cc + 1
-        end do
-      end do
-    endif
-
     ! Snow assimilation
     ! Case 1: Snow depth
     if(clmupdate_snow.eq.1) then
@@ -564,25 +540,6 @@ module enkf_clm_mod
             ! incl. organic matter
             porgm(j,i) = clm_statevec(cc+3*clm_varsize+offset)
           end if
-          cc = cc + 1
-        end do
-      end do
-      call clm_correct_texture
-      call clm_texture_to_parameters
-    endif
-
-    ! write updated texture incl. organic matter back to CLM
-    if(clmupdate_texture.eq.2) then
-      cc = 1
-      do i=1,nlevsoi
-        do j=clm_begg,clm_endg
-            ! iterate through the columns and copy from the same gridcell
-            ! i.e. statevec position (cc) for each column
-            do jj=clm_begc,clm_endc
-                psand(jj,i) = clm_statevec(cc+1*clm_varsize+offset)
-                pclay(jj,i) = clm_statevec(cc+2*clm_varsize+offset)
-                porgm(jj,i) = clm_statevec(cc+3*clm_varsize+offset)
-            end do
           cc = cc + 1
         end do
       end do
