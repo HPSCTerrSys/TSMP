@@ -377,15 +377,6 @@ module enkf_clm_mod
 
     integer, pointer :: snlsno(:)
 
-#ifdef PDAF_DEBUG
-    ! TSMP-PDAF: For debug runs, output the state vector in files
-    WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".update.", tstartcycle, ".txt"
-    OPEN(unit=71, file=fn, action="write")
-    DO i = 1, clm_statevecsize
-      WRITE (71,"(f20.15)") clm_statevec(i)
-    END DO
-    CLOSE(71)
-#endif
     swc   => waterstate_inst%h2osoi_vol_col
     watsat => soilstate_inst%watsat_col
     psand => soilstate_inst%cellsand_col
