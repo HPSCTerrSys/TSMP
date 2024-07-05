@@ -74,6 +74,7 @@ module enkf_clm_mod
   integer :: COMM_couple_clm    ! CLM-version of COMM_couple
                                 ! (currently not used for clm5_0)
   logical :: newgridcell        !only clm5_0
+
   contains
 
 #if defined CLMSA
@@ -310,13 +311,15 @@ module enkf_clm_mod
     endif
 
 #ifdef PDAF_DEBUG
-  ! TSMP-PDAF: For debug runs, output the state vector in files
-  WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
-  OPEN(unit=71, file=fn, action="write")
-  DO i = 1, clm_statevecsize
-    WRITE (71,"(f20.15)") clm_statevec(i)
-  END DO
-  CLOSE(71)
+    IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
+      ! TSMP-PDAF: For debug runs, output the state vector in files
+      WRITE(fn, "(a,i5.5,a,i5.5,a)") "clmstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
+      OPEN(unit=71, file=fn, action="write")
+      DO i = 1, clm_statevecsize
+        WRITE (71,"(f20.15)") clm_statevec(i)
+      END DO
+      CLOSE(71)
+    END IF
 #endif
 
   end subroutine set_clm_statevec
