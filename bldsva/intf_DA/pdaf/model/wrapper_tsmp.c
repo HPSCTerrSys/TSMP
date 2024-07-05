@@ -60,13 +60,8 @@ void initialize_tsmp() {
   /* initialize clm, parflow and cosmo instances */
   if(model == 0) {
 #if defined COUP_OAS_PFL || defined CLMSA || defined COUP_OAS_COS
-#if defined CLMFIVE
     /* enkf_clm.F90 */
-    clm5_init(clminfile, &pdaf_id, &pdaf_max);
-#else    
-    /* enkf_clm.F90 */
-    clm_init(clminfile);
-#endif    
+    clm_init(clminfile, &pdaf_id, &pdaf_max, &mype_world);
 #endif
   }
   if(model == 1) {

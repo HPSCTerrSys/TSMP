@@ -38,10 +38,7 @@ void printstat_parflow();
 void printstat_param_parflow(double* dat, char* name, int dim);
 void enkf_ensemblestatistics (double* dat, double* mean, double* var, int size, MPI_Comm comm);
 void enkf_printstatistics_pfb (double *dat, char* name, int cycle, char* prefix, int dim);
-extern void clm_init(char *s);
-#ifdef CLMFIVE
-extern void clm5_init(char *s, int *pdaf_id, int *pdaf_max);
-#endif
+extern void clm_init(char *s, int *pdaf_id, int *pdaf_max, int *mype);
 extern void clm_advance(int *ntstep, int *tstartcycle, int *mype);
 extern void update_clm(int *tstartcycle, int *mype);
 #if defined CLMSA
@@ -94,6 +91,9 @@ GLOBAL int clmupdate_snow;
 GLOBAL int clmupdate_snow_repartitioning;
 GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
+GLOBAL int clmstatevec_allcol;
+GLOBAL int clmt_printensemble;
+GLOBAL int clmwatmin_switch;
 GLOBAL int dtmult_cosmo;
 GLOBAL int pf_olfmasking;
 GLOBAL int pf_olfmasking_param;
@@ -106,6 +106,7 @@ GLOBAL int is_dampfac_state_time_dependent;
 GLOBAL int is_dampfac_param_time_dependent;
 GLOBAL int pf_dampswitch_sm;
 GLOBAL int crns_flag;
+GLOBAL int da_print_obs_index;
 extern int model;
 extern int mype_model;
 extern int npes_model;
