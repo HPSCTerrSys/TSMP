@@ -650,7 +650,7 @@ module enkf_clm_mod
         end if
     endif
 
-  end subroutine
+  end subroutine update_clm
 
   subroutine clm_repartition_snow(h2osno_in)
     use ColumnType,    only : col
@@ -818,7 +818,7 @@ module enkf_clm_mod
       end if ! End of snow present check
     end do ! End of column iteration
 
-  end subroutine update_clm
+  end subroutine clm_repartition_snow
 
   subroutine clm_correct_texture()
 
