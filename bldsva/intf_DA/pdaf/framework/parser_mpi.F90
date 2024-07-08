@@ -244,9 +244,10 @@ CONTAINS
           CALL get_command_argument(i+1, str2_check)
           IF (mype == 0) THEN
              IF (.NOT. TRIM(str2_check) == TRIM(str2)) THEN
-                PRINT *, "PARSER: ERROR, command line input too long."
-                PRINT *, "handle=", string
-                PRINT *, "parsed input(cut)=", str2
+                WRITE (*,'(2x, a)') "PARSER: ERROR, command line input too long."
+                WRITE (*,'(2x, a, a)') "called handle=", string
+                WRITE (*,'(2x, a, a)') "parsed handle=", str1
+                WRITE (*,'(2x, a, a)') "parsed input(cut)=", str2
                 call abort_parallel()
              END IF
           END IF
