@@ -23,8 +23,6 @@
 !-------------------------------------------------------------------------------------------
 
 module mod_read_obs
- use mod_parallel_model, only: tcycle
-
  use iso_C_binding
 
   implicit none
@@ -335,7 +333,7 @@ contains
 
         call check(nf90_get_var(ncid, clmobs_varid, clm_obs))
         if (screen > 2) then
-            print *, "TSMP-PDAF mype(w)=", mype_world, ": clm_obs=", clm_obs, "at time", tcycle 
+            print *, "TSMP-PDAF mype(w)=", mype_world, ": clm_obs=", clm_obs
         end if
 
         !check, if observation errors are present in observation file
