@@ -415,6 +415,9 @@ module enkf_clm_mod
       error stop "Not implemented: clmupdate_swc.eq.2"
     endif
 
+    ! CLM5: Update the Data Assimulation time-step to the current time
+    ! step, since DA has been done. Used by CLM5 to skip BalanceChecks
+    ! directly after the DA step.
     call update_DA_nstep()
 
     ! write updated swc back to CLM
