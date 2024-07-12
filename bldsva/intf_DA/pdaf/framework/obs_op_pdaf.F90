@@ -106,7 +106,6 @@ integer :: nsc
 ! *** operator H on vector or matrix column ***
 ! *********************************************
 
-
 ! If no special observation operator is compiled, use point observations
 lpointobs = .true.
 
