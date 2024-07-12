@@ -581,6 +581,9 @@ module enkf_clm_mod
                 rsnow(jj) = h2osno(jj)
                 if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
                   h2osno(jj)   = clm_statevec(cc+offset)
+                  ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
+                  ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
+                  ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
                   if ( clmupdate_snow_repartitioning.eq.3) then
                     incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
                       do i=snlsno(jj)+1,0
@@ -655,6 +658,7 @@ module enkf_clm_mod
       else ! snow (h2osno) present
         if (snlsno(jj).lt.0) then ! snow layers in the column
           if (clmupdate_snow .eq. 1) then
+            ! DART source: https://github.com/NCAR/DART/blob/main/models/clm/dart_to_clm.f90
             ! Formulas below from DART use h2osno_po / h2osno_pr for after / before DA SWE
             ! clmupdate_snow == 1 has snow_depth after and h2osno before DA snow depth
             ! Therefore need to have a transform to get h2osno_po
@@ -692,6 +696,8 @@ module enkf_clm_mod
               if(clmupdate_snow_repartitioning.eq.1) then
                 if (ii .eq. 0) then ! DART version indexing check against nlevsno but for us 0
                   frac_swe = 1.0_r8
+                  ! JK: Let CLM repartitioning do the job
+                  ! afterwards. Provide all the snow in a single layer
                 else
                   frac_swe = 0.0_r8
                 end if
