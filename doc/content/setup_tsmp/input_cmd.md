@@ -49,9 +49,12 @@ filter. See [Command Line Examples](#command-line-examples).
 `obs_filename` (string) Prefix for observation files.
 
 Note: The prefix for observation files cannot be longer than 100
-characters! Otherwise, the observation filename will be cropped. In
-these cases, usually an error message `No such file or directory` is
-thrown in `next_observation_pdaf.F90`.
+characters! Otherwise, the observation filename will be cropped.
+
+Tip: Try to use relative paths as input to `obs_filename`.
+
+If observation filenames are not found, an error message `No such file
+or directory` is printed out in `next_observation_pdaf.F90`.
  
 ## rms_obs ##
 
