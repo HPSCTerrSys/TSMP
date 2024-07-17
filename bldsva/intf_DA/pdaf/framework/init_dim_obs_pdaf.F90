@@ -474,6 +474,19 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
             end if
             count = count + 1
         end do
+
+        ! Check if observation has been snapped
+        ! Comment out if unused observations are wanted.
+        if (.not. obs_snapped) then
+          print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Observation not snapped by any grid cell."
+          print *, "i=", i
+          if (is_use_dr) then
+            print *, "clmobs_lon(i)=", clmobs_lon(i)
+            print *, "clmobs_lat(i)=", clmobs_lat(i)
+          end if
+          call abort_parallel()
+        end if
+
     end do
   end if
 #endif
