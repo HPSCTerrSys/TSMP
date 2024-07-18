@@ -293,21 +293,35 @@ module enkf_clm_mod
     ! Case 2: SWE
     if(clmupdate_snow.eq.2) then
         cc = 1
-        do j=clm_begg,clm_endg
-        ! Only get the SWE from the first column of each gridcell
-        ! and add it to the clm_statevec at the position of the gridcell (cc)
-        newgridcell = .true.
-        do jj=clm_begc,clm_endc
-          g = col%gridcell(jj)
-          if (g .eq. j) then
-            if (newgridcell) then
-              newgridcell = .false.
-              clm_statevec(cc+offset) = h2osno(jj)
-            endif
-          endif
-        end do
-        cc = cc + 1
-        end do
+
+        if(clmstatevec_allcol.eq.0) then
+
+          do j=clm_begg,clm_endg
+            ! Only get the SWE from the first column of each gridcell
+            ! and add it to the clm_statevec at the position of the gridcell (cc)
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  clm_statevec(cc+offset) = h2osno(jj)
+                endif
+              endif
+            end do
+            cc = cc + 1
+          end do
+
+        else
+
+          do jj=clm_begc,clm_endc
+            ! SWC from all columns of each gridcell
+            clm_statevec(cc+offset) = h2osno(jj)
+            cc = cc + 1
+          end do
+
+        end if
+
     endif
 
 #ifdef PDAF_DEBUG
@@ -572,32 +586,43 @@ module enkf_clm_mod
     ! Case 2: Snow water equivalent
     ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
     if(clmupdate_snow.eq.2) then
-        cc = 1
-        do j=clm_begg,clm_endg
+        ! cc = 1
+        ! do j=clm_begg,clm_endg
         ! iterate through the columns and copy from the same gridcell
         ! i.e. statevec position (cc) for each column
-          do jj=clm_begc,clm_endc
+          do j=clm_begc,clm_endc
+
+            ! Set cc (the state vector index) from the
+              ! CLM5-grid-index and the `CLM5-layer-index times
+              ! num_gridcells`
+              if(clmstatevec_allcol.eq.0) then
+                cc = (col%gridcell(j) - clm_begg + 1)
+              else
+                cc = (j - clm_begc + 1)
+              end if
+
               ! Catch negative or 0 values from DA
               if (clm_statevec(cc+offset).lt.0.0) then
-                print *, "WARNING: SWE at g,c is negative: ", j, jj, clm_statevec(cc+offset)
+                print *, "WARNING: SWE at g,c is negative: ", j, clm_statevec(cc+offset)
               else
-                rsnow(jj) = h2osno(jj)
+                rsnow(j) = h2osno(j)
                 if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
-                  h2osno(jj)   = clm_statevec(cc+offset)
+                  h2osno(j)   = clm_statevec(cc+offset)
                   ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
                   ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
                   ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
                   if ( clmupdate_snow_repartitioning.eq.3) then
-                    incr_h2osno = h2osno(jj) / rsnow(jj) ! INC = New SWE / OLD SWE
-                      do i=snlsno(jj)+1,0
-                        h2osoi_ice(jj,i) = h2osoi_ice(jj,i) * incr_h2osno
+                    incr_h2osno = h2osno(j) / rsnow(j) ! INC = New SWE / OLD SWE
+                      do i=snlsno(j)+1,0
+                        h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
                       end do
                   end if
                 end if
               endif
           end do
-        cc = cc + 1
-        end do
+        ! cc = cc + 1
+        ! end do
+
         if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
           if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
             call clm_repartition_snow(rsnow(:))
