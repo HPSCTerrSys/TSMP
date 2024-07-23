@@ -239,7 +239,8 @@ CONTAINS
           CALL get_command_argument(i, str1)
           CALL get_command_argument(i+1, str2)
 
-          ! Add check for cut strings longer than 100 characters
+          ! Add check for inadmissible strings longer than 100
+          ! characters
           CALL get_command_argument(i, str1_check)
           CALL get_command_argument(i+1, str2_check)
           IF (mype == 0) THEN
