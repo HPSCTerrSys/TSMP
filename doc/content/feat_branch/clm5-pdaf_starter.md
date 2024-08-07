@@ -6,7 +6,7 @@ The following instructions assume you are working on the JSC machine JURECA. If 
 
 ### 1.1 TSMP-PDAF
 
-Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF branch like this:
+Clone the TSMP-PDAF repository to your work folder like this:
 
 ```bash
  git clone https://github.com/HPSCTerrSys/TSMP.git tsmp
@@ -15,6 +15,8 @@ Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF b
 
 ```
 
+The directory `tsmp` is the root directory of TSMP, or in this case
+CLM5-PDAF.
 
 ### 1.2 PDAF
 
@@ -27,49 +29,21 @@ Get PDAF from <https://github.com/PDAF/PDAF> and clone it in the
 
 ### 1.3 CLM5
 
-Clone CLM5 and its dependencies from the official repo to the tsmp folder like this:
+Clone CLM5 and its dependencies from the HPSCTerrSys repo to the tsmp folder like this:
 
 ```bash
-git clone -b release-clm5.0 https://github.com/ESCOMP/CTSM.git clm5_0
-
-cd clm5_0
-
-source ../bldsva/machines/JURECA/loadenvs.Intel
-
-./manage_externals/checkout_externals
+git clone --recurse-submodules https://github.com/HPSCTerrSys/clm5_0
 ```
 
-- `source ...`: Loads the software environment on JURECA that is later
-  used for build with Intel
-- `./manage_externals/checkout_externals`: Loads dependencies of CLM5,
-  mostly a collection of `git clone` commands
+- `--recurse-submodules`: Ensures cloning of the following internal
+  dependencies ("externals") of CLM5: CIME, FATES, CISM, MOSART, RTM
 
-### 1.4 Compile the models together
+### 1.4 Build CLM5-PDAF
 
 The TSMP framework works with its own build system. With the models in
 the folders as described before the compilation of both CLM5 and PDAF
 can be done with a single build command after the following
 preparations.
-
-If not already configured for CLM5 the following environmental
-variables are needed to compile CLM5 and can be for example be set
-like this:
-
-User defined data paths
-
-Path to the root directory for all CESM / CLM input files
-```bash
-export CESMDATAROOT=$SCRATCH/cesm
-```
-
-This is the default value set by the build process. However, you can
-export your own `CESMDATAROOT`.
-
-Path to the CSM specific input files (usually subfolder of CESMDATAROOT)
-
-```bash
-export CSMDATA=$CESMDATAROOT/inputdata
-```
 
 In the `tsmp/bldsva` directory:
 
@@ -77,7 +51,10 @@ In the `tsmp/bldsva` directory:
 ./build_tsmp.ksh -c clm5-pdaf -m JURECA -O Intel
 ```
 
-Potential problems that can happen during this step:
+If the build was successful, the executable can be found in path
+`$rootdir/bin/JURECA_clm/tsmp-pdaf`.
+
+#### 1.4.1 Potential build errors
 
   * If you worked with CLM5 standalone and have created a `.cime`
     folder in your home directory it can cause a conflict during
@@ -85,7 +62,8 @@ Potential problems that can happen during this step:
     No machine jureca found` for example. The easiest solution to this
     is to move the `~/.cime` folder to `~/.cime_deactivated` while
     working with CLM5-PDAF.
-  *  Using the newest software stages from JSC there is an import
+
+*  Using the newest software stages from JSC there is an import
     conflict with bigint for PERL.  See
     [https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp/-/issues/67](https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp/-/issues/67)
     for details. The error message will contain a line like this:
@@ -95,8 +73,34 @@ Potential problems that can happen during this step:
     needed to check some version numbers the PERL modules is not
     strictly needed.
 
-Once successfully compiled the executable can be found in path
-`tsmp/bin/JURECA_clm/tsmp-pdaf`.
+#### 1.4.2 CLM5 environment variables
+
+If changes from the defaults are wanted, the following environmental
+variables may be set before compiling CLM5.
+
+##### `CESMDATAROOT`: User defined data paths
+
+Path to the root directory for all CESM / CLM input files
+
+If you exported your own `CESMDATAROOT`, it will be used by CLM5-PDAF.
+
+Default:
+```bash
+export CESMDATAROOT=$rootdir/cesm
+```
+
+##### `CSMDATA`: Path to the CSM specific input files
+
+`CSMDATA` is usually a subfolder of `CESMDATAROOT`.
+
+Default:
+```bash
+export CSMDATA=$CESMDATAROOT/inputdata
+```
+
+You may manipulate `CSMDATA` either by changing `CESMDATAROOT`
+(recommended), or in
+`$rootdir/bldsva/intf_oas3/clm5_0/arch/config/softwarepaths.ksh`.
 
 ## 2. File preparation
 
