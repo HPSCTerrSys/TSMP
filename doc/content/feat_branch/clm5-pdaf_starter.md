@@ -186,8 +186,12 @@ The script at the moment can either be called without arguments if all
 variables are modified within the script or with year_start and prefix
 as arguments.
 
-To run PDAF an additional namelist is needed, enkfpf.par for details
+To run PDAF an additional namelist is needed, `enkfpf.par` for details
 on the contents of this namelist refer to the TSMP-PDAF manual.
+
+Remark: For CLM5-PDAF it is recommended to set inside `enkfpf.par` the
+following: `DA:startreal = 1`. For more information, see:
+https://github.com/HPSCTerrSys/eCLM/issues/41
 
 Lastly, we create a symbolic link to the executable in the case
 directory. This way we do not create unnecessary copies of the
