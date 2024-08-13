@@ -119,25 +119,27 @@ CLM5-PDAF compilation.
 
 ### Prerequisite1: CLM5 preparation ###
 
-For obtaining and preparing the component model `clm5_0`, you
-have to run the following commands
+Obtain `clm5_0` from the HPSCTerrsys-fork
+``` bash
+git clone --recurse-submodules https://github.com/HPSCTerrSys/clm5_0
+```
+Externals are loaded as git submodules.
+
+Alternative (explicitly loading the externals): For obtaining the
+component model `clm5_0` from the official main repository, you have
+to run the following commands
 
 ``` bash
-	git clone git@github.com:ESCOMP/CTSM.git clm5_0
+	git clone -b release-clm5.0 git@github.com:ESCOMP/CTSM.git clm5_0
 	cd clm5_0
-	git checkout release-clm5.0
 	./manage_externals/checkout_externals
 ```
 
 ### Prerequisite2: Path to cesm ###
 
-The path `CESMDATAROOT` needs to be changed in
+The path `CESMDATAROOT` can be changed in
 `TSMP/bldsva/intf_oas3/clm5_0/arch/JURECA/config/softwarepaths.ksh`. (analogous
 for `JUWELS`).
 
-Currently you need to have access to compute project `cjicg41` and use the line:
-```bash
-	export CESMDATAROOT=/p/scratch/cjicg41/<user>/cesm
-```
-For `<user>`, please contact someone on the inside.
-	
+Default: `export CESMDATAROOT=$rootdir/cesm`, where `$rootdir` is the
+root directory of TSMP itself.
