@@ -299,7 +299,7 @@ Then in the observation files we need to specify variable
 `var_id`: (integer) ID of cells with similar observations.
 
 Only used for [multi-scale data
-assimilation](#multi-scale-data-assimilation-observation-variables)
+assimilation](#multi-scale-data-assimilation-observation-file-variables)
 (turned on using [`DA:point_obs`](./input_enkfpf.md#dapoint_obs)).
 
 The size of `var_id` is `dim_obs`.
