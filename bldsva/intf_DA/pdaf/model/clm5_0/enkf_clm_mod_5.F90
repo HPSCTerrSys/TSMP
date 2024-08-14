@@ -893,7 +893,7 @@ module enkf_clm_mod
       dim_l = 3*nlevsoi + nshift
     endif
 
-  end subroutine
+  end subroutine init_clm_l_size
 #endif
 
 end module enkf_clm_mod
