@@ -194,9 +194,6 @@ end subroutine clm_init
 !--------------------------------------------------------------------------
 subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   use cime_comp_mod, only : cime_run
-  use cime_comp_mod, only : mpicom_GLOID
-  use perf_mod,      only : t_startf
-  use perf_mod,      only : t_stopf
   use enkf_clm_mod, only : set_clm_statevec 
   use iso_C_binding
 
@@ -204,12 +201,9 @@ subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   !--------------------------------------------------------------------------
   ! PDAF variables
   !--------------------------------------------------------------------------
-  integer  :: ierr                   ! MPI error return
   integer(c_int),intent(in) :: ntstep
   integer(c_int),intent(in) :: tstartcycle
   integer(c_int),intent(in) :: mype
-  integer :: counter=0
-  integer :: nstep
 
   ! call modified cime_run that runs for a specificied number of timesteps.
   call cime_run(ntstep)
@@ -218,11 +212,6 @@ subroutine clm_advance(ntstep, tstartcycle, mype) bind(C,name="clm_advance")
   ! Calling PDAF Function to set state vector before assimiliation
   call set_clm_statevec(tstartcycle, mype)
 #endif
-
-  call t_startf ('CPL:RUN_LOOP_BSTOP')
-  call mpi_barrier(mpicom_GLOID,ierr)
-  call t_stopf ('CPL:RUN_LOOP_BSTOP')
-
 
 end subroutine clm_advance
 !--------------------------------------------------------------------------
