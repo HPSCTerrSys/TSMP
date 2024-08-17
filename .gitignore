@@ -11,3 +11,4 @@ doc/_build/**
 /oasis3-mct*/
 /parflow*/
 /pdaf1_1*/
+build_info_*.txt
