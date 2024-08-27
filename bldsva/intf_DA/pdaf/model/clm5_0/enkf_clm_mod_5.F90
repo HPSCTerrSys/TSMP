@@ -136,6 +136,11 @@ module enkf_clm_mod
     endif
     !end hcp
 
+#ifdef PDAF_DEBUG
+    ! Debug output of clm_statevecsize
+    WRITE(*, '(a,x,a,i5,x,a,i10)') "TSMP-PDAF-debug", "mype(w)=", mype, "define_clm_statevec: clm_statevecsize=", clm_statevecsize
+#endif
+
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
