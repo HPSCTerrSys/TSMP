@@ -703,16 +703,16 @@ module enkf_clm_mod
     end do
   end subroutine clm_texture_to_parameters
 
-  subroutine  average_swc_crp(profdat,profave)
-    use clm_varcon  , only : zsoi
+  ! subroutine  average_swc_crp(profdat,profave)
+  !   use clm_varcon  , only : zsoi
 
-    implicit none
+  !   implicit none
 
-    real(r8),intent(in)  :: profdat(10)
-    real(r8),intent(out) :: profave
+  !   real(r8),intent(in)  :: profdat(10)
+  !   real(r8),intent(out) :: profave
 
-    error stop "Not implemented average_swc_crp"
-  end subroutine average_swc_crp
+  !   error stop "Not implemented average_swc_crp"
+  ! end subroutine average_swc_crp
 #endif
 
   subroutine domain_def_clm(lon_clmobs, lat_clmobs, dim_obs, &
