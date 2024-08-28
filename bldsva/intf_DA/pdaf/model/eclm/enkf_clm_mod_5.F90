@@ -440,8 +440,6 @@ module enkf_clm_mod
                 h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
               end if
               
-              end if
-
               ! cc = cc + 1
             end do
         end do
