@@ -512,11 +512,11 @@ time step.
 ### CLM:watmin_switch ###
 
 `CLM:watmin_switch`: (integer) Switch for the values of minimal soil
-moisture checked and set during updating CLM's soil moisture
-`h2osoi_vol`.
+moisture checked and, if lower, set during updating CLM's soil
+moisture `h2osoi_vol`.
 
-Default setting is `0`: Use CLM3.5 / CLM5.0 values of minimal soil
-moisture according to the used version.
+Default setting is `0`: Check and set `0.0`, i.e. no negative values
+are allowed.
 
 - `3`: CLM3.5 values: Check if SM in state vector is less than
   `0.00`. If yes, set SM to `0.05`.

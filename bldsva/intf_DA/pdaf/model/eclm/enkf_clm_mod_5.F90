@@ -372,8 +372,8 @@ module enkf_clm_mod
           watmin_set = watmin
         else
           ! Default
-          watmin_check = watmin
-          watmin_set = watmin
+          watmin_check = 0.0
+          watmin_set = 0.0
         end if
 
         ! cc = 1
