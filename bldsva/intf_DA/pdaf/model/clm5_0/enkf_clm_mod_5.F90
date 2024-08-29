@@ -428,9 +428,11 @@ module enkf_clm_mod
                 ! If you want to make sure that no zero SWCs appear in
                 ! the code, comment out the error stop
                 
+#ifdef PDAF_DEBUG
                 ! error stop "ERROR: Update of zero-swc"
                 print *, "WARNING: Update of zero-swc"
                 print *, "WARNING: Any new H2O added to h2osoi_liq(j,i) with j,i = ", j, i
+#endif
                 h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
                 h2osoi_ice(j,i) = 0.0
               else
