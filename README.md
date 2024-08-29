@@ -1,3 +1,5 @@
+The branch `master-debug` is a clone of `master` with debug
+compilation flags.
 
 # Terrestrial System Modeling Platform - TSMP
 
