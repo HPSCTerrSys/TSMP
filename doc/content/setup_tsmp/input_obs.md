@@ -255,8 +255,12 @@ the observation error (equal for all observations).
 
 #### layer ####
 
-`layer`: (integer) CLM layer where the observation is located (counted
-from uppermost CLM layer).
+`layer`: (integer) Index of CLM depth layer where the observation is
+located.
+
+`layer` counts downwards from uppermost CLM layer.
+
+**Attention**: The uppermost CLM layer has index `layer=1`.
 
 #### dr ####
 
