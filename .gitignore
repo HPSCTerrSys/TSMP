@@ -12,3 +12,7 @@ doc/_build/**
 /parflow*/
 /pdaf1_1*/
 build_info_*.txt
+**/clm3_5*
+**/cosmo5_1*
+**/parflow*
+**/oasis3-mct*
