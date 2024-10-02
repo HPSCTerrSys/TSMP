@@ -56,6 +56,7 @@ update_T  =
 print_swc   =
 print_et   =
 statevec_allcol =
+statevec_only_active =
 t_printensemble =
 watmin_switch =
 
@@ -501,6 +502,21 @@ state vector.
 If `1`: `#columns` SWC values per grid cell are saved in the state
 vector.
 
+### CLM:statevec_only_active ###
+
+**Not yet in main branch**
+
+`CLM:statevec_only_active`: (integer) Switch for using in the state
+vector only (1) hydrologically active columns of a CLM5 gridcell and
+(2) only layers until bedrock.
+
+Only valid, when `CLM:statevec_allcol` is switched on.
+
+If `0` (default): Use all columns and all layers.
+
+If `1`: Use only hydrologically active columns and only layers until
+bedrock.
+
 ### CLM:t_printensemble ###
 
 `CLM:t_printensemble`: (integer) The timestep for the state ensemble
@@ -728,6 +744,7 @@ Default: 0, output turned off.
  |           | `print_swc`             | 0             |
  |           | `print_et`              | 0             |
  |           | `statevec_allcol`       | 0             |
+ |           | `statevec_only_active`  | 0             |
  |           | `t_printensemble`       | -1            |
  |           | `watmin_switch`         | 0             |
  | `[COSMO]` |                         |               |
