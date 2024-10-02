@@ -159,6 +159,8 @@ module enkf_clm_mod
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi
+    ! use clm_varcon, only: nameg, namec
+    ! use GetGlobalValuesMod, only: GetGlobalWrite
     use ColumnType , only : col
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
@@ -218,6 +220,11 @@ module enkf_clm_mod
 
             do jj=clm_begc,clm_endc
               ! SWC from all columns of each gridcell
+
+              ! if (col%gridcell(jj) .eq. 65277) then
+              !   call GetGlobalWrite(col%gridcell(jj), nameg)
+              !   call GetGlobalWrite(jj, namec)
+              ! end if
 
               clm_statevec(cc+offset) = swc(jj,i)
               cc = cc + 1

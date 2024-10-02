@@ -110,6 +110,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   use shr_kind_mod, only: r8 => shr_kind_r8
 #ifdef CLMFIVE
   use GridcellType, only: grc
+  ! use GetGlobalValuesMod, only: GetGlobalWrite
+  ! use clm_varcon, only: nameg
 #else  
   USE clmtype,                  ONLY : clm3
 #endif  
@@ -456,6 +458,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
             if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(count)) .and. (latixy_obs(i) == latixy(count)))) then
                 dim_obs_p = dim_obs_p + 1
                 obs_id_p(count) = i
+
+                ! if (is_use_dr) then
+                !   call GetGlobalWrite(j,nameg)
+                ! end if
 
                 ! Check if observation has already been snapped.
                 ! Comment out if multiple grids per observation are wanted.
