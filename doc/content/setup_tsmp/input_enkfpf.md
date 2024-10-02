@@ -57,6 +57,7 @@ print_swc   =
 print_et   =
 statevec_allcol =
 statevec_only_active =
+statevec_max_layer =
 t_printensemble =
 watmin_switch =
 
@@ -510,12 +511,31 @@ vector.
 vector only (1) hydrologically active columns of a CLM5 gridcell and
 (2) only layers until bedrock.
 
-Only valid, when `CLM:statevec_allcol` is switched on.
+Only used, when `CLM:statevec_allcol` is switched on.
 
 If `0` (default): Use all columns and all layers.
 
 If `1`: Use only hydrologically active columns and only layers until
 bedrock.
+
+### CLM:statevec_max_layer ###
+
+**Not yet in main branch**
+
+`CLM:statevec_max_layer`: (integer) Number of layers to add in the
+state vector.
+
+Only used, when `CLM:statevec_allcol` and `CLM:statevec_only_active`
+are switched on.
+
+If `25` (default): All layers are in state vector.
+
+If `9`: Only the first nine layers in state vector (corresponds to 1.2
+meter).
+
+For a depth profile of CLM layers, see [CLM Technical Note: 2.2.2.1
+Soil
+Layers](https://escomp.github.io/ctsm-docs/versions/master/html/tech_note/Ecosystem/CLM50_Tech_Note_Ecosystem.html#soil-layers).
 
 ### CLM:t_printensemble ###
 
@@ -745,6 +765,7 @@ Default: 0, output turned off.
  |           | `print_et`              | 0             |
  |           | `statevec_allcol`       | 0             |
  |           | `statevec_only_active`  | 0             |
+ |           | `statevec_max_layer`    | 25            |
  |           | `t_printensemble`       | -1            |
  |           | `watmin_switch`         | 0             |
  | `[COSMO]` |                         |               |
