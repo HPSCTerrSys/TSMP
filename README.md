@@ -12,7 +12,7 @@ compilation flags.
 
 ## Introduction 
 
-The Terrestrial System Modeling Platform (TSMP or TerrSysMP, https://www.terrsysmp.org) is an open source scale-consistent, highly modular, massively parallel regional Earth system model. TSMP essentially consists of an interface which couples dedicated versions of the Consortium for Small-scale Modeling (COSMO, http://www.cosmo-model.org) or ICOsahedral Nonhydrostatic (ICON, https://code.mpimet.mpg.de/projects/iconpublic) atmospheric model in NWP or climate mode, the Community Land Model (CLM, http://www.cesm.ucar.edu/models/clm/), and the hydrologic model ParFlow (https://www.parflow.org) through the OASIS3-MCT coupler (https://oasis.cerfacs.fr/en/, https://www.mcs.anl.gov/research/projects/mct/).
+The Terrestrial System Modeling Platform (TSMP or TerrSysMP, https://www.terrsysmp.org) is an open source scale-consistent, highly modular, massively parallel regional Earth system model. TSMP essentially consists of an interface which couples dedicated versions of the Consortium for Small-scale Modeling ([COSMO](http://www.cosmo-model.org)) or ICOsahedral Nonhydrostatic ([ICON](https://code.mpimet.mpg.de/projects/iconpublic)) atmospheric model in NWP or climate mode, the Community Land Model ([CLM](http://www.cesm.ucar.edu/models/clm/)), and the hydrologic model [ParFlow](https://www.parflow.org) through the [OASIS3](https://oasis.cerfacs.fr/en/)-[MCT](https://www.mcs.anl.gov/research/projects/mct/) coupler.
 
 TSMP allows for a physically-based representation of transport processes of mass, energy and momentum and interactions between the different compartments of the geo-ecosystem across scales, explicitly reproducing feedbacks in the hydrological cycle from the groundwater into the atmosphere.
 
