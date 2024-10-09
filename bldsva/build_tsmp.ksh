@@ -41,6 +41,7 @@ getDefaults(){
   #compiler options, CPS remove hardwiring of compilers
   def_compiler="Intel" # set Intel default if not explicitly set
   def_processor="CPU"
+  def_debugswitch=""  # debug compilation switch
 
   #profiling
   def_profiling="no"
@@ -74,6 +75,7 @@ setDefaults(){
   optComp=$def_optComp
   compiler=$def_compiler
   processor=$def_processor
+  debugswitch=$def_debugswitch
   profiling=$def_profiling
   oasdir=$def_oasdir
   clmdir=$def_clmdir
@@ -132,6 +134,7 @@ clearMachineSelection(){
   optComp=""
   compiler=""
   processor=""
+  debugswitch=""
   clearPathSelection
 }
 
@@ -166,6 +169,7 @@ setSelection(){
   #compiler selection
   if [[ $compiler == "" ]] then ; compiler=$defaultcompiler ; fi
   if [[ $processor == "" ]] then ; processor=$defaultprocessor ; fi
+  if [[ $debugswitch == "" ]] then ; debugswitch=$defaultdebugswitch ; fi
 }
 
 finalizeSelection(){
@@ -542,6 +546,7 @@ interactive(){
 		  if [[ $numb == 28 ]] ; then ; read freeDrain ; fi
                   if [[ $numb == 29 ]] ; then ; read compiler ; fi
                   if [[ $numb == 30 ]] ; then ; read processor ; fi
+                  if [[ $numb == 31 ]] ; then ; read debugswitch ; fi
 		done	
 		interactive
 	  ;;
@@ -592,6 +597,7 @@ printState(){
   print "${cred}(29)${cnormal} Compiles ParFlow with free drainage feature (default=$def_freeDrain): ${cgreen}$freeDrain ${cnormal}"
   print "${cred}(30)${cnormal} compiler (default=$defaultcompiler): ${cgreen}$compiler ${cnormal}"
   print "${cred}(31)${cnormal} processor (default=$defaultprocessor): ${cgreen}$processor ${cnormal}"
+  print "${cred}(32)${cnormal} debugswitch (default=$defaultdebugswitch): ${cgreen}$debugswitch ${cnormal}"
 }
 
 check(){
@@ -895,6 +901,7 @@ getGitInfo(){
   USAGE+="[o:optimization?Compiler optimisation flags.]:[optimization:='$def_optComp']"
   USAGE+="[O:compiler?Compiler option flags.]:[compiler:='$def_compiler']"
   USAGE+="[A:processor?Processor GPU or CPU.]:[processor:='$def_processor']"
+  USAGE+="[D:debugswitch?Debug compilation switch. Any string turns on debugging.]:[debugswitch:='$def_debugswitch']"
   USAGE+="[c:combination? Combination of component models.]:[combination:='$def_combination']"
   USAGE+="[C:cplscheme? Couple-Scheme for CLM/COS coupling.]:[cplscheme:='$def_cplscheme']"
   USAGE+="[r:readclm? Flag to consistently read in CLM mask.]:[readclm:='$def_readCLM']"
@@ -977,6 +984,7 @@ getGitInfo(){
     P)  pnetcdfPath="$OPTARG" ; args=1 ;;
     L)  lapackPath="$OPTARG" ; args=1 ;;
     A)  processor="$OPTARG" ; args=1 ;;
+    D)  debugswitch="$OPTARG" ; args=1 ;;
     esac
   done
 
