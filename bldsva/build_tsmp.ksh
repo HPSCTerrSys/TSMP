@@ -169,7 +169,7 @@ setSelection(){
   #compiler selection
   if [[ $compiler == "" ]] then ; compiler=$defaultcompiler ; fi
   if [[ $processor == "" ]] then ; processor=$defaultprocessor ; fi
-  if [[ $debugswitch== "" ]] then ; debugswitch=$defaultdebugswitch ; fi
+  if [[ $debugswitch == "" ]] then ; debugswitch=$defaultdebugswitch ; fi
 }
 
 finalizeSelection(){
