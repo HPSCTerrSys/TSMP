@@ -32,7 +32,9 @@ route "${cyellow}>> configure_da${cnormal}"
   fi
 
   pdaflib_cpp_defs=" "
-  pdaflib_cpp_defs+=" -DPDAF_DEBUG "
+  if [[ $debugswitch != "" ]]; then
+    pdaflib_cpp_defs+=" -DPDAF_DEBUG "
+  fi
 
 #    libs_src=" -L$lapackPath -L${mpiPath}/lib64"
 #    libs_src=" -L$lapackPath -lopenblas -L${mpiPath}/lib64"
@@ -48,7 +50,10 @@ route "${cyellow}>> configure_da${cnormal}"
   c_configure_pdaf_arch
 
 #PDAF interface part configuration variables
-  importFlags=" -g -traceback "
+  importFlags=" "
+  if [[ $debugswitch != "" ]]; then
+    importFlags+=" -g -traceback "
+  fi
   importFlagsOAS=" "
   importFlagsPFL=" "
   importFlagsCLM=" "
@@ -56,7 +61,9 @@ route "${cyellow}>> configure_da${cnormal}"
   importFlagsDA=" "
   cppdefs=" "
   # cppdefs+=" ${pf}-DOLD_TRUNCATE_SAT "
-  cppdefs+=" ${pf}-DPDAF_DEBUG "
+  if [[ $debugswitch != "" ]]; then
+    cppdefs+=" ${pf}-DPDAF_DEBUG "
+  fi
   obj=' '
   libs=" -L$mpiPath -lmpich -L$netcdfPath/lib/ -lnetcdff -lnetcdf "
   libsOAS=" "

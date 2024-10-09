@@ -26,13 +26,28 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   gpuMpiSettings="mpi-settings/CUDA"
   cuda_architectures="" 
 
-  # Default Compiler/Linker optimization
-  if [[ $compiler == "Gnu" ]] ; then
+  if [[ $debugswitch != "" ]]; then
+
+    # Debug Compiler/Linker optimization
+    if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-g -O0 -fbacktrace " # Gnu
-  elif [[ $compiler == "Intel" ]] ; then
+    elif [[ $compiler == "Intel" ]] ; then
       defaultOptC="-g -O0 -xHost -traceback " # Intel
+    else
+      defaultOptC="-O0 " # Default
+    fi
+
   else
-      defaultOptC="-O0" # Default
+
+    # Default Compiler/Linker optimization
+    if [[ $compiler == "Gnu" ]] ; then
+      defaultOptC="-O2" # Gnu
+    elif [[ $compiler == "Intel" ]] ; then
+      defaultOptC="-O2 -xHost" # Intel
+    else
+      defaultOptC="-O2" # Default
+    fi
+
   fi
 
   profilingImpl=" no scalasca "  
