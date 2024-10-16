@@ -4057,6 +4057,7 @@ char          filename[2048];
 
 //>>TSMP-PDAF addition beginning
 // Compare to AdvanceRichards() in parflow v3.9.0
+void
 PseudoAdvanceRichards(PFModule * this_module, double start_time,      /* Starting time */
                 double stop_time,       /* Stopping time */
                 PFModule * time_step_control,   /* Use this module to control timestep if supplied */

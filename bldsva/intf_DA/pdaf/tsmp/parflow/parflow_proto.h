@@ -979,8 +979,8 @@ typedef PFModule *(*SaturationOutputStaticInvoke) (char *file_prefix, ProblemDat
 /* problem_saturation.c */
 void Saturation(Vector *phase_saturation, Vector *phase_pressure, Vector *phase_density, double gravity, ProblemData *problem_data, int fcn);
 //>>TSMP-PDAF addition beginning
-PFModule *SaturationGetAlpha(PFModule *this_module);
-PFModule *SaturationGetN(PFModule *this_module);
+Vector *SaturationGetAlpha(PFModule *this_module);
+Vector *SaturationGetN(PFModule *this_module);
 //<<TSMP-PDAF addition end
 PFModule *SaturationInitInstanceXtra(Grid *grid, double *temp_data);
 void SaturationFreeInstanceXtra(void);
