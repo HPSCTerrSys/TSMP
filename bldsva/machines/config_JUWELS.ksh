@@ -26,7 +26,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
   gpuMpiSettings="mpi-settings/CUDA"
   cuda_architectures="" 
 
-  if [[ $debugswitch != "" ]]; then
+  if [[ $debugswitch != "off" ]]; then
 
     # Debug Compiler/Linker optimization
     if [[ $compiler == "Gnu" ]] ; then

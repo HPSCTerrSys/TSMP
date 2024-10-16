@@ -32,7 +32,7 @@ route "${cyellow}>> configure_da${cnormal}"
   fi
 
   pdaflib_cpp_defs=" "
-  if [[ $debugswitch != "" ]]; then
+  if [[ $debugswitch != "off" ]]; then
     pdaflib_cpp_defs+=" -DPDAF_DEBUG "
   fi
 
@@ -51,7 +51,7 @@ route "${cyellow}>> configure_da${cnormal}"
 
 #PDAF interface part configuration variables
   importFlags=" "
-  if [[ $debugswitch != "" ]]; then
+  if [[ $debugswitch != "off" ]]; then
     importFlags+=" -g -traceback "
   fi
   importFlagsOAS=" "
@@ -61,7 +61,7 @@ route "${cyellow}>> configure_da${cnormal}"
   importFlagsDA=" "
   cppdefs=" "
   # cppdefs+=" ${pf}-DOLD_TRUNCATE_SAT "
-  if [[ $debugswitch != "" ]]; then
+  if [[ $debugswitch != "off" ]]; then
     cppdefs+=" ${pf}-DPDAF_DEBUG "
   fi
   obj=' '

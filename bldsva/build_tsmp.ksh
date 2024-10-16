@@ -41,7 +41,7 @@ getDefaults(){
   #compiler options, CPS remove hardwiring of compilers
   def_compiler="Intel" # set Intel default if not explicitly set
   def_processor="CPU"
-  def_debugswitch=""  # debug compilation switch
+  def_debugswitch="off"  # debug compilation switch
 
   #profiling
   def_profiling="no"
