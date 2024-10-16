@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structure of TSMP &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Structure of DA inside TSMP" href="intf_da.html" />
+    <link rel="prev" title="TSMP-PDAF Build Examples" href="build_examples_tsmppdaf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structure of TSMP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#component-model-directories-and-pdaf-directory">Component model directories and PDAF directory</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsmp-framework">TSMP framework</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tsmp-component-directory">TSMP component directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#oasis3-mct-and-pdaf-directory">OASIS3-MCT and PDAF directory</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#example">Example</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#directory-bldsva-and-subdirectories">Directory <code class="docutils literal notranslate"><span class="pre">bldsva</span></code> and subdirectories</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#data-oas3">data_oas3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intf-oas3">intf_oas3</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#machines">machines</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setups">setups</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intf-da"><code class="docutils literal notranslate"><span class="pre">intf_DA</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shell-scripts-in-bldsva">Shell Scripts in <code class="docutils literal notranslate"><span class="pre">bldsva</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#supported-versions-ksh"><code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shell-scripts-in-subdirectories">Shell Scripts in subdirectories</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#intf-oas3-common-build-interface-ksh"><code class="docutils literal notranslate"><span class="pre">intf_oas3/common_build_interface.ksh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#intf-oas3-model-arch-build-interface-model-ksh"><code class="docutils literal notranslate"><span class="pre">intf_oas3/MODEL/arch/build_interface_MODEL.ksh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#machines-arch-build-interface-arch-ksh"><code class="docutils literal notranslate"><span class="pre">machines/ARCH/build_interface_ARCH.ksh</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setups-setup-setup-setup-ksh"><code class="docutils literal notranslate"><span class="pre">setups/SETUP/SETUP_setup.ksh</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shell-script-build-tsmp-ksh">Shell script <code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#routines">Routines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#getdefaults"><code class="docutils literal notranslate"><span class="pre">getDefaults()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setdefaults"><code class="docutils literal notranslate"><span class="pre">setDefaults()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clearmachineselection"><code class="docutils literal notranslate"><span class="pre">clearMachineSelection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clearpathselection"><code class="docutils literal notranslate"><span class="pre">clearPathSelection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setselection"><code class="docutils literal notranslate"><span class="pre">setSelection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#finalizeselection"><code class="docutils literal notranslate"><span class="pre">finalizeSelection()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#setcombination"><code class="docutils literal notranslate"><span class="pre">setCombination()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compileclm"><code class="docutils literal notranslate"><span class="pre">compileClm()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compilecosmo"><code class="docutils literal notranslate"><span class="pre">compileCosmo()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compileoasis"><code class="docutils literal notranslate"><span class="pre">compileOasis()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#compileparflow"><code class="docutils literal notranslate"><span class="pre">compileParflow()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#runcompilation"><code class="docutils literal notranslate"><span class="pre">runCompilation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#interactive"><code class="docutils literal notranslate"><span class="pre">interactive()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#printstate"><code class="docutils literal notranslate"><span class="pre">printState()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#check-pfl"><code class="docutils literal notranslate"><span class="pre">check_pfl()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#terminate"><code class="docutils literal notranslate"><span class="pre">terminate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#comment"><code class="docutils literal notranslate"><span class="pre">comment()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#route"><code class="docutils literal notranslate"><span class="pre">route()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#warning"><code class="docutils literal notranslate"><span class="pre">warning()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#hardsanitycheck"><code class="docutils literal notranslate"><span class="pre">hardSanityCheck()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#softsanitycheck"><code class="docutils literal notranslate"><span class="pre">softSanityCheck()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#deprecatedversion"><code class="docutils literal notranslate"><span class="pre">deprecatedVersion()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#listavailabilities"><code class="docutils literal notranslate"><span class="pre">listAvailabilities()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#listtutorial"><code class="docutils literal notranslate"><span class="pre">listTutorial()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#getroot"><code class="docutils literal notranslate"><span class="pre">getRoot()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#main"><code class="docutils literal notranslate"><span class="pre">MAIN()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#features">Features</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#layers-of-defaults-and-selections">Layers of defaults and selections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#logging-and-debugging">Logging and debugging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#sanity-checks">Sanity checks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#build-options">Build options</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#directories">Directories</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#shell-script-setup-tsmp-ksh">Shell script <code class="docutils literal notranslate"><span class="pre">setup_tsmp.ksh</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#id1">Routines</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id2">finalizeSelection()</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3">softSanityCheck()</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4">MAIN()</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#feature">Feature</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#id5">Layers of defaults and selections</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6">Logging and debugging</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7">Sanity checks</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8">Directories</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#multi-instance">Multi instance</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#restarts">Restarts</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Structure of TSMP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/content/build_tsmp/structure.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="structure-of-tsmp">
+<h1>Structure of TSMP<a class="headerlink" href="#structure-of-tsmp" title="Permalink to this heading"></a></h1>
+<p>After cloning TSMP into a directory, for example <code class="docutils literal notranslate"><span class="pre">TSMP</span></code>, you obtain a fixed top level folder structure. This folder structured is discussed in this section.</p>
+<section id="component-model-directories-and-pdaf-directory">
+<h2>Component model directories and PDAF directory<a class="headerlink" href="#component-model-directories-and-pdaf-directory" title="Permalink to this heading"></a></h2>
+<p>TSMP essentially consists of an interface which couples dedicated versions of the Consortium for Small-scale Modeling (COSMO,
+<a class="reference external" href="http://www.cosmo-model.org">http://www.cosmo-model.org</a>) atmospheric model in NWP or climate mode, the Community Land Model (CLM, <a class="reference external" href="http://www.cesm.ucar.edu/models/clm/">http://www.cesm.ucar.edu/models/clm/</a>), and the hydrologic model ParFlow (<a class="reference external" href="https://www.parflow.org">https://www.parflow.org</a>) through the OASIS3-MCT coupler (<a class="reference external" href="https://portal.enes.org/oasis">https://portal.enes.org/oasis</a>, <a class="reference external" href="https://www.mcs.anl.gov/research/projects/mct/">https://www.mcs.anl.gov/research/projects/mct/</a>).</p>
+<section id="tsmp-framework">
+<h3>TSMP framework<a class="headerlink" href="#tsmp-framework" title="Permalink to this heading"></a></h3>
+<p>In the install directory <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> the <code class="docutils literal notranslate"><span class="pre">bldsva</span></code> can be found, which contain all files of the <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> framework (details below):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva
+</pre></div>
+</div>
+</section>
+<section id="tsmp-component-directory">
+<h3>TSMP component directory<a class="headerlink" href="#tsmp-component-directory" title="Permalink to this heading"></a></h3>
+<p>The directories are called after the respective model component and ends with the version number of the model component.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/clm3_5
+TSMP/clm4_0
+TSMP/cosmo4_21
+TSMP/cosmo5_1
+TSMP/icon2_1
+TSMP/icon2_622
+TSMP/parflow
+</pre></div>
+</div>
+<p>The directories <code class="docutils literal notranslate"><span class="pre">clm3_5</span></code>, <code class="docutils literal notranslate"><span class="pre">clm4_0</span></code>, <code class="docutils literal notranslate"><span class="pre">cosmo4_21</span></code>, <code class="docutils literal notranslate"><span class="pre">cosmo5_1</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow</span></code>, and <code class="docutils literal notranslate"><span class="pre">parflow3_0</span></code> contain the model source codes of the respective model components of TSMP.</p>
+</section>
+<section id="oasis3-mct-and-pdaf-directory">
+<h3>OASIS3-MCT and PDAF directory<a class="headerlink" href="#oasis3-mct-and-pdaf-directory" title="Permalink to this heading"></a></h3>
+<p>The<a class="reference internal" href="#directory-bldsva-and-subdirectories"> <code class="docutils literal notranslate"><span class="pre">bldsva</span></code></a> directory includes the scripts for configuring and compiling TSMP.</p>
+<p>The directory<code class="docutils literal notranslate"><span class="pre">oasis3-mct</span></code> contains the source code of the OASIS3-MCT coupler. <code class="docutils literal notranslate"><span class="pre">oasis3</span></code>  (without MCT) is deprecated and is no longer used in current versions of TSMP.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/oasis3-mct
+</pre></div>
+</div>
+<p>After successfully downloading the three parts of TSMP-PDAF (TSMP-repository, PDAF, component models), rename PDAF-source folder
+<b style="color:#b96922;">called <code class="docutils literal notranslate"><span class="pre">PDAF-D_V1.13.2</span></code> to <code class="docutils literal notranslate"><span class="pre">pdaf1_1</span></code>.</p>
+</b><b style="color:#b96922;"><p>The directory <code class="docutils literal notranslate"><span class="pre">pdaf1_1</span></code> contains the PDAF source code.</p>
+</b><b style="color:#b96922;"><div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/pdaf1_1
+</b></pre></div>
+</div>
+</section>
+<section id="example">
+<h3>Example<a class="headerlink" href="#example" title="Permalink to this heading"></a></h3>
+<p>The following directory structure should be present in the install directory <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> in case you want to run a fully coupled <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> with COSMO5_1, CLM3_5 and ParFlow:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva
+TSMP/clm3_5
+TSMP/cosmo5_1
+TSMP/parflow
+TSMP/oasis3-mct
+</pre></div>
+</div>
+</section>
+</section>
+<section id="directory-bldsva-and-subdirectories">
+<h2>Directory <code class="docutils literal notranslate"><span class="pre">bldsva</span></code> and subdirectories<a class="headerlink" href="#directory-bldsva-and-subdirectories" title="Permalink to this heading"></a></h2>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva/data_oas3
+TSMP/bldsva/intf_DA
+TSMP/bldsva/intf_oas3
+TSMP/bldsva/machines
+TSMP/bldsva/setups
+</pre></div>
+</div>
+<section id="data-oas3">
+<h3>data_oas3<a class="headerlink" href="#data-oas3" title="Permalink to this heading"></a></h3>
+<p>The directory <code class="docutils literal notranslate"><span class="pre">data_oas3</span></code> holds files with static parameters, namely all
+variants of the <code class="docutils literal notranslate"><span class="pre">namcouple</span></code> file and <code class="docutils literal notranslate"><span class="pre">cf_name_table.txt</span></code>.</p>
+</section>
+<section id="intf-oas3">
+<h3>intf_oas3<a class="headerlink" href="#intf-oas3" title="Permalink to this heading"></a></h3>
+<p>Holds the interfaces of the component models and scripts to build them.
+This folder again holds sub-folders with one for each component model
+version that is available.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva/intf_oas3/clm3_5
+TSMP/bldsva/intf_oas3/clm3_5-icon
+TSMP/bldsva/intf_oas3/clm4_0
+TSMP/bldsva/intf_oas3/cosmo4_21
+TSMP/bldsva/intf_oas3/cosmo5_1
+TSMP/bldsva/intf_oas3/icon2-1
+TSMP/bldsva/intf_oas3/icon2-622
+TSMP/bldsva/intf_oas3/oasis3
+TSMP/bldsva/intf_oas3/oasis3-mct
+TSMP/bldsva/intf_oas3/parflow
+TSMP/bldsva/intf_oas3/parflow3_0
+</pre></div>
+</div>
+<p>Each component model folder contains itself a subset of the following
+subfolders, as an example take <code class="docutils literal notranslate"><span class="pre">clm3_5</span></code>:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva/intf_oas3/clm3_5/arch
+TSMP/bldsva/intf_oas3/clm3_5/mct
+TSMP/bldsva/intf_oas3/clm3_5/oas3
+TSMP/bldsva/intf_oas3/clm3_5/pfile  (only clm3_5, possibly deprecated; currently not used)
+TSMP/bldsva/intf_oas3/clm3_5/tsmp
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">arch</span></code>: This folder contains build information and contains two optional
+folders:</p>
+<ol class="arabic simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">config</span></code>, which includes makefiles, configure scripts,
+machine-dependent build files etc, and</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src</span></code> which contains machine specific source code modifications.</p></li>
+</ol>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tsmp</span></code>: This folder holds source code modifications that need to be
+made in the component model for every machine (not only for specific
+machines as the modifications in <code class="docutils literal notranslate"><span class="pre">/arch/*/src/</span></code>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">oas3</span></code>: This folder holds source code of the interface between the
+component model and oasis.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">mct</span></code>: This folder holds source code that is only needed when using
+Oasis3-MCT.</p></li>
+</ul>
+</section>
+<section id="machines">
+<h3>machines<a class="headerlink" href="#machines" title="Permalink to this heading"></a></h3>
+<p>Holds scripts with machine specifications and also scripts to load
+modules among other configurations. This folder has one sub-folder for
+all supported machines.</p>
+</section>
+<section id="setups">
+<h3>setups<a class="headerlink" href="#setups" title="Permalink to this heading"></a></h3>
+<p>Holds scripts to specify experiment setups and namelist templates for
+this particular setup. This folder has one sub-folder for each supported
+setup</p>
+</section>
+<section id="intf-da">
+<h3><code class="docutils literal notranslate"><span class="pre">intf_DA</span></code><a class="headerlink" href="#intf-da" title="Permalink to this heading"></a></h3>
+<p>See <a class="reference internal" href="intf_da.html"><span class="std std-doc">Structure of DA inside TSMP</span></a></p>
+</section>
+</section>
+<section id="shell-scripts-in-bldsva">
+<h2>Shell Scripts in <code class="docutils literal notranslate"><span class="pre">bldsva</span></code><a class="headerlink" href="#shell-scripts-in-bldsva" title="Permalink to this heading"></a></h2>
+<p>The following files reside under <code class="docutils literal notranslate"><span class="pre">$tsmp_root</span></code>/bldsva/:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#shell-script-build-tsmp-ksh"><code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code></a></p></li>
+<li><p><a class="reference internal" href="#shell-script-setup-tsmp-ksh"><code class="docutils literal notranslate"><span class="pre">setup_tsmp.ksh</span></code></a></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">download_data_for_test_test_cases.ksh</span></code></p></li>
+</ul>
+<p>The two important scripts to automatically build TSMP and setup an
+experiment are</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>build_tsmp.ksh
+setup_tsmp.ksh
+</pre></div>
+</div>
+<p>There will be no explicit user documentation, since both scripts include
+a man-page styled output by calling the individual script with the
+option <code class="docutils literal notranslate"><span class="pre">–man</span></code>.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>--man
+./setup_tsmp.ksh<span class="w"> </span>--man
+</pre></div>
+</div>
+<p>The shell script <code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code> that contains the supported
+versions of the TSMP instance is described in the following
+subsection.</p>
+<p>The script <code class="docutils literal notranslate"><span class="pre">download_data_for_test_test_cases.ksh</span></code> simplifies working
+through the <code class="docutils literal notranslate"><span class="pre">README.md</span></code> of TSMP by automating the download of the
+CORDEX test case input data.</p>
+<section id="supported-versions-ksh">
+<h3><code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code><a class="headerlink" href="#supported-versions-ksh" title="Permalink to this heading"></a></h3>
+<p>This script is a source list of supported machines and configurations.
+It is called by running the main scripts with option <code class="docutils literal notranslate"><span class="pre">-a</span></code> / <code class="docutils literal notranslate"><span class="pre">–avail</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-a
+./setup_tsmp.ksh<span class="w"> </span>-a
+</pre></div>
+</div>
+<p>The output includes:</p>
+<ul class="simple">
+<li><p>for <code class="docutils literal notranslate"><span class="pre">./build_tsmp.ksh</span></code>: A list of supported machines including the
+information which version is available on which machine; a list of
+versions including the information of which combinations of
+component models is available for each version and the directory
+names of the component model versions of each TSMP version.</p></li>
+<li><p>for <code class="docutils literal notranslate"><span class="pre">./setup_tsmp.ksh</span></code>: The information from before and additionally
+the available setups for each TSMP-version and a list of setups with
+short documentation. Setups are automatically build test cases for
+TSMP.</p></li>
+</ul>
+<p>The dictionaries containing all information in <code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code>
+are implemented as <code class="docutils literal notranslate"><span class="pre">ksh-associative-array</span></code>. These dictionaries are used
+by other scripts as well, for example for sanity checks, as possible
+user choices in the interactive mode and for naming conventions.</p>
+<p>Whenever you pass a machine-name, version, combination, setup, etc. as a
+flag or need to know the folder name of a component-model make sure it
+is identically written as in this script (case sensitive).</p>
+<p>Some array entries are string lists and are converted to a list later
+on. Make sure these lists start and end with a space (see comments in
+this file).</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    # IMPORTANT: add a leading and trailing &quot; &quot;(space)
+</pre></div>
+</div>
+<p>The spaces are necessary because strings might be parsed with spaces,
+i.e. as <code class="docutils literal notranslate"> <span class="pre">value</span></code>. If a default is necessary the first entry of a string
+list will be taken.</p>
+<p>With versions you have a variety of options to constrain your support.
+For example you could create a special version that is only supported on
+a certain machine. This version then consists of special
+component-model-versions and might only allow certain combinations (for
+example only standalone - if MPMD is not supported).</p>
+<p>One special naming convention I introduced is for Oasis3-MCT coupling.
+Oasis3-MCT is used if “MCT” is somehow part of the version-name. (One
+could think about adding this information as a flag, but for now I
+decided not to do so.)</p>
+</section>
+</section>
+<section id="shell-scripts-in-subdirectories">
+<h2>Shell Scripts in subdirectories<a class="headerlink" href="#shell-scripts-in-subdirectories" title="Permalink to this heading"></a></h2>
+<section id="intf-oas3-common-build-interface-ksh">
+<h3><code class="docutils literal notranslate"><span class="pre">intf_oas3/common_build_interface.ksh</span></code><a class="headerlink" href="#intf-oas3-common-build-interface-ksh" title="Permalink to this heading"></a></h3>
+<p>This file has the only intention to reduce duplicate code. It is sourced
+by the main-scripts and thus available in all subscripts. I outsourced
+code to this file that is the same amongst different versions of a
+component-model and amongst different machines. Since many things are
+similar between model-versions/machines this lowers the complexity of
+adding a new model a lot.</p>
+<p>If you add a new machine/model-version and encounter inconsistencies
+between this file and your commands you are responsible to solve it.
+Either by removing the inconsistent commands from the
+<code class="docutils literal notranslate"><span class="pre">common_build_interface</span></code> to the “real” interfaces of the form
+<code class="docutils literal notranslate"><span class="pre">intf_oas3/MODEL/arch/build_interface_MODEL.ksh</span></code> (f.e.
+<code class="docutils literal notranslate"><span class="pre">intf_oas3/clm3_5/arch/build_interface_clm3_5.ksh</span></code>). If a
+lot is inconsistent you can simply not make use of the common interface.</p>
+</section>
+<section id="intf-oas3-model-arch-build-interface-model-ksh">
+<h3><code class="docutils literal notranslate"><span class="pre">intf_oas3/MODEL/arch/build_interface_MODEL.ksh</span></code><a class="headerlink" href="#intf-oas3-model-arch-build-interface-model-ksh" title="Permalink to this heading"></a></h3>
+<p>This is the “real” interface to compile a specific model on a specific
+machine and to handle namelist substitutions.</p>
+<p>As you see by the location in the directory tree
+(<code class="docutils literal notranslate"><span class="pre">intf_oas3/MODEL/arch/</span></code>), there must be a script for every
+supported model (<code class="docutils literal notranslate"><span class="pre">MODEL</span></code>). The script
+<code class="docutils literal notranslate"><span class="pre">build_interface_MODEL.ksh</span></code> must implement 5 interface routines:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">always_MOD()</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">configure_MOD()</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make_MOD()</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">substitution_MOD()</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup_MOD()</span></code>, where <code class="docutils literal notranslate"><span class="pre">MOD</span></code>
+<span class="math notranslate nohighlight">\(\in \{\mathtt{clm},\mathtt{cos},\mathtt{oas},\mathtt{pfl}\}\)</span></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">always_MOD()</span></code>: in this routine stuff is handled that always needs to be
+done even if compilation is skipped. An example is declaring paths to
+oasis libs in [always_oas()]{.roman}.</p>
+<p><code class="docutils literal notranslate"><span class="pre">configure_MOD()</span></code>: this routine handles everything that is needed to
+configure or to create Makefiles. It also edits Makefile-templates after
+creation. It is important that also config file-templates are always
+copied from the config folder in order to have a fresh template before
+editing.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make_MOD()</span></code>: this routine calls <code class="docutils literal notranslate"><span class="pre">make</span></code> and starts compiling and moves
+the created executables to a bindir.</p>
+<p><code class="docutils literal notranslate"><span class="pre">substitution_MOD()</span></code>: This routine substitutes source code that is
+unchanged for this configuration and is independent from
+making/configuring (other than in <code class="docutils literal notranslate"><span class="pre">configure_MOD()</span></code>). This is usually
+the whole <code class="docutils literal notranslate"><span class="pre">oas3</span></code> and <code class="docutils literal notranslate"><span class="pre">tsmp</span></code> folder or the <code class="docutils literal notranslate"><span class="pre">src</span></code> folder.</p>
+<p><code class="docutils literal notranslate"><span class="pre">setup_MOD()</span></code>: This routine handles the creation of necessary files for
+the run. In especially editing the namelist template. And also execute
+the namelist.</p>
+<p>The ParFlow <code class="docutils literal notranslate"><span class="pre">tcl</span></code> file and the Cosmo <code class="docutils literal notranslate"><span class="pre">lmrun_uc</span></code> always needed to get
+executed. But now also the clm namelist needs an execution (compare with
+<code class="docutils literal notranslate"><span class="pre">lnd.stdin</span></code> in nrw setup). This was necessary for <code class="docutils literal notranslate"><span class="pre">clm4_0</span></code> and also for
+ensembles.</p>
+<p>Most of these routines call a function with the same name but with
+leading <code class="docutils literal notranslate"><span class="pre">c_</span></code> for example <code class="docutils literal notranslate"><span class="pre">c_configure_oas()</span></code>. This is the according
+routine in the
+<a class="reference internal" href="#intf-oas3-common-build-interface-ksh"><code class="docutils literal notranslate"><span class="pre">common_build_interface.ksh</span></code></a>
+and handles stuff that is the same throughout versions/machines.</p>
+</section>
+<section id="machines-arch-build-interface-arch-ksh">
+<h3><code class="docutils literal notranslate"><span class="pre">machines/ARCH/build_interface_ARCH.ksh</span></code><a class="headerlink" href="#machines-arch-build-interface-arch-ksh" title="Permalink to this heading"></a></h3>
+<p>This script must implement 3 interface routines:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">getMachineDefaults()</span></code>,</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">finalizeMachine()</span></code></p></li>
+<li><p>and <code class="docutils literal notranslate"><span class="pre">createRunscript()</span></code>.</p></li>
+</ul>
+<p>In <code class="docutils literal notranslate"><span class="pre">getMachineDefaults()</span></code> some variables need to be defined, basically
+loading modules (or executing a load-script) but also the location of
+the libraries that are necessary for compiling. Plus some additional
+things like default optimization or profiling on this machine (not yet
+supported). This routine is used by the interactive mode to pre-load the
+values. Because of that this routine might get called several times.</p>
+<p>For this reason it is separated from <code class="docutils literal notranslate"><span class="pre">finalizeMachine()</span></code>. It was
+supposed to do fixed steps, after a selection was made. Originally it
+was planned to load the modules there, but it turned out that this was
+mostly also necessary for the first step in order to get library-paths.
+It is still used by some machines.</p>
+<p>In <code class="docutils literal notranslate"><span class="pre">createRunscript()</span></code> the runscript for a job scheduler on this machine
+is created. It calculates processor-distribution and also creates
+map-files if needed. It also creates the <code class="docutils literal notranslate"><span class="pre">instanceMap.txt</span></code> which is used
+for ensemble runs.</p>
+<p>Ensemble runs are currently only supported if Oasis3-MCT is used as
+coupler. Ensembles also increase the used processors (as given) by the
+factor of ensemble members.</p>
+</section>
+<section id="setups-setup-setup-setup-ksh">
+<h3><code class="docutils literal notranslate"><span class="pre">setups/SETUP/SETUP_setup.ksh</span></code><a class="headerlink" href="#setups-setup-setup-setup-ksh" title="Permalink to this heading"></a></h3>
+<p>This script must implement two interface routines:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">initSetup()</span></code></p></li>
+<li><p>and <code class="docutils literal notranslate"><span class="pre">finalizeSetup()</span></code></p></li>
+</ul>
+<p>In <code class="docutils literal notranslate"><span class="pre">initSetup()</span></code> some variables need to be defined, basically values
+that are needed to fill the namelist-templates. These might be optional
+if they are not needed for the template. But others are mandatory like
+namelist-location, forcing-dir etc. Some variables only serve as default
+and might get overwritten by the main-scripts (usually start with
+“default”).</p>
+<p>This routine is used by the interactive mode to pre-load the values.
+Because of that this routine might get called several times.</p>
+<p>For this reason it is separated from <code class="docutils literal notranslate"><span class="pre">finalizeSetup()</span></code> where
+setup-specific edits to the run-directory is done. For example copying
+files like rmp-files or parflow slope-files and other resource files
+that are not common to all experiments.</p>
+</section>
+</section>
+<section id="shell-script-build-tsmp-ksh">
+<h2>Shell script <code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code><a class="headerlink" href="#shell-script-build-tsmp-ksh" title="Permalink to this heading"></a></h2>
+<p>This script does everything that is needed to build (create executables)
+a given version of TSMP for on certain machine with a certain
+model-combination.</p>
+<section id="routines">
+<h3>Routines<a class="headerlink" href="#routines" title="Permalink to this heading"></a></h3>
+<section id="getdefaults">
+<h4><code class="docutils literal notranslate"><span class="pre">getDefaults()</span></code><a class="headerlink" href="#getdefaults" title="Permalink to this heading"></a></h4>
+<p>This section serves as hardcoded defaults. All necessary variables are
+here defined as a default version <code class="docutils literal notranslate"><span class="pre">def_...</span></code>. They will be used if they
+are not overwritten by flags or interactive modifications.</p>
+<p>This section is intended to be modified also by users. It is useful if
+you are always using a specific setup and don’t want to type a lengthy
+command every time. Note that by running the script without argument
+flags it will start the interactive session. But with providing the flag
+<code class="docutils literal notranslate"><span class="pre">-b</span></code> the batch mode is forced. Thus, with <code class="docutils literal notranslate"><span class="pre">./build_tsmp.ksh</span> <span class="pre">-b</span></code> only the
+hardcoded defaults of this section will be used.</p>
+</section>
+<section id="setdefaults">
+<h4><code class="docutils literal notranslate"><span class="pre">setDefaults()</span></code><a class="headerlink" href="#setdefaults" title="Permalink to this heading"></a></h4>
+<p>This section copies the hardcoded default of the previous session into
+the “real” data structure/variables.</p>
+<p>Some variables need a decision. If they are not hardcoded in the
+previous section and not given as flag/interactively a decision is made
+in this routine (really hard coded). Most importantly <code class="docutils literal notranslate"><span class="pre">platform=JUWELS</span></code>.</p>
+</section>
+<section id="clearmachineselection">
+<h4><code class="docutils literal notranslate"><span class="pre">clearMachineSelection()</span></code><a class="headerlink" href="#clearmachineselection" title="Permalink to this heading"></a></h4>
+<p>This is only necessary for handling the interactive mode. If the
+platform is switched during the interactive session some variables needs
+to be cleared.</p>
+</section>
+<section id="clearpathselection">
+<h4><code class="docutils literal notranslate"><span class="pre">clearPathSelection()</span></code><a class="headerlink" href="#clearpathselection" title="Permalink to this heading"></a></h4>
+<p>This is only necessary for handling the interactive mode. If some paths
+(fore example root) are switched during the interactive session some
+variables needs to be cleared.</p>
+</section>
+<section id="setselection">
+<h4><code class="docutils literal notranslate"><span class="pre">setSelection()</span></code><a class="headerlink" href="#setselection" title="Permalink to this heading"></a></h4>
+<p>If a new machine is chosen (at the beginning or during interactive
+session) machine dependent default variables are getting read from
+<code class="docutils literal notranslate"><span class="pre">machines/config_ARCH.ksh</span></code>.</p>
+<p>Note: They will only loaded if this values were not set in any other
+selection (like interactive/flag/hardcoded).</p>
+</section>
+<section id="finalizeselection">
+<h4><code class="docutils literal notranslate"><span class="pre">finalizeSelection()</span></code><a class="headerlink" href="#finalizeselection" title="Permalink to this heading"></a></h4>
+<p>Doing stuff after selections were made. Currently only creating a
+bindir.</p>
+<p>Questionable if this routine is necessary anymore.</p>
+</section>
+<section id="setcombination">
+<h4><code class="docutils literal notranslate"><span class="pre">setCombination()</span></code><a class="headerlink" href="#setcombination" title="Permalink to this heading"></a></h4>
+<p>This routine is setting the <code class="docutils literal notranslate"><span class="pre">withMOD</span></code> variables depending on the chosen
+combination. This routine was designed to be flexible with the
+combination options. But other routines are hindering this flexibility
+anyways.</p>
+<p>This routine needs a revision.</p>
+</section>
+<section id="compileclm">
+<h4><code class="docutils literal notranslate"><span class="pre">compileClm()</span></code><a class="headerlink" href="#compileclm" title="Permalink to this heading"></a></h4>
+<p>Compiles CLM. It will first source the <code class="docutils literal notranslate"><span class="pre">build_script</span></code> for the selected
+machine and then calls the interface. Which interface routines are
+called is dependent of the chosen build option (<code class="docutils literal notranslate"><span class="pre">skip</span></code>, <code class="docutils literal notranslate"><span class="pre">fresh</span></code>,
+<code class="docutils literal notranslate"><span class="pre">build</span></code>, <code class="docutils literal notranslate"><span class="pre">configure</span></code>, <code class="docutils literal notranslate"><span class="pre">make</span></code>). If <code class="docutils literal notranslate"><span class="pre">fresh</span></code> (default) is chosen, also a
+backup is made.</p>
+</section>
+<section id="compilecosmo">
+<h4><code class="docutils literal notranslate"><span class="pre">compileCosmo()</span></code><a class="headerlink" href="#compilecosmo" title="Permalink to this heading"></a></h4>
+<p>Analog to <code class="docutils literal notranslate"><span class="pre">compileClm()</span></code></p>
+</section>
+<section id="compileoasis">
+<h4><code class="docutils literal notranslate"><span class="pre">compileOasis()</span></code><a class="headerlink" href="#compileoasis" title="Permalink to this heading"></a></h4>
+<p>Analog to <code class="docutils literal notranslate"><span class="pre">compileClm()</span></code></p>
+</section>
+<section id="compileparflow">
+<h4><code class="docutils literal notranslate"><span class="pre">compileParflow()</span></code><a class="headerlink" href="#compileparflow" title="Permalink to this heading"></a></h4>
+<p>Analog to <code class="docutils literal notranslate"><span class="pre">compileClm()</span></code></p>
+</section>
+<section id="runcompilation">
+<h4><code class="docutils literal notranslate"><span class="pre">runCompilation()</span></code><a class="headerlink" href="#runcompilation" title="Permalink to this heading"></a></h4>
+<p>Determines which models are part of the selected combination and above
+functions are called.</p>
+</section>
+<section id="interactive">
+<h4><code class="docutils literal notranslate"><span class="pre">interactive()</span></code><a class="headerlink" href="#interactive" title="Permalink to this heading"></a></h4>
+<p>Handles the interactive session. Reads selections from the console and
+pushes return values to the desired variables. Some Variables need extra
+handling, in especially if dependencies follow. For example <code class="docutils literal notranslate"><span class="pre">machine</span></code>,
+<code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">rootdir</span></code>, etc.</p>
+</section>
+<section id="printstate">
+<h4><code class="docutils literal notranslate"><span class="pre">printState()</span></code><a class="headerlink" href="#printstate" title="Permalink to this heading"></a></h4>
+<p>Prints all selectable variables. This is used by the interactive mode
+and as debug information for the log.</p>
+</section>
+<section id="check">
+<h4><code class="docutils literal notranslate"><span class="pre">check()</span></code><a class="headerlink" href="#check" title="Permalink to this heading"></a></h4>
+<p>Helper function to check the <code class="docutils literal notranslate"><span class="pre">$?</span></code> return value of each command.</p>
+</section>
+<section id="check-pfl">
+<h4><code class="docutils literal notranslate"><span class="pre">check_pfl()</span></code><a class="headerlink" href="#check-pfl" title="Permalink to this heading"></a></h4>
+<p>Helper function to check the <code class="docutils literal notranslate"><span class="pre">$?</span></code> return value of each command without
+exiting. The function was introduced with <code class="docutils literal notranslate"><span class="pre">common_setup.ksh</span></code>.</p>
+</section>
+<section id="terminate">
+<h4><code class="docutils literal notranslate"><span class="pre">terminate()</span></code><a class="headerlink" href="#terminate" title="Permalink to this heading"></a></h4>
+<p>Clean exit handling.</p>
+</section>
+<section id="comment">
+<h4><code class="docutils literal notranslate"><span class="pre">comment()</span></code><a class="headerlink" href="#comment" title="Permalink to this heading"></a></h4>
+<p>Prints to log and terminal. Usual approach for every system call is to
+comment the action and append a <code class="docutils literal notranslate"><span class="pre">check()</span></code> to make sure no error
+happened.</p>
+</section>
+<section id="route">
+<h4><code class="docutils literal notranslate"><span class="pre">route()</span></code><a class="headerlink" href="#route" title="Permalink to this heading"></a></h4>
+<p>An call that should be made as first and last action of a routine to get
+output in which routine the script currently is (debugging).</p>
+</section>
+<section id="warning">
+<h4><code class="docutils literal notranslate"><span class="pre">warning()</span></code><a class="headerlink" href="#warning" title="Permalink to this heading"></a></h4>
+<p>If some sanity checks trigger it is asked for a decision to continue on
+own responsibility.</p>
+</section>
+<section id="hardsanitycheck">
+<h4><code class="docutils literal notranslate"><span class="pre">hardSanityCheck()</span></code><a class="headerlink" href="#hardsanitycheck" title="Permalink to this heading"></a></h4>
+<p>Exits if incompatible decisions were made.</p>
+</section>
+<section id="softsanitycheck">
+<h4><code class="docutils literal notranslate"><span class="pre">softSanityCheck()</span></code><a class="headerlink" href="#softsanitycheck" title="Permalink to this heading"></a></h4>
+<p>Gives warning if decisions are not supported but could work if it was
+taken care of. For example setups/combinations that are not in the
+<code class="docutils literal notranslate"><span class="pre">supported_machine.ksh</span></code>.</p>
+</section>
+<section id="deprecatedversion">
+<h4><code class="docutils literal notranslate"><span class="pre">deprecatedVersion()</span></code><a class="headerlink" href="#deprecatedversion" title="Permalink to this heading"></a></h4>
+<p>Exits if deprecated internal version number is used.</p>
+</section>
+<section id="listavailabilities">
+<h4><code class="docutils literal notranslate"><span class="pre">listAvailabilities()</span></code><a class="headerlink" href="#listavailabilities" title="Permalink to this heading"></a></h4>
+<p>Returns a human readable output of supported machines/combinations etc
+basically everything that is given in <code class="docutils literal notranslate"><span class="pre">supported_machines.ksh</span></code>. Script
+will exit without modifications afterwards.</p>
+</section>
+<section id="listtutorial">
+<h4><code class="docutils literal notranslate"><span class="pre">listTutorial()</span></code><a class="headerlink" href="#listtutorial" title="Permalink to this heading"></a></h4>
+<p>Returns a tutorial. Probably not sufficient enough. Script will exit
+without modifications afterwards.</p>
+</section>
+<section id="getroot">
+<h4><code class="docutils literal notranslate"><span class="pre">getRoot()</span></code><a class="headerlink" href="#getroot" title="Permalink to this heading"></a></h4>
+<p>Determines the root-directory out of pwd and call-command. Working on
+usual Linux.</p>
+</section>
+<section id="main">
+<h4><code class="docutils literal notranslate"><span class="pre">MAIN()</span></code><a class="headerlink" href="#main" title="Permalink to this heading"></a></h4>
+<p>Starts with determining root and loading defaults. Then handling the
+command line flags. Then doing sanity checks and sourcing machine-script
+based on flags. Then starting the interactive session. Then finalizing
+the selection and starting the compilation. At the end doing some
+cleanup and logging.</p>
+</section>
+</section>
+<section id="features">
+<h3>Features<a class="headerlink" href="#features" title="Permalink to this heading"></a></h3>
+<section id="layers-of-defaults-and-selections">
+<h4>Layers of defaults and selections<a class="headerlink" href="#layers-of-defaults-and-selections" title="Permalink to this heading"></a></h4>
+<p>We have two kinds of defaults: Hardcoded defaults from
+<a class="reference internal" href="#getdefaults"><code class="docutils literal notranslate"><span class="pre">getDefaults</span></code></a> (starting with <code class="docutils literal notranslate"><span class="pre">def_</span></code>) and some machine-
+and setup specific defaults (starting with <code class="docutils literal notranslate"><span class="pre">default...</span></code>) in the setup-
+and machine-interfaces. Then there is the batch-mode which overwrites
+existing values with command-line flags and the interactive mode which
+will be started if no flags are given.</p>
+<p>The hierarchy of overwriting is:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>defaults... &lt; def_ &lt; batch-mode &lt; interactive-mode.
+</pre></div>
+</div>
+<p>Even if providing flags, the interactive mode can be forced with <code class="docutils literal notranslate"><span class="pre">-i</span></code>
+flag. Additional flags will then be pre-selected in the interactive
+mode.</p>
+</section>
+<section id="logging-and-debugging">
+<h4>Logging and debugging<a class="headerlink" href="#logging-and-debugging" title="Permalink to this heading"></a></h4>
+<p>Three log files are created during the build and setup script.</p>
+<p><code class="docutils literal notranslate"><span class="pre">log_all_$DATE</span></code> – stores all std-output that is generated by system
+calls and executing external scripts (like <code class="docutils literal notranslate"><span class="pre">make</span></code> etc.) This output is
+not shown while scripts run.</p>
+<p><code class="docutils literal notranslate"><span class="pre">err_all_$DATE</span></code> – stores all err-output that is generated by system
+calls and executing external scripts (like <code class="docutils literal notranslate"><span class="pre">make</span></code> etc.) This output is
+not shown while scripts run.</p>
+<p><code class="docutils literal notranslate"><span class="pre">stdout_all_$DATE</span></code> – stores the output of the script (which you also
+see on screen when scripts run)</p>
+<p>Usually, a comment output is written to <code class="docutils literal notranslate"><span class="pre">stdout_*</span></code> before system
+calls.</p>
+<p>After execution, the system call is usually checked by
+<a class="reference internal" href="#check"><code class="docutils literal notranslate"><span class="pre">check()</span></code></a>. If errors are found, the build is terminated.</p>
+<p>Additionally, every function entry and exit is logged.</p>
+<p><strong>Debugging Tip</strong>: If a check fails the script stops and it is
+immediately visible in which routine and call it failed. Thus, the
+output in <code class="docutils literal notranslate"><span class="pre">stdout_*</span></code> is a good starting point for finding the location
+in <code class="docutils literal notranslate"><span class="pre">TSMP</span></code>, where an error occurred during building.</p>
+</details>
+</section>
+<section id="sanity-checks">
+<h4>Sanity checks<a class="headerlink" href="#sanity-checks" title="Permalink to this heading"></a></h4>
+<p>2 types of sanity checks exist, hard and soft.</p>
+<p>Hard: The script need to know the machine, version and setup. Otherwise
+it does not know what files to source. Thus, if an unsupported
+version/machine/setup is given the script will exit.</p>
+<p>Soft: Combinations and model versions might work even if not supported/
+or under development. An warning will be shown with the option to quit
+or continue. Furthermore, during the interactive session only supported
+selections will be given as option.</p>
+</section>
+<section id="build-options">
+<h4>Build options<a class="headerlink" href="#build-options" title="Permalink to this heading"></a></h4>
+<p>Currently the following build options are implemented to provide
+flexibility for debugging/porting/tuning/source modifications.</p>
+<p><code class="docutils literal notranslate"><span class="pre">skip</span></code>: the model is part of the combination, but it is already compiled
+and further compilation can be skipped.</p>
+<p><code class="docutils literal notranslate"><span class="pre">fresh</span></code>: the model needs to be build completely and is also backed up to
+a new folder. The source folder remains untouched. Also the model source
+must lie under <code class="docutils literal notranslate"><span class="pre">$root/model</span></code> (as in the catalog).</p>
+<p><code class="docutils literal notranslate"><span class="pre">build</span></code>: the model needs to be build completely but in the original
+folder/or the folder-name that is given to <code class="docutils literal notranslate"><span class="pre">-wxyz</span></code> flags.</p>
+<p><code class="docutils literal notranslate"><span class="pre">configure</span></code>: the model is only configured. New set of
+makefile(-templates) make clean configure, etc.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make</span></code>: the model is only compiled (make). No make clean etc., thus, can
+resume a started make.</p>
+</section>
+<section id="directories">
+<h4>Directories<a class="headerlink" href="#directories" title="Permalink to this heading"></a></h4>
+<p>Paths like <code class="docutils literal notranslate"><span class="pre">bin-dir</span></code>, <code class="docutils literal notranslate"><span class="pre">run-dir</span></code>, <code class="docutils literal notranslate"><span class="pre">forcing-dirs</span></code>, <code class="docutils literal notranslate"><span class="pre">namelist-dirs</span></code> are
+arbitrary. Even the <code class="docutils literal notranslate"><span class="pre">root-dir</span></code>, which means, that theoretically a
+different version of <code class="docutils literal notranslate"><span class="pre">bldsva</span></code> or component-models under <code class="docutils literal notranslate"><span class="pre">root-dir</span></code> could
+be used. If this makes sense is questionable (error prone).</p>
+</section>
+</section>
+</section>
+<section id="shell-script-setup-tsmp-ksh">
+<h2>Shell script <code class="docutils literal notranslate"><span class="pre">setup_tsmp.ksh</span></code><a class="headerlink" href="#shell-script-setup-tsmp-ksh" title="Permalink to this heading"></a></h2>
+<section id="id1">
+<h3>Routines<a class="headerlink" href="#id1" title="Permalink to this heading"></a></h3>
+<p>Most of the routines are identical or have the same purpose as those in
+<code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code>.</p>
+<p>The following will only list significantly different.</p>
+<section id="id2">
+<h4>finalizeSelection()<a class="headerlink" href="#id2" title="Permalink to this heading"></a></h4>
+<p>Additionally to the identical stuff it also calculates some processor
+counts for the models.</p>
+</section>
+<section id="id3">
+<h4>softSanityCheck()<a class="headerlink" href="#id3" title="Permalink to this heading"></a></h4>
+<p>Additionally to the identical stuff it also tests for multi-instance
+support (is not supported with Oasis3).</p>
+</section>
+<section id="id4">
+<h4>MAIN()<a class="headerlink" href="#id4" title="Permalink to this heading"></a></h4>
+<p>Starts with determining root and loading defaults. Then handling the
+command line flags. Then doing sanity checks and sourcing machine-script
+and setup-script based on flags. Then starting the interactive session.
+And finalizing the selection afterwards.</p>
+<p>Then a loop loops over the number of instances and searches for a
+individual namelist for that instance. Then a sub-run-dir is created for
+each instance. To create the run the <code class="docutils literal notranslate"><span class="pre">setup_MOD()</span></code> interface routine is
+called for every model and executables are copied to the <code class="docutils literal notranslate"><span class="pre">run-dir</span></code>.
+After the loop the run-script is created.</p>
+<p>At the end doing some cleanup and logging.</p>
+</section>
+</section>
+<section id="feature">
+<h3>Feature<a class="headerlink" href="#feature" title="Permalink to this heading"></a></h3>
+<section id="id5">
+<h4>Layers of defaults and selections<a class="headerlink" href="#id5" title="Permalink to this heading"></a></h4>
+<p>See section <a class="reference internal" href="#layers-of-defaults-and-selections">Layers of defaults and
+selections.</a>.</p>
+</section>
+<section id="id6">
+<h4>Logging and debugging<a class="headerlink" href="#id6" title="Permalink to this heading"></a></h4>
+<p>See section <a class="reference internal" href="#logging-and-debugging">Logging and Debugging</a>.</p>
+</section>
+<section id="id7">
+<h4>Sanity checks<a class="headerlink" href="#id7" title="Permalink to this heading"></a></h4>
+<p>See section <a class="reference internal" href="#sanity-checks">Sanity checks</a>.</p>
+</section>
+<section id="id8">
+<h4>Directories<a class="headerlink" href="#id8" title="Permalink to this heading"></a></h4>
+<p>See section <a class="reference internal" href="#directories">Directories</a></p>
+<p>For creating run-dirs some extra safety provisions were made. An
+experiment-ID (<code class="docutils literal notranslate"><span class="pre">-I</span></code> flag) is appended to the run-dir. This is per
+default the date. Also, if rundirs already exist, a backup is created to
+avoid potential data losses.</p>
+</section>
+<section id="multi-instance">
+<h4>Multi instance<a class="headerlink" href="#multi-instance" title="Permalink to this heading"></a></h4>
+<p>Running TSMP in multiple instances is supported by splitting the
+<code class="docutils literal notranslate"><span class="pre">MPI_COMM_WORLD</span></code> in sub-communicators inside the models (standalone) or
+in Oasis3-MCT (coupled). Inside the run directory sub-directories are
+created for every instance. But all start the same executable and will
+then <code class="docutils literal notranslate"><span class="pre">chdir</span></code> depending on the rank. The information is given in an
+instance-mapfile which is created in <code class="docutils literal notranslate"><span class="pre">createRunscript()</span></code>.</p>
+<p>Every instance is looking for an individual namelist which needs to be
+named like, for example, <code class="docutils literal notranslate"><span class="pre">coup_oas.tcl_0</span></code> for the 0th member. If no such
+namelist is found it will take the base (<code class="docutils literal notranslate"><span class="pre">coup_oas.tcl</span></code>). In this way
+not all component models need namelists for every instance if no
+perturbation is applied.</p>
+</section>
+<section id="restarts">
+<h4>Restarts<a class="headerlink" href="#restarts" title="Permalink to this heading"></a></h4>
+<p>The restarts functionality is basically handled in the namelists itself
+in the model-typical way. But two things need to be given to the script
+in order to perform a restart.</p>
+<p>Restart files: Every restarted model needs a restart file to start from.
+This must be provided by the flags <code class="docutils literal notranslate"><span class="pre">-jkl</span></code>.</p>
+<p>Initial date: For CLM and ParFlow this only regulates the output naming,
+restart files are sufficient for this two. But for Cosmo also the
+<code class="docutils literal notranslate"><span class="pre">start_hours</span></code> is determined by <code class="docutils literal notranslate"><span class="pre">startDate</span></code>-<code class="docutils literal notranslate"><span class="pre">initDate</span></code>.</p>
+<p>Performing an automated spinup or chain-jobs needs to be handled by the
+user (example scripts might be available in the future). This basically
+needs a loop over some restart periods and run the setup-script which
+creates a specific setup in every iteration.</p>
+</section>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="build_examples_tsmppdaf.html" class="btn btn-neutral float-left" title="TSMP-PDAF Build Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="intf_da.html" class="btn btn-neutral float-right" title="Structure of DA inside TSMP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
