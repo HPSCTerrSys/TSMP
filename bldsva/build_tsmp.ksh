@@ -174,7 +174,7 @@ setSelection(){
 
 finalizeSelection(){
 comment "  create bindir: $bindir"
-  mkdir -p $bindir/libs >> $log_file 2>> $err_file
+  mkdir -p $rootdir/$bindir/libs >> $log_file 2>> $err_file
 check
 
 }
