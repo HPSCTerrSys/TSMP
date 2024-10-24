@@ -64,11 +64,13 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
        tag_model_clm, point_obs, model
 #else
   ONLY: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-       tag_model_clm, nx_glob, ny_glob, nz_glob, xcoord_fortran, ycoord_fortran, &
-       zcoord_fortran, point_obs, model
+       tag_model_clm, nx_glob, ny_glob, nz_glob, &
+       xcoord, ycoord, zcoord, &
+       xcoord_fortran, ycoord_fortran, zcoord_fortran, &
+       point_obs, model
 #endif
 
-  USE, INTRINSIC :: iso_c_binding
+  USE, INTRINSIC :: iso_c_binding, ONLY: C_F_POINTER
 
   IMPLICIT NONE
 
@@ -99,6 +101,20 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
   ! **********************************************
   ! *** Initialize local observation dimension ***
   ! **********************************************
+
+  ! Setting fortran pointer to ParFlow-coordinate arrays
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
+!!#if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
+  IF (model == tag_model_parflow) THEN
+     !print *, "Parflow: converting xcoord to fortran"
+     call C_F_POINTER(xcoord, xcoord_fortran, [enkf_subvecsize])
+     call C_F_POINTER(ycoord, ycoord_fortran, [enkf_subvecsize])
+     call C_F_POINTER(zcoord, zcoord_fortran, [enkf_subvecsize])
+  ENDIF
+#endif
+#endif
+
   ! Count observations within cradius
 #ifdef CLMSA 
   obsind    = 0

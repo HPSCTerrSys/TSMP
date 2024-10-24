@@ -53,7 +53,7 @@ SUBROUTINE localize_covar_pdaf(dim_state, dim_obs, HP, HPH)
           model
 #endif
 
-  USE, INTRINSIC :: iso_c_binding
+  USE, INTRINSIC :: iso_c_binding, ONLY: C_F_POINTER
 
   IMPLICIT NONE
 
