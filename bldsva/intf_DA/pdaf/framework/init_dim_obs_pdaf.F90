@@ -506,6 +506,9 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: dim_obs_p=", dim_obs_p
   end if
 
+  ! Dimension of full observation vector
+  ! ------------------------------------
+
   ! add and broadcast size of local observation dimensions using mpi_allreduce 
   call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
        comm_filter, ierror) 
