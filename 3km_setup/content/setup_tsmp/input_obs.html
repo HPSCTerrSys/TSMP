@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Observation input &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=30646c52"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Command line options" href="input_cmd.html" />
+    <link rel="prev" title="Control file enkfpf.par" href="input_enkfpf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="running.html">Running TSMP-PDAF</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_clm.html">Input files for CLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_pfl.html">Input files for ParFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cos.html">Input files for COSMO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_oas.html">Input files for OASIS-MCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Observation input</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#observation-files">Observation files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#general-observation-file-variables">General observation file variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#parflow-observation-file-variables">ParFlow observation file variables</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-observation-file-variables">CLM observation file variables</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#multi-scale-data-assimilation">Multi-Scale Data Assimilation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#observation-time-flexibility">Observation time flexibility</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#specifying-type-of-observation-at-compile-time">Specifying type of observation at compile time</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#example-for-setting-environment-variables">Example for setting environment variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html">Command line options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<b style="color:#b96922;"><li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+</b><li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="running.html">Running TSMP-PDAF</a></li>
+      <li class="breadcrumb-item active">Observation input</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/setup_tsmp/input_obs.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="observation-input">
+<h1>Observation input<a class="headerlink" href="#observation-input" title="Link to this heading"></a></h1>
+<p>Observation input consists of a number of different inputs:</p>
+<ul class="simple">
+<li><p>Observation files with correct name and content</p></li>
+<li><p>Command Line Options</p></li>
+<li><p>Environment Variables</p></li>
+</ul>
+<section id="observation-files">
+<h2>Observation files<a class="headerlink" href="#observation-files" title="Link to this heading"></a></h2>
+<p>Observation files for TSMP-PDAF are netCDF files which follow a
+certain naming convention. Each observation file has a fixed prefix
+followed by the formatted number of the assimilation cycle which is
+determined by <a class="reference internal" href="input_enkfpf.html#da-da-interval"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">da_interval</span></code></span></a>
+. Additionally, the <a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">command line
+input</span></a> <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> determines the
+number of assimilation cycles/iterations/steps that are run purely
+forward before checking an observation file again.</p>
+<p>The prefix is chosen with the <a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">command line
+option</span></a> <code class="docutils literal notranslate"><span class="pre">obs_filename</span></code>.</p>
+<p>Example: If the chosen prefix is <code class="docutils literal notranslate"><span class="pre">myobs</span></code>, the observation files are
+named <code class="docutils literal notranslate"><span class="pre">myobs.00001,</span> <span class="pre">myobs.00002,</span> <span class="pre">myobs.00003</span></code>, etc.</p>
+<section id="general-observation-file-variables">
+<h3>General observation file variables<a class="headerlink" href="#general-observation-file-variables" title="Link to this heading"></a></h3>
+<p>All observation files contain the following variable:</p>
+<section id="dim-obs">
+<h4>dim_obs<a class="headerlink" href="#dim-obs" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">dim_obs</span></code>: (int) The observation files contain one dimension named
+<code class="docutils literal notranslate"><span class="pre">dim_obs</span></code> which should be set equal to the number of observations for
+the respective assimilation cycle. The observation files for ParFlow
+should contain the following variables which all should have the
+dimension <code class="docutils literal notranslate"><span class="pre">dim_obs</span></code> (except variable <code class="docutils literal notranslate"><span class="pre">dr</span></code> in CLM observations files):</p>
+</section>
+</section>
+<section id="parflow-observation-file-variables">
+<h3>ParFlow observation file variables<a class="headerlink" href="#parflow-observation-file-variables" title="Link to this heading"></a></h3>
+<p>If TSMP-PDAF is only applied with ParFlow, the following variables
+have to be specified in the observation files:</p>
+<section id="obs-pf">
+<h4>obs_pf<a class="headerlink" href="#obs-pf" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">obs_pf</span></code>: (real) Observations for ParFlow (either pressure or soil
+moisture)</p>
+</section>
+<section id="obserr-pf">
+<h4>obserr_pf<a class="headerlink" href="#obserr-pf" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">obserr_pf</span></code>: (real) Observation errors which can be different for
+individual observations (optional). If this variable is not
+present. the command line option <code class="docutils literal notranslate"><span class="pre">rms_obs</span></code> (see <a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">Command line
+options</span></a>) will be used to define
+the observation error (equal for all observations).</p>
+</section>
+<section id="ix">
+<h4>ix<a class="headerlink" href="#ix" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ix</span></code>: (integer) Position of the observation in the ParFlow grid in
+x-direction.</p>
+</section>
+<section id="iy">
+<h4>iy<a class="headerlink" href="#iy" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">iy</span></code>: (integer) Position of the observation in the ParFlow grid in
+y-direction.</p>
+</section>
+<section id="iz">
+<h4>iz<a class="headerlink" href="#iz" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">iz</span></code>: (integer) Position of the observation in the ParFlow grid in
+z-direction.</p>
+</section>
+<section id="idx">
+<h4>idx<a class="headerlink" href="#idx" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">idx</span></code>: (integer) Index of the observation in the ParFlow grid.</p>
+<p>The positions are always relative to the south-east corner cell at the
+lowest model layer. The index <code class="docutils literal notranslate"><span class="pre">idx</span></code> can be calculated as follows:</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*}
+	idx = (iz-1) \cdot nx \cdot ny + (iy-1) \cdot nx + ix
+\end{gather*}\]</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">nx</span></code> and <code class="docutils literal notranslate"><span class="pre">ny</span></code> are the number of grid cells in x- and y-direction
+respectively and <code class="docutils literal notranslate"><span class="pre">ix</span></code>, <code class="docutils literal notranslate"><span class="pre">iy</span></code> and <code class="docutils literal notranslate"><span class="pre">iz</span></code> are the positions of the
+observation in x-, y- and z-direction.</p>
+</section>
+<section id="ix-interp-d">
+<h4>ix_interp_d<a class="headerlink" href="#ix-interp-d" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code>: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with <code class="docutils literal notranslate"><span class="pre">ix</span></code>. Only used when
+<a class="reference internal" href="input_enkfpf.html#da-obs-interp-switch"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">DA:obs_interp_switch</span></code></span></a> is set
+to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>The correct observation location should be located at</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*} x_{obs} =
+x_{grid}(ix) + \mathtt{ix\_interp\_d} \cdot \Delta x
+\end{gather*}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p>Important: <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">ix_interp_d</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{obs}\)</span>: x-coordinate of the observation location</p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{grid}(ix)\)</span>: x-coordinate of grid cell with index <code class="docutils literal notranslate"><span class="pre">ix</span></code> in the
+ParFlow grid. Note that <span class="math notranslate nohighlight">\(x_{grid}(ix) = \max_{ix}\{x(ix) | x(ix) &lt;
+x_{obs}\}\)</span> (closest grid point that is smaller than <span class="math notranslate nohighlight">\(x_{obs}\)</span>)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Delta x\)</span>: Difference of x-coordinate between grid cells
+neighboring observation location: <span class="math notranslate nohighlight">\(\Delta x = x_{grid}(ix+1) -
+x_{grid}(ix)\)</span></p></li>
+</ul>
+<section id="example">
+<h5>Example<a class="headerlink" href="#example" title="Link to this heading"></a></h5>
+<p>This example shows how to set <code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code> from a given (1) grid and
+(2) observation location.</p>
+<p>Let the observation location be at longitude <span class="math notranslate nohighlight">\(x_{obs} = 6.404\)</span>.</p>
+<p>Let the grid be simple going from <code class="docutils literal notranslate"><span class="pre">6.3</span></code> to <code class="docutils literal notranslate"><span class="pre">6.5</span></code> in steps of <code class="docutils literal notranslate"><span class="pre">0.02</span></code>.
+Example grid locations:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(x_{grid}(1) = 6.3\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{grid}(6) = 6.4\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(x_{grid}(11) = 6.5\)</span></p></li>
+</ul>
+<p>We find <code class="docutils literal notranslate"><span class="pre">ix</span></code> and <code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code> as follows:</p>
+<ol class="arabic simple">
+<li><p>Find the two grid locations with longitudes closest to the
+observation location: <span class="math notranslate nohighlight">\(x_{grid}(6) = 6.4\)</span>, <span class="math notranslate nohighlight">\(x_{grid}(7) = 6.42\)</span></p></li>
+<li><p>Choose the index of the grid location smaller than <span class="math notranslate nohighlight">\(x_{obs}\)</span> for
+observation file input <code class="docutils literal notranslate"><span class="pre">ix</span></code>: <code class="docutils literal notranslate"><span class="pre">ix=6</span></code></p></li>
+<li><p>Compute <code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code> from the two closest grid locations as follows</p></li>
+</ol>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*}
+\mathtt{ix\_interp\_d} = \frac{ x_{obs} -  x_{grid}(ix)}{ \Delta x}
+\end{gather*}\]</div>
+<p>Here this leads to <code class="docutils literal notranslate"><span class="pre">ix_interp_d=0.2</span></code>.</p>
+<p>We can check this by computing <span class="math notranslate nohighlight">\(x_{obs}\)</span> from <code class="docutils literal notranslate"><span class="pre">ix</span></code>, <code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code>:</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{align*}
+x_{obs} &amp;= x_{grid}(6) + \mathtt{ix\_interp\_d} \cdot \Delta x \\
+   &amp;= 6.4 + 0.2 \cdot 0.02 = 6.4 + 0.004 = 6.404
+\end{align*}\]</div>
+</section>
+</section>
+<section id="iy-interp-d">
+<h4>iy_interp_d<a class="headerlink" href="#iy-interp-d" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code>: (real) Offset of the correct observation locations
+compared to the position of the observation in the ParFlow grid
+assigned with <code class="docutils literal notranslate"><span class="pre">iy</span></code>. Only used when
+<a class="reference internal" href="input_enkfpf.html#da-obs-interp-switch"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">DA:obs_interp_switch</span></code></span></a> is set
+to <code class="docutils literal notranslate"><span class="pre">1</span></code>.</p>
+<p>The correct observation location should be located at</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*} y_{obs} =
+y_{grid}(iy) + \mathtt{iy\_interp\_d} \cdot \Delta y
+\end{gather*}\]</div>
+<p>where</p>
+<ul class="simple">
+<li><p>Important: <code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">iy_interp_d</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_{obs}\)</span>: y-coordinate of the observation location</p></li>
+<li><p><span class="math notranslate nohighlight">\(y_{grid}(iy)\)</span>: y-coordinate of grid cell with index <code class="docutils literal notranslate"><span class="pre">iy</span></code> in the
+ParFlow grid. Note that <span class="math notranslate nohighlight">\(y_{grid}(iy) = \max_{iy}\{y(iy) | y(iy) &lt;
+y_{obs}\}\)</span> (closest grid point that is smaller than <span class="math notranslate nohighlight">\(y_{obs}\)</span>)</p></li>
+<li><p><span class="math notranslate nohighlight">\(\Delta y\)</span>: Difference of y-coordinate grid cells neighboring
+observation location: <span class="math notranslate nohighlight">\(\Delta y = y_{grid}(iy+1) - y_{grid}(iy)\)</span></p></li>
+</ul>
+<section id="id1">
+<h5>Example<a class="headerlink" href="#id1" title="Link to this heading"></a></h5>
+<p>This example shows how to set <code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code> from a given (1) grid and
+(2) observation location.</p>
+<p>Let the observation location be at longitude <span class="math notranslate nohighlight">\(y_{obs} = 50.910\)</span>.</p>
+<p>Let the grid be simple going from <code class="docutils literal notranslate"><span class="pre">50.8</span></code> to <code class="docutils literal notranslate"><span class="pre">51.0</span></code> in steps of <code class="docutils literal notranslate"><span class="pre">0.02</span></code>.
+Example grid locations:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(y_{grid}(1) = 50.8\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(y_{grid}(6) = 50.9\)</span></p></li>
+<li><p><span class="math notranslate nohighlight">\(y_{grid}(11) = 51.0\)</span></p></li>
+</ul>
+<p>We find <code class="docutils literal notranslate"><span class="pre">iy</span></code> and <code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code> as follows:</p>
+<ol class="arabic simple">
+<li><p>Find the two grid locations with longitudes closest to the
+observation location: <span class="math notranslate nohighlight">\(y_{grid}(6) = 50.9\)</span>, <span class="math notranslate nohighlight">\(y_{grid}(7) = 50.92\)</span></p></li>
+<li><p>Choose the index of the grid location smaller than <span class="math notranslate nohighlight">\(y_{obs}\)</span> for
+observation file input <code class="docutils literal notranslate"><span class="pre">iy</span></code>: <code class="docutils literal notranslate"><span class="pre">iy=6</span></code></p></li>
+<li><p>Compute <code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code> from the two closest grid locations as follows</p></li>
+</ol>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*}
+\mathtt{iy\_interp\_d} = \frac{ y_{obs} -  y_{grid}(iy)}{ \Delta y }
+\end{gather*}\]</div>
+<p>Here this leads to <code class="docutils literal notranslate"><span class="pre">iy_interp_d=0.5</span></code>.</p>
+<p>We can check this by computing <span class="math notranslate nohighlight">\(y_{obs}\)</span> from <code class="docutils literal notranslate"><span class="pre">iy</span></code>, <code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code>:</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{align*}
+y_{obs} &amp;= y_{grid}(6) + \mathtt{iy\_interp\_d} \cdot \Delta y \\
+   &amp;= 50.9 + 0.5 \cdot 0.02 = 50.9 + 0.01 = 50.910
+\end{align*}\]</div>
+</section>
+</section>
+</section>
+<section id="clm-observation-file-variables">
+<h3>CLM observation file variables<a class="headerlink" href="#clm-observation-file-variables" title="Link to this heading"></a></h3>
+<p>If TSMP-PDAF is only applied with CLM, different variables have to be
+specified in the observation files:</p>
+<section id="obs-clm">
+<h4>obs_clm<a class="headerlink" href="#obs-clm" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">obs_clm</span></code>: (real) Observations for CLM (soil moisture)</p>
+</section>
+<section id="obserr-clm">
+<h4>obserr_clm<a class="headerlink" href="#obserr-clm" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">obserr_clm</span></code>: (real) Observation errors which can be different for
+individual observations (optional). If this variable is not
+present. the command line option <code class="docutils literal notranslate"><span class="pre">rms_obs</span></code> (see <a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">Command line
+options</span></a>) will be used to define
+the observation error (equal for all observations).</p>
+<section id="lon">
+<h5>lon<a class="headerlink" href="#lon" title="Link to this heading"></a></h5>
+<p><code class="docutils literal notranslate"><span class="pre">lon</span></code>: (real) Longitude of the observation.</p>
+</section>
+</section>
+<section id="lat">
+<h4>lat<a class="headerlink" href="#lat" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">lat</span></code>: (real) Latitude of the observation.</p>
+</section>
+<section id="layer">
+<h4>layer<a class="headerlink" href="#layer" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">layer</span></code>: (integer) CLM layer where the observation is located (counted
+from uppermost CLM layer).</p>
+</section>
+<section id="var-id">
+<h4>var_id<a class="headerlink" href="#var-id" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">var_id</span></code>: (integer) Only used for multi-scale data assimilation. Size
+of <code class="docutils literal notranslate"><span class="pre">var_id</span></code> is same as <code class="docutils literal notranslate"><span class="pre">dim_obs</span></code>. <code class="docutils literal notranslate"><span class="pre">var_id</span></code> has same values over model
+grid cells, which have range of similar observations values from raw
+data over them.  The values can be grouped starting from 1 for similar
+observation values to other integers (2,3,4,5 etc.) for other similar
+observations. If there are no observations over some grid cells than a
+negative <code class="docutils literal notranslate"><span class="pre">var_id</span></code> (integer) is assigned to them.</p>
+</section>
+<section id="dr">
+<h4>dr<a class="headerlink" href="#dr" title="Link to this heading"></a></h4>
+<p><code class="docutils literal notranslate"><span class="pre">dr</span></code>: (real) Snapping distance for the observation.</p>
+<p><strong>Attention</strong> This variable should have a length of <code class="docutils literal notranslate"><span class="pre">2</span></code> (one snapping
+distance for longitudes and one for latitudes).</p>
+<p>Each of the CLM observations is snapped to the nearest CLM grid cell
+based on the given <code class="docutils literal notranslate"><span class="pre">lon</span></code>, <code class="docutils literal notranslate"><span class="pre">lat</span></code> and the snapping distance <code class="docutils literal notranslate"><span class="pre">dr</span></code> which
+should be smaller than the minimum grid cell size.</p>
+</section>
+</section>
+</section>
+<section id="multi-scale-data-assimilation">
+<h2>Multi-Scale Data Assimilation<a class="headerlink" href="#multi-scale-data-assimilation" title="Link to this heading"></a></h2>
+<p>The multi-scale data assimilation has been implemented for Local
+Ensemble Transform Kalman Filter(LETKF) filter (<code class="docutils literal notranslate"><span class="pre">filtertype=5</span></code>). For
+multi-scale data assimilation, we need to specify in <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> the
+entry <code class="docutils literal notranslate"><span class="pre">point_obs</span></code> (in <code class="docutils literal notranslate"><span class="pre">[DA]</span></code>) to value 0 (integer) for using
+multi-scale data assimilation (eg. using SMAP satellite data over a
+large area which is not point data).</p>
+<p>Then in the observation files we need to specify variable <code class="docutils literal notranslate"><span class="pre">var_id</span></code>
+values. Size of <code class="docutils literal notranslate"><span class="pre">var_id</span></code> is same as <code class="docutils literal notranslate"><span class="pre">dim_obs</span></code> . <code class="docutils literal notranslate"><span class="pre">var_id</span></code> has same
+values over model grid cells, which have range of similar observations
+values from raw data over them. The values can be grouped starting
+from 1 for similar observation values to other integers (2,3,4,5 etc.)
+for other similar obersvations. If there are no observations over some
+grid cells than a negative <code class="docutils literal notranslate"><span class="pre">var_id</span></code> (integer) is assigned to them.</p>
+</section>
+<section id="observation-time-flexibility">
+<h2>Observation time flexibility<a class="headerlink" href="#observation-time-flexibility" title="Link to this heading"></a></h2>
+<p>Currently, in TSMP-PDAF there are a number input options that
+determine, when observations are read-in and assimilated:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="input_enkfpf.html#da-da-interval"><span class="std std-ref">da_interval</span></a></p></li>
+<li><p><a class="reference internal" href="input_cmd.html#delt-obs"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">delt_obs</span></code></span></a></p></li>
+<li><p>Parflow: <code class="docutils literal notranslate"><span class="pre">TimeInfo.BaseUnit</span></code></p></li>
+<li><p>Observation file NetCDF variable <code class="docutils literal notranslate"><span class="pre">no_obs</span></code></p></li>
+</ul>
+<p>The goal of this section is to show how these inputs can be used to
+create a flexible observation time input.</p>
+<p>First, <code class="docutils literal notranslate"><span class="pre">da_interval</span></code> and <code class="docutils literal notranslate"><span class="pre">TimeInfo.BaseUnit</span></code> define the forward
+integration step that is executed during on iteration of the main
+TSMP-PDAF loop. This is the smallest time interval in your model and
+it determines the counter, also for observation file names. So
+<code class="docutils literal notranslate"><span class="pre">da_interval</span></code> should be small enough that each possible observation
+can be attributed to one timestep.</p>
+<p>Next, <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> is used to specify if data assimilation is not to be
+called at every iteration/cycle of <code class="docutils literal notranslate"><span class="pre">da_interval</span></code>. If two available
+observations are only <code class="docutils literal notranslate"><span class="pre">da_interval</span></code> apart, <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> has to be set to
+<code class="docutils literal notranslate"><span class="pre">1</span></code>. However, suppose observations daily at noon, and <code class="docutils literal notranslate"><span class="pre">da_interval</span></code> is
+one hour, then <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> could be chosen as <code class="docutils literal notranslate"><span class="pre">24</span></code>.</p>
+<p>Now, PDAF will be called every <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> iterations/cycles. However,
+there is one last way of manipulating observation input, by setting
+the NetCDF variable <code class="docutils literal notranslate"><span class="pre">no_obs</span></code> in the observation file to <code class="docutils literal notranslate"><span class="pre">0</span></code>. In this
+case, PDAF will skip the assimilation during that observation files
+cycle. So, in principle, one could set <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> to <code class="docutils literal notranslate"><span class="pre">1</span></code>, thus needing
+an observation file at every cycle. At each timestep that is not
+supposed to be assimilated, one could supply an alsmost-empty
+observation file with just a single variable <code class="docutils literal notranslate"><span class="pre">no_obs</span></code> that has the
+value <code class="docutils literal notranslate"><span class="pre">0</span></code>. By this workaround, one obtains a fairly flexible
+observation time input!</p>
+<p>Example code for setting variable <code class="docutils literal notranslate"><span class="pre">no_obs</span></code> to zero in an existing NetCDF
+file:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">scio</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">scio</span><span class="o">.</span><span class="n">netcdf_file</span><span class="p">(</span><span class="s2">&quot;swc_obs.00001&quot;</span><span class="p">,</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="n">mmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># append</span>
+<span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;no_obs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">assignValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Example code for generating a minimal NetCDF observation file with
+just one variable <code class="docutils literal notranslate"><span class="pre">no_obs</span></code> set to zero:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">scio</span>
+
+<span class="n">f</span> <span class="o">=</span> <span class="n">scio</span><span class="o">.</span><span class="n">netcdf_file</span><span class="p">(</span><span class="s2">&quot;swc_obs.00001&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">,</span> <span class="n">mmap</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="c1"># write</span>
+<span class="n">f</span><span class="o">.</span><span class="n">createDimension</span><span class="p">(</span><span class="s2">&quot;dim_noobs&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">createVariable</span><span class="p">(</span><span class="s2">&quot;no_obs&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;dim_noobs&quot;</span><span class="p">])</span>
+<span class="n">f</span><span class="o">.</span><span class="n">variables</span><span class="p">[</span><span class="s2">&quot;no_obs&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">assignValue</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="specifying-type-of-observation-at-compile-time">
+<h2>Specifying type of observation at compile time<a class="headerlink" href="#specifying-type-of-observation-at-compile-time" title="Link to this heading"></a></h2>
+<p>The following environment variables let the user specify the expected
+observational input (i.e. ParFlow or CLM observations) at compile time
+(during the build-process). This may save some time during execution
+as certain parts of the source code are not accessed at all.</p>
+<p>CLM observations: Set</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../build_tsmp/build_environment_variables.html#clmsa"><span class="std std-ref">CLMSA</span></a></p></li>
+<li><p><a class="reference internal" href="../build_tsmp/build_environment_variables.html#obs-only-clm"><span class="std std-ref">OBS_ONLY_CLM</span></a></p></li>
+</ul>
+<p>ParFlow observations: Set</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../build_tsmp/build_environment_variables.html#parflow-stand-alone"><span class="std std-ref">PARFLOW_STAND_ALONE</span></a></p></li>
+<li><p><a class="reference internal" href="../build_tsmp/build_environment_variables.html#obs-only-parflow"><span class="std std-ref">OBS_ONLY_PARFLOW</span></a></p></li>
+</ul>
+<section id="example-for-setting-environment-variables">
+<h3>Example for setting environment variables<a class="headerlink" href="#example-for-setting-environment-variables" title="Link to this heading"></a></h3>
+<p>The aforementioned environment variables can be set in the PDAF-build
+script
+<code class="docutils literal notranslate"><span class="pre">TSMP/bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh</span></code>
+(or replace <code class="docutils literal notranslate"><span class="pre">JURECA</span></code> with other machine).</p>
+<p>Source code from script <code class="docutils literal notranslate"><span class="pre">build_interface_pdaf_JURECA.ksh</span></code>:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">  </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$withCLM</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$withCOS</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;false&quot;</span><span class="w"> </span><span class="o">&amp;&amp;</span><span class="w"> </span><span class="nv">$withPFL</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="k">then</span>
+<span class="w">     </span><span class="nv">importFlags</span><span class="o">+=</span><span class="nv">$importFlagsCLM</span>
+<span class="w">     </span><span class="nv">importFlags</span><span class="o">+=</span><span class="nv">$importFlagsOAS</span>
+<span class="w">     </span><span class="nv">importFlags</span><span class="o">+=</span><span class="nv">$importFlagsPFL</span>
+<span class="w">     </span><span class="nv">importFlags</span><span class="o">+=</span><span class="nv">$importFlagsDA</span>
+<span class="w">     </span><span class="nv">cppdefs</span><span class="o">+=</span><span class="s2">&quot; </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-Duse_comm_da </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-DCOUP_OAS_PFL </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-DMAXPATCH_PFT=1 &quot;</span>
+<span class="w">     </span><span class="nv">cppdefs</span><span class="o">+=</span><span class="s2">&quot; </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-DOBS_ONLY_PARFLOW &quot;</span><span class="w"> </span><span class="c1"># Remove for observations from both ParFlow + CLM</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$readCLM</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nv">cppdefs</span><span class="o">+=</span><span class="s2">&quot; </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-DREADCLM &quot;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">     </span><span class="k">if</span><span class="w"> </span><span class="o">[[</span><span class="w"> </span><span class="nv">$freeDrain</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="s2">&quot;true&quot;</span><span class="w"> </span><span class="o">]]</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="nv">cppdefs</span><span class="o">+=</span><span class="s2">&quot; </span><span class="si">${</span><span class="nv">pf</span><span class="si">}</span><span class="s2">-DFREEDRAINAGE &quot;</span><span class="w"> </span><span class="p">;</span><span class="w"> </span><span class="k">fi</span>
+<span class="w">     </span><span class="nv">libs</span><span class="o">+=</span><span class="nv">$libsCLM</span>
+<span class="w">     </span><span class="nv">libs</span><span class="o">+=</span><span class="nv">$libsOAS</span>
+<span class="w">     </span><span class="nv">libs</span><span class="o">+=</span><span class="nv">$libsPFL</span>
+<span class="w">     </span><span class="nv">obj</span><span class="o">+=</span><span class="s1">&#39; $(OBJCLM) $(OBJPF) &#39;</span>
+<span class="w">  </span><span class="k">fi</span>
+</pre></div>
+</div>
+<p>Here we see the flags that are set when the compilation flag <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">clm-pfl</span></code> is used. Interesting is the second line starting with
+<code class="docutils literal notranslate"><span class="pre">cppdefs+=...</span></code>. Here <code class="docutils literal notranslate"><span class="pre">OBS_ONLY_PARFLOW</span></code> is set. In analogous fashion,
+one of the other environment variables mentioned before could be set.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="input_enkfpf.html" class="btn btn-neutral float-left" title="Control file enkfpf.par" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="input_cmd.html" class="btn btn-neutral float-right" title="Command line options" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
