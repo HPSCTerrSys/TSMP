@@ -151,7 +151,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   INTEGER :: idx         ! Computed Index
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
-  integer,allocatable :: local_dis(:),local_dim(:)
+  integer,allocatable :: local_dis(:)
   integer :: k_count !,nsc !hcp
   real    :: sum_interp_weights
 
@@ -523,14 +523,13 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
+  ! Set array local_dis (number of observations before process) from
+  ! local observation dimensions
   allocate(local_dis(npes_filter))
-  allocate(local_dim(npes_filter))
-  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dim, 1, MPI_INTEGER, comm_filter, ierror)
   local_dis(1) = 0
   do i = 2, npes_filter
-     local_dis(i) = local_dis(i-1) + local_dim(i-1)
+     local_dis(i) = local_dis(i-1) + local_dims_obs(i-1)
   end do
-  deallocate(local_dim)
 
   if (mype_filter==0 .and. screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_dis=", local_dis
