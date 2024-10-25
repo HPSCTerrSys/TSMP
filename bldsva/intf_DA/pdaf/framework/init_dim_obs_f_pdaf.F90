@@ -399,6 +399,17 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
     call abort_parallel()
   end if
 
+  !  Gather local dim obs in array
+  ! ------------------------------
+
+  ! allocate array of local observation dimensions with total PEs
+  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
+  ALLOCATE(local_dims_obs(npes_filter))
+
+  ! Gather array of local observation dimensions
+  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
+       comm_filter, ierror)
+
   allocate(local_dis(npes_filter))
   allocate(local_dim(npes_filter))
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dim, 1, MPI_INTEGER, comm_filter, ierror)
@@ -411,17 +422,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   if (mype_filter==0 .and. screen > 2) then
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_dis=", local_dis
   end if
-
-  !  Gather local dim obs in array
-  ! ------------------------------
-
-  ! allocate array of local observation dimensions with total PEs
-  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
-  ALLOCATE(local_dims_obs(npes_filter))
-
-  ! Gather array of local observation dimensions
-  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
-       comm_filter, ierror)
 
   ! Write process-local observation arrays
   ! --------------------------------------
