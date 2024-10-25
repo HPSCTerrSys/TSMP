@@ -146,6 +146,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   INTEGER :: ilayer
   INTEGER :: cc                 ! Counter for obs_index_p
   INTEGER :: i,j,k,count  ! Counters
+  INTEGER :: cnt          ! Counters
   INTEGER :: count_interp ! Counter for interpolation grid cells
   INTEGER :: m,l          ! Counters
   INTEGER :: idx         ! Computed Index
@@ -525,7 +526,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_dis=", local_dis
   end if
 
-  ! Write process-local observation arrays
+  ! Write index mapping array NetCDF->PDAF
   ! --------------------------------------
   ! allocate index for mapping between observations in nc input and
   ! sorted by pdaf: obs_nc2pdaf
@@ -542,6 +543,76 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !-> obs_nc2pdaf(local_dis(1)+1) = 2
   !-> obs_nc2pdaf(1) = 2
 
+  if (allocated(obs_nc2pdaf)) deallocate(obs_nc2pdaf)
+  allocate(obs_nc2pdaf(dim_obs))
+  obs_nc2pdaf = 0
+
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
+  if (model .eq. tag_model_parflow) then
+  if (point_obs.eq.1) then
+
+    cnt = 1
+    do i = 1, dim_obs
+      do j = 1, enkf_subvecsize
+        if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
+          obs_nc2pdaf(local_dis(mype_filter+1)+cnt) = i
+          cnt = cnt + 1
+        end if
+      end do
+    end do
+
+  end if
+  end if
+#endif
+#endif
+
+#ifndef PARFLOW_STAND_ALONE
+#ifndef OBS_ONLY_PARFLOW
+  if(model .eq. tag_model_clm) then
+  if (point_obs.eq.1) then
+
+    cnt = 1
+    do i = 1, dim_obs
+      do g = begg,endg
+        newgridcell = .true.
+        do c = begc,endc
+          cg =   mycgridcell(c)
+          if(cg .eq. g) then
+            if(newgridcell) then
+
+              if(is_use_dr) then
+                deltax = abs(lon(g)-clmobs_lon(i))
+                deltay = abs(lat(g)-clmobs_lat(i))
+              end if
+
+              if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+                obs_nc2pdaf(local_dis(mype_filter+1)+cnt) = i
+                cnt = cnt + 1
+              end if
+
+              newgridcell = .false.
+
+            end if
+          end if
+        end do
+      end do
+    end do
+
+  end if
+  end if
+#endif
+#endif
+
+  call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
+
+  if (mype_filter==0 .and. screen > 2) then
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: obs_nc2pdaf=", obs_nc2pdaf
+  end if
+
+
+  ! Write process-local observation arrays
+  ! --------------------------------------
   IF (ALLOCATED(obs)) DEALLOCATE(obs)
   ALLOCATE(obs(dim_obs))
   !IF (ALLOCATED(obs_index)) DEALLOCATE(obs_index)
@@ -561,10 +632,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       IF (ALLOCATED(var_id_obs)) DEALLOCATE(var_id_obs)
       ALLOCATE(var_id_obs(dim_obs_p))
   end if
-
-  if (allocated(obs_nc2pdaf)) deallocate(obs_nc2pdaf)
-  allocate(obs_nc2pdaf(dim_obs))
-  obs_nc2pdaf = 0
 
 #ifndef CLMSA
 #ifndef OBS_ONLY_CLM
@@ -662,7 +729,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                   idx_obs_nc_p(count)=idx_obs_nc(i)
                   !Allocate(sc_p(count)%scol_obs_in(nz_glob))       
               endif
-              obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
               count = count + 1
            end if
         end do
@@ -733,7 +799,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   end if
   end if
-  call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 #endif
 #endif
 
@@ -854,7 +919,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                  !write(*,*) 'obs_index_p(',count,') is',obs_index_p(count)
                  obs_p(count) = clm_obs(i)
                  if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)
-                 obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
                  count = count + 1
                end if
 
@@ -936,13 +1000,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   end if
   end if
-  call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 #endif
 #endif
-
-  if (mype_filter==0 .and. screen > 2) then
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: obs_nc2pdaf=", obs_nc2pdaf
-  end if
 
   ! allocate array of local observation dimensions with total PEs
   IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
