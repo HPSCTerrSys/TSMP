@@ -70,6 +70,7 @@ SUBROUTINE finalize_pdaf()
   ! with letkf filter
   IF (ALLOCATED(obs_index_l)) DEALLOCATE(obs_index_l)
   IF (ALLOCATED(global_to_local)) DEALLOCATE(global_to_local)
+  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
 
 ! *** Finalize parallel MPI region - if not done by model ***
 !  CALL finalize_parallel()
