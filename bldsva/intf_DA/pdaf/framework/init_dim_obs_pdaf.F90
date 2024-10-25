@@ -512,10 +512,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
     call abort_parallel()
   end if
 
-  !  Gather local dim obs in array
-  ! ------------------------------
+  !  Gather local observation dimensions and displacements in arrays
+  ! ----------------------------------------------------------------
 
-  ! allocate array of local observation dimensions with total PEs
+  ! Allocate array of local observation dimensions
   IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
   ALLOCATE(local_dims_obs(npes_filter))
 
@@ -523,9 +523,11 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
-  ! Set observation displacement array local_disp_obs
+  ! Allocate observation displacement array local_disp_obs
   IF (ALLOCATED(local_disp_obs)) DEALLOCATE(local_disp_obs)
   ALLOCATE(local_disp_obs(npes_filter))
+
+  ! Set observation displacement array local_disp_obs
   local_disp_obs(1) = 0
   do i = 2, npes_filter
      local_disp_obs(i) = local_disp_obs(i-1) + local_dims_obs(i-1)
