@@ -65,6 +65,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        pressure_obserr_p, clm_obserr_p, &
        obs_nc2pdaf, &
        local_dims_obs, &
+       local_disp_obs, &
        dim_obs_p, &
        obs_id_p, &
 #ifndef PARFLOW_STAND_ALONE
@@ -129,7 +130,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   INTEGER :: m,l          ! Counters
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
-  integer,allocatable :: local_disp_obs(:)
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -410,9 +410,9 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
-  ! Set array local_disp_obs (number of observations before process) from
-  ! local observation dimensions
-  allocate(local_disp_obs(npes_filter))
+  ! Set observation displacement array  local_disp_obs
+  IF (ALLOCATED(local_disp_obs)) DEALLOCATE(local_disp_obs)
+  ALLOCATE(local_disp_obs(npes_filter))
   local_disp_obs(1) = 0
   do i = 2, npes_filter
      local_disp_obs(i) = local_disp_obs(i-1) + local_dims_obs(i-1)
@@ -651,7 +651,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
   !  clean up the temp data from nc file
   ! ------------------------------------
-  deallocate(local_disp_obs)
   call clean_obs_nc()
 
 END SUBROUTINE init_dim_obs_f_pdaf
