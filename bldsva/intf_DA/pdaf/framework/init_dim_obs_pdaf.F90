@@ -151,7 +151,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   INTEGER :: idx         ! Computed Index
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
-  integer,allocatable :: local_dis(:)
+  integer,allocatable :: local_disp_obs(:)
   integer :: k_count !,nsc !hcp
   real    :: sum_interp_weights
 
@@ -523,16 +523,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
-  ! Set array local_dis (number of observations before process) from
+  ! Set array local_disp_obs (number of observations before process) from
   ! local observation dimensions
-  allocate(local_dis(npes_filter))
-  local_dis(1) = 0
+  allocate(local_disp_obs(npes_filter))
+  local_disp_obs(1) = 0
   do i = 2, npes_filter
-     local_dis(i) = local_dis(i-1) + local_dims_obs(i-1)
+     local_disp_obs(i) = local_disp_obs(i-1) + local_dims_obs(i-1)
   end do
 
   if (mype_filter==0 .and. screen > 2) then
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_dis=", local_dis
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_disp_obs=", local_disp_obs
   end if
 
   ! Write process-local observation arrays
@@ -548,8 +548,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   ! count = 1
   ! mype_filter = 0
   ! 
-  ! obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
-  !-> obs_nc2pdaf(local_dis(1)+1) = 2
+  ! obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
+  !-> obs_nc2pdaf(local_disp_obs(1)+1) = 2
   !-> obs_nc2pdaf(1) = 2
 
   IF (ALLOCATED(obs)) DEALLOCATE(obs)
@@ -672,7 +672,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                   idx_obs_nc_p(count)=idx_obs_nc(i)
                   !Allocate(sc_p(count)%scol_obs_in(nz_glob))       
               endif
-              obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
+              obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
               count = count + 1
            end if
         end do
@@ -864,7 +864,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                  !write(*,*) 'obs_index_p(',count,') is',obs_index_p(count)
                  obs_p(count) = clm_obs(i)
                  if(multierr.eq.1) clm_obserr_p(count) = clm_obserr(i)
-                 obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
+                 obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
                  count = count + 1
                end if
 
@@ -957,7 +957,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   !  clean up the temp data from nc file
   ! ------------------------------------
-  deallocate(local_dis)
+  deallocate(local_disp_obs)
   call clean_obs_nc()
 
 END SUBROUTINE init_dim_obs_pdaf

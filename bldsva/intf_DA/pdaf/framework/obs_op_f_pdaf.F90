@@ -84,7 +84,7 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   INTEGER :: ierror, max_var_id
   INTEGER :: i                         ! Counter
   REAL, ALLOCATABLE :: m_state_tmp(:)  ! Temporary process-local state vector
-  INTEGER, ALLOCATABLE :: local_dis(:) ! Displacement array for gathering
+  INTEGER, ALLOCATABLE :: local_disp_obs(:) ! Displacement array for gathering
   INTEGER, ALLOCATABLE :: m_id_p_tmp(:)
   INTEGER, ALLOCATABLE :: m_id_f_tmp(:)
 
@@ -108,24 +108,24 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   END DO
   
   ! Gather full observed state
-  ALLOCATE(local_dis(npes_filter))
+  ALLOCATE(local_disp_obs(npes_filter))
 
   !print *,'local_dims_obs(mype_filter+1) ', local_dims_obs(mype_filter+1)
   !print *,'dim_obs_p ', dim_obs_p
 
-  local_dis(1) = 0
+  local_disp_obs(1) = 0
   DO i = 2, npes_filter
-     local_dis(i) = local_dis(i-1) + local_dims_obs(i-1)
+     local_disp_obs(i) = local_disp_obs(i-1) + local_dims_obs(i-1)
   END DO
 
   ! gather local observed states of different sizes in a vector 
   CALL mpi_allgatherv(m_state_tmp, local_dims_obs(mype_filter+1), &
-       MPI_DOUBLE_PRECISION, m_state_f, local_dims_obs, local_dis, &  
+       MPI_DOUBLE_PRECISION, m_state_f, local_dims_obs, local_disp_obs, &  
        MPI_DOUBLE_PRECISION, comm_filter, ierror)
 
   ! gather m_id_p 
   CALL mpi_allgatherv(m_id_p_tmp, local_dims_obs(mype_filter+1), &
-       MPI_INT, m_id_f, local_dims_obs, local_dis, &  
+       MPI_INT, m_id_f, local_dims_obs, local_disp_obs, &  
        MPI_INT, comm_filter, ierror)
 
   ! resort m_id_p
@@ -138,6 +138,6 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   enddo
 
   ! Clean up
-  DEALLOCATE(m_state_tmp, local_dis,m_id_p_tmp,m_id_f_tmp)
+  DEALLOCATE(m_state_tmp, local_disp_obs,m_id_p_tmp,m_id_f_tmp)
 
 END SUBROUTINE obs_op_f_pdaf
