@@ -154,12 +154,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   INTEGER :: c                ! CLM Column index
   INTEGER :: g                ! CLM Gridcell index
   INTEGER :: cg
-  INTEGER :: ilayer
   INTEGER :: i,j,k,count  ! Counters
   INTEGER :: cnt          ! Counters
   INTEGER :: count_interp ! Counter for interpolation grid cells
   INTEGER :: m,l          ! Counters
-  INTEGER :: idx         ! Computed Index
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
   integer :: k_count !,nsc !hcp
