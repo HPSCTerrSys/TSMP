@@ -1024,21 +1024,21 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
      end if
 
-#ifdef PDAF_DEBUG
-     IF (da_print_obs_index > 0) THEN
-       ! TSMP-PDAF: For debug runs, output the state vector in files
-       WRITE(fn, "(a,i5.5,a,i5.5,a)") "obs_index_p_", mype_world, ".", step, ".txt"
-       OPEN(unit=71, file=fn, action="write")
-       DO i = 1, dim_obs_p
-         WRITE (71,"(i10)") obs_index_p(i)
-       END DO
-       CLOSE(71)
-     END IF
+  end if
+  end if
+#endif
 #endif
 
-  end if
-  end if
-#endif
+#ifdef PDAF_DEBUG
+  IF (da_print_obs_index > 0) THEN
+    ! TSMP-PDAF: For debug runs, output the state vector in files
+    WRITE(fn, "(a,i5.5,a,i5.5,a)") "obs_index_p_", mype_world, ".", step, ".txt"
+    OPEN(unit=71, file=fn, action="write")
+    DO i = 1, dim_obs_p
+      WRITE (71,"(i10)") obs_index_p(i)
+    END DO
+    CLOSE(71)
+  END IF
 #endif
 
 
