@@ -137,7 +137,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   INTEGER :: max_var_id
   INTEGER :: sum_dim_obs_p
   INTEGER :: i,j,k,count  ! Counters
-  INTEGER :: cnt           ! Counters
+  INTEGER :: cnt          ! Counters
+  INTEGER :: count_interp ! Counter for interpolation grid cells
   INTEGER :: m,l          ! Counters
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename

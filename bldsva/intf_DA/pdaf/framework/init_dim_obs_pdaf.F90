@@ -151,10 +151,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   integer :: ierror
   INTEGER :: max_var_id
   INTEGER :: sum_dim_obs_p
-  INTEGER :: c,g                ! Column index, Gridcell index
+  INTEGER :: c                ! CLM Column index
+  INTEGER :: g                ! CLM Gridcell index
   INTEGER :: cg
   INTEGER :: ilayer
-  INTEGER :: cc                 ! Counter for obs_index_p
   INTEGER :: i,j,k,count  ! Counters
   INTEGER :: cnt          ! Counters
   INTEGER :: count_interp ! Counter for interpolation grid cells
