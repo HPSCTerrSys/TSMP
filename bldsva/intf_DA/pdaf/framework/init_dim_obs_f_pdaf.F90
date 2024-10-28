@@ -63,6 +63,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        ONLY: obs_p, obs_index_p, dim_obs, obs_filename, &
        obs, &
        pressure_obserr_p, clm_obserr_p, &
+       obs_nc2pdaf, &
        local_dims_obs, &
        local_disp_obs, &
        dim_obs_p, &
@@ -424,6 +425,80 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
       print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_disp_obs=", local_disp_obs
   end if
 
+  ! Write index mapping array NetCDF->PDAF
+  ! --------------------------------------
+  ! allocate index for mapping between observations in nc input and
+  ! sorted by pdaf: obs_nc2pdaf
+
+  ! Non-trivial example: The second observation in the NetCDF file
+  ! (`i=2`) is the only observation in the subgrid (`count = 1`) of
+  ! the first PE (`mype_filter = 0`):
+  !
+  ! i = 2
+  ! count = 1
+  ! mype_filter = 0
+  ! 
+  ! obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
+  !-> obs_nc2pdaf(local_disp_obs(1)+1) = 2
+  !-> obs_nc2pdaf(1) = 2
+
+  if (allocated(obs_nc2pdaf)) deallocate(obs_nc2pdaf)
+  allocate(obs_nc2pdaf(dim_obs))
+  obs_nc2pdaf = 0
+
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
+  if (model .eq. tag_model_parflow) then
+  if (point_obs.eq.1) then
+
+    cnt = 1
+    do i = 1, dim_obs
+      do j = 1, enkf_subvecsize
+        if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
+          obs_nc2pdaf(local_disp_obs(mype_filter+1)+cnt) = i
+          cnt = cnt + 1
+        end if
+      end do
+    end do
+
+  end if
+  end if
+#endif
+#endif
+
+#ifndef PARFLOW_STAND_ALONE
+#ifndef OBS_ONLY_PARFLOW
+  if(model .eq. tag_model_clm) then
+  if(point_obs.eq.1) then
+
+    cnt = 1
+     do i = 1, dim_obs
+        k = 1
+       do j = begg,endg
+            if(is_use_dr) then
+                deltax = abs(lon(j)-clmobs_lon(i))
+                deltay = abs(lat(j)-clmobs_lat(i))
+            end if
+            if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k)))) then
+              obs_nc2pdaf(local_disp_obs(mype_filter+1)+cnt) = i
+              cnt = cnt + 1
+           end if
+           k = k + 1
+        end do
+     end do
+
+  end if
+  end if
+#endif
+#endif
+
+  ! collect values from all PEs, by adding all PE-local arrays (works
+  ! since only the subsection belonging to a specific PE is non-zero)
+  call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
+
+  if (mype_filter==0 .and. screen > 2) then
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: obs_nc2pdaf=", obs_nc2pdaf
+  end if
 
   ! Write process-local observation arrays
   ! --------------------------------------
