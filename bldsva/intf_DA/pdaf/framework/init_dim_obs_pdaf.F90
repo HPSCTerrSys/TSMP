@@ -540,18 +540,29 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   ! Write index mapping array NetCDF->PDAF
   ! --------------------------------------
-  ! allocate index for mapping between observations in nc input and
-  ! sorted by pdaf: obs_nc2pdaf
+  ! Set index mapping `obs_nc2pdaf` between observation order in
+  ! NetCDF input and observation order in pdaf as determined by domain
+  ! decomposition.
 
-  ! Non-trivial example: The second observation in the NetCDF file
-  ! (`i=2`) is the only observation in the subgrid (`count = 1`) of
-  ! the first PE (`mype_filter = 0`):
+  ! Use-case: Correct index order in loops over NetCDF-observation
+  ! file input arrays.
+
+  ! Trivial example: The order in the NetCDF file corresponds exactly
+  ! to the order in the domain decomposition in PDAF, e.g. for a
+  ! single PE per component model run.
+
+  ! Non-trivial example: The first observation in the NetCDF file is
+  ! not located in the domain/subgrid of the first PE. Rather, the
+  ! second observation in the NetCDF file (`i=2`) is the only
+  ! observation (`cnt = 1`) in the subgrid of the first PE
+  ! (`mype_filter = 0`). This leads to a non-trivial index mapping,
+  ! e.g. `obs_nc2pdaf(1)==2`:
   !
   ! i = 2
-  ! count = 1
+  ! cnt = 1
   ! mype_filter = 0
   ! 
-  ! obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
+  ! obs_nc2pdaf(local_disp_obs(mype_filter+1)+cnt) = i
   !-> obs_nc2pdaf(local_disp_obs(1)+1) = 2
   !-> obs_nc2pdaf(1) = 2
 
