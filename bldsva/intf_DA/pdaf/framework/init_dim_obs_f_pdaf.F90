@@ -65,6 +65,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        pressure_obserr_p, clm_obserr_p, &
        obs_nc2pdaf, &
        local_dims_obs, &
+       local_disp_obs, &
        dim_obs_p, &
        obs_id_p, &
 #ifndef PARFLOW_STAND_ALONE
@@ -130,7 +131,6 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   INTEGER :: m,l          ! Counters
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
-  integer,allocatable :: local_dis(:),local_dim(:)
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -400,17 +400,29 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
     call abort_parallel()
   end if
 
-  allocate(local_dis(npes_filter))
-  allocate(local_dim(npes_filter))
-  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dim, 1, MPI_INTEGER, comm_filter, ierror)
-  local_dis(1) = 0
+  !  Gather local observation dimensions and displacements in arrays
+  ! ----------------------------------------------------------------
+
+  ! Allocate array of local observation dimensions
+  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
+  ALLOCATE(local_dims_obs(npes_filter))
+
+  ! Gather array of local observation dimensions
+  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
+       comm_filter, ierror)
+
+  ! Allocate observation displacement array  local_disp_obs
+  IF (ALLOCATED(local_disp_obs)) DEALLOCATE(local_disp_obs)
+  ALLOCATE(local_disp_obs(npes_filter))
+
+  ! Set observation displacement array  local_disp_obs
+  local_disp_obs(1) = 0
   do i = 2, npes_filter
-     local_dis(i) = local_dis(i-1) + local_dim(i-1)
+     local_disp_obs(i) = local_disp_obs(i-1) + local_dims_obs(i-1)
   end do
-  deallocate(local_dim)
 
   if (mype_filter==0 .and. screen > 2) then
-      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_dis=", local_dis
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": init_dim_obs_pdaf: local_disp_obs=", local_disp_obs
   end if
 
   ! Write index mapping array NetCDF->PDAF
@@ -426,8 +438,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   ! count = 1
   ! mype_filter = 0
   ! 
-  ! obs_nc2pdaf(local_dis(mype_filter+1)+count) = i
-  !-> obs_nc2pdaf(local_dis(1)+1) = 2
+  ! obs_nc2pdaf(local_disp_obs(mype_filter+1)+count) = i
+  !-> obs_nc2pdaf(local_disp_obs(1)+1) = 2
   !-> obs_nc2pdaf(1) = 2
 
   if (allocated(obs_nc2pdaf)) deallocate(obs_nc2pdaf)
@@ -443,7 +455,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
     do i = 1, dim_obs
       do j = 1, enkf_subvecsize
         if (idx_obs_nc(i) .eq. idx_map_subvec2state_fortran(j)) then
-          obs_nc2pdaf(local_dis(mype_filter+1)+cnt) = i
+          obs_nc2pdaf(local_disp_obs(mype_filter+1)+cnt) = i
           cnt = cnt + 1
         end if
       end do
@@ -468,7 +480,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
                 deltay = abs(lat(j)-clmobs_lat(i))
             end if
             if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(k)) .and. (latixy_obs(i) == latixy(k)))) then
-              obs_nc2pdaf(local_dis(mype_filter+1)+cnt) = i
+              obs_nc2pdaf(local_disp_obs(mype_filter+1)+cnt) = i
               cnt = cnt + 1
            end if
            k = k + 1
@@ -688,17 +700,9 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 #endif
 #endif
 
-  ! allocate array of local observation dimensions with total PEs
-  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
-  ALLOCATE(local_dims_obs(npes_filter))
-
-  ! Gather array of local observation dimensions 
-  call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
-       comm_filter, ierror)
 
   !  clean up the temp data from nc file
   ! ------------------------------------
-  deallocate(local_dis)
   call clean_obs_nc()
 
 END SUBROUTINE init_dim_obs_f_pdaf
