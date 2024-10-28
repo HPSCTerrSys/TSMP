@@ -96,8 +96,12 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
       nx_glob, ny_glob, nz_glob, crns_flag, da_print_obs_index, &
-      tag_model_clm, point_obs, obs_interp_switch, is_dampfac_state_time_dependent, &
-      dampfac_state_time_dependent, is_dampfac_param_time_dependent, dampfac_param_time_dependent, model
+      tag_model_clm, point_obs
+  use mod_tsmp, only: obs_interp_switch
+  use mod_tsmp, &
+      only: is_dampfac_state_time_dependent, &
+      dampfac_state_time_dependent, is_dampfac_param_time_dependent, dampfac_param_time_dependent
+  use mod_tsmp, only: model
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -119,7 +123,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   !hcp
   !use the subroutine written by Mukund "domain_def_clm" to evaluate longxy,
   !latixy, longxy_obs, latixy_obs
-  USE enkf_clm_mod, only: domain_def_clm, get_interp_idx
+  USE enkf_clm_mod, only: domain_def_clm
+  USE enkf_clm_mod, only: get_interp_idx
   use enkf_clm_mod, only: clmstatevec_allcol
   !hcp end
 #endif
@@ -288,7 +293,6 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
              if (allocated(pressure_obserr)) deallocate(pressure_obserr)
              allocate(pressure_obserr(dim_obs))
         endif
-
         if(allocated(idx_obs_nc)) deallocate(idx_obs_nc)
         allocate(idx_obs_nc(dim_obs))
         if(allocated(x_idx_obs_nc))deallocate(x_idx_obs_nc)
