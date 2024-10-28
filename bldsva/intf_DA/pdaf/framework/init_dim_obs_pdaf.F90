@@ -627,6 +627,8 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 #endif
 #endif
 
+  ! collect values from all PEs, by adding all PE-local arrays (works
+  ! since only the subsection belonging to a specific PE is non-zero)
   call mpi_allreduce(MPI_IN_PLACE,obs_nc2pdaf,dim_obs,MPI_INTEGER,MPI_SUM,comm_filter,ierror)
 
   if (mype_filter==0 .and. screen > 2) then
