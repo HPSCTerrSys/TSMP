@@ -80,6 +80,11 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 !hcp end
 #endif
 #endif
+#ifndef CLMSA
+#ifndef OBS_ONLY_CLM
+       sc_p, idx_obs_nc_p, &
+#endif
+#endif
        var_id_obs, maxlon, minlon, maxlat, &
        minlat, maxix, minix, maxiy, miniy, lon_var_id, ix_var_id, lat_var_id, iy_var_id, &
        screen
@@ -95,6 +100,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   use mod_read_obs, only: dampfac_param_time_dependent_in
   use mod_tsmp, &
       only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize
+  use mod_tsmp, &
+      only: nx_glob, ny_glob, nz_glob, crns_flag
   use mod_tsmp, only: da_print_obs_index
   use mod_tsmp, only: tag_model_clm
   use mod_tsmp, only: point_obs
@@ -157,6 +164,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   INTEGER :: m,l          ! Counters
   logical :: is_multi_observation_files
   character (len = 110) :: current_observation_filename
+  integer :: k_count !,nsc !hcp
   real    :: sum_interp_weights
 
 #ifndef PARFLOW_STAND_ALONE
@@ -215,6 +223,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   call mpi_bcast(dim_obs, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! Switch for vector of observation errors
   call mpi_bcast(multierr, 1, MPI_INTEGER, 0, comm_filter, ierror)
+  !! broadcast crns_flag
+  !call mpi_bcast(crns_flag, 1, MPI_INTEGER, 0, comm_filter, ierror)
   ! broadcast dim_ny and dim_nx
   if(point_obs.eq.0) then
      call mpi_bcast(dim_nx, 1, MPI_INTEGER, 0, comm_filter, ierror)
@@ -672,6 +682,12 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
         if (allocated(pressure_obserr_p)) deallocate(pressure_obserr_p)
         allocate(pressure_obserr_p(dim_obs_p))
      endif
+     if(crns_flag.eq.1) then 
+        if (allocated(sc_p)) deallocate(sc_p)
+        allocate(sc_p(nz_glob, dim_obs_p))
+        if (allocated(idx_obs_nc_p)) deallocate(idx_obs_nc_p)
+        allocate(idx_obs_nc_p(dim_obs_p))
+     endif
      !hcp fin
 
   if (point_obs.eq.0) then
@@ -730,6 +746,11 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      end do
   else if (point_obs.eq.1) then
 
+     !hcp
+     if(crns_flag.eq.1) then
+         idx_obs_nc(:)=nx_glob*(y_idx_obs_nc(:)-1)+x_idx_obs_nc(:)
+     endif
+     !hcp fin
      count = 1
      do i = 1, dim_obs
         obs(i) = pressure_obs(i)  
@@ -742,10 +763,24 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
               obs_index_p(count) = j
               obs_p(count) = pressure_obs(i)
               if(multierr.eq.1) pressure_obserr_p(count) = pressure_obserr(i)
+              if(crns_flag.eq.1) then
+                  idx_obs_nc_p(count)=idx_obs_nc(i)
+                  !Allocate(sc_p(count)%scol_obs_in(nz_glob))       
+              endif
               count = count + 1
            end if
         end do
      end do
+     do i = 1, dim_obs_p
+      if(crns_flag.eq.1) then 
+        do k = 1, nz_glob
+          k_count=idx_obs_nc_p(i)+(k-1)*nx_glob*ny_glob
+          do j = 1, enkf_subvecsize
+             if (k_count .eq. idx_map_subvec2state_fortran(j)) sc_p(nz_glob-k+1,i)=j
+          enddo
+        enddo
+      endif
+     enddo
 
      if(obs_interp_switch) then
          ! loop over all obs and save the indices of the nearest grid
