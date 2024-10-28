@@ -91,12 +91,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        x_idx_interp_d_obs_nc, y_idx_interp_d_obs_nc, &
        clm_obs, &
        var_id_obs_nc, dim_nx, dim_ny, &
-       clmobs_lon, clmobs_lat, clmobs_layer, clmobs_dr, clm_obserr, &
-       dampfac_state_time_dependent_in, dampfac_param_time_dependent_in
+       clmobs_lon, clmobs_lat, clmobs_layer, clmobs_dr, clm_obserr
+  use mod_read_obs, only: dampfac_state_time_dependent_in
+  use mod_read_obs, only: dampfac_param_time_dependent_in
   use mod_tsmp, &
-      only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      nx_glob, ny_glob, nz_glob, crns_flag, da_print_obs_index, &
-      tag_model_clm, point_obs
+      only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize
+  use mod_tsmp, &
+      only: nx_glob, ny_glob, nz_glob, crns_flag
+  use mod_tsmp, only: da_print_obs_index
+  use mod_tsmp, only: tag_model_clm
+  use mod_tsmp, only: point_obs
   use mod_tsmp, only: obs_interp_switch
   use mod_tsmp, &
       only: is_dampfac_state_time_dependent, &

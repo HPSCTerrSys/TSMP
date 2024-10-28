@@ -92,11 +92,12 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
        var_id_obs_nc, dim_nx, dim_ny, &
        clmobs_lon, clmobs_lat, clmobs_layer, clmobs_dr, clm_obserr
   use mod_tsmp, &
-      only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize, &
-      tag_model_clm, point_obs
+      only: idx_map_subvec2state_fortran, tag_model_parflow, enkf_subvecsize
+  use mod_tsmp, only: da_print_obs_index
+  use mod_tsmp, only: tag_model_clm
+  use mod_tsmp, only: point_obs
   use mod_tsmp, only: obs_interp_switch
   use mod_tsmp, only: model
-
 
 #ifndef PARFLOW_STAND_ALONE
 #ifndef OBS_ONLY_PARFLOW
@@ -161,6 +162,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   logical :: obs_snapped     !Switch for checking multiple observation counts
 #endif
 #endif
+
+  character (len = 27) :: fn    !TSMP-PDAF: function name for obs_index_p output
 
   ! ****************************************
   ! *** Initialize observation dimension ***
@@ -850,6 +853,18 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
          end do
 
      end if
+
+#ifdef PDAF_DEBUG
+     IF (da_print_obs_index > 0) THEN
+       ! TSMP-PDAF: For debug runs, output the state vector in files
+       WRITE(fn, "(a,i5.5,a,i5.5,a)") "obs_index_p_", mype_world, ".", step, ".txt"
+       OPEN(unit=71, file=fn, action="write")
+       DO i = 1, dim_obs_p
+         WRITE (71,"(i10)") obs_index_p(i)
+       END DO
+       CLOSE(71)
+     END IF
+#endif
 
   end if
   end if
