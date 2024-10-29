@@ -695,10 +695,12 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
   if (point_obs.eq.0) then
      max_var_id = MAXVAL(var_id_obs_nc(:,:))
+
      if(allocated(ix_var_id)) deallocate(ix_var_id) 
      allocate(ix_var_id(max_var_id))
      if(allocated(iy_var_id)) deallocate(iy_var_id)
      allocate(iy_var_id(max_var_id))
+
      if(allocated(maxix)) deallocate(maxix)
      allocate(maxix(max_var_id))
      if(allocated(minix)) deallocate(minix)

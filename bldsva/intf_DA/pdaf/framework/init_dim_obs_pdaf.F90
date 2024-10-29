@@ -678,6 +678,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
         if (allocated(pressure_obserr_p)) deallocate(pressure_obserr_p)
         allocate(pressure_obserr_p(dim_obs_p))
      endif
+
      if(crns_flag.eq.1) then 
         if (allocated(sc_p)) deallocate(sc_p)
         allocate(sc_p(nz_glob, dim_obs_p))
