@@ -149,7 +149,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
   ! *** Local variables
   integer :: ierror
-  INTEGER :: max_var_id
+  INTEGER :: max_var_id         ! Multi-scale DA
   INTEGER :: sum_dim_obs_p
   INTEGER :: c                ! CLM Column index
   INTEGER :: g                ! CLM Gridcell index
