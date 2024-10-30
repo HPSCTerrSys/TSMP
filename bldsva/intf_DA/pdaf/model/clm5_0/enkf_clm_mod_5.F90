@@ -617,6 +617,14 @@ module enkf_clm_mod
                         h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
                       end do
                   end if
+
+                  if (isnan(rsnow(j))) then
+                    print *, "WARNING: rsnow at j is nan: ", j
+                  endif
+                  if (isnan(h2osno(j))) then
+                    print *, "WARNING: h2osno at j is nan: ", j
+                  endif
+
                 end if
               endif
           end do
@@ -683,6 +691,14 @@ module enkf_clm_mod
         end do
         snow_depth(jj) = sum(dzsno(jj,:))
         h2osno(jj) = sum(h2oice(jj,:))
+
+        if (isnan(h2osno(jj))) then
+          print *, "WARNING: h2osno at jj is nan: ", jj
+        endif
+        if (isnan(snow_depth(jj))) then
+          print *, "WARNING: snow_depth at jj is nan: ", jj
+        endif
+
       else ! snow (h2osno) present
         if (snlsno(jj).lt.0) then ! snow layers in the column
           if (clmupdate_snow .eq. 1) then
@@ -798,6 +814,14 @@ module enkf_clm_mod
             snow_depth(jj) = snow_depth(jj) + sum(gain_dzsno(-nlevsno+1:0))
           end if
         end if
+
+        if (isnan(h2osno(jj))) then
+          print *, "WARNING2: h2osno at jj is nan: ", jj
+        endif
+        if (isnan(snow_depth(jj))) then
+          print *, "WARNING2: snow_depth at jj is nan: ", jj
+        endif
+
       end if ! End of snow present check
     end do ! End of column iteration
 
