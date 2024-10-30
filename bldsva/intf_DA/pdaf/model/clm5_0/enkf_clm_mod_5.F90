@@ -602,8 +602,8 @@ module enkf_clm_mod
               end if
 
               ! Catch negative or 0 values from DA
-              if (clm_statevec(cc+offset).lt.0.0) then
-                print *, "WARNING: SWE at g,c is negative: ", j, clm_statevec(cc+offset)
+              if (clm_statevec(cc+offset).le.0.0) then
+                print *, "WARNING: SWE at g,c is negative or zero: ", j, clm_statevec(cc+offset)
               else
                 rsnow(j) = h2osno(j)
                 if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
