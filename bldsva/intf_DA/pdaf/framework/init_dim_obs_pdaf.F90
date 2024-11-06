@@ -935,7 +935,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                    if(clmstatevec_only_active) then
 
                      ! Error if observation deeper than clmstatevec_max_layer
-                     if(clmobs_layer(i) > min(clmstatevec_max_layer, col%nbedrock(c)) then
+                     if(clmobs_layer(i) > min(clmstatevec_max_layer, col%nbedrock(c))) then
                        print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR observation layer deeper than clmstatevec_max_layer or bedrock."
                        print *, "i=", i
                        print *, "c=", c
