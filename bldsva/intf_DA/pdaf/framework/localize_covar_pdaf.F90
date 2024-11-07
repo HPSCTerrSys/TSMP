@@ -96,6 +96,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
   ! INTEGER :: k
   real(r8), pointer :: lon(:)
   real(r8), pointer :: lat(:)
+  integer, pointer :: mycgridcell(:) !Pointer for CLM3.5/CLM5.0 col->gridcell index arrays
 #endif
   INTEGER :: icoord
 
@@ -224,8 +225,8 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          ! dy = abs(latixy_obs(j) - latixy(state_pdaf2clm_c_p(i)))
 
          ! Units: lat/lon
-         dx = abs(clmobs_lon(obs_pdaf2nc(j)) - lon(mygridcell(state_pdaf2clm_c_p(i))))
-         dy = abs(clmobs_lat(obs_pdaf2nc(j)) - lat(mygridcell(state_pdaf2clm_c_p(i))))
+         dx = abs(clmobs_lon(obs_pdaf2nc(j)) - lon(mycgridcell(state_pdaf2clm_c_p(i))))
+         dy = abs(clmobs_lat(obs_pdaf2nc(j)) - lat(mycgridcell(state_pdaf2clm_c_p(i))))
 
          distance = sqrt(real(dx)**2 + real(dy)**2)
     
