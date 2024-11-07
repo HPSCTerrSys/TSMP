@@ -35,6 +35,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
   USE mod_read_obs,&
   ONLY: x_idx_obs_nc, y_idx_obs_nc, z_idx_obs_nc
 #if defined CLMSA
+   USE shr_kind_mod , only : r8 => shr_kind_r8
    USE mod_read_obs, ONLY: clmobs_lon
    USE mod_read_obs, ONLY: clmobs_lat
    USE enkf_clm_mod, ONLY: init_clm_l_size, clmupdate_T
