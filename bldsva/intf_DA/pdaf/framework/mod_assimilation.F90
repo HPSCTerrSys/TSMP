@@ -70,7 +70,10 @@ MODULE mod_assimilation
   INTEGER, ALLOCATABLE :: obs_interp_indices_p(:,:)  ! Vector holding state-vector indices of grid cells surrounding interpolation for PE-local domain
   INTEGER, ALLOCATABLE :: obs_interp_weights_p(:,:)  ! Vector holding weights of grid cells surrounding observation for PE-local domain
   INTEGER, ALLOCATABLE :: local_dims_obs(:) ! Array for process-local observation dimensions
-  INTEGER, ALLOCATABLE :: obs_nc2pdaf(:)  ! mapping ordering of obs between netcdf input and internal ordering in pdaf
+  INTEGER, ALLOCATABLE :: local_disp_obs(:) ! Observation displacement array for gathering. Displacement: #obs before current PE
+  ! pdaf-ordered index: determined by domain-decomposition
+  ! nc-ordered index:   pure ordering of observation in NetCDF observation file
+  INTEGER, ALLOCATABLE :: obs_pdaf2nc(:)  ! index mapping from a pdaf-ordered index to a nc-ordered index
   REAL, ALLOCATABLE :: pressure_obserr_p(:) ! Vector holding observation errors for paraflow run at each PE-local domain 
   !hcp
   !type :: scoltype
@@ -82,9 +85,6 @@ MODULE mod_assimilation
   !end hcp  
   REAL, ALLOCATABLE :: clm_obserr_p(:)    ! Vector holding  observation errors for CLM run at each PE-local domain  
   REAL, ALLOCATABLE :: distance(:)        ! Localization distance
-  REAL, ALLOCATABLE :: xcoord_fortran_g(:), & ! Global coordinates for the domain are stored,
-                       ycoord_fortran_g(:), & ! been gathered from local domains. used when 
-                       zcoord_fortran_g(:)    ! local filter analysis is selected. 
   INTEGER, ALLOCATABLE :: global_to_local(:)  ! Vector to map global index to local domain index
   INTEGER, ALLOCATABLE :: longxy(:), latixy(:), longxy_obs(:), latixy_obs(:) ! longitude and latitude of grid cells and observation cells
   INTEGER, ALLOCATABLE :: longxy_obs_floor(:), latixy_obs_floor(:) ! indices of grid cells with smaller lon/lat than observation location
@@ -95,12 +95,28 @@ MODULE mod_assimilation
   INTEGER, ALLOCATABLE :: m_id_f(:)   ! index for mapping mstate to local domain
   !kuw end
 
-  INTEGER, ALLOCATABLE :: maxlon(:), minlon(:), maxlat(:), minlat(:), & ! store the maximum and minimum coordinates limits 
-                          maxix(:), minix(:), maxiy(:), miniy(:)        ! for remote sensing data with the same variable identity 
-  INTEGER :: dim_nx, dim_ny ! the dimension along the x and y direction
-                            ! for remote sensing data
-  REAL, ALLOCATABLE :: lon_var_id(:), ix_var_id(:)
-  REAL, ALLOCATABLE :: lat_var_id(:), iy_var_id(:)
+  ! Multi-scale DA
+
+  ! store the maximum and minimum limits for remote sensing data with
+  ! the same variable identity (CLM: coordinate limits, ParFlow: index
+  ! limits)
+  INTEGER, ALLOCATABLE :: maxlon(:) !CLM
+  INTEGER, ALLOCATABLE :: minlon(:)
+  INTEGER, ALLOCATABLE :: maxlat(:)
+  INTEGER, ALLOCATABLE :: minlat(:)
+  INTEGER, ALLOCATABLE :: maxix(:) !ParFlow
+  INTEGER, ALLOCATABLE :: minix(:)
+  INTEGER, ALLOCATABLE :: maxiy(:)
+  INTEGER, ALLOCATABLE :: miniy(:)
+
+  ! Dimension along the x and y direction for remote sensing data
+  INTEGER :: dim_nx
+  INTEGER :: dim_ny
+
+  REAL, ALLOCATABLE :: lon_var_id(:)
+  REAL, ALLOCATABLE :: lat_var_id(:)
+  REAL, ALLOCATABLE :: ix_var_id(:)
+  REAL, ALLOCATABLE :: iy_var_id(:)
 
 ! *** User defined observation filename ***
   character (len = 110) :: obs_filename

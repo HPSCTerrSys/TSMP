@@ -92,6 +92,8 @@ GLOBAL int clmupdate_snow_repartitioning;
 GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
 GLOBAL int clmstatevec_allcol;
+GLOBAL int clmstatevec_only_active;
+GLOBAL int clmstatevec_max_layer;
 GLOBAL int clmt_printensemble;
 GLOBAL int clmwatmin_switch;
 GLOBAL int dtmult_cosmo;

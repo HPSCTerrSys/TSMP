@@ -1,14 +1,32 @@
 # Debugging flags
 
-If an error appears and the source can not be localized by the default
-outputs, it might make sense to build TSMP-PDAF again, but with more
-debug-flags enabled.
+If an error appears and the source can not be located by the default
+outputs, it might make sense to build TSMP-PDAF with more debug-flags
+enabled.
 
-These flags can be set in
+Quick debug build: Add the option `-D true` to your original
+`./build_tsmp.ksh` command. E.g. 
+
+```
+./build_tsmp.ksh -c clm5-pdaf -m JURECA -O Intel
+```
+
+becomes
+
+```
+./build_tsmp.ksh -c clm5-pdaf -D true -m JURECA -O Intel
+```
+
+## More detailed information
+
+Debugging flags are set in
 
 - `bldsva/intf_DA/pdaf/arch/build_interface_pdaf.ksh`
 - `bldsva/machines/config_JUWELS.ksh`
 
+
+The following examples are for the Intel compiler, gcc-flags are
+slightly different.
 
 In `config_JUWELS.ksh`, there is `defaultOptC`, which can be
 set, f.e. as
@@ -23,8 +41,4 @@ For TSMP-PDAF: In `build_interface_pdaf.ksh`, there is the general
 ```ksh
 importFlags="-g -traceback"
 ```
-
-Watch out here, to get the right condition (Intel / Fortran
-compilers)! The examples are for the Intel compiler, gcc-flags are
-slightly different.
 

@@ -41,8 +41,10 @@ SUBROUTINE finalize_pdaf()
 ! !USES:
   USE mod_assimilation, &      ! Variables for assimilation
        ONLY: dim_state_p_count, obs_p, &
-             obs_index_p, xcoord_fortran_g, ycoord_fortran_g, &
-             zcoord_fortran_g, obs_index_l, global_to_local
+             obs_index_p, &
+             obs_index_l, global_to_local, &
+             local_dims_obs, &
+             local_disp_obs
   USE mod_parallel_pdaf, &
        ONLY: local_npes_model, mype_world
 
@@ -68,11 +70,10 @@ SUBROUTINE finalize_pdaf()
   if (allocated(dim_state_p_count)) deallocate (dim_state_p_count)
   ! M.Pondkule: deallocating variables used in data assimilation
   ! with letkf filter
-  IF (ALLOCATED(xcoord_fortran_g)) DEALLOCATE(xcoord_fortran_g)
-  IF (ALLOCATED(ycoord_fortran_g)) DEALLOCATE(ycoord_fortran_g)
-  IF (ALLOCATED(zcoord_fortran_g)) DEALLOCATE(zcoord_fortran_g)
   IF (ALLOCATED(obs_index_l)) DEALLOCATE(obs_index_l)
   IF (ALLOCATED(global_to_local)) DEALLOCATE(global_to_local)
+  IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
+  IF (ALLOCATED(local_disp_obs)) DEALLOCATE(local_disp_obs)
 
 ! *** Finalize parallel MPI region - if not done by model ***
 !  CALL finalize_parallel()

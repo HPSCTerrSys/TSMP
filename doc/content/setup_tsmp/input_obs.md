@@ -30,9 +30,7 @@ All observation files contain the following variable:
 
 `dim_obs`: (int) The observation files contain one dimension named
 `dim_obs` which should be set equal to the number of observations for
-the respective assimilation cycle. The observation files for ParFlow
-should contain the following variables which all should have the
-dimension `dim_obs` (except variable `dr` in CLM observations files):
+the respective assimilation cycle.
 
 #### dampfac_state ####
 
@@ -54,17 +52,18 @@ general input from
 
 ### ParFlow observation file variables ###
 
-If TSMP-PDAF is only applied with ParFlow, the following variables
-have to be specified in the observation files:
+If TSMP-PDAF is only applied with ParFlow, the following variable
+arrays of dimension `dim_obs` have to be specified in the observation
+files:
 
 #### obs_pf ####
 
-`obs_pf`: (real) Observations for ParFlow (either pressure or soil
+`obs_pf`: (real, `dim=(dim_obs)`) Observations for ParFlow (either pressure or soil
 moisture)
 
 #### obserr_pf ####
 
-`obserr_pf`: (real) Observation errors which can be different for
+`obserr_pf`: (real, `dim=(dim_obs)`) Observation errors which can be different for
 individual observations (optional). If this variable is not
 present. the command line option `rms_obs` (see [Command line
 options](./input_cmd.md#command-line-options)) will be used to define
@@ -72,22 +71,22 @@ the observation error (equal for all observations).
 
 #### ix ####
 
-`ix`: (integer) Position of the observation in the ParFlow grid in
+`ix`: (integer, `dim=(dim_obs)`) Position of the observation in the ParFlow grid in
 x-direction.
 
 #### iy ####
 
-`iy`: (integer) Position of the observation in the ParFlow grid in
+`iy`: (integer, `dim=(dim_obs)`) Position of the observation in the ParFlow grid in
 y-direction.
 
 #### iz ####
 
-`iz`: (integer) Position of the observation in the ParFlow grid in
+`iz`: (integer, `dim=(dim_obs)`) Position of the observation in the ParFlow grid in
 z-direction.
 
 #### idx ####
 
-`idx`: (integer) Index of the observation in the ParFlow grid.
+`idx`: (integer, `dim=(dim_obs)`) Index of the observation in the ParFlow grid.
 
 The positions are always relative to the south-east corner cell at the
 lowest model layer. The index `idx` can be calculated as follows:
@@ -230,37 +229,44 @@ y_{obs} &= y_{grid}(6) + \mathtt{iy\_interp\_d} \cdot \Delta y \\
 
 ### CLM observation file variables ###
 
-If TSMP-PDAF is only applied with CLM, different variables have to be
-specified in the observation files:
+If TSMP-PDAF is only applied with CLM, different variable arrays of
+ dimension `dim_obs` (exception `dr` of dimension `2`) have to be
+ specified in the observation files:
 
 #### obs_clm ####
 
-`obs_clm`: (real) Observations for CLM (soil moisture)
+`obs_clm`: (real, `dim=(dim_obs)`) Observations for CLM.
+
+Default: Soil moisture observations.
 
 #### obserr_clm ####
 
-`obserr_clm`: (real) Observation errors which can be different for
-individual observations (optional). If this variable is not
-present. the command line option `rms_obs` (see [Command line
+`obserr_clm`: (real, `dim=(dim_obs)`) Observation errors which can be
+different for individual observations (optional). If this variable is
+not present. the command line option `rms_obs` (see [Command line
 options](./input_cmd.md#command-line-options)) will be used to define
 the observation error (equal for all observations).
 
 ##### lon #####
 
-`lon`: (real) Longitude of the observation.
+`lon`: (real, `dim=(dim_obs)`) Longitude of the observation.
 
 #### lat ####
 
-`lat`: (real) Latitude of the observation.
+`lat`: (real, `dim=(dim_obs)`) Latitude of the observation.
 
 #### layer ####
 
-`layer`: (integer) CLM layer where the observation is located (counted
-from uppermost CLM layer).
+`layer`: (integer, `dim=(dim_obs)`) Index of CLM depth layer where the observation is
+located.
+
+`layer` counts downwards from uppermost CLM layer.
+
+**Attention**: The uppermost CLM layer has index `layer=1`.
 
 #### dr ####
 
-`dr`: (real) Snapping distance for the observation.
+`dr`: (real, `dim=(2)`) Snapping distance for the observation.
 
 **Attention** This variable should have a length of `2` (one snapping
 distance in longitude direction and another snapping distance in
@@ -275,8 +281,8 @@ should be smaller than the minimum grid cell size.
 The multi-scale data assimilation has been implemented for Local
 Ensemble Transform Kalman Filter(LETKF) filter (`filtertype=5`).
 
-Definition: Multiscale DA means that the simulation grid and
-measurement grid are at different scales. 
+Definition: Multi-scale DA means that the simulation grid and
+measurement grid are at different scales.
 
 Example for multi-scale data assimilation: Using SMAP satellite soil
 moisture data at 9km resolution and a simulation grid at 1km
@@ -296,7 +302,8 @@ Then in the observation files we need to specify variable
 
 #### var_id ####
 
-`var_id`: (integer) ID of cells with similar observations.
+`var_id`: (integer, `dim=(dim_ny, dim_nx)`) ID of cells with similar
+observations.
 
 Only used for [multi-scale data
 assimilation](#multi-scale-data-assimilation-observation-file-variables)
@@ -307,21 +314,23 @@ The size of `var_id` is `dim_obs`.
 `var_id` has equal values over model grid cells, which have range of
 similar observations values from raw data over them.
 
-The values of `var_id` can be grouped starting from 1 for similar
-observation values to other integers (2,3,4,5 etc.) for other similar
-observations.
+The values of `var_id` have to start from `var_id=1` for the first set
+of observation values. Then, the consecutively higher integers should
+be used (`var_id=2,3,4,5` etc.) for other sets of observations. This
+is important, as the maximal `var_id` will be used as "number of
+`var_id`".
 
-If there are no observations over some grid cells than a
-negative `var_id` (integer) is assigned to them.
+If there are no observations over a set of grid cells, then a negative
+`var_id` (integer) should assigned to this set.
 
 #### dim_nx ####
 
-`dim_nx`: (int) This is the x-dimension of the remote sensing
+`dim_nx`: (integer) This is the x-dimension of the remote sensing
 measurment in multi-scale Data Assimilation.
 
 #### dim_ny ####
 
-`dim_ny`: (int) This is the y-dimension of the remote sensing
+`dim_ny`: (integer) This is the y-dimension of the remote sensing
 measurment in multi-scale Data Assimilation.
 
 ## Observation time flexibility ##

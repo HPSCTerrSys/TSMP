@@ -29,7 +29,7 @@
 ! !ROUTINE: add_obs_error_pdaf --- Add observation error covariance matrix
 !
 ! !INTERFACE:
-SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
+SUBROUTINE add_obs_error_pdaf(step, dim_obs, C_p)
 
 ! !DESCRIPTION:
 ! User-supplied routine for PDAF.
@@ -49,16 +49,19 @@ SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
 !
 ! !USES:
   USE mod_assimilation, &
-       ONLY: rms_obs, obs_nc2pdaf
+       ONLY: rms_obs, obs_pdaf2nc
 
   USE mod_read_obs, ONLY: multierr,clm_obserr, pressure_obserr
+  USE mod_parallel_pdaf, ONLY: mype_world
+  USE mod_parallel_pdaf, ONLY: abort_parallel
+  USE mod_tsmp, ONLY: point_obs
 
   IMPLICIT NONE
 
 ! !ARGUMENTS:
   INTEGER, INTENT(in) :: step       ! Current time step
-  INTEGER, INTENT(in) :: dim_obs_p  ! Dimension of observation vector
-  REAL, INTENT(inout) :: C_p(dim_obs_p,dim_obs_p) ! Matrix to that
+  INTEGER, INTENT(in) :: dim_obs    ! Dimension of observation vector
+  REAL, INTENT(inout) :: C_p(dim_obs,dim_obs) ! Matrix to that
                                     ! observation covariance R is added
 
 ! !CALLING SEQUENCE:
@@ -87,18 +90,25 @@ SUBROUTINE add_obs_error_pdaf(step, dim_obs_p, C_p)
 ! *************************************
 
   if(multierr.ne.1) then
-    DO i = 1, dim_obs_p
+    DO i = 1, dim_obs
        C_p(i, i) = C_p(i, i) + variance_obs
     ENDDO
   endif
 
  
   if(multierr.eq.1) then
-    do i=1,dim_obs_p
+
+    ! Check that point observations are used
+    if (.not. point_obs .eq. 1) then
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR(3) `point_obs.eq.1` needed for using obs_pdaf2nc."
+      call abort_parallel()
+    end if
+
+    do i=1,dim_obs
 #if defined CLMSA
-      C_p(i,i) = C_p(i,i) + clm_obserr(obs_nc2pdaf(i))*clm_obserr(obs_nc2pdaf(i))
+      C_p(i,i) = C_p(i,i) + clm_obserr(obs_pdaf2nc(i))*clm_obserr(obs_pdaf2nc(i))
 #else
-      C_p(i,i) = C_p(i,i) + pressure_obserr(obs_nc2pdaf(i))*pressure_obserr(obs_nc2pdaf(i))
+      C_p(i,i) = C_p(i,i) + pressure_obserr(obs_pdaf2nc(i))*pressure_obserr(obs_pdaf2nc(i))
 #endif
     enddo
   endif
