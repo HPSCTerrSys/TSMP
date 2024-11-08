@@ -229,6 +229,14 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          dx = abs(clmobs_lon(obs_pdaf2nc(j)) - lon(mycgridcell(state_pdaf2clm_c_p(i))))
          dy = abs(clmobs_lat(obs_pdaf2nc(j)) - lat(mycgridcell(state_pdaf2clm_c_p(i))))
 
+         ! Check for longitude differences that may yield differences
+         ! larger than 180deg depending on conventions. Example:
+         ! crossing the prime meridian (lon=0deg), when convention is
+         ! all-positive lons
+         IF (dx > 180.0) THEN
+           dx = 360.0 - 180.0
+         END IF
+
          distance = sqrt(real(dx)**2 + real(dy)**2)
     
          ! Compute weight
@@ -253,6 +261,14 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          ! Units: lat/lon
          dx = abs(clmobs_lon(obs_pdaf2nc(j)) - clmobs_lon(obs_pdaf2nc(i)))
          dy = abs(clmobs_lat(obs_pdaf2nc(j)) - clmobs_lat(obs_pdaf2nc(i)))
+
+         ! Check for longitude differences that may yield differences
+         ! larger than 180deg depending on conventions. Example:
+         ! crossing the prime meridian (lon=0deg), when convention is
+         ! all-positive lons
+         IF (dx > 180.0) THEN
+           dx = 360.0 - 180.0
+         END IF
 
          distance = sqrt(real(dx)**2 + real(dy)**2)
     
