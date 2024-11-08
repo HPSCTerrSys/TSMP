@@ -98,6 +98,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
   real(r8), pointer :: lon(:)
   real(r8), pointer :: lat(:)
   integer, pointer :: mycgridcell(:) !Pointer for CLM3.5/CLM5.0 col->gridcell index arrays
+  REAL :: yhalf
 #endif
   INTEGER :: icoord
 
@@ -237,7 +238,15 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
            dx = 360.0 - 180.0
          END IF
 
-         distance = sqrt(real(dx)**2 + real(dy)**2)
+         ! Intermediate latitude
+         yhalf = (clmobs_lat(obs_pdaf2nc(j)) + clmobs_lat(obs_pdaf2nc(i))) / 2.0
+
+         ! Latitude-dependent factor for longitude difference
+         dx = dx * cos(yhalf * 3.14159265358979323846 / 180.0)
+
+         ! Factor ca. 111km comes from R*pi/180, where R is earth
+         ! radius and pi/180 is because we input lat/lon in degrees
+         distance = 111.19492664455873 * sqrt(real(dx)**2 + real(dy)**2)
     
          ! Compute weight
          CALL PDAF_local_weight(wtype, rtype, cradius, sradius, distance, 1, 1, tmp, 1.0, weight, 0)
@@ -270,7 +279,15 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
            dx = 360.0 - 180.0
          END IF
 
-         distance = sqrt(real(dx)**2 + real(dy)**2)
+         ! Intermediate latitude
+         yhalf = (clmobs_lat(obs_pdaf2nc(j)) + clmobs_lat(obs_pdaf2nc(i))) / 2.0
+
+         ! Latitude-dependent factor for longitude difference
+         dx = dx * cos(yhalf * 3.14159265358979323846 / 180.0)
+
+         ! Factor ca. 111km comes from R*pi/180, where R is earth
+         ! radius and pi/180 is because we input lat/lon in degrees
+         distance = 111.19492664455873 * sqrt(real(dx)**2 + real(dy)**2)
     
          ! Compute weight
          CALL PDAF_local_weight(wtype, rtype, cradius, sradius, distance, 1, 1, tmp, 1.0, weight, 0)
