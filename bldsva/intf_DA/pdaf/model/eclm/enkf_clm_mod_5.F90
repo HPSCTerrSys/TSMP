@@ -501,17 +501,11 @@ module enkf_clm_mod
               ! CLM5-grid-index and the `CLM5-layer-index times
               ! num_gridcells`
               if(clmstatevec_allcol.eq.1) then
-                if(clmstatevec_only_active.eq.1) then
-                  if(i<=clmstatevec_max_layer .and. col%hydrologically_active(j) .and. i<=col%nbedrock(j) ) then
-                    cc = state_clm2pdaf_p(j,i)
-                  else
-                    cycle
-                  end if
-                else
-                  cc = state_clm2pdaf_p(j,i)
-                end if
+                cc = state_clm2pdaf_p(j,i)
               else
-                cc = state_clm2_pdaf_p(col%gridcell(j),i)
+                ! All columns in a gridcell are assigned the updated
+                ! gridcell-SWC
+                cc = state_clm2pdaf_p(col%gridcell(j),i)
               end if
 
               if(swc(j,i).eq.0.0) then
