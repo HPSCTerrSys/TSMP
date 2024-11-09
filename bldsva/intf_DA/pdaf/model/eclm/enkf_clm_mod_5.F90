@@ -204,11 +204,13 @@ module enkf_clm_mod
       else
 
         IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
-        allocate(state_clm2pdaf_p(begg:endg,nlevsoi))
+        allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
 
         do i=1,nlevsoi
-          do g=clm_begg,clm_endg
-            state_clm2pdaf_p(g,i) = (g - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+          do c=clm_begc,clm_endc
+            ! All columns in a gridcell are assigned the updated
+            ! gridcell-SWC
+            state_clm2pdaf_p(c,i) = (col%gridcell(c) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
           end do
         end do
 
@@ -409,6 +411,7 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
+    real(r8)  :: swc_update        ! updated SWC in loop
 
     integer :: i,j,jj,g,cc=0,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
@@ -497,17 +500,6 @@ module enkf_clm_mod
           ! do j=clm_begg,clm_endg
             do j=clm_begc,clm_endc
 
-              ! Set cc (the state vector index) from the
-              ! CLM5-grid-index and the `CLM5-layer-index times
-              ! num_gridcells`
-              if(clmstatevec_allcol.eq.1) then
-                cc = state_clm2pdaf_p(j,i)
-              else
-                ! All columns in a gridcell are assigned the updated
-                ! gridcell-SWC
-                cc = state_clm2pdaf_p(col%gridcell(j),i)
-              end if
-
               if(swc(j,i).eq.0.0) then
                 swc_zero_before_update = .true.
 
@@ -524,12 +516,14 @@ module enkf_clm_mod
                 !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
               end if
 
-              if(clm_statevec(cc+offset).le.watmin_check) then
+              swc_update = clm_statevec(state_clm2pdaf_p(j,i))
+
+              if(swc_update.le.watmin_check) then
                 swc(j,i) = watmin_set
-              else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
+              else if(swc_update.ge.watsat(j,i)) then
                 swc(j,i) = watsat(j,i)
               else
-                swc(j,i)   = clm_statevec(cc+offset)
+                swc(j,i)   = swc_update
               endif
 
               if (isnan(swc(j,i))) then
