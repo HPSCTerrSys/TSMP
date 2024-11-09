@@ -93,6 +93,8 @@ module enkf_clm_mod
     integer,intent(in) :: mype
 
     integer :: i
+    integer :: j
+    integer :: jj
     integer :: c
     integer :: g
     integer :: cc
@@ -150,6 +152,25 @@ module enkf_clm_mod
           clm_varsize = clm_statevecsize
           clm_statevecsize = cc
 
+          allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+          cc = 0
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              ! Only take into account layers above input maximum layer
+              if(i<=clmstatevec_max_layer) then
+                ! Only take into account hydrologically active columns
+                ! and layers above bedrock
+                if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
+                  cc = cc + 1
+                  state_pdaf2clm_c_p(cc) = c
+                  state_pdaf2clm_j_p(cc) = i
+                end if
+              end if
+            end do
+          end do
         else
 
           IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
@@ -164,6 +185,20 @@ module enkf_clm_mod
           ! #cols values per grid-cell
           clm_varsize      =  (endc-begc+1) * nlevsoi
           clm_statevecsize =  (endc-begc+1) * nlevsoi
+
+          allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+          cc = 0
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              cc = cc + 1
+              state_pdaf2clm_c_p(cc) = c
+              state_pdaf2clm_j_p(cc) = i
+            end do
+          end do
+
         end if
 
       else
@@ -180,6 +215,34 @@ module enkf_clm_mod
         ! One value per grid-cell
         clm_varsize      =  (endg-begg+1) * nlevsoi
         clm_statevecsize =  (endg-begg+1) * nlevsoi
+
+        allocate(state_pdaf2clm_c_p(clm_statevecsize))
+        allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+        cc = 0
+
+        do i=1,nlevsoi
+          do j=clm_begg,clm_endg
+
+            ! SWC from the first column of each gridcell
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  ! Possibliy: Add state_pdaf2clm_g_p
+                  state_pdaf2clm_c_p(cc) = jj
+                  state_pdaf2clm_j_p(cc) = i
+                end if
+              end if
+            end do
+
+            cc = cc + 1
+          end do
+        end do
+
+
 
       end if
     endif
@@ -212,8 +275,6 @@ module enkf_clm_mod
     if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
       !hcp added condition
       allocate(clm_statevec(clm_statevecsize))
-      allocate(state_pdaf2clm_c_p(clm_statevecsize))
-      allocate(state_pdaf2clm_j_p(clm_statevecsize))
     end if
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
@@ -275,52 +336,10 @@ module enkf_clm_mod
     endif
 
     if(clmupdate_swc.ne.0) then
-        ! write swc values to state vector
-        cc = 1
-        do i=1,nlevsoi
-
-          if(clmstatevec_allcol.eq.1) then
-
-            do jj=clm_begc,clm_endc
-              ! SWC from all columns of each gridcell
-              if(clmstatevec_only_active.eq.1) then
-                if(i<=clmstatevec_max_layer .and. col%hydrologically_active(jj) .and. i<=col%nbedrock(jj) ) then
-                  clm_statevec(cc+offset) = swc(jj,i)
-                  state_pdaf2clm_c_p(cc+offset) = jj
-                  state_pdaf2clm_j_p(cc+offset) = i
-                  cc = cc + 1
-                end if
-              else
-                clm_statevec(cc+offset) = swc(jj,i)
-                state_pdaf2clm_c_p(cc+offset) = jj
-                state_pdaf2clm_j_p(cc+offset) = i
-                cc = cc + 1
-              end if
-
-            end do
-
-          else
-
-            do j=clm_begg,clm_endg
-              ! SWC from the first column of each gridcell
-              newgridcell = .true.
-              do jj=clm_begc,clm_endc
-                g = col%gridcell(jj)
-                if (g .eq. j) then
-                  if (newgridcell) then
-                    newgridcell = .false.
-                    clm_statevec(cc+offset) = swc(jj,i)
-                    state_pdaf2clm_c_p(cc+offset) = jj
-                    state_pdaf2clm_j_p(cc+offset) = i
-                  endif
-                endif
-              end do
-              cc = cc + 1
-            end do
-
-          end if
-
-        end do
+      ! write swc values to state vector
+      do cc = 1, clm_statevecsize
+        clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+      end do
     endif
 
     !hcp  LAI
