@@ -46,7 +46,7 @@ module enkf_clm_mod
   ! clm_paramarr: Contains LAI used in obs_op_pdaf for computing model
   ! LST in LST assimilation (clmupdate_T)
   real(r8),allocatable :: clm_paramarr(:)  !hcp CLM parameter vector (f.e. LAI)
-  integer, allocatable :: col_index_hydr_act(:,:) !Index of column in hydraulic active state vector (nlevsoi,endc-begc+1)
+  integer, allocatable :: state_clm2pdaf_p(:,:) !Index of column in hydraulic active state vector (nlevsoi,endc-begc+1)
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
   integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
@@ -123,8 +123,8 @@ module enkf_clm_mod
 
         if(clmstatevec_only_active .eq. 1) then
 
-          IF (allocated(col_index_hydr_act)) deallocate(col_index_hydr_act)
-          allocate(col_index_hydr_act(begc:endc,min(nlevsoi,clmstatevec_max_layer)))
+          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+          allocate(state_clm2pdaf_p(begc:endc,min(nlevsoi,clmstatevec_max_layer)))
 
           clm_statevecsize = 0
 
@@ -138,9 +138,9 @@ module enkf_clm_mod
                 ! and layers above bedrock
                 if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
                   cc = cc + 1
-                  col_index_hydr_act(c,i) = cc
+                  state_clm2pdaf_p(c,i) = cc
                 else
-                  col_index_hydr_act(c,i) = ispval
+                  state_clm2pdaf_p(c,i) = ispval
                 end if
               end if
             end do
@@ -470,7 +470,7 @@ module enkf_clm_mod
               if(clmstatevec_allcol.eq.1) then
                 if(clmstatevec_only_active.eq.1) then
                   if(i<=clmstatevec_max_layer .and. col%hydrologically_active(j) .and. i<=col%nbedrock(j) ) then
-                    cc = col_index_hydr_act(j,i)
+                    cc = state_clm2pdaf_p(j,i)
                   else
                     cycle
                   end if
