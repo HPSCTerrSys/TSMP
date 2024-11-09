@@ -94,6 +94,7 @@ module enkf_clm_mod
 
     integer :: i
     integer :: c
+    integer :: g
     integer :: cc
     integer :: cccheck
 
@@ -126,8 +127,6 @@ module enkf_clm_mod
           IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
           allocate(state_clm2pdaf_p(begc:endc,min(nlevsoi,clmstatevec_max_layer)))
 
-          clm_statevecsize = 0
-
           cc = 0
 
           do i=1,nlevsoi
@@ -152,12 +151,32 @@ module enkf_clm_mod
           clm_statevecsize = cc
 
         else
+
+          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+          allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              state_clm2pdaf_p(c,i) = (c - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+            end do
+          end do
+
           ! #cols values per grid-cell
           clm_varsize      =  (endc-begc+1) * nlevsoi
           clm_statevecsize =  (endc-begc+1) * nlevsoi
         end if
 
       else
+
+        IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+        allocate(state_clm2pdaf_p(begg:endg,nlevsoi))
+
+        do i=1,nlevsoi
+          do g=clm_begg,clm_endg
+            state_clm2pdaf_p(g,i) = (g - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+          end do
+        end do
+
         ! One value per grid-cell
         clm_varsize      =  (endg-begg+1) * nlevsoi
         clm_statevecsize =  (endg-begg+1) * nlevsoi
@@ -213,6 +232,7 @@ module enkf_clm_mod
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
     IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
     IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+    IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
 
   end subroutine cleanup_clm_statevec
 
@@ -469,10 +489,10 @@ module enkf_clm_mod
                     cycle
                   end if
                 else
-                  cc = (j - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+                  cc = state_clm2pdaf_p(j,i)
                 end if
               else
-                cc = (col%gridcell(j) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+                cc = state_clm2_pdaf_p(col%gridcell(j),i)
               end if
 
               if(swc(j,i).eq.0.0) then
