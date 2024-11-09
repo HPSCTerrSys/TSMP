@@ -222,6 +222,17 @@ module enkf_clm_mod
 
   end subroutine define_clm_statevec
 
+  subroutine cleanup_clm_statevec()
+
+    implicit none
+
+    ! Deallocate arrays from `define_clm_statevec`
+    IF (allocated(clm_statevec)) deallocate(clm_statevec)
+    IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+    IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+
+  end subroutine cleanup_clm_statevec
+
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varpar   , only : nlevsoi

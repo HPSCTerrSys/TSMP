@@ -229,6 +229,11 @@ subroutine clm_finalize() bind(C,name="clm_finalize")
 
   call cime_final()
 
+#if defined CLMSA
+  ! TSMP-PDAF: Deallocate arrays from `define_clm_statevec`
+  call cleanup_clm_statevec(mype)
+#endif
+
   !--------------------------------------------------------------------------
   ! Clean-up
   !--------------------------------------------------------------------------
