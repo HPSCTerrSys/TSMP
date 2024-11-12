@@ -68,7 +68,7 @@ getDefaults(){
 setDefaults(){
   platform=$def_platform
   compiler=$def_compiler
-  if [[ $platform == "" ]] then ; platform="JUWELS" ; fi #We need a hard default here
+  if [[ $platform == "" ]] then ; platform="JEDI" ; fi #We need a hard default here
   version=$def_combination
   if [[ $version == "" ]] then ; version="" ; fi #We need a hard default here
   bindir=$def_bindir

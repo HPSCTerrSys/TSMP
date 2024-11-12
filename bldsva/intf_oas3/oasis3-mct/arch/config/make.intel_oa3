@@ -44,13 +44,14 @@ CPPDEF    =  -Duse_libMPI -Duse_netCDF -Duse_comm_$(CHAN) -DVERBOSE -DDEBUG -DTR
 # For compiling in double precision, put -r8
 # For compiling in single precision, remove -r8 and add -Duse_realtype_single
 # 
-F90FLAGS  = -C __precision__ $(PSMILE_INCDIR) $(CPPDEF)
+F90FLAGS  = -C __precision__ __allow__ $(PSMILE_INCDIR) $(CPPDEF)
 #
 f90FLAGS  = $(F90FLAGS)
 FFLAGS    = $(F90FLAGS)
 fFLAGS    = $(F90FLAGS)
 CCFLAGS   = $(PSMILE_INCDIR) $(CPPDEF)
 LDFLAGS   = __ldflg__
+FCFLAGS   = $(F90FLAGS)
 #
 # MPP_IOOPT needed for compiling mpp_io
 MPP_IOOPT = __precision__ 
