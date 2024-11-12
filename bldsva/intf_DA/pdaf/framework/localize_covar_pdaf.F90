@@ -239,7 +239,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          END IF
 
          ! Intermediate latitude
-         yhalf = (clmobs_lat(obs_pdaf2nc(j)) + clmobs_lat(obs_pdaf2nc(i))) / 2.0
+         yhalf = ( clmobs_lat(obs_pdaf2nc(j)) + lat(mycgridcell(state_pdaf2clm_c_p(i))) ) / 2.0
 
          ! Latitude-dependent factor for longitude difference
          dx = dx * cos(yhalf * 3.14159265358979323846 / 180.0)
