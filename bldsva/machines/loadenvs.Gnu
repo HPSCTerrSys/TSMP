@@ -1,25 +1,35 @@
-#USAGE="source $0"
-#for bld and setup of TSMP 
-#for standard user
-#
+# Adapted to JEDI Stages/2024   AGN
 module --force purge
 module use $OTHERSTAGES
-module load Stages/2023
-module load GCC/11.3.0
-module load ParaStationMPI/5.7.0-1
+module load Stages/2024
+module load GCC/12.3.0
+module load ParaStationMPI/5.9.2-1    # needs EBROOTPSMPI in file config_JEDI
 #
-#module load Hypre/2.27.0
-module load Silo/4.11
-module load Tcl/8.6.12 
+#module load OpenMPI/4.1.5            # needs EBROOTOPENMPI in file config_JEDI 
+#module load Hypre/2.31.0       
+
+#module load Silo/4.11                # not installed on JEDI
+module load Tcl/8.6.13 
 #
-module load ecCodes/2.27.0
-module load HDF5/1.12.2-serial
-module load netCDF/4.9.0
-module load netCDF-Fortran/4.6.0
+module load ecCodes/2.31.0 
+module load HDF5/1.14.2-serial 
+module load netCDF/4.9.2
+module load netCDF-Fortran/4.6.1
 module load PnetCDF/1.12.3
-module load cURL/7.83.0
-module load Szip/.2.1.1
-module load Python/3.10.4
-module load CMake/3.23.1
- 
+module load cURL/8.0.1
+module load Szip/.2.1.1 
+module load Python/3.11.3
+module load CMake/3.26.3
+module load git/2.41.0-nodocs  
+
+# Modules for CLM5
+#module load ESMF/8.2.0              # not installed on JEDI
+#module load imkl/2022.1.0           # not installed on JEDI
+# module load NVHPC/22.9
+# module load NCL/6.6.2
+#module load netCDF-C++4/4.3.1
+
+module load GCCcore/.12.3.0
+module load Perl/5.36.1
+
 module li
