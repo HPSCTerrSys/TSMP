@@ -297,6 +297,15 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
 
        END DO
     END DO
+
+    ! Deallocate lon/lat arrays
+
+    ! For other filters these are deallocated in clean_obs_nc, invoked
+    ! at the end of init_dim_obs_pdaf. For LEnKF, deallocation is
+    ! moved to end of localize_covar_pdaf as these arrays are still
+    ! used here.
+    if(allocated(clmobs_lon))deallocate(clmobs_lon)
+    if(allocated(clmobs_lat))deallocate(clmobs_lat)
     
   ENDIF ! model==tag_model_clm
 #endif
