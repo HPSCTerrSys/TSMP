@@ -59,6 +59,7 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   USE mod_assimilation, &
        ONLY: obs_index_p, local_dims_obs, local_disp_obs, obs_id_p, obs_nc2pdaf_deprecated, &
        var_id_obs, dim_obs_p
+  USE mod_assimilation, ONLY: obs_pdaf2nc
   USE mod_parallel_pdaf, &
        ONLY: mype_world, mype_filter, npes_filter, comm_filter, MPI_DOUBLE, &
        MPI_DOUBLE_PRECISION, MPI_INT, MPI_SUM, abort_parallel
@@ -132,6 +133,15 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
 
   ! At this point OBS_NC2PDAF_DEPRECATED should be the same as OBS_PDAF2NC from
   ! INIT_DIM_OBS_PDAF / INIT_DIM_OBS_F_PDAF
+  do i = 1, dim_obs_f
+    if(.not. obs_nc2pdaf_deprecated(i) .eq. obs_pdaf2nc(i)) then
+      print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR in observation index arrays"
+      print *, "i=", i
+      print *, "obs_nc2pdaf_deprecated(i)=", obs_nc2pdaf_deprecated(i)
+      print *, "obs_pdaf2nc(i)=", obs_pdaf2nc(i)
+      call abort_parallel()
+    end if
+  end do
 
   ! Then it is inverted in the following lines
   
