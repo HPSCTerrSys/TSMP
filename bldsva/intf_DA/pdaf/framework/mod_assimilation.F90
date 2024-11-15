@@ -93,6 +93,7 @@ MODULE mod_assimilation
   !kuw
   INTEGER, ALLOCATABLE :: obs_id_p(:) ! ID of observation point in PE-local domain
   INTEGER, ALLOCATABLE :: obs_nc2pdaf_deprecated(:)   ! index for mapping mstate to local domain
+  INTEGER, ALLOCATABLE :: obs_nc2pdaf(:)   ! index for mapping mstate to local domain
   !kuw end
 
   ! Multi-scale DA
