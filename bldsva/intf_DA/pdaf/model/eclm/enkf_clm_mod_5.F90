@@ -152,7 +152,9 @@ module enkf_clm_mod
           clm_varsize = clm_statevecsize
           clm_statevecsize = cc
 
+          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
           allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
           allocate(state_pdaf2clm_j_p(clm_statevecsize))
 
           cc = 0
@@ -186,7 +188,9 @@ module enkf_clm_mod
           clm_varsize      =  (endc-begc+1) * nlevsoi
           clm_statevecsize =  (endc-begc+1) * nlevsoi
 
+          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
           allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
           allocate(state_pdaf2clm_j_p(clm_statevecsize))
 
           cc = 0
@@ -218,7 +222,9 @@ module enkf_clm_mod
         clm_varsize      =  (endg-begg+1) * nlevsoi
         clm_statevecsize =  (endg-begg+1) * nlevsoi
 
+        IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
         allocate(state_pdaf2clm_c_p(clm_statevecsize))
+        IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
         allocate(state_pdaf2clm_j_p(clm_statevecsize))
 
         cc = 0
@@ -274,8 +280,6 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
-    IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
     if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
       !hcp added condition
       allocate(clm_statevec(clm_statevecsize))
