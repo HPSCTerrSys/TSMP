@@ -57,7 +57,7 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   !
   ! !USES:
   USE mod_assimilation, &
-       ONLY: obs_index_p, local_dims_obs, local_disp_obs, obs_id_p, m_id_f, &
+       ONLY: obs_index_p, local_dims_obs, local_disp_obs, obs_id_p, obs_nc2pdaf_deprecated, &
        var_id_obs, dim_obs_p
   USE mod_parallel_pdaf, &
        ONLY: mype_world, mype_filter, npes_filter, comm_filter, MPI_DOUBLE, &
@@ -84,8 +84,8 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
   INTEGER :: ierror, max_var_id
   INTEGER :: i                         ! Counter
   REAL, ALLOCATABLE :: m_state_tmp(:)  ! Temporary process-local state vector
-  INTEGER, ALLOCATABLE :: m_id_p_tmp(:)
-  INTEGER, ALLOCATABLE :: m_id_f_tmp(:)
+  INTEGER, ALLOCATABLE :: obs_nc2pdaf_deprecated_p_tmp(:)
+  INTEGER, ALLOCATABLE :: obs_nc2pdaf_deprecated_tmp(:)
 
   ! *********************************************
   ! *** Perform application of measurement    ***
@@ -103,16 +103,16 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
 
   ! Initialize process-local observed state
   ALLOCATE(m_state_tmp(dim_obs_p))
-  allocate(m_id_p_tmp (dim_obs_p))
+  allocate(obs_nc2pdaf_deprecated_p_tmp (dim_obs_p))
 
-  if(allocated(m_id_f)) deallocate(m_id_f)
-  allocate(m_id_f(dim_obs_f))
-  if(allocated(m_id_f_tmp)) deallocate(m_id_f_tmp)
-  allocate(m_id_f_tmp(dim_obs_f))
+  if(allocated(obs_nc2pdaf_deprecated)) deallocate(obs_nc2pdaf_deprecated)
+  allocate(obs_nc2pdaf_deprecated(dim_obs_f))
+  if(allocated(obs_nc2pdaf_deprecated_tmp)) deallocate(obs_nc2pdaf_deprecated_tmp)
+  allocate(obs_nc2pdaf_deprecated_tmp(dim_obs_f))
 
   DO i = 1, dim_obs_p
      m_state_tmp(i) = state_p(obs_index_p(i))
-     m_id_p_tmp(i)  = obs_id_p(obs_index_p(i))
+     obs_nc2pdaf_deprecated_p_tmp(i)  = obs_id_p(obs_index_p(i))
   END DO
   
   !print *,'local_dims_obs(mype_filter+1) ', local_dims_obs(mype_filter+1)
@@ -125,21 +125,26 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
        MPI_DOUBLE_PRECISION, m_state_f, local_dims_obs, local_disp_obs, &  
        MPI_DOUBLE_PRECISION, comm_filter, ierror)
 
-  ! gather m_id_p 
-  CALL mpi_allgatherv(m_id_p_tmp, dim_obs_p, &
-       MPI_INT, m_id_f, local_dims_obs, local_disp_obs, &  
+  ! gather obs_nc2pdaf_deprecated_p 
+  CALL mpi_allgatherv(obs_nc2pdaf_deprecated_p_tmp, dim_obs_p, &
+       MPI_INT, obs_nc2pdaf_deprecated, local_dims_obs, local_disp_obs, &  
        MPI_INT, comm_filter, ierror)
 
-  ! resort m_id_p
+  ! At this point OBS_NC2PDAF_DEPRECATED should be the same as OBS_PDAF2NC from
+  ! INIT_DIM_OBS_PDAF / INIT_DIM_OBS_F_PDAF
+
+  ! Then it is inverted in the following lines
+  
+  ! resort obs_nc2pdaf_deprecated_p
   do i=1,dim_obs_f
-     m_id_f_tmp(i) = m_id_f(i)     
+     obs_nc2pdaf_deprecated_tmp(i) = obs_nc2pdaf_deprecated(i)     
   enddo
   do i=1,dim_obs_f
-    ! print *,'m_id_f_tmp(i) ', m_id_f_tmp(i)
-     m_id_f(m_id_f_tmp(i)) = i
+    ! print *,'obs_nc2pdaf_deprecated_tmp(i) ', obs_nc2pdaf_deprecated_tmp(i)
+     obs_nc2pdaf_deprecated(obs_nc2pdaf_deprecated_tmp(i)) = i
   enddo
 
   ! Clean up
-  DEALLOCATE(m_state_tmp,m_id_p_tmp,m_id_f_tmp)
+  DEALLOCATE(m_state_tmp,obs_nc2pdaf_deprecated_p_tmp,obs_nc2pdaf_deprecated_tmp)
 
 END SUBROUTINE obs_op_f_pdaf
