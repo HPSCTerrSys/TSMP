@@ -116,7 +116,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   use ColumnType, only : col
   ! use GetGlobalValuesMod, only: GetGlobalWrite
   ! use clm_varcon, only: nameg
-  use enkf_clm_mod, only: col_index_hydr_act
+  use enkf_clm_mod, only: state_clm2pdaf_p
   use enkf_clm_mod, only: clmstatevec_only_active
   use enkf_clm_mod, only: clmstatevec_max_layer
 #else  
@@ -781,7 +781,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
       endif
      enddo
 
-     if(obs_interp_switch) then
+     if(obs_interp_switch.eq.1) then
          ! loop over all obs and save the indices of the nearest grid
          ! points to array obs_interp_indices_p and save the distance
          ! weights to array obs_interp_weights_p (later normalized)
@@ -932,7 +932,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                  ! vector assembling.
                  if(clmstatevec_allcol.eq.1) then
 #ifdef CLMFIVE
-                   if(clmstatevec_only_active) then
+                   if(clmstatevec_only_active.eq.1) then
 
                      ! Error if observation deeper than clmstatevec_max_layer
                      if(clmobs_layer(i) > min(clmstatevec_max_layer, col%nbedrock(c))) then
@@ -944,7 +944,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                        print *, "clmstatevec_max_layer=", clmstatevec_max_layer
                        call abort_parallel()
                      end if
-                     obs_index_p(cnt) = col_index_hydr_act(c,clmobs_layer(i))
+                     obs_index_p(cnt) = state_clm2pdaf_p(c,clmobs_layer(i))
                    else
 #endif
                      obs_index_p(cnt) = c-begc+1 + ((endc-begc+1) * (clmobs_layer(i)-1))
@@ -971,7 +971,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
        end do
      end do
 
-     if(obs_interp_switch) then
+     if(obs_interp_switch.eq.1) then
          ! loop over all obs and save the indices of the nearest grid
          ! points to array obs_interp_indices_p and save the distance
          ! weights to array obs_interp_weights_p (later normalized)
