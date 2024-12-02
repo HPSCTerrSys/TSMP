@@ -46,7 +46,7 @@ module enkf_clm_mod
   ! clm_paramarr: Contains LAI used in obs_op_pdaf for computing model
   ! LST in LST assimilation (clmupdate_T)
   real(r8),allocatable :: clm_paramarr(:)  !hcp CLM parameter vector (f.e. LAI)
-  integer, allocatable :: col_index_hydr_act(:,:) !Index of column in hydraulic active state vector (nlevsoi,endc-begc+1)
+  integer, allocatable :: state_clm2pdaf_p(:,:) !Index of column in hydraulic active state vector (nlevsoi,endc-begc+1)
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
   integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
@@ -63,7 +63,7 @@ module enkf_clm_mod
   real(r8) :: dtime     ! time step increment (sec)
   integer  :: ier       ! error code
 
-  character(c_char),bind(C,name="outdir"),target :: outdir
+  character(kind=c_char,len=100),bind(C,name="outdir"),target :: outdir
 
   logical  :: log_print    ! true=> print diagnostics
   real(r8) :: eccf         ! earth orbit eccentricity factor
@@ -93,7 +93,10 @@ module enkf_clm_mod
     integer,intent(in) :: mype
 
     integer :: i
+    integer :: j
+    integer :: jj
     integer :: c
+    integer :: g
     integer :: cc
     integer :: cccheck
 
@@ -123,10 +126,8 @@ module enkf_clm_mod
 
         if(clmstatevec_only_active .eq. 1) then
 
-          IF (allocated(col_index_hydr_act)) deallocate(col_index_hydr_act)
-          allocate(col_index_hydr_act(begc:endc,min(nlevsoi,clmstatevec_max_layer)))
-
-          clm_statevecsize = 0
+          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+          allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
 
           cc = 0
 
@@ -138,46 +139,121 @@ module enkf_clm_mod
                 ! and layers above bedrock
                 if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
                   cc = cc + 1
-                  col_index_hydr_act(c,i) = cc
+                  state_clm2pdaf_p(c,i) = cc
                 else
-                  col_index_hydr_act(c,i) = ispval
+                  state_clm2pdaf_p(c,i) = ispval
+                end if
+              else
+                state_clm2pdaf_p(c,i) = ispval
+              end if
+            end do
+          end do
+
+          ! Set `clm_varsize`, even though it is currently not used
+          ! for `clmupdate_swc.eq.1`
+          clm_varsize = clm_statevecsize
+          clm_statevecsize = cc
+
+          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+          allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+          allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+          cc = 0
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              ! Only take into account layers above input maximum layer
+              if(i<=clmstatevec_max_layer) then
+                ! Only take into account hydrologically active columns
+                ! and layers above bedrock
+                if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
+                  cc = cc + 1
+                  state_pdaf2clm_c_p(cc) = c
+                  state_pdaf2clm_j_p(cc) = i
                 end if
               end if
             end do
           end do
 
-          clm_statevecsize = cc
-
-          ! ! Check against other method of computation
-          ! cccheck = 0
-          ! do c=clm_begc,clm_endc
-          !   if(col%hydrologically_active(c)) then
-          !     ! Only count non-bedrock layers
-          !     cccheck = cccheck + col%nbedrock(c)
-          !     ! Possible -1 to leave out layer that is partly bedrock
-          !   end if
-          ! end do
-
-          ! if(clm_statevecsize .ne. cccheck) then
-          !   print *, "clm_statevecsize", clm_statevecsize
-          !   print *, "cccheck", cccheck
-          !   error stop "clm_statevecsize not equal to cccheck"
-          ! end if
-
-          ! Set `clm_varsize`, even though it is currently not used
-          ! for `clmupdate_swc.eq.1`
-          clm_varsize = clm_statevecsize
-
         else
+
+          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+          allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              state_clm2pdaf_p(c,i) = (c - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+            end do
+          end do
+
           ! #cols values per grid-cell
           clm_varsize      =  (endc-begc+1) * nlevsoi
           clm_statevecsize =  (endc-begc+1) * nlevsoi
+
+          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+          allocate(state_pdaf2clm_c_p(clm_statevecsize))
+          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+          allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+          cc = 0
+
+          do i=1,nlevsoi
+            do c=clm_begc,clm_endc
+              cc = cc + 1
+              state_pdaf2clm_c_p(cc) = c
+              state_pdaf2clm_j_p(cc) = i
+            end do
+          end do
+
         end if
 
       else
+
+        IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+        allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
+
+        do i=1,nlevsoi
+          do c=clm_begc,clm_endc
+            ! All columns in a gridcell are assigned the updated
+            ! gridcell-SWC
+            state_clm2pdaf_p(c,i) = (col%gridcell(c) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
+          end do
+        end do
+
         ! One value per grid-cell
         clm_varsize      =  (endg-begg+1) * nlevsoi
         clm_statevecsize =  (endg-begg+1) * nlevsoi
+
+        IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+        allocate(state_pdaf2clm_c_p(clm_statevecsize))
+        IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+        allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+        cc = 0
+
+        do i=1,nlevsoi
+          do j=clm_begg,clm_endg
+
+            ! SWC from the first column of each gridcell
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  ! Possibliy: Add state_pdaf2clm_g_p
+                  state_pdaf2clm_c_p(cc) = jj
+                  state_pdaf2clm_j_p(cc) = i
+                end if
+              end if
+            end do
+
+            cc = cc + 1
+          end do
+        end do
+
+
 
       end if
     endif
@@ -210,8 +286,6 @@ module enkf_clm_mod
     if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
       !hcp added condition
       allocate(clm_statevec(clm_statevecsize))
-      allocate(state_pdaf2clm_c_p(clm_statevecsize))
-      allocate(state_pdaf2clm_j_p(clm_statevecsize))
     end if
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
@@ -221,6 +295,18 @@ module enkf_clm_mod
     end if
 
   end subroutine define_clm_statevec
+
+  subroutine cleanup_clm_statevec()
+
+    implicit none
+
+    ! Deallocate arrays from `define_clm_statevec`
+    IF (allocated(clm_statevec)) deallocate(clm_statevec)
+    IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+    IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+    IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+
+  end subroutine cleanup_clm_statevec
 
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
@@ -261,52 +347,10 @@ module enkf_clm_mod
     endif
 
     if(clmupdate_swc.ne.0) then
-        ! write swc values to state vector
-        cc = 1
-        do i=1,nlevsoi
-
-          if(clmstatevec_allcol.eq.1) then
-
-            do jj=clm_begc,clm_endc
-              ! SWC from all columns of each gridcell
-              if(clmstatevec_only_active.eq.1) then
-                if(i<=clmstatevec_max_layer .and. col%hydrologically_active(jj) .and. i<=col%nbedrock(jj) ) then
-                  clm_statevec(cc+offset) = swc(jj,i)
-                  state_pdaf2clm_c_p(cc+offset) = jj
-                  state_pdaf2clm_j_p(cc+offset) = i
-                  cc = cc + 1
-                end if
-              else
-                clm_statevec(cc+offset) = swc(jj,i)
-                state_pdaf2clm_c_p(cc+offset) = jj
-                state_pdaf2clm_j_p(cc+offset) = i
-                cc = cc + 1
-              end if
-
-            end do
-
-          else
-
-            do j=clm_begg,clm_endg
-              ! SWC from the first column of each gridcell
-              newgridcell = .true.
-              do jj=clm_begc,clm_endc
-                g = col%gridcell(jj)
-                if (g .eq. j) then
-                  if (newgridcell) then
-                    newgridcell = .false.
-                    clm_statevec(cc+offset) = swc(jj,i)
-                    state_pdaf2clm_c_p(cc+offset) = jj
-                    state_pdaf2clm_j_p(cc+offset) = i
-                  endif
-                endif
-              end do
-              cc = cc + 1
-            end do
-
-          end if
-
-        end do
+      ! write swc values to state vector
+      do cc = 1, clm_statevecsize
+        clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+      end do
     endif
 
     !hcp  LAI
@@ -357,6 +401,7 @@ module enkf_clm_mod
     use ColumnType , only : col
     use clm_instMod, only : soilstate_inst, waterstate_inst
     use clm_varcon      , only : denh2o, denice, watmin
+    use clm_varcon      , only : ispval
     use clm_varcon      , only : spval
 
     implicit none
@@ -376,6 +421,7 @@ module enkf_clm_mod
     real(r8)  :: rliq,rice
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
+    real(r8)  :: swc_update        ! updated SWC in loop
 
     integer :: i,j,jj,g,cc=0,offset=0
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
@@ -464,73 +510,62 @@ module enkf_clm_mod
           ! do j=clm_begg,clm_endg
             do j=clm_begc,clm_endc
 
-              ! Set cc (the state vector index) from the
-              ! CLM5-grid-index and the `CLM5-layer-index times
-              ! num_gridcells`
-              if(clmstatevec_allcol.eq.1) then
-                if(clmstatevec_only_active.eq.1) then
-                  if(i<=clmstatevec_max_layer .and. col%hydrologically_active(j) .and. i<=col%nbedrock(j) ) then
-                    cc = col_index_hydr_act(j,i)
-                  else
-                    cycle
-                  end if
+              ! Update only those SWCs that are not excluded by ispval
+              if(state_clm2pdaf_p(j,i) .ne. ispval) then
+
+                if(swc(j,i).eq.0.0) then
+                  swc_zero_before_update = .true.
+
+                  ! Zero-SWC leads to zero denominator in computation of
+                  ! rliq/rice, therefore setting rliq/rice to special
+                  ! value
+                  rliq = spval
+                  rice = spval
                 else
-                  cc = (j - clm_begc + 1) + (i - 1)*(clm_endc - clm_begc + 1)
+                  swc_zero_before_update = .false.
+
+                  rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+                  rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+                  !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
                 end if
-              else
-                cc = (col%gridcell(j) - clm_begg + 1) + (i - 1)*(clm_endg - clm_begg + 1)
-              end if
 
-              if(swc(j,i).eq.0.0) then
-                swc_zero_before_update = .true.
+                swc_update = clm_statevec(state_clm2pdaf_p(j,i))
 
-                ! Zero-SWC leads to zero denominator in computation of
-                ! rliq/rice, therefore setting rliq/rice to special
-                ! value
-                rliq = spval
-                rice = spval
-              else
-                swc_zero_before_update = .false.
+                if(swc_update.le.watmin_check) then
+                  swc(j,i) = watmin_set
+                else if(swc_update.ge.watsat(j,i)) then
+                  swc(j,i) = watsat(j,i)
+                else
+                  swc(j,i)   = swc_update
+                endif
 
-                rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-                rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
-                !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
-              end if
+                if (isnan(swc(j,i))) then
+                  swc(j,i) = watmin_set
+                  print *, "WARNING: swc at j,i is nan: ", j, i
+                endif
 
-              if(clm_statevec(cc+offset).le.watmin_check) then
-                swc(j,i) = watmin_set
-              else if(clm_statevec(cc+offset).ge.watsat(j,i)) then
-                swc(j,i) = watsat(j,i)
-              else
-                swc(j,i)   = clm_statevec(cc+offset)
-              endif
+                if(swc_zero_before_update) then
+                  ! This case should not appear for hydrologically
+                  ! active columns/layers, where always: swc > watmin
+                  !
+                  ! If you want to make sure that no zero SWCs appear in
+                  ! the code, comment out the error stop
 
-              if (isnan(swc(j,i))) then
-                      swc(j,i) = watmin_set
-                      print *, "WARNING: swc at j,i is nan: ", j, i
-              endif
-
-              if(swc_zero_before_update) then
-                ! This case should not appear for hydrologically
-                ! active columns/layers, where always: swc > watmin
-                !
-                ! If you want to make sure that no zero SWCs appear in
-                ! the code, comment out the error stop
-                
 #ifdef PDAF_DEBUG
-                ! error stop "ERROR: Update of zero-swc"
-                print *, "WARNING: Update of zero-swc"
-                print *, "WARNING: Any new H2O added to h2osoi_liq(j,i) with j,i = ", j, i
+                  ! error stop "ERROR: Update of zero-swc"
+                  print *, "WARNING: Update of zero-swc"
+                  print *, "WARNING: Any new H2O added to h2osoi_liq(j,i) with j,i = ", j, i
 #endif
-                h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
-                h2osoi_ice(j,i) = 0.0
-              else
-                ! update liquid water content
-                h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
-                ! update ice content
-                h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+                  h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
+                  h2osoi_ice(j,i) = 0.0
+                else
+                  ! update liquid water content
+                  h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
+                  ! update ice content
+                  h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+                end if
+
               end if
-              
               ! cc = cc + 1
             end do
         end do
