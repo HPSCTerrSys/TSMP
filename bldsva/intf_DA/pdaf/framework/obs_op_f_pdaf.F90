@@ -122,12 +122,12 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
 
   ! Gather full observed state using local_dims_obs, local_disp_obs
 
-  ! gather local observed states of different sizes in a vector 
+  ! gather local observed states of different sizes in a vector
   CALL mpi_allgatherv(m_state_tmp, dim_obs_p, &
-       MPI_DOUBLE_PRECISION, m_state_f, local_dims_obs, local_disp_obs, &  
+       MPI_DOUBLE_PRECISION, m_state_f, local_dims_obs, local_disp_obs, &
        MPI_DOUBLE_PRECISION, comm_filter, ierror)
 
-  ! gather obs_nc2pdaf_deprecated_p 
+  ! gather obs_nc2pdaf_deprecated_p
   CALL mpi_allgatherv(obs_nc2pdaf_deprecated_p_tmp, dim_obs_p, &
        MPI_INT, obs_nc2pdaf_deprecated, local_dims_obs, local_disp_obs, &  
        MPI_INT, comm_filter, ierror)
@@ -144,11 +144,11 @@ SUBROUTINE obs_op_f_pdaf(step, dim_p, dim_obs_f, state_p, m_state_f)
     end if
   end do
 
-  ! Then it is inverted in the following lines
-  
+  ! Then OBS_NC2PDAF_DEPRECATED is inverted in the following lines
+
   ! resort obs_nc2pdaf_deprecated_p
   do i=1,dim_obs_f
-     obs_nc2pdaf_deprecated_tmp(i) = obs_nc2pdaf_deprecated(i)     
+     obs_nc2pdaf_deprecated_tmp(i) = obs_nc2pdaf_deprecated(i)
   enddo
   do i=1,dim_obs_f
     ! print *,'obs_nc2pdaf_deprecated_tmp(i) ', obs_nc2pdaf_deprecated_tmp(i)
