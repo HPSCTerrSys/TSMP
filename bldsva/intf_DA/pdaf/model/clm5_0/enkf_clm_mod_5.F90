@@ -406,7 +406,7 @@ module enkf_clm_mod
       do cc = 1, clm_varsize
         ! t_grnd iterated over cols
         ! t_veg  iterated over patches
-        clm_statevec(cc)             = t_grnd(state_pdaf2clm_c_p(cc)))
+        clm_statevec(cc)             = t_grnd(state_pdaf2clm_c_p(cc))
         clm_statevec(cc+clm_varsize) = t_veg( state_pdaf2clm_p_p(cc+clm_varsize))
       end do
 
