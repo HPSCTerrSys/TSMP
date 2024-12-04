@@ -1019,7 +1019,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 
                    ! Set index in state vector, LST will be computed
                    ! for first patch appearing here
-                   obs_index_p(cnt) = state_clm2pdaf_p(p)
+                   obs_index_p(cnt) = state_clm2pdaf_p(p,1)
 
                    !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
                    obs_p(cnt) = clm_obs(i)
