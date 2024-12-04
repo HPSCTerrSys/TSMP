@@ -42,6 +42,7 @@ module enkf_clm_mod
   integer :: clm_begp,clm_endp
   real(r8),allocatable :: clm_statevec(:)
   integer,allocatable :: state_pdaf2clm_c_p(:)
+  integer,allocatable :: state_pdaf2clm_p_p(:)
   integer,allocatable :: state_pdaf2clm_j_p(:)
   ! clm_paramarr: Contains LAI used in obs_op_pdaf for computing model
   ! LST in LST assimilation (clmupdate_T)
@@ -88,6 +89,7 @@ module enkf_clm_mod
     use clm_varpar   , only : nlevsoi
     use clm_varcon , only : ispval
     use ColumnType , only : col
+    use PatchType  , only : patch
 
     implicit none
 
@@ -287,6 +289,8 @@ module enkf_clm_mod
       clm_statevecsize =  (endp-begp+1)*2  !TG, then TV
 
       IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
       allocate(state_pdaf2clm_c_p(clm_statevecsize))
       IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
       allocate(state_pdaf2clm_j_p(clm_statevecsize))
@@ -295,9 +299,11 @@ module enkf_clm_mod
 
       do p=clm_begp,clm_endp
         cc = cc + 1
-        state_pdaf2clm_c_p(cc) = p !TG
+        state_pdaf2clm_p_p(cc) = p !TG
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TG
         state_pdaf2clm_j_p(cc) = 1
-        state_pdaf2clm_c_p(cc+clm_varsize) = p !TV
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TV
         state_pdaf2clm_j_p(cc+clm_varsize) = 1
       end do
 
@@ -398,8 +404,10 @@ module enkf_clm_mod
     !hcp  LAI
     if(clmupdate_T.eq.1) then
       do cc = 1, clm_varsize
-        clm_statevec(cc)             = t_grnd(patch%column(state_pdaf2clm_c_p(cc)))
-        clm_statevec(cc+clm_varsize) = t_veg( state_pdaf2clm_c_p(cc+clm_varsize))
+        ! t_grnd iterated over cols
+        ! t_veg  iterated over patches
+        clm_statevec(cc)             = t_grnd(state_pdaf2clm_c_p(cc)))
+        clm_statevec(cc+clm_varsize) = t_veg( state_pdaf2clm_p_p(cc+clm_varsize))
       end do
 
       do cc = 1, clm_paramsize
