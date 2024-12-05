@@ -1057,8 +1057,28 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 #endif
        else
 
-         print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR unsupported update in setting obs_index_p."
-         call abort_parallel()
+         print *, "TSMP-PDAF mype(w)=", mype_world, ": WARNING unsupported update in setting obs_index_p."
+         print *, "TSMP-PDAF mype(w)=", mype_world, ": WARNING using default gridcell loop."
+         ! call abort_parallel()
+
+         ! gridcell loop with layer information as default!
+         do g = begg,endg
+
+           if(is_use_dr) then
+             deltax = abs(lon(g)-clmobs_lon(i))
+             deltay = abs(lat(g)-clmobs_lat(i))
+           end if
+
+           if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+             obs_index_p(cnt) = g-begg+1 +  ((endg-begg+1) * (clmobs_layer(i)-1))
+           end if
+
+           !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
+           obs_p(cnt) = clm_obs(i)
+           if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
+           cnt = cnt + 1
+
+         end do
 
        end if
 
