@@ -469,10 +469,8 @@ CLM (standalone only).
 
 ### CLM:update_T ###
 
-`CLM:update_T`: (integer) Flag for updating of ground and vegetation
-temperature.
-
-Currently only CLM3.5
+`CLM:update_T`: (integer) Flag for updating of CLM's ground and
+vegetation temperature.
 
 -  0: No update of ground and vegetation temperature
 
