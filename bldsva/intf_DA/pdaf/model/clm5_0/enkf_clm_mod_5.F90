@@ -309,6 +309,42 @@ module enkf_clm_mod
     endif
     !end hcp
 
+    ! skin temperature state vector
+    if(clmupdate_T.eq.2) then
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      ! clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  (endp-begp+1)  !TSKIN
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TG
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TG
+        state_pdaf2clm_j_p(cc) = 1
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+clm_varsize) = 1
+      end do
+
+    endif
+
+
 #ifdef PDAF_DEBUG
     ! Debug output of clm_statevecsize
     WRITE(*, '(a,x,a,i5,x,a,i10)') "TSMP-PDAF-debug", "mype(w)=", mype, "define_clm_statevec: clm_statevecsize=", clm_statevecsize
@@ -323,7 +359,7 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
     if (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
-    if ((clmupdate_T.ne.0)) then  !hcp
+    if ((clmupdate_T.eq.1)) then  !hcp
       allocate(clm_paramarr(clm_paramsize))
     end if
 
@@ -374,6 +410,7 @@ module enkf_clm_mod
     ! LST variables (t_veg is patch variable...)
     t_grnd => temperature_inst%t_grnd_col
     t_veg  => temperature_inst%t_veg_patch
+    t_skin => temperature_inst%t_skin_patch
     tlai   => canopystate_inst%tlai_patch
 
 
@@ -415,6 +452,14 @@ module enkf_clm_mod
       end do
     endif
     !end hcp  LAI
+
+    ! skin temperature state vector
+    if(clmupdate_T.eq.2) then
+      do cc = 1, clm_statevecsize
+        ! t_skin iterated over patches
+        clm_statevec(cc)             = t_skin(state_pdaf2clm_p_p(cc))
+      end do
+    endif
 
     ! write average swc to state vector (CRP assimilation)
     if(clmupdate_swc.eq.2) then
@@ -521,6 +566,7 @@ module enkf_clm_mod
     ! LST
     t_grnd => temperature_inst%t_grnd_col
     t_veg  => temperature_inst%t_veg_patch
+    t_skin => temperature_inst%t_skin_patch
     ! tlai   => canopystate_inst%tlai_patch
 
 #ifdef PDAF_DEBUG
@@ -677,6 +723,14 @@ module enkf_clm_mod
       end do
     endif
     ! end hcp TG, TV
+
+    ! skin temperature state vector
+    if(clmupdate_T.EQ.2) then
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
+      end do
+    endif
 
     !! update liquid water content
     !do j=clm_begg,clm_endg
