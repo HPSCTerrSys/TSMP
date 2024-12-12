@@ -411,7 +411,7 @@ module enkf_clm_mod
       do cc = 1, clm_paramsize
         ! Works only if clm_paramsize corresponds to clm_varsize (also
         ! the order)
-        clm_paramarr(cc) = tlai(state_pdaf2clm_c_p(cc))
+        clm_paramarr(cc) = tlai(state_pdaf2clm_p_p(cc))
       end do
     endif
     !end hcp  LAI
