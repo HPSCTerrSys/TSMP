@@ -287,7 +287,7 @@ module enkf_clm_mod
       clm_paramsize =  endp-begp+1         !LAI
       clm_statevecsize =  (endp-begp+1)*2  !TG, then TV
 
-      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
       allocate(state_pdaf2clm_p_p(clm_statevecsize))
       IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
       allocate(state_pdaf2clm_c_p(clm_statevecsize))
