@@ -135,6 +135,17 @@ if (clmupdate_T.EQ.1) then
 !  write(*,*) 'TV', state_p(clm_varsize+obs_index_p(:))
 
 endif
+
+if (clmupdate_T.EQ.2) then
+
+  lpointobs = .false.
+
+  DO i = 1, dim_obs_p
+    ! first implementation: simulated LST equals TSKIN
+    m_state_p(i) = state_p(obs_index_p(i))
+  END DO
+
+endif
 #endif
 
 
