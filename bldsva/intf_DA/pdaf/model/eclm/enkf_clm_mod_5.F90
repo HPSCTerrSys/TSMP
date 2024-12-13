@@ -397,6 +397,7 @@ module enkf_clm_mod
     real(r8), pointer :: porgm(:,:)
     real(r8), pointer :: t_grnd(:)
     real(r8), pointer :: t_veg(:)
+    real(r8), pointer :: t_skin(:)
     real(r8), pointer :: tlai(:)
     integer :: i,j,jj,g,cc=0,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
@@ -526,6 +527,7 @@ module enkf_clm_mod
 
     real(r8), pointer :: t_grnd(:)
     real(r8), pointer :: t_veg(:)
+    real(r8), pointer :: t_skin(:)
 
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
