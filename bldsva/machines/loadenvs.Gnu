@@ -1,0 +1,35 @@
+# Adapted to JEDI Stages/2024  
+module --force purge
+module use $OTHERSTAGES
+module load Stages/2024
+module load GCC/12.3.0
+#module load ParaStationMPI/5.9.2-1      # Export below MPI_VAR="$EBROOTPSMPI"
+module load OpenMPI/4.1.5               # Export below MPI_VAR="$EBROOTOPENMPI"
+module load Hypre/2.31.0  
+
+#module load Silo/4.11                # not installed on JEDI
+module load Tcl/8.6.13 
+#
+module load ecCodes/2.31.0 
+module load HDF5/1.14.2-serial 
+module load netCDF/4.9.2
+module load netCDF-Fortran/4.6.1
+module load PnetCDF/1.12.3
+module load cURL/8.0.1
+module load Szip/.2.1.1 
+module load Python/3.11.3
+module load CMake/3.26.3
+module load git/2.41.0-nodocs  
+
+# Modules for CLM5
+#module load ESMF/8.2.0              # not installed on JEDI
+#module load imkl/2022.1.0           # not installed on JEDI
+# module load NVHPC/22.9
+# module load NCL/6.6.2
+#module load netCDF-C++4/4.3.1
+
+module load GCCcore/.12.3.0
+module load Perl/5.36.1
+
+module li
+
