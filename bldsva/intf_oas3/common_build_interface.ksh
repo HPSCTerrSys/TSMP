@@ -566,10 +566,21 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export FC=$pfc
   export F77=$pf77
   export CXX=$pcxx
+  echo $CC 
+  echo $FC 
+  echo $F77 
+  echo $CXX
 
   comment "    configure pfsimulator and pftools"
   export SCOREP_WRAPPER=off
-  cmake ../ $flagsSim >> $log_file 2>> $err_file
+  echo "flagsSim= ",$flagsSim
+    #cmake ../ $flagsSim >> $log_file 2>> $err_file
+  if [[ $processor == "GPU"|| $processor == "MSA" ]]; then
+     cmake .. $flagsSim -DCMAKE_EXE_LINKER_FLAGS="-lcurand -lcusparse -lcublas">> $log_file 2>> $err_file
+  else
+     cmake .. $flagsSim >> $log_file 2>> $err_file
+   fi
+   
   check
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
