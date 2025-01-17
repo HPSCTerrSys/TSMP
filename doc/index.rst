@@ -52,6 +52,7 @@ Welcome to TSMP documentation!
    :caption: Debugging TSMP:
 
    content/debugging/debug_tips.md
+   content/debugging/debug_tsmp2.md
    content/debugging/debugging_flags.md
    content/debugging/debugger.md
 
