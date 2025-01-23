@@ -321,7 +321,7 @@ module enkf_clm_mod
 
       clm_varsize      =  endp-begp+1
       ! clm_paramsize =  endp-begp+1         !LAI
-      clm_statevecsize =  (endp-begp+1)  !TSKIN
+      clm_statevecsize =  3* (endp-begp+1)  !TSKIN, then TG and TV
 
       IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
       allocate(state_pdaf2clm_p_p(clm_statevecsize))
@@ -334,12 +334,15 @@ module enkf_clm_mod
 
       do p=clm_begp,clm_endp
         cc = cc + 1
-        state_pdaf2clm_p_p(cc) = p !TG
-        state_pdaf2clm_c_p(cc) = patch%column(p) !TG
+        state_pdaf2clm_p_p(cc) = p !TSKIN
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TSKIN
         state_pdaf2clm_j_p(cc) = 1
-        state_pdaf2clm_p_p(cc+clm_varsize) = p !TV
-        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TG
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TG
         state_pdaf2clm_j_p(cc+clm_varsize) = 1
+        state_pdaf2clm_p_p(cc+2*clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+2*clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+2*clm_varsize) = 1
       end do
 
     endif
@@ -460,9 +463,11 @@ module enkf_clm_mod
 
     ! skin temperature state vector
     if(clmupdate_T.eq.2) then
-      do cc = 1, clm_statevecsize
+      do cc = 1, clm_varsize
         ! t_skin iterated over patches
-        clm_statevec(cc)             = t_skin(state_pdaf2clm_p_p(cc))
+        clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
+        clm_statevec(cc+clm_varsize)   = t_grnd(state_pdaf2clm_c_p(cc+clm_varsize))
+        clm_statevec(cc+2*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+2*clm_varsize))
       end do
     endif
 
@@ -734,6 +739,8 @@ module enkf_clm_mod
       do p = clm_begp, clm_endp
         c = patch%column(p)
         t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
+        t_grnd(c)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
+        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + 2*clm_varsize)
       end do
     endif
 
