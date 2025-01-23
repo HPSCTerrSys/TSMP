@@ -85,4 +85,6 @@ myst_heading_anchors = 4
 myst_enable_extensions = [
     "amsmath",                  # LaTeX equations
     "dollarmath",               # Inline LaTex
+    "attrs_block",              # Attribution in quotations
+    "deflist",                  # Definition lists
 ]
