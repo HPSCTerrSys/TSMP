@@ -1021,10 +1021,10 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
 
                  end if
 
+                 newgridcell = .false.
+
                end if
              end if
-
-             newgridcell = .false.
 
            end do
          end do
