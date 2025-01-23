@@ -472,18 +472,18 @@ CLM (standalone only).
 `CLM:update_T`: (integer) Flag for updating of CLM's ground and
 vegetation temperature.
 
-`0`
+`CLM:update_T=0`
 : No update of ground and vegetation temperature
 
-`1`
+`CLM:update_T=1`
 : Update of ground and vegetation temperature, based on
   Kustas2009-observation operator
 
-`2`
+`CLM:update_T=2`
 : Update of ground and vegetation temperature based on TSKIN in
   observation operator
 
-`3`
+`CLM:update_T=3`
 : Update of first-layer-soil-temperature and vegetation temperature
   based on TSKIN in observation operator
 
@@ -492,10 +492,10 @@ vegetation temperature.
 Variable names in this subsection reflect the conventions from
 Kustas2009, not from CLM model.
 
-Eq(7) from Kustas2009
-(<http://dx.doi.org/10.1016/j.agrformet.2009.05.016>)
+LST is compared to the surface temperature $T_R$ defined by
+Kustas2009:
 
-{attribution="Kustas2009"}
+{attribution="Kustas2009 (<http://dx.doi.org/10.1016/j.agrformet.2009.05.016>), Eq(7)"}
 >\begin{align*}
 >T_R(\phi) \approx \left[ f_C(\phi) T_{C}^{4} + (1 - f_C(\phi)) T_{S}^{4} \right]^{\frac{1}{4}}
 >\end{align*}
