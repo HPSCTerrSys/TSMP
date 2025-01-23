@@ -347,6 +347,43 @@ module enkf_clm_mod
 
     endif
 
+    if(clmupdate_T.eq.3) then
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      ! clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  3* (endp-begp+1)  !TSKIN, then TSOIL and TV
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TSKIN
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TSKIN
+        state_pdaf2clm_j_p(cc) = 1
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TSOIL
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TSOIL
+        state_pdaf2clm_j_p(cc+clm_varsize) = 1
+        state_pdaf2clm_p_p(cc+2*clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+2*clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+2*clm_varsize) = 1
+      end do
+
+    endif
+
 
 #ifdef PDAF_DEBUG
     ! Debug output of clm_statevecsize
@@ -399,6 +436,7 @@ module enkf_clm_mod
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
     real(r8), pointer :: t_grnd(:)
+    real(r8), pointer :: t_soisno(:,:)
     real(r8), pointer :: t_veg(:)
     real(r8), pointer :: t_skin(:)
     real(r8), pointer :: tlai(:)
@@ -411,10 +449,11 @@ module enkf_clm_mod
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
 
-    ! LST variables (t_veg is patch variable...)
+    ! LST variables
     t_grnd => temperature_inst%t_grnd_col
     t_veg  => temperature_inst%t_veg_patch
     t_skin => temperature_inst%t_skin_patch
+    t_soisno => temperature_inst%t_soisno_col
     tlai   => canopystate_inst%tlai_patch
 
 
@@ -467,6 +506,16 @@ module enkf_clm_mod
         ! t_skin iterated over patches
         clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
         clm_statevec(cc+clm_varsize)   = t_grnd(state_pdaf2clm_c_p(cc+clm_varsize))
+        clm_statevec(cc+2*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+2*clm_varsize))
+      end do
+    endif
+
+    ! skin temperature state vector updating soil temperature
+    if(clmupdate_T.eq.3) then
+      do cc = 1, clm_varsize
+        ! t_skin iterated over patches
+        clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
+        clm_statevec(cc+clm_varsize)   = t_soisno(state_pdaf2clm_c_p(cc+clm_varsize), state_pdaf2clm_j_p(cc+clm_varsize))
         clm_statevec(cc+2*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+2*clm_varsize))
       end do
     endif
@@ -531,6 +580,7 @@ module enkf_clm_mod
     real(r8), pointer :: porgm(:,:)
 
     real(r8), pointer :: t_grnd(:)
+    real(r8), pointer :: t_soisno(:,:)
     real(r8), pointer :: t_veg(:)
     real(r8), pointer :: t_skin(:)
 
@@ -576,6 +626,7 @@ module enkf_clm_mod
 
     ! LST
     t_grnd => temperature_inst%t_grnd_col
+    t_soisno => temperature_inst%t_soisno_col
     t_veg  => temperature_inst%t_veg_patch
     t_skin => temperature_inst%t_skin_patch
     ! tlai   => canopystate_inst%tlai_patch
@@ -740,6 +791,16 @@ module enkf_clm_mod
         c = patch%column(p)
         t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
         t_grnd(c)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
+        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + 2*clm_varsize)
+      end do
+    endif
+
+    ! skin temperature state vector updating soil temperature
+    if(clmupdate_T.EQ.3) then
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
+        t_soisno(c,1)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
         t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + 2*clm_varsize)
       end do
     endif
