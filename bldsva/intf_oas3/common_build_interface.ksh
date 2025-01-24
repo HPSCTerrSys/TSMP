@@ -329,6 +329,10 @@ c_make_oas(){
 route "${cyellow}>>> c_make_oas${cnormal}"
   comment "    make oasis"
     export SCOREP_WRAPPER=on
+	if echo "$compiler" | grep -qE 'Gnu'; then
+      export FCFLAGS="-w -fallow-argument-mismatch -O2"
+      export FFLAGS="-w -fallow-argument-mismatch -O2"
+    fi
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
@@ -408,7 +412,12 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
       cplLib+="$liboas $libpsmile"
-      cplInc=$incpsmile
+      #cplInc=$incpsmile
+	  if echo "$compiler" | grep -qE 'Gnu'; then
+	    cplInc="$incpsmile -fallow-invalid-boz -fallow-argument-mismatch"
+      else
+        cplInc=$incpsmile
+      fi
     fi
       comment " OAS libs cplLib: $cplLib"
       comment " OAS libs cplInc: $cplInc"
