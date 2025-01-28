@@ -86,6 +86,7 @@ module enkf_clm_mod
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     use clm_varcon , only : ispval
     use ColumnType , only : col
     use PatchType  , only : patch
@@ -97,6 +98,7 @@ module enkf_clm_mod
     integer :: i
     integer :: j
     integer :: jj
+    integer :: lev
     integer :: p
     integer :: c
     integer :: g
@@ -358,7 +360,7 @@ module enkf_clm_mod
 
       clm_varsize      =  endp-begp+1
       ! clm_paramsize =  endp-begp+1         !LAI
-      clm_statevecsize =  3* (endp-begp+1)  !TSKIN, then TSOIL and TV
+      clm_statevecsize =  (1 + nlevgrnd + 1)* (endp-begp+1)  !TSKIN, then nlevgrnd times TSOIL and TV
 
       IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
       allocate(state_pdaf2clm_p_p(clm_statevecsize))
@@ -374,13 +376,15 @@ module enkf_clm_mod
         state_pdaf2clm_p_p(cc) = p !TSKIN
         state_pdaf2clm_c_p(cc) = patch%column(p) !TSKIN
         state_pdaf2clm_j_p(cc) = 1
-        state_pdaf2clm_p_p(cc+clm_varsize) = p !TSOIL
-        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TSOIL
-        state_pdaf2clm_j_p(cc+clm_varsize) = 1
-        state_pdaf2clm_p_p(cc+2*clm_varsize) = p !TV
-        state_pdaf2clm_c_p(cc+2*clm_varsize) = patch%column(p) !TV
-        state_pdaf2clm_j_p(cc+2*clm_varsize) = 1
-      end do
+        do lev=1,nlevgrnd
+          ! ivar = 2-26: TSOIL
+          state_pdaf2clm_p_p(cc + lev*clm_varsize) = p
+          state_pdaf2clm_c_p(cc + lev*clm_varsize) = patch%column(p)
+          state_pdaf2clm_j_p(cc + lev*clm_varsize) = lev
+        end do
+        state_pdaf2clm_p_p(cc+(1+nlevgrnd)*clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+(1+nlevgrnd)*clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+(1+nlevgrnd)*clm_varsize) = 1
 
     endif
 
@@ -423,6 +427,7 @@ module enkf_clm_mod
     use clm_instMod, only : temperature_inst
     use clm_instMod, only : canopystate_inst
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     ! use clm_varcon, only: nameg, namec
     ! use GetGlobalValuesMod, only: GetGlobalWrite
     use ColumnType , only : col
@@ -441,6 +446,7 @@ module enkf_clm_mod
     real(r8), pointer :: t_skin(:)
     real(r8), pointer :: tlai(:)
     integer :: i,j,jj,g,cc=0,offset=0
+    integer :: lev
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
     character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
@@ -523,8 +529,10 @@ module enkf_clm_mod
       do cc = 1, clm_varsize
         ! t_skin iterated over patches
         clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
-        clm_statevec(cc+clm_varsize)   = t_soisno(state_pdaf2clm_c_p(cc+clm_varsize), state_pdaf2clm_j_p(cc+clm_varsize))
-        clm_statevec(cc+2*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+2*clm_varsize))
+        do lev=1,nlevgrnd
+          clm_statevec(cc+lev*clm_varsize)   = t_soisno(state_pdaf2clm_c_p(cc+lev*clm_varsize), state_pdaf2clm_j_p(cc+lev*clm_varsize))
+        end do
+        clm_statevec(cc+(1+nlevgrnd)*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+(1+nlevgrnd)*clm_varsize))
       end do
     endif
 
@@ -565,6 +573,7 @@ module enkf_clm_mod
 
   subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     use clm_time_manager  , only : update_DA_nstep
     use shr_kind_mod , only : r8 => shr_kind_r8
     use PatchType , only : patch
@@ -601,6 +610,7 @@ module enkf_clm_mod
     real(r8)  :: swc_update        ! updated SWC in loop
 
     integer :: i,j,jj,g,c,p,cc=0,offset=0
+    integer :: lev
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
     character (len = 31) :: fn2    !TSMP-PDAF: function name for state vector outpu
     character (len = 32) :: fn3    !TSMP-PDAF: function name for state vector outpu
@@ -782,8 +792,10 @@ module enkf_clm_mod
       do p = clm_begp, clm_endp
         c = patch%column(p)
         t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
-        t_soisno(c,1)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
-        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + 2*clm_varsize)
+        do lev=1,nlevgrnd
+          t_soisno(c,lev)  = clm_statevec(state_clm2pdaf_p(p,1) + (lev)*clm_varsize)
+        end do
+        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + (1+nlevgrnd)*clm_varsize)
       end do
     endif
 
