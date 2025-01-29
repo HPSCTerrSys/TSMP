@@ -385,6 +385,7 @@ module enkf_clm_mod
         state_pdaf2clm_p_p(cc+(1+nlevgrnd)*clm_varsize) = p !TV
         state_pdaf2clm_c_p(cc+(1+nlevgrnd)*clm_varsize) = patch%column(p) !TV
         state_pdaf2clm_j_p(cc+(1+nlevgrnd)*clm_varsize) = 1
+      end do
 
     endif
 
