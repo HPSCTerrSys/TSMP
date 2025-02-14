@@ -4,58 +4,51 @@
 getMachineDefaults(){
 route "${cyellow}>> getMachineDefaults${cnormal}"
   comment "   init lmod functionality"
-  . /p/software/juwels/lmod/lmod/init/ksh >> $log_file 2>> $err_file
+  . /p/software/jedi/lmod/lmod/init/ksh >> $log_file 2>> $err_file
   check
-  comment "   source and load Modules on JUWELS: loadenvs.$compiler"
+  comment "   source and load Modules on JEDI: loadenvs.$compiler"         
   . $rootdir/bldsva/machines/loadenvs.$compiler >> $log_file 2>> $err_file
   check
 
-
-#  defaultMpiPath="$EBROOTOPENMPI"            # for OpenMPI
-#  defaultMpiPath="$EBROOTPSMPI"              # for ParaStation
+  # defaultMpiPath="$EBROOTOPENMPI"            # for OpenMPI
+  # defaultMpiPath="$EBROOTPSMPI"              # for ParaStation
   export MPI_VAR="$EBROOTOPENMPI"
   if [ -z "${EBROOTOPENMPI}" ]; then
-        export MPI_VAR="${EBROOTPSMPI}"
+    export MPI_VAR="${EBROOTPSMPI}"
   fi
   echo "MPI_VAR is set to: ${MPI_VAR}"
-  defaultMpiPath="$MPI_VAR"
+  defaultMpiPath="$MPI_VAR"            # MPI_VAR defined in loadenvs
   
   defaultNcdfPath="$EBROOTNETCDFMINFORTRAN"
-  #defaultGrib1Path="/p/project/cslts/local/juwels/DWD-libgrib1_20110128_Intel/lib/"
+  
+  #if [[ $compiler == "Gnu" ]] ; then
+  #  defaultGrib1Path="/p/project1/cslts/local/jureca/DWD-libgrib1_20110128_Gnu/lib/"
+  #else
+  #  defaultGrib1Path="/p/project1/cslts/local/jureca/DWD-libgrib1_20110128_Gnu/lib/"
+  #fi
+  
   defaultGribPath="$EBROOTECCODES"
   defaultGribapiPath="$EBROOTECCODES"
   defaultJasperPath="$EBROOTJASPER"
   defaultTclPath="$EBROOTTCL"
   defaultHyprePath="$EBROOTHYPRE"
-  defaultSiloPath="$EBROOTSILO"
-  defaultLapackPath="$EBROOTIMKL"
-  defaultPncdfPath="$EBROOTPNETCDF"
+  defaultSiloPath="$EBROOTSILO"                 # not on JEDI
+  
+  #defaultLapackPath="$EBROOTIMKL"              # This is for intel
+  defaultLapackPath="$EBROOTFLEXIBLAS"          # Alternative to Lapack on JEDI
+  
+  #defaultPncdfPath="$EBROOTPARALLELMINNETCDF"  # not on JEDI
+  defaultPncdfPath="$EBROOTPNETCDF"             # alternative for $EBROOTPARALLELMINNETCDF
+  
   # Additional option for GPU compilation 
-  gpuMpiSettings="mpi-settings/CUDA"
-  cuda_architectures="70" 
+  gpuMpiSettings="UCX-settings/RC-CUDA"
+  cuda_architectures="-DCMAKE_CUDA_ARCHITECTURES=90" 
 
-  if [[ $debugswitch != "" ]]; then
-
-    # Debug Compiler/Linker optimization
-    if [[ $compiler == "Gnu" ]] ; then
-      defaultOptC="-g -O0 -fbacktrace " # Gnu
-    elif [[ $compiler == "Intel" ]] ; then
-      defaultOptC="-g -O0 -xHost -traceback " # Intel
-    else
-      defaultOptC="-O0 " # Default
-    fi
-
-  else
-
-    # Default Compiler/Linker optimization
-    if [[ $compiler == "Gnu" ]] ; then
+  # Default Compiler/Linker optimization
+  if [[ $compiler == "Gnu" ]] ; then
       defaultOptC="-O2" # Gnu
-    elif [[ $compiler == "Intel" ]] ; then
-      defaultOptC="-O2 -xHost" # Intel
-    else
+  else
       defaultOptC="-O2" # Default
-    fi
-
   fi
 
   profilingImpl=" no scalasca "  
@@ -63,7 +56,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Processor settings
   defaultwtime="01:00:00"
-  defaultQ="devel"
+  defaultQ="all"
 
 route "${cyellow}<< getMachineDefaults${cnormal}"
 }
@@ -82,7 +75,7 @@ echo $((processes%resources?processes/resources+1:processes/resources))
 
 createRunscript(){
 route "${cyellow}>> createRunscript${cnormal}"
-comment "   copy JUWELS module load script into rundirectory"
+comment "   copy JEDI module load script into rundirectory"
   cp $rootdir/bldsva/machines/loadenvs.$compiler $rundir/loadenvs
 check
 
@@ -328,7 +321,7 @@ check
 route "${cyellow}<< createRunscript${cnormal}"
 }
 
-Npp=48
+Npp=288
 Ngp=4
 
 PFLProcXg=1
@@ -345,10 +338,10 @@ if [[ $refSetup == "cordex" ]] then
 	COSProcX=12
 	COSProcY=16
 	elif [[ $refSetup == "nrw" ]] then
-	PFLProcX=3
-	PFLProcY=4
-	CLMProcX=2
-	CLMProcY=2
+	PFLProcX=3 #8 #12 #3
+	PFLProcY=4 #8 #12 #4
+	CLMProcX=2  #2
+	CLMProcY=2  #2
 	COSProcX=4
 	COSProcY=8
 	elif [[ $refSetup == "idealRTD" ]] then
