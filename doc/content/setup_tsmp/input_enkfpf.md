@@ -592,6 +592,9 @@ written.
 simulation. `DA:nreal` Must be equal to command line input
 `n_modeltasks`.
 
+Remark: Ensemble sizes of 2 have been shown to lead to
+errors. Recommendation: Use at least an ensemble size of 4.
+
 ### DA:startreal ###
 
 `DA:startreal`: (integer) Added to suffix-numbers for input file
