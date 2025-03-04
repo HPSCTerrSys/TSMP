@@ -722,28 +722,43 @@ module enkf_clm_mod
     ! Case 1: Snow depth
     ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
     if(clmupdate_snow.eq.1) then
-        cc = 1
-        do j=clm_begg,clm_endg
+      do j=clm_begc,clm_endc
         ! iterate through the columns and copy from the same gridcell
         ! i.e. statevec position (cc) for each column
-          do jj=clm_begc,clm_endc
-              ! Catch negative or 0 values from DA
-              if (clm_statevec(cc+offset).lt.0.0) then
-                print *, "WARNING: snow depth at g,c is negative: ", j, jj, clm_statevec(cc+offset)
-              else
-                rsnow(jj) = snow_depth(jj) - clm_statevec(cc+offset)
-                if ( ABS(SUM(rsnow(:))) .gt.0.000001) then
-                  snow_depth(jj)   = clm_statevec(cc+offset)
-                endif
-              endif
-          end do
-        cc = cc + 1
-        end do
-        if ( clmupdate_snow_repartitioning.ne.0) then
+
+        ! Set cc (the state vector index) from the
+        ! CLM5-grid-index and the `CLM5-layer-index times
+        ! num_gridcells`
+        if(clmstatevec_allcol.eq.0) then
+          cc = (col%gridcell(j) - clm_begg + 1)
+        else
+          cc = (j - clm_begc + 1)
+        end if
+        ! Catch negative or 0 values from DA
+        if (clm_statevec(cc+offset).lt.0.0) then
+          print *, "WARNING: snow depth at g,c is negative: ", cc, j, clm_statevec(cc+offset)
+        else
+          rsnow(j) = snow_depth(j) 
+          if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))) .gt.0.000001) then
+            snow_depth(j)   = clm_statevec(cc+offset)
+            ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
+            ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
+            ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
+            if ( clmupdate_snow_repartitioning.eq.3) then
+              incr_h2osno = snow_depth(j) / rsnow(j) ! INC = New SD / OLD SD
+                do i=snlsno(j)+1,0
+                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+                end do
+            endif
+          endif
+        endif
+      end do
+
+      if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
           if ( ABS(SUM(rsnow(:))).gt.0.000001) then
             call clm_repartition_snow()
           end if
-        end if
+      end if
     endif
     ! Case 2: Snow water equivalent
     ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
