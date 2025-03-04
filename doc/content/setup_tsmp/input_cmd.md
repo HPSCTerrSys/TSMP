@@ -81,6 +81,32 @@ avoid performance loss. See remark in
 - 2: 1 plus timing output
 - 3: 2 plus debug output
 
+## forget ##
+
+`forget` (real) forgetting factor for filter analysis
+
+Example: `-forget 0.98`.
+
+General advise: Choose forgetting factor close to one. For values
+smaller than 0.95, effects like a splitting of the ensemble have been
+observed (compare Amezcua et al., Tellus A 2012, 64, 18039,
+<http://dx.doi.org/10.3402/tellusa.v64i0.18039>)
+
+For EnKF / LEnKF, the forgetting factor leads to a spreading of the
+ensemble through manipulating ensemble member by
+
+\begin{align*}
+x^{f}_{i} &= \bar{x} + (x_{i}-\bar{x}) \cdot \frac{1}{\mathtt{forget}^2},
+\end{align*}
+
+where $x_{i}$ is the state vector ensemble member $i$ and $\bar{x}$ is
+the ensemble mean of the state vector.
+
+For ETKF, see
+e.g. <https://github.com/PDAF/PDAF/blob/ae9545227bd4804469dff389a9baadcc9e31906e/src/PDAF_etkf_analysis.F90#L441-L444>
+
+
+
 ## Command Line Examples ##
 
 ### Command Line Example: EnKF ###

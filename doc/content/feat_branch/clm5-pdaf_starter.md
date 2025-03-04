@@ -20,11 +20,11 @@ CLM5-PDAF.
 
 ### 1.2 PDAF
 
-Get PDAF from <https://github.com/PDAF/PDAF> and clone it in the
-`tsmp` directory as `pdaf`.
+Get PDAF from <https://github.com/HPSCTerrSys/pdaf> and clone it into
+the `tsmp` directory:
 
 ```bash
- git clone https://github.com/PDAF/PDAF.git pdaf
+ git clone https://github.com/HPSCTerrSys/pdaf.git
 ```
 
 ### 1.3 CLM5
@@ -40,14 +40,13 @@ git clone --recurse-submodules https://github.com/HPSCTerrSys/clm5_0
 
 ### 1.4 Build CLM5-PDAF
 
-The TSMP framework works with its own build system. With the models in
-the folders as described before the compilation of both CLM5 and PDAF
-can be done with a single build command after the following
-preparations.
-
-In the `tsmp/bldsva` directory:
+The TSMP framework works with its own build system. With the CLM5 and
+PDAF cloned as described, the compilation of both CLM5-PDAF can be
+done with a single build command in the `tsmp/bldsva` directory:
 
 ```bash
+cd bldsva/
+
 ./build_tsmp.ksh -c clm5-pdaf -m JURECA -O Intel
 ```
 
