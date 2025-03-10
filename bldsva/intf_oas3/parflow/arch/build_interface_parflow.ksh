@@ -71,8 +71,11 @@ route "${cyellow}>> configure_pfl${cnormal}"
        check
        comment "    additional configuration options for GPU are set "
         flagsSim+=" -DPARFLOW_ACCELERATOR_BACKEND=cuda"
-        flagsSim+=" -DRMM_ROOT=$RMM_ROOT"
+        flagsSim+=" -DRMM_ROOT=$RMM_ROOT/install"
         flagsSim+=" -DCMAKE_CUDA_RUNTIME_LIBRARY=Shared"
+        flagsSim+=" -DCMAKE_CUDA_ARCHITECTURES=90"
+        #flagsSim+=" -DCMAKE_EXE_LINKER_FLAGS=\"-lcurand -lcusparse -lcublas\"" 
+        flagsSim+=" -DCMAKE_VERBOSE_MAKEFILE:BOOL=ON"   
        check
        comment "    git clone  RAPIDS Memory Manager "
        if [ -d $RMM_ROOT ] ; then 
@@ -80,12 +83,13 @@ route "${cyellow}>> configure_pfl${cnormal}"
         rm -rf $RMM_ROOT >> $log_file 2>> $err_file
         check
        fi
-       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+       #git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/hokkanen/rmm.git >> $log_file 2>> $err_file
+       git clone -b branch-0.10 --single-branch --recurse-submodules https://github.com/mfahdaz/rmm.git >> $log_file 2>> $err_file
        check
         mkdir -p $RMM_ROOT/build
         cd $RMM_ROOT/build
        comment "    configure RMM: RAPIDS Memory Manager "
-        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT ${cuda_architectures} >> $log_file 2>> $err_file
+        cmake ../ -DCMAKE_INSTALL_PREFIX=$RMM_ROOT/install ${cuda_architectures} >> $log_file 2>> $err_file
        check
        comment "    make RMM "
         make -j  >> $log_file 2>> $err_file

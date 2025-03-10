@@ -329,6 +329,10 @@ c_make_oas(){
 route "${cyellow}>>> c_make_oas${cnormal}"
   comment "    make oasis"
     export SCOREP_WRAPPER=on
+	if echo "$compiler" | grep -qE 'Gnu'; then
+      export FCFLAGS="-w -fallow-argument-mismatch -O2"
+      export FFLAGS="-w -fallow-argument-mismatch -O2"
+    fi
     make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
@@ -408,7 +412,12 @@ route "${cyellow}>>> c_configure_clm${cnormal}"
     if [[ $withOAS == "true" ]]; then
       comment "adding OAS libs"
       cplLib+="$liboas $libpsmile"
-      cplInc=$incpsmile
+      #cplInc=$incpsmile
+	  if echo "$compiler" | grep -qE 'Gnu'; then
+	    cplInc="$incpsmile -fallow-invalid-boz -fallow-argument-mismatch"
+      else
+        cplInc=$incpsmile
+      fi
     fi
       comment " OAS libs cplLib: $cplLib"
       comment " OAS libs cplInc: $cplInc"
@@ -557,10 +566,21 @@ route "${cyellow}>>> c_configure_pfl${cnormal}"
   export FC=$pfc
   export F77=$pf77
   export CXX=$pcxx
+  echo $CC 
+  echo $FC 
+  echo $F77 
+  echo $CXX
 
   comment "    configure pfsimulator and pftools"
   export SCOREP_WRAPPER=off
-  cmake ../ $flagsSim >> $log_file 2>> $err_file
+  echo "flagsSim= ",$flagsSim
+    #cmake ../ $flagsSim >> $log_file 2>> $err_file
+  if [[ $processor == "GPU"|| $processor == "MSA" ]]; then
+     cmake .. $flagsSim -DCMAKE_EXE_LINKER_FLAGS="-lcurand -lcusparse -lcublas">> $log_file 2>> $err_file
+  else
+     cmake .. $flagsSim >> $log_file 2>> $err_file
+   fi
+   
   check
 route "${cyellow}<<< c_configure_pfl${cnormal}"
 }
