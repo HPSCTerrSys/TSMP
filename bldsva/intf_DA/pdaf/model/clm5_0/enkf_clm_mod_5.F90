@@ -59,6 +59,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
   integer(c_int),bind(C,name="clmwatmin_switch")         :: clmwatmin_switch
   real(c_double),bind(C,name="clmcrns_bd")      :: clmcrns_bd
+
   integer  :: nstep     ! time step index
   real(r8) :: dtime     ! time step increment (sec)
   integer  :: ier       ! error code
