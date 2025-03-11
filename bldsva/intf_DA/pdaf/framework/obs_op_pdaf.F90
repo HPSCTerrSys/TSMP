@@ -100,6 +100,8 @@ real(8) :: tot, avesm, avesm_temp, Dp
 integer :: nsc
 ! end of hcp 
 
+#ifndef PARFLOW_STAND_ALONE
+#ifndef OBS_ONLY_PARFLOW
 ! Variables used in crns version 2
 REAL :: weights_r1(920), weights_r2(920), weights_r3(920)
 Real :: weights_layer(8)
@@ -110,6 +112,8 @@ REAL :: r2 = 20.0
 REAL :: r3 = 85.0
 REAL :: bd, y
 REAL :: sum_r1, sum_r2, sum_r3, totw
+#endif
+#endif
 
 
 ! *********************************************
@@ -205,6 +209,8 @@ endif
 #endif
 #endif
 
+#ifndef PARFLOW_STAND_ALONE
+#ifndef OBS_ONLY_PARFLOW
  if (crns_flag.EQ.2) then
    lpointobs = .false.
    ! CRNS implementation based on Schrön et al. 2017 using
@@ -287,6 +293,8 @@ endif
      ! end loop over observations
    END DO
  end if
+#endif
+#endif
 
 
  if(obs_interp_switch == 1) then
