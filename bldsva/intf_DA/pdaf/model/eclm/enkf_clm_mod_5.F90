@@ -86,7 +86,7 @@ module enkf_clm_mod
   subroutine define_clm_statevec(mype)
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
-    use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevsoi, nlevsno, nlevgrnd
     use clm_varcon , only : ispval
     use ColumnType , only : col
 
@@ -284,6 +284,11 @@ module enkf_clm_mod
         clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
         clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
     endif
+    ! Case 3: Assimilation of snow depth: adding h2osoi_ice in the state vector
+    if(clmupdate_snow.eq.3) then
+        clm_varsize      =  (clm_endg-clm_begg+1)
+        clm_statevecsize =  2*((clm_endg-clm_begg+1) * (nlevsno + nlevgrnd)) !2D h2osoi_ice
+    endif
 
     !hcp LST DA
     if(clmupdate_T.eq.1) then
@@ -325,7 +330,7 @@ module enkf_clm_mod
 
   subroutine set_clm_statevec(tstartcycle, mype)
     use clm_instMod, only : soilstate_inst, waterstate_inst
-    use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevsoi, nlevsno, nlevgrnd
     ! use clm_varcon, only: nameg, namec
     ! use GetGlobalValuesMod, only: GetGlobalWrite
     use ColumnType , only : col
@@ -339,6 +344,7 @@ module enkf_clm_mod
     real(r8), pointer :: porgm(:,:)
     real(r8), pointer :: snow_depth(:)
     real(r8), pointer :: h2osno(:)
+    real(r8), pointer :: h2oice(:,:)
     integer :: i,j,jj,g,cc=0,offset=0
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
     character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
@@ -350,6 +356,7 @@ module enkf_clm_mod
 
     snow_depth => waterstate_inst%snow_depth_col ! snow height of snow covered area (m) 
     h2osno     => waterstate_inst%h2osno_col     ! snow water equivalent (mm)
+    h2osoi_ice     => waterstate_inst%h2osoi_ice_col ! col ice lens (kg/m2) (-nlevsno+1:nlevgrnd)
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
@@ -456,6 +463,49 @@ module enkf_clm_mod
 
         end if
 
+    endif
+    ! Case 3: Snow Depth with h2osoi_ice in state vector
+    if(clmupdate_snow.eq.3) then
+
+        ! snow_depth into state vector
+        cc = 1
+        do j=clm_begg,clm_endg
+        ! Only get the snow_depth from the first column of each gridcell
+        ! and add it to the clm_statevec at the position of the gridcell (cc)
+        newgridcell = .true.
+        do jj=clm_begc,clm_endc
+          g = col%gridcell(jj)
+          if (g .eq. j) then
+            if (newgridcell) then
+              newgridcell = .false.
+              clm_statevec(cc+offset) = snow_depth(jj)
+            endif
+          endif 
+        end do
+        cc = cc + 1
+        end do
+
+        ! h2osoi_ice into state vector
+        cc = 1
+        ! Additional loop over layers
+        do i=-nlevsno+1,nlevgrnd
+          do j=clm_begg,clm_endg
+            ! Only get the h2osoi_ice from the first column of each gridcell
+            ! and add it to the clm_statevec at the position of the gridcell (cc)
+            newgridcell = .true.
+            do jj=clm_begc,clm_endc
+              g = col%gridcell(jj)
+              if (g .eq. j) then
+                if (newgridcell) then
+                  newgridcell = .false.
+                  ! Shift by clm_varsize (size of snow-depth in state vector)
+                  clm_statevec(cc+clm_varsize+offset) = h2osoi_ice(jj,i)
+                endif
+              endif
+            end do
+            cc = cc + 1
+          end do
+        end do
     endif
 
 #ifdef PDAF_DEBUG
@@ -576,113 +626,113 @@ module enkf_clm_mod
     ! write updated swc back to CLM
     if(clmupdate_swc.ne.0) then
 
-        ! Set minimum soil moisture for checking the state vector and
-        ! for setting minimum swc for CLM
-        if(clmwatmin_switch.eq.3) then
-          ! CLM3.5 type watmin
-          watmin_check = 0.00
-          watmin_set = 0.05
-        else if(clmwatmin_switch.eq.5) then
-          ! CLM5.0 type watmin
-          watmin_check = watmin
-          watmin_set = watmin
-        else
-          ! Default
-          watmin_check = 0.0
-          watmin_set = 0.0
-        end if
+      ! Set minimum soil moisture for checking the state vector and
+      ! for setting minimum swc for CLM
+      if(clmwatmin_switch.eq.3) then
+        ! CLM3.5 type watmin
+        watmin_check = 0.00
+        watmin_set = 0.05
+      else if(clmwatmin_switch.eq.5) then
+        ! CLM5.0 type watmin
+        watmin_check = watmin
+        watmin_set = watmin
+      else
+        ! Default
+        watmin_check = 0.0
+        watmin_set = 0.0
+      end if
 
-        ! cc = 0
-        do i=1,nlevsoi
-          ! CLM3.5: iterate over grid cells
-          ! CLM5.0: iterate over columns
-          ! do j=clm_begg,clm_endg
-            do j=clm_begc,clm_endc
+      ! cc = 0
+      do i=1,nlevsoi
+        ! CLM3.5: iterate over grid cells
+        ! CLM5.0: iterate over columns
+        ! do j=clm_begg,clm_endg
+        do j=clm_begc,clm_endc
 
-              ! Update only those SWCs that are not excluded by ispval
-              if(state_clm2pdaf_p(j,i) .ne. ispval) then
+          ! Update only those SWCs that are not excluded by ispval
+          if(state_clm2pdaf_p(j,i) .ne. ispval) then
 
-                if(swc(j,i).eq.0.0) then
-                  swc_zero_before_update = .true.
+            if(swc(j,i).eq.0.0) then
+              swc_zero_before_update = .true.
 
-                  ! Zero-SWC leads to zero denominator in computation of
-                  ! rliq/rice, therefore setting rliq/rice to special
-                  ! value
-                  rliq = spval
-                  rice = spval
-                else
-                  swc_zero_before_update = .false.
+              ! Zero-SWC leads to zero denominator in computation of
+              ! rliq/rice, therefore setting rliq/rice to special
+              ! value
+              rliq = spval
+              rice = spval
+            else
+              swc_zero_before_update = .false.
 
-                  rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
-                  rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
-                  !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
-                end if
+              rliq = h2osoi_liq(j,i)/(dz(j,i)*denh2o*swc(j,i))
+              rice = h2osoi_ice(j,i)/(dz(j,i)*denice*swc(j,i))
+              !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
+            end if
 
-                swc_update = clm_statevec(state_clm2pdaf_p(j,i))
+            swc_update = clm_statevec(state_clm2pdaf_p(j,i))
 
-                if(swc_update.le.watmin_check) then
-                  swc(j,i) = watmin_set
-                else if(swc_update.ge.watsat(j,i)) then
-                  swc(j,i) = watsat(j,i)
-                else
-                  swc(j,i)   = swc_update
-                endif
+            if(swc_update.le.watmin_check) then
+              swc(j,i) = watmin_set
+            else if(swc_update.ge.watsat(j,i)) then
+              swc(j,i) = watsat(j,i)
+            else
+              swc(j,i)   = swc_update
+            endif
 
-                if (isnan(swc(j,i))) then
-                  swc(j,i) = watmin_set
-                  print *, "WARNING: swc at j,i is nan: ", j, i
-                endif
+            if (isnan(swc(j,i))) then
+              swc(j,i) = watmin_set
+              print *, "WARNING: swc at j,i is nan: ", j, i
+            endif
 
-                if(swc_zero_before_update) then
-                  ! This case should not appear for hydrologically
-                  ! active columns/layers, where always: swc > watmin
-                  !
-                  ! If you want to make sure that no zero SWCs appear in
-                  ! the code, comment out the error stop
+            if(swc_zero_before_update) then
+              ! This case should not appear for hydrologically
+              ! active columns/layers, where always: swc > watmin
+              !
+              ! If you want to make sure that no zero SWCs appear in
+              ! the code, comment out the error stop
 
 #ifdef PDAF_DEBUG
-                  ! error stop "ERROR: Update of zero-swc"
-                  print *, "WARNING: Update of zero-swc"
-                  print *, "WARNING: Any new H2O added to h2osoi_liq(j,i) with j,i = ", j, i
+              ! error stop "ERROR: Update of zero-swc"
+              print *, "WARNING: Update of zero-swc"
+              print *, "WARNING: Any new H2O added to h2osoi_liq(j,i) with j,i = ", j, i
 #endif
-                  h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
-                  h2osoi_ice(j,i) = 0.0
-                else
-                  ! update liquid water content
-                  h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
-                  ! update ice content
-                  h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
-                end if
+              h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o
+              h2osoi_ice(j,i) = 0.0
+            else
+              ! update liquid water content
+              h2osoi_liq(j,i) = swc(j,i) * dz(j,i)*denh2o*rliq
+              ! update ice content
+              h2osoi_ice(j,i) = swc(j,i) * dz(j,i)*denice*rice
+            end if
 
-              end if
-              ! cc = cc + 1
-            end do
+          end if
+          ! cc = cc + 1
         end do
+      end do
 
 #ifdef PDAF_DEBUG
-        IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
+      IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
 
-          IF(clmupdate_swc.NE.0) THEN
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn3, action="write")
-            WRITE (71,"(es22.15)") h2osoi_liq(:,:)
-            CLOSE(71)
+        IF(clmupdate_swc.NE.0) THEN
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn3, action="write")
+          WRITE (71,"(es22.15)") h2osoi_liq(:,:)
+          CLOSE(71)
 
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn4, action="write")
-            WRITE (71,"(es22.15)") h2osoi_ice(:,:)
-            CLOSE(71)
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn4, action="write")
+          WRITE (71,"(es22.15)") h2osoi_ice(:,:)
+          CLOSE(71)
 
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn2, action="write")
-            WRITE (71,"(es22.15)") swc(:,:)
-            CLOSE(71)
-          END IF
-
+          ! TSMP-PDAF: For debug runs, output the state vector in files
+          WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
+          OPEN(unit=71, file=fn2, action="write")
+          WRITE (71,"(es22.15)") swc(:,:)
+          CLOSE(71)
         END IF
+
+      END IF
 #endif
 
     endif
@@ -746,73 +796,111 @@ module enkf_clm_mod
             ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
             if ( clmupdate_snow_repartitioning.eq.3) then
               incr_h2osno = snow_depth(j) / rsnow(j) ! INC = New SD / OLD SD
-                do i=snlsno(j)+1,0
-                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-                end do
+              do i=snlsno(j)+1,0
+                h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+              end do
             endif
           endif
         endif
       end do
 
       if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
-          if ( ABS(SUM(rsnow(:))).gt.0.000001) then
-            call clm_repartition_snow()
-          end if
+        if ( ABS(SUM(rsnow(:))).gt.0.000001) then
+          call clm_repartition_snow()
+        end if
       end if
     endif
     ! Case 2: Snow water equivalent
     ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
     if(clmupdate_snow.eq.2) then
-        ! cc = 1
-        ! do j=clm_begg,clm_endg
-        ! iterate through the columns and copy from the same gridcell
-        ! i.e. statevec position (cc) for each column
-          do j=clm_begc,clm_endc
+      ! cc = 1
+      ! do j=clm_begg,clm_endg
+      ! iterate through the columns and copy from the same gridcell
+      ! i.e. statevec position (cc) for each column
+      do j=clm_begc,clm_endc
 
-            ! Set cc (the state vector index) from the
-              ! CLM5-grid-index and the `CLM5-layer-index times
-              ! num_gridcells`
-              if(clmstatevec_allcol.eq.0) then
-                cc = (col%gridcell(j) - clm_begg + 1)
-              else
-                cc = (j - clm_begc + 1)
-              end if
-
-              ! Catch negative or 0 values from DA
-              if (clm_statevec(cc+offset).le.0.0) then
-                print *, "WARNING: SWE at g,c is negative or zero: ", j, clm_statevec(cc+offset)
-              else
-                rsnow(j) = h2osno(j)
-                if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
-                  h2osno(j)   = clm_statevec(cc+offset)
-                  ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
-                  ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
-                  ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
-                  if ( clmupdate_snow_repartitioning.eq.3) then
-                    incr_h2osno = h2osno(j) / rsnow(j) ! INC = New SWE / OLD SWE
-                      do i=snlsno(j)+1,0
-                        h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-                      end do
-                  end if
-
-                  if (isnan(rsnow(j))) then
-                    print *, "WARNING: rsnow at j is nan: ", j
-                  endif
-                  if (isnan(h2osno(j))) then
-                    print *, "WARNING: h2osno at j is nan: ", j
-                  endif
-
-                end if
-              endif
-          end do
-        ! cc = cc + 1
-        ! end do
-
-        if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
-          if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
-            call clm_repartition_snow(rsnow(:))
-          end if
+        ! Set cc (the state vector index) from the
+        ! CLM5-grid-index and the `CLM5-layer-index times
+        ! num_gridcells`
+        if(clmstatevec_allcol.eq.0) then
+          cc = (col%gridcell(j) - clm_begg + 1)
+        else
+          cc = (j - clm_begc + 1)
         end if
+
+        ! Catch negative or 0 values from DA
+        if (clm_statevec(cc+offset).le.0.0) then
+          print *, "WARNING: SWE at g,c is negative or zero: ", j, clm_statevec(cc+offset)
+        else
+          rsnow(j) = h2osno(j)
+          if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
+            h2osno(j)   = clm_statevec(cc+offset)
+            ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
+            ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
+            ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
+            if ( clmupdate_snow_repartitioning.eq.3) then
+              incr_h2osno = h2osno(j) / rsnow(j) ! INC = New SWE / OLD SWE
+              do i=snlsno(j)+1,0
+                h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+              end do
+            end if
+
+            if (isnan(rsnow(j))) then
+              print *, "WARNING: rsnow at j is nan: ", j
+            endif
+            if (isnan(h2osno(j))) then
+              print *, "WARNING: h2osno at j is nan: ", j
+            endif
+
+          end if
+        endif
+      end do
+      ! cc = cc + 1
+      ! end do
+
+      if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
+        if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
+          call clm_repartition_snow(rsnow(:))
+        end if
+      end if
+    endif
+    ! Case 3: Snow depth with h2osoi_ice in state vector
+    ! Write updated h2osoi_ice back to CLM and then repartition snow and adjust related variables
+    if(clmupdate_snow.eq.3) then
+      do i=-nlevsno+1,nlevsoi
+        do j=clm_begc,clm_endc
+          ! iterate through the columns and copy from the same gridcell
+          ! i.e. statevec position (cc) for each column
+
+          ! Set cc (the state vector index) from the
+          ! CLM5-grid-index and the `CLM5-layer-index times
+          ! num_gridcells`
+          if(clmstatevec_allcol.eq.0) then
+            cc = (col%gridcell(j) - clm_begg + 1)  + (i + nlevsno -1)*(clm_endg - clm_begg + 1)
+          else
+            cc = (j - clm_begc + 1) + (i + nlevsno -1)*(clm_endc - clm_begc + 1)
+          end if
+          ! Catch negative or 0 values from DA
+          if (i .eq. -nlevsno+1) then
+            if (clm_statevec(cc+offset).lt.0.0) then
+              print *, "WARNING: snow_depth at g,c is negative: ", cc, j, clm_statevec(cc+offset)
+            end if
+          end if
+          if (clm_statevec(cc+clm_varsize+offset).lt.0.0) then
+            print *, "WARNING: h2osoi_ice at g,c is negative: ", cc, j, i, clm_statevec(cc+clm_varsize+offset)
+          else
+            ! UPDATE
+            h2osoi_ice(j,i) = clm_statevec(cc+clm_varsize+offset)
+          endif
+        end do
+      end do
+
+      ! How to interact with repartitioning?
+      if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
+        if ( ABS(SUM(rsnow(:))).gt.0.000001) then
+          call clm_repartition_snow()
+        end if
+      end if
     endif
 
   end subroutine update_clm
