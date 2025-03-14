@@ -701,16 +701,35 @@ Effect of `obs_interp_switch=1`:
 
 ### DA:crns_flag ###
 
-`DA:crns_flag`: (int) Set to 1 will read the parflow soil moisture data 
-as averaged soil moisture with the conventional weighting profile proposed 
-in Schroen etal HESS 2017 to model CRNS observation. Default is zero.
+`DA:crns_flag`: (int) Flag for using CRNS-observations
+
+- `1`: ParFlow-based CRNS-measurement operator. ParFlow soil moisture
+data is averaged and used in conventional weighting profile proposed
+in Schroen etal HESS 2017 for modelling CRNS observations.
+
+- `2`: CLM-based CRNS-measurement operator. CLM-soil moisture are
+    weighted and used in the operator. CRNS implementation based on
+    Schrön et al. 2017 using d86 for 3 different radius values. Note
+    that the penetration depths are computed using the observations y.
+
+Default: `0` (no CRNS-observations).
+
+### DA:crns_bd ###
+
+`DA:crns_bd`: (int) Only used for `DA:crns_flag=2`. Prescribed bulk
+density average for the eight soil layers considered in
+CRNS-measurement operator.
+
+Default: `-1.0` (bulk density computed from CLM's
+`soilstate_inst%bd_col`).
 
 ### DA:da_crns_depth_tol ###
 
-`DA:da_crns_depth_tol`: (double) Convergence criteria for weighting
-procedure that "generate[s] a weighted average of [soil-moisture]
-point measurements that can be compared with [...] [a] CRNS product"
-(Schrön et al, 2017 http://dx.doi.org/10.5194/hess-21-5009-2017)
+`DA:da_crns_depth_tol`: (double) Only used for
+`DA:crns_flag=1`. Convergence criteria for weighting procedure that
+"generate[s] a weighted average of [soil-moisture] point measurements
+that can be compared with [...] [a] CRNS product" (Schrön et al, 2017
+http://dx.doi.org/10.5194/hess-21-5009-2017)
 
 Only used if CRNS-observations are turned on by adding parameter
 `depth` in observation input.
