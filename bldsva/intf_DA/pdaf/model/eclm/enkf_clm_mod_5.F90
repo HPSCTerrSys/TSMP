@@ -485,8 +485,8 @@ module enkf_clm_mod
     real(r8), pointer :: h2osoi_ice(:,:)
 
     real(r8)  :: rliq,rice,incr_h2osno
-    real(r8) :: rsnow(clm_statevecsize)
-    real(r8) :: nsnow(clm_statevecsize)
+    real(r8) :: rsnow(clm_begc:clm_endc)
+    real(r8) :: nsnow(clm_begc:clm_endc)
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
     real(r8)  :: swc_update        ! updated SWC in loop
