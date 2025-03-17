@@ -276,16 +276,13 @@ module enkf_clm_mod
     ! Snow assimilation
     ! Case 1: Assimilation of snow depth : allocated 1 per column in CLM5
     ! But observations and history file 1 per grid cell and therefore statevecsize 1 per grid cell
-    if(clmupdate_snow.eq.1) then 
-        clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
-        clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
-    endif
     ! Case 2: Assimilation of snow water equivalent same as above
-    if(clmupdate_snow.eq.2) then
+    if(clmupdate_snow.eq.1 .or. clmupdate_snow.eq.2) then 
         clm_varsize      =  (clm_endg-clm_begg+1) ! Currently no combination of SWC and snow DA
         clm_statevecsize =  (clm_endg-clm_begg+1) ! So like this if snow is set it takes priority
     endif
-    ! Case 3: Assimilation of snow depth: adding swe in the state vector
+    ! Case 3: Assimilation of snow depth: Snow depth and snow water
+    ! equivalent in the state vector
     if(clmupdate_snow.eq.3) then
         clm_varsize      =  (clm_endg-clm_begg+1)
         clm_statevecsize =  2*(clm_endg-clm_begg+1)
@@ -410,63 +407,11 @@ module enkf_clm_mod
       end do
     endif
 
-    ! Snow assimilation
+    ! Snow assimilation state vector
     ! Case 1: Snow depth
-    if(clmupdate_snow.eq.1) then
-        cc = 1
-        do j=clm_begg,clm_endg
-        ! Only get the snow_depth from the first column of each gridcell
-        ! and add it to the clm_statevec at the position of the gridcell (cc)
-        newgridcell = .true.
-        do jj=clm_begc,clm_endc
-          g = col%gridcell(jj)
-          if (g .eq. j) then
-            if (newgridcell) then
-              newgridcell = .false.
-              clm_statevec(cc+offset) = snow_depth(jj)
-            endif
-          endif 
-        end do
-        cc = cc + 1
-        end do
-    endif
     ! Case 2: SWE
-    if(clmupdate_snow.eq.2) then
-        cc = 1
-
-        if(clmstatevec_allcol.eq.0) then
-
-          do j=clm_begg,clm_endg
-            ! Only get the SWE from the first column of each gridcell
-            ! and add it to the clm_statevec at the position of the gridcell (cc)
-            newgridcell = .true.
-            do jj=clm_begc,clm_endc
-              g = col%gridcell(jj)
-              if (g .eq. j) then
-                if (newgridcell) then
-                  newgridcell = .false.
-                  clm_statevec(cc+offset) = h2osno(jj)
-                endif
-              endif
-            end do
-            cc = cc + 1
-          end do
-
-        else
-
-          do jj=clm_begc,clm_endc
-            ! SWC from all columns of each gridcell
-            clm_statevec(cc+offset) = h2osno(jj)
-            cc = cc + 1
-          end do
-
-        end if
-
-    endif
-    ! Case 3: Snow Depth with swe in state vector
-    if(clmupdate_snow.eq.3) then
-
-        ! snow_depth and swe into state vector
+    ! Case 3: Snow depth + SWE
+    if(clmupdate_snow.ne.0) then
         cc = 1
         do j=clm_begg,clm_endg
         ! Only get the snow_depth/swe from the first column of each gridcell
@@ -477,8 +422,18 @@ module enkf_clm_mod
           if (g .eq. j) then
             if (newgridcell) then
               newgridcell = .false.
-              clm_statevec(cc+offset) = snow_depth(jj)
-              clm_statevec(cc+clm_varsize+offset) = h2osno(jj)
+
+              if(clmupdate_snow.eq.1) then
+                clm_statevec(cc+offset) = snow_depth(jj)
+              else if(clmupdate_snow.eq.2) then
+                clm_statevec(cc+offset) = h2osno(jj)
+              else if(clmupdate_snow.eq.3) then
+                clm_statevec(cc+offset) = snow_depth(jj)
+                clm_statevec(cc+clm_varsize+offset) = h2osno(jj)
+              else
+                error stop "Wrong input for clmupdate_snow"
+              end if
+
             endif
           endif 
         end do
@@ -531,6 +486,7 @@ module enkf_clm_mod
 
     real(r8)  :: rliq,rice,incr_h2osno
     real(r8) :: rsnow(clm_statevecsize)
+    real(r8) :: nsnow(clm_statevecsize)
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
     real(r8)  :: swc_update        ! updated SWC in loop
@@ -749,156 +705,75 @@ module enkf_clm_mod
 
     ! Snow assimilation:
     ! Case 1: Snow depth
-    ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
-    if(clmupdate_snow.eq.1) then
+    ! Case 2: Snow water equivalent
+    ! Case 3: Snow depth (assimilated) and SWE (used for increment) in state vector
+    ! Write updated snow variable back to CLM and then repartition snow and adjust related variables
+    if(clmupdate_snow.ne.0) then
       do j=clm_begc,clm_endc
-        ! iterate through the columns and copy from the same gridcell
-        ! i.e. statevec position (cc) for each column
+        ! Iterate through the columns
+
+        ! For each column index, copy the gridcell-linked state vector
+        ! value at state vector index `cc`
 
         ! Set cc (the state vector index) from the
-        ! CLM5-grid-index and the `CLM5-layer-index times
-        ! num_gridcells`
-        if(clmstatevec_allcol.eq.0) then
-          cc = (col%gridcell(j) - clm_begg + 1)
-        else
-          cc = (j - clm_begc + 1)
-        end if
+        ! CLM5-grid-index
+        cc = (col%gridcell(j) - clm_begg + 1)
+
         ! Catch negative or 0 values from DA
-        if (clm_statevec(cc+offset).lt.0.0) then
-          print *, "WARNING: snow depth at g,c is negative: ", cc, j, clm_statevec(cc+offset)
-        else
-          rsnow(j) = snow_depth(j) 
-          if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))) .gt.0.000001) then
-            snow_depth(j)   = clm_statevec(cc+offset)
-            ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
-            ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
-            ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
-            if ( clmupdate_snow_repartitioning.eq.3) then
-              incr_h2osno = snow_depth(j) / rsnow(j) ! INC = New SD / OLD SD
-                do i=snlsno(j)+1,0
-                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-                end do
-            endif
-          endif
-        endif
+        if (clm_statevec(cc+offset).le.0.0) then
+          print *, "WARNING: Snow-statevec is negative/zero at cc. cc, j, offset, clm_statevec(cc+offset): ", cc, j, offset, clm_statevec(cc+offset)
+        end if
+
+        if (clmupdate_snow.eq.1) then
+          rsnow(j) = snow_depth(j)
+        else if (clmupdate_snow.eq.2) then
+          rsnow(j) = h2osno(j)
+        else if (clmupdate_snow.eq.3) then
+          rsnow(j) = h2osno(j)
+        end if
+
+        if (clmupdate_snow.eq.1 .or. clmupdate_snow.eq.2) then
+          nsnow(j) = clm_statevec(cc+offset)
+        else if (clmupdate_snow.eq.3) then
+          nsnow(j) = clm_statevec(cc+clm_varsize+offset)
+        end if
+            
+        ! Update state variable to CLM
+        ! Not needed for repartioning-case 3?
+        if(clmupdate_snow.eq.1) then
+          snow_depth(j) = nsnow(j)
+        end if
+        if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3) then
+          h2osno(j) = nsnow(j)
+        end if
+
       end do
 
-      if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
-          if ( ABS(SUM(rsnow(:))).gt.0.000001) then
-            call clm_repartition_snow()
-          end if
+      ! Repartitioning
+      if ( clmupdate_snow_repartitioning.eq.1 .and. clmupdate_snow_repartitioning.eq.2) then
+
+        if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
+          call clm_repartition_snow(rsnow(:))
+        end if
+
       end if
-    endif
-    ! Case 2: Snow water equivalent
-    ! Write updated snow depth back to CLM and then repartition snow and adjust related variables
-    if(clmupdate_snow.eq.2) then
-        ! cc = 1
-        ! do j=clm_begg,clm_endg
-        ! iterate through the columns and copy from the same gridcell
-        ! i.e. statevec position (cc) for each column
-          do j=clm_begc,clm_endc
 
-            ! Set cc (the state vector index) from the
-              ! CLM5-grid-index and the `CLM5-layer-index times
-              ! num_gridcells`
-              if(clmstatevec_allcol.eq.0) then
-                cc = (col%gridcell(j) - clm_begg + 1)
-              else
-                cc = (j - clm_begc + 1)
-              end if
+      if ( clmupdate_snow_repartitioning.eq.3) then
 
-              ! Catch negative or 0 values from DA
-              if (clm_statevec(cc+offset).le.0.0) then
-                print *, "WARNING: SWE at g,c is negative or zero: ", j, clm_statevec(cc+offset)
-              else
-                rsnow(j) = h2osno(j)
-                if ( ABS(SUM(rsnow(:) - clm_statevec(cc+offset))).gt.0.000001) then
-                  h2osno(j)   = clm_statevec(cc+offset)
-                  ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
-                  ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
-                  ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
-                  if ( clmupdate_snow_repartitioning.eq.3) then
-                    incr_h2osno = h2osno(j) / rsnow(j) ! INC = New SWE / OLD SWE
-                      do i=snlsno(j)+1,0
-                        h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-                      end do
-                  end if
-
-                  if (isnan(rsnow(j))) then
-                    print *, "WARNING: rsnow at j is nan: ", j
-                  endif
-                  if (isnan(h2osno(j))) then
-                    print *, "WARNING: h2osno at j is nan: ", j
-                  endif
-
-                end if
-              endif
-          end do
-        ! cc = cc + 1
-        ! end do
-
-        if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
-          if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
-            call clm_repartition_snow(rsnow(:))
+        do j=clm_begc,clm_endc
+          if ( ABS(rsnow(j) - nsnow(j)).gt.0.000001) then
+            if ( ABS(rsnow(j)).gt.0.000001) then
+              ! Update h2osoi_ice with increment
+              incr_h2osno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
+              do i=snlsno(j)+1,0
+                h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+              end do
+            end if
           end if
-        end if
-    endif
-    ! Case 3: Snow depth with swe in state vector
-    ! Use updated swe (from snow_depth observations) to update h2osoi_ice by increment
-    if(clmupdate_snow.eq.3) then
-        ! cc = 1
-        ! do j=clm_begg,clm_endg
-        ! iterate through the columns and copy from the same gridcell
-        ! i.e. statevec position (cc) for each column
-          do j=clm_begc,clm_endc
+        end do
 
-            ! Set cc (the state vector index) from the
-              ! CLM5-grid-index and the `CLM5-layer-index times
-              ! num_gridcells`
-              if(clmstatevec_allcol.eq.0) then
-                cc = (col%gridcell(j) - clm_begg + 1)
-              else
-                cc = (j - clm_begc + 1)
-              end if
+      end if
 
-              ! Catch negative or 0 values from DA
-              if (clm_statevec(cc+offset).lt.0.0) then
-                print *, "WARNING: snow depth at g,c is negative: ", cc, j, clm_statevec(cc+offset)
-              end if
-              if (clm_statevec(cc+clm_varsize+offset).le.0.0) then
-                print *, "WARNING: SWE at g,c is negative or zero: ", j, clm_statevec(cc+clm_varsize+offset)
-              else
-                rsnow(j) = h2osno(j)
-                if ( ABS(SUM(rsnow(:) - clm_statevec(cc+clm_varsize+offset))).gt.0.000001) then
-                  h2osno(j)   = clm_statevec(cc+clm_varsize+offset)
-                  ! JK: clmupdate_snow_repartitioning.eq.3 is experimental
-                  ! JK: clmupdate_snow_repartitioning.eq.3 from NASA-Code (based on older CLM3.5 version)
-                  ! https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
-                  if ( clmupdate_snow_repartitioning.eq.3) then
-                    incr_h2osno = h2osno(j) / rsnow(j) ! INC = New SWE / OLD SWE
-                      do i=snlsno(j)+1,0
-                        h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-                      end do
-                  end if
-
-                  if (isnan(rsnow(j))) then
-                    print *, "WARNING: rsnow at j is nan: ", j
-                  endif
-                  if (isnan(h2osno(j))) then
-                    print *, "WARNING: h2osno at j is nan: ", j
-                  endif
-
-                end if
-              endif
-          end do
-        ! cc = cc + 1
-        ! end do
-
-        if ( clmupdate_snow_repartitioning.ne.0 .and. clmupdate_snow_repartitioning.ne.3) then
-          if ( ABS(SUM(rsnow(:) - h2osno(:))).gt.0.000001) then
-            call clm_repartition_snow(rsnow(:))
-          end if
-        end if
     endif
 
   end subroutine update_clm
