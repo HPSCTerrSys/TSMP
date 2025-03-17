@@ -320,14 +320,9 @@ endif
 
   if(lpointobs) then
 
-    ! WORKAROUND FOR SUDDEN SEG 11 error
-    ! DO NOT LEAVE IN FINAL VERSION
-    ! JUST DURING DEBUG PROCESS
-    ! JUST VALID FOR SINGLE GRID CELLS WITH SINGLE VALUE OBS
-    m_state_p(1) = state_p(1)
-!  DO i = 1, dim_obs_p
-!     m_state_p(i) = state_p(obs_index_p(i))
-!  END DO
+  DO i = 1, dim_obs_p
+     m_state_p(i) = state_p(obs_index_p(i))
+  END DO
       
   end if
 
