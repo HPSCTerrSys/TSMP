@@ -498,7 +498,7 @@ Only CLM5.0/eCLM.
    in the update as in Case 2.
 
 See CLM Technical Note for more information on snow variable:
-https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/Snow_Hydrology/CLM50_Tech_Note_Snow_Hydrology.html
+<https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/Snow_Hydrology/CLM50_Tech_Note_Snow_Hydrology.html>
 - snow depth: `waterstate_inst%snow_depth_col`
 - snow water equivalent: `waterstate_inst%h2osno_col`
 
@@ -522,7 +522,7 @@ CLM5.0/eCLM.
 -  3 (Currently recommended): `h2osoi_ice` updated by increment based
    on updated state vector variable. Further repartitioning left to
    CLM-code. Based on
-   https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90
+   <https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90>
 
 ### CLM:print_swc ###
 
