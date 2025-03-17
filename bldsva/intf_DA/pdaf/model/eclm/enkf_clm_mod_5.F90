@@ -537,7 +537,9 @@ module enkf_clm_mod
         OPEN(unit=71, file=fn5, action="write")
         WRITE (71,"(es22.15)") h2osoi_liq(:,:)
         CLOSE(71)
+      END IF
 
+      IF(clmupdate_swc.NE.0 .OR. clmupdate_snow.NE.0) THEN
         ! TSMP-PDAF: For debug runs, output the state vector in files
         WRITE(fn6, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".bef_up.", tstartcycle, ".txt"
         OPEN(unit=71, file=fn6, action="write")
@@ -776,6 +778,17 @@ module enkf_clm_mod
 
       end if
 
+#ifdef PDAF_DEBUG
+      IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
+
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+        OPEN(unit=71, file=fn4, action="write")
+        WRITE (71,"(es22.15)") h2osoi_ice(:,:)
+        CLOSE(71)
+
+      END IF
+#endif
     endif
 
   end subroutine update_clm
