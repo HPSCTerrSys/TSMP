@@ -719,11 +719,6 @@ module enkf_clm_mod
         ! CLM5-grid-index
         cc = (col%gridcell(j) - clm_begg + 1)
 
-        ! Catch negative or 0 values from DA
-        if (clm_statevec(cc+offset).le.0.0) then
-          print *, "WARNING: Snow-statevec is negative/zero at cc. cc, j, offset, clm_statevec(cc+offset): ", cc, j, offset, clm_statevec(cc+offset)
-        end if
-
         if (clmupdate_snow.eq.1) then
           rsnow(j) = snow_depth(j)
         else if (clmupdate_snow.eq.2) then
@@ -737,14 +732,19 @@ module enkf_clm_mod
         else if (clmupdate_snow.eq.3) then
           nsnow(j) = clm_statevec(cc+clm_varsize+offset)
         end if
-            
-        ! Update state variable to CLM
-        ! Not needed for repartioning-case 3?
-        if(clmupdate_snow.eq.1) then
-          snow_depth(j) = nsnow(j)
-        end if
-        if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3) then
-          h2osno(j) = nsnow(j)
+
+        if (nsnow(j).gt.0.0) then
+          ! Update state variable to CLM
+          ! Not needed for repartioning-case 3?
+          if(clmupdate_snow.eq.1) then
+            snow_depth(j) = nsnow(j)
+          end if
+          if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3) then
+            h2osno(j) = nsnow(j)
+          end if
+        else
+          ! Catch negative or 0 values from DA
+          print *, "WARNING: Snow-statevec is negative/zero at cc. cc, j, offset, clm_statevec(cc+offset): ", cc, j, offset, clm_statevec(cc+offset)
         end if
 
       end do
@@ -761,13 +761,15 @@ module enkf_clm_mod
       if ( clmupdate_snow_repartitioning.eq.3) then
 
         do j=clm_begc,clm_endc
-          if ( ABS(rsnow(j) - nsnow(j)).gt.0.000001) then
-            if ( ABS(rsnow(j)).gt.0.000001) then
-              ! Update h2osoi_ice with increment
-              incr_h2osno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
-              do i=snlsno(j)+1,0
-                h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
-              end do
+          if (nsnow(j).gt.0.0) then
+            if ( ABS(rsnow(j) - nsnow(j)).gt.0.000001) then
+              if ( rsnow(j).ne.0.0) then
+                ! Update h2osoi_ice with increment
+                incr_h2osno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
+                do i=snlsno(j)+1,0
+                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+                end do
+              end if
             end if
           end if
         end do
