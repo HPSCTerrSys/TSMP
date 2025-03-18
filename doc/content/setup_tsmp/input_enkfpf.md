@@ -510,7 +510,7 @@ repartitioning applied during Snow-DA.
 Only used if Snow-DA is switched on by setting `CLM:update_snow`. Only
 CLM5.0/eCLM.
 
--  0 (Default): No repartitioning. Not recommended if Snow-DA is used,
+-  0: No repartitioning. Not recommended if Snow-DA is used,
    when state vector consists of diagnostic variables.
 
 -  1: Repartitioning routine in DA-interface:
@@ -519,7 +519,7 @@ CLM5.0/eCLM.
 -  2: Repartitioning routine in DA-interface:
    `clm_repartition_snow`. Option 2: Adjusting all active layers.
 
--  3 (Currently recommended): `h2osoi_ice` updated by increment based
+-  3 (Default, Currently recommended): `h2osoi_ice` updated by increment based
    on updated state vector variable. Further repartitioning left to
    CLM-code. Based on
    <https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90>
