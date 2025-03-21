@@ -752,7 +752,7 @@ module enkf_clm_mod
       end do
 
       ! Repartitioning
-      if ( clmupdate_snow_repartitioning.eq.1 .and. clmupdate_snow_repartitioning.eq.2) then
+      if ( clmupdate_snow_repartitioning.eq.1 .or. clmupdate_snow_repartitioning.eq.2) then
 
         if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
           call clm_repartition_snow(rsnow(:))
