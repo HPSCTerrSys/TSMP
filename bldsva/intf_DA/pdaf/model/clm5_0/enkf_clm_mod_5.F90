@@ -754,8 +754,14 @@ module enkf_clm_mod
       ! Repartitioning
       if ( clmupdate_snow_repartitioning.eq.1 .or. clmupdate_snow_repartitioning.eq.2) then
 
-        if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
-          call clm_repartition_snow(rsnow(:))
+        if (clmupdate_snow.eq.1 .or. clmupdate_snow.eq.2) then
+          if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
+            call clm_repartition_snow(rsnow(:))
+          end if
+        end if
+
+        if (clmupdate_snow.eq.3 .or. clmupdate_snow.eq.4) then
+          error stop "Not implemented: Repartioning 1/2 for clmupdate_snow.eq.3/4"
         end if
 
       end if

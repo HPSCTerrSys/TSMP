@@ -754,8 +754,14 @@ module enkf_clm_mod
       ! Repartitioning
       if ( clmupdate_snow_repartitioning.eq.1 .or. clmupdate_snow_repartitioning.eq.2) then
 
-        if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
-          call clm_repartition_snow(rsnow(:))
+        if (clmupdate_snow.eq.1 .or. clmupdate_snow.eq.2) then
+          if ( SUM(ABS(rsnow(:) - nsnow(:))).gt.0.000001) then
+            call clm_repartition_snow(rsnow(:))
+          end if
+        end if
+
+        if (clmupdate_snow.eq.3 .or. clmupdate_snow.eq.4) then
+          error stop "Not implemented: Repartioning 1/2 for clmupdate_snow.eq.3/4"
         end if
 
       end if
@@ -873,7 +879,7 @@ module enkf_clm_mod
               h2osno_po(jj) = snow_depth(jj) * denice
             end if
             h2osno_pr(jj) = h2osno(jj)
-          else if (clmupdate_snow .eq. 2 .or. clmupdate_snow .eq. 3) then
+          else if (clmupdate_snow .eq. 2) then
             ! for clmupdate_snow == 2 we have post H2OSNO as the main H2OSNO already
             h2osno_po(jj) = h2osno(jj)
             h2osno_pr(jj) = h2osno_in(jj)

@@ -513,11 +513,13 @@ CLM5.0/eCLM.
 -  0: No repartitioning. Not recommended if Snow-DA is used,
    when state vector consists of diagnostic variables.
 
--  1: (experimental) Repartitioning routine in DA-interface:
-   `clm_repartition_snow`. Option 1: Adjusting the bottom layer only.
+-  1: (experimental, only for `CLM:update_snow=1,2`) Repartitioning
+   routine in DA-interface: `clm_repartition_snow`. Option 1:
+   Adjusting the bottom layer only.
 
--  2: (experimental) Repartitioning routine in DA-interface:
-   `clm_repartition_snow`. Option 2: Adjusting all active layers.
+-  2: (experimental, only for `CLM:update_snow=1,2`) Repartitioning
+   routine in DA-interface: `clm_repartition_snow`. Option 2:
+   Adjusting all active layers.
 
 -  3 (Default, Currently recommended): `h2osoi_ice` updated by increment based
    on updated state vector variable. Further repartitioning left to
