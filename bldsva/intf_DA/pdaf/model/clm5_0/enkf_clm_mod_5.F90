@@ -765,7 +765,7 @@ module enkf_clm_mod
         do j=clm_begc,clm_endc
           if (nsnow(j).gt.0.0) then
             if ( ABS(rsnow(j) - nsnow(j)).gt.0.000001) then
-              if ( rsnow(j).ne.0.0) then
+              if ( ABS(rsnow(j)).gt.0.0) then
                 ! Update h2osoi_ice with increment
                 incr_h2osno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
                 do i=snlsno(j)+1,0
