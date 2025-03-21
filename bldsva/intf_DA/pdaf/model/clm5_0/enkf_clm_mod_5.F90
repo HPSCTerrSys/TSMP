@@ -484,7 +484,7 @@ module enkf_clm_mod
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
 
-    real(r8)  :: rliq,rice,incr_h2osno
+    real(r8)  :: rliq,rice,incr_sno
     real(r8) :: rsnow(clm_begc:clm_endc)
     real(r8) :: nsnow(clm_begc:clm_endc)
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
@@ -773,9 +773,9 @@ module enkf_clm_mod
             if ( ABS(rsnow(j) - nsnow(j)).gt.0.000001) then
               if ( ABS(rsnow(j)).gt.0.0) then
                 ! Update h2osoi_ice with increment
-                incr_h2osno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
+                incr_sno = nsnow(j) / rsnow(j) ! INC = New snow var / OLD snow var
                 do i=snlsno(j)+1,0
-                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_h2osno
+                  h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_sno
                 end do
               end if
             end if
