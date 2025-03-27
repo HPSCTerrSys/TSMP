@@ -157,9 +157,15 @@ module enkf_clm_mod
       error stop "Not implemented: clmupdate_snow.eq.1 or clmupdate_snow.eq.1"
     endif
     ! Case 3: Assimilation of snow depth: Snow depth and snow water
-    ! equivalent in the state vector
+    ! equivalent in the state vector. Update of h2osoi_ice
     if(clmupdate_snow.eq.3) then
       error stop "Not implemented: clmupdate_snow.eq.3"
+    endif
+    ! Case 4: Assimilation of snow depth: Snow depth and snow water
+    ! equivalent in the state vector. Update of h2osoi_ice, h2osoi_liq
+    ! and dz
+    if(clmupdate_snow.eq.4) then
+      error stop "Not implemented: clmupdate_snow.eq.4"
     endif
 
     !hcp LST DA

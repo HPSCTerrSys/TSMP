@@ -287,6 +287,13 @@ module enkf_clm_mod
         clm_varsize      =  (clm_endg-clm_begg+1)
         clm_statevecsize =  2*(clm_endg-clm_begg+1)
     endif
+    ! Case 4: Assimilation of snow depth: Snow depth and snow water
+    ! equivalent in the state vector. Update of h2osoi_ice, h2osoi_liq
+    ! and dz
+    if(clmupdate_snow.eq.4) then
+        clm_varsize      =  (clm_endg-clm_begg+1)
+        clm_statevecsize =  2*(clm_endg-clm_begg+1)
+    endif
 
     !hcp LST DA
     if(clmupdate_T.eq.1) then
@@ -428,6 +435,9 @@ module enkf_clm_mod
               else if(clmupdate_snow.eq.2) then
                 clm_statevec(cc+offset) = h2osno(jj)
               else if(clmupdate_snow.eq.3) then
+                clm_statevec(cc+offset) = snow_depth(jj)
+                clm_statevec(cc+clm_varsize+offset) = h2osno(jj)
+              else if(clmupdate_snow.eq.4) then
                 clm_statevec(cc+offset) = snow_depth(jj)
                 clm_statevec(cc+clm_varsize+offset) = h2osno(jj)
               else
@@ -732,6 +742,9 @@ module enkf_clm_mod
           h2osno_in(j) = h2osno(j)
         else if (clmupdate_snow.eq.3) then
           h2osno_in(j) = h2osno(j)
+        else if (clmupdate_snow.eq.4) then
+          snow_depth_in(j) = snow_depth(j)
+          h2osno_in(j) = h2osno(j)
         end if
 
         if (clmupdate_snow.eq.1) then
@@ -740,9 +753,12 @@ module enkf_clm_mod
           h2osno_out(j) = clm_statevec(cc+offset)
         else if (clmupdate_snow.eq.3) then
           h2osno_out(j) = clm_statevec(cc+clm_varsize+offset)
+        else if (clmupdate_snow.eq.4) then
+          snow_depth_out(j) = clm_statevec(cc+offset)
+          h2osno_out(j) = clm_statevec(cc+clm_varsize+offset)
         end if
 
-        if(clmupdate_snow.eq.1) then
+        if(clmupdate_snow.eq.1 .or. clmupdate_snow.eq.4) then
           ! Update state variable to CLM
           ! Not needed for repartioning-case 3?
           if (snow_depth_out(j).gt.0.0) then
@@ -751,7 +767,7 @@ module enkf_clm_mod
             ! Catch negative or 0 values from DA
             print *, "WARNING: Snow-depth is negative/zero at cc. cc, j, offset, snow_depth_out(j): ", cc, j, offset, snow_depth_out(j)
           end if
-        else if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3) then
+        else if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3 .or. clmupdate_snow.eq.4) then
           if (h2osno_out(j).gt.0.0) then
             h2osno(j) = h2osno_out(j)
           else
@@ -810,6 +826,43 @@ module enkf_clm_mod
                   incr_sno = h2osno_out(j) / h2osno_in(j)
                   do i=snlsno(j)+1,0
                     h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_sno
+                  end do
+                end if
+              end if
+            end if
+          end do
+        end if
+
+        if (clmupdate_snow.eq.4) then
+          do j=clm_begc,clm_endc
+            if (h2osno_out(j).gt.0.0) then
+              if ( ABS(h2osno_in(j) - h2osno_out(j)).gt.0.000001) then
+                if (h2osno_in(j).gt.0.0) then
+                  ! Update h2osoi_ice/h2osoi_liq with increment
+                  incr_swe = h2osno_out(j) / h2osno_in(j)
+                  do i=snlsno(j)+1,0
+                    h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
+                    h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
+                    if (isnan(h2osoi_ice(j,i))) then
+                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
+                    endif
+                    if (isnan(h2osoi_liq(j,i))) then
+                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
+                    endif
+                  end do
+                end if
+              end if
+            end if
+            if (snow_depth_out(j).gt.0.0) then
+              if ( ABS(snow_depth_in(j) - snow_depth_out(j)).gt.0.000001) then
+                if (snow_depth_in(j).gt.0.0) then
+                  ! Update snow_depth with increment
+                  incr_sd = snow_depth_out(j) / snow_depth_in(j)
+                  do i=snlsno(j)+1,0
+                    dz(j,i) = dz(j,i) * incr_sd
+                    if (isnan(dz(j,i))) then
+                      print *, "WARNING: dz at j,i is nan: ", j, i
+                    endif
                   end do
                 end if
               end if

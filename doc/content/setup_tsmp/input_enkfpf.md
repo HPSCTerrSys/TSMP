@@ -494,8 +494,15 @@ Only CLM5.0/eCLM.
    equivalent.
 
 -  3: Assimilation of snow depth. State vector: Snow depth and snow
-   water equivalent. Snow water equivalent from state vector is used
-   in the update as in Case 2.
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment.
+
+-  4: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` and `h2osoi_liq`
+   updated based on `h2osno`-increment. `dz` updated based on
+   `snow_depth`-increment.
 
 See CLM Technical Note for more information on snow variable:
 <https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/Snow_Hydrology/CLM50_Tech_Note_Snow_Hydrology.html>
@@ -521,8 +528,9 @@ CLM5.0/eCLM.
    routine in DA-interface: `clm_repartition_snow`. Option 2:
    Adjusting all active layers.
 
--  3 (Default, Currently recommended): `h2osoi_ice` updated by increment based
-   on updated state vector variable. Further repartitioning left to
+-  3 (Default, Currently recommended): `h2osoi_ice` (and possibly
+   `h2osoi_liq` and `dz`) updated by increment based on updated
+   `h2osno` or `snow_depth`. Further repartitioning left to
    CLM-code. Based on
    <https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90>
 
