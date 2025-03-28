@@ -840,8 +840,8 @@ module enkf_clm_mod
           end if
         end if
 
-        if (clmupdate_snow.eq.3 .or. clmupdate_snow.eq.4) then
-          error stop "Not implemented: Repartioning 1/2 for clmupdate_snow.eq.3/4"
+        if (clmupdate_snow.ge.3) then
+          error stop "Not implemented: Repartioning 1/2 for clmupdate_snow.ge.3"
         end if
 
       end if
