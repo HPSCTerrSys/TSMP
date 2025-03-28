@@ -504,6 +504,21 @@ Only CLM5.0/eCLM.
    updated based on `h2osno`-increment. `dz` updated based on
    `snow_depth`-increment.
 
+-  5: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment. `dz` updated based on `snow_depth`-increment.
+
+-  6: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` and `h2osoi_liq`
+   updated based on `h2osno`-increment. 
+
+-  7: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment. Should reproduce Case 3.
+
 See CLM Technical Note for more information on snow variable:
 <https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/Snow_Hydrology/CLM50_Tech_Note_Snow_Hydrology.html>
 - snow depth: `waterstate_inst%snow_depth_col`
