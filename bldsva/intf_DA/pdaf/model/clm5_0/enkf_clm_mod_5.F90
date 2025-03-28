@@ -850,8 +850,8 @@ module enkf_clm_mod
 
         if (clmupdate_snow.eq.1) then
           do j=clm_begc,clm_endc
-            if (snow_depth_out(j).gt.0.0) then
-                if (snow_depth_in(j).gt.0.0) then
+            if (snow_depth_out(j).gt.1.0d-6) then
+                if (snow_depth_in(j).gt.1.0d-6) then
                   ! Update h2osoi_ice with increment
                   incr_sno = snow_depth_out(j) / snow_depth_in(j)
                   do i=snlsno(j)+1,0
@@ -864,8 +864,8 @@ module enkf_clm_mod
 
         if (clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3) then
           do j=clm_begc,clm_endc
-            if (h2osno_out(j).gt.0.0) then
-                if (h2osno_in(j).gt.0.0) then
+            if (h2osno_out(j).gt.1.0d-6) then
+                if (h2osno_in(j).gt.1.0d-6) then
                   ! Update h2osoi_ice with increment
                   incr_sno = h2osno_out(j) / h2osno_in(j)
                   do i=snlsno(j)+1,0
@@ -878,10 +878,10 @@ module enkf_clm_mod
 
         if (clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5 .or. clmupdate_snow.eq.6 .or. clmupdate_snow.eq.7) then
           do j=clm_begc,clm_endc
-            if (h2osno_out(j).gt.0.0) then
-              if (h2osno_in(j).gt.0.0) then
-                if (snow_depth_out(j).gt.0.0) then
-                  if (snow_depth_in(j).gt.0.0) then
+            if (h2osno_out(j).gt.1.0d-6) then
+              if (h2osno_in(j).gt.1.0d-6) then
+                if (snow_depth_out(j).gt.1.0d-6) then
+                  if (snow_depth_in(j).gt.1.0d-6) then
                     ! Update h2osoi_ice/h2osoi_liq with increment
                     incr_swe = h2osno_out(j) / h2osno_in(j)
                     ! Update snow_depth with increment
