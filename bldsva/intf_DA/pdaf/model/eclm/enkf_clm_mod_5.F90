@@ -805,16 +805,16 @@ module enkf_clm_mod
           h2osno_out(j) = clm_statevec(cc+clm_varsize+offset)
         end if
 
-        if(clmupdate_snow.eq.1 .or. clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5 .or. clmupdate_snow.eq.6 .or. clmupdate_snow.eq.7) then
+        if(clmupdate_snow.eq.1) then
           ! Update state variable to CLM
-          ! Not needed for repartioning-case 3?
+          ! Needed for Case 1/2 if they use repartioning function
           if (snow_depth_out(j).gt.0.0) then
             snow_depth(j) = snow_depth_out(j)
           else
             ! Catch negative or 0 values from DA
             print *, "WARNING: Snow-depth is negative/zero at cc. cc, j, offset, snow_depth_out(j): ", cc, j, offset, snow_depth_out(j)
           end if
-        else if(clmupdate_snow.eq.2 .or. clmupdate_snow.eq.3 .or. clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5 .or. clmupdate_snow.eq.6 .or. clmupdate_snow.eq.7) then
+        else if(clmupdate_snow.eq.2) then
           if (h2osno_out(j).gt.0.0) then
             h2osno(j) = h2osno_out(j)
           else
