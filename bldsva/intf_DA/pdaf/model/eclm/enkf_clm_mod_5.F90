@@ -876,135 +876,44 @@ module enkf_clm_mod
           end do
         end if
 
-        if (clmupdate_snow.eq.4) then
+        if (clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5 .or. clmupdate_snow.eq.6 .or. clmupdate_snow.eq.7) then
           do j=clm_begc,clm_endc
             if (h2osno_out(j).gt.0.0) then
-                if (h2osno_in(j).gt.0.0) then
-                  ! Update h2osoi_ice/h2osoi_liq with increment
-                  incr_swe = h2osno_out(j) / h2osno_in(j)
-                  do i=snlsno(j)+1,0
-                    h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
-                    h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
-                    if (isnan(h2osoi_ice(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                    if (isnan(h2osoi_liq(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                  end do
-                end if
-            end if
-            if (snow_depth_out(j).gt.0.0) then
-                if (snow_depth_in(j).gt.0.0) then
-                  ! Update snow_depth with increment
-                  incr_sd = snow_depth_out(j) / snow_depth_in(j)
-                  do i=snlsno(j)+1,0
-                    dz(j,i) = dz(j,i) * incr_sd
-                    if (isnan(dz(j,i))) then
-                      print *, "WARNING: dz at j,i is nan: ", j, i
-                    endif
-                  end do
-                end if
-            end if
-          end do
-        end if
+              if (h2osno_in(j).gt.0.0) then
+                if (snow_depth_out(j).gt.0.0) then
+                  if (snow_depth_in(j).gt.0.0) then
+                    ! Update h2osoi_ice/h2osoi_liq with increment
+                    incr_swe = h2osno_out(j) / h2osno_in(j)
+                    ! Update snow_depth with increment
+                    incr_sd = snow_depth_out(j) / snow_depth_in(j)
+                    do i=snlsno(j)+1,0
 
-        if (clmupdate_snow.eq.5) then
-          do j=clm_begc,clm_endc
-            if (h2osno_out(j).gt.0.0) then
-                if (h2osno_in(j).gt.0.0) then
-                  ! Update h2osoi_ice/h2osoi_liq with increment
-                  incr_swe = h2osno_out(j) / h2osno_in(j)
-                  do i=snlsno(j)+1,0
-                    h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
-                    ! h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
-                    if (isnan(h2osoi_ice(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                    ! if (isnan(h2osoi_liq(j,i))) then
-                    !   print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    ! endif
-                  end do
-                end if
-            end if
-            if (snow_depth_out(j).gt.0.0) then
-                if (snow_depth_in(j).gt.0.0) then
-                  ! Update snow_depth with increment
-                  incr_sd = snow_depth_out(j) / snow_depth_in(j)
-                  do i=snlsno(j)+1,0
-                    dz(j,i) = dz(j,i) * incr_sd
-                    if (isnan(dz(j,i))) then
-                      print *, "WARNING: dz at j,i is nan: ", j, i
-                    endif
-                  end do
-                end if
-            end if
-          end do
-        end if
+                      if (clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5 .or. clmupdate_snow.eq.6 .or. clmupdate_snow.eq.7) then
+                        h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
+                        if (isnan(h2osoi_ice(j,i))) then
+                          print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
+                        endif
+                      end if
 
-        if (clmupdate_snow.eq.6) then
-          do j=clm_begc,clm_endc
-            if (h2osno_out(j).gt.0.0) then
-                if (h2osno_in(j).gt.0.0) then
-                  ! Update h2osoi_ice/h2osoi_liq with increment
-                  incr_swe = h2osno_out(j) / h2osno_in(j)
-                  do i=snlsno(j)+1,0
-                    h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
-                    h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
-                    if (isnan(h2osoi_ice(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                    if (isnan(h2osoi_liq(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                  end do
-                end if
-            end if
-            ! if (snow_depth_out(j).gt.0.0) then
-            !     if (snow_depth_in(j).gt.0.0) then
-            !       ! Update snow_depth with increment
-            !       incr_sd = snow_depth_out(j) / snow_depth_in(j)
-            !       do i=snlsno(j)+1,0
-            !         dz(j,i) = dz(j,i) * incr_sd
-            !         if (isnan(dz(j,i))) then
-            !           print *, "WARNING: dz at j,i is nan: ", j, i
-            !         endif
-            !       end do
-            !     end if
-            ! end if
-          end do
-        end if
+                      if (clmupdate_snow.eq.4                          .or. clmupdate_snow.eq.6) then
+                        h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
+                        if (isnan(h2osoi_liq(j,i))) then
+                          print *, "WARNING: h2osoi_liq at j,i is nan: ", j, i
+                        endif
+                      end if
 
-        if (clmupdate_snow.eq.7) then
-          do j=clm_begc,clm_endc
-            if (h2osno_out(j).gt.0.0) then
-                if (h2osno_in(j).gt.0.0) then
-                  ! Update h2osoi_ice/h2osoi_liq with increment
-                  incr_swe = h2osno_out(j) / h2osno_in(j)
-                  do i=snlsno(j)+1,0
-                    h2osoi_ice(j,i) = h2osoi_ice(j,i) * incr_swe
-                    ! h2osoi_liq(j,i) = h2osoi_liq(j,i) * incr_swe
-                    if (isnan(h2osoi_ice(j,i))) then
-                      print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    endif
-                    ! if (isnan(h2osoi_liq(j,i))) then
-                    !   print *, "WARNING: h2osoi_ice at j,i is nan: ", j, i
-                    ! endif
-                  end do
+                      if (clmupdate_snow.eq.4 .or. clmupdate_snow.eq.5) then
+                        dz(j,i) = dz(j,i) * incr_sd
+                        if (isnan(dz(j,i))) then
+                          print *, "WARNING: dz at j,i is nan: ", j, i
+                        endif
+                      end if
+
+                    end do
+                  end if
                 end if
+              end if
             end if
-            ! if (snow_depth_out(j).gt.0.0) then
-            !     if (snow_depth_in(j).gt.0.0) then
-            !       ! Update snow_depth with increment
-            !       incr_sd = snow_depth_out(j) / snow_depth_in(j)
-            !       do i=snlsno(j)+1,0
-            !         dz(j,i) = dz(j,i) * incr_sd
-            !         if (isnan(dz(j,i))) then
-            !           print *, "WARNING: dz at j,i is nan: ", j, i
-            !         endif
-            !       end do
-            !     end if
-            ! end if
           end do
         end if
 
