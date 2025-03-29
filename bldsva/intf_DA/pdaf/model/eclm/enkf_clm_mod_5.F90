@@ -310,7 +310,7 @@ module enkf_clm_mod
     ! Case 7: Assimilation of snow depth: Snow depth and snow water
     ! equivalent in the state vector. Update of h2osoi_ice
     ! Should reproduce case 3
-    if(clmupdate_snow.eq.6) then
+    if(clmupdate_snow.eq.7) then
         clm_varsize      =  (clm_endg-clm_begg+1)
         clm_statevecsize =  2*(clm_endg-clm_begg+1)
     endif
