@@ -85,20 +85,26 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
   end if
 #endif   
 
-#ifndef CLMSA
+#if defined COUP_OAS_PFL
   if (model == tag_model_clm) then
      ! Here simply the process-local state dimension  
      n_domains_p = dim_state_p
-  end if   
-#else
-  ! beg and end gridcell for atm
+  end if
+#endif
+
+#if defined CLMSA
+
 #if defined CLMFIVE
   call get_proc_bounds(begg, endg)
 #else  
+  ! CLM3.5: beg and end gridcell for atm
+  ! TODO: Why are atm indices used?
   call get_proc_bounds_atm(begg, endg)
 #endif
+
   ! Here simply the process-local state dimension  
   n_domains_p = endg - begg + 1
+
 #endif
 
 END SUBROUTINE init_n_domains_pdaf
