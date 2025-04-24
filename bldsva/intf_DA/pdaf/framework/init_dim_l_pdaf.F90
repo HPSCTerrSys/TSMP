@@ -48,7 +48,7 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
   USE mod_tsmp, ONLY: tag_model_parflow, &
        tag_model_clm, model
   USE mod_tsmp, &
-       ONLY: init_parf_l_size
+       ONLY: init_dim_l_pfl
 #ifdef CLMSA
   USE enkf_clm_mod, &
        ONLY: init_clm_l_size
@@ -72,7 +72,7 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
 #if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
   if (model.eq.tag_model_parflow) then
      ! Set the size of the local analysis domain 
-     call init_parf_l_size(dim_l)
+     call init_dim_l_pfl(dim_l)
   end if
 #endif  
 
