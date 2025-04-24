@@ -51,7 +51,7 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
   USE mod_assimilation, &
       ONLY: dim_state_p
   USE mod_tsmp, &
-      ONLY: init_n_domains_size
+      ONLY: init_n_domains_pfl
 #if defined CLMSA
 #if defined CLMFIVE
   USE decompMod, ONLY: get_proc_bounds
@@ -79,12 +79,12 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
 ! *** Initialize number of domains ***
 ! ************************************
 #if defined PARFLOW_STAND_ALONE
-  call init_n_domains_size(n_domains_p)
+  call init_n_domains_pfl(n_domains_p)
 #endif   
 
 #if defined COUP_OAS_PFL
   if (model == tag_model_parflow) then
-     call init_n_domains_size(n_domains_p)
+     call init_n_domains_pfl(n_domains_p)
   end if
   if (model == tag_model_clm) then
      ! Here simply the process-local state dimension  

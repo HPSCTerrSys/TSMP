@@ -102,7 +102,7 @@ int  enkf_getsubvectorsize(Grid *grid);
 void update_parflow();
 void mask_overlandcells();
 void mask_overlandcells_river();
-void init_n_domains_size(int* n_domains_p);
+void init_n_domains_pfl(int* n_domains_p);
 void init_dim_l_pfl(int* dim_l);
 //void g2l_state(int* domain_p, float* state_p[], int* dim_l, float* state_l[]);
 //void l2g_state(int* domain_p, float* state_p[], int* dim_l, float* state_l[]);

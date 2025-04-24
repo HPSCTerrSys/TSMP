@@ -88,11 +88,11 @@ module mod_tsmp
     end interface
 
      interface
-        subroutine init_n_domains_size(n_domains_p) bind(c)
+        subroutine init_n_domains_pfl(n_domains_p) bind(c)
             use iso_c_binding
             import
             INTEGER(c_int) :: n_domains_p ! PE-local number of analysis domains
-        end subroutine init_n_domains_size
+        end subroutine init_n_domains_pfl
     end interface
 
      interface
