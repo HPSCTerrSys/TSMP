@@ -53,11 +53,7 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
   USE mod_tsmp, &
       ONLY: init_n_domains_pfl
 #if defined CLMSA
-#if defined CLMFIVE
-  USE decompMod, ONLY: get_proc_bounds
-#else
-  USE decompMod, ONLY: get_proc_bounds_atm
-#endif
+  USE enkf_clm_mod, ONLY: init_n_domains_clm
 #endif
 
   IMPLICIT NONE
@@ -65,9 +61,6 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
 ! !ARGUMENTS:
   INTEGER, INTENT(in)  :: step        ! Current time step
   INTEGER, INTENT(out) :: n_domains_p ! PE-local number of analysis domains
-#if defined CLMSA
-  INTEGER :: begg, endg   ! per-proc gridcell ending gridcell indices
-#endif
 
 ! !CALLING SEQUENCE:
 ! Called by: PDAF_lseik_update   (as U_init_n_domains)
@@ -87,24 +80,13 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
      call init_n_domains_pfl(n_domains_p)
   end if
   if (model == tag_model_clm) then
-     ! Here simply the process-local state dimension  
+     ! For CLM coupled with ParFlow, use the process-local state dimension
      n_domains_p = dim_state_p
   end if
 #endif
 
 #if defined CLMSA
-#if defined CLMFIVE
-  call get_proc_bounds(begg, endg)
-#else  
-  ! CLM3.5: beg and end gridcell for atm
-  ! TODO: Why are atm indices used?
-  call get_proc_bounds_atm(begg, endg)
-#endif
-
-  ! TODO: Changes for hydrologically active gridcells and allcol
-
-  ! Process-local number of gridcells (< state dimension)
-  n_domains_p = endg - begg + 1
+  call init_n_domains_clm(n_domains_p)
 #endif
 
 END SUBROUTINE init_n_domains_pdaf

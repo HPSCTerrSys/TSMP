@@ -886,6 +886,28 @@ module enkf_clm_mod
   end subroutine get_interp_idx
 
 #if defined CLMSA
+  !> @author  Johannes Keller
+  !> @date    24.04.2025
+  !> @brief   Set number of local analysis domains N_DOMAINS_P
+  !> @details
+  !>    This routine sets N_DOMAINS_P, the number of local analysis domains.
+  subroutine init_n_domains_clm(n_domains_p)
+
+    use decompMod, only : get_proc_bounds_atm
+
+    implicit none
+
+    integer, intent(out) :: n_domains_p
+    integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+
+    call get_proc_bounds_atm(begg, endg)
+
+    ! Process-local number of gridcells
+    n_domains_p = endg - begg + 1
+
+  end subroutine init_n_domains_clm
+
+
   !> @author  Wolfgang Kurtz, Johannes Keller
   !> @date    20.11.2017
   !> @brief   Set local state vector dimension DIM_L local PDAF filters
