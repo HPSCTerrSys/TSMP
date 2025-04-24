@@ -1029,7 +1029,12 @@ module enkf_clm_mod
   end subroutine get_interp_idx
 
 #if defined CLMSA
-  subroutine init_clm_l_size(dim_l)
+  !> @author  Wolfgang Kurtz, Johannes Keller
+  !> @date    20.11.2017
+  !> @brief   Set local state vector dimension DIM_L local PDAF filters
+  !> @details
+  !>    This routine sets DIM_L, the local state vector dimension.
+  subroutine init_dim_l_clm(dim_l)
     use clm_varpar   , only : nlevsoi
 
     implicit none
@@ -1056,7 +1061,7 @@ module enkf_clm_mod
       dim_l = 3*nlevsoi + nshift
     endif
 
-  end subroutine init_clm_l_size
+  end subroutine init_dim_l_clm
 #endif
 
 end module enkf_clm_mod

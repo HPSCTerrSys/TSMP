@@ -51,7 +51,7 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
        ONLY: init_dim_l_pfl
 #ifdef CLMSA
   USE enkf_clm_mod, &
-       ONLY: init_clm_l_size
+       ONLY: init_dim_l_clm
 #endif
   IMPLICIT NONE
 
@@ -84,7 +84,7 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
 #else
   ! Set the size of the local analysis domain  
   ! for clm stand alone mode only
-  call init_clm_l_size(dim_l)
+  call init_dim_l_clm(dim_l)
 #endif
  
 END SUBROUTINE init_dim_l_pdaf
