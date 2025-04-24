@@ -105,19 +105,66 @@ the ensemble mean of the state vector.
 For ETKF, see
 e.g. <https://github.com/PDAF/PDAF/blob/ae9545227bd4804469dff389a9baadcc9e31906e/src/PDAF_etkf_analysis.F90#L441-L444>
 
+## locweight ##
+
+Only for localization.
+
+Usage depends on interface routines.
+
+`locweight` (integer): set weight function for localization,
+- default=0
+- for constant weight of 1
+- possible are integer values 0 to 4.(see `init_pdaf`)
+
+``` text
+locweight == 0    ! Uniform (unit) weighting
+locweight == 1    ! Exponential weighting
+locweight == 2    ! 5th-order polynomial (Gaspari&Cohn, 1999)
+```
+## cradius ##
+
+Only for localization.
+
+Usage depends on interface routines.
+
+`cradius` (old name: `local_range`) (real) set cut-off radius
+- 0.0 by default
+- any positive value should work.
+
+## sradius ##
+
+Only for localization.
+
+Usage depends on interface routines.
+
+`sradius` (old name `srange`) (real): the support radius of the
+localization, default: equal to `cradius`.
+
+`sradius` has different meanings depending on the value of
+`locweight`. 
+
+- `locweight == 0`: `sradius` is not used
+- `locweight == 1`: `sradius` is distance with weight `1/e`, for
+  avoiding sharp cut-off, `cradius` should be significantly larger
+  than `sradius`
+- `locweight == 2`: `sradius` is the support radius for 5th-order
+  polynomial, can safely be chosen the same as `cradius`,
+  parametrization change of the 5th-order polynomial is at `sradius/2`,
+  see
+  <https://github.com/PDAF/PDAF/blob/ed631034956dece8e91e8b588c4cf3aaa7916f49/src/PDAF_local_weight.F90#L147-L176>.
+
+More detail in PDAF documentation:
+<https://pdaf.awi.de/trac/wiki/PDAF_local_weight>
 
 
 ## Command Line Examples ##
 
 ### Command Line Example: EnKF ###
 
-`subtype` (integer) Parameter subtype for Ensemble Kalman Filter (EnKF).
+Main option: `-filtertype 2`
 
--   Full ensemble integration; analysis for $2\cdot \mathtt{dim\_obs} > \mathtt{dim\_ens}$
-
--   Full ensemble integration; analysis for $2\cdot \mathtt{dim\_obs} \leq \mathtt{dim\_ens}$
-
--   Offline mode
+Additional options:
+- `-subtype`
 
 Example of the model execution using EnKF analysis:
 
@@ -128,20 +175,27 @@ With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 will be performed every assimilation cycle with an observation error of
 0.1 and observations read from the files `myobs.xxxxx`.
 
+#### EnKF: subtype ####
+
+`subtype` (integer) Parameter subtype for Ensemble Kalman Filter (EnKF).
+
+``` fortran
+     IF (subtype == 0) THEN
+        WRITE (*, '(a, 14x, a)') 'PDAF', '--> EnKF with analysis for large observation dimension'
+     ELSE IF (subtype == 1) THEN
+        WRITE (*, '(a, 14x, a)') 'PDAF', '--> EnKF with analysis for small observation dimension'
+     ELSE IF (subtype == 5) THEN
+        WRITE (*, '(a, 14x, a)') 'PDAF', '--> offline mode'
+
+```
+
+
 ### Command Line Example: ETKF ###
 
-`subtype` (integer) Parameter subtype for Ensemble Transform Kalman
-Filter (ETKF).
+Main option: `-filtertype 4`
 
--   full ensemble integration; apply T-matrix analogously to SEIK
-
--   full ensemble integration; formulation without T matrix
-
--   Fixed error space basis; analysis with T-matrix
-
--   Fixed state covariance matrix; analysis with T-matrix
-
--   Offline mode; analysis with T-matrix
+Additional options:
+- `-subtype`
 
 Example of the model execution using EtKF analysis:
 
@@ -152,18 +206,31 @@ With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 will be performed every assimilation cycle with an observation error of
 0.1 and observations read from the files `myobs.xxxxx`.
 
+#### ETKF: subtype ####
+
+`subtype` (integer) Parameter subtype for Ensemble Transform Kalman
+Filter (ETKF).
+
+``` fortran
+     IF (subtype == 0) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ETKF using T-matrix'
+     ELSE IF (subtype == 1) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ETKF following Hunt et al. (2007)'
+     ELSE IF (subtype == 2) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ETKF with fixed error-space basis'
+     ELSE IF (subtype == 3) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ETKF with fixed state covariance matrix'
+     ELSE IF (subtype == 5) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> offline mode'
+
+```
+
 ### Command Line Example: ESTKF ###
 
-`subtype` (integer) Parameter subtype for Error Subspace Transform Kalman Filter
-(ESTKF).
+Main option: `-filtertype 6`
 
--   Standard implementation with ensemble integration
-
--   Fixed error space basis
-
--   Fixed state covariance matrix
-
--   Offline mode
+Additional options:
+- `-subtype`
 
 Example of the model execution using EstKF analysis:
 
@@ -174,24 +241,32 @@ With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 will be performed every assimilation cycle with an observation error of
 0.1 and observations read from the files `myobs.xxxxx`.
 
+#### ESTKF: subtype ####
+
+`subtype` (integer) Parameter subtype for Error Subspace Transform Kalman Filter
+(ESTKF).
+
+``` fortran
+     IF (subtype == 0) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> Standard ESTKF'
+     ELSE IF (subtype == 2) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ESTKF with fixed error-space basis'
+     ELSE IF (subtype == 3) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> ESTKF with fixed state covariance matrix'
+     ELSE IF (subtype == 5) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> offline mode'
+
+```
+
 ### Command Line Example: LETKF ###
 
-`cradius` (deprecated: `local_range`) (real) set cut-off radius, 0.0
-by default, any positive value should work.
+Main option: `-filtertype 5`
 
-`locweight` (integer) set weight function for localization, default=0
-for constant weight of 1; possible are integer values 0 to 4.
-
-`subtype` (integer) Parameter subtype for Local Ensemble Transform
-Kalman Filter (Letkf).
-
--   full ensemble integration; apply T-matrix analogously to SEIK
-
--   Fixed error space basis; analysis with T-matrix
-
--   Fixed state covariance matrix; analysis with T-matrix
-
--   Offline mode; analysis with T-matrix.
+Additional options:
+- `-subtype`
+- `-locweight`
+- `-cradius`
+- `-sradius`
 
 Example of the model execution using Letkf analysis:
 
@@ -202,26 +277,35 @@ With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 will be performed every assimilation cycle with an observation error of
 0.1 and observations read from the files `myobs.xxxxx`.
 
+#### LETKF subtype
+
+`subtype` (integer) Parameter subtype for Local Ensemble Transform
+Kalman Filter (LETKF).
+
+```f90
+     IF (subtype == 0) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LETKF using T-matrix'
+     ELSE IF (subtype == 1) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LETKF following Hunt et al. (2007)'
+     ELSE IF (subtype == 2) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LETKF with fixed error-space basis'
+     ELSE IF (subtype == 3) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LETKF with fixed state covariance matrix'
+     ELSE IF (subtype == 5) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> offline mode'
+```
+
 ### Command Line Example: LESTKF ###
 
-`cradius` (deprecated: `local_range`) (real) set cut-off radius, 0.0 by default, any
-positive value should work.
+Main option: `-filtertype 7`
 
-`locweight` (integer) set weight function for localization, default=0
-for constant weight of 1; possible are integer values 0 to 4.
+Additional options:
+- `-subtype`
+- `-locweight`
+- `-cradius`
+- `-sradius`
 
-`subtype` (integer) Parameter subtype for Local Error Subspace Transform Kalman
-Filter (LESTKF).
-
--   Standard implementation with ensemble integration
-
--   Fixed error space basis
-
--   Fixed state covariance matrix
-
--   Offline mode
-
-Example of the model execution using Lestkf analysis:
+Example of the model execution using LESTKF analysis:
 
         mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 7 -cradius 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
 
@@ -229,6 +313,23 @@ With this command, the TSMP-PDAF executable `tsmp-pdaf` will be run with
 64 realisations (8 processors for each realisation) and Lestkf analysis
 will be performed every assimilation cycle with an observation error of
 0.1 and observations read from the files `myobs.xxxxx`.
+
+#### LESTKF: subtype ####
+
+`subtype` (integer) Parameter subtype for Local Error Subspace Transform Kalman
+Filter (LESTKF).
+
+
+``` fortran
+     IF (subtype == 0) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> Standard LESTKF'
+     ELSE IF (subtype == 2) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LESTKF with fixed error-space basis'
+     ELSE IF (subtype == 3) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> LESTKF with fixed state covariance matrix'
+     ELSE IF (subtype == 5) THEN
+        WRITE (*, '(a, 12x, a)') 'PDAF', '--> offline mode'
+```
 
 ### Command Line Example: LENKF ###
 
@@ -252,49 +353,9 @@ analysis will be performed every assimilation cycle with an
 observation error of 0.1 and observations read from the files
 `myobs.xxxxx`.
 
-#### subtype
+#### LENKF: subtype ####
 
 `subtype` (integer) Parameter subtype for Localized Ensemble Kalman
 Filter (Lenkf).
 -   Full ensemble integration; analysis with covariance localization
 -   Offline mode
-
-#### locweight
-
-`locweight` (integer): set weight function for localization,
-- default=0
-- for constant weight of 1
-- possible are integer values 0 to 4.(see `init_pdaf`)
-
-``` text
-locweight == 0    ! Uniform (unit) weighting
-locweight == 1    ! Exponential weighting
-locweight == 2    ! 5th-order polynomial (Gaspari&Cohn, 1999)
-```
-#### cradius
-
-`cradius` (old name: `local_range`) (real) set cut-off radius
-- 0.0 by default
-- any positive value should work.
-
-#### sradius
-
-`sradius` (old name `srange`) (real): the support radius of the
-localization, default: equal to `cradius`.
-
-`sradius` has different meanings depending on the value of
-`locweight`. 
-
-- `locweight == 0`: `sradius` is not used
-- `locweight == 1`: `sradius` is distance with weight `1/e`, for
-  avoiding sharp cut-off, `cradius` should be significantly larger
-  than `sradius`
-- `locweight == 2`: `sradius` is the support radius for 5th-order
-  polynomial, can safely be chosen the same as `cradius`,
-  parametrization change of the 5th-order polynomial is at `sradius/2`,
-  see
-  <https://github.com/PDAF/PDAF/blob/ed631034956dece8e91e8b588c4cf3aaa7916f49/src/PDAF_local_weight.F90#L147-L176>.
-
-More detail in PDAF documentation:
-<https://pdaf.awi.de/trac/wiki/PDAF_local_weight>
-
