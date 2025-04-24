@@ -69,19 +69,23 @@ SUBROUTINE init_dim_l_pdaf(step, domain_p, dim_l)
 ! ****************************************
 ! *** Initialize local state dimension ***
 ! ****************************************
-#if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
-  if (model.eq.tag_model_parflow) then
+#if defined PARFLOW_STAND_ALONE
+  ! Set the size of the local analysis domain
+  call init_dim_l_pfl(dim_l)
+#endif
+
+#if defined COUP_OAS_PFL
+  if (model == tag_model_parflow) then
      ! Set the size of the local analysis domain 
      call init_dim_l_pfl(dim_l)
   end if
-#endif  
-
-#ifndef CLMSA
-  if (model.eq.tag_model_clm) then
+  if (model == tag_model_clm) then
      ! Set the size of the local analysis domain   
      dim_l = 1     
   end if   
-#else
+#endif
+
+#if defined CLMSA
   ! Set the size of the local analysis domain  
   ! for clm stand alone mode only
   call init_dim_l_clm(dim_l)

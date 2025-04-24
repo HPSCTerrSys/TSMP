@@ -78,14 +78,14 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
 ! ************************************
 ! *** Initialize number of domains ***
 ! ************************************
-#if (defined PARFLOW_STAND_ALONE || defined COUP_OAS_PFL)
-  if (model.eq.tag_model_parflow) then
-     ! Here simply the process-local state dimension
-     call init_n_domains_size(n_domains_p)
-  end if
+#if defined PARFLOW_STAND_ALONE
+  call init_n_domains_size(n_domains_p)
 #endif   
 
 #if defined COUP_OAS_PFL
+  if (model == tag_model_parflow) then
+     call init_n_domains_size(n_domains_p)
+  end if
   if (model == tag_model_clm) then
      ! Here simply the process-local state dimension  
      n_domains_p = dim_state_p
@@ -93,7 +93,6 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
 #endif
 
 #if defined CLMSA
-
 #if defined CLMFIVE
   call get_proc_bounds(begg, endg)
 #else  
@@ -102,9 +101,10 @@ SUBROUTINE init_n_domains_pdaf(step, n_domains_p)
   call get_proc_bounds_atm(begg, endg)
 #endif
 
-  ! Here simply the process-local state dimension  
-  n_domains_p = endg - begg + 1
+  ! TODO: Changes for hydrologically active gridcells and allcol
 
+  ! Process-local number of gridcells (< state dimension)
+  n_domains_p = endg - begg + 1
 #endif
 
 END SUBROUTINE init_n_domains_pdaf
