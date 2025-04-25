@@ -986,7 +986,7 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
            end do
          end do
 
-       else if(clmupdate_T.eq.1 .or. clmupdate_T.eq.2 .or. clmupdate_T.eq.3) then
+       else if(clmupdate_T.eq.1 .or. clmupdate_T.eq.2 .or. clmupdate_T.eq.3 .or. clmupdate_T.eq.4) then
 #ifdef CLMFIVE
          ! patch loop
          do g = begg,endg
