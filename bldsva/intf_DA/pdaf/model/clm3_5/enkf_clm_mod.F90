@@ -940,6 +940,41 @@ module enkf_clm_mod
     endif
 
   end subroutine init_dim_l_clm
+
+  !> @author  Wolfgang Kurtz, Johannes Keller
+  !> @date    20.11.2017
+  !> @brief   Set local state vector STATE_L from global state vector STATE_P
+  !> @details
+  !>    This routine sets STATE_L, the local state vector.
+  !>
+  !>    Source is STATE_P, the global (PE-local) state vector.
+  subroutine g2l_state_clm(domain_p, dim_p, state_p, dim_l, state_l)
+
+    use decompMod, only : get_proc_bounds_atm
+    use ColumnType , only : col
+
+    implicit none
+
+    INTEGER, INTENT(in) :: domain_p       ! Current local analysis domain
+    INTEGER, INTENT(in) :: dim_p          ! PE-local full state dimension
+    INTEGER, INTENT(in) :: dim_l          ! Local state dimension
+    REAL, TARGET, INTENT(in)    :: state_p(dim_p) ! PE-local full state vector
+    REAL, TARGET, INTENT(out)   :: state_l(dim_l) ! State vector on local analysis d
+
+    integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+    integer :: begc, endc   ! per-proc beginning and ending column indices
+    integer              :: nshift_p
+
+    ! beg and end gridcell for atm
+    call get_proc_bounds_atm(begg, endg)
+
+    n_domain = endg - begg + 1
+    DO i = 0, dim_l-1
+      nshift_p = domain_p + i * n_domain
+      state_l(i+1) = state_p(nshift_p)
+    ENDDO
+
+  end subroutine g2l_state_clm
 #endif
 
 end module enkf_clm_mod
