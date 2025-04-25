@@ -54,6 +54,7 @@ module enkf_clm_mod
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
   integer(c_int),bind(C,name="clmstatevec_allcol")       :: clmstatevec_allcol
+  integer(c_int),bind(C,name="clmstatevec_colmean")       :: clmstatevec_colmean
   integer(c_int),bind(C,name="clmstatevec_only_active")  :: clmstatevec_only_active
   integer(c_int),bind(C,name="clmstatevec_max_layer")  :: clmstatevec_max_layer
   integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
@@ -322,7 +323,8 @@ module enkf_clm_mod
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
-    integer :: i,j,jj,g,cc=0,offset=0
+    integer :: i,j,jj,g,c,cc=0,offset=0
+    real :: n_c
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
     character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
@@ -352,9 +354,45 @@ module enkf_clm_mod
 
     if(clmupdate_swc.ne.0) then
       ! write swc values to state vector
-      do cc = 1, clm_statevecsize
-        clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
-      end do
+      if (clmstatevec_colmean.eq.1) then
+
+        do cc = 1, clm_statevecsize
+
+          clm_statevec(cc) = 0.0
+          n_c = 0.0
+
+          ! Get gridcell and layer
+          g = col%gridcell(state_pdaf2clm_c_p(cc))
+          j = state_pdaf2clm_j_p(cc)
+
+          ! Loop over all columns
+          do c=clm_begc,clm_endc
+            ! Add columns in gridcell g
+            if(col%gridcell(c).eq.g) then
+              ! Only hydrologically active columns above bedrock
+              if(col%hydrologically_active(c) .and. j<=col%nbedrock(c)) then
+                clm_statevec(cc) = clm_statevec(cc) + swc(c,j)
+                n_c = n_c + 1.0
+              end if
+            end if
+          end do
+
+          if(n_c == 0.0) then
+            write(*,*) "WARNING: Gridcell g=", g
+            write(*,*) "Grid cell g without hydrologically active column! Setting SWC as before from first column."
+            clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+          else
+            ! Compute final average
+            clm_statevec(cc) = clm_statevec(cc) / n_c
+          end if
+
+        end do
+
+      else
+        do cc = 1, clm_statevecsize
+          clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+        end do
+      end if
     endif
 
     !hcp  LAI
