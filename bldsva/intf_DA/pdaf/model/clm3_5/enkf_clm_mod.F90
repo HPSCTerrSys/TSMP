@@ -965,6 +965,10 @@ module enkf_clm_mod
     integer :: begc, endc   ! per-proc beginning and ending column indices
     integer              :: nshift_p
 
+    INTEGER :: i
+    INTEGER :: n_domain
+    INTEGER :: nshift_p
+
     ! beg and end gridcell for atm
     call get_proc_bounds_atm(begg, endg)
 
@@ -999,6 +1003,10 @@ module enkf_clm_mod
     integer :: begg, endg   ! per-proc gridcell ending gridcell indices
     integer :: begc, endc   ! per-proc beginning and ending column indices
     integer              :: nshift_p
+
+    INTEGER :: i
+    INTEGER :: n_domain
+    INTEGER :: nshift_p
 
     ! beg and end gridcell for atm
     call get_proc_bounds_atm(begg, endg)

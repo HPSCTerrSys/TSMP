@@ -1139,7 +1139,7 @@ module enkf_clm_mod
     REAL, TARGET, INTENT(in)    :: state_p(dim_p) ! PE-local full state vector
     REAL, TARGET, INTENT(out)   :: state_l(dim_l) ! State vector on local analysis d
 
-    INTEGER :: i,
+    INTEGER :: i
     INTEGER :: n_domain
     INTEGER :: nshift_p
 
@@ -1169,7 +1169,7 @@ module enkf_clm_mod
     REAL, TARGET, INTENT(in)    :: state_l(dim_l) ! State vector on local analysis domain
     REAL, TARGET, INTENT(inout) :: state_p(dim_p) ! PE-local full state vector
 
-    INTEGER :: i,
+    INTEGER :: i
     INTEGER :: n_domain
     INTEGER :: nshift_p
 
