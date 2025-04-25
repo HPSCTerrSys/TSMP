@@ -1131,9 +1131,6 @@ module enkf_clm_mod
   !>    Source is STATE_P, the global (PE-local) state vector.
   subroutine g2l_state_clm(domain_p, dim_p, state_p, dim_l, state_l)
 
-    use decompMod, only : get_proc_bounds
-    use ColumnType , only : col
-
     implicit none
 
     INTEGER, INTENT(in) :: domain_p       ! Current local analysis domain
@@ -1142,13 +1139,12 @@ module enkf_clm_mod
     REAL, TARGET, INTENT(in)    :: state_p(dim_p) ! PE-local full state vector
     REAL, TARGET, INTENT(out)   :: state_l(dim_l) ! State vector on local analysis d
 
-    integer :: begg, endg   ! per-proc gridcell ending gridcell indices
-    integer :: begc, endc   ! per-proc beginning and ending column indices
-    integer              :: nshift_p
+    INTEGER :: i,
+    INTEGER :: n_domain
+    INTEGER :: nshift_p
 
-    call get_proc_bounds(begg, endg)
+    call init_n_domains_clm(n_domain)
 
-    n_domain = endg - begg + 1
     DO i = 0, dim_l-1
       nshift_p = domain_p + i * n_domain
       state_l(i+1) = state_p(nshift_p)
@@ -1165,9 +1161,6 @@ module enkf_clm_mod
   !>    Source is STATE_L, the local vector.
   subroutine l2g_state_clm(domain_p, dim_l, state_l, dim_p, state_p)
 
-    use decompMod, only : get_proc_bounds
-    use ColumnType , only : col
-
     implicit none
 
     INTEGER, INTENT(in) :: domain_p       ! Current local analysis domain
@@ -1176,14 +1169,13 @@ module enkf_clm_mod
     REAL, TARGET, INTENT(in)    :: state_l(dim_l) ! State vector on local analysis domain
     REAL, TARGET, INTENT(inout) :: state_p(dim_p) ! PE-local full state vector
 
-    integer :: begg, endg   ! per-proc gridcell ending gridcell indices
-    integer :: begc, endc   ! per-proc beginning and ending column indices
-    integer              :: nshift_p
+    INTEGER :: i,
+    INTEGER :: n_domain
+    INTEGER :: nshift_p
 
     ! beg and end gridcell for atm
-    call get_proc_bounds(begg, endg)
+    call init_n_domains_clm(n_domain)
 
-    n_domain = endg - begg + 1
     DO i = 0, dim_l-1
       nshift_p = domain_p + i * n_domain
       state_p(nshift_p) = state_l(i+1)
