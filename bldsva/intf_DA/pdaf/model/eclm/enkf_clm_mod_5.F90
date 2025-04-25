@@ -1037,18 +1037,48 @@ module enkf_clm_mod
   subroutine init_n_domains_clm(n_domains_p)
 
     use decompMod, only : get_proc_bounds
+    use ColumnType , only : col
 
     implicit none
 
     integer, intent(out) :: n_domains_p
     integer :: begg, endg   ! per-proc gridcell ending gridcell indices
+    integer :: begc, endc   ! per-proc beginning and ending column indices
 
-    call get_proc_bounds(begg, endg)
+    integer :: c
 
-    ! TODO: Changes for hydrologically active gridcells and allcol
+    call get_proc_bounds(begg=begg, endg=endg, begc=begc, endc=endc)
 
-    ! Process-local number of gridcells
-    n_domains_p = endg - begg + 1
+    if(clmupdate_swc.eq.1) then
+      if(clmstatevec_allcol.eq.1) then
+        if(clmstatevec_only_active .eq. 1) then
+
+          ! Each hydrologically active layer is a local domain
+          ! -> DIM_L: number of layers in hydrologically active column
+          n_domains_p = 0
+
+          do c=clm_begc,clm_endc
+            if(col%hydrologically_active(c)) then
+              n_domains_p = n_domains_p + 1
+            end if
+          end do
+
+        else
+          ! Each column is a local domain
+          ! -> DIM_L: number of layers in column
+          n_domains_p = endc - begc + 1
+        end if
+      else
+        ! Each gridcell is a local domain
+        ! -> DIM_L: number of layers in gridcell
+        n_domains_p = endg - begg + 1
+      end if
+    else
+      ! Process-local number of gridcells
+      ! Default, possibly not tested
+      n_domains_p = endg - begg + 1
+    end if
+
 
   end subroutine init_n_domains_clm
 
@@ -1067,8 +1097,13 @@ module enkf_clm_mod
     integer              :: nshift
 
     if(clmupdate_swc.eq.1) then
-      dim_l = nlevsoi
-      nshift = nlevsoi
+      ! Currently: All columns/gridcells (each being a local domain)
+      ! must have the same number of layers.
+
+      ! TODO: Include flexibility for different number of layers
+      ! (example: different bedrock depths)
+      dim_l = min(nlevsoi, clmstatevec_max_layer)
+      nshift = min(nlevsoi, clmstatevec_max_layer)
     endif
 
     if(clmupdate_swc.eq.2) then
