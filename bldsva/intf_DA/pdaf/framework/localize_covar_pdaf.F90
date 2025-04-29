@@ -226,7 +226,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          ! dx = abs(longxy_obs(j) - longxy(state_pdaf2clm_c_p(i)))
          ! dy = abs(latixy_obs(j) - latixy(state_pdaf2clm_c_p(i)))
 
-         ! Units: lat/lon
+         ! Units: lat/lon (degrees)
          dx = abs(clmobs_lon(obs_pdaf2nc(j)) - lon(mycgridcell(state_pdaf2clm_c_p(i))))
          dy = abs(clmobs_lat(obs_pdaf2nc(j)) - lat(mycgridcell(state_pdaf2clm_c_p(i))))
 
@@ -267,7 +267,7 @@ SUBROUTINE localize_covar_pdaf(dim_p, dim_obs, HP, HPH)
          ! dx = abs(longxy_obs(j) - longxy_obs(i))
          ! dy = abs(latixy_obs(j) - latixy_obs(i))
 
-         ! Units: lat/lon
+         ! Units: lat/lon (degrees)
          dx = abs(clmobs_lon(obs_pdaf2nc(j)) - clmobs_lon(obs_pdaf2nc(i)))
          dy = abs(clmobs_lat(obs_pdaf2nc(j)) - clmobs_lat(obs_pdaf2nc(i)))
 
