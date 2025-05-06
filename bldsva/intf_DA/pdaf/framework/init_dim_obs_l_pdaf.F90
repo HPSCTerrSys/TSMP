@@ -77,6 +77,7 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
 
 #if defined CLMSA
   USE enkf_clm_mod, ONLY: state_pdaf2clm_c_p
+  use shr_kind_mod, only: r8 => shr_kind_r8
 
 #ifdef CLMFIVE
   USE GridcellType, ONLY: grc
