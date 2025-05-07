@@ -354,7 +354,7 @@ module enkf_clm_mod
     end if
 
     IF (allocated(clm_statevec_orig)) deallocate(clm_statevec_orig)
-    if (clmupdate_swc.ne.0 .and clmstatevec_colmean.ne.0) then
+    if (clmupdate_swc.ne.0 .and. clmstatevec_colmean.ne.0) then
       allocate(clm_statevec_orig(clm_statevecsize))
     end if
 
