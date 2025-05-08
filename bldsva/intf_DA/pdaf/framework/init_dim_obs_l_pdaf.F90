@@ -111,7 +111,12 @@ SUBROUTINE init_dim_obs_l_pdaf(domain_p, step, dim_obs_f, dim_obs_l)
   INTEGER  :: domain_p_coord   ! Current local analysis domain for coord arrays
 
   !kuw
-  integer :: dx,dy, max_var_id, ierror
+#if defined CLMSA
+  real :: dx,dy
+#else
+  integer :: dx,dy
+#endif
+  integer :: max_var_id, ierror
   integer :: obsind(dim_obs)
   real    :: obsdist(dim_obs)
   ! kuw end
