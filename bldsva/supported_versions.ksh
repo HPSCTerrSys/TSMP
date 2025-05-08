@@ -16,6 +16,7 @@ platforms+=(
         ["JUWELS"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["DEEP"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
         ["JUSUF"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
+        ["JEDI"]="JSC (FZ-Juelich) - general purpose Linux Cluster"
 )
 
 # list of available versions for a platform
@@ -30,6 +31,8 @@ availability+=(
         ["JUSUF"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
         ["GENERIC_X86"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
+                     clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
+        ["JEDI"]=" clm3-cos4-pfl clm3-cos4-pfl-pdaf clm3-cos5-pfl clm4-cos4-pfl clm4-cos5-pfl clm3-cos5-pfl-pdaf clm3-icon21-pfl \
                      clm3-icon26-pfl eclm eclm-mct clm5-cos5-pfl clm5-cos5-pfl-pdaf "
 )
 
@@ -108,5 +111,6 @@ setupsAvail+=(
 	["JURECA"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex cordex0275 idealRTD idiurnal-cycle "
     ["DEEP"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
 	["GENERIC_X86"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex idealRTD "
+	["JEDI"]=" nrw ideal300150 ideal600300 ideal1200600 ideal24001200 cordex cordex0275 idealRTD idiurnal-cycle "
 )
 
