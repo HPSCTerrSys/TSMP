@@ -119,6 +119,7 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
 #ifdef CLMFIVE
   use GridcellType, only: grc
   use ColumnType, only : col
+  use PatchType, only : patch
   ! use GetGlobalValuesMod, only: GetGlobalWrite
   ! use clm_varcon, only: nameg
   use enkf_clm_mod, only: state_clm2pdaf_p
@@ -135,6 +136,8 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   USE enkf_clm_mod, only: domain_def_clm
   USE enkf_clm_mod, only: get_interp_idx
   use enkf_clm_mod, only: clmstatevec_allcol
+  use enkf_clm_mod, only: clmupdate_swc
+  use enkf_clm_mod, only: clmupdate_T
   !hcp end
 #endif
 #endif
@@ -156,9 +159,12 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
   integer :: ierror
   INTEGER :: max_var_id         ! Multi-scale DA
   INTEGER :: sum_dim_obs_p
+  INTEGER :: p                ! CLM Patch index
   INTEGER :: c                ! CLM Column index
   INTEGER :: g                ! CLM Gridcell index
   INTEGER :: cg
+  INTEGER :: pg
+  INTEGER :: pc
   INTEGER :: i,j,k        ! Counters
   INTEGER :: cnt          ! Counters
   INTEGER :: cnt_interp   ! Counter for interpolation grid cells
@@ -921,68 +927,161 @@ SUBROUTINE init_dim_obs_f_pdaf(step, dim_obs_f)
      cnt = 1
 
      do i = 1, dim_obs
-        obs(i) = clm_obs(i)
 
-       do g = begg,endg
-         newgridcell = .true.
+       obs(i) = clm_obs(i)
 
-         do c = begc,endc
+       if(clmupdate_swc.eq.1) then
 
-           cg =   mycgridcell(c)
+         do g = begg,endg
+           newgridcell = .true.
 
-           if(cg .eq. g) then
+           do c = begc,endc
 
-             if(newgridcell) then
+             cg =   mycgridcell(c)
 
-               if(is_use_dr) then
-                 deltax = abs(lon(g)-clmobs_lon(i))
-                 deltay = abs(lat(g)-clmobs_lat(i))
-               end if
+             if(cg .eq. g) then
 
-               if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+               if(newgridcell) then
 
-                 ! Different settings of observation-location-index in
-                 ! state vector depending on the method of state
-                 ! vector assembling.
-                 if(clmstatevec_allcol.eq.1) then
-#ifdef CLMFIVE
-                   if(clmstatevec_only_active.eq.1) then
-
-                     ! Error if observation deeper than clmstatevec_max_layer
-                     if(clmobs_layer(i) > min(clmstatevec_max_layer, col%nbedrock(c))) then
-                       print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR observation layer deeper than clmstatevec_max_layer or bedrock."
-                       print *, "i=", i
-                       print *, "c=", c
-                       print *, "clmobs_layer(i)=", clmobs_layer(i)
-                       print *, "col%nbedrock(c)=", col%nbedrock(c)
-                       print *, "clmstatevec_max_layer=", clmstatevec_max_layer
-                       call abort_parallel()
-                     end if
-                     obs_index_p(cnt) = state_clm2pdaf_p(c,clmobs_layer(i))
-                   else
-#endif
-                     obs_index_p(cnt) = c-begc+1 + ((endc-begc+1) * (clmobs_layer(i)-1))
-#ifdef CLMFIVE
-                   end if
-#endif
-                 else
-                   obs_index_p(cnt) = g-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+                 if(is_use_dr) then
+                   deltax = abs(lon(g)-clmobs_lon(i))
+                   deltay = abs(lat(g)-clmobs_lat(i))
                  end if
 
-                 !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
-                 obs_p(cnt) = clm_obs(i)
-                 if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
-                 cnt = cnt + 1
-               end if
+                 if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
 
-               newgridcell = .false.
+                   ! Different settings of observation-location-index in
+                   ! state vector depending on the method of state
+                   ! vector assembling.
+                   if(clmstatevec_allcol.eq.1) then
+#ifdef CLMFIVE
+                     if(clmstatevec_only_active.eq.1) then
+
+                       ! Error if observation deeper than clmstatevec_max_layer
+                       if(clmobs_layer(i) > min(clmstatevec_max_layer, col%nbedrock(c))) then
+                         print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR observation layer deeper than clmstatevec_max_layer or bedrock."
+                         print *, "i=", i
+                         print *, "c=", c
+                         print *, "clmobs_layer(i)=", clmobs_layer(i)
+                         print *, "col%nbedrock(c)=", col%nbedrock(c)
+                         print *, "clmstatevec_max_layer=", clmstatevec_max_layer
+                         call abort_parallel()
+                       end if
+                       obs_index_p(cnt) = state_clm2pdaf_p(c,clmobs_layer(i))
+                     else
+#endif
+                       obs_index_p(cnt) = c-begc+1 + ((endc-begc+1) * (clmobs_layer(i)-1))
+#ifdef CLMFIVE
+                     end if
+#endif
+                   else
+                     obs_index_p(cnt) = g-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+                   end if
+
+                   !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
+                   obs_p(cnt) = clm_obs(i)
+                   if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
+                   cnt = cnt + 1
+                 end if
+
+                 newgridcell = .false.
+
+               end if
 
              end if
 
+           end do
+         end do
+
+       else if(clmupdate_T.eq.1 .or. clmupdate_T.eq.2 .or. clmupdate_T.eq.3 .or. clmupdate_T.eq.4) then
+#ifdef CLMFIVE
+         ! patch loop
+         do g = begg,endg
+           newgridcell = .true.
+
+           do p = begp,endp
+
+             pg = patch%gridcell(p)
+             pc = patch%column(p)
+
+             if(pg .eq. g) then
+               if(newgridcell) then
+                 ! Sets first patch/column in a gridcell. TODO: Make
+                 ! patch / column information part of the observation
+                 ! file
+
+                 if(is_use_dr) then
+                   deltax = abs(lon(g)-clmobs_lon(i))
+                   deltay = abs(lat(g)-clmobs_lat(i))
+                 end if
+
+                 if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+
+                   ! Set index in state vector, LST will be computed
+                   ! for first patch appearing here
+                   obs_index_p(cnt) = state_clm2pdaf_p(p,1)
+
+                   !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
+                   obs_p(cnt) = clm_obs(i)
+                   if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
+                   cnt = cnt + 1
+
+                 end if
+
+                 newgridcell = .false.
+
+               end if
+             end if
+
+           end do
+         end do
+#else
+         ! gridcell loop
+         do g = begg,endg
+
+           if(is_use_dr) then
+             deltax = abs(lon(g)-clmobs_lon(i))
+             deltay = abs(lat(g)-clmobs_lat(i))
            end if
 
+           if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+             obs_index_p(cnt) = g-begg+1
+           end if
+
+           !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
+           obs_p(cnt) = clm_obs(i)
+           if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
+           cnt = cnt + 1
+
          end do
-       end do
+#endif
+       else
+
+         print *, "TSMP-PDAF mype(w)=", mype_world, ": WARNING unsupported update in setting obs_index_p."
+         print *, "TSMP-PDAF mype(w)=", mype_world, ": WARNING using default gridcell loop."
+         ! call abort_parallel()
+
+         ! gridcell loop with layer information as default!
+         do g = begg,endg
+
+           if(is_use_dr) then
+             deltax = abs(lon(g)-clmobs_lon(i))
+             deltay = abs(lat(g)-clmobs_lat(i))
+           end if
+
+           if(((is_use_dr).and.(deltax.le.clmobs_dr(1)).and.(deltay.le.clmobs_dr(2))).or.((.not. is_use_dr).and.(longxy_obs(i) == longxy(g-begg+1)) .and. (latixy_obs(i) == latixy(g-begg+1)))) then
+             obs_index_p(cnt) = g-begg+1 +  ((endg-begg+1) * (clmobs_layer(i)-1))
+           end if
+
+           !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
+           obs_p(cnt) = clm_obs(i)
+           if(multierr.eq.1) clm_obserr_p(cnt) = clm_obserr(i)
+           cnt = cnt + 1
+
+         end do
+
+       end if
+
      end do
 
      if(obs_interp_switch.eq.1) then

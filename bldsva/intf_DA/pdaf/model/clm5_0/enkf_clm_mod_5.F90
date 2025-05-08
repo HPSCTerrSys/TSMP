@@ -42,6 +42,7 @@ module enkf_clm_mod
   integer :: clm_begp,clm_endp
   real(r8),allocatable :: clm_statevec(:)
   integer,allocatable :: state_pdaf2clm_c_p(:)
+  integer,allocatable :: state_pdaf2clm_p_p(:)
   integer,allocatable :: state_pdaf2clm_j_p(:)
   ! clm_paramarr: Contains LAI used in obs_op_pdaf for computing model
   ! LST in LST assimilation (clmupdate_T)
@@ -86,8 +87,10 @@ module enkf_clm_mod
     use shr_kind_mod, only: r8 => shr_kind_r8
     use decompMod , only : get_proc_bounds
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     use clm_varcon , only : ispval
     use ColumnType , only : col
+    use PatchType  , only : patch
 
     implicit none
 
@@ -96,6 +99,8 @@ module enkf_clm_mod
     integer :: i
     integer :: j
     integer :: jj
+    integer :: lev
+    integer :: p
     integer :: c
     integer :: g
     integer :: cc
@@ -272,9 +277,149 @@ module enkf_clm_mod
 
     !hcp LST DA
     if(clmupdate_T.eq.1) then
-      error stop "Not implemented: clmupdate_T.eq.1"
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  (endp-begp+1)*2  !TG, then TV
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TG
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TG
+        state_pdaf2clm_j_p(cc) = 1
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+clm_varsize) = 1
+      end do
+
     endif
     !end hcp
+
+    ! skin temperature state vector
+    if(clmupdate_T.eq.2) then
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      ! clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  3* (endp-begp+1)  !TSKIN, then TG and TV
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TSKIN
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TSKIN
+        state_pdaf2clm_j_p(cc) = 1
+        state_pdaf2clm_p_p(cc+clm_varsize) = p !TG
+        state_pdaf2clm_c_p(cc+clm_varsize) = patch%column(p) !TG
+        state_pdaf2clm_j_p(cc+clm_varsize) = 1
+        state_pdaf2clm_p_p(cc+2*clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+2*clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+2*clm_varsize) = 1
+      end do
+
+    endif
+
+    if(clmupdate_T.eq.3) then
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      ! clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  (1 + nlevgrnd + 1)* (endp-begp+1)  !TSKIN, then nlevgrnd times TSOIL and TV
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TSKIN
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TSKIN
+        state_pdaf2clm_j_p(cc) = 1
+        do lev=1,nlevgrnd
+          ! ivar = 2-26: TSOIL
+          state_pdaf2clm_p_p(cc + lev*clm_varsize) = p
+          state_pdaf2clm_c_p(cc + lev*clm_varsize) = patch%column(p)
+          state_pdaf2clm_j_p(cc + lev*clm_varsize) = lev
+        end do
+        state_pdaf2clm_p_p(cc+(1+nlevgrnd)*clm_varsize) = p !TV
+        state_pdaf2clm_c_p(cc+(1+nlevgrnd)*clm_varsize) = patch%column(p) !TV
+        state_pdaf2clm_j_p(cc+(1+nlevgrnd)*clm_varsize) = 1
+      end do
+
+    endif
+
+    if(clmupdate_T.eq.4) then
+
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begp:endp,1))
+
+      do p=clm_begp,clm_endp
+        state_clm2pdaf_p(p,1) = (p - clm_begp + 1)
+      end do
+
+      clm_varsize      =  endp-begp+1
+      ! clm_paramsize =  endp-begp+1         !LAI
+      clm_statevecsize =  1* (endp-begp+1)  !TSOIL
+
+      IF (allocated(state_pdaf2clm_p_p)) deallocate(state_pdaf2clm_p_p)
+      allocate(state_pdaf2clm_p_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      cc = 0
+
+      do p=clm_begp,clm_endp
+        cc = cc + 1
+        state_pdaf2clm_p_p(cc) = p !TSOIL
+        state_pdaf2clm_c_p(cc) = patch%column(p) !TSOIL
+        state_pdaf2clm_j_p(cc) = 1
+      end do
+
+    endif
+
 
 #ifdef PDAF_DEBUG
     ! Debug output of clm_statevecsize
@@ -290,8 +435,8 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_paramsize is ',clm_paramsize
     if (allocated(clm_paramarr)) deallocate(clm_paramarr)         !hcp
-    if ((clmupdate_T.ne.0)) then  !hcp
-      error stop "Not implemented clmupdate_T.NE.0"
+    if ((clmupdate_T.eq.1)) then  !hcp
+      allocate(clm_paramarr(clm_paramsize))
     end if
 
   end subroutine define_clm_statevec
@@ -309,11 +454,16 @@ module enkf_clm_mod
   end subroutine cleanup_clm_statevec
 
   subroutine set_clm_statevec(tstartcycle, mype)
-    use clm_instMod, only : soilstate_inst, waterstate_inst
+    use clm_instMod, only : soilstate_inst
+    use clm_instMod, only : waterstate_inst
+    use clm_instMod, only : temperature_inst
+    use clm_instMod, only : canopystate_inst
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     ! use clm_varcon, only: nameg, namec
     ! use GetGlobalValuesMod, only: GetGlobalWrite
     use ColumnType , only : col
+    use PatchType , only : patch
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
     integer,intent(in) :: tstartcycle
@@ -322,7 +472,13 @@ module enkf_clm_mod
     real(r8), pointer :: psand(:,:)
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
+    real(r8), pointer :: t_grnd(:)
+    real(r8), pointer :: t_soisno(:,:)
+    real(r8), pointer :: t_veg(:)
+    real(r8), pointer :: t_skin(:)
+    real(r8), pointer :: tlai(:)
     integer :: i,j,jj,g,cc=0,offset=0
+    integer :: lev
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
     character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
@@ -330,6 +486,14 @@ module enkf_clm_mod
     psand => soilstate_inst%cellsand_col
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
+
+    ! LST variables
+    t_grnd => temperature_inst%t_grnd_col
+    t_veg  => temperature_inst%t_veg_patch
+    t_skin => temperature_inst%t_skin_patch
+    t_soisno => temperature_inst%t_soisno_col
+    tlai   => canopystate_inst%tlai_patch
+
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
@@ -339,6 +503,14 @@ module enkf_clm_mod
         WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".integrate.", tstartcycle + 1, ".txt"
         OPEN(unit=71, file=fn2, action="write")
         WRITE (71,"(es22.15)") swc(:,:)
+        CLOSE(71)
+      END IF
+
+      IF(clmupdate_T.NE.0) THEN
+        ! TSMP-PDAF: Debug output of CLM t_soisno, first layer
+        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "t_soisno_", mype, ".integrate.", tstartcycle + 1, ".txt"
+        OPEN(unit=71, file=fn2, action="write")
+        WRITE (71,"(es22.15)") t_soisno(:,1)
         CLOSE(71)
       END IF
 
@@ -359,9 +531,49 @@ module enkf_clm_mod
 
     !hcp  LAI
     if(clmupdate_T.eq.1) then
-      error stop "Not implemented: clmupdate_T.eq.1"
+      do cc = 1, clm_varsize
+        ! t_grnd iterated over cols
+        ! t_veg  iterated over patches
+        clm_statevec(cc)             = t_grnd(state_pdaf2clm_c_p(cc))
+        clm_statevec(cc+clm_varsize) = t_veg( state_pdaf2clm_p_p(cc+clm_varsize))
+      end do
+
+      do cc = 1, clm_paramsize
+        ! Works only if clm_paramsize corresponds to clm_varsize (also
+        ! the order)
+        clm_paramarr(cc) = tlai(state_pdaf2clm_p_p(cc))
+      end do
     endif
     !end hcp  LAI
+
+    ! skin temperature state vector
+    if(clmupdate_T.eq.2) then
+      do cc = 1, clm_varsize
+        ! t_skin iterated over patches
+        clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
+        clm_statevec(cc+clm_varsize)   = t_grnd(state_pdaf2clm_c_p(cc+clm_varsize))
+        clm_statevec(cc+2*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+2*clm_varsize))
+      end do
+    endif
+
+    ! skin temperature state vector updating soil temperature
+    if(clmupdate_T.eq.3) then
+      do cc = 1, clm_varsize
+        ! t_skin iterated over patches
+        clm_statevec(cc)               = t_skin(state_pdaf2clm_p_p(cc))
+        do lev=1,nlevgrnd
+          clm_statevec(cc+lev*clm_varsize)   = t_soisno(state_pdaf2clm_c_p(cc+lev*clm_varsize), state_pdaf2clm_j_p(cc+lev*clm_varsize))
+        end do
+        clm_statevec(cc+(1+nlevgrnd)*clm_varsize) = t_veg(state_pdaf2clm_p_p(cc+(1+nlevgrnd)*clm_varsize))
+      end do
+    endif
+
+    ! soil temperature state vector updating soil temperature
+    if(clmupdate_T.eq.4) then
+      do cc = 1, clm_varsize
+        clm_statevec(cc)               = t_soisno(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+      end do
+    endif
 
     ! write average swc to state vector (CRP assimilation)
     if(clmupdate_swc.eq.2) then
@@ -400,10 +612,14 @@ module enkf_clm_mod
 
   subroutine update_clm(tstartcycle, mype) bind(C,name="update_clm")
     use clm_varpar   , only : nlevsoi
+    use clm_varpar   , only : nlevgrnd
     use clm_time_manager  , only : update_DA_nstep
     use shr_kind_mod , only : r8 => shr_kind_r8
+    use PatchType , only : patch
     use ColumnType , only : col
-    use clm_instMod, only : soilstate_inst, waterstate_inst
+    use clm_instMod, only : soilstate_inst
+    use clm_instMod, only : waterstate_inst
+    use clm_instMod, only : temperature_inst
     use clm_varcon      , only : denh2o, denice, watmin
     use clm_varcon      , only : ispval
     use clm_varcon      , only : spval
@@ -419,6 +635,11 @@ module enkf_clm_mod
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
 
+    real(r8), pointer :: t_grnd(:)
+    real(r8), pointer :: t_soisno(:,:)
+    real(r8), pointer :: t_veg(:)
+    real(r8), pointer :: t_skin(:)
+
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
@@ -427,7 +648,8 @@ module enkf_clm_mod
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
     real(r8)  :: swc_update        ! updated SWC in loop
 
-    integer :: i,j,jj,g,cc=0,offset=0
+    integer :: i,j,jj,g,c,p,cc=0,offset=0
+    integer :: lev
     character (len = 31) :: fn    !TSMP-PDAF: function name for state vector outpu
     character (len = 31) :: fn2    !TSMP-PDAF: function name for state vector outpu
     character (len = 32) :: fn3    !TSMP-PDAF: function name for state vector outpu
@@ -458,6 +680,13 @@ module enkf_clm_mod
     dz            => col%dz
     h2osoi_liq    => waterstate_inst%h2osoi_liq_col
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
+
+    ! LST
+    t_grnd => temperature_inst%t_grnd_col
+    t_soisno => temperature_inst%t_soisno_col
+    t_veg  => temperature_inst%t_veg_patch
+    t_skin => temperature_inst%t_skin_patch
+    ! tlai   => canopystate_inst%tlai_patch
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
@@ -575,39 +804,47 @@ module enkf_clm_mod
             end do
         end do
 
-#ifdef PDAF_DEBUG
-        IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
-
-          IF(clmupdate_swc.NE.0) THEN
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn3, action="write")
-            WRITE (71,"(es22.15)") h2osoi_liq(:,:)
-            CLOSE(71)
-
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn4, action="write")
-            WRITE (71,"(es22.15)") h2osoi_ice(:,:)
-            CLOSE(71)
-
-            ! TSMP-PDAF: For debug runs, output the state vector in files
-            WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
-            OPEN(unit=71, file=fn2, action="write")
-            WRITE (71,"(es22.15)") swc(:,:)
-            CLOSE(71)
-          END IF
-
-        END IF
-#endif
-
     endif
 
     !hcp: TG, TV
     if(clmupdate_T.EQ.1) then
-      error stop "Not implemented: clmupdate_T.eq.1"
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_grnd(c) = clm_statevec(state_clm2pdaf_p(p,1))
+        t_veg(p)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
+      end do
     endif
     ! end hcp TG, TV
+
+    ! skin temperature state vector
+    if(clmupdate_T.EQ.2) then
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
+        t_grnd(c)  = clm_statevec(state_clm2pdaf_p(p,1) + clm_varsize)
+        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + 2*clm_varsize)
+      end do
+    endif
+
+    ! skin temperature state vector updating soil temperature
+    if(clmupdate_T.EQ.3) then
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_skin(p)  = clm_statevec(state_clm2pdaf_p(p,1))
+        do lev=1,nlevgrnd
+          t_soisno(c,lev)  = clm_statevec(state_clm2pdaf_p(p,1) + (lev)*clm_varsize)
+        end do
+        t_veg(p)   = clm_statevec(state_clm2pdaf_p(p,1) + (1+nlevgrnd)*clm_varsize)
+      end do
+    endif
+
+    ! soil temperature state vector updating soil temperature
+    if(clmupdate_T.EQ.4) then
+      do p = clm_begp, clm_endp
+        c = patch%column(p)
+        t_soisno(c,1)  = clm_statevec(state_clm2pdaf_p(p,1))
+      end do
+    endif
 
     !! update liquid water content
     !do j=clm_begg,clm_endg
@@ -633,6 +870,40 @@ module enkf_clm_mod
       call clm_correct_texture
       call clm_texture_to_parameters
     endif
+
+#ifdef PDAF_DEBUG
+    IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
+
+      IF(clmupdate_swc.NE.0) THEN
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn3, "(a,i5.5,a,i5.5,a)") "h2osoi_liq", mype, ".update.", tstartcycle, ".txt"
+        OPEN(unit=71, file=fn3, action="write")
+        WRITE (71,"(es22.15)") h2osoi_liq(:,:)
+        CLOSE(71)
+
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn4, "(a,i5.5,a,i5.5,a)") "h2osoi_ice", mype, ".update.", tstartcycle, ".txt"
+        OPEN(unit=71, file=fn4, action="write")
+        WRITE (71,"(es22.15)") h2osoi_ice(:,:)
+        CLOSE(71)
+
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "swcstate_", mype, ".update.", tstartcycle, ".txt"
+        OPEN(unit=71, file=fn2, action="write")
+        WRITE (71,"(es22.15)") swc(:,:)
+        CLOSE(71)
+      END IF
+
+      IF(clmupdate_T.NE.0) THEN
+        ! TSMP-PDAF: For debug runs, output the state vector in files
+        WRITE(fn2, "(a,i5.5,a,i5.5,a)") "t_soisno_", mype, ".update.", tstartcycle, ".txt"
+        OPEN(unit=71, file=fn2, action="write")
+        WRITE (71,"(es22.15)") t_soisno(:,1)
+        CLOSE(71)
+      END IF
+
+    END IF
+#endif
 
   end subroutine update_clm
 
