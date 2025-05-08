@@ -53,6 +53,8 @@ nprocs      =
 update_swc  =
 update_texture  =
 update_T  =
+update_snow  =
+update_snow_repartitioning  =
 print_swc   =
 print_et   =
 statevec_allcol =
@@ -478,6 +480,79 @@ Currently only CLM3.5
 
 -  1: Update of ground and vegetation temperature
 
+### CLM:update_snow ###
+
+`CLM:update_snow`: (integer) Flag for Snow-DA.
+
+Only CLM5.0/eCLM.
+
+-  0 (Default): No Snow-DA
+
+-  1: Assimilation of snow depth. State vector: Snow depth.
+
+-  2: Assimilation of snow water equivalent. State vector: Snow water
+   equivalent.
+
+-  3: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment.
+
+-  4: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` and `h2osoi_liq`
+   updated based on `h2osno`-increment. `dz` updated based on
+   `snow_depth`-increment.
+
+-  5: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment. `dz` updated based on `snow_depth`-increment.
+
+-  6: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` and `h2osoi_liq`
+   updated based on `h2osno`-increment. 
+
+-  7: Assimilation of snow depth. State vector: Snow depth and snow
+   water equivalent. Requires
+   `CLM:update_snow_repartitioning=3`. `h2osoi_ice` updated based on
+   `h2osno`-increment. Should reproduce Case 3.
+
+See CLM Technical Note for more information on snow variable:
+<https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/Snow_Hydrology/CLM50_Tech_Note_Snow_Hydrology.html>
+- snow depth: `waterstate_inst%snow_depth_col`
+- snow water equivalent: `waterstate_inst%h2osno_col`
+
+### CLM:update_snow_repartitioning ###
+
+`CLM:update_snow_repartitioning`: (integer) Flag for snow-layer
+repartitioning applied during Snow-DA.
+
+Only used if Snow-DA is switched on by setting `CLM:update_snow`. Only
+CLM5.0/eCLM.
+
+-  0: No repartitioning. Not recommended if Snow-DA is used,
+   when state vector consists of diagnostic variables.
+
+-  1: (experimental, only for `CLM:update_snow=1,2`) Repartitioning
+   routine in DA-interface: `clm_repartition_snow`. Option 1:
+   Adjusting the bottom layer only.
+
+-  2: (experimental, only for `CLM:update_snow=1,2`) Repartitioning
+   routine in DA-interface: `clm_repartition_snow`. Option 2:
+   Adjusting all active layers.
+
+-  3 (Default, Currently recommended): `h2osoi_ice` (and possibly
+   `h2osoi_liq` and `dz`) updated by increment based on updated
+   `h2osno` or `snow_depth`. Further repartitioning left to
+   CLM-code. Based on
+   <https://github.com/NASA-LIS/LISF/blob/master/lis/surfacemodels/land/clm2/da_snow/clm2_setsnowvars.F90>
+
+Note: Using the repartitioning scheme has lead to balance errors and
+NaN-values in previous CLM-simulations. The function is still included
+in the code, because it may be revisited and adapted in the future.
+
 ### CLM:print_swc ###
 
 `CLM:print_swc`: (integer) If set to `1`, the updated soil moisture
@@ -752,58 +827,60 @@ Default: 0, output turned off.
 
 ## Parameter Summary ##
 
- | section   | parameter               | default value |
- |:---------:|:-----------------------:|:-------------:|
- | `[PF]`    |                         |               |
- |           | `problemname`           | \-            |
- |           | `nprocs`                | 0             |
- |           | `starttime`             | 0.0           |
- |           | `endtime`               | 0             |
- |           | `simtime`               | 0             |
- |           | `dt`                    | 0.0           |
- |           | `updateflag`            | 1             |
- |           | `paramupdate`           | 0             |
- |           | `paramupdate_frequency` | 1             |
- |           | `dampingfactor_param`   | 1.0           |
- |           | `dampingfactor_state`   | 1.0           |
- |           | `damping_switch_sm`     | 1             |
- |           | `aniso_perm_y`          | 1.0           |
- |           | `aniso_perm_z`          | 1.0           |
- |           | `aniso_use_parflow`     | 0             |
- |           |                         |               |
- |           | `printensemble`         | 1             |
- |           | `t_printensemble`       | -1            |
- |           | `printstat`             | 1             |
- |           | `paramprintensemble`    | 1             |
- |           | `paramprintstat`        | 1             |
- |           | `olfmasking`            | 0             |
- |           | `olfmasking_param`      | 0             |
- |           | `olfmasking_depth`      | 0             |
- | `[CLM]`   |                         |               |
- |           | `problemname`           | \-            |
- |           | `nprocs`                | 0             |
- |           | `update_swc`            | 1             |
- |           | `print_swc`             | 0             |
- |           | `print_et`              | 0             |
- |           | `statevec_allcol`       | 0             |
- |           | `statevec_only_active`  | 0             |
- |           | `statevec_max_layer`    | 25            |
- |           | `t_printensemble`       | -1            |
- |           | `watmin_switch`         | 0             |
- | `[COSMO]` |                         |               |
- |           | `nprocs`                | 0             |
- |           | `dtmult`                | 0             |
- | `[DA]`    |                         |               |
- |           | `nreal`                 | 0             |
- |           | `outdir`                | \-            |
- |           | `da_interval`           | 1             |
- |           | `stat_dumpoffset`       | 0             |
- |           | `screen_wrapper`        | 1             |
- |           | `point_obs`             | 1             |
- |           | `obs_interp_switch`     | 0             |
- |           | `crns_flag`             | 1             |
- |           | `da_crns_depth_tol`     | 0.01          |
- |           | `print_obs_index`       | 0             |
+ | section   | parameter                    | default value |
+ |:---------:|:----------------------------:|:-------------:|
+ | `[PF]`    |                              |               |
+ |           | `problemname`                | \-            |
+ |           | `nprocs`                     | 0             |
+ |           | `starttime`                  | 0.0           |
+ |           | `endtime`                    | 0             |
+ |           | `simtime`                    | 0             |
+ |           | `dt`                         | 0.0           |
+ |           | `updateflag`                 | 1             |
+ |           | `paramupdate`                | 0             |
+ |           | `paramupdate_frequency`      | 1             |
+ |           | `dampingfactor_param`        | 1.0           |
+ |           | `dampingfactor_state`        | 1.0           |
+ |           | `damping_switch_sm`          | 1             |
+ |           | `aniso_perm_y`               | 1.0           |
+ |           | `aniso_perm_z`               | 1.0           |
+ |           | `aniso_use_parflow`          | 0             |
+ |           |                              |               |
+ |           | `printensemble`              | 1             |
+ |           | `t_printensemble`            | -1            |
+ |           | `printstat`                  | 1             |
+ |           | `paramprintensemble`         | 1             |
+ |           | `paramprintstat`             | 1             |
+ |           | `olfmasking`                 | 0             |
+ |           | `olfmasking_param`           | 0             |
+ |           | `olfmasking_depth`           | 0             |
+ | `[CLM]`   |                              |               |
+ |           | `problemname`                | \-            |
+ |           | `nprocs`                     | 0             |
+ |           | `update_swc`                 | 1             |
+ |           | `update_snow`                | 0             |
+ |           | `update_snow_repartitioning` | 1             |
+ |           | `print_swc`                  | 0             |
+ |           | `print_et`                   | 0             |
+ |           | `statevec_allcol`            | 0             |
+ |           | `statevec_only_active`       | 0             |
+ |           | `statevec_max_layer`         | 25            |
+ |           | `t_printensemble`            | -1            |
+ |           | `watmin_switch`              | 0             |
+ | `[COSMO]` |                              |               |
+ |           | `nprocs`                     | 0             |
+ |           | `dtmult`                     | 0             |
+ | `[DA]`    |                              |               |
+ |           | `nreal`                      | 0             |
+ |           | `outdir`                     | \-            |
+ |           | `da_interval`                | 1             |
+ |           | `stat_dumpoffset`            | 0             |
+ |           | `screen_wrapper`             | 1             |
+ |           | `point_obs`                  | 1             |
+ |           | `obs_interp_switch`          | 0             |
+ |           | `crns_flag`                  | 1             |
+ |           | `da_crns_depth_tol`          | 0.01          |
+ |           | `print_obs_index`            | 0             |
 
 Default values for parameter file `enkfpf.par`.
 

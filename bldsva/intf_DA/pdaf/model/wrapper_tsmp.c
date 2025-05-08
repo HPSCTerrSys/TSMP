@@ -198,7 +198,7 @@ void integrate_tsmp() {
 void update_tsmp(){
 
 #if defined CLMSA
-  if((model == tag_model_clm) && ((clmupdate_swc != 0) || (clmupdate_T != 0))){
+  if((model == tag_model_clm) && ((clmupdate_swc != 0) || (clmupdate_T != 0) || (clmupdate_snow!=0))){
     update_clm(&tstartcycle, &mype_world);
     if(clmprint_swc == 1 || clmupdate_texture == 1 || clmupdate_texture == 2){
       print_update_clm(&tcycle, &total_steps);

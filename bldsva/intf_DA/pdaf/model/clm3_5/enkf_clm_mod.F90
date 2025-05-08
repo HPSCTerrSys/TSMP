@@ -65,6 +65,8 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmupdate_swc")     :: clmupdate_swc
   integer(c_int),bind(C,name="clmupdate_T")     :: clmupdate_T  ! by hcp
   integer(c_int),bind(C,name="clmupdate_texture") :: clmupdate_texture
+  integer(c_int),bind(C,name="clmupdate_snow")    :: clmupdate_snow
+  integer(c_int),bind(C,name="clmupdate_snow_repartitioning") :: clmupdate_snow_repartitioning
   integer(c_int),bind(C,name="clmprint_swc")      :: clmprint_swc
 #endif
   integer(c_int),bind(C,name="clmprint_et")       :: clmprint_et
@@ -145,6 +147,25 @@ module enkf_clm_mod
 
     if(clmupdate_texture.eq.2) then
       error stop "Not implemented: clmupdate_texture.eq.2"
+    endif
+
+    ! Snow assimilation
+    ! Case 1: Assimilation of snow depth : allocated 1 per column in CLM5
+    ! But observations and history file 1 per grid cell and therefore statevecsize 1 per grid cell
+    ! Case 2: Assimilation of snow water equivalent same as above
+    if(clmupdate_snow.eq.1 .or. clmupdate_snow.eq.2) then 
+      error stop "Not implemented: clmupdate_snow.eq.1 or clmupdate_snow.eq.1"
+    endif
+    ! Case 3: Assimilation of snow depth: Snow depth and snow water
+    ! equivalent in the state vector. Update of h2osoi_ice
+    if(clmupdate_snow.eq.3) then
+      error stop "Not implemented: clmupdate_snow.eq.3"
+    endif
+    ! Case 4: Assimilation of snow depth: Snow depth and snow water
+    ! equivalent in the state vector. Update of h2osoi_ice, h2osoi_liq
+    ! and dz
+    if(clmupdate_snow.eq.4) then
+      error stop "Not implemented: clmupdate_snow.eq.4"
     endif
 
     !hcp LST DA
@@ -285,6 +306,14 @@ module enkf_clm_mod
           cc = cc + 1
         end do
       end do
+    endif
+
+    ! Snow assimilation state vector
+    ! Case 1: Snow depth
+    ! Case 2: SWE
+    ! Case 3: Snow depth + SWE
+    if(clmupdate_snow.ne.0) then
+      error stop "Not implemented: clmupdate_snow.ne.0"
     endif
 
 #ifdef PDAF_DEBUG
@@ -532,6 +561,15 @@ module enkf_clm_mod
       end do
       call clm_correct_texture
       call clm_texture_to_parameters
+    endif
+
+    ! Snow assimilation:
+    ! Case 1: Snow depth
+    ! Case 2: Snow water equivalent
+    ! Case 3: Snow depth (assimilated) and SWE (used for increment) in state vector
+    ! Write updated snow variable back to CLM and then repartition snow and adjust related variables
+    if(clmupdate_snow.ne.0) then
+      error stop "Not implemented: clmupdate_snow.ne.0"
     endif
 
   end subroutine update_clm

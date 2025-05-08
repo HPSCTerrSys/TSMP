@@ -87,6 +87,8 @@ GLOBAL int nx_local,ny_local,nz_local;
 GLOBAL int clmupdate_swc;
 GLOBAL int clmupdate_T;
 GLOBAL int clmupdate_texture;
+GLOBAL int clmupdate_snow;
+GLOBAL int clmupdate_snow_repartitioning;
 GLOBAL int clmprint_swc;
 GLOBAL int clmprint_et;
 GLOBAL int clmstatevec_allcol;
