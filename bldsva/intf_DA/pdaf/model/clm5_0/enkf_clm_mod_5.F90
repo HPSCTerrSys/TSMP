@@ -152,7 +152,7 @@ module enkf_clm_mod
 
           ! Set `clm_varsize`, even though it is currently not used
           ! for `clmupdate_swc.eq.1`
-          clm_varsize = clm_statevecsize
+          clm_varsize = cc
           clm_statevecsize = cc
 
           IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
@@ -243,14 +243,13 @@ module enkf_clm_mod
               if (g .eq. j) then
                 if (newgridcell) then
                   newgridcell = .false.
+                  cc = cc + 1
                   ! Possibliy: Add state_pdaf2clm_g_p
                   state_pdaf2clm_c_p(cc) = jj
                   state_pdaf2clm_j_p(cc) = i
                 end if
               end if
             end do
-
-            cc = cc + 1
           end do
         end do
 
