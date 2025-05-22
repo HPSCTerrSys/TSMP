@@ -2,7 +2,7 @@
 
 ## 1.  Install components
 
-The following instructions assume you are working on the JSC machine JURECA. If you are working on another JSC machine switch the name appropriately and the instructions should still work. Running CLM5-PDAF on non JSC machines is not covered in these instructions but should be similar if TSMP-PDAF, PDAF, and CLM5 can be installed on the machine. 
+The following instructions assume you are working on the JSC machine `JURECA`. If you are working on another JSC machine switch the name appropriately and the instructions should still work. Running CLM5-PDAF on non JSC machines is not covered in these instructions but should be similar if TSMP-PDAF, PDAF, and CLM5 can be installed on the machine. 
 
 ### 1.1 TSMP-PDAF
 
@@ -119,7 +119,7 @@ suffix with zero filled numbering like
 The exact details of perturbation can vary from study to study, but a
 usable script to perturb the forcings and surface files can be found
 at
-`/p/largedata/jicg41/strebel2/CLM5PDAF_Example/perturb_forcings_and_soil_properties_in_range.py`.
+`/p/data1/jicg41/strebel2/CLM5PDAF_Example/perturb_forcings_and_soil_properties_in_range.py`.
 
 In this script the following variables should be modified or at least considered for modification before running it for your case.
 
@@ -163,7 +163,7 @@ CLM5-PDAF does not use the same case setup as CLM5 standalone, instead we skip t
     * rof_modelio.nml
     * wav_modelio.nml
 
-Since these files are needed for each ensemble member we create them with a script. An example of  such a script can be found at `/p/largedata/jicg41/strebel2/CLM5PDAF_Example/create_ensemble_namelists.py`
+Since these files are needed for each ensemble member we create them with a script. An example of  such a script can be found at `/p/data1/jicg41/strebel2/CLM5PDAF_Example/create_ensemble_namelists.py`
 
 In this script the following variables should be modified or at least considered for modification before running it for your case.
 
@@ -211,7 +211,7 @@ Similarly, we can use a symbolic link to the loadenvs file from TSMP to make sur
 
 ## 3. Running the simulation
 
-To run the simulation we use can use a simple jobscript, an example can be found at `/p/largedata/jicg41/strebel2/CLM5PDAF_Example/jobscript_da.slurm`
+To run the simulation we use can use a simple jobscript, an example can be found at `/p/data1/jicg41/strebel2/CLM5PDAF_Example/jobscript_da.slurm`
 
 The arguments for the tsmp-pdaf executable are explained in the TSMP-PDAF manual.
 
@@ -232,7 +232,7 @@ moved / archived away from `$SCRATCH` to avoid filling the number of
 files limit. One way to process the output is to collect the ensemble
 statistics of the variables in one file. An example script to perform
 this post-processing can be found at
-`/p/largedata/jicg41/strebel2/CLM5PDAF_Example/collect_some_ensemble_stats.py`
+`/p/data1/jicg41/strebel2/CLM5PDAF_Example/collect_some_ensemble_stats.py`
 
 The script should be modified before use, by changing the
 `collect_vars` variable to a list with the CLM5 variable names that
@@ -251,7 +251,7 @@ different simulations within the same case.
 
 All the input files necessary to create a 10 ensemble case for the
 year 2009 are located at
-`/p/largedata/jicg41/strebel2/CLM5PDAF_Example/Example_Case` and can
+`/p/data1/jicg41/strebel2/CLM5PDAF_Example/Example_Case` and can
 be used to test the setup before working on your own case.
 
 
