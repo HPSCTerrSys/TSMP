@@ -64,6 +64,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
        ONLY: obs_filename
   use mod_read_obs, &
        only: check_n_observationfile
+  use mod_read_obs, ONLY: check_n_observationfile_da_interval
   IMPLICIT NONE
 
 ! !ARGUMENTS:
@@ -136,18 +137,24 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
     ! Warning Check: nsteps should be one
 
     ! Initialize da_interval_variable as zero
-    da_interval_new = 0
+    da_interval_new = 0.0
 
     if(counter>(total_steps+toffset)) then
       ! Set da_interval to da_interval_final from EnKF input file
       da_interval_new = da_interval_final
     else
       ! Set da_interval from observation files
-      !call check_n_observationfile_da_interval(fn,da_interval_new)
-      da_interval_new = 1
+      call check_n_observationfile_da_interval(fn,da_interval_new)
     end if
 
-    ! Error Check: that da_interval_new is not zero anymore
+#ifdef PDAF_DEBUG
+    ! Error Check: da_interval_new should be set to at least one
+    if(da_interval_new < 1.0) then
+      write(*,'(a,es22.15)') "da_interval_new = ", da_interval_new
+      write(*,'(a)') "da_interval_new is too small, should be minimum of one"
+      stop "Stopped from incorrect da_interval_new"
+    end if
+#endif
 
     ! Update da_interval
     da_interval = da_interval_new
