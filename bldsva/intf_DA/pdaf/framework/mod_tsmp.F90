@@ -51,6 +51,7 @@ module mod_tsmp
     type(c_ptr), bind(c)     :: soilay
     real(c_double), pointer  :: soilay_fortran(:)
     real(c_double),bind(C) :: da_interval
+    real(c_double),bind(C) :: da_interval_final
     real(c_double),bind(C) :: dampfac_state_time_dependent
     real(c_double),bind(C) :: dampfac_param_time_dependent
 

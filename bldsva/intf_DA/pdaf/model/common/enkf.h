@@ -130,6 +130,7 @@ GLOBAL double dt;
 GLOBAL double pf_aniso_perm_y;
 GLOBAL double pf_aniso_perm_z;
 GLOBAL double da_interval;
+GLOBAL double da_interval_final;
 GLOBAL double pf_dampfac_param;
 GLOBAL double pf_dampfac_state;
 GLOBAL double dampfac_state_time_dependent;

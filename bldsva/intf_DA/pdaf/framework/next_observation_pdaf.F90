@@ -58,6 +58,7 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   USE mod_tsmp, &
        ONLY: total_steps
   USE mod_tsmp, ONLY: da_interval
+  USE mod_tsmp, ONLY: da_interval_final
   USE mod_tsmp, ONLY: flexible_da_interval
   USE mod_assimilation, &
        ONLY: obs_filename
@@ -130,32 +131,25 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
     ! total_steps can be input via `PF:simtime`
 
-    ! Input: da_interval_final
-
-    ! Todo: Add da_interval, da_interval_final to mod_tsmp
-
     ! Error Check: delt_obs must be one (check in read_enkfpar)
 
-    ! Warning Check: no_obs, should be non-zero for every observation file
+    ! Warning Check: nsteps should be one
 
     ! Initialize da_interval_variable as zero
     da_interval_new = 0
 
     if(counter>(total_steps+toffset)) then
-      ! Add final da_interval read from input
-      da_interval_new = 1 !da_interval_final
+      ! Set da_interval to da_interval_final from EnKF input file
+      da_interval_new = da_interval_final
     else
       ! Set da_interval from observation files
       !call check_n_observationfile_da_interval(fn,da_interval_new)
       da_interval_new = 1
     end if
 
-    ! Warning Check: nsteps should be one
-
     ! Error Check: that da_interval_new is not zero anymore
 
     ! Update da_interval
-    ! TODO: Add da_interval to mod_tsmp
     da_interval = da_interval_new
 
   end if

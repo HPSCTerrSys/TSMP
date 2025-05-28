@@ -96,6 +96,7 @@ void read_enkfpar(char *parname)
   nreal                 = iniparser_getint(pardict,"DA:nreal",0);
   startreal             = iniparser_getint(pardict,"DA:startreal",0);
   da_interval           = iniparser_getdouble(pardict,"DA:da_interval",1);
+  da_interval_final     = iniparser_getdouble(pardict,"DA:da_interval_final",1);
   flexible_da_interval  = iniparser_getint(pardict,"DA:flexible_da_interval",0);
   stat_dumpoffset       = iniparser_getint(pardict,"DA:stat_dumpoffset",0);
   screen_wrapper        = iniparser_getint(pardict,"DA:screen_wrapper",1);
