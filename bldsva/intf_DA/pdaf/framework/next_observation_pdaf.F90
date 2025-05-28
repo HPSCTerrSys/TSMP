@@ -101,13 +101,13 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
     !nsteps  = nsteps  + delt_obs 
     counter = counter + delt_obs
 
-    ! Exit if at end
+    ! Exit if past last observation file
     !if(counter>total_steps) exit
     if(counter>(total_steps+toffset)) then
       exit
     end if
 
-    ! Check id observation file of counter contains observations
+    ! Check observation file #counter for observations
     write(fn, '(a, i5.5)') trim(obs_filename)//'.', counter
     call check_n_observationfile(fn,no_obs)
 
@@ -117,6 +117,8 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
     end if
 
   end do
+
+  ! Set number of steps for PDAF
   nsteps = counter - stepnow
 
   if (mype_world==0 .and. screen > 2) then
