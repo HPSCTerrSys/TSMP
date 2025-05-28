@@ -130,11 +130,32 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   ! flexible_da_interval should be input (0/1)
   if(flexible_da_interval.eq.1) then
 
-    ! total_steps can be input via `PF:simtime`
+    ! Document: EnKF-Parameter-File Input `flexible_da_interval`
 
-    ! Error Check: delt_obs must be one (check in read_enkfpar)
+    ! Document: total_steps can be input via `PF:simtime`
 
-    ! Warning Check: nsteps should be one
+    ! Document: Input da_interval_final
+
+    ! Document: Input restriction for delt_obs
+
+    ! Document: Observation file input `da_interval`
+
+#ifdef PDAF_DEBUG
+    ! Error Check: delt_obs must be one for flexible time stepping
+    if (delt_obs /= 1) then
+      write(*,'(a,i10)') "delt_obs = ", delt_obs
+      write(*,'(a)') "delt_obs must be one for flexible time stepping"
+      stop "Stopped from incorrect delt_obs"
+    end if
+
+    ! Warning: nsteps should be one
+    if(nsteps > 1) then
+      write(*,'(a,i10)') "WARNING: nsteps = ", nsteps
+      write(*,'(a)') "WARNING: nsteps should be one for flexible time stepping"
+      write(*,'(a)') "WARNING: Any time differences can be encoded in observation files"
+      write(*,'(a)') "WARNING: using the variable da_interval."
+    end if
+#endif
 
     ! Initialize da_interval_variable as zero
     da_interval_new = 0.0
@@ -158,6 +179,10 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
     ! Update da_interval
     da_interval = da_interval_new
+
+    if (mype_world==0 .and. screen > 2) then
+      write(*,'(a,es22.15)')'TSMP-PDAF (next_observation_pdaf.F90) da_interval: ', da_interval
+    end if
 
   end if
 
