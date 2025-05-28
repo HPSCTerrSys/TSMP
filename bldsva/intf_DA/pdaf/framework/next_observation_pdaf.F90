@@ -130,16 +130,6 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   ! flexible_da_interval should be input (0/1)
   if(flexible_da_interval.eq.1) then
 
-    ! Document: EnKF-Parameter-File Input `flexible_da_interval`
-
-    ! Document: total_steps can be input via `PF:simtime`
-
-    ! Document: Input da_interval_final
-
-    ! Document: Input restriction for delt_obs
-
-    ! Document: Observation file input `da_interval`
-
 #ifdef PDAF_DEBUG
     ! Error Check: delt_obs must be one for flexible time stepping
     if (delt_obs /= 1) then

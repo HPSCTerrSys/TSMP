@@ -70,6 +70,8 @@ outdir = ""
 nreal =
 startreal =
 da_interval       =
+da_interval_final =
+flexible_da_interval =
 stat_dumpoffset   =
 point_obs =
 crns_flag =
@@ -653,6 +655,30 @@ called, assembling EnKF state vectors and calling the PDAF
 library. Maximizing `da_interval`, minimizes the number of these calls
 and thus reduces compute time.
 
+### DA:da_interval_final ###
+
+`DA:da_interval_final`: (float) Final `da_interval` for flexible time
+stepping using observation files.
+
+Used only if `DA:flexible_da_interval` is switched on.
+
+### DA:flexible_da_interval ###
+
+`DA:flexible_da_interval`: (integer) Switch for flexible time stepping
+using observation files.
+
+- `0`: default, fixed time stepping, single `da_interval`
+- `1`: flexible time stepping, `da_interval` read from next
+  observation file
+
+- Set `total_steps` using `PF:simtime` (`DA:da_interval` must be `1`)
+- Command line input [`delt_obs`](./input_cmd.md#delt_obs) must be
+  `1`!
+
+In observation files, the new input variable
+[`da_interval`](./input_obs.md#da_interval) determines the
+`da_interval` before the observation file in question.
+
 ### DA:stat_dumpoffset ###
 
 `DA:stat_dumpoffset`: File number offset for the data assimilation
@@ -797,6 +823,8 @@ Default: 0, output turned off.
  |           | `nreal`                 | 0             |
  |           | `outdir`                | \-            |
  |           | `da_interval`           | 1             |
+ |           | `da_interval_final`     | 1             |
+ |           | `flexible_da_interval`  | 0             |
  |           | `stat_dumpoffset`       | 0             |
  |           | `screen_wrapper`        | 1             |
  |           | `point_obs`             | 1             |
