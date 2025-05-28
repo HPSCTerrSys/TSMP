@@ -57,6 +57,8 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
        ONLY: mype_world
   USE mod_tsmp, &
        ONLY: total_steps
+  USE mod_tsmp, ONLY: da_interval
+  USE mod_tsmp, ONLY: flexible_da_interval
   USE mod_assimilation, &
        ONLY: obs_filename
   use mod_read_obs, &
@@ -78,6 +80,8 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
   integer :: no_obs=0
   character (len = 110) :: fn
   !kuw end
+
+  REAL :: da_interval_new
   
   time = 0.0    ! Not used in fully-parallel implementation variant
   doexit = 0
@@ -120,6 +124,41 @@ SUBROUTINE next_observation_pdaf(stepnow, nsteps, doexit, time)
 
   ! Set number of steps for PDAF
   nsteps = counter - stepnow
+
+  ! flexible_da_interval should be input (0/1)
+  if(flexible_da_interval.eq.1) then
+
+    ! total_steps can be input via `PF:simtime`
+
+    ! Input: da_interval_final
+
+    ! Todo: Add da_interval, da_interval_final to mod_tsmp
+
+    ! Error Check: delt_obs must be one (check in read_enkfpar)
+
+    ! Warning Check: no_obs, should be non-zero for every observation file
+
+    ! Initialize da_interval_variable as zero
+    da_interval_new = 0
+
+    if(counter>(total_steps+toffset)) then
+      ! Add final da_interval read from input
+      da_interval_new = 1 !da_interval_final
+    else
+      ! Set da_interval from observation files
+      !call check_n_observationfile_da_interval(fn,da_interval_new)
+      da_interval_new = 1
+    end if
+
+    ! Warning Check: nsteps should be one
+
+    ! Error Check: that da_interval_new is not zero anymore
+
+    ! Update da_interval
+    ! TODO: Add da_interval to mod_tsmp
+    da_interval = da_interval_new
+
+  end if
 
   if (mype_world==0 .and. screen > 2) then
       write(*,*)'TSMP-PDAF (next_observation_pdaf.F90) stepnow: ',stepnow

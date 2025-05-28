@@ -66,6 +66,7 @@ GLOBAL int nprocclm;
 GLOBAL int nproccosmo;
 GLOBAL int nreal;
 GLOBAL int startreal;
+GLOBAL int flexible_da_interval;
 GLOBAL int total_steps;
 GLOBAL int tcycle;
 GLOBAL int tstartcycle;
