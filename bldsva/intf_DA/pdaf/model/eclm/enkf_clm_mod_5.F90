@@ -311,6 +311,9 @@ module enkf_clm_mod
       allocate(clm_statevec(clm_statevecsize))
     end if
 
+    ! Allocate statevector-duplicate for saving original column mean
+    ! values used in computing increments during updating the state
+    ! vector in column-mean-mode.
     IF (allocated(clm_statevec_orig)) deallocate(clm_statevec_orig)
     if (clmupdate_swc.ne.0 .and. clmstatevec_colmean.ne.0) then
       allocate(clm_statevec_orig(clm_statevecsize))
@@ -394,11 +397,11 @@ module enkf_clm_mod
 
           ! Loop over all columns
           do c=clm_begc,clm_endc
-            ! Add columns in gridcell g
+            ! Select columns in gridcell g
             if(col%gridcell(c).eq.g) then
-              ! If there are hydrologically inactive columns in the
-              ! same gridcell with active columns
+              ! Select hydrologically active columns
               if(col%hydrologically_active(c)) then
+                ! Add active column to swc-sum
                 clm_statevec(cc) = clm_statevec(cc) + swc(c,j)
                 n_c = n_c + 1.0
               end if
@@ -408,14 +411,15 @@ module enkf_clm_mod
           if(n_c == 0.0) then
             write(*,*) "WARNING: Gridcell g=", g
             write(*,*) "WARNING: Layer    j=", j
-            write(*,*) "Grid cell g at layer j without hydrologically active column! Setting SWC as before from first column."
+            write(*,*) "Grid cell g at layer j without hydrologically active column! Setting SWC as in gridcell mode."
             clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
           else
             ! Compute final average
             clm_statevec(cc) = clm_statevec(cc) / n_c
           end if
 
-          ! Save prior state vector for increment
+          ! Save prior column mean state vector for computing
+          ! increment in updating the state vector
           clm_statevec_orig(cc) = clm_statevec(cc)
 
         end do
