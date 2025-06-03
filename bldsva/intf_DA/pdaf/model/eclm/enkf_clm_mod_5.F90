@@ -125,65 +125,45 @@ module enkf_clm_mod
     clm_begp     = begp
     clm_endp     = endp
 
+    ! Soil Moisture DA: State vector index arrays
     if(clmupdate_swc.eq.1) then
+
+      ! 1) COL/GRC: CLM->PDAF
+      IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
+      allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
+      do i=1,nlevsoi
+        do c=clm_begc,clm_endc
+          ! Default: inactive
+          state_clm2pdaf_p = ispval
+        end do
+      end do
+
+      ! All column variables in state vector
       if(clmstatevec_allcol.eq.1) then
 
+        ! Only hydrologically active columns
         if(clmstatevec_only_active .eq. 1) then
-
-          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
-          allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
 
           cc = 0
 
           do i=1,nlevsoi
-            do c=clm_begc,clm_endc
-              ! Only take into account layers above input maximum layer
-              if(i<=clmstatevec_max_layer) then
+            ! Only take into account layers above input maximum layer
+            if(i<=clmstatevec_max_layer) then
+
+              do c=clm_begc,clm_endc
                 ! Only take into account hydrologically active columns
                 ! and layers above bedrock
                 if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
                   cc = cc + 1
                   state_clm2pdaf_p(c,i) = cc
-                else
-                  state_clm2pdaf_p(c,i) = ispval
                 end if
-              else
-                state_clm2pdaf_p(c,i) = ispval
-              end if
-            end do
+              end do
+
+            end if
           end do
 
-          ! Set `clm_varsize`, even though it is currently not used
-          ! for `clmupdate_swc.eq.1`
-          clm_varsize = cc
-          clm_statevecsize = cc
-
-          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
-          allocate(state_pdaf2clm_c_p(clm_statevecsize))
-          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
-          allocate(state_pdaf2clm_j_p(clm_statevecsize))
-
-          cc = 0
-
-          do i=1,nlevsoi
-            do c=clm_begc,clm_endc
-              ! Only take into account layers above input maximum layer
-              if(i<=clmstatevec_max_layer) then
-                ! Only take into account hydrologically active columns
-                ! and layers above bedrock
-                if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
-                  cc = cc + 1
-                  state_pdaf2clm_c_p(cc) = c
-                  state_pdaf2clm_j_p(cc) = i
-                end if
-              end if
-            end do
-          end do
-
+          ! All column variables in state vector simplifying the indexing   
         else
-
-          IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
-          allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
 
           do i=1,nlevsoi
             do c=clm_begc,clm_endc
@@ -191,63 +171,43 @@ module enkf_clm_mod
             end do
           end do
 
-          ! #cols values per grid-cell
-          clm_varsize      =  (endc-begc+1) * nlevsoi
-          clm_statevecsize =  (endc-begc+1) * nlevsoi
-
-          IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
-          allocate(state_pdaf2clm_c_p(clm_statevecsize))
-          IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
-          allocate(state_pdaf2clm_j_p(clm_statevecsize))
-
-          cc = 0
-
-          do i=1,nlevsoi
-            do c=clm_begc,clm_endc
-              cc = cc + 1
-              state_pdaf2clm_c_p(cc) = c
-              state_pdaf2clm_j_p(cc) = i
-            end do
-          end do
-
         end if
 
+      ! Gridcell values or averages in state vector
       else
 
-        IF (allocated(state_clm2pdaf_p)) deallocate(state_clm2pdaf_p)
-        allocate(state_clm2pdaf_p(begc:endc,nlevsoi))
-
+        ! Only hydrologically active columns
         if(clmstatevec_only_active.eq.1) then
+
           cc = 0
+
           do i=1,nlevsoi
-            do g=clm_begg,clm_endg
+            ! Only layers above max_layer
+            if(i<=clmstatevec_max_layer) then
 
-              newgridcell = .true.
+              do g=clm_begg,clm_endg
 
-              do c=clm_begc,clm_endc
-                ! All hydrologically active columns above max layer
-                ! and bedrock in a gridcell are assigned the updated
-                ! gridcell-SWC
-                if(i<=clmstatevec_max_layer) then
-                  if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
-                    if(col%gridcell(c) == g) then
+                newgridcell = .true.
+
+                do c=clm_begc,clm_endc
+                  if(col%gridcell(c) == g) then
+                    ! All hydrologically active columns above
+                    ! bedrock in a gridcell point to the state
+                    ! vector index of the gridcell
+                    if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
                       if(newgridcell) then
-                        ! Update the index if first col for grc,
+                        ! Update the index if first col found for grc,
                         ! otherwise reproduce previous index
                         cc = cc + 1
                         newgridcell = .false.
                       end if
                       state_clm2pdaf_p(c,i) = cc
                     end if
-                  else
-                    state_clm2pdaf_p(c,i) = ispval
                   end if
-                else
-                  state_clm2pdaf_p(c,i) = ispval
-                end if
-              end do
+                end do
 
-            end do
+              end do
+            end if
           end do
         else
           do i=1,nlevsoi
@@ -259,68 +219,66 @@ module enkf_clm_mod
           end do
         end if
 
-        ! One value per grid-cell
-        if(clmstatevec_only_active.eq.1) then
-          clm_varsize      =  cc
-          clm_statevecsize =  cc
+      end if
+
+      ! 2) COL/GRC: STATEVECSIZE
+      if(clmstatevec_only_active.eq.1) then
+        ! Use iterator cc for setting state vector size.
+        !
+        ! Set `clm_varsize`, even though it is currently not used
+        ! for `clmupdate_swc.eq.1`
+        clm_varsize      =  cc
+        clm_statevecsize =  cc
+      else
+        if(clmstatevec_allcol.eq.1) then
+          ! #cols * #levels
+          clm_varsize      =  (endc-begc+1) * nlevsoi
+          clm_statevecsize =  (endc-begc+1) * nlevsoi
         else
+          ! #grcs * #levels
           clm_varsize      =  (endg-begg+1) * nlevsoi
           clm_statevecsize =  (endg-begg+1) * nlevsoi
         end if
-
-        IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
-        allocate(state_pdaf2clm_c_p(clm_statevecsize))
-        IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
-        allocate(state_pdaf2clm_j_p(clm_statevecsize))
-
-        cc = 0
-
-        if(clmstatevec_only_active .eq. 1) then
-          do i=1,nlevsoi
-            do g=clm_begg,clm_endg
-
-              if(i<=clmstatevec_max_layer) then
-                ! SWC from the first column of each gridcell
-                newgridcell = .true.
-                do c=clm_begc,clm_endc
-                  cg = col%gridcell(c)
-                  if(col%hydrologically_active(c) .and. i<=col%nbedrock(c)) then
-                    if (cg .eq. g) then
-                      if (newgridcell) then
-                        newgridcell = .false.
-                        cc = cc + 1
-                        ! Possibly: Add state_pdaf2clm_g_p
-                        state_pdaf2clm_c_p(cc) = c
-                        state_pdaf2clm_j_p(cc) = i
-                      end if
-                    end if
-                  end if
-                end do
-              end if
-            end do
-          end do
-        else
-          do i=1,nlevsoi
-            do g=clm_begg,clm_endg
-              ! SWC from the first column of each gridcell
-              newgridcell = .true.
-              do c=clm_begc,clm_endc
-                cg = col%gridcell(c)
-                if (cg .eq. g) then
-                  if (newgridcell) then
-                    newgridcell = .false.
-                    cc = cc + 1
-                    ! Possibly: Add state_pdaf2clm_g_p
-                    state_pdaf2clm_c_p(cc) = c
-                    state_pdaf2clm_j_p(cc) = i
-                  end if
-                end if
-              end do
-            end do
-          end do
-        end if
-
       end if
+
+      ! 3) COL/GRC: PDAF->CLM
+      IF (allocated(state_pdaf2clm_c_p)) deallocate(state_pdaf2clm_c_p)
+      allocate(state_pdaf2clm_c_p(clm_statevecsize))
+      IF (allocated(state_pdaf2clm_j_p)) deallocate(state_pdaf2clm_j_p)
+      allocate(state_pdaf2clm_j_p(clm_statevecsize))
+
+      ! Defaults
+      do cc=1,clm_statevecsize
+        state_pdaf2clm_c_p(cc) = ispval
+        state_pdaf2clm_j_p(cc) = ispval
+      end do
+
+      do cc=1,clm_statevecsize
+
+        lay: do i=1,nlevsoi
+          col: do c=clm_begc,clm_endc
+            if (state_clm2pdaf_p(c,i) == cc) then
+              ! Set column index and then exit loop
+              state_pdaf2clm_c_p(cc) = c
+              state_pdaf2clm_j_p(cc) = i
+              exit lay
+            end if
+          end do col
+        end do lay
+
+#ifdef PDAF_DEBUG
+        ! Check that all state vectors have been assigned c, i
+        if(state_pdaf2clm_c_p(cc) == ispval) then
+          write(*,*) 'cc: ', cc
+          error stop "state_pdaf2clm_c_p not set at cc"
+        end if
+        if(state_pdaf2clm_j_p(cc) == ispval) then
+          write(*,*) 'cc: ', cc
+          error stop "state_pdaf2clm_j_p not set at cc"
+        end if
+#endif
+      end do
+
     endif
 
     if(clmupdate_swc.eq.2) then
