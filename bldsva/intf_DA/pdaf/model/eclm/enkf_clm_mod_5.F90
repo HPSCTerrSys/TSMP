@@ -256,14 +256,14 @@ module enkf_clm_mod
       do cc=1,clm_statevecsize
 
         lay: do i=1,nlevsoi
-          col: do c=clm_begc,clm_endc
+          do c=clm_begc,clm_endc
             if (state_clm2pdaf_p(c,i) == cc) then
               ! Set column index and then exit loop
               state_pdaf2clm_c_p(cc) = c
               state_pdaf2clm_j_p(cc) = i
               exit lay
             end if
-          end do col
+          end do
         end do lay
 
 #ifdef PDAF_DEBUG
