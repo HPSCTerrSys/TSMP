@@ -608,11 +608,14 @@ module enkf_clm_mod
                   !h2osoi_vol(c,j) = h2osoi_liq(c,j)/(dz(c,j)*denh2o) + h2osoi_ice(c,j)/(dz(c,j)*denice)
                 end if
 
-                swc_update = clm_statevec(state_clm2pdaf_p(j,i))
-
                 if (clmstatevec_colmean.eq.1) then
-                  ! Update with the factor of the update for the column mean
+                  ! Update SWC column value with the increment-factor
+                  ! of the state vector update (state vector updates
+                  ! are means of cols in grc)
                   swc_update = swc(j,i) * clm_statevec(state_clm2pdaf_p(j,i)) / clm_statevec_orig(state_clm2pdaf_p(j,i))
+                else
+                  ! Update SWC with updated state vector
+                  swc_update = clm_statevec(state_clm2pdaf_p(j,i))
                 end if
 
                 if(swc_update.le.watmin_check) then
