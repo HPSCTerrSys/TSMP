@@ -354,7 +354,7 @@ module enkf_clm_mod
     real(r8), pointer :: pclay(:,:)
     real(r8), pointer :: porgm(:,:)
     integer :: i,j,jj,g,c,cc=0,offset=0
-    real :: n_c
+    integer :: n_c
     character (len = 34) :: fn    !TSMP-PDAF: function name for state vector output
     character (len = 34) :: fn2    !TSMP-PDAF: function name for swc output
 
@@ -389,7 +389,7 @@ module enkf_clm_mod
         do cc = 1, clm_statevecsize
 
           clm_statevec(cc) = 0.0
-          n_c = 0.0
+          n_c = 0
 
           ! Get gridcell and layer
           g = col%gridcell(state_pdaf2clm_c_p(cc))
@@ -403,19 +403,19 @@ module enkf_clm_mod
               if(col%hydrologically_active(c)) then
                 ! Add active column to swc-sum
                 clm_statevec(cc) = clm_statevec(cc) + swc(c,j)
-                n_c = n_c + 1.0
+                n_c = n_c + 1
               end if
             end if
           end do
 
-          if(n_c == 0.0) then
+          if(n_c == 0) then
             write(*,*) "WARNING: Gridcell g=", g
             write(*,*) "WARNING: Layer    j=", j
             write(*,*) "Grid cell g at layer j without hydrologically active column! Setting SWC as in gridcell mode."
             clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
           else
-            ! Compute final average
-            clm_statevec(cc) = clm_statevec(cc) / n_c
+            ! Normalize sum to average
+            clm_statevec(cc) = clm_statevec(cc) / real(n_c, r8)
           end if
 
           ! Save prior column mean state vector for computing
