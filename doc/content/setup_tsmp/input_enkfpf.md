@@ -679,6 +679,11 @@ stepping using observation files.
 
 Used only if `DA:flexible_da_interval` is switched on.
 
+Note: If the last observation file contains observations,
+`da_interval_final` is set, but never used, as the simulation
+currently finishes exactly at the time the observations from the last
+observation file is assimilated.
+
 ### DA:flexible_da_interval ###
 
 `DA:flexible_da_interval`: (integer) Switch for flexible time stepping
