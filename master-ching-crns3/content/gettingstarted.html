@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Getting Started &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../_static/copybutton.js?v=30646c52"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Coupling approaches" href="tech_note/coupling-approaches.html" />
+    <link rel="prev" title="Introduction to TSMP &amp; TSMP-PDAF" href="introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#general-concept">General concept</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp">The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-dependencies">Step 1: Dependencies</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#porting-tsmp-on-generic-x86-linux-platform">Porting TSMP on GENERIC_X86 Linux platform</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-get-the-tsmp-interface">Step 2: Get the TSMP interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-get-the-component-models-for-this-experiment">Step 3: Get the component models for this experiment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#hpsc-terrsys-users">HPSC-TerrSys users</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#external-users">External users</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-retrieving-the-test-case-input-data-euro-cordex">Step 4: Retrieving the test case input data (EURO-CORDEX)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-build-tsmp-interface-and-component-models">Step 5: Build TSMP, interface and component models</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#build-tsmp-on-generic-x86-linux-platform">Build TSMP on GENERIC_X86 Linux platform</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-6-setup-and-configuration-of-the-respective-usage-and-test-case">Step 6: Setup and configuration of the respective usage and test case</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#setup-and-configuration-of-the-test-case-on-generic-x86-linux-platform">Setup and configuration of the test case on GENERIC_X86 Linux platform</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#step-7-run-the-test-case">Step 7: Run the test case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-8-simulation-results">Step 8: Simulation results</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Getting Started</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/gettingstarted.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Link to this heading"></a></h1>
+<p><strong>Throughout this quick start guide a distinction is made between HPSC-TerrSys users who use specific HPC systems at HPC centres in Germany and external users. Through centralized machinefiles and compute environment initialisation scripts, TSMP can be very quickly adjusted to any other HPC site.</strong></p>
+<p>For a general documentation on how to use TSMP, please refer to the more detailed <a class="reference internal" href="build_tsmp/build_examples.html#building-tsmp"><span class="std std-ref">Building TSMP</span></a> section.</p>
+<section id="general-concept">
+<h2>General concept<a class="headerlink" href="#general-concept" title="Link to this heading"></a></h2>
+<p>TSMP uses a multiple program multiple data (MPMD) execution model where states (e.g., near surface air temperature) and fluxes (e.g., latent and sensible heat fluxes) are passed between the atmospheric, land surface and hydrologic/groundwater component models along compartmental interfaces through the OASIS3 or the parallel OASIS3-MCT coupling interface.</p>
+<p>TSMP essentially consists of the interface that combines the specific versions of different component models in a modular (various combinations of component models) and flexible (various spatial and temporal resolutions) way. During the install process, before the compilation of the component models, the source code of the component models is patched by the setup shell scripts, implementing the necessary coupling functionalities.</p>
+<p>Please note: For licensing and maintenance reasons, we do not provide any source code of any of the component models or the coupler library. The users should download the component models from their respective websites. TSMP has various setup options: each component model standalone (ParFlow, CLM, COSMO), only land surface and hydrology / groundwater (CLM+ParFlow), only land surface and atmosphere (CLM+COSMO), or fully coupled (ParFlow, CLM, COSMO). Since the patches are designed for specific versions of the models, it is required to get the exact original, unaltered version as specified.</p>
+<p>During the build and compile step (<a class="reference internal" href="#step-5-build-tsmp-interface-and-component-models">step 5 below</a>) multiple predefined coupled model combinations (of component models and their versions) as well as predefined HPC systems and operating environments can be chosen. Via so-called machinefiles the built and execution environment can be centrally adjusted to the respective HPC systems. A generic machinefile for x86-64 GNU/Linux systems with a GNU Compiler Collection and a standard scientific software stack is also provided. Many predefined built environments are provided for the machines which are available to the HPSC-TerrSys users.</p>
+<p>During the setup and configuration step (<a class="reference internal" href="#step-6-setup-and-configuration-of-the-respective-usage-and-test-case">step 6 below</a>), TSMP is configured for different, predefined test cases or numerical experiments, for which we also provide input data via a dedicated data server. Here we document one specific experiment. The <a class="reference external" href="https://hpscterrsys.github.io/TSMP/index.html">TSMP user guide</a> will contain a complete list.</p>
+<p>The two most important scripts to build and setup TSMP are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code> to built and compile TSMP (one component model after the other)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup_tsmp.ksh</span></code> to setup one of the predefined experiments</p></li>
+</ul>
+<p>To get a man-page for the usage of this scripts, do:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>--man
+./setup_tsmp.ksh<span class="w"> </span>--man
+</pre></div>
+</div>
+</section>
+<section id="the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp">
+<h2>The fully coupled pan-European EURO-CORDEX evaluation experiment with TSMP<a class="headerlink" href="#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp" title="Link to this heading"></a></h2>
+<p>This test case uses the current TSMP release version v1.4.0 with OASIS3-MCT, COSMO v5.01, CLM v3.5 and ParFlow 3.12.  A short 3hr simulation in a climate-mode configuration over Europe is set up, driven by ERA-Interim reanalysis, following the <a class="reference external" href="https://euro-cordex.net/">EURO-CORDEX project</a> experiment guidelines. Simulated time span: 2016-05-01_12:00:00 to 2016-05-01_15:00:00.</p>
+<section id="step-1-dependencies">
+<h3>Step 1: Dependencies<a class="headerlink" href="#step-1-dependencies" title="Link to this heading"></a></h3>
+<p>For the users who use Jülich Supercomputing Centre facilities JUWELS and JURECA-DC, all necessary software modules are loaded automatically through a “loadenv” file located in directory JUWELS or JURECA-DC in machines directory. The users of other HPC systems should provide an appropriate “loadenv” files for loading the modules and locate it in <code class="docutils literal notranslate"><span class="pre">machines/&lt;machine_name&gt;</span></code>, similar to JURECA-DC and JUWELS. For the users who want to port TSMP on GENERIC_X86 Linux platform, a script is provided by TSMP team which installs the following libraries automatically and create a “loadenv” file in the directory <code class="docutils literal notranslate"><span class="pre">machines/GENERIC_X86</span></code>. For more information on using this script please see the README in branch <strong>TSMP_x86_64</strong>.</p>
+<ul class="simple">
+<li><p>gfortran</p></li>
+<li><p>gcc</p></li>
+<li><p>g++</p></li>
+<li><p>ksh</p></li>
+<li><p>bash</p></li>
+<li><p>zlib</p></li>
+<li><p>curl</p></li>
+<li><p>make</p></li>
+<li><p>python</p></li>
+<li><p>OpenMPI</p></li>
+<li><p>netCDF</p></li>
+<li><p>HDF5</p></li>
+<li><p>GRIBAPI</p></li>
+<li><p>TCL</p></li>
+<li><p>Hypre</p></li>
+<li><p>Silo</p></li>
+<li><p>Lapack</p></li>
+</ul>
+<p>A short guide on how the TSMP built system can be expanded to account for your local situation (software modules, compiler, MPI wrapper) will be provided shortly. The best starting point is to use the generic GNU compiler built. A hint on how to proceed is given in <a class="reference internal" href="#step-5-build-tsmp-interface-and-component-models">step 5 below</a>.
+The following libraries are required to run the EURO-CORDEX experiment:</p>
+<section id="porting-tsmp-on-generic-x86-linux-platform">
+<h4>Porting TSMP on GENERIC_X86 Linux platform<a class="headerlink" href="#porting-tsmp-on-generic-x86-linux-platform" title="Link to this heading"></a></h4>
+<p>The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries as mentioned in <a class="reference internal" href="#step-1-dependencies">step 1 above</a> automatically in TSMP root directory. Please run the script “lib_install.sh” located in <code class="docutils literal notranslate"><span class="pre">bldsva</span></code> directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.</p>
+</section>
+</section>
+<section id="step-2-get-the-tsmp-interface">
+<h3>Step 2: Get the TSMP interface<a class="headerlink" href="#step-2-get-the-tsmp-interface" title="Link to this heading"></a></h3>
+<p>Go to your preferred root directory (e.g., on a scratch file system) for the TSMP installation and get the <code class="docutils literal notranslate"><span class="pre">HEAD</span></code> of the <code class="docutils literal notranslate"><span class="pre">master</span></code> branch from <code class="docutils literal notranslate"><span class="pre">github</span></code> and set the environment variable <code class="docutils literal notranslate"><span class="pre">TSMP_DIR</span></code> to TSMP installation directory; for bash:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/HPSCTerrSys/TSMP.git
+<span class="nb">export</span><span class="w"> </span><span class="nv">TSMP_DIR</span><span class="o">=</span><span class="k">$(</span>realpath<span class="w"> </span>TSMP<span class="k">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-3-get-the-component-models-for-this-experiment">
+<h3>Step 3: Get the component models for this experiment<a class="headerlink" href="#step-3-get-the-component-models-for-this-experiment" title="Link to this heading"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>
+</pre></div>
+</div>
+<section id="hpsc-terrsys-users">
+<h4>HPSC-TerrSys users<a class="headerlink" href="#hpsc-terrsys-users" title="Link to this heading"></a></h4>
+<p>Authenticate with your GitLab web GUI user name and password and clone
+the repositories (instead of “fresh”, also “legacy” repositories with
+specific code modifications may be retrieved):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo5.01_fresh.git<span class="w">  </span>cosmo5_1
+git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>v3.12.0<span class="w"> </span>https://github.com/parflow/parflow.git<span class="w">                              </span>parflow
+git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git<span class="w">     </span>clm3_5
+git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git<span class="w">       </span>oasis3-mct
+</pre></div>
+</div>
+</section>
+<section id="external-users">
+<h4>External users<a class="headerlink" href="#external-users" title="Link to this heading"></a></h4>
+<p>Make sure directories are renamed as shown above. The component models can be downloaded from the respective websites as indicated below. Due to licensing reasons HPSC-TerrSys cannot provide these source codes to external users.</p>
+<section id="cosmo-v5-01">
+<h5>COSMO v5.01<a class="headerlink" href="#cosmo-v5-01" title="Link to this heading"></a></h5>
+<p>Available from http://www.cosmo-model.org. A license agreement is needed.</p>
+</section>
+<section id="clm-v3-5">
+<h5>CLM v3.5<a class="headerlink" href="#clm-v3-5" title="Link to this heading"></a></h5>
+<p>Available from https://github.com/HPSCTerrSys/CLM3.5/tree/clm3.5_rel3.code.c070524.</p>
+</section>
+<section id="parflow-v3-12">
+<h5>ParFlow v3.12<a class="headerlink" href="#parflow-v3-12" title="Link to this heading"></a></h5>
+<p>ParFlow 3.12  is available from</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>v3.12.0<span class="w"> </span>https://github.com/parflow/parflow.git
+</pre></div>
+</div>
+</section>
+<section id="oasis3-mct-v2-0">
+<h5>OASIS3-MCT v2.0<a class="headerlink" href="#oasis3-mct-v2-0" title="Link to this heading"></a></h5>
+<p>Available from https://oasis.cerfacs.fr/en/downloads/.</p>
+</section>
+</section>
+</section>
+<section id="step-4-retrieving-the-test-case-input-data-euro-cordex">
+<h3>Step 4: Retrieving the test case input data (EURO-CORDEX)<a class="headerlink" href="#step-4-retrieving-the-test-case-input-data-euro-cordex" title="Link to this heading"></a></h3>
+<p>For each officially documented and supported test case experiment, HPSC-TerrSys provides all required, pre-processed input data (as well as reference simulation results in the future).</p>
+<p>The input files which are necessary for running the <code class="docutils literal notranslate"><span class="pre">EURO-CORDEX</span> <span class="pre">evaluation</span> <span class="pre">run</span></code> test case:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./download_data_for_test_cases.ksh<span class="w"> </span>cordex
+</pre></div>
+</div>
+</section>
+<section id="step-5-build-tsmp-interface-and-component-models">
+<h3>Step 5: Build TSMP, interface and component models<a class="headerlink" href="#step-5-build-tsmp-interface-and-component-models" title="Link to this heading"></a></h3>
+<p>Before building TerrSysMP, first check what build options are there</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-a
+</pre></div>
+</div>
+<p>Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the COSMO NWP and regional climate model (cos); this is a built on the JUWELS HPC system of Jülich Supercomputing Centre using Intel compilers and ParaStation MPI:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<p>A note to external users:</p>
+<p>The path to the modules, compiler and MPI wrapper can be set in:<br />
+<code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/machines/config_&lt;your_machine_name&gt;.ksh</span></code></p>
+<p>An example for the JUWELS HPC system at the Jülich Supercomputing Centre is here: <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/machines/config_JUWELS.ksh</span></code> <br />
+and an example to load the environment modules or the needed software compatible with Intel compiler version 2023 is in <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/machines/JUWELS/loadenvs.Intel</span></code>.</p>
+<section id="build-tsmp-on-generic-x86-linux-platform">
+<h4>Build TSMP on GENERIC_X86 Linux platform<a class="headerlink" href="#build-tsmp-on-generic-x86-linux-platform" title="Link to this heading"></a></h4>
+<p>After successful installation of all the necessary libraries as mentioned in <a class="reference internal" href="#step-1-dependencies">step 1 above</a>, TSMP can be built using:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-m<span class="w"> </span>GENERIC_X86<span class="w"> </span>-O<span class="w"> </span>Gnu
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-6-setup-and-configuration-of-the-respective-usage-and-test-case">
+<h3>Step 6: Setup and configuration of the respective usage and test case<a class="headerlink" href="#step-6-setup-and-configuration-of-the-respective-usage-and-test-case" title="Link to this heading"></a></h3>
+<p>For HPSC-TerrSys users:</p>
+<p>To configure TSMP for the <a class="reference internal" href="#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp">EURO-CORDEX test case experiment</a> on JUWELS machine (on JURECA-DC just change -m JUWELS to -m JURECA):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w">  </span>-V<span class="w"> </span>cordex<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-I<span class="w"> </span>_cordex<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<p>This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.</p>
+<section id="setup-and-configuration-of-the-test-case-on-generic-x86-linux-platform">
+<h4>Setup and configuration of the test case on GENERIC_X86 Linux platform<a class="headerlink" href="#setup-and-configuration-of-the-test-case-on-generic-x86-linux-platform" title="Link to this heading"></a></h4>
+<p>Now that the all the necessary libraries are installed as mentioned in <a class="reference internal" href="#step-1-dependencies">step 1 above</a> and TSMP is also build (<a class="reference internal" href="#step-5-build-tsmp-interface-and-component-models">step 5 above</a>), we can configure TSMP on GENERIC_X86 Linux for the the <a class="reference internal" href="#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp">EURO-CORDEX test case experiment</a> as follows:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>cordex<span class="w"> </span>-m<span class="w"> </span>GENERIC_X86<span class="w"> </span>-I<span class="w"> </span>_cordex<span class="w"> </span>-O<span class="w"> </span>Gnu
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-7-run-the-test-case">
+<h3>Step 7: Run the test case<a class="headerlink" href="#step-7-run-the-test-case" title="Link to this heading"></a></h3>
+<p>For HPSC-TerrSys users:</p>
+<p>Change into the run directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/run/JUWELS_clm3-cos5-pfl<span class="w"> </span>_cordex_cordex
+</pre></div>
+</div>
+<p>Edit the scheduler settings (<code class="docutils literal notranslate"><span class="pre">#SBATCH</span></code> lines):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>vim<span class="w"> </span>tsmp_slm_run.bsh
+</pre></div>
+</div>
+<p>Submit the job:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>tsmp_slm_run.bsh
+</pre></div>
+</div>
+<p>Monitor the running job by checking some COSMO and ParFlow logs:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>tail<span class="w"> </span>-f<span class="w"> </span>YUPRMASS
+tail<span class="w"> </span>-f<span class="w"> </span>cordex0.11.out.kinsol.log
+</pre></div>
+</div>
+</section>
+<section id="step-8-simulation-results">
+<h3>Step 8: Simulation results<a class="headerlink" href="#step-8-simulation-results" title="Link to this heading"></a></h3>
+<p>After a successful model run you will have model outputs form ParFlow, CLM and COSMO in the run directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/run/JUWELS_clm3-cos5-pfl<span class="w"> </span>cordex_cordex
+ls<span class="w"> </span>-l<span class="w"> </span>*satur*.pfb<span class="w"> </span>*press*.pfb
+ls<span class="w"> </span>-l<span class="w"> </span>clmoas*.nc
+ls<span class="w"> </span>-l<span class="w"> </span>cosmo_out/*.nc
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="introduction.html" class="btn btn-neutral float-left" title="Introduction to TSMP &amp; TSMP-PDAF" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tech_note/coupling-approaches.html" class="btn btn-neutral float-right" title="Coupling approaches" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

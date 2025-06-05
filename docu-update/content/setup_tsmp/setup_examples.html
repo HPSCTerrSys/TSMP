@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup Examples &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=30646c52"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Running TSMP-PDAF" href="running.html" />
+    <link rel="prev" title="TSMP-PDAF Environment variables" href="../build_tsmp/build_environment_variables.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Setup Examples</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pan-european-euro-cordex">Pan-European EURO-CORDEX</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#heterogeneous-job-using-tsmp">Heterogeneous Job using TSMP</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#nrw-test-case">NRW Test case</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#retrieving-the-test-case-input-data-nrw">Retrieving the test case input data (NRW)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-and-configuration-of-the-nrw-test-case">Setup and configuration of the NRW test case</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#idealrtd-idealized-test-case">IdealRTD (Idealized) Test case</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#preprocessing-of-input-data">Preprocessing of Input Data</a></li>
+</ul>
+</li>
+<b style="color:#b96922;"><li class="toctree-l2"><a class="reference internal" href="#idealscal-idealized-test-case">IdealScal (Idealized) Test case</a><ul>
+</b><b style="color:#b96922;"><li class="toctree-l3"><a class="reference internal" href="#running-idealscal-test-case">Running IdealScal Test case</a></li>
+</b><b style="color:#b96922;"></ul>
+</b><b style="color:#b96922;"></li>
+</b><li class="toctree-l2"><a class="reference internal" href="#long-time-climate-simulation">Long time climate simulation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#implementation-of-non-const-co2-in-tsmp">Implementation of non-const CO2 in TSMP</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#clm5-in-tsmp-setup-nrw-5x">CLM5 in TSMP setup: nrw_5x</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#for-icon-users-hpsc-terrsys-users">For ICON Users (HPSC-TerrSys users)</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#step-0-judac-storage-managment">Step 0: JUDAC Storage Managment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-1-dependencies">Step 1: Dependencies</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-2-get-the-tsmp-interface">Step 2: Get the TSMP interface</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-3-get-the-component-models-for-this-experiment">Step 3: Get the component models for this experiment</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-4-build-tsmp-interface-and-component-models">Step 4: Build TSMP, interface and component models</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-5-setup-and-configuration-of-the-respective-usage-and-test-case">Step 5: Setup and configuration of the respective usage and test case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-6-run-the-test-case">Step 6: Run the test case</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#step-7-create-own-case-optional">Step 7: Create own case (optional)</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#setup-tsmp-pdaf">Setup TSMP-PDAF</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#day4-testcase-fallschool-2022">Day4: Testcase FallSchool 2022</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#build">Build</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#setups">Setups</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setup-cordex-test-case-for-fully-coupled-tsmp-on-juwels-with-oasis3-mct">Setup CORDEX test case for fully coupled TSMP on JUWELS with Oasis3-MCT</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-nrw-test-case-for-parflow-standalone-on-jureca">Setup NRW test case for ParFlow standalone on JURECA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-nrw-test-case-for-new-clm4-0-cosmo5-1-on-jureca">Setup NRW test case for new CLM4.0 + Cosmo5.1 on JURECA</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-nrw-test-case-with-24h-runtime-3h-wallclock-time-latest-lets-say-01-07-2016-00-00-cosmo-forcing-parflow-and-clm-restart-fully-coupled-on-jureca-on-work">Setup NRW test case with 24h runtime, 3h wallclock time, latest(lets say 01.07.2016 00:00) Cosmo forcing, ParFlow and CLM restart, fully coupled on JURECA on <code class="docutils literal notranslate"><span class="pre">$WORK</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-nrw-test-case-with-20-member-ensemble-parflow-on-jureca-but-only-use-members-10-15-perturbed-namelists-reside-in-a-special-folder">Setup NRW test case with 20 member ensemble (parflow) on JURECA, but only use members 10-15. perturbed namelists reside in a special folder</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setup-nrw-spinup-with-init-date-lets-say-01-01-2005-00-00-1-month-runtime-24h-wallclock-time-restart-from-arbitrary-date-lets-say-01-03-2005-00-00-in-indexed-3rd-rundir-on-jureca">Setup NRW spinup with init date (lets say 01.01.2005 00:00) 1 month runtime, 24h wallclock time, restart from arbitrary date (lets say 01.03.2005 00:00) in indexed (3rd) rundir on JURECA</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Setup Examples</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/setup_tsmp/setup_examples.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="setup-examples">
+<h1>Setup Examples<a class="headerlink" href="#setup-examples" title="Link to this heading"></a></h1>
+<p>This Section need to be revised! Please take a look into the
+<a class="reference external" href="https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys">FallSchool
+setup/configuration</a>
+to test your model.</p>
+<p>Active setups.</p>
+<section id="pan-european-euro-cordex">
+<h2>Pan-European EURO-CORDEX<a class="headerlink" href="#pan-european-euro-cordex" title="Link to this heading"></a></h2>
+<p>Please find the instructions for this case in the <a class="reference internal" href="../gettingstarted.html#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp"><span class="std std-ref">getting started section</span></a>.</p>
+</section>
+<section id="heterogeneous-job-using-tsmp">
+<h2>Heterogeneous Job using TSMP<a class="headerlink" href="#heterogeneous-job-using-tsmp" title="Link to this heading"></a></h2>
+<p>TSMP has the possibility of submitting heterogeneous job for EURO-CORDEX test experiment, meaning that ParFlow3.12  will run on GPU while Cosmo5.1 and CLM3.5 on CPU.
+After locating the model components in the TSMP root as mentioned in <a class="reference internal" href="../gettingstarted.html#step-3-get-the-component-models-for-this-experiment"><span class="std std-ref">Step 3</span></a>, the following command should be executed in order to build TSMP and to create the run directory for the <a class="reference internal" href="../gettingstarted.html#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp"><span class="std std-ref">EURO-CORDEX test case experiment</span></a> on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):</p>
+<p>Building TSMP for HPSC-TerrSys users:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>cordex<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-I<span class="w"> </span>_cordex<span class="w"> </span>-O<span class="w"> </span>Intel<span class="w"> </span>-A<span class="w"> </span>GPU
+</pre></div>
+</div>
+<p>Creating run directory for HPSC-TerrSys users:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>cordex<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-I<span class="w"> </span>_cordex<span class="w"> </span>-O<span class="w"> </span>Intel<span class="w"> </span>-A<span class="w"> </span>GPU
+</pre></div>
+</div>
+<p>Not that heterogeneous job will be possible only for TSMP with ParFlow3.12 which is available from version v1.3.3.</p>
+</section>
+<section id="nrw-test-case">
+<h2>NRW Test case<a class="headerlink" href="#nrw-test-case" title="Link to this heading"></a></h2>
+<section id="retrieving-the-test-case-input-data-nrw">
+<h3>Retrieving the test case input data (NRW)<a class="headerlink" href="#retrieving-the-test-case-input-data-nrw" title="Link to this heading"></a></h3>
+<p>For <code class="docutils literal notranslate"><span class="pre">NRW</span></code> test case:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./download_data_for_test_cases.ksh<span class="w"> </span>nrw
+</pre></div>
+</div>
+</section>
+<section id="setup-and-configuration-of-the-nrw-test-case">
+<h3>Setup and configuration of the NRW test case<a class="headerlink" href="#setup-and-configuration-of-the-nrw-test-case" title="Link to this heading"></a></h3>
+<p>NRW Test case covers a geographical domain of 150 km x 150 km encompassing the North Rhine-Westphalia region, located in western Germany, Belgium, the Netherlands, and Luxembourg. The experiment is carried out in a clear sky day condition (08 May 2008) using the fully coupled (COSMO5.01-CLM3.5-
+ParFlow) configuration of TSMP. The atmospheric component uses a constant lateral spatial resolution of about 1 km and a variable vertical discretization into 50 levels gradually coarsening from the bottom (20 m) to the top (22000 m). Initial and lateral boundary conditions for the atmospheric model are obtained from the operational weather forecast model
+COSMO-DE of the German Weather Service (DWD).For downloading the necessary INPUT data for the NRW test case please see <a class="reference internal" href="../gettingstarted.html#step-3-get-the-component-models-for-this-experiment"><span class="std std-ref">Step 3</span></a> and for building the TSMP (with -c clm3-cos5-pfl) refer to <a class="reference internal" href="../gettingstarted.html#step-5-build-tsmp-interface-and-component-models"><span class="std std-ref">Step 5</span></a>. For more information about NRW test case please refer to https://doi.org/10.3390/w10111697. <br />
+To configure TSMP for the NRW test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>nrw<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-I<span class="w"> </span>_ClearSkyDay<span class="w">  </span>-s<span class="w"> </span><span class="m">2008</span>-05-08_00<span class="w"> </span>-S<span class="w"> </span><span class="m">2008</span>-05-08_00<span class="w"> </span>-T<span class="w"> </span><span class="m">24</span><span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+</section>
+</section>
+<section id="idealrtd-idealized-test-case">
+<h2>IdealRTD (Idealized) Test case<a class="headerlink" href="#idealrtd-idealized-test-case" title="Link to this heading"></a></h2>
+<p>We will use a horizontally homogeneous domain (Figure 1) to simulate the diurnal
+cycle of the atmospheric boundary layer with radiative forcing. A periodic boundary
+condition will be used in X and Y direction for COSMO, while the X- and Y-slopes are
+set to zero for ParFlow, so there is no lateral flow. The domain setup is summarized in the Table below.</p>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p></p></th>
+<th class="head text-left"><p>NX</p></th>
+<th class="head text-right"><p>NY</p></th>
+<th class="head text-right"><p>NZ</p></th>
+<th class="head text-right"><p>dt(s)</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>cosmo</p></td>
+<td class="text-left"><p>60</p></td>
+<td class="text-right"><p>30</p></td>
+<td class="text-right"><p>50</p></td>
+<td class="text-right"><p>18</p></td>
+</tr>
+<tr class="row-odd"><td><p>CLM</p></td>
+<td class="text-left"><p>54</p></td>
+<td class="text-right"><p>24</p></td>
+<td class="text-right"><p>10</p></td>
+<td class="text-right"><p>18</p></td>
+</tr>
+<tr class="row-even"><td><p>ParFlow</p></td>
+<td class="text-left"><p>54</p></td>
+<td class="text-right"><p>24</p></td>
+<td class="text-right"><p>30</p></td>
+<td class="text-right"><p>18</p></td>
+</tr>
+</tbody>
+</table>
+<p>NX_clm = NX_pfl =NX_cos -2 *nboundlines</p>
+<p>The initial soil moisture content for the different soil textures (e.g., sandy loam, clay
+loam) is varied based on the (<span class="math notranslate nohighlight">\(\psi - \theta_vol\)</span>) van Genuchten relationship, to
+simulate the physical processes from water stressed environment to an atmospheric
+controlled environment. The groundwater table is specified at a depth of 5 m below
+the surface, with a spatially homogeneous and constant unsaturated zone above. The atmosphere is initialized with a semi-idealized sounding data obtained from
+Stuttgart (observations) at 00Z 07 Aug 2015. Ground and vegetation temperature are
+initialized horizontally homogeneous with a value of 287 K. The simulation will be
+integrated for 24 hours starting at midnight with an hourly output frequency.</p>
+<section id="preprocessing-of-input-data">
+<h3>Preprocessing of Input Data<a class="headerlink" href="#preprocessing-of-input-data" title="Link to this heading"></a></h3>
+<p>Here the user can generate the case-specific input data for ParFlow
+and CLM. Note that the COSMO model uses the same setup for all the ensemble
+members, that is, no need for ad-hoc editing.
+Please download the Input data and preproccesing script using:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./download_data_for_test_cases.ksh<span class="w"> </span>idealrtd
+</pre></div>
+</div>
+<p>then</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/tsmp_idealrtd/pre-processing
+<span class="nb">source</span><span class="w"> </span>loadenvs.Gnu_2020
+<span class="nb">cd</span><span class="w"> </span>../external
+chmod<span class="w"> </span><span class="m">755</span><span class="w"> </span>compile
+./compile
+<span class="nb">cd</span><span class="w"> </span>../pre-processing-tools
+ncl<span class="w"> </span>sva_surfdata_clm.ncl
+ncl<span class="w"> </span>sva_iniPress_pfl.ncl
+mv<span class="w"> </span>*.nc<span class="w">  </span>../input/clm
+mv<span class="w"> </span>*.pfb<span class="w"> </span>../input/parflow
+</pre></div>
+</div>
+<p>Note that you have the possibilty to generate different Input data for CLM and parFlow by in the scripts <code class="docutils literal notranslate"><span class="pre">sva_iniPress_pfl.ncl</span></code> and <code class="docutils literal notranslate"><span class="pre">sva_surfdata_clm.ncl</span></code>.
+To configure TSMP for the IdealRTD test case on JUWELS machine (on JURECA just change -m JUWELS to -m JURECA):</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>idealRTD<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+<b style="color:#b96922;"></pre></div>
+</b><b style="color:#b96922;"></div>
+</b><b style="color:#b96922;"></section>
+</b><b style="color:#b96922;"></section>
+</b><b style="color:#b96922;"><section id="idealscal-idealized-test-case">
+</b><b style="color:#b96922;"><h2>IdealScal (Idealized) Test case<a class="headerlink" href="#idealscal-idealized-test-case" title="Link to this heading"></a></h2>
+</b><b style="color:#b96922;"><p>The IdealScal Test case is designed for scaling studies (weak and strong scaling) and uses a horizontally homogeneous domain to simulate the diurnal cycle of the atmospheric boundary layer with radiative forcing. A periodic boundary condition will be used in X and Y direction for COSMO, while the X- and Y-slopes are set to zero for ParFlow, so there is no lateral flow. The domain setup is summarized in the table below.</p>
+</b><b style="color:#b96922;"><table class="docutils align-default">
+</b><b style="color:#b96922;"><thead>
+</b><b style="color:#b96922;"><tr class="row-odd"><th class="head"><p></p></th>
+</b><b style="color:#b96922;"><th class="head text-left"><p>NX/NY</p></th>
+</b><b style="color:#b96922;"><th class="head text-right"><p>NZ</p></th>
+</b><b style="color:#b96922;"><th class="head text-right"><p>dx/dy (m)</p></th>
+</b><b style="color:#b96922;"><th class="head text-right"><p>dt(s)</p></th>
+</b><b style="color:#b96922;"></tr>
+</b><b style="color:#b96922;"></thead>
+</b><b style="color:#b96922;"><tbody>
+</b><b style="color:#b96922;"><tr class="row-even"><td><p>COSMO</p></td>
+</b><b style="color:#b96922;"><td class="text-left"><p>[150,300,600,1200]</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>50</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>~1000</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>10</p></td>
+</b><b style="color:#b96922;"></tr>
+</b><b style="color:#b96922;"><tr class="row-odd"><td><p>CLM</p></td>
+</b><b style="color:#b96922;"><td class="text-left"><p>2x NX/NY_{COSMO}</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>10</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>~500</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>900</p></td>
+</b><b style="color:#b96922;"></tr>
+</b><b style="color:#b96922;"><tr class="row-even"><td><p>ParFlow</p></td>
+</b><b style="color:#b96922;"><td class="text-left"><p>2x NY/NY_{COSMO}</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>30</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>500</p></td>
+</b><b style="color:#b96922;"><td class="text-right"><p>900</p></td>
+</b><b style="color:#b96922;"></tr>
+</b><b style="color:#b96922;"></tbody>
+</b><b style="color:#b96922;"></table>
+</b><b style="color:#b96922;"><p>The groundwater table is specified at a depth of 5 m below the surface, with a spatially homogeneous and constant unsaturated zone above. The atmosphere is initialized based on an idealized profile with a well-mixed atmospheric boundary layer (ABL), 50% relative humidity in the ABL and 0.5 m/s background wind in u-direction.</p>
+</b><b style="color:#b96922;"><section id="running-idealscal-test-case">
+</b><b style="color:#b96922;"><h3>Running IdealScal Test case<a class="headerlink" href="#running-idealscal-test-case" title="Link to this heading"></a></h3>
+</b><b style="color:#b96922;"><p>Download the input data for the IdealScal test case:</p>
+</b><b style="color:#b96922;"><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+</b><b style="color:#b96922;">./download_data_for_test_cases.ksh<span class="w"> </span>idealscal
+</b><b style="color:#b96922;"></pre></div>
+</b><b style="color:#b96922;"></div>
+</b><b style="color:#b96922;"><p>Configure TSMP for the IdealScal test case on JUWELS machine (the <code class="docutils literal notranslate"><span class="pre">300150</span></code> denotes the number of grid points for CLM/ParFlow and COSMO) :</p>
+</b><b style="color:#b96922;"><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+</b><b style="color:#b96922;">./setup_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm3-cos5-pfl<span class="w"> </span>-V<span class="w"> </span>ideal300150<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+</b></pre></div>
+</div>
+</section>
+</section>
+<section id="long-time-climate-simulation">
+<h2>Long time climate simulation<a class="headerlink" href="#long-time-climate-simulation" title="Link to this heading"></a></h2>
+<section id="implementation-of-non-const-co2-in-tsmp">
+<h3>Implementation of non-const CO2 in TSMP<a class="headerlink" href="#implementation-of-non-const-co2-in-tsmp" title="Link to this heading"></a></h3>
+<p>CO2 is different for different RCP scenarios, and it can impact largely the results of TSMP simulations. In order to change CO2 value in CLM according to the RCP scenario you need to change the value of the variable <code class="docutils literal notranslate"><span class="pre">co2_s</span></code> which is sent from COSMO to CLM and is hard-coded in <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/</span> <span class="pre">bldsva/intf_oas3/cosmo5_1/oas3/send_fld_2clm.F90</span></code>.
+Therefor the variable <code class="docutils literal notranslate"><span class="pre">co2_s</span></code> should be changed in order to vary CO2 in CLM depending on RCP scenarios. This means that if you want to do simulation for different RCP scenarios, you need to recompile the TSMP for each of them. Note that in order to change the CO2 value in COSMO according to RCP scenarios you need to change the COSMO namelist parameter <code class="docutils literal notranslate"><span class="pre">ico2_rad</span></code> in <code class="docutils literal notranslate"><span class="pre">INPUT_PHY</span></code>. For more</p>
+</section>
+</section>
+<section id="clm5-in-tsmp-setup-nrw-5x">
+<h2>CLM5 in TSMP setup: nrw_5x<a class="headerlink" href="#clm5-in-tsmp-setup-nrw-5x" title="Link to this heading"></a></h2>
+<p>By Lukas Strebel</p>
+<p>Cloning <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> and <code class="docutils literal notranslate"><span class="pre">CLM5</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp.git<span class="w"> </span>TSMP
+<span class="w">	</span><span class="nb">cd</span><span class="w"> </span>TSMP
+<span class="w">	</span>git<span class="w"> </span>checkout<span class="w"> </span>clm5-coupling
+
+<span class="w">	</span>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release-clm5.0.29<span class="w"> </span>https://github.com/ESCOMP/ctsm.git<span class="w"> </span>clm5_0
+<span class="w">	</span><span class="nb">cd</span><span class="w"> </span>clm5_0
+<span class="w">	</span>./manage_externals/checkout_externals
+<span class="w">	</span><span class="nb">cd</span><span class="w"> </span>..
+</pre></div>
+</div>
+<p>Build and setup commands</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span><span class="nb">cd</span><span class="w"> </span>bldsva
+<span class="w">	</span>./build_tsmp.ksh<span class="w"> </span>-v<span class="w"> </span><span class="m">4</span>.4.0MCT<span class="w"> </span>-c<span class="w"> </span>clm<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+<span class="w">	</span><span class="c1"># wait until build is finished - can take some time</span>
+<span class="w">	</span>./setup_tsmp.ksh<span class="w"> </span>-v<span class="w"> </span><span class="m">4</span>.4.0MCT<span class="w"> </span>-c<span class="w"> </span>clm<span class="w"> </span>-V<span class="w"> </span>nrw_5x<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+<span class="w">	</span><span class="nb">cd</span><span class="w"> </span><span class="c1">#Rundir given as last output line</span>
+
+<span class="w">	</span><span class="c1"># Change number of tasks / cores:</span>
+<span class="w">	</span><span class="c1"># change all *_ntasks = x in drv_in</span>
+<span class="w">	</span><span class="c1"># change nodes and task_per_node (and account for 1 node maybe increase time</span>
+<span class="w">	</span><span class="c1"># limit to 2h) in tsmp_clm_run.bsh and then finally:</span>
+
+<span class="w">	</span>sbatch<span class="w"> </span>tsmp_clm_run.bsh
+</pre></div>
+</div>
+<p>If you want to submit multiple experiments at the same time, copy the full
+Rundir and do changes in individual folders. Otherwise one at a time and save
+timing folder between submits (is overwritten each time).</p>
+</section>
+<section id="for-icon-users-hpsc-terrsys-users">
+<h2>For ICON Users (HPSC-TerrSys users)<a class="headerlink" href="#for-icon-users-hpsc-terrsys-users" title="Link to this heading"></a></h2>
+<section id="step-0-judac-storage-managment">
+<h3>Step 0: JUDAC Storage Managment<a class="headerlink" href="#step-0-judac-storage-managment" title="Link to this heading"></a></h3>
+<p>Please inform yourself about the storage managment. If you are new to the Jülich supercomputers, it is recomannded to visit “Introduction to the usage and programming of supercomputer resources in Jülich” course. The next date of this ocurse can be found here: https://www.fz-juelich.de/ias/jsc/EN/Expertise/Workshops/Courses/courses_node.html . Please, make yourself familiar with the different partitions of the JUDAC system as well:</p>
+<blockquote>
+<div><p>https://www.fz-juelich.de/ias/jsc/EN/Expertise/Datamanagement/JUDAC/FAQ/judac-FAQ_node.html</p>
+</div></blockquote>
+<p>It is recomannded to store no data at <span class="math notranslate nohighlight">\(HOME, your model data at \)</span>PROJECT and your experiment data at $SCRATCH.</p>
+</section>
+<section id="step-1-dependencies">
+<h3>Step 1: Dependencies<a class="headerlink" href="#step-1-dependencies" title="Link to this heading"></a></h3>
+<p>See <a class="reference internal" href="../gettingstarted.html#step-1-dependencies"><span class="std std-ref">step 1 above</span></a></p>
+</section>
+<section id="step-2-get-the-tsmp-interface">
+<h3>Step 2: Get the TSMP interface<a class="headerlink" href="#step-2-get-the-tsmp-interface" title="Link to this heading"></a></h3>
+<p>Go to your preferred root directory (e.g., your $PROJECT directory) for the TSMP installation and get the <code class="docutils literal notranslate"><span class="pre">TSMP_iconcoup</span></code> branch from <code class="docutils literal notranslate"><span class="pre">gitlab</span></code> and set the environment variable <code class="docutils literal notranslate"><span class="pre">TSMP_DIR</span></code> to TSMP installation directory; for bash:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/spoll/tsmp.git
+<span class="nb">export</span><span class="w"> </span><span class="nv">TSMP_DIR</span><span class="o">=</span><span class="k">$(</span>realpath<span class="w"> </span>tsmp<span class="k">)</span>
+git<span class="w"> </span>checkout<span class="w"> </span>TSMP_iconcoup
+</pre></div>
+</div>
+</section>
+<section id="step-3-get-the-component-models-for-this-experiment">
+<h3>Step 3: Get the component models for this experiment<a class="headerlink" href="#step-3-get-the-component-models-for-this-experiment" title="Link to this heading"></a></h3>
+<p>Authenticate with your GitLab web GUI user name and password and clone the repositories (instead of “fresh”, also “legacy” repositories with specific code modifications may be retrieved). Choose the model components needed from your experiment, in case of any coupled model one need the external coupler “oasis3-mct”.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/icon2.1_legacy.git<span class="w">   </span>icon2-1
+git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>v3.12.0<span class="w"> </span>https://github.com/parflow/parflow.git<span class="w"> 							</span>parflow
+git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh.git<span class="w">     </span>clm3_5
+git<span class="w"> </span>clone<span class="w"> </span>https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git<span class="w">       </span>oasis3-mct
+</pre></div>
+</div>
+</section>
+<section id="step-4-build-tsmp-interface-and-component-models">
+<h3>Step 4: Build TSMP, interface and component models<a class="headerlink" href="#step-4-build-tsmp-interface-and-component-models" title="Link to this heading"></a></h3>
+<p>Before building TerrSysMP, first check what build options are there</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-a
+</pre></div>
+</div>
+<p>Building the fully coupled TSMP with ParFlow (pfl), the Community Land Model (clm) and the ICON NWP and regional climate model (icon); this is a built on the JUWELS HPC system of Jülich Supercomputing Centre using Intel compilers and ParaStation MPI:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>clm-icon21-pfl<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<p>For ICON standalone version use:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-c<span class="w"> </span>icon21<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+</section>
+<section id="step-5-setup-and-configuration-of-the-respective-usage-and-test-case">
+<h3>Step 5: Setup and configuration of the respective usage and test case<a class="headerlink" href="#step-5-setup-and-configuration-of-the-respective-usage-and-test-case" title="Link to this heading"></a></h3>
+<p>It is recommended to store your model data at scratch (please notice that data will be automatically deleted if there are not touched for a while). Please, edit <em>YOUR_PROJECT</em> and <em>YOUR_DIRECTORY</em> correspondingly.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">EXP</span><span class="o">=</span>/p/scratch/YOUR_PROJECT/YOUR_DIRECTORY
+</pre></div>
+</div>
+<p>To configure TSMP for the Germany test case for ICON stand-alone on JUWELS machine:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./setup_tsmp.ksh<span class="w"> </span>-V<span class="w"> </span>germany<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-c<span class="w"> </span>icon21<span class="w"> </span>-r<span class="w"> </span><span class="nv">$EXP</span>/JUWELS_icon_4.1.0MCT_germany<span class="w"> </span>-I<span class="w"> </span>_experiment<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<p>This includes the creation of a run directory, the copying of namelists, the provisioning of run control scripts for the job scheduler, incl. mapping files which pin the MPI tasks of the component model to specific CPU cores, as well as copying and linking of forcing data.</p>
+</section>
+<section id="step-6-run-the-test-case">
+<h3>Step 6: Run the test case<a class="headerlink" href="#step-6-run-the-test-case" title="Link to this heading"></a></h3>
+<p>Change into the run directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$EXP</span>/JUWELS_icon21_germany_experiment
+</pre></div>
+</div>
+<p>Edit the scheduler settings (<code class="docutils literal notranslate"><span class="pre">#SBATCH</span></code> lines) accordingly to <em>YOUR_PROJECT</em> and run time of your experiment. Please do not change <em>nodes</em>, <em>ntasks</em> and <em>ntasks-per-node</em>:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>vi<span class="w"> </span>tsmp_slm_run.bsh
+</pre></div>
+</div>
+<p>Proof if all necessary files are in your experiment directory:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>ls<span class="w"> </span>-lrth
+</pre></div>
+</div>
+<p>Submit the job:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>sbatch<span class="w"> </span>tsmp_slm_run.bsh
+</pre></div>
+</div>
+<p>Monitor your ICON simulation by</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>tail<span class="w"> </span>-f<span class="w"> </span>mpiMPMD-err.*
+</pre></div>
+</div>
+</section>
+<section id="step-7-create-own-case-optional">
+<h3>Step 7: Create own case (optional)<a class="headerlink" href="#step-7-create-own-case-optional" title="Link to this heading"></a></h3>
+<blockquote>
+<div><p>This step is for advanced users.</p>
+</div></blockquote>
+<p>In case you want create your own setup you can create your own direcory (<em>YOUR_CASE</em>) in the <code class="docutils literal notranslate"><span class="pre">TSMP_DIR</span></code>/setups and add the name of your case in the <code class="docutils literal notranslate"><span class="pre">setupsAvail</span></code> of your maschine (e.g. JUWELS) in the <code class="docutils literal notranslate"><span class="pre">supported_versions.ksh</span></code> file.</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>mkdir<span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva/setups/YOUR_CASE
+vi<span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva/supported_versions.ksh
+</pre></div>
+</div>
+<p>Each setup needs a setup ksh-script with the naming convention <em>‘YOUR_CASE’_’YOUR_MACHINE’_setup.ksh</em> (e.g. <code class="docutils literal notranslate"><span class="pre">germany_JUWELS_setup.ksh</span></code> for the germany test case on the JUWELS machine). Please, adjust the setup carefully, you can use the setups scripts from various test cases as blueprint. You can add the namelist of your component models in the direcotry of your case (e.g. icon_master.namelist and NAMELIST_icon for ICON).</p>
+</section>
+</section>
+<section id="setup-tsmp-pdaf">
+<h2>Setup TSMP-PDAF<a class="headerlink" href="#setup-tsmp-pdaf" title="Link to this heading"></a></h2>
+<p>For starting our data assimilation experiments with TSMP-PDAF, we will
+consider a down- scaled version of the test case described in Kurtz et
+al. (2016) which deals with a relatively simple land
+surface-subsurface problem. With this forward model we will perform
+experiments for the assimilation of soil moisture data including
+parameter estimation. This testcase is also available in the TSMP
+virtual machine or can be downloaded from gitlab in IBG-3
+institute. For external users you can contact Prof. Dr. Harrie-Jan
+Hendricks-Franssen at IBG-3 institute in Juelich Research Center.</p>
+</section>
+<section id="day4-testcase-fallschool-2022">
+<h2>Day4: Testcase FallSchool 2022<a class="headerlink" href="#day4-testcase-fallschool-2022" title="Link to this heading"></a></h2>
+<p>Input files for the Testcase are found at
+<a class="reference external" href="https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys/tsmp_pdaf_exercise_data">https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys/tsmp_pdaf_exercise_data</a></p>
+<p>A detailed step-by-step explanation of how to build and run this setup
+is given at
+<a class="reference external" href="https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys/fall-school-tutorials/-/wikis/Ensemble-Data-Assimilation">https://gitlab.jsc.fz-juelich.de/sdlts/FallSchool_HPSC_TerrSys/fall-school-tutorials/-/wikis/Ensemble-Data-Assimilation</a></p>
+<section id="build">
+<h3>Build<a class="headerlink" href="#build" title="Link to this heading"></a></h3>
+<p>The common build for the Testcase FallSchool 2019 is <a class="reference internal" href="../build_tsmp/build_examples_tsmppdaf.html#compile-parflow-and-clm-with-pdaf"><span class="std std-ref">Compile
+Parflow + CLM with
+PDAF</span></a>. Choose the
+correct command for your machine and, if possible, the newest version.</p>
+</section>
+</section>
+<section id="setups">
+<h2>Setups<a class="headerlink" href="#setups" title="Link to this heading"></a></h2>
+<section id="setup-cordex-test-case-for-fully-coupled-tsmp-on-juwels-with-oasis3-mct">
+<h3>Setup CORDEX test case for fully coupled TSMP on JUWELS with Oasis3-MCT<a class="headerlink" href="#setup-cordex-test-case-for-fully-coupled-tsmp-on-juwels-with-oasis3-mct" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JUWELS -c clm3-cos4-pfl -V cordex
+</pre></div>
+</div>
+</section>
+<section id="setup-nrw-test-case-for-parflow-standalone-on-jureca">
+<h3>Setup NRW test case for ParFlow standalone on JURECA<a class="headerlink" href="#setup-nrw-test-case-for-parflow-standalone-on-jureca" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JURECA -c pfl -V nrw
+</pre></div>
+</div>
+</section>
+<section id="setup-nrw-test-case-for-new-clm4-0-cosmo5-1-on-jureca">
+<h3>Setup NRW test case for new CLM4.0 + Cosmo5.1 on JURECA<a class="headerlink" href="#setup-nrw-test-case-for-new-clm4-0-cosmo5-1-on-jureca" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JURECA -c clm4-cos5 -C false
+</pre></div>
+</div>
+<p>The new models are currently only supported for clm-cos and with
+alternative coupling-scheme.</p>
+</section>
+<section id="setup-nrw-test-case-with-24h-runtime-3h-wallclock-time-latest-lets-say-01-07-2016-00-00-cosmo-forcing-parflow-and-clm-restart-fully-coupled-on-jureca-on-work">
+<h3>Setup NRW test case with 24h runtime, 3h wallclock time, latest(lets say 01.07.2016 00:00) Cosmo forcing, ParFlow and CLM restart, fully coupled on JURECA on <code class="docutils literal notranslate"><span class="pre">$WORK</span></code><a class="headerlink" href="#setup-nrw-test-case-with-24h-runtime-3h-wallclock-time-latest-lets-say-01-07-2016-00-00-cosmo-forcing-parflow-and-clm-restart-fully-coupled-on-jureca-on-work" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl -V nrw -r &quot;$WORK/tsmp/nrw20160701/run&quot; -Q 3 -T 24 -s 2016-07-01_00 -F &quot;$WORK/tsmp/nrw20160701/cosforcing&quot; -j &quot;$WORK/tsmp/nrw20160630/run/clmoas.clm2.r.2016-06-30-00000.nc&quot; -l &quot;$WORK/tsmp/nrw20160630/run/rurlaf.out.press.00024.pfb&quot;
+</pre></div>
+</div>
+</section>
+<section id="setup-nrw-test-case-with-20-member-ensemble-parflow-on-jureca-but-only-use-members-10-15-perturbed-namelists-reside-in-a-special-folder">
+<h3>Setup NRW test case with 20 member ensemble (parflow) on JURECA, but only use members 10-15. perturbed namelists reside in a special folder<a class="headerlink" href="#setup-nrw-test-case-with-20-member-ensemble-parflow-on-jureca-but-only-use-members-10-15-perturbed-namelists-reside-in-a-special-folder" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl  -V nrw -N 5 -n 10 -g &quot;$HOME/ensemble/namelists/coup\_oas.tcl&quot;
+</pre></div>
+</div>
+<p>Note, that even though you give the base namelist-name for the <code class="docutils literal notranslate"><span class="pre">-g</span></code>
+flag the actual namelists in this folder must be named like:
+<code class="docutils literal notranslate"><span class="pre">coup_oas.tcl_0</span></code>, <code class="docutils literal notranslate"><span class="pre">coup_oas.tcl_1</span></code>, <code class="docutils literal notranslate"><span class="pre">coup_oas.tcl_2</span></code>, etc.</p>
+</section>
+<section id="setup-nrw-spinup-with-init-date-lets-say-01-01-2005-00-00-1-month-runtime-24h-wallclock-time-restart-from-arbitrary-date-lets-say-01-03-2005-00-00-in-indexed-3rd-rundir-on-jureca">
+<h3>Setup NRW spinup with init date (lets say 01.01.2005 00:00) 1 month runtime, 24h wallclock time, restart from arbitrary date (lets say 01.03.2005 00:00) in indexed (3rd) rundir on JURECA<a class="headerlink" href="#setup-nrw-spinup-with-init-date-lets-say-01-01-2005-00-00-1-month-runtime-24h-wallclock-time-restart-from-arbitrary-date-lets-say-01-03-2005-00-00-in-indexed-3rd-rundir-on-jureca" title="Link to this heading"></a></h3>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./setup_tsmp.ksh -m JURECA -c clm3-cos4-pfl -V nrw -r &quot;$WORK/tsmp/nrwSpinup/run&quot; -I 3 -Q 24 -T 744 -s 2005-03-01_00 -S 2005-01-01_00 -j &quot;$WORK/tsmp/nrwSpinup/run2/clmoas.clm2.r.2005-02-28-00000.nc&quot; -k &quot;$WORK/tsmp/nrwSpinup/run2/cosmo_out/lfff59000000&quot; -l &quot;$WORK/tsmp/nrwSpinup/run2/rurlaf.out.press.01416.pfb&quot;
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../build_tsmp/build_environment_variables.html" class="btn btn-neutral float-left" title="TSMP-PDAF Environment variables" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running.html" class="btn btn-neutral float-right" title="Running TSMP-PDAF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSMP-PDAF Environment variables &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Running TSMP-PDAF" href="running.html" />
+    <link rel="prev" title="TSMP-PDAF Build Examples" href="build_examples_tsmppdaf.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building and Running:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="build_examples.html">Building TSMP</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="build_examples.html#build-script-of-tsmp">Build script of TSMP</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="build_examples.html#building-on-gpu">Building on GPU</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="build_examples_tsmp.html">TSMP Build Examples</a></li>
+<li class="toctree-l4"><a class="reference internal" href="build_examples_tsmppdaf.html">TSMP-PDAF Build Examples</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">TSMP-PDAF Environment variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="build_examples.html#patching-the-orginal-source-code">Patching the orginal source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="build_examples.html#automatic-porting-of-tsmp-on-x86-machines">Automatic Porting of TSMP on x86 machines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Developing TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Development Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="remotes.html">TSMP remote repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html#clm5-pdaf-starting-instructions">CLM5-PDAF Starting instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsc.html">JSC systems</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="build_examples.html">Building TSMP</a></li>
+      <li class="breadcrumb-item active">TSMP-PDAF Environment variables</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/content/build_environment_variables.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tsmp-pdaf-environment-variables">
+<h1>TSMP-PDAF Environment variables<a class="headerlink" href="#tsmp-pdaf-environment-variables" title="Permalink to this heading"></a></h1>
+<p>A number of environment variables are set during the build process of
+TSMP-PDAF in order to make the code behave in specific ways.</p>
+<p>TSMP-PDAF environemnt variables are set in the machine-specific
+TSMP-PDAF build-scripts of the form:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">bldsva</span><span class="o">/</span><span class="n">intf_DA</span><span class="o">/</span><span class="n">pdaf1_1</span><span class="o">/</span><span class="n">arch</span><span class="o">/&lt;</span><span class="n">machine</span><span class="o">&gt;/</span><span class="n">build_interface_pdaf1_1_</span><span class="o">&lt;</span><span class="n">machine</span><span class="o">&gt;.</span><span class="n">ksh</span>
+</pre></div>
+</div>
+<p>where <code class="docutils literal notranslate"><span class="pre">&lt;machine&gt;</span></code> could be f.e. <code class="docutils literal notranslate"><span class="pre">JURECA</span></code> or <code class="docutils literal notranslate"><span class="pre">JUWELS</span></code>.</p>
+<section id="clmsa">
+<h2>CLMSA<a class="headerlink" href="#clmsa" title="Permalink to this heading"></a></h2>
+<p>Environment variable <code class="docutils literal notranslate"><span class="pre">CLMSA</span></code> is true if CLM-standalone is used in
+TSMP-PDAF, i.e. no coupling to other component models (ParFlow,
+atmospheric model).</p>
+<p><code class="docutils literal notranslate"><span class="pre">CLMSA</span></code> is used in many places in TSMP-PDAF, where CLM-standalone
+specific code is introduced. This includes</p>
+<ul class="simple">
+<li><p>observation reading</p></li>
+<li><p>setting observation vector</p></li>
+<li><p>setting state vector</p></li>
+<li><p>communicator handling</p></li>
+<li><p>localized filters</p></li>
+<li><p>TSMP-PDAF-wrapper routines</p></li>
+</ul>
+</section>
+<section id="parflow-stand-alone">
+<h2>PARFLOW_STAND_ALONE<a class="headerlink" href="#parflow-stand-alone" title="Permalink to this heading"></a></h2>
+<p>Environment variable <code class="docutils literal notranslate"><span class="pre">PARFLOW_STAND_ALONE</span></code> is true if
+ParFlow-standalone is used in TSMP-PDAF, i.e. no coupling to other
+component models (CLM, atmospheric model).</p>
+<p>It is used less frequently than <a class="reference internal" href="#clmsa">CLMSA</a>, only at code places
+where the behavior of ParFlow-CLM-PDAF and ParFlow-PDAF should differ.</p>
+</section>
+<section id="obs-only-parflow">
+<h2>OBS_ONLY_PARFLOW<a class="headerlink" href="#obs-only-parflow" title="Permalink to this heading"></a></h2>
+<p>Environment variable <code class="docutils literal notranslate"><span class="pre">OBS_ONLY_PARFLOW</span></code> is true if observations in
+TSMP-PDAF are of ParFlow-type.</p>
+<p>This will remove unnecessary code during observation reading, when
+ParFlow-CLM-PDAF is built, but no CLM-type observations are included.</p>
+</section>
+<section id="obs-only-clm">
+<h2>OBS_ONLY_CLM<a class="headerlink" href="#obs-only-clm" title="Permalink to this heading"></a></h2>
+<p>Environment variable <code class="docutils literal notranslate"><span class="pre">OBS_ONLY_CLM</span></code> is true if observations in
+TSMP-PDAF are of CLM-type.</p>
+<p>This will remove unnecessary code during observation reading, when
+ParFlow-CLM-PDAF is built, but no ParFlow-type observations are
+included.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="build_examples_tsmppdaf.html" class="btn btn-neutral float-left" title="TSMP-PDAF Build Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="running.html" class="btn btn-neutral float-right" title="Running TSMP-PDAF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

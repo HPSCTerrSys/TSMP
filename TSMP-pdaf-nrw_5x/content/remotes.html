@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSMP remote repositories &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="TSMP-PDAF related branches" href="branches.html" />
+    <link rel="prev" title="Debugging TSMP" href="debugging.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building and Running:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Developing TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Development Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TSMP remote repositories</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#development-scheme">Development scheme</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#privacy">Privacy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#more-in-depth-example">More in-depth Example</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html#clm5-pdaf-starting-instructions">CLM5-PDAF Starting instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsc.html">JSC systems</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TSMP remote repositories</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/content/remotes.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="tsmp-remote-repositories">
+<h1>TSMP remote repositories<a class="headerlink" href="#tsmp-remote-repositories" title="Permalink to this heading"></a></h1>
+<p>Relationship between the two remotes of the <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> repository:</p>
+<ul class="simple">
+<li><p>Github
+(<a class="reference external" href="https://github.com/HPSCTerrSys/TSMP">https://github.com/HPSCTerrSys/TSMP</a>)</p></li>
+<li><p>Gitlab
+(<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp">https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp</a>)</p></li>
+</ul>
+<p>Technically the two servers are two remote servers of the same
+git-repository <code class="docutils literal notranslate"><span class="pre">TSMP</span></code>.</p>
+<p>This means that both repositories have the same history of commits and
+if you clone either remote repository, all branches that are part of
+both repositories are identical. The difference is that the
+Gitlab-remote contains additional branches, where TSMP-PDAF is
+developed.</p>
+<section id="development-scheme">
+<h2>Development scheme<a class="headerlink" href="#development-scheme" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Github: <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> general development</p></li>
+<li><p>Gitlab: <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> is always kept up-to-date and changes are merged into
+the <code class="docutils literal notranslate"><span class="pre">TSMP-PDAF</span></code>-related branches.</p></li>
+</ul>
+<p>See also <a class="reference internal" href="best_practices.html"><span class="doc std std-doc">development best practices</span></a></p>
+</section>
+<section id="privacy">
+<h2>Privacy<a class="headerlink" href="#privacy" title="Permalink to this heading"></a></h2>
+<ul class="simple">
+<li><p>Github: Completely open.</p></li>
+<li><p>Gitlab: Only visible to invited members.</p></li>
+</ul>
+</section>
+<section id="more-in-depth-example">
+<h2>More in-depth Example<a class="headerlink" href="#more-in-depth-example" title="Permalink to this heading"></a></h2>
+<p>Output of <code class="docutils literal notranslate"><span class="pre">TSMP</span></code>-git-repository’s recent history including tags for
+local branches and branches from the two remote repositories <code class="docutils literal notranslate"><span class="pre">origin</span></code>
+(Gitlab) and <code class="docutils literal notranslate"><span class="pre">github</span></code> (Github):</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>*   05099a1 - (4 weeks ago)Merge branch &#39;master&#39; into TSMP_pdaf_github - Johannes Keller (HEAD -&gt; TSMP_pdaf, origin/TSMP_pdaf, github/TSMP_pdaf, TSMP_pdaf_github)
+|\
+| * 423ec0c - (4 weeks ago).gitignore: Ignore directories /cosmo4_21*/ - Johannes Keller (origin/master, github/master, github/HEAD, master-github, master)
+* | 786909f - (4 weeks ago)Merge branch &#39;master&#39; into TSMP_pdaf_github - Johannes Keller
+|\|
+| * b7beccd - (4 weeks ago)upgrade to ParFlow3.7 with possibilty of heterogeneous job submission - Abouzar Ghasemi
+| * 8803904 - (4 weeks ago)upgrade to ParFlow3.7 with possibilty of heterogeneous job submission - Abouzar Ghasemi (tag: v1.3.3)
+* | 7a26c8b - (5 weeks ago)Merge branch &#39;master-github&#39; into TSMP_pdaf - Johannes Keller (tag: v1.2.3PDAF, origin/TSMP_pdaf_v1.2.3, TSMP_pdaf_v1.2.3)
+|\|
+| * 3cc6477 - (5 weeks ago)Correcting machine file for JURECA - Abouzar Ghasemi
+| * 10a4cb3 - (6 weeks ago)Porting TSMP on JUSUF and JURECA_DC - Abouzar Ghasemi (tag: v1.2.3)
+| * 8d54475 - (7 weeks ago)Machine files for JUWELS compatible with Stage2020 (Intel) and Stage2019a (Gnu) - Abouzar Ghasemi
+* | 507714f - (8 weeks ago)compiler specific changes in src.Gnu / src.Intel in Oasis intf - Johannes Keller
+</pre></div>
+</div>
+<p>Note that the commit <code class="docutils literal notranslate"><span class="pre">05099a1</span></code> is the current commit of the branches
+<code class="docutils literal notranslate"><span class="pre">TSMP_pdaf,</span> <span class="pre">origin/TSMP_pdaf,</span> <span class="pre">github/TSMP_pdaf,</span> <span class="pre">TSMP_pdaf_github</span></code>. In
+the local repository these are:</p>
+<ul class="simple">
+<li><p>The local branch <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf</span></code></p></li>
+<li><p>the branch at remote origin (Gitlab) <code class="docutils literal notranslate"><span class="pre">origin/TSMP_pdaf</span></code></p></li>
+<li><p>the branch at remote github (Github) <code class="docutils literal notranslate"><span class="pre">github/TSMP_pdaf</span></code></p></li>
+<li><p>and the local version of the Github remote <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf_github</span></code>
+(introduced for automatic pushing and pulling, should always be at the
+same commit as <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf</span></code>).</p></li>
+</ul>
+<p>The commit <code class="docutils literal notranslate"><span class="pre">423ec0c</span></code> is the current commit of <code class="docutils literal notranslate"><span class="pre">origin/master,</span> <span class="pre">github/master,</span> <span class="pre">master-github,</span> <span class="pre">master</span></code> with similar meaning as before
+for the <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf</span></code> branches.</p>
+<p>On commit <code class="docutils literal notranslate"><span class="pre">10a4cb3</span></code>, you see the tag <code class="docutils literal notranslate"><span class="pre">v1.2.3</span></code> for the version of
+<code class="docutils literal notranslate"><span class="pre">TSMP</span></code> before ParFlow3.7 was introduced. From this version the commit
+<code class="docutils literal notranslate"><span class="pre">7a26c8b</span></code> was derived with branches <code class="docutils literal notranslate"><span class="pre">origin/TSMP_pdaf_v1.2.3,</span> <span class="pre">TSMP_pdaf_v1.2.3</span></code>. These branches only exist on Gitlab!</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="debugging.html" class="btn btn-neutral float-left" title="Debugging TSMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="branches.html" class="btn btn-neutral float-right" title="TSMP-PDAF related branches" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

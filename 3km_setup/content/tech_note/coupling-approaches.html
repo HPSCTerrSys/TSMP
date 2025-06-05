@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coupling approaches &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Obtaining the code" href="../build_tsmp/obtain_code.html" />
+    <link rel="prev" title="Getting Started" href="../gettingstarted.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Coupling approaches</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#coupling-between-cosmo-and-clm">Coupling between COSMO and CLM</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#update-of-transfer-coefficients-in-cosmo-based-on-clm-surface-fluxes">Update of transfer coefficients in COSMO based on CLM surface fluxes.</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#coupling-time-step">Coupling Time Step</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#use-of-same-grid-between-cosmo-and-clm">Use of same grid between COSMO and CLM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#interpolation-between-cosmo-and-clm-grids">Interpolation between COSMO and CLM grids</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#coupling-between-clm-and-parflow">Coupling between CLM and ParFlow</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<b style="color:#b96922;"><li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+</b><li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Coupling approaches</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/tech_note/coupling-approaches.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="coupling-approaches">
+<h1>Coupling approaches<a class="headerlink" href="#coupling-approaches" title="Link to this heading"></a></h1>
+<section id="coupling-between-cosmo-and-clm">
+<h2>Coupling between COSMO and CLM<a class="headerlink" href="#coupling-between-cosmo-and-clm" title="Link to this heading"></a></h2>
+<section id="update-of-transfer-coefficients-in-cosmo-based-on-clm-surface-fluxes">
+<h3>Update of transfer coefficients in COSMO based on CLM surface fluxes.<a class="headerlink" href="#update-of-transfer-coefficients-in-cosmo-based-on-clm-surface-fluxes" title="Link to this heading"></a></h3>
+<p>1. Flux Inversion Scheme (INV)</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>    -&gt; CLM surface fluxes are inverted to obtain the transfer coefficients.
+    -&gt; Use --cplscheme=false when building the source code
+</pre></div>
+</div>
+<p>2. Transfer Coefficient Scheme (TRN)</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>    -&gt; CLM transfer coefficients are directly used to update the COSMO transfer coefficients.
+    -&gt; Use --cplscheme=true --readclm=true when building the source code
+</pre></div>
+</div>
+</section>
+<section id="coupling-time-step">
+<h3>Coupling Time Step<a class="headerlink" href="#coupling-time-step" title="Link to this heading"></a></h3>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>The coupling frequency should be always less than the radiation update frequency in COSMO controlled by the namelist
+(hincrad) in COSMO, which is a time step in hours.
+
+Within the uncertainty of the simulated surface fluxes and the vertical transport of heat/moisture into the boundary layer,
+a coupling time step of 60 s appears to be quite appropriate in terms of rmsd and computational efficiency. 
+The INV scheme is less sensitive to larger coupling intervals than the TRN scheme while both perform equally well at 
+coupling time steps &lt;= 60 s. The findings are based from an unpublished study of idealized simulations (idealRTD) 
+with the above two schemes using different coupling frequency. 
+</pre></div>
+</div>
+</section>
+<section id="use-of-same-grid-between-cosmo-and-clm">
+<h3>Use of same grid between COSMO and CLM<a class="headerlink" href="#use-of-same-grid-between-cosmo-and-clm" title="Link to this heading"></a></h3>
+<p>COSMO and CLM uses rotated and regular geographic coordinates respectively. So, there is always a need of spatial interpolation for the coupling between the component models. However, there exists an additional flag in the TerrSysMP interface, which allows coupling without explicit interpolation between the two component models.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>   -&gt; Use --readclm=&#39;True&#39; when building the source code. In this setup, OASIS coupler will use the same grid/mask for 
+        both component models. This grid/mask is based on CLM grid data.
+   -&gt; The CLM domain size for this setup should be 2*nboundlines smaller than the COSMO domain in both X and Y extents. 
+        This is basically cropping the outer halo regions of the COSMO domain and &#39;nboundlines&#39; is a parameter in the namelist 
+        of COSMO, which specifies the number of halos for each subdomains. A minimum of 3 boundary lines are required for 
+        the Runge-Kutta dynamical core in COSMO.
+</pre></div>
+</div>
+</section>
+<section id="interpolation-between-cosmo-and-clm-grids">
+<h3>Interpolation between COSMO and CLM grids<a class="headerlink" href="#interpolation-between-cosmo-and-clm-grids" title="Link to this heading"></a></h3>
+<p>Bilinear Interpolation — (COSMO to CLM grids)<br />
+Distance Weighted Interpolation — (CLM to COSMO grids)</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>    Remapping files are generated at runtime, if they are not existing in the run directory. The distance weighted interpolation scheme uses a small number &#39;epsilon&#39; to prevent division by &#39;zero&#39;, so it will never generate a remapping weight of &#39;1&#39; even if COSMO and CLM uses same grid. So, when COSMO and CLM are using the same grids, the weights in the remapping file has to be forced to &#39;1&#39;.  A pre-processing script is available in tps for fixing the weights in the remapping file. 
+</pre></div>
+</div>
+</section>
+</section>
+<section id="coupling-between-clm-and-parflow">
+<h2>Coupling between CLM and ParFlow<a class="headerlink" href="#coupling-between-clm-and-parflow" title="Link to this heading"></a></h2>
+<p>1. The time step of the two component models and the coupling time step should always be the same.</p>
+<p>2. CLM and ParFlow are only coupled for the top 10 layers. The vertical discretization of this top 10 layers are specified ‘iniTimeConst.F90’. This has to always match with the discretization of top 10 layers specified in the TCL script of ParFlow. If the user wants to change the vertical discretization, it needs to be changed accordingly.</p>
+<p>3. The porosity in CLM and ParFlow are specified via the input surface data and the TCL script respectively. In CLM, pedotransfer functions are used to convert the sand percentage in surface data to porosity. This porosity has to match with the porosity specified in TCL script for the first 10 layers.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../gettingstarted.html" class="btn btn-neutral float-left" title="Getting Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../build_tsmp/obtain_code.html" class="btn btn-neutral float-right" title="Obtaining the code" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
