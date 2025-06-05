@@ -96,6 +96,8 @@ void read_enkfpar(char *parname)
   strcpy(outdir,string);
   nreal                 = iniparser_getint(pardict,"DA:nreal",0);
   startreal             = iniparser_getint(pardict,"DA:startreal",0);
+  total_steps           = iniparser_getint(pardict,"DA:total_steps",-1);
+  tstartcycle           = iniparser_getint(pardict,"DA:tstartcycle",-1);
   da_interval           = iniparser_getdouble(pardict,"DA:da_interval",1);
   da_interval_final     = iniparser_getdouble(pardict,"DA:da_interval_final",1);
   flexible_da_interval  = iniparser_getint(pardict,"DA:flexible_da_interval",0);
@@ -107,15 +109,38 @@ void read_enkfpar(char *parname)
   da_crns_depth_tol     = iniparser_getdouble(pardict,"DA:da_crns_depth_tol",0.01);
   clmcrns_bd            = iniparser_getdouble(pardict, "DA:crns_bd", -1.0);
   da_print_obs_index    = iniparser_getint(pardict,"DA:print_obs_index",0);
-  total_steps = (int) (t_sim/da_interval);
-  tstartcycle = (int) (t_start/da_interval);
 
-  /* print inputs / debug output for data assimilation settings */
+  /* Debug output */
   if (mype_world == 0) {
     if (screen_wrapper > 0) {
       printf("TSMP-PDAF-WRAPPER mype(w)=%5d read_enkfpar: [DA]\n",mype_world);
       printf("TSMP-PDAF-WRAPPER mype(w)=%5d ------------------\n",mype_world);
-      printf("TSMP-PDAF-WRAPPER mype(w)=%5d t_sim = %lf | da_interval = %lf | total_steps = %d\n",mype_world,t_sim,da_interval,total_steps);
+    }
+  }
+
+  /* Set total_steps from PF:simtime if it has not been set
+     directly */
+  if (total_steps == -1) {
+    total_steps = (int) (t_sim/da_interval);
+
+    /* Debug output */
+    if (mype_world == 0) {
+      if (screen_wrapper > 0) {
+	printf("TSMP-PDAF-WRAPPER mype(w)=%5d total_steps set based on t_sim = %lf\n",mype_world,t_sim);
+      }
+    }
+  }
+
+  /* Set tstartcycle from PF:starttime if it has not been set
+     directly */
+  if (tstartcycle == -1) {
+    tstartcycle = (int) (t_start/da_interval);
+  }
+
+  /* Debug output */
+  if (mype_world == 0) {
+    if (screen_wrapper > 0) {
+      printf("TSMP-PDAF-WRAPPER mype(w)=%5d da_interval = %lf | total_steps = %d\n",mype_world,da_interval,total_steps);
       printf("TSMP-PDAF-WRAPPER mype(w)=%5d nreal = %d | n_modeltasks = %d\n",mype_world,nreal,n_modeltasks);
     }
   }
