@@ -56,6 +56,7 @@ update_T  =
 print_swc   =
 print_et   =
 statevec_allcol =
+statevec_colmean =
 statevec_only_active =
 statevec_max_layer =
 t_printensemble =
@@ -495,7 +496,7 @@ further information, see source code. Default: `0`.
 ### CLM:statevec_allcol ###
 
 `CLM:statevec_allcol`: (integer) Switch for using all SWC columns of a
-CLM5 gridcell in the state vector.
+eCLM gridcell in the state vector.
 
 If `0` (default): Only one SWC value per grid cell is saved in the
 state vector.
@@ -503,15 +504,31 @@ state vector.
 If `1`: `#columns` SWC values per grid cell are saved in the state
 vector.
 
-### CLM:statevec_only_active ###
+Remark: `CLM:statevec_allcol` should not be switched on together with
+`CLM:statevec_colmean`.
 
-**Not yet in main branch**
+### CLM:statevec_colmean ###
+
+`CLM:statevec_colmean`: (integer) Switch for using gridcell averages
+of SWC (which is a column-variable) in the state vector.
+
+If `0` (default): Only the SWC value from the **first** column is
+saved per grid cell in the state vector.
+
+If `1`: The gridcell mean over all (possibly hydrologically active)
+SWC values is saved per grid cell in the state vector.
+
+Remark: `CLM:statevec_colmean` should not be switched on together with
+`CLM:statevec_allcol`.
+
+### CLM:statevec_only_active ###
 
 `CLM:statevec_only_active`: (integer) Switch for using in the state
 vector only (1) hydrologically active columns of a CLM5 gridcell and
 (2) only layers until bedrock.
 
-Only used, when `CLM:statevec_allcol` is switched on.
+Only used for `CLM:update_swc`. Therein, only used, when either
+`CLM:statevec_colmean` or `CLM:statevec_allcol` is used.
 
 If `0` (default): Use all columns and all layers.
 
@@ -786,6 +803,7 @@ Default: 0, output turned off.
  |           | `print_swc`             | 0             |
  |           | `print_et`              | 0             |
  |           | `statevec_allcol`       | 0             |
+ |           | `statevec_colmean`      | 0             |
  |           | `statevec_only_active`  | 0             |
  |           | `statevec_max_layer`    | 25            |
  |           | `t_printensemble`       | -1            |

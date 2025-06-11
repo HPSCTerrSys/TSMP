@@ -510,27 +510,27 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
   ! Dimension of full observation vector
   ! ------------------------------------
 
-  ! add and broadcast size of local observation dimensions using mpi_allreduce 
+  ! add and broadcast size of PE-local observation dimensions using mpi_allreduce
   call mpi_allreduce(dim_obs_p, sum_dim_obs_p, 1, MPI_INTEGER, MPI_SUM, &
        comm_filter, ierror) 
 
   ! Check sum of dimensions of PE-local observation vectors against
   ! dimension of full observation vector
   if (.not. sum_dim_obs_p == dim_obs) then
-    print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Sum of local observation dimensions"
+    print *, "TSMP-PDAF mype(w)=", mype_world, ": ERROR Sum of PE-local observation dimensions"
     print *, "sum_dim_obs_p=", sum_dim_obs_p
     print *, "dim_obs=", dim_obs
     call abort_parallel()
   end if
 
-  !  Gather local observation dimensions and displacements in arrays
+  !  Gather PE-local observation dimensions and displacements in arrays
   ! ----------------------------------------------------------------
 
-  ! Allocate array of local observation dimensions
+  ! Allocate array of PE-local observation dimensions
   IF (ALLOCATED(local_dims_obs)) DEALLOCATE(local_dims_obs)
   ALLOCATE(local_dims_obs(npes_filter))
 
-  ! Gather array of local observation dimensions
+  ! Gather array of PE-local observation dimensions
   call mpi_allgather(dim_obs_p, 1, MPI_INTEGER, local_dims_obs, 1, MPI_INTEGER, &
        comm_filter, ierror)
 
@@ -959,7 +959,16 @@ SUBROUTINE init_dim_obs_pdaf(step, dim_obs_p)
                    end if
 #endif
                  else
-                   obs_index_p(cnt) = g-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+#ifdef CLMFIVE
+                   if(clmstatevec_only_active.eq.1) then
+                     obs_index_p(cnt) = state_clm2pdaf_p(c,clmobs_layer(i))
+                   else
+
+#endif
+                     obs_index_p(cnt) = g-begg+1 + ((endg-begg+1) * (clmobs_layer(i)-1))
+#ifdef CLMFIVE
+                   end if
+#endif
                  end if
 
                  !write(*,*) 'obs_index_p(',cnt,') is',obs_index_p(cnt)
