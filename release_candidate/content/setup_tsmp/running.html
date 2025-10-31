@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Running TSMP-PDAF &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Input files for CLM" href="input_clm.html" />
+    <link rel="prev" title="Setup Examples" href="setup_examples.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Running TSMP-PDAF</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_clm.html">Input files for CLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_pfl.html">Input files for ParFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cos.html">Input files for COSMO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_oas.html">Input files for OASIS-MCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html">Observation input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html">Command line options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Running TSMP-PDAF</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/content/setup_tsmp/running.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="running-tsmp-pdaf">
+<h1>Running TSMP-PDAF<a class="headerlink" href="#running-tsmp-pdaf" title="Permalink to this heading"></a></h1>
+<p>The execution of TSMP-PDAF and the necessary input is closely related
+to the one of TSMP. For executing TSMP, a ParFlow database file
+<code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> (see ParFlow documentation for more details), an input file
+for CLM (<code class="docutils literal notranslate"><span class="pre">lnd.stdin</span></code>) and several input files for OASIS-MCT and COSMO
+need to be present in the run directory. TSMP-PDAF follows a similar
+approach. The only difference is that for each realisation a different
+set of ParFlow/ CLM/ COSMO input files needs to be present which
+follow a certain naming convention (see Sections <a class="reference internal" href="input_clm.html#input-files-for-clm"><span class="std std-ref">Input files for
+CLM</span></a>, <a class="reference internal" href="input_pfl.html#input-files-for-parflow"><span class="std std-ref">Input files for
+ParFlow</span></a> and <a class="reference internal" href="input_cos.html#input-files-for-cosmo"><span class="std std-ref">Input files for
+COSMO</span></a>). Additionally, a control
+file for the data assimilation (<a class="reference internal" href="input_enkfpf.html#control-file-enkfpf-par"><span class="std std-ref">Control file
+<code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></span></a>) and
+observation files (<a class="reference internal" href="input_obs.html#observation-files"><span class="std std-ref">Observation
+files</span></a>) need to be present in the
+run directory.  Furthermore, some command line options (<a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">Command line
+options</span></a>) need to be specified
+when TSMP-PDAF is executed.</p>
+<p>See the Virtual Machine download on webpage
+<a class="reference external" href="https://datapub.fz-juelich.de/slts/tsmp-vm/index.html">https://datapub.fz-juelich.de/slts/tsmp-vm/index.html</a>.</p>
+<p>The data on this website is quite large - <code class="docutils literal notranslate"><span class="pre">12.8 GB</span></code>.</p>
+<p>Only download this, if you really want to run the Virtual Machine!.</p>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Inputs for TSMP-PDAF</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="input_clm.html">Input files for CLM</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_pfl.html">Input files for ParFlow</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_cos.html">Input files for COSMO</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_oas.html">Input files for OASIS-MCT</a></li>
+<li class="toctree-l1"><a class="reference internal" href="input_enkfpf.html">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html#pf">[PF]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-problemname">PF:problemname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-nprocs">PF:nprocs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-starttime">PF:starttime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-dt">PF:dt</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-endtime-deprecated">PF:endtime (deprecated)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-simtime">PF:simtime</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-updateflag">PF:updateflag</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-gwmasking">PF:gwmasking</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-paramupdate">PF:paramupdate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-paramupdate-frequency">PF:paramupdate_frequency</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-aniso-perm-y">PF:aniso_perm_y</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-aniso-perm-z">PF:aniso_perm_z</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-printensemble">PF:printensemble</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-printstat">PF:printstat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-paramprintensemble">PF:paramprintensemble</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-paramprintstat">PF:paramprintstat</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#pf-olfmasking">PF:olfmasking</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html#clm">[CLM]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-problemname">CLM:problemname</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-nprocs">CLM:nprocs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-update-swc">CLM:update_swc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-update-texture">CLM:update_texture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-print-swc">CLM:print_swc</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#clm-print-et">CLM:print_et</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html#cosmo">[COSMO]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#cosmo-nprocs">COSMO:nprocs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#cosmo-dtmult">COSMO:dtmult</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html#da">[DA]</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-outdir">DA:outdir</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-nreal">DA:nreal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-startreal">DA:startreal</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-da-interval">DA:da_interval</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-stat-dumpoffset">DA:stat_dumpoffset</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-screen-wrapper">DA:screen_wrapper</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-point-obs">DA:point_obs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_enkfpf.html#da-obs-interp-switch">DA:obs_interp_switch</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html#parameter-summary">Parameter Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="input_obs.html">Observation input</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html#observation-files">Observation files</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_obs.html#general-observation-file-variables">General observation file variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_obs.html#parflow-observation-file-variables">ParFlow observation file variables</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_obs.html#clm-observation-file-variables">CLM observation file variables</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html#multiscalar-data-assimilation">Multiscalar Data Assimilation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html#observation-time-flexibility">Observation time flexibility</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html#specifying-type-of-observation-at-compile-time">Specifying type of observation at compile time</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_obs.html#example-for-setting-environment-variables">Example for setting environment variables</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="input_cmd.html">Command line options</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#n-modeltasks">n_modeltasks</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#filtertype">filtertype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#subtype">subtype</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#obs-filename">obs_filename</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#rms-obs">rms_obs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#delt-obs">delt_obs</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#screen">screen</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html#command-line-examples">Command Line Examples</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-enkf">Command Line Example: EnKF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-etkf">Command Line Example: ETKF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-estkf">Command Line Example: ESTKF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-letkf">Command Line Example: LETKF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-lestkf">Command Line Example: LESTKF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="input_cmd.html#command-line-example-lenkf">Command Line Example: LENKF</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="setup_examples.html" class="btn btn-neutral float-left" title="Setup Examples" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="input_clm.html" class="btn btn-neutral float-right" title="Input files for CLM" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

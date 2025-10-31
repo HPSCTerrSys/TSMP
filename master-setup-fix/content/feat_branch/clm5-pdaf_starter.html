@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLM5-PDAF Starting instructions &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Contributing to TSMP in general" href="../faq/general.html" />
+    <link rel="prev" title="TSMP-PDAF related branches" href="branches.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">CLM5-PDAF Starting instructions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#install-components">1.  Install components</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tsmp-pdaf">1.1 TSMP-PDAF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pdaf">1.2 PDAF</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clm5">1.3 CLM5</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#compile-the-models-together">1.4 Compile the models together</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#file-preparation">2. File preparation</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#ensemble-generation">2.1 Ensemble generation</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#case-generation">2.2 Case generation</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#running-the-simulation">3. Running the simulation</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#post-processing-the-output">4. Post-processing the output</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-case">5. Example case:</a></li>
+</ul>
+</li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">CLM5-PDAF Starting instructions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/content/feat_branch/clm5-pdaf_starter.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="clm5-pdaf-starting-instructions">
+<h1>CLM5-PDAF Starting instructions<a class="headerlink" href="#clm5-pdaf-starting-instructions" title="Permalink to this heading"></a></h1>
+<section id="install-components">
+<h2>1.  Install components<a class="headerlink" href="#install-components" title="Permalink to this heading"></a></h2>
+<p>The following instructions assume you are working on the JSC machine JURECA. If you are working on another JSC machine switch the name appropriately and the instructions should still work. Running CLM5-PDAF on non JSC machines is not covered in these instructions but should be similar if TSMP-PDAF, PDAF, and CLM5 can be installed on the machine.</p>
+<section id="tsmp-pdaf">
+<h3>1.1 TSMP-PDAF<a class="headerlink" href="#tsmp-pdaf" title="Permalink to this heading"></a></h3>
+<p>Clone the TSMP-PDAF repository to your work folder and switch to the CLM5-PDAF branch like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>git<span class="w"> </span>clone<span class="w"> </span>https://github.com/HPSCTerrSys/TSMP.git<span class="w"> </span>tsmp
+
+<span class="w"> </span><span class="nb">cd</span><span class="w"> </span>tsmp
+
+<span class="w"> </span>git<span class="w"> </span>checkout<span class="w"> </span>TSMP_pdaf-clm5
+</pre></div>
+</div>
+</section>
+<section id="pdaf">
+<h3>1.2 PDAF<a class="headerlink" href="#pdaf" title="Permalink to this heading"></a></h3>
+<p>Get PDAF from <a class="reference external" href="http://pdaf.awi.de/">http://pdaf.awi.de/</a> at least
+version 1.13 (suggested version 2.0) and unpack it in the tsmp
+directory and re-name the folder to <code class="docutils literal notranslate"><span class="pre">pdaf</span></code>.</p>
+<p>Users with internal IBG-3 access may also look here:
+<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh">https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/pdaf2.0_fresh</a></p>
+<p>Example: On your local machine:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>scp<span class="w"> </span>your_local_download_folder/PDAF-D_V1.16.tar.gz<span class="w"> </span>your_username@jureca.fz-juelich.de:/full_path_to_your_tsmp_folder
+</pre></div>
+</div>
+<p>On the JSC machine in the tsmp folder:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>tar<span class="w"> </span>-xzf<span class="w"> </span>PDAF-D_V1.16.tar.gz
+<span class="w"> </span>mv<span class="w"> </span>PDAF-D_V1.16<span class="w"> </span>pdaf
+</pre></div>
+</div>
+</section>
+<section id="clm5">
+<h3>1.3 CLM5<a class="headerlink" href="#clm5" title="Permalink to this heading"></a></h3>
+<p>Clone CLM5 and its dependencies from the official repo to the tsmp folder like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git<span class="w"> </span>clone<span class="w"> </span>-b<span class="w"> </span>release-clm5.0<span class="w"> </span>https://github.com/ESCOMP/CTSM.git<span class="w"> </span>clm5_0
+
+<span class="nb">cd</span><span class="w"> </span>clm5_0
+
+<span class="nb">source</span><span class="w"> </span>../bldsva/machines/JURECA/loadenvs.Intel
+
+./manage_externals/checkout_externals
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">source</span> <span class="pre">...</span></code>: Loads the software environment on JURECA that is later
+used for build with Intel</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">./manage_externals/checkout_externals</span></code>: Loads dependencies of CLM5,
+mostly a collection of <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">clone</span></code> commands</p></li>
+</ul>
+</section>
+<section id="compile-the-models-together">
+<h3>1.4 Compile the models together<a class="headerlink" href="#compile-the-models-together" title="Permalink to this heading"></a></h3>
+<p>The TSMP framework works with its own build system. With the models in
+the folders as described before the compilation of both CLM5 and PDAF
+can be done with a single build command after the following
+preparations.</p>
+<p>If not already configured for CLM5 the following environmental
+variables are needed to compile CLM5 and can be for example be set
+like this:</p>
+<p>User defined data paths</p>
+<p>Path to the root directory for all CESM / CLM input files</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CESMDATAROOT</span><span class="o">=</span><span class="nv">$SCRATCH</span>/cesm
+</pre></div>
+</div>
+<p>This is the default value set by the build process. However, you can
+export your own <code class="docutils literal notranslate"><span class="pre">CESMDATAROOT</span></code>.</p>
+<p>Path to the CSM specific input files (usually subfolder of CESMDATAROOT)</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">export</span><span class="w"> </span><span class="nv">CSMDATA</span><span class="o">=</span><span class="nv">$CESMDATAROOT</span>/inputdata
+</pre></div>
+</div>
+<p>In the <code class="docutils literal notranslate"><span class="pre">tsmp/bldsva</span></code> directory:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-v<span class="w"> </span><span class="m">4</span>.4.0MCTPDAF<span class="w"> </span>-c<span class="w"> </span>clm<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<p>Potential problems that can happen during this step:</p>
+<ul class="simple">
+<li><p>If you worked with CLM5 standalone and have created a <code class="docutils literal notranslate"><span class="pre">.cime</span></code>
+folder in your home directory it can cause a conflict during
+compilation. The error file will contain a line that says <code class="docutils literal notranslate"><span class="pre">ERROR:</span> <span class="pre">No</span> <span class="pre">machine</span> <span class="pre">jureca</span> <span class="pre">found</span></code> for example. The easiest solution to this
+is to move the <code class="docutils literal notranslate"><span class="pre">~/.cime</span></code> folder to <code class="docutils literal notranslate"><span class="pre">~/.cime_deactivated</span></code> while
+working with CLM5-PDAF.</p></li>
+<li><p>Using the newest software stages from JSC there is an import
+conflict with bigint for PERL.  See
+<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp/-/issues/67">https://icg4geo.icg.kfa-juelich.de/ExternalRepos/tsmp-pdaf/tsmp/-/issues/67</a>
+for details. The error message will contain a line like this:
+<code class="docutils literal notranslate"><span class="pre">err=Can't</span> <span class="pre">locate</span> <span class="pre">bigint.pm</span> <span class="pre">in</span> <span class="pre">&#64;INC</span></code>. The solution for now is to
+comment all lines with <code class="docutils literal notranslate"><span class="pre">bigint</span></code> and <code class="docutils literal notranslate"><span class="pre">bignum</span></code> in the script
+<code class="docutils literal notranslate"><span class="pre">tsmp/clm5_0/bld/config_files/clm_phys_vers.pm</span></code> since this is only
+needed to check some version numbers the PERL modules is not
+strictly needed.</p></li>
+</ul>
+<p>Once successfully compiled the executable can be found in path
+<code class="docutils literal notranslate"><span class="pre">tsmp/bin/JURECA_4.4.0MCTPDAF_clm/tsmp-pdaf</span></code>.</p>
+</section>
+</section>
+<section id="file-preparation">
+<h2>2. File preparation<a class="headerlink" href="#file-preparation" title="Permalink to this heading"></a></h2>
+<p>For example files see <a class="reference internal" href="#example-case">Example Case</a>.</p>
+<section id="ensemble-generation">
+<h3>2.1 Ensemble generation<a class="headerlink" href="#ensemble-generation" title="Permalink to this heading"></a></h3>
+<p>For data assimilation with the ensemble Kalman filter we usually
+create an ensemble by perturbing the atmospheric forcing files as well
+as the sand and clay fractions in the surface file.</p>
+<p>For CLM5 how these files are named and numbered can be customized, as
+shown in the next section. But a recommended approach is to have a
+suffix with zero filled numbering like
+<code class="docutils literal notranslate"><span class="pre">surfdata_DE-Wue_hist_78pfts_CMIP6_simyr2000_c191001.nc_00001.nc</span></code>.</p>
+<p>The exact details of perturbation can vary from study to study, but a
+usable script to perturb the forcings and surface files can be found
+at
+<code class="docutils literal notranslate"><span class="pre">/p/largedata/jicg41/strebel2/CLM5PDAF_Example/perturb_forcings_and_soil_properties_in_range.py</span></code>.</p>
+<p>In this script the following variables should be modified or at least considered for modification before running it for your case.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>* years (range of years for atm. forcing perturb)
+* num_ensembles (how many ensemble members should be created)
+* sname (path and naming for the output surface files)
+* sorig (path for the original surface file)
+* the attribute &quot;perturbed by&quot; (to indicate for future use who created the files)
+* the values of the random.uniform function (range of perturbation for soil characteristics)
+* sd, mean, and correl (the statistical characteristics for the atm. forcing perturbations)
+* fname (path and naming for the original atm. files)
+* outname (path and naming for the output atm. files)
+</pre></div>
+</div>
+</section>
+<section id="case-generation">
+<h3>2.2 Case generation<a class="headerlink" href="#case-generation" title="Permalink to this heading"></a></h3>
+<p>These instructions assume you already have a running CLM5 standalone
+case before moving to CLM5PDAF. If not instructions of how to generate
+the domain file, surface file, and download the default CLM5 inputfile
+can be found on the GitLab.</p>
+<p>We setup a new case in a new directory. In this directory we will need a few subfolders:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>mkdir<span class="w"> </span>logs
+
+<span class="w"> </span>mkdir<span class="w"> </span>timing/checkpoints<span class="w"> </span>-p
+</pre></div>
+</div>
+<p>CLM5-PDAF does not use the same case setup as CLM5 standalone, instead we skip to the final namelist files that are needed to run CLM5. The minimal set of namelists to run CLM5 is:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>* atm_modelio.nml
+* datm_in
+* drv_flds_in
+* drv_in
+* esp_modelio.nml
+* glc_modelio.nml
+* ice_modelio.nml
+* lnd_in
+* lnd_modelio.nml
+* mosart_in
+* ocn_modelio.nml
+* rof_modelio.nml
+* wav_modelio.nml
+</pre></div>
+</div>
+<p>Since these files are needed for each ensemble member we create them with a script. An example of  such a script can be found at <code class="docutils literal notranslate"><span class="pre">/p/largedata/jicg41/strebel2/CLM5PDAF_Example/create_ensemble_namelists.py</span></code></p>
+<p>In this script the following variables should be modified or at least considered for modification before running it for your case.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>*  domain file (appears in write_datm_in(), as fatmlndfrc in write_lnd_in(), in write_stream_files() with path and name separated)
+*  streams (in write_datm_in() modify to name of your case)
+*  finidat (in write_lnd_in() your initial condition file from spinup)
+*  fsurdat (in write_lnd_in() your surface files including ensemble numbering)
+*  hist_mfilt, hist_nhtfrq (customize your history file settings)
+*  filePath, fileNames (in write_stream_files customize the name and list of years for forcings)
+*  name of the case (at the end of write_stream_files() needs to be consistent with the ones given in write_datm_in())
+*  year_start, year_end (in main() give start and end year)
+*  prefix (in main() for naming of output files)
+*  num_ensemble (in main() number of ensemble members)
+*  b_dir (in main() path to build directory of clm within tsmp)
+*  r_dir (in main() path to the directory where the case will be run from i.e. the case directory)
+*  Every other variable uses the default from a standalone CLM5 case, but may vary in your case, check the namelists in the run directory of your case against the variables listed in this script if you have customized the CLM5 case.
+</pre></div>
+</div>
+<p>The script at the moment can either be called without arguments if all
+variables are modified within the script or with year_start and prefix
+as arguments.</p>
+<p>To run PDAF an additional namelist is needed, enkfpf.par for details
+on the contents of this namelist refer to the TSMP-PDAF manual.</p>
+<p>Lastly, we create a symbolic link to the executable in the case
+directory. This way we do not create unnecessary copies of the
+executable for each case, we make sure that all cases are run with the
+same executable, and modification and re-compilations of the
+executable will not need any changes in the case directories. The
+symbolic link can be created like this:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>PATH_TO_THE_EXECUTABLE/tsmp-pdaf<span class="w"> </span>.
+</pre></div>
+</div>
+<p>Similarly, we can use a symbolic link to the loadenvs file from TSMP to make sure we use the same module versions during runtime as during compilation.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w"> </span>ln<span class="w"> </span>-s<span class="w"> </span>PATH_TO_THE_TSMP_FOLDER/bldsva/machines/JURECA/loadenvs.Intel<span class="w"> </span>loadenvs
+</pre></div>
+</div>
+</section>
+</section>
+<section id="running-the-simulation">
+<h2>3. Running the simulation<a class="headerlink" href="#running-the-simulation" title="Permalink to this heading"></a></h2>
+<p>To run the simulation we use can use a simple jobscript, an example can be found at <code class="docutils literal notranslate"><span class="pre">/p/largedata/jicg41/strebel2/CLM5PDAF_Example/jobscript_da.slurm</span></code></p>
+<p>The arguments for the tsmp-pdaf executable are explained in the TSMP-PDAF manual.</p>
+<p>Important parameters are <code class="docutils literal notranslate"><span class="pre">-n_modeltasks</span></code> is the number of ensemble members and <code class="docutils literal notranslate"><span class="pre">nodes</span></code> times <code class="docutils literal notranslate"><span class="pre">ntasks-per-node</span></code> should be at least the same or a multiple of <code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code>.</p>
+<p>The argument <code class="docutils literal notranslate"><span class="pre">-delt_obs</span></code> can be used to switch between open loop and DA simulation by increasing the value to be larger than the number of simulation steps set in <code class="docutils literal notranslate"><span class="pre">enkfpar.par</span></code> no assimilation will take place and the simulation will be an open loop ensemble simulation.</p>
+<p>Additionally, <code class="docutils literal notranslate"><span class="pre">-obs_filename</span></code> has the path to the observations and the prefix of the observation files without the numbering.</p>
+</section>
+<section id="post-processing-the-output">
+<h2>4. Post-processing the output<a class="headerlink" href="#post-processing-the-output" title="Permalink to this heading"></a></h2>
+<p>CLM5-PDAF will create history files for each ensemble members
+according to the settings defined in the script
+<code class="docutils literal notranslate"><span class="pre">create_ensemble_namelists.py</span></code> with the hist variables. For large
+ensembles this will create a lot of files and should be processed and
+moved / archived away from <code class="docutils literal notranslate"><span class="pre">$SCRATCH</span></code> to avoid filling the number of
+files limit. One way to process the output is to collect the ensemble
+statistics of the variables in one file. An example script to perform
+this post-processing can be found at
+<code class="docutils literal notranslate"><span class="pre">/p/largedata/jicg41/strebel2/CLM5PDAF_Example/collect_some_ensemble_stats.py</span></code></p>
+<p>The script should be modified before use, by changing the
+<code class="docutils literal notranslate"><span class="pre">collect_vars</span></code> variable to a list with the CLM5 variable names that
+should be collected. The output netcdf file will be called
+<code class="docutils literal notranslate"><span class="pre">Ensemble_Collection_</span></code> and contain the listed variables with their
+ensemble minimum, maximum, mean, and standard deviation.</p>
+<p>At the moment the script assumes that each year is in a separate
+history file, but could be customized to work on multi-year or less
+than a year files.  Currently, the script takes the arguments: year,
+OL or DA, num_ensemble, case name. Where case name refers to the
+previously mentioned prefix that can be used to differentiate between
+different simulations within the same case.</p>
+</section>
+<section id="example-case">
+<h2>5. Example case:<a class="headerlink" href="#example-case" title="Permalink to this heading"></a></h2>
+<p>All the input files necessary to create a 10 ensemble case for the
+year 2009 are located at
+<code class="docutils literal notranslate"><span class="pre">/p/largedata/jicg41/strebel2/CLM5PDAF_Example/Example_Case</span></code> and can
+be used to test the setup before working on your own case.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="branches.html" class="btn btn-neutral float-left" title="TSMP-PDAF related branches" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../faq/general.html" class="btn btn-neutral float-right" title="Contributing to TSMP in general" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

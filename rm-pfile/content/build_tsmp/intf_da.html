@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Structure of DA inside TSMP &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Structure of PDAF inside TSMP" href="pdaf.html" />
+    <link rel="prev" title="Structure of TSMP" href="structure.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Structure of DA inside TSMP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#arch"><code class="docutils literal notranslate"><span class="pre">arch</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#framework"><code class="docutils literal notranslate"><span class="pre">framework</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#model"><code class="docutils literal notranslate"><span class="pre">model</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#tsmp"><code class="docutils literal notranslate"><span class="pre">tsmp</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Structure of DA inside TSMP</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/build_tsmp/intf_da.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="structure-of-da-inside-tsmp">
+<h1>Structure of DA inside TSMP<a class="headerlink" href="#structure-of-da-inside-tsmp" title="Link to this heading"></a></h1>
+<p>The directory <code class="docutils literal notranslate"><span class="pre">intf_DA</span></code> holds the interfaces of the component models
+to data assimilation frameworks (<code class="docutils literal notranslate"><span class="pre">dart</span></code>, <code class="docutils literal notranslate"><span class="pre">kenda</span></code> (currently not in
+<code class="docutils literal notranslate"><span class="pre">master</span></code>) and <code class="docutils literal notranslate"><span class="pre">pdaf</span></code>) alongside scripts for building the data
+assimilation frameworks.</p>
+<p>The directory <code class="docutils literal notranslate"><span class="pre">intf_DA/pdaf</span></code> contains build interface scripts and
+the interface code for coupling and running PDAF along with model
+component <code class="docutils literal notranslate"><span class="pre">clm3_5</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow3_0</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow3_2</span></code>, <code class="docutils literal notranslate"><span class="pre">oasis</span></code>,
+<code class="docutils literal notranslate"><span class="pre">oasis-mct</span></code> and <code class="docutils literal notranslate"><span class="pre">cosmo4_21</span></code>.  It has the following internal structure:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>TSMP/bldsva/intf_DA/pdaf/arch
+TSMP/bldsva/intf_DA/pdaf/framework
+TSMP/bldsva/intf_DA/pdaf/model
+TSMP/bldsva/intf_DA/pdaf/tsmp
+</pre></div>
+</div>
+<ul class="simple">
+<li><p><a class="reference internal" href="#arch"><code class="docutils literal notranslate"><span class="pre">arch</span></code></a> contains the configuration and build scripts for
+different computers/clusters.</p>
+<ul>
+<li><p>Most important file(s): <code class="docutils literal notranslate"><span class="pre">build_interface_pdaf.ksh</span></code></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#framework"><code class="docutils literal notranslate"><span class="pre">framework</span></code></a> contains the interface to PDAF.</p>
+<ul>
+<li><p>Most important file: <code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp.F90</span></code>.</p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#model"><code class="docutils literal notranslate"><span class="pre">model</span></code></a> contains the wrapper/interface to the component
+models.  In the subdirectories, there is component-model-specific
+wrapper functions.</p>
+<ul>
+<li><p>Most important files: <code class="docutils literal notranslate"><span class="pre">wrapper_tsmp.c</span></code>, <code class="docutils literal notranslate"><span class="pre">Makefile</span></code></p></li>
+</ul>
+</li>
+<li><p><a class="reference internal" href="#tsmp"><code class="docutils literal notranslate"><span class="pre">tsmp</span></code></a> contains modified source files for <code class="docutils literal notranslate"><span class="pre">clm3_5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">parflow</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow3_0</span></code>, <code class="docutils literal notranslate"><span class="pre">parflow3_2</span></code>, <code class="docutils literal notranslate"><span class="pre">oasis</span></code>, <code class="docutils literal notranslate"><span class="pre">oasis-mct</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cosmo4_21</span></code>. These source files are copied into the sources of the
+component models, when PDAF is invoked and on top of the files
+copied from <code class="docutils literal notranslate"><span class="pre">intf_oas3</span></code>.</p>
+<ul>
+<li><p>Most important file: <code class="docutils literal notranslate"><span class="pre">Makefile</span></code></p></li>
+</ul>
+</li>
+</ul>
+<section id="arch">
+<h2><code class="docutils literal notranslate"><span class="pre">arch</span></code><a class="headerlink" href="#arch" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">arch</span></code> currently contains the PDAF build scripts tested for the
+following two computers:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>├── JURECA
+└── JUWELS
+</pre></div>
+</div>
+<p>The directory looks as follows:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>├── build_interface_pdaf.ksh
+└── config
+    ├── linux_gfortran_openmpi.h
+    └── linux_ifort.h
+
+1 directory, 3 files
+</pre></div>
+</div>
+<p>The build-script <code class="docutils literal notranslate"><span class="pre">build_interface_pdaf.ksh</span></code> contains the following
+functions. The script is source and the functions are called in
+<code class="docutils literal notranslate"><span class="pre">/TSMP/bldsva/build_tsmp.ksh</span></code> in the function <code class="docutils literal notranslate"><span class="pre">compileDA()</span></code>.</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">always_da()</span></code>:</p>
+<ul>
+<li><p>always executed, when DA is used (<code class="docutils literal notranslate"><span class="pre">$withDA==&quot;true&quot;</span></code>) ()</p></li>
+<li><p>up to now: dummy function, no effect</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">always_*</span></code> only used for OASIS3 for setting some directories</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">substitutions_da()</span></code></p>
+<ul>
+<li><p>make directory <code class="docutils literal notranslate"><span class="pre">$dadir/interface</span></code> (inside the newly generated
+PDAF-directory-backup with build-suffix)</p></li>
+<li><p>copy directories <a class="reference internal" href="#model"><code class="docutils literal notranslate"><span class="pre">model</span></code></a> (component model interface) and <a class="reference internal" href="#framework"><code class="docutils literal notranslate"><span class="pre">framework</span></code></a> (PDAF interface)
+into <code class="docutils literal notranslate"><span class="pre">interface</span></code></p></li>
+<li><p>make directory <code class="docutils literal notranslate"><span class="pre">$dadir/lib</span></code> (make sure the empty <code class="docutils literal notranslate"><span class="pre">/lib</span></code> exists inside PDAF, this is where the static PDAF library <code class="docutils literal notranslate"><span class="pre">libpdaf-d.a</span></code> is written after compilation)</p></li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">configure_da()</span></code></p>
+<ul>
+<li><p>configure three Makefiles (three-step process: (1)copying Makfiles
+into compilation directories, (2) setting variables and then
+overwriting dummy placeholders in the template makefiles), (3)
+<code class="docutils literal notranslate"><span class="pre">make</span> <span class="pre">clean</span></code> for all Makefiles)</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">make.arch/linux_*.h</span></code>: PDAF machine-specific configuration</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">framework/Makefile</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">model/Makefile</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">make_da()</span></code></p>
+<ul>
+<li><p>three <code class="docutils literal notranslate"><span class="pre">make</span></code> commands</p>
+<ul>
+<li><p>PDAF source <code class="docutils literal notranslate"><span class="pre">src</span></code></p></li>
+<li><p>PDAF <code class="docutils literal notranslate"><span class="pre">interface/model</span></code></p></li>
+<li><p>PDAF <code class="docutils literal notranslate"><span class="pre">interface/framework</span></code></p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="framework">
+<h2><code class="docutils literal notranslate"><span class="pre">framework</span></code><a class="headerlink" href="#framework" title="Link to this heading"></a></h2>
+</section>
+<section id="model">
+<h2><code class="docutils literal notranslate"><span class="pre">model</span></code><a class="headerlink" href="#model" title="Link to this heading"></a></h2>
+</section>
+<section id="tsmp">
+<h2><code class="docutils literal notranslate"><span class="pre">tsmp</span></code><a class="headerlink" href="#tsmp" title="Link to this heading"></a></h2>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="structure.html" class="btn btn-neutral float-left" title="Structure of TSMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="pdaf.html" class="btn btn-neutral float-right" title="Structure of PDAF inside TSMP" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

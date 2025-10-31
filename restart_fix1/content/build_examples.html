@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Building TSMP &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+<b style="color:#b96922;">    <link rel="next" title="Running TSMP-PDAF" href="running.html" />
+</b>    <link rel="prev" title="Installing TSMP" href="installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building and Running:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Building TSMP</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#build-script-of-tsmp">Build script of TSMP</a><ul>
+<b style="color:#b96922;"><li class="toctree-l3"><a class="reference internal" href="#building-on-gpu">Building on GPU</a></li>
+</b></ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#patching-the-orginal-source-code">Patching the orginal source code</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#automatic-porting-of-tsmp-on-x86-machines">Automatic Porting of TSMP on x86 machines</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Developing TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Development Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="remotes.html">TSMP remote repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html#clm5-pdaf-starting-instructions">CLM5-PDAF Starting instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsc.html">JSC systems</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Building TSMP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/content/build_examples.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="building-tsmp">
+<h1>Building TSMP<a class="headerlink" href="#building-tsmp" title="Permalink to this heading"></a></h1>
+<p>These are example builds of TSMP that are frequently tested.</p>
+<section id="build-script-of-tsmp">
+<h2>Build script of TSMP<a class="headerlink" href="#build-script-of-tsmp" title="Permalink to this heading"></a></h2>
+<p>To get information about TSMP build options for different version
+using standalone or different combination of model components on
+different machines inside the folder <code class="docutils literal notranslate"><span class="pre">TSMP/bldsva</span></code> execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>./build_tsmp.ksh<span class="w"> </span>-a
+</pre></div>
+</div>
+<p>you can also use <code class="docutils literal notranslate"><span class="pre">--man</span></code> or <code class="docutils literal notranslate"><span class="pre">--help</span></code> to get terrsysmp build options</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>./build_tsmp.ksh<span class="w"> </span>--man<span class="w"> </span>./build_tsmp.ksh<span class="w"> </span>--help
+</pre></div>
+</div>
+<p>for building <code class="docutils literal notranslate"><span class="pre">TSMP</span></code> with COSMO-CLM3.5-ParFlow the following internal version is recommended:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">3.1.0MCT</span></code> (recommended).</p></li>
+</ul>
+<p>for building <code class="docutils literal notranslate"><span class="pre">TSMP-PDAF</span></code> the following internal versions can be used:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">1.1.0MCTPDAF</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3.0.0MCTPDAF</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3.1.0MCTPDAF</span></code> (recommended).</p></li>
+</ul>
+<section id="building-on-gpu">
+<h3>Building on GPU<a class="headerlink" href="#building-on-gpu" title="Permalink to this heading"></a></h3>
+<p>For building ParFlow 3.9 on GPU:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span><span class="w"> </span><span class="nv">$TSMP_DIR</span>/bldsva
+./build_tsmp.ksh<span class="w"> </span>-v<span class="w"> </span><span class="m">3</span>.1.0MCT<span class="w"> </span>-c<span class="w"> </span>clm-cos-pfl<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-O<span class="w"> </span>Intel<span class="w"> </span>-A<span class="w"> </span>GPU
+</pre></div>
+</div>
+</section>
+</section>
+<section id="patching-the-orginal-source-code">
+<h2>Patching the orginal source code<a class="headerlink" href="#patching-the-orginal-source-code" title="Permalink to this heading"></a></h2>
+<p>In order to prepare the original Cosmo5_1 source code for coupling, the Cosmo source code is patched using the diff files which are located in <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/pfile</span></code>.
+The diff files are generated using the script <code class="docutils literal notranslate"><span class="pre">fpatch.sh</span></code> which is located in the same directory. Note that the patching is done only for cosmo5_1 source code.
+If the user aims to modify the coupling source files, should modify the files located in <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/intf_oas3/cosmo5_1/tsmp</span></code> and run again the script <code class="docutils literal notranslate"><span class="pre">fpatch.sh</span></code> in order to generate the the new diff files accordingly.
+The necessary changes for making the ParFlow3.9 ready for coupling are already included in the official ParFlow3.9 release.
+The changed source files for CLM3.5 are located in  <code class="docutils literal notranslate"><span class="pre">$TSMP_DIR/bldsva/intf_oas3/clm3_5/tsmp</span></code> and will be copied by TSMP scripts to the user’s source code directory of CLM3.5 ‘(<code class="docutils literal notranslate"><span class="pre">bld/usr.src</span></code>)</p>
+</section>
+<section id="automatic-porting-of-tsmp-on-x86-machines">
+<h2>Automatic Porting of TSMP on x86 machines<a class="headerlink" href="#automatic-porting-of-tsmp-on-x86-machines" title="Permalink to this heading"></a></h2>
+<p>The users who want to port TSMP on GENERIC_X86 Linux, the TSMP team provided a script to install all the necessary libraries (Netcdf, GRIBAPI, OpenMPI, HDF5, TCL, Hypre and Silo) automatically in TSMP root directory. Please run the script “lib_install.sh” located in bldsva directory to install the libraries. Note that if you exported already one of the libraries Netcdf, HDF5, GRIBAPI, Silo, Hypre and TCL in the .baschrc or .profile, you need to comment them out in order to not mess up the installation via the script lib_install.sh.</p>
+<p>The instruction on how to build and how to configure TSMP for the cordex test case (<a class="reference internal" href="gettingstarted.html#the-fully-coupled-pan-european-euro-cordex-evaluation-experiment-with-tsmp"><span class="std std-ref">EURO-CORDEX test case experiment</span></a>) are given in <a class="reference internal" href="gettingstarted.html#step-5-build-tsmp-interface-and-component-models"><span class="std std-ref">step 5 </span></a> and <a class="reference internal" href="gettingstarted.html#step-6-setup-and-configuration-of-the-respective-usage-and-test-case"><span class="std std-ref">step 6 </span></a> in the getting started section, respectively.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="installation.html" class="btn btn-neutral float-left" title="Installing TSMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+<b style="color:#b96922;">        <a href="running.html" class="btn btn-neutral float-right" title="Running TSMP-PDAF" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+</b>    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

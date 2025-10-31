@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Debug tips &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Debugging flags" href="debugging_flags.html" />
+    <link rel="prev" title="JUBE with TSMP" href="../profiling/jube.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../setup_tsmp/development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Debug tips</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#debug-tip-1-skip-component-models-in-tsmp-pdaf-build">Debug Tip 1: Skip component models in TSMP-PDAF build</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#debug-tip-2-building-tsmp-pdaf-after-source-code-changes-in-component-models">Debug Tip 2: Building TSMP-PDAF after source code changes in component models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Debug tips</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/content/debugging/debug_tips.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="debug-tips">
+<h1>Debug tips<a class="headerlink" href="#debug-tips" title="Permalink to this heading"></a></h1>
+<section id="debug-tip-1-skip-component-models-in-tsmp-pdaf-build">
+<h2>Debug Tip 1: Skip component models in TSMP-PDAF build<a class="headerlink" href="#debug-tip-1-skip-component-models-in-tsmp-pdaf-build" title="Permalink to this heading"></a></h2>
+<b style="color:#b96922;"><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-c<span class="w"> </span>clm3-cos4-pfl<span class="w"> </span>-W<span class="w"> </span>skip<span class="w"> </span>-X<span class="w"> </span>skip
+</b></pre></div>
+</div>
+<p>Oasis and CLM compilation are skipped with the option <code class="docutils literal notranslate"><span class="pre">skip</span></code> for flags
+<code class="docutils literal notranslate"><span class="pre">-W</span></code> and <code class="docutils literal notranslate"><span class="pre">-X</span></code>. Parflow and pdaf are compiled after Cosmo.</p>
+<p>All flags can be found using <code class="docutils literal notranslate"><span class="pre">./build_tsmp.ksh</span> <span class="pre">--help</span></code>. Here, the
+<b style="color:#b96922;">output for flag of component model build options:</p>
+</b><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>-W,<span class="w"> </span>--optoas<span class="o">=</span>optoas
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Oasis.
+<span class="w">                    </span>fresh<span class="w">        </span><span class="c1">#build from scratch in a new folder</span>
+<span class="w">                    </span>build<span class="w">        </span><span class="c1">#build clean</span>
+<span class="w">                    </span>make<span class="w">         </span><span class="c1">#only (resume) make and make install - no make clean and configure</span>
+<span class="w">                    </span>configure<span class="w">    </span><span class="c1">#only make clean and configure - no make</span>
+<span class="w">                    </span>skip<span class="w">         </span><span class="c1">#no build</span>
+<span class="w">                  </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-E,<span class="w"> </span>--opticon<span class="o">=</span>opticon
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>ICON.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-Y,<span class="w"> </span>--optcos<span class="o">=</span>optcos
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Cosmo.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-X,<span class="w"> </span>--optclm<span class="o">=</span>optclm
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>CLM.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-Z,<span class="w"> </span>--optpfl<span class="o">=</span>optpfl
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Parflow.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-U,<span class="w"> </span>--optda<span class="o">=</span>optda
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Data<span class="w"> </span>Assimilation.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+</pre></div>
+</div>
+</section>
+<section id="debug-tip-2-building-tsmp-pdaf-after-source-code-changes-in-component-models">
+<h2>Debug Tip 2: Building TSMP-PDAF after source code changes in component models<a class="headerlink" href="#debug-tip-2-building-tsmp-pdaf-after-source-code-changes-in-component-models" title="Permalink to this heading"></a></h2>
+<b style="color:#b96922;"><div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-c<span class="w"> </span>clm3-cos4-pfl<span class="w"> </span>-W<span class="w"> </span>skip<span class="w"> </span>-X<span class="w"> </span>skip<span class="w"> </span>-Y<span class="w"> </span>make
+</b></pre></div>
+</div>
+<p>Oasis and CLM compilation are skipped with the option <code class="docutils literal notranslate"><span class="pre">skip</span></code> for flags
+<code class="docutils literal notranslate"><span class="pre">-W</span></code> and <code class="docutils literal notranslate"><span class="pre">-X</span></code>.</p>
+<p>Cosmo compilation is resumed without making clean with option <code class="docutils literal notranslate"><span class="pre">make</span></code>
+for flag <code class="docutils literal notranslate"><span class="pre">-Y</span></code>. The source code change needs to be made in
+<b style="color:#b96922;"><code class="docutils literal notranslate"><span class="pre">cosmo4_21_JURECA_clm3-cos4-pfl</span></code>. <strong>But note</strong>: The source
+</b>code change will be lost after the next clean build of cosmo. Thus,
+make sure to incorporate the source code changes in the designated
+replace structures.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../profiling/jube.html" class="btn btn-neutral float-left" title="JUBE with TSMP" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="debugging_flags.html" class="btn btn-neutral float-right" title="Debugging flags" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TSMP-PDAF Build Examples &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+        <script src="../_static/clipboard.min.js"></script>
+        <script src="../_static/copybutton.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+<b style="color:#b96922;">    <link rel="search" title="Search" href="../search.html" /> 
+</b></head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Installation:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installing TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building and Running:</span></p>
+<b style="color:#b96922;"><ul>
+</b><b style="color:#b96922;"><li class="toctree-l1"><a class="reference internal" href="build_examples.html">Building TSMP</a></li>
+</b><li class="toctree-l1"><a class="reference internal" href="running.html">Running TSMP-PDAF</a></li>
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Developing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Developing TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="best_practices.html">Development Best Practices</a></li>
+<li class="toctree-l1"><a class="reference internal" href="structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pdaf.html">Structure of PDAF inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debugging.html">Debugging TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="remotes.html">TSMP remote repositories</a></li>
+<li class="toctree-l1"><a class="reference internal" href="branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html">Misc</a></li>
+<li class="toctree-l1"><a class="reference internal" href="misc.html#clm5-pdaf-starting-instructions">CLM5-PDAF Starting instructions</a></li>
+<li class="toctree-l1"><a class="reference internal" href="jsc.html">JSC systems</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Contributing:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="contributing/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contributing/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">TSMP-PDAF Build Examples</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/content/build_examples_tsmppdaf.md.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tsmp-pdaf-build-examples">
+<h1>TSMP-PDAF Build Examples<a class="headerlink" href="#tsmp-pdaf-build-examples" title="Permalink to this heading"></a></h1>
+<p>A collection of build examples for TSMP-PDAF.</p>
+<p>All builds involving more than one coupled component model use the
+coupling software Oasis3-MCT.</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#compile-fully-coupled-tsmp-pdaf-on-jureca"><code class="docutils literal notranslate"><span class="pre">Compile</span> <span class="pre">fully</span> <span class="pre">coupled</span> <span class="pre">TSMP-PDAF</span></code></a></p></li>
+<li><p><a class="reference internal" href="#compile-parflow-and-clm-with-pdaf"><code class="docutils literal notranslate"><span class="pre">Compile</span> <span class="pre">ParFlow</span> <span class="pre">standalone</span> <span class="pre">with</span> <span class="pre">PDAF</span></code></a></p></li>
+<li><p><a class="reference internal" href="#compile-parflow-standalone-with-pdaf-on-juwels-without-compiler-optimization"><code class="docutils literal notranslate"><span class="pre">Compile</span> <span class="pre">ParFlow</span> <span class="pre">and</span> <span class="pre">CLM</span> <span class="pre">with</span> <span class="pre">PDAF</span></code></a></p></li>
+</ul>
+<section id="compile-fully-coupled-tsmp-pdaf-on-jureca">
+<h2>Compile fully coupled TSMP-PDAF (on JURECA)<a class="headerlink" href="#compile-fully-coupled-tsmp-pdaf-on-jureca" title="Permalink to this heading"></a></h2>
+<p>The first example runs the build script of TSMP-PDAF, specifies the
+machine <code class="docutils literal notranslate"><span class="pre">JURECA</span></code>, specifies the component models CLM, COSMO and
+ParFlow and specifies version <code class="docutils literal notranslate"><span class="pre">1.1.0MCTPDAF</span></code>.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./build_tsmp.ksh -m JURECA -c clm-cos-pfl -v 1.1.0MCTPDAF
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-c</span></code> and <code class="docutils literal notranslate"><span class="pre">-v</span></code> flag are optional in this case because the inputs for
+these flags on <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">JURECA</span></code> are equivalent to the corresponding default
+inputs.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">-v</span></code> flag is optional in this case because <code class="docutils literal notranslate"><span class="pre">-c</span> <span class="pre">clm-cos-pfl</span></code> is the
+default input for this flag on <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">JURECA</span></code> and for version <code class="docutils literal notranslate"><span class="pre">-v</span> <span class="pre">1.1.0MCTPDAF</span></code>.</p>
+<p>By default the <code class="docutils literal notranslate"><span class="pre">build_tsmp.ksh</span></code> script will make a copy of the original
+model source folder (named as in the catalog, f.e. <code class="docutils literal notranslate"><span class="pre">clm3_5</span></code>,
+<code class="docutils literal notranslate"><span class="pre">cosmo4_21</span></code>, and <code class="docutils literal notranslate"><span class="pre">parflow</span></code>) and back it up to
+<code class="docutils literal notranslate"><span class="pre">MODEL_ARCH_VERSION_COMBINATION</span></code>.</p>
+<p>With the flags <code class="docutils literal notranslate"><span class="pre">-wxyz</span></code> (see man-page) you can specify your own directory
+where it is backed up to. If you like to use your own folder structure
+for the models you can again select your own model-path with <code class="docutils literal notranslate"><span class="pre">-wxyz</span></code> and
+avoid making a backup with <code class="docutils literal notranslate"><span class="pre">-WXYZ</span></code> option set to “<code class="docutils literal notranslate"><span class="pre">build</span></code>”.</p>
+</section>
+<section id="compile-parflow-and-clm-with-pdaf">
+<h2>Compile Parflow and CLM with PDAF<a class="headerlink" href="#compile-parflow-and-clm-with-pdaf" title="Permalink to this heading"></a></h2>
+<section id="build-commands">
+<h3>Build commands<a class="headerlink" href="#build-commands" title="Permalink to this heading"></a></h3>
+<p>Build commands for different machines.</p>
+<p>Remarks:</p>
+<ul class="simple">
+<li><p>For building TSMP-PDAF with DA, use branch <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf</span></code></p></li>
+<li><p>Parflow-3.9 is supported using version tag <code class="docutils literal notranslate"><span class="pre">3.1.0MCTPDAF</span></code>. For older
+versions, use <code class="docutils literal notranslate"><span class="pre">3.0.0MCTPDAF</span></code> (&gt;=3.2, &lt;3.7), <code class="docutils literal notranslate"><span class="pre">1.1.0MCTPDAF</span></code> (&lt;3.2).</p></li>
+</ul>
+<section id="jureca">
+<h4>JURECA<a class="headerlink" href="#jureca" title="Permalink to this heading"></a></h4>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./build_tsmp.ksh -m JURECA -c clm-pfl -v 3.1.0MCTPDAF -O Intel
+</pre></div>
+</div>
+</section>
+<section id="juwels">
+<h4>JUWELS<a class="headerlink" href="#juwels" title="Permalink to this heading"></a></h4>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./build_tsmp.ksh -m JUWELS -c clm-pfl -v 3.1.0MCTPDAF -O Intel
+</pre></div>
+</div>
+</section>
+<section id="remote-build">
+<h4>Remote build<a class="headerlink" href="#remote-build" title="Permalink to this heading"></a></h4>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>./build_tsmp_remote<span class="w"> </span>-m<span class="w"> </span>JUWELS<span class="w"> </span>-v<span class="w"> </span><span class="m">3</span>.1.0MCTPDAF<span class="w"> </span>-O<span class="w"> </span>Intel<span class="w"> </span>-c<span class="w"> </span>clm-pfl<span class="w"> </span>-branch<span class="w"> </span>TSMP_pdaf<span class="w"> </span>-host<span class="w"> </span>juwels<span class="w"> </span><span class="p">&amp;</span>
+<span class="w">	</span>./build_tsmp_remote<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-v<span class="w"> </span><span class="m">3</span>.1.0MCTPDAF<span class="w"> </span>-O<span class="w"> </span>Intel<span class="w"> </span>-c<span class="w"> </span>clm-pfl<span class="w"> </span>-branch<span class="w"> </span>TSMP_pdaf<span class="w"> </span>-host<span class="w"> </span>jureca<span class="w"> </span><span class="p">&amp;</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="component-models">
+<h3>Component Models<a class="headerlink" href="#component-models" title="Permalink to this heading"></a></h3>
+<p>The build commands were last tested for these component models</p>
+<ul class="simple">
+<li><p><strong>TSMP</strong></p>
+<ul>
+<li><p>current revision of branch <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf</span></code> from
+<a class="reference external" href="https://github.com/HPSCTerrSys/TSMP">https://github.com/HPSCTerrSys/TSMP</a></p></li>
+</ul>
+</li>
+<li><p><strong>clm3_5</strong></p>
+<ul>
+<li><p>Version 3.5, <code class="docutils literal notranslate"><span class="pre">clm3_5/Copyright</span></code>, <code class="docutils literal notranslate"><span class="pre">share3_070321</span></code> in
+<code class="docutils literal notranslate"><span class="pre">clm3_5/src/csm_share/ChangeLog</span></code>
+<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh">https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/clm3.5_fresh</a>
+revision <code class="docutils literal notranslate"><span class="pre">801b5304179f0a8cbe3dc2c50b584a6bfee387b0</span></code></p></li>
+</ul>
+</li>
+<li><p><strong>oasis3-mct</strong></p>
+<ul>
+<li><p>(svn revision r1506, <code class="docutils literal notranslate"><span class="pre">svn info</span></code> (caused error);</p></li>
+<li><p>new: Gitlab repo
+<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git">https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/oasis3-mct.git</a>,
+branch <code class="docutils literal notranslate"><span class="pre">oasis3-MCT_2.0</span></code>, revision <code class="docutils literal notranslate"><span class="pre">bc58342</span></code>)</p></li>
+</ul>
+</li>
+<li><p><strong>parflow3_0</strong> (<code class="docutils literal notranslate"><span class="pre">1.0.0MCTPDAF</span></code>)</p>
+<ul>
+<li><p>Version v3.2.0 in <code class="docutils literal notranslate"><span class="pre">VERSION</span></code>, no <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> yet, revision
+<code class="docutils literal notranslate"><span class="pre">faaee2c</span></code> in <code class="docutils literal notranslate"><span class="pre">parflow_vTdz</span></code> from
+<a class="reference external" href="https://git.meteo.uni-bonn.de/git/parflow">https://git.meteo.uni-bonn.de/git/parflow</a></p></li>
+</ul>
+</li>
+<li><p><strong>parflow3_2</strong> (<code class="docutils literal notranslate"><span class="pre">3.0.0MCTPDAF</span></code>)</p>
+<ul>
+<li><p>Version v3.2.0 in <code class="docutils literal notranslate"><span class="pre">VERSION</span></code>, no <code class="docutils literal notranslate"><span class="pre">CMakeLists.txt</span></code> yet, revision
+<code class="docutils literal notranslate"><span class="pre">98a87011</span></code> in <code class="docutils literal notranslate"><span class="pre">master</span></code> from
+<a class="reference external" href="https://github.com/parflow/parflow.git">https://github.com/parflow/parflow.git</a></p></li>
+</ul>
+</li>
+<li><p><strong>parflow</strong> (<code class="docutils literal notranslate"><span class="pre">3.1.0MCTPDAF</span></code>)</p>
+<ul>
+<li><p>Version Tag <code class="docutils literal notranslate"><span class="pre">v3.9.0</span></code>, revision <code class="docutils literal notranslate"><span class="pre">bc80e3ac</span></code> from
+<a class="reference external" href="https://github.com/parflow/parflow.git">https://github.com/parflow/parflow.git</a></p></li>
+</ul>
+</li>
+<li><p><strong>pdaf1_1</strong></p>
+<ul>
+<li><p>Version 2.0 in <code class="docutils literal notranslate"><span class="pre">/pdaf1_1/src/PDAF_print_version.F90</span></code>, new version</p></li>
+</ul>
+</li>
+</ul>
+<p>Not used:</p>
+<ul class="simple">
+<li><p><strong>cosmo4_21</strong></p>
+<ul>
+<li><p>Gitlab REPO
+<a class="reference external" href="https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo4.21_fresh.git">https://icg4geo.icg.kfa-juelich.de/ModelSystems/tsmp_src/cosmo4.21_fresh.git</a>,
+<code class="docutils literal notranslate"><span class="pre">c81de76</span></code></p>
+<ul>
+<li><p>Makefile different to other <strong>cosmo4_21</strong> versions</p></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+<section id="compile-parflow-standalone-with-pdaf-on-juwels-without-compiler-optimization">
+<h2>Compile ParFlow standalone with PDAF (on JUWELS without compiler optimization)<a class="headerlink" href="#compile-parflow-standalone-with-pdaf-on-juwels-without-compiler-optimization" title="Permalink to this heading"></a></h2>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./build_tsmp.ksh -m JUWELS -c pfl -v 1.1.0MCTPDAF -o -O0
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-c</span></code> and <code class="docutils literal notranslate"><span class="pre">-v</span></code> flag are optional in this case because the inputs
+for these flags on <code class="docutils literal notranslate"><span class="pre">-m</span> <span class="pre">JUWELS</span></code> are equivalent to the corresponding
+default inputs.</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>  ./build_tsmp.ksh -m JUWELS -c pfl -v 1.1.0MCTPDAF -o -g
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">-g</span></code> flag, is build to produce debugging information.</p>
+</section>
+<section id="compile-clm5-with-pdaf">
+<h2>Compile CLM5 with PDAF<a class="headerlink" href="#compile-clm5-with-pdaf" title="Permalink to this heading"></a></h2>
+<p>CLM5-PDAF compilation, currently available only on branch
+<code class="docutils literal notranslate"><span class="pre">TSMP_pdaf-clm5</span></code> (January 2023).</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>./build_tsmp.ksh<span class="w"> </span>-v<span class="w"> </span><span class="m">4</span>.4.0MCTPDAF<span class="w"> </span>-c<span class="w"> </span>clm<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-O<span class="w"> </span>Intel
+</pre></div>
+</div>
+<section id="prerequisite1-clm5-preparation">
+<h3>Prerequisite1: CLM5 preparation<a class="headerlink" href="#prerequisite1-clm5-preparation" title="Permalink to this heading"></a></h3>
+<p>For obtaining and preparing the component model <code class="docutils literal notranslate"><span class="pre">clm5_0</span></code>, you
+have to run the following commands</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>git<span class="w"> </span>clone<span class="w"> </span>git@github.com:ESCOMP/CTSM.git<span class="w"> </span>clm5_0
+<span class="w">	</span><span class="nb">cd</span><span class="w"> </span>clm5_0
+<span class="w">	</span>git<span class="w"> </span>checkout<span class="w"> </span>release-clm5.0
+<span class="w">	</span>./manage_externals/checkout_externals
+</pre></div>
+</div>
+</section>
+<section id="prerequisite2-path-to-cesm">
+<h3>Prerequisite2: Path to cesm<a class="headerlink" href="#prerequisite2-path-to-cesm" title="Permalink to this heading"></a></h3>
+<p>The path <code class="docutils literal notranslate"><span class="pre">CESMDATAROOT</span></code> needs to be changed in
+<code class="docutils literal notranslate"><span class="pre">TSMP/bldsva/intf_oas3/clm5_0/arch/JURECA/config/softwarepaths.ksh</span></code>. (analogous
+for <code class="docutils literal notranslate"><span class="pre">JUWELS</span></code>).</p>
+<p>Currently you need to have access to compute project <code class="docutils literal notranslate"><span class="pre">cjicg41</span></code> and use the line:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="w">	</span><span class="nb">export</span><span class="w"> </span><span class="nv">CESMDATAROOT</span><span class="o">=</span>/p/scratch/cjicg41/&lt;user&gt;/cesm
+</pre></div>
+</div>
+<p>For <code class="docutils literal notranslate"><span class="pre">&lt;user&gt;</span></code>, please contact someone on the inside.</p>
+</section>
+</section>
+<section id="debug-tips">
+<h2>Debug tips<a class="headerlink" href="#debug-tips" title="Permalink to this heading"></a></h2>
+<section id="debug-tip-1-skip-component-models-in-tsmp-pdaf-build">
+<h3>Debug Tip 1: Skip component models in TSMP-PDAF build<a class="headerlink" href="#debug-tip-1-skip-component-models-in-tsmp-pdaf-build" title="Permalink to this heading"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-c<span class="w"> </span>clm-cos-pfl<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.1.0MCTPDAF<span class="w"> </span>-W<span class="w"> </span>skip<span class="w"> </span>-X<span class="w"> </span>skip
+</pre></div>
+</div>
+<p>Oasis and CLM compilation are skipped with the option <code class="docutils literal notranslate"><span class="pre">skip</span></code> for flags
+<code class="docutils literal notranslate"><span class="pre">-W</span></code> and <code class="docutils literal notranslate"><span class="pre">-X</span></code>. Parflow and pdaf are compiled after Cosmo.</p>
+<p>All flags can be found using <code class="docutils literal notranslate"><span class="pre">./build_tsmp.ksh</span> <span class="pre">--help</span></code>. Here, the
+output for flag of componeent model build options:</p>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span><span class="w">	</span>-W,<span class="w"> </span>--optoas<span class="o">=</span>optoas
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Oasis.
+<span class="w">                    </span>fresh<span class="w">        </span><span class="c1">#build from scratch in a new folder</span>
+<span class="w">                    </span>build<span class="w">        </span><span class="c1">#build clean</span>
+<span class="w">                    </span>make<span class="w">         </span><span class="c1">#only (resume) make and make install - no make clean and configure</span>
+<span class="w">                    </span>configure<span class="w">    </span><span class="c1">#only make clean and configure - no make</span>
+<span class="w">                    </span>skip<span class="w">         </span><span class="c1">#no build</span>
+<span class="w">                  </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-E,<span class="w"> </span>--opticon<span class="o">=</span>opticon
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>ICON.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-Y,<span class="w"> </span>--optcos<span class="o">=</span>optcos
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Cosmo.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-X,<span class="w"> </span>--optclm<span class="o">=</span>optclm
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>CLM.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-Z,<span class="w"> </span>--optpfl<span class="o">=</span>optpfl
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Parflow.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+<span class="w">  </span>-U,<span class="w"> </span>--optda<span class="o">=</span>optda
+<span class="w">                  </span>Build<span class="w"> </span>option<span class="w"> </span><span class="k">for</span><span class="w"> </span>Data<span class="w"> </span>Assimilation.<span class="w"> </span>The<span class="w"> </span>default<span class="w"> </span>value<span class="w"> </span>is<span class="w"> </span><span class="s1">&#39;fresh&#39;</span>.
+</pre></div>
+</div>
+</section>
+<section id="debug-tip-2-building-tsmp-pdaf-after-source-code-changes-in-component-models">
+<h3>Debug Tip 2: Building TSMP-PDAF after source code changes in component models<a class="headerlink" href="#debug-tip-2-building-tsmp-pdaf-after-source-code-changes-in-component-models" title="Permalink to this heading"></a></h3>
+<div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>./build_tsmp.ksh<span class="w"> </span>-m<span class="w"> </span>JURECA<span class="w"> </span>-c<span class="w"> </span>clm-cos-pfl<span class="w"> </span>-v<span class="w"> </span><span class="m">1</span>.1.0MCTPDAF<span class="w"> </span>-W<span class="w"> </span>skip<span class="w"> </span>-X<span class="w"> </span>skip<span class="w"> </span>-Y<span class="w"> </span>make
+</pre></div>
+</div>
+<p>Oasis and CLM compilation are skipped with the option <code class="docutils literal notranslate"><span class="pre">skip</span></code> for flags
+<code class="docutils literal notranslate"><span class="pre">-W</span></code> and <code class="docutils literal notranslate"><span class="pre">-X</span></code>.</p>
+<p>Cosmo compilation is resumed without making clean with option <code class="docutils literal notranslate"><span class="pre">make</span></code>
+for flag <code class="docutils literal notranslate"><span class="pre">-Y</span></code>. The source code change needs to be made in
+<code class="docutils literal notranslate"><span class="pre">cosmo4_21_JURECA_1.1.0MCTPDAF_clm-cos-pfl</span></code>. <strong>But note</strong>: The source
+code change will be lost after the next clean build of cosmo. Thus,
+make sure to incorporate the source code changes in the designated
+replace structures.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+<b style="color:#b96922;">          <footer>
+</b>
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

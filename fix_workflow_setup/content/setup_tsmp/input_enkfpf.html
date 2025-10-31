@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Control file enkfpf.par &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/sphinx_highlight.js"></script>
+        <script src="../../_static/clipboard.min.js"></script>
+        <script src="../../_static/copybutton.js"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Observation input" href="input_obs.html" />
+    <link rel="prev" title="Input files for OASIS-MCT" href="input_oas.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="running.html">Running TSMP-PDAF</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_clm.html">Input files for CLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_pfl.html">Input files for ParFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cos.html">Input files for COSMO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_oas.html">Input files for OASIS-MCT</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pf">[PF]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#pf-problemname">PF:problemname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-nprocs">PF:nprocs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-starttime">PF:starttime</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-dt">PF:dt</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-endtime-deprecated">PF:endtime (deprecated)</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-simtime">PF:simtime</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-updateflag">PF:updateflag</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-gwmasking">PF:gwmasking</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-paramupdate">PF:paramupdate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-paramupdate-frequency">PF:paramupdate_frequency</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-dampingfactor-param">PF:dampingfactor_param</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-dampingfactor-state">PF:dampingfactor_state</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-aniso-perm-y">PF:aniso_perm_y</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-aniso-perm-z">PF:aniso_perm_z</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-aniso-use-parflow">PF:aniso_use_parflow</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-printensemble">PF:printensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-printstat">PF:printstat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-paramprintensemble">PF:paramprintensemble</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-paramprintstat">PF:paramprintstat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#pf-olfmasking">PF:olfmasking</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#clm">[CLM]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#clm-problemname">CLM:problemname</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-nprocs">CLM:nprocs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-update-swc">CLM:update_swc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-update-texture">CLM:update_texture</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-print-swc">CLM:print_swc</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#clm-print-et">CLM:print_et</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#cosmo">[COSMO]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#cosmo-nprocs">COSMO:nprocs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#cosmo-dtmult">COSMO:dtmult</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#da">[DA]</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#da-outdir">DA:outdir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-nreal">DA:nreal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-startreal">DA:startreal</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-da-interval">DA:da_interval</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-stat-dumpoffset">DA:stat_dumpoffset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-screen-wrapper">DA:screen_wrapper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-point-obs">DA:point_obs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#da-obs-interp-switch">DA:obs_interp_switch</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#parameter-summary">Parameter Summary</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html">Observation input</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cmd.html">Command line options</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="running.html">Running TSMP-PDAF</a></li>
+      <li class="breadcrumb-item active">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/setup_tsmp/input_enkfpf.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="control-file-enkfpf-par">
+<h1>Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code><a class="headerlink" href="#control-file-enkfpf-par" title="Permalink to this heading"></a></h1>
+<p>An additional file named <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> needs to be present in the
+TSMP-PDAF run directory.</p>
+<p><code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> is read by the routine <code class="docutils literal notranslate"><span class="pre">read_enkfpar</span></code> in
+<code class="docutils literal notranslate"><span class="pre">model/common/read_enkfpar.c</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> contains information about the different model components
+(ParFlow, CLM and data assimilation) like, e.g., the timing
+information of the models, the prefixes for the ParFlow/ CLM input
+files, etc.</p>
+<p>This input is structured in four sections:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="#pf"><code class="docutils literal notranslate"><span class="pre">[PF]</span></code></a> which holds information about ParFlow,</p></li>
+<li><p><a class="reference internal" href="#clm"><code class="docutils literal notranslate"><span class="pre">[CLM]</span></code></a> which holds information about CLM</p></li>
+<li><p><a class="reference internal" href="#cosmo"><code class="docutils literal notranslate"><span class="pre">[COSMO]</span></code></a> which holds information about COSMO</p></li>
+<li><p><a class="reference internal" href="#da"><code class="docutils literal notranslate"><span class="pre">[DA]</span></code></a> which holds information about the data assimilation process</p></li>
+</ul>
+<p>An example for <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> is given below.  Note that the sequence of
+the entries within these four categories can be changed if desired.</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>[PF]
+problemname        = &quot;&quot;
+nprocs             =
+starttime          =
+dt                 =
+endtime            =
+simtime            =
+updateflag         =
+gwmasking          =
+paramupdate        =
+paramupdate_frequency =
+dampingfactor_param =
+dampingfactor_state =
+aniso_perm_y       =
+aniso_perm_z       =
+aniso_use_parflow  =
+printensemble      =
+printstat          =
+paramprintensemble =
+paramprintstat     =
+olfmasking         =
+
+[CLM]
+problemname = &quot;&quot;
+nprocs      =
+update_swc  =
+update_texture  =
+print_swc   =
+print_et   =
+
+[COSMO]
+nprocs      =
+dtmult      =
+
+[DA]
+outdir = &quot;&quot;
+nreal =
+startreal =
+da_interval       =
+stat_dumpoffset   =
+point_obs =
+</pre></div>
+</div>
+<p>In the following the individual entries of <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code> are described:</p>
+<section id="pf">
+<h2>[PF]<a class="headerlink" href="#pf" title="Permalink to this heading"></a></h2>
+<section id="pf-problemname">
+<h3>PF:problemname<a class="headerlink" href="#pf-problemname" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:problemname</span></code>: (string) Problem prefix for ParFlow.</p>
+</section>
+<section id="pf-nprocs">
+<h3>PF:nprocs<a class="headerlink" href="#pf-nprocs" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:nprocs</span></code>: (integer) Number of processors per ParFlow instance. Must
+match with the specifications in the <code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> input.</p>
+<p>This number of processors specifies a subset of the processors
+available in a single <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code>. Each <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code> contains - if
+there are no remainders - the following number of processes:
+<code class="docutils literal notranslate"><span class="pre">npes_world</span> <span class="pre">/</span> <span class="pre">nreal</span></code>.</p>
+</section>
+<section id="pf-starttime">
+<h3>PF:starttime<a class="headerlink" href="#pf-starttime" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:starttime</span></code>: (real) ParFlow start time. Must match with the
+specifications in the <code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> input (<code class="docutils literal notranslate"><span class="pre">TimingInfo.StartTime</span></code>).</p>
+</section>
+<section id="pf-dt">
+<h3>PF:dt<a class="headerlink" href="#pf-dt" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:dt</span></code>: (real) Length of ParFlow time step. Must match with the
+specifications in the <code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> input.</p>
+<p>It is implicitly assumed that ParFlow and CLM calculate the same
+amount of time steps (i.e., have the same time step
+length). (Johannes: This may not be true, CLM time steps are computed)</p>
+</section>
+<section id="pf-endtime-deprecated">
+<h3>PF:endtime (deprecated)<a class="headerlink" href="#pf-endtime-deprecated" title="Permalink to this heading"></a></h3>
+<p>Deprecated. Use <code class="docutils literal notranslate"><span class="pre">PF:simtime</span></code> instead.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PF:endtime</span></code>: (real) Total simulation time (in terms of ParFlow
+timing). Must match with the specifications in the <code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> input.</p>
+</section>
+<section id="pf-simtime">
+<h3>PF:simtime<a class="headerlink" href="#pf-simtime" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:simtime</span></code>: (real) Total simulation time (in terms of ParFlow
+timing).</p>
+<p>Must match with the specifications in the <code class="docutils literal notranslate"><span class="pre">*.pfidb</span></code> input.</p>
+<p><code class="docutils literal notranslate"><span class="pre">PF:simtime</span></code> must correspond to <code class="docutils literal notranslate"><span class="pre">TimingInfo.StopTime</span></code> MINUS
+<code class="docutils literal notranslate"><span class="pre">TimingInfo.StartTime</span></code>!</p>
+</section>
+<section id="pf-updateflag">
+<h3>PF:updateflag<a class="headerlink" href="#pf-updateflag" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:updateflag</span></code>: (integer) Type of state vector update in ParFlow.</p>
+<ul class="simple">
+<li><p>1: Assimilation of pressure data. State vector consists of
+pressure values and is directly updated with pressure
+observations.</p></li>
+<li><p>2: Assimilation of soil moisture data. State vector consists of
+soil moisture content values and is updated with soil moisture
+observations. The updated soil moisture content is transformed
+back to pressure via the inverse van Genuchten functions.</p></li>
+<li><p>3: Assimilation of soil moisture data. State vector consists of
+soil moisture content and pressure values. Soil moisture data are
+used to update pressure indirectly.</p></li>
+</ul>
+</section>
+<section id="pf-gwmasking">
+<h3>PF:gwmasking<a class="headerlink" href="#pf-gwmasking" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:gwmasking</span></code>: (integer) Groundwater masking for assimilation of
+pressure data (updateflag=1) in ParFlow.</p>
+<ul class="simple">
+<li><p>0: No groundwater masking.</p></li>
+<li><p>1: Groundwater masking using saturated cells only.</p></li>
+<li><p>2: Groundwater masking using mixed state vector.</p></li>
+</ul>
+</section>
+<section id="pf-paramupdate">
+<h3>PF:paramupdate<a class="headerlink" href="#pf-paramupdate" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:paramupdate</span></code>: (integer) Flag for parameter update</p>
+<ul class="simple">
+<li><p>0: No parameter update</p></li>
+<li><p>1: Update of saturated hydraulic conductivity</p></li>
+<li><p>2: Update of Mannings coefficient</p></li>
+<li><p>3: Update porosity</p></li>
+<li><p>4: Update van Genuchten parameters</p></li>
+<li><p>5: Update hydraulic conductivity and porosity</p></li>
+<li><p>6: Update hydraulic conductivity and van Genuchten parameters</p></li>
+<li><p>7: Update porosity and van Genuchten parameters</p></li>
+<li><p>8 Update hydraulic conductivity, porosity and van Genuchten parameters</p></li>
+</ul>
+</section>
+<section id="pf-paramupdate-frequency">
+<h3>PF:paramupdate_frequency<a class="headerlink" href="#pf-paramupdate-frequency" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:paramupdate_frequency</span></code>: (integer) Frequency of parameter
+updates. Default: <code class="docutils literal notranslate"><span class="pre">1</span></code></p>
+<p>For each assimilation cycle it is checked whether <code class="docutils literal notranslate"><span class="pre">tcycle</span> <span class="pre">mod</span> <span class="pre">paramupdate_frequency</span> <span class="pre">==</span> <span class="pre">0</span></code>. When this happens, a parameter update is
+applied. For the default of <code class="docutils literal notranslate"><span class="pre">1</span></code>, each assimilation cycle contains a
+parameter update.</p>
+</section>
+<section id="pf-dampingfactor-param">
+<h3>PF:dampingfactor_param<a class="headerlink" href="#pf-dampingfactor-param" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:dampingfactor_param</span></code>: (real) Damping factor for parameter
+updates. Default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+<p>The damping factor should be chosen between <code class="docutils literal notranslate"><span class="pre">0.0</span></code> and <code class="docutils literal notranslate"><span class="pre">1.0</span></code>, where the
+inputs yield the following behavior:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code>: No parameter update.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code>: Parameter update without damping (default)</p></li>
+</ul>
+<p>General equation for the damped, updated parameter vector</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{align*}
+p_{update, damped} &amp;= p + \mathtt{dampingfactor\_param} \cdot ( p_{update} - p )
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(p\)</span> is the parameter vector that is part of the state vector
+before assimilation and <span class="math notranslate nohighlight">\(p_{update}\)</span> is <span class="math notranslate nohighlight">\(p\)</span> after the assimilation.</p>
+</section>
+<section id="pf-dampingfactor-state">
+<h3>PF:dampingfactor_state<a class="headerlink" href="#pf-dampingfactor-state" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:dampingfactor_state</span></code>: (real) Damping factor for state
+updates. Default <code class="docutils literal notranslate"><span class="pre">1.0</span></code>.</p>
+<p>Remark: Currently implemented for <code class="docutils literal notranslate"><span class="pre">pf_updateflag==1</span></code>.</p>
+<p>The damping factor should be chosen between <code class="docutils literal notranslate"><span class="pre">0.0</span></code> and <code class="docutils literal notranslate"><span class="pre">1.0</span></code>, where the
+inputs yield the following behavior:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">0.0</span></code>: No state update.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1.0</span></code>: State update without damping (default)</p></li>
+</ul>
+<p>General equation for the damped, updated state vector</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{align*}
+x_{update, damped} &amp;= x + \mathtt{dampingfactor\_state} \cdot ( x_{update} - x )
+\end{align*}\]</div>
+<p>where <span class="math notranslate nohighlight">\(x\)</span> is the state vector (without parameters) before assimilation
+and <span class="math notranslate nohighlight">\(x_{update}\)</span> is the state vector after the assimilation.</p>
+</section>
+<section id="pf-aniso-perm-y">
+<h3>PF:aniso_perm_y<a class="headerlink" href="#pf-aniso-perm-y" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:aniso_perm_y</span></code>: (real) Anisotropy factor of saturated hydraulic
+conductivity in y-direction. Only used when hydraulic conductivity is
+updated (<code class="docutils literal notranslate"><span class="pre">[PF]paramupdate</span> <span class="pre">=</span> <span class="pre">1</span></code>). Important: Compare this anisotropy
+factor with the corresponding anisotropy factor from
+ParFlow-input. Currently, we believe that the ParFlow-factor is used
+in the beginning of the simulation, while the factor set here, is used
+after each parameter update.</p>
+</section>
+<section id="pf-aniso-perm-z">
+<h3>PF:aniso_perm_z<a class="headerlink" href="#pf-aniso-perm-z" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:aniso_perm_z</span></code>: (real) Anisotropy factor of saturated hydraulic
+conductivity in z-direction. Only used when hydraulic conductivity is
+updated (<code class="docutils literal notranslate"><span class="pre">[PF]paramupdate</span> <span class="pre">=</span> <span class="pre">1</span></code>). Important: Compare this anisotropy
+factor with the corresponding anisotropy factor from
+ParFlow-input. Currently, we believe that the ParFlow-factor is used
+in the beginning of the simulation, while the factor set here, is used
+after each parameter update.</p>
+</section>
+<section id="pf-aniso-use-parflow">
+<h3>PF:aniso_use_parflow<a class="headerlink" href="#pf-aniso-use-parflow" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:aniso_use_parflow</span></code>: (integer) If 1, heterogeneous anisotropy
+factors (computed from ParFlow permeability arrays before the PDAF
+update) are used to compute the permeability in y and z direction
+based on the permeability in x direction that has been updated by
+PDAF.</p>
+<p>If 0, two homogeneous anisotropy factors are used to compute the
+updated permeabilities in y and z direction. These factors are read
+from the input variables <code class="docutils literal notranslate"><span class="pre">PF:aniso_perm_y</span></code> and <code class="docutils literal notranslate"><span class="pre">PF:aniso_perm_z</span></code>.</p>
+</section>
+<section id="pf-printensemble">
+<h3>PF:printensemble<a class="headerlink" href="#pf-printensemble" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:printensemble</span></code>: (integer) If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, the updated state
+variables for all ensemble members is printed out as <code class="docutils literal notranslate"><span class="pre">pfb</span></code> files after
+each assimilation cycle.  Files are printed to <code class="docutils literal notranslate"><span class="pre">[DA]outdir</span></code> and follow
+the file naming convention of ParFlow. They include the specifier
+<code class="docutils literal notranslate"><span class="pre">update</span></code> in the file name.</p>
+</section>
+<section id="pf-printstat">
+<h3>PF:printstat<a class="headerlink" href="#pf-printstat" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:printstat</span></code>: (integer) If set to <code class="docutils literal notranslate"><span class="pre">1</span></code> (default) the ensemble
+statistics (mean and standard deviation) of the forecasted state
+variable are calculated and printed out as <code class="docutils literal notranslate"><span class="pre">pfb</span></code> files after each
+assimilation cycle. Files are printed to <code class="docutils literal notranslate"><span class="pre">DA:outdir</span></code> and follow the
+file naming convention of ParFlow. The output files include the
+specifiers <code class="docutils literal notranslate"><span class="pre">press.mean</span></code>/ <code class="docutils literal notranslate"><span class="pre">press.sd</span></code> in case of assimilated pressure
+update <code class="docutils literal notranslate"><span class="pre">PF:updateflag</span> <span class="pre">=</span> <span class="pre">1</span></code> and the specifiers <code class="docutils literal notranslate"><span class="pre">swc.mean</span></code>/ <code class="docutils literal notranslate"><span class="pre">swc.sd</span></code> in
+case of assimilated soil moisture data <code class="docutils literal notranslate"><span class="pre">PF:updateflag</span> <span class="pre">=</span> <span class="pre">2</span></code> or
+<code class="docutils literal notranslate"><span class="pre">PF:updateflag</span> <span class="pre">=</span> <span class="pre">3</span></code>.</p>
+</section>
+<section id="pf-paramprintensemble">
+<h3>PF:paramprintensemble<a class="headerlink" href="#pf-paramprintensemble" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:paramprintensemble</span></code>: (integer) Only used in case of parameter
+update. If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, the updated parameters are printed to <code class="docutils literal notranslate"><span class="pre">pfb</span></code>
+files (similar to <code class="docutils literal notranslate"><span class="pre">[PF]printensemble</span></code>). Output files include a
+specifier depending on <code class="docutils literal notranslate"><span class="pre">PF:paramupdate</span></code>, f.e. <code class="docutils literal notranslate"><span class="pre">update.param.ksat</span></code>,
+<code class="docutils literal notranslate"><span class="pre">update.param.ksat</span></code>.</p>
+</section>
+<section id="pf-paramprintstat">
+<h3>PF:paramprintstat<a class="headerlink" href="#pf-paramprintstat" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:paramprintstat</span></code>: (integer) Only used in case of parameter
+update. If set to <code class="docutils literal notranslate"><span class="pre">1</span></code> statistics on the updated parameters are printed
+to <code class="docutils literal notranslate"><span class="pre">pfb</span></code> files (similar to <code class="docutils literal notranslate"><span class="pre">[PF]printstat</span></code>).</p>
+<p>The output files include a specifier depending on <code class="docutils literal notranslate"><span class="pre">PF:paramupdate</span></code>,
+f.e.  <code class="docutils literal notranslate"><span class="pre">param.ksat</span></code>, <code class="docutils literal notranslate"><span class="pre">param.mannings</span></code> or <code class="docutils literal notranslate"><span class="pre">param.poro</span></code>.</p>
+</section>
+<section id="pf-olfmasking">
+<h3>PF:olfmasking<a class="headerlink" href="#pf-olfmasking" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">PF:olfmasking</span></code>: (integer) Only used in case you do not want to update
+the state on certain grid-cells during DA with pdaf. eg. not update
+the cell which is saturated. Option “1” means that all saturated
+cells at surface are not used for an update. Option “2” reads a pfb
+for masking the stream.</p>
+</section>
+</section>
+<section id="clm">
+<h2>[CLM]<a class="headerlink" href="#clm" title="Permalink to this heading"></a></h2>
+<section id="clm-problemname">
+<h3>CLM:problemname<a class="headerlink" href="#clm-problemname" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:problemname</span></code>: (string) Problem prefix for CLM</p>
+</section>
+<section id="clm-nprocs">
+<h3>CLM:nprocs<a class="headerlink" href="#clm-nprocs" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:nprocs</span></code>: (integer) Number of processors for each CLM instance.</p>
+<p>This number of processors specifies a subset of the processors
+available in a single <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code>. Each <code class="docutils literal notranslate"><span class="pre">COMM_model</span></code> contains - if
+there are no remainders - the following number of processes:
+<code class="docutils literal notranslate"><span class="pre">npes_world</span> <span class="pre">/</span> <span class="pre">nreal</span></code>.</p>
+</section>
+<section id="clm-update-swc">
+<h3>CLM:update_swc<a class="headerlink" href="#clm-update-swc" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:update_swc</span></code>: (integer) Flag for update of soil moisture content
+in CLM (standalone only).</p>
+<ul class="simple">
+<li><p>0: No update of soil moisture content</p></li>
+<li><p>1: Update of soil moisture content</p></li>
+<li><p>(only branch <code class="docutils literal notranslate"><span class="pre">TSMP_pdaf-crns</span></code>) 2: Update and average of soil
+moisture content for use with Cosmic-Ray data (Hui Pung
+implementation).</p></li>
+<li><p>(only CLM5.0) 3: Update and average of soil moisture content for use
+with Cosmic-Ray data (Strebel implementation of Schrön2017,
+<a class="reference external" href="https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor">https://research-information.bris.ac.uk/en/publications/improving-calibration-and-validation-of-cosmic-ray-neutron-sensor</a>).</p></li>
+</ul>
+</section>
+<section id="clm-update-texture">
+<h3>CLM:update_texture<a class="headerlink" href="#clm-update-texture" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:update_texture</span></code>: (integer) Flag for update of soil parameter in
+CLM (standalone only).</p>
+<ul class="simple">
+<li><p>0: No update of soil parameter</p></li>
+<li><p>1: Update of soil parameter (clay or sand)</p></li>
+<li><p>(only CLM5.0) 2: Update of soil parameter (clay, sand or organic matter)</p></li>
+<li><p>(only CLM5.0) 3: Update of hydraulic conductivity log-transformed</p></li>
+<li><p>(only CLM5.0) 4: Update of hydraulic conductivity, porosity,
+suction, hydraulic conductivity exponent B (see CLM5.0 technical
+manual
+<a class="reference external" href="https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/index.html">https://escomp.github.io/ctsm-docs/versions/release-clm5.0/html/tech_note/index.html</a>)</p></li>
+</ul>
+</section>
+<section id="clm-print-swc">
+<h3>CLM:print_swc<a class="headerlink" href="#clm-print-swc" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:print_swc</span></code>: (integer) If set to <code class="docutils literal notranslate"><span class="pre">1</span></code>, the updated soil moisture
+content in CLM for all ensemble members is printed out as <code class="docutils literal notranslate"><span class="pre">netcdf</span></code>
+files (one file per realisation for the whole simulation
+period). Files are printed to the run directory and are named
+according to the CLM problem prefix of the corresponding realisation
+and include the specifier <code class="docutils literal notranslate"><span class="pre">update</span></code> in the file name.</p>
+</section>
+<section id="clm-print-et">
+<h3>CLM:print_et<a class="headerlink" href="#clm-print-et" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">CLM:print_et</span></code>: (integer) Invoke function <code class="docutils literal notranslate"><span class="pre">write_clm_statistics</span></code>. For
+further information, see source code.</p>
+</section>
+</section>
+<section id="cosmo">
+<h2>[COSMO]<a class="headerlink" href="#cosmo" title="Permalink to this heading"></a></h2>
+<section id="cosmo-nprocs">
+<h3>COSMO:nprocs<a class="headerlink" href="#cosmo-nprocs" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">COSMO:nprocs</span></code>: (integer) Number of processors for each COSMO
+instance.</p>
+<p>Currently, <code class="docutils literal notranslate"><span class="pre">COSMO:nprocs</span></code> is NOT USED by TSMP-PDAF. Instead, COSMO
+will get processors if there are processes left after giving
+<code class="docutils literal notranslate"><span class="pre">PF:nprocs</span> <span class="pre">+</span> <span class="pre">CLM:nprocs</span></code> processes to ParFlow and CLM.</p>
+</section>
+<section id="cosmo-dtmult">
+<h3>COSMO:dtmult<a class="headerlink" href="#cosmo-dtmult" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">COSMO:dtmult</span></code>: (integer) Number of COSMO time steps within one
+ParFlow time step.</p>
+</section>
+</section>
+<section id="da">
+<h2>[DA]<a class="headerlink" href="#da" title="Permalink to this heading"></a></h2>
+<section id="da-outdir">
+<h3>DA:outdir<a class="headerlink" href="#da-outdir" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:outdir</span></code>: (string) Directory where assimilation results should be
+written.</p>
+</section>
+<section id="da-nreal">
+<h3>DA:nreal<a class="headerlink" href="#da-nreal" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:nreal</span></code>: (integer) Number of realisations used in the
+simulation. <code class="docutils literal notranslate"><span class="pre">DA:nreal</span></code> Must be equal to command line input
+<code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code>.</p>
+</section>
+<section id="da-startreal">
+<h3>DA:startreal<a class="headerlink" href="#da-startreal" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:startreal</span></code>: (integer) Added to suffix-numbers for input file
+creation.</p>
+</section>
+<section id="da-da-interval">
+<h3>DA:da_interval<a class="headerlink" href="#da-da-interval" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:da_interval</span></code>: (double) Time interval (units of ParFlow timing,
+usually hours, check ParFlow input <code class="docutils literal notranslate"><span class="pre">TimingInfo.BaseUnit</span></code>,
+<a class="reference external" href="https://parflow.readthedocs.io/en/latest/keys.html#timing-information">https://parflow.readthedocs.io/en/latest/keys.html#timing-information</a>).</p>
+<p>After the time interval <code class="docutils literal notranslate"><span class="pre">da_interval</span></code> the forward simulation
+(integration) of all component models is stopped in the main loop of
+TSMP-PDAF (<code class="docutils literal notranslate"><span class="pre">pdaf_terrsysmp.f90</span></code>). Afterwards PDAF is called and it
+depends on the command line option <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> (<a class="reference internal" href="input_cmd.html#command-line-options"><span class="std std-ref">Command line
+options</span></a>) whether data
+assimilation is performed during this iteration. <code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> will
+specify the number of steps (loop iterations) that PDAF will iterate
+back to the forward simulation, before performing the actual data
+assimilation.</p>
+<p>One exception is that the observation file is empty at a data
+assimilation step. Then, no data assimilation takes place and the next
+set forward integration steps is executed.</p>
+<p>Formula for the simulation time between data assimilation steps (given
+non-empty observation files)</p>
+<div class="amsmath math notranslate nohighlight">
+\[\begin{gather*} 
+	t_{\mathtt{betweenDA}} =  \mathtt{da\_interval} \cdot \mathtt{delt\_obs} \cdot \mathtt{BaseUnit}
+\end{gather*}\]</div>
+<p><strong>Example 1 (FallSchoolCase):</strong> <code class="docutils literal notranslate"><span class="pre">da_interval=1.0</span></code>, <code class="docutils literal notranslate"><span class="pre">delt_obs</span> <span class="pre">12</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TimingInfo.BaseUnit=1.0</span></code>. In this case, component models will be
+simulated for 12 1-hour-steps between data assimilation times. So an
+assimilation will be applied each 12 hours.</p>
+<p><strong>Example 2:</strong> <code class="docutils literal notranslate"><span class="pre">da_interval=24.0</span></code>, <code class="docutils literal notranslate"><span class="pre">delt_obs</span> <span class="pre">1</span></code>,
+<code class="docutils literal notranslate"><span class="pre">TimingInfo.BaseUnit=1.0</span></code>. In this case, component models will be
+simulated for 1 24-hour-step between data assimilation times. So an
+assimilation will be applied each 24 hours.</p>
+</section>
+<section id="da-stat-dumpoffset">
+<h3>DA:stat_dumpoffset<a class="headerlink" href="#da-stat-dumpoffset" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:stat_dumpoffset</span></code>: File number offset for the data assimilation
+output files for ParFlow.  Can be used when an assimilation run is
+restarted.</p>
+</section>
+<section id="da-screen-wrapper">
+<h3>DA:screen_wrapper<a class="headerlink" href="#da-screen-wrapper" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:screen_wrapper</span></code> (added 02/2022): Variable for controlling
+output. Analogous to <code class="docutils literal notranslate"><span class="pre">screen</span></code> variable for PDAF. Values: (0) no
+outputs, (1) medium outputs (default), (2) debugging output.</p>
+</section>
+<section id="da-point-obs">
+<h3>DA:point_obs<a class="headerlink" href="#da-point-obs" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:point_obs</span></code>: (integer) Only used in case of multi-scale data
+assimilation. Set to value 0 for using multi-scale data assimilation
+(eg. using SMAP satellite data over a large area which is not point
+data). If not specified its default value is set to 1, which is for
+using point observation for data assimilation run.</p>
+</section>
+<section id="da-obs-interp-switch">
+<h3>DA:obs_interp_switch<a class="headerlink" href="#da-obs-interp-switch" title="Permalink to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">DA:obs_interp_switch</span></code>: (integer) Switch for using an interpolation of
+simulated measurements from the closest grid cells to the observation
+location.</p>
+<p>Default: <code class="docutils literal notranslate"><span class="pre">0</span></code> (no interpolation)</p>
+<p>Effect of <code class="docutils literal notranslate"><span class="pre">obs_interp_switch=1</span></code>:</p>
+<ul class="simple">
+<li><p>For <a class="reference internal" href="input_obs.html#clm-observation-file-variables"><span class="std std-ref">CLM-type
+observations</span></a> the
+longitude and latitude inputs in the observation file are compared
+to the four neihboring grid points and the simulated measurements
+from these grid points are averaged with the distances to the grid
+points as weights.</p></li>
+<li><p>For <a class="reference internal" href="input_obs.html#parflow-observation-file-variables"><span class="std std-ref">ParFlow-type
+observations</span></a> the
+observation files need two more inputs: <code class="docutils literal notranslate"><span class="pre">ix_interp_d</span></code> and
+<code class="docutils literal notranslate"><span class="pre">iy_interp_d</span></code>. These index distances are used to compute an average
+of the simulated measurements from the value at the surrounding grid
+points in the x-y-plane.</p></li>
+</ul>
+</section>
+</section>
+<section id="parameter-summary">
+<h2>Parameter Summary<a class="headerlink" href="#parameter-summary" title="Permalink to this heading"></a></h2>
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head text-center"><p>section</p></th>
+<th class="head text-center"><p>parameter</p></th>
+<th class="head text-center"><p>default value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">[PF]</span></code></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">problemname</span></code></p></td>
+<td class="text-center"><p>-</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">nprocs</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">starttime</span></code></p></td>
+<td class="text-center"><p>0.0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">endtime</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">simtime</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">dt</span></code></p></td>
+<td class="text-center"><p>0.0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">updateflag</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">paramupdate</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">paramupdate_frequency</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">dampingfactor_param</span></code></p></td>
+<td class="text-center"><p>1.0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">dampingfactor_state</span></code></p></td>
+<td class="text-center"><p>1.0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">aniso_perm_y</span></code></p></td>
+<td class="text-center"><p>1.0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">aniso_perm_z</span></code></p></td>
+<td class="text-center"><p>1.0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">aniso_use_parflow</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">printensemble</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">printstat</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">paramprintensemble</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">paramprintstat</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">olfmasking</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">[CLM]</span></code></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">problemname</span></code></p></td>
+<td class="text-center"><p>-</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">nprocs</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">update_swc</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">print_swc</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">[COSMO]</span></code></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">nprocs</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">dtmult</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">[DA]</span></code></p></td>
+<td class="text-center"><p></p></td>
+<td class="text-center"><p></p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">nreal</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">outdir</span></code></p></td>
+<td class="text-center"><p>-</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">da_interval</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">stat_dumpoffset</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">screen_wrapper</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-odd"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">point_obs</span></code></p></td>
+<td class="text-center"><p>1</p></td>
+</tr>
+<tr class="row-even"><td class="text-center"><p></p></td>
+<td class="text-center"><p><code class="docutils literal notranslate"><span class="pre">obs_interp_switch</span></code></p></td>
+<td class="text-center"><p>0</p></td>
+</tr>
+</tbody>
+</table>
+<p>Default values for parameter file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code>.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="input_oas.html" class="btn btn-neutral float-left" title="Input files for OASIS-MCT" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="input_obs.html" class="btn btn-neutral float-right" title="Observation input" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Command line options &mdash; TSMP-Documentation  documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/copybutton.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=5929fcd5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../_static/copybutton.js?v=30646c52"></script>
+        <script>window.MathJax = {"options": {"processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Setting up new cases" href="development.html" />
+    <link rel="prev" title="Observation input" href="input_obs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            TSMP-Documentation
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Introduction:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction to TSMP &amp; TSMP-PDAF</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Getting Started:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../gettingstarted.html">Getting Started</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Technical Note TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../tech_note/coupling-approaches.html">Coupling approaches</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Building TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/obtain_code.html">Obtaining the code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/build_examples.html">Building TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/structure.html">Structure of TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/intf_da.html">Structure of DA inside TSMP</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../build_tsmp/pdaf.html">Structure of PDAF inside TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Setting up TSMP:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="setup_examples.html">Setup Examples</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="running.html">Running TSMP-PDAF</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="input_clm.html">Input files for CLM</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_pfl.html">Input files for ParFlow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_cos.html">Input files for COSMO</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_oas.html">Input files for OASIS-MCT</a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_enkfpf.html">Control file <code class="docutils literal notranslate"><span class="pre">enkfpf.par</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="input_obs.html">Observation input</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Command line options</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#n-modeltasks">n_modeltasks</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#filtertype">filtertype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#subtype">subtype</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#obs-filename">obs_filename</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#rms-obs">rms_obs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#delt-obs">delt_obs</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#screen">screen</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#command-line-examples">Command Line Examples</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-enkf">Command Line Example: EnKF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-etkf">Command Line Example: ETKF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-estkf">Command Line Example: ESTKF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-letkf">Command Line Example: LETKF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-lestkf">Command Line Example: LESTKF</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#command-line-example-lenkf">Command Line Example: LENKF</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Setting up new cases</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Profiling TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../profiling/jube.html">JUBE with TSMP</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Debugging TSMP:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debug_tips.html">Debug tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugging_flags.html">Debugging flags</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debugging/debugger.html">Debugging with TotalView</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Feature Branches:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/branches.html">TSMP-PDAF related branches</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../feat_branch/clm5-pdaf_starter.html">CLM5-PDAF Starting instructions</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">FAQ:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../faq/general.html">Contributing to TSMP in general</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../faq/documentation.html">Contribute to TSMP documentation.</a></li>
+</ul>
+<p class="caption" role="heading"><span class="caption-text">Misc:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../misc/misc.html">Misc</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">TSMP-Documentation</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="running.html">Running TSMP-PDAF</a></li>
+      <li class="breadcrumb-item active">Command line options</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/HPSCTerrSys/TSMP/blob/master/doc/content/setup_tsmp/input_cmd.md" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section class="tex2jax_ignore mathjax_ignore" id="command-line-options">
+<h1>Command line options<a class="headerlink" href="#command-line-options" title="Link to this heading"></a></h1>
+<p>The following command line options must be specified when TSMP-PDAF is
+executed:</p>
+<section id="n-modeltasks">
+<h2>n_modeltasks<a class="headerlink" href="#n-modeltasks" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">n_modeltasks</span></code> (integer) Number of realisations. Must be consistent
+with <code class="docutils literal notranslate"><span class="pre">[DA]</span> <span class="pre">nreal</span></code>.</p>
+</section>
+<section id="filtertype">
+<h2>filtertype<a class="headerlink" href="#filtertype" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">filtertype</span></code> (integer) Type of filter used for data assimilation. For
+more details see the PDAF documentation. Currently, the following
+filter options are available</p>
+<ul class="simple">
+<li><p>(Ensemble Kalman Filter(Enkf)) is supported.</p></li>
+<li><p>(Ensemble Transform Kalman Filter(Etkf)) is supported.</p></li>
+<li><p>(Local Ensemble Transform Kalman Filter(Letkf)) is supported.</p></li>
+<li><p>(Error Subspace Transform Kalman Filter(Estkf)) is supported.</p></li>
+<li><p>(Local Error Subspace Transform Kalman Filter(Lestkf)) is supported.</p></li>
+<li><p>(Local Ensemble Kalman Filter(LEnkf)) is supported.</p></li>
+</ul>
+<p>To see all available command line options for the different filter
+algorithms please refer to PDAF wiki link</p>
+<p><a class="reference external" href="http://pdaf.awi.de/trac/wiki/AvailableOptionsforInitPDAF">http://pdaf.awi.de/trac/wiki/AvailableOptionsforInitPDAF</a></p>
+</section>
+<section id="subtype">
+<h2>subtype<a class="headerlink" href="#subtype" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype, different options for each
+filter. See <a class="reference internal" href="#command-line-examples">Command Line Examples</a>.</p>
+</section>
+<section id="obs-filename">
+<h2>obs_filename<a class="headerlink" href="#obs-filename" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">obs_filename</span></code> (string) Prefix for observation files.</p>
+</section>
+<section id="rms-obs">
+<h2>rms_obs<a class="headerlink" href="#rms-obs" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">rms_obs</span></code> (real) Measurement error. This is the standard deviation of
+the Gaussian probability distribution of the measurements.</p>
+</section>
+<section id="delt-obs">
+<h2>delt_obs<a class="headerlink" href="#delt-obs" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">delt_obs</span></code> (integer) Number of data assimilation intervals (see
+<a class="reference internal" href="input_enkfpf.html#da-da-interval"><span class="std std-ref"><code class="docutils literal notranslate"><span class="pre">[DA]da_interval</span></code></span></a>) that are forward
+computed, before assimilation is actually performed.</p>
+</section>
+<section id="screen">
+<h2>screen<a class="headerlink" href="#screen" title="Link to this heading"></a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">screen</span></code> (integer) Control verbosity of PDAF</p>
+<ul class="simple">
+<li><p>0: no outputs</p></li>
+<li><p>1: basic output (default)</p></li>
+<li><p>2: 1 plus timing output</p></li>
+<li><p>3: 2 plus debug output</p></li>
+</ul>
+</section>
+<section id="command-line-examples">
+<h2>Command Line Examples<a class="headerlink" href="#command-line-examples" title="Link to this heading"></a></h2>
+<section id="command-line-example-enkf">
+<h3>Command Line Example: EnKF<a class="headerlink" href="#command-line-example-enkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Ensemble Kalman Filter (EnKF).</p>
+<ul class="simple">
+<li><p>Full ensemble integration; analysis for <span class="math notranslate nohighlight">\(2\cdot \mathtt{dim\_obs} &gt; \mathtt{dim\_ens}\)</span></p></li>
+<li><p>Full ensemble integration; analysis for <span class="math notranslate nohighlight">\(2\cdot \mathtt{dim\_obs} \leq \mathtt{dim\_ens}\)</span></p></li>
+<li><p>Offline mode</p></li>
+</ul>
+<p>Example of the model execution using EnKF analysis:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 2 -subytype 1 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run with
+64 realisations (8 processors for each realisation) and EnKF analysis
+will be performed every assimilation cycle with an observation error of
+0.1 and observations read from the files <code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+<section id="command-line-example-etkf">
+<h3>Command Line Example: ETKF<a class="headerlink" href="#command-line-example-etkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Ensemble Transform Kalman
+Filter (ETKF).</p>
+<ul class="simple">
+<li><p>full ensemble integration; apply T-matrix analogously to SEIK</p></li>
+<li><p>full ensemble integration; formulation without T matrix</p></li>
+<li><p>Fixed error space basis; analysis with T-matrix</p></li>
+<li><p>Fixed state covariance matrix; analysis with T-matrix</p></li>
+<li><p>Offline mode; analysis with T-matrix</p></li>
+</ul>
+<p>Example of the model execution using EtKF analysis:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 4 -subytype 1 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run with
+64 realisations (8 processors for each realisation) and EtKF analysis
+will be performed every assimilation cycle with an observation error of
+0.1 and observations read from the files <code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+<section id="command-line-example-estkf">
+<h3>Command Line Example: ESTKF<a class="headerlink" href="#command-line-example-estkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Error Subspace Transform Kalman Filter
+(ESTKF).</p>
+<ul class="simple">
+<li><p>Standard implementation with ensemble integration</p></li>
+<li><p>Fixed error space basis</p></li>
+<li><p>Fixed state covariance matrix</p></li>
+<li><p>Offline mode</p></li>
+</ul>
+<p>Example of the model execution using EstKF analysis:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 6 -subytype 1 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run with
+64 realisations (8 processors for each realisation) and EstKF analysis
+will be performed every assimilation cycle with an observation error of
+0.1 and observations read from the files <code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+<section id="command-line-example-letkf">
+<h3>Command Line Example: LETKF<a class="headerlink" href="#command-line-example-letkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">local_range</span></code> (real) set localization radius, 0.0 by default, any
+positive value should work.</p>
+<p><code class="docutils literal notranslate"><span class="pre">locweight</span></code> (integer) set weight function for localization, default=0
+for constant weight of 1; possible are integer values 0 to 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Local Ensemble Transform
+Kalman Filter (Letkf).</p>
+<ul class="simple">
+<li><p>full ensemble integration; apply T-matrix analogously to SEIK</p></li>
+<li><p>Fixed error space basis; analysis with T-matrix</p></li>
+<li><p>Fixed state covariance matrix; analysis with T-matrix</p></li>
+<li><p>Offline mode; analysis with T-matrix.</p></li>
+</ul>
+<p>Example of the model execution using Letkf analysis:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 5 -local_range 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run with
+64 realisations (8 processors for each realisation) and Letkf analysis
+will be performed every assimilation cycle with an observation error of
+0.1 and observations read from the files <code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+<section id="command-line-example-lestkf">
+<h3>Command Line Example: LESTKF<a class="headerlink" href="#command-line-example-lestkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">local_range</span></code> (real) set localization radius, 0.0 by default, any
+positive value should work.</p>
+<p><code class="docutils literal notranslate"><span class="pre">locweight</span></code> (integer) set weight function for localization, default=0
+for constant weight of 1; possible are integer values 0 to 4.</p>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Local Error Subspace Transform Kalman
+Filter (LESTKF).</p>
+<ul class="simple">
+<li><p>Standard implementation with ensemble integration</p></li>
+<li><p>Fixed error space basis</p></li>
+<li><p>Fixed state covariance matrix</p></li>
+<li><p>Offline mode</p></li>
+</ul>
+<p>Example of the model execution using Lestkf analysis:</p>
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>    mpiexec -np 512 ./tsmp-pdaf -n_modeltasks 64 -filtertype 7 -local_range 3 -locweight 0 -subtype 0 -delt_obs 1 -rms_obs 0.1 -obs_filename myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run with
+64 realisations (8 processors for each realisation) and Lestkf analysis
+will be performed every assimilation cycle with an observation error of
+0.1 and observations read from the files <code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+<section id="command-line-example-lenkf">
+<h3>Command Line Example: LENKF<a class="headerlink" href="#command-line-example-lenkf" title="Link to this heading"></a></h3>
+<p><code class="docutils literal notranslate"><span class="pre">local_range</span></code> (real) set localization radius (cut-off-radius)</p>
+<ul class="simple">
+<li><p>0.0 by default</p></li>
+<li><p>any positive value should work.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">srange</span></code> (integer): the support radius of the localization</p>
+<ul class="simple">
+<li><p>the localization weight radius; support range for 5th-order
+polynomial</p></li>
+<li><p>by default set to <code class="docutils literal notranslate"><span class="pre">local_range</span></code></p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">locweight</span></code> (integer): set weight function for localization,</p>
+<ul class="simple">
+<li><p>default=0</p></li>
+<li><p>for constant weight of 1</p></li>
+<li><p>possible are integer values 0 to 4.(see <code class="docutils literal notranslate"><span class="pre">init_pdaf</span></code>)</p></li>
+</ul>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>locweight == 0    ! Uniform (unit) weighting
+locweight == 1    ! Exponential weighting
+locweight == 2    ! 5th-order polynomial (Gaspari&amp;Cohn, 1999)
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">subtype</span></code> (integer) Parameter subtype for Localized Ensemble Kalman
+Filter (Lenkf).</p>
+<ul class="simple">
+<li><p>Full ensemble integration; analysis with covariance localization</p></li>
+<li><p>Offline mode</p></li>
+</ul>
+<p>Example of the model execution using Lenkf analysis:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mpiexec<span class="w"> </span>-np<span class="w"> </span><span class="m">512</span><span class="w"> </span>./tsmp-pdaf<span class="w"> </span>-n_modeltasks<span class="w"> </span><span class="m">64</span><span class="w"> </span>-filtertype<span class="w"> </span><span class="m">8</span><span class="w"> </span>-local_range<span class="w"> </span><span class="m">3</span><span class="w"> </span>-locweight<span class="w"> </span><span class="m">0</span><span class="w"> </span>-subtype<span class="w"> </span><span class="m">0</span><span class="w"> </span>-delt_obs<span class="w"> </span><span class="m">1</span><span class="w"> </span>-rms_obs<span class="w"> </span><span class="m">0</span>.1<span class="w"> </span>-obs_filename<span class="w"> </span>myobs
+</pre></div>
+</div>
+<p>With this command, the TSMP-PDAF executable <code class="docutils literal notranslate"><span class="pre">tsmp-pdaf</span></code> will be run
+with 64 realisations (8 processors for each realisation) and Lenkf
+analysis will be performed every assimilation cycle with an
+observation error of 0.1 and observations read from the files
+<code class="docutils literal notranslate"><span class="pre">myobs.xxxxx</span></code>.</p>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="input_obs.html" class="btn btn-neutral float-left" title="Observation input" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="development.html" class="btn btn-neutral float-right" title="Setting up new cases" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
