@@ -57,7 +57,7 @@ module enkf_clm_mod
   integer(c_int),bind(C,name="clmstatevec_only_active")  :: clmstatevec_only_active
   integer(c_int),bind(C,name="clmstatevec_max_layer")  :: clmstatevec_max_layer
   integer(c_int),bind(C,name="clmt_printensemble")       :: clmt_printensemble
-  integer(c_int),bind(C,name="clmwatmin_switch")         :: clmwatmin_switch
+  integer(c_int),bind(C,name="clmwatmin_switch")       :: clmwatmin_switch
   real(c_double),bind(C,name="clmcrns_bd")      :: clmcrns_bd
 
   integer  :: nstep     ! time step index
@@ -79,6 +79,9 @@ module enkf_clm_mod
                                 ! (currently not used for clm5_0)
   logical :: newgridcell        !only clm5_0
 
+  ! Arrays for LAI Assimilation
+  real(r8),allocatable :: tlai(:)
+  real(r8),allocatable :: old_frac(:)
   contains
 
 #if defined CLMSA
@@ -271,6 +274,22 @@ module enkf_clm_mod
         clm_statevecsize = clm_statevecsize + 3*((endg-begg+1)*nlevsoi)
     endif
 
+    ! LAI assimilation
+    if(clmupdate_lai.eq.1) then
+        ! Allocate array to store total leaf area index per patch
+        if (allocated(tlai)) deallocate(tlai)
+        allocate(tlai(clm_endp-clm_begp+1))
+        ! Allocate array to store fraction of LAI the patch represents.
+        if (allocated(old_frac)) deallocate(old_frac)
+        allocate(old_frac(clm_endp-clm_begp+1))
+        ! set sizes
+        clm_varsize = 1 ! each grid cell gets 1 value of LAI
+        clm_statevecsize = (clm_endg - clm_begg + 1) ! statevector is the size of the num of gridcells
+        if (clmupdate_lai_params.eq.1) then ! add parameters to the state vector.
+            clm_varsize = (clm_endg - clm_begg+1)
+            clm_statevecsize = (clm_endg - clm_begg+1)*1 ! 1 parameters
+        endif
+
     !hcp LST DA
     if(clmupdate_T.eq.1) then
       error stop "Not implemented: clmupdate_T.eq.1"
@@ -284,7 +303,7 @@ module enkf_clm_mod
 
     !write(*,*) 'clm_statevecsize is ',clm_statevecsize
     IF (allocated(clm_statevec)) deallocate(clm_statevec)
-    if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0)) then
+    if ((clmupdate_swc.ne.0) .or. (clmupdate_T.ne.0) .or. (clmupdate_texture.ne.0) .or. (clmupdate_lai.ne.0)) then
       !hcp added condition
       allocate(clm_statevec(clm_statevecsize))
     end if
@@ -310,11 +329,14 @@ module enkf_clm_mod
   end subroutine cleanup_clm_statevec
 
   subroutine set_clm_statevec(tstartcycle, mype)
-    use clm_instMod, only : soilstate_inst, waterstate_inst
+    use clm_instMod, only : soilstate_inst, waterstate_inst, bgc_vegetation_inst
+
     use clm_varpar   , only : nlevsoi
     ! use clm_varcon, only: nameg, namec
     ! use GetGlobalValuesMod, only: GetGlobalWrite
     use ColumnType , only : col
+    use PatchType  , only : patch
+    use pftconMod  , only : pftcon
     use shr_kind_mod, only: r8 => shr_kind_r8
     implicit none
     integer,intent(in) :: tstartcycle
@@ -331,6 +353,8 @@ module enkf_clm_mod
     psand => soilstate_inst%cellsand_col
     pclay => soilstate_inst%cellclay_col
     porgm => soilstate_inst%cellorg_col
+
+    leafc => bgc_vegetation_inst%cnveg_carbonstate_inst%leafc_patch
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle + 1 .OR. clmt_printensemble < 0) THEN
@@ -355,6 +379,40 @@ module enkf_clm_mod
       ! write swc values to state vector
       do cc = 1, clm_statevecsize
         clm_statevec(cc) = swc(state_pdaf2clm_c_p(cc), state_pdaf2clm_j_p(cc))
+      end do
+    endif
+
+    ! LAI assimilation
+    ! Case 1: Transformations in Set and Update functions
+    if(clmupdate_lai.eq.1) then
+       clm_statevec(:) = 0._r8 ! reset statevector to 0 because we add to it for the average
+       do i=clm_begp,clm_endp ! iterate through patches
+           ! set the leaf area index based on leafC and SLA
+           ! Eq 3 from Thornton and Zimmerman, 2007, J Clim, 20, 3902-3923.
+           if (pftcon%dsladlai(patch%itype(i)) > 0._r8) then
+               tlai(i) = (pftcon%slatop(patch%itype(i))*(exp(leafc(i)*pftcon%dsladlai(patch%itype(i))) - 1._r8))/pftcon%dsladlai(patch%itype(i))
+           else
+               tlai(i) = pftcon%slatop(patch%iytpe(i)) * leafc(i)
+           endif
+           tlai(i) = max(0._r8, tlai(i)) ! don't allow negative LAI
+           ! Add to grid cell average of patch with weighted tlai
+           clm_statevec(patch%gridell(i)) = clm_statevec(patch%gridcell(i)) + patch%wtgcell(i)*tlai(i)
+       end do
+       ! Require second loop to calculate fraction from collected grid cell average
+       do i=clm_begp,clm_endp
+           if (clm_statevec(patch%gridcell(i)) > 0._r8) then ! divide by zero protection
+                old_frac(i) = patch%wtgcell(i)*tlai(i) / clm_statevec(patch%gridcell(i))
+           else
+                old_frac(i) = 0._r8
+           end if
+       end do
+    endif
+
+    if (clmupdate_lai_params.eq.1) then
+      cc = 1
+      do i=clm_begp,clm_endp
+          clm_statevec(cc+1*clm_varsize+offset) = pftcon%slatop(patch%itype(i))
+          cc = cc + 1
       end do
     endif
 
@@ -404,10 +462,12 @@ module enkf_clm_mod
     use clm_time_manager  , only : update_DA_nstep
     use shr_kind_mod , only : r8 => shr_kind_r8
     use ColumnType , only : col
-    use clm_instMod, only : soilstate_inst, waterstate_inst
+    use clm_instMod, only : soilstate_inst, waterstate_inst, bgc_vegetation_inst
     use clm_varcon      , only : denh2o, denice, watmin
     use clm_varcon      , only : ispval
     use clm_varcon      , only : spval
+    use pftconMod       , only : pftcon
+    use PatchType       , only : patch
 
     implicit none
 
@@ -423,6 +483,8 @@ module enkf_clm_mod
     real(r8), pointer :: dz(:,:)          ! layer thickness depth (m)
     real(r8), pointer :: h2osoi_liq(:,:)  ! liquid water (kg/m2)
     real(r8), pointer :: h2osoi_ice(:,:)
+    real(r8), pointer :: leafc(:)         ! leaf carbon of patch
+    real(r8), pointer :: leafn(:)         ! leaf nitrogen of patch
     real(r8)  :: rliq,rice
     real(r8)  :: watmin_check      ! minimum soil moisture for checking clm_statevec (mm)
     real(r8)  :: watmin_set        ! minimum soil moisture for setting swc (mm)
@@ -459,6 +521,9 @@ module enkf_clm_mod
     dz            => col%dz
     h2osoi_liq    => waterstate_inst%h2osoi_liq_col
     h2osoi_ice    => waterstate_inst%h2osoi_ice_col
+
+    leafc => bgc_vegetation_inst%cnveg_carbonstate_inst%leafc_patch
+    leafn => bgc_vegetation_inst%cnveg_nitrogenstate_inst%leafn_patch
 
 #ifdef PDAF_DEBUG
     IF(clmt_printensemble == tstartcycle .OR. clmt_printensemble < 0) THEN
@@ -635,6 +700,42 @@ module enkf_clm_mod
       call clm_texture_to_parameters
     endif
 
+    ! LAI assimilation:
+    ! Case 1:
+    if(clmupdate_lai.eq.1) then
+      do i=clm_begp,clm_endp
+      ! At this time tlai(patches) contains the pre-DA patch level LAI
+      ! clm_statevec(gridcells) contains the post-DA grid level LAI
+      ! old_frac(patches) contains the fraction of the pre-DA patch lai / grid cell average lai
+      ! To update tlai(patches) = new gridcell average * old_frac(patches) / patchweight.
+      ! Then use that tlai to determine leafc(patches)
+        if (patch%wtgcell(i) > 0._r8) then ! divide by zero protection
+            tlai(i) = clm_statevec(patch%gridcell(i)) * old_frac(i)/patch%wtgcell(i)
+        else
+            tlai(i) = 0._r8
+        endif
+        ! update leafc based on Eq 3 from Thornton and Zimmerman, 2007, J Clim, 20, 3902-3923
+        ! reformulate the equation to solve for leafc
+        if (tlai(i) > 0._r8) then ! invalid log protection
+          if (pftcon%dsladlai(patch%itype(i)) > 0._r8) then
+            leafc(i) = log(((tlai(i) * pftcon%dsladlai(patch%itype(i))) / pftcon%slatop(patch%itype(i))) + 1.0_r8) / pftcon%dsladlai(patch%itype(i))
+          else
+              leafc(i) = tlai(i) * pftcon%slatop(patch%itype(i))
+          endif
+        else
+          leafc(i) = 0._r8
+        endif
+        leafc(i) = max(0._r8, leafc(i)) ! Don't allow negative leaf carbon
+        leafn(i) = leafc(i) / pftcon%leafcn(patch%itype(i))
+      end do
+
+      if (clmupdate_lai_params.eq.1) then
+        cc = 1
+        do i=clm_begp,clm_endp
+            pftcon%slatop(patch%itype(i)) = clm_statevec(cc+1*clm_varsize+offset)
+            cc = cc + 1
+        end do
+      endif
   end subroutine update_clm
 
   subroutine clm_correct_texture()
