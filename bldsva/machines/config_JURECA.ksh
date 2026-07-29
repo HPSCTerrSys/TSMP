@@ -34,7 +34,7 @@ route "${cyellow}>> getMachineDefaults${cnormal}"
 
   # Default Compiler/Linker optimization
   if [[ $compiler == "Gnu" ]] ; then
-      defaultOptC="-O2" # Gnu
+      defaultOptC="-O2 -fallow-argument-mismatch -fallow-invalid-boz"  # Gnu
   elif [[ $compiler == "Intel" ]] ; then
       defaultOptC="-O2 -xHost" # Intel
   else

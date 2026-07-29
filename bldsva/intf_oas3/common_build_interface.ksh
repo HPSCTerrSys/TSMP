@@ -49,7 +49,7 @@ route "${cyellow}>>> c_make_icon${cnormal}"
   check
   comment "    make icon"
     export SCOREP_WRAPPER=on
-    make -j16 -f $icondir/Makefile >> $log_file 2>> $err_file
+    make -j1 -f $icondir/Makefile >> $log_file 2>> $err_file
   check
 
   comment "    cp icon binary to $bindir"
@@ -329,7 +329,7 @@ c_make_oas(){
 route "${cyellow}>>> c_make_oas${cnormal}"
   comment "    make oasis"
     export SCOREP_WRAPPER=on
-    make -j16 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
+    make -j1 -f $oasdir/util/make_dir/TopMakefileOasis3 oasis3_psmile >> $log_file 2>> $err_file
   check
 #DA
   if [[ $withPDAF == "true" ]]; then
@@ -431,7 +431,7 @@ route "${cyellow}>>> c_make_clm${cnormal}"
   check
   comment "    make clm"
     export SCOREP_WRAPPER=on
-    gmake -j16 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
+    gmake -j1 -f $clmdir/build/Makefile >> $log_file 2>> $err_file
   check
 
 #DA
@@ -580,11 +580,11 @@ if [[ $profiling == "scalasca" ]]; then
   check
   comment "    make pfsimulator and pftools"
     SCOREP_WRAPPER=off make pftools >> $log_file 2>> $err_file
-    SCOREP_WRAPPER=on make -j8 >> $log_file 2>> $err_file
+    SCOREP_WRAPPER=on make -j1 >> $log_file 2>> $err_file
   check
 else
   comment "    make pfsimulator and pftools"
-    make -j8 >> $log_file 2>> $err_file
+    make -j1 >> $log_file 2>> $err_file
   check
 fi
 comment "    make install pfsimulator and pftools"

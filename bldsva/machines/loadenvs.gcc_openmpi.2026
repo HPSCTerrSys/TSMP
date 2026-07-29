@@ -1,0 +1,23 @@
+module --force purge
+module use $OTHERSTAGES
+
+module load Stages/2026
+
+module load GCC
+module load OpenMPI
+
+module load Hypre
+module load Silo
+module load Tcl
+
+module load ecCodes
+module load HDF5
+module load netCDF
+module load netCDF-Fortran
+module load PnetCDF
+module load cURL
+module load Python
+module load CMake
+module load git
+
+module li

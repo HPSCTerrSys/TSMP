@@ -12,7 +12,7 @@ route "${cyellow}>> configure_pfl${cnormal}"
 #    export PFV="oas-gpu"
     export RMM_ROOT=$pfldir/rmm
 #
-    C_FLAGS="-fopenmp -Wall -Werror"
+    export CFLAGS="-fopenmp -fcommon"
     flagsSim="  -DMPIEXEC_EXECUTABLE=$(which srun)"
     if [[ $withOAS == "true" ]]; then
         flagsSim+=" -DPARFLOW_AMPS_LAYER=oas3"
@@ -26,7 +26,6 @@ route "${cyellow}>> configure_pfl${cnormal}"
     flagsSim+=" -DOAS3_ROOT=$oasdir/$platform"
     flagsSim+=" -DSILO_ROOT=$EBROOTSILO"
     flagsSim+=" -DHYPRE_ROOT=$EBROOTHYPRE"
-    flagsSim+=" -DCMAKE_C_FLAGS=$C_FLAGS"
     flagsSim+=" -DCMAKE_BUILD_TYPE=Release"
     flagsSim+=" -DPARFLOW_ENABLE_TIMING=TRUE"
     flagsSim+=" -DCMAKE_INSTALL_PREFIX=$PARFLOW_INS"
